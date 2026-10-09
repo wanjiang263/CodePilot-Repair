@@ -19,7 +19,7 @@ dependencies = [
     "python-dotenv>=1.0",
     "pyyaml>=6.0",
     # LLM 调用层（02「多 Provider 接入」兼容性测试明确要求 httpx.MockTransport）
-    "httpx>=0.27",
+    "httpx[socks]>=0.27",
     # 存储与可观测
     "sqlalchemy>=2.0",
     "structlog>=24.1",

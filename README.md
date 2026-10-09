@@ -23,6 +23,7 @@ Repository-level autonomous software engineering agent.
 | [`docs/03-AGENTS.md`](docs/03-AGENTS.md) | 开发规范：工程原则、测试策略、汇报格式 |
 | [`docs/04-分阶段开发任务清单.md`](docs/04-分阶段开发任务清单.md) | Phase 0–14 的任务与验收（阶段编号权威） |
 | [`docs/05-精细化待办清单.md`](docs/05-精细化待办清单.md) | 由 04 深拆得到的阶梯式任务清单与依赖 DAG |
+| [`docs/llm-config.md`](docs/llm-config.md) | 已核实的模型与价格来源、请求参数、真实冒烟与代理配置 |
 
 文档冲突时的优先级：设计细节以 02 为准；流程规则以 03 为准；阶段编号以 04 为准。
 

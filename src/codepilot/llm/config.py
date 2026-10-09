@@ -116,6 +116,26 @@ class ModelSpec(BaseModel):
 
     max_output_tokens: int = 4096
     price: ModelPrice | None = None
+    extra_body: dict[str, Any] = Field(default_factory=dict)
+    """模型专属的请求参数，例如思考模式开关；直接合入请求体，不按厂商分支。"""
+
+    @field_validator("extra_body")
+    @classmethod
+    def _protect_request_fields(cls, value: dict[str, Any]) -> dict[str, Any]:
+        reserved = {
+            "model",
+            "messages",
+            "max_tokens",
+            "temperature",
+            "tools",
+            "tool_choice",
+            "response_format",
+            "stream",
+        }
+        conflicts = sorted(reserved.intersection(value))
+        if conflicts:
+            raise ValueError(f"extra_body 不可覆盖请求或能力字段: {', '.join(conflicts)}")
+        return value
 
     @field_validator("model", mode="before")
     @classmethod

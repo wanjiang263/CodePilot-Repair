@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from typing import Any
 
 from codepilot.llm.config import ModelSpec
@@ -122,6 +123,7 @@ def build_request_body(
 ) -> dict[str, Any]:
     """构造 OpenAI 兼容的请求体。"""
     body: dict[str, Any] = {
+        **deepcopy(spec.extra_body),
         "model": spec.model,
         "messages": [_encode_message(m) for m in messages],
         "max_tokens": request.max_output_tokens,
