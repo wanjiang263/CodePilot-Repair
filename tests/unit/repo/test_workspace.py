@@ -435,6 +435,13 @@ def _junction(link: Path, target: Path) -> None:
         ["cmd", "/c", "mklink", "/J", str(link), str(target)],
         capture_output=True,
         text=True,
+        # 中文 Windows 上 cmd 把 mklink 的成功消息按 GBK/cp936 写进管道；不显式指定
+        # encoding+errors 时，PYTHONUTF8 下 subprocess 用严格 UTF-8 解码 reader 线程，
+        # GBK 字节 0xb4/0xd3 触发 UnicodeDecodeError（表现为 pytest 的
+        # PytestUnhandledThreadExceptionWarning）。这里只按 returncode 判断成败、
+        # 消息仅用于 skip 原因，故 errors="replace" 足够，且**不是过滤 warning**。
+        encoding="utf-8",
+        errors="replace",
     )
     if completed.returncode != 0:
         pytest.skip(f"无法创建 junction: {completed.stderr.strip() or completed.stdout.strip()}")

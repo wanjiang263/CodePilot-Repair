@@ -347,3 +347,168 @@ def test_unchanged_test_file_gets_low_but_not_medium_link_to_new_symbol(
     assert (
         _test_edge_confidence(stores, workspace.repository_id, test_qname, mint_qname) == "medium"
     )
+
+
+# ----------------------------------------- 遗留边界 #1：未变化文件的出边不重建
+
+
+def _import_edges(
+    index: RepositoryIndex, source_qname: str, target_name: str
+) -> list[tuple[bool, str]]:
+    """返回 ``source 模块 → target_name`` 的 IMPORT 边集合，每项 ``(target 是否已解析, confidence)``。"""
+    ids = {s.qualified_name: s.id for s in index.symbols()}
+    source_id = ids.get(source_qname)
+    return [
+        (e.target_id is not None, score_to_confidence(e.confidence))
+        for e in index.edges(kind="IMPORT")
+        if e.source_id == source_id and e.target_name == target_name
+    ]
+
+
+def test_incremental_does_not_rebuild_unchanged_files_outgoing_edges(
+    stores: Stores, fresh_stores: Stores, tmp_path: Path
+) -> None:
+    """钉住遗留边界 #1（index.py 模块 docstring 第 3 条）：
+
+    未变化文件的出边**不重建**。当变化文件新出现一个 symbol、而**引用它的文件本身
+    没变化**时，该引用文件指向新 symbol 的边要等它自己变化才补——增量结果里这条边
+    停留在"未解析、low"形态；对同一状态做**全新全量索引**才会把它解析成 high。
+    这是"只重新解析变化文件"的必然保守边界，本用例只钉当前行为，不改变它。
+    """
+    root = tmp_path / "p"
+    _write(root, "pkg/__init__.py", "")
+    # a.py 从一开始就显式引用 pkg.b.newfn，但首次索引时 b 里还没有 newfn → 解析不到。
+    _write(root, "pkg/a.py", "from pkg.b import newfn\n\n\ndef use() -> int:\n    return newfn()\n")
+    _write(root, "pkg/b.py", "def placeholder() -> int:\n    return 0\n")
+    workspace = _ws(root, "repo_bnd_newsym")
+    indexer = Indexer()
+    indexer.index(stores, workspace)
+
+    # 只改 b.py 新增 newfn；a.py 内容一字不动。
+    _write(
+        root,
+        "pkg/b.py",
+        "def placeholder() -> int:\n    return 0\n\n\ndef newfn() -> int:\n    return 2\n",
+    )
+    stats = indexer.index(stores, workspace)
+    assert stats.parsed_paths == ("pkg/b.py",)  # a.py 未被重新解析
+
+    Indexer().index(fresh_stores, workspace)  # 同状态全新全量
+
+    # 增量：a.py 的出边没重建，仍停在未解析 low。
+    assert _import_edges(
+        RepositoryIndex(stores, workspace.repository_id), "pkg.a", "pkg.b.newfn"
+    ) == [(False, "low")]
+    # 全量：重解析 a.py 后同一名字解析得到，升级为 high。二者差异正是该保守边界本身。
+    assert _import_edges(
+        RepositoryIndex(fresh_stores, workspace.repository_id), "pkg.a", "pkg.b.newfn"
+    ) == [(True, "high")]
+
+
+# ----------------------------- 遗留边界 #3：同名多目标部分删除时 confidence 不重算
+
+
+def test_incremental_does_not_recompute_confidence_when_redundant_target_removed(
+    stores: Stores, fresh_stores: Stores, tmp_path: Path
+) -> None:
+    """钉住遗留边界 #3（index.py 模块 docstring）：
+
+    一条 import 曾解析到**多个**同名目标（这里 ``from pkg.mod import thing`` 命中
+    ``class thing`` 与 ``def thing`` 两个，kind 不同故 id 不同），按 imports.py 的规则
+    每条 IMPORT 边都是 low（只有恰好 1 个目标才 high）。删掉其中一个同名目标后，
+    引用方 caller **未变化** → 增量不重解析它 → 对存活目标的档位**不重算**（拿不到
+    升级到 high 的结果）；全新全量会因候选数变 1 而升级成 high。本用例只钉当前行为。
+    """
+    root = tmp_path / "p"
+    _write(root, "pkg/__init__.py", "")
+    _write(root, "pkg/mod.py", "class thing:\n    pass\n\n\ndef thing() -> int:\n    return 1\n")
+    _write(root, "pkg/caller.py", "from pkg.mod import thing\n\n\nx = thing\n")
+    workspace = _ws(root, "repo_bnd_conf")
+    indexer = Indexer()
+    indexer.index(stores, workspace)  # 首次：thing 两个同名目标 → caller 的 IMPORT 都是 low
+
+    # 删掉 class thing，只留 def thing；caller 内容不变。
+    _write(root, "pkg/mod.py", "def thing() -> int:\n    return 1\n")
+    stats = indexer.index(stores, workspace)
+    assert "pkg/caller.py" not in stats.parsed_paths  # caller 未重解析
+
+    Indexer().index(fresh_stores, workspace)
+
+    # 全量：thing 现在唯一 → 已解析的 IMPORT 边升到 high。
+    fresh_edges = _import_edges(
+        RepositoryIndex(fresh_stores, workspace.repository_id), "pkg.caller", "pkg.mod.thing"
+    )
+    assert (True, "high") in fresh_edges
+    # 增量：caller 没被重解析，存活边不会被升级到 high（档位不重算）——这条不出现。
+    incremental = _import_edges(
+        RepositoryIndex(stores, workspace.repository_id), "pkg.caller", "pkg.mod.thing"
+    )
+    assert (True, "high") not in incremental
+    assert incremental  # 仍有边（悬挂收敛后的未解析 low），只是没升级
+
+
+# --------------------------- 遗留边界 #5：RepositoryIndex 每次查询不缓存 + 增量走全量读
+
+
+def test_repository_index_requeries_without_caching(stores: Stores, tmp_path: Path) -> None:
+    """钉住遗留边界 #5（index.py 类 docstring + §3）：``RepositoryIndex`` 每次方法调用
+    都重新查询、不缓存行。两次 ``symbols()`` 应各触发一次底层 ``list_by_repo``。
+    """
+    root = tmp_path / "p"
+    _write(root, "pkg/__init__.py", "")
+    _write(root, "pkg/m.py", "def f() -> int:\n    return 1\n")
+    workspace = _ws(root, "repo_bnd_nocache")
+    Indexer().index(stores, workspace)
+    index = RepositoryIndex(stores, workspace.repository_id)
+
+    calls = {"n": 0}
+    original = stores.symbols.list_by_repo
+
+    def counting(rid: str):
+        calls["n"] += 1
+        return original(rid)
+
+    stores.symbols.list_by_repo = counting
+    try:
+        first = index.symbols()
+        second = index.symbols()
+    finally:
+        stores.symbols.list_by_repo = original
+
+    assert first and second
+    assert calls["n"] == 2  # 每次调用都新查询；若做了缓存只会是 1
+
+
+def test_incremental_reads_known_symbols_via_full_repo_query(
+    stores: Stores, tmp_path: Path
+) -> None:
+    """钉住遗留边界 #5 的另一半：增量索引为了拿到未变化文件的 known 符号，走
+    ``list_by_repo`` **全量读**（不按 file_id 分批 IN，SQLite 999 变量上限是原因）。
+    """
+    root = tmp_path / "p"
+    _write(root, "pkg/__init__.py", "")
+    _write(
+        root, "pkg/a.py", "from pkg.b import helper\n\n\ndef use() -> int:\n    return helper()\n"
+    )
+    _write(root, "pkg/b.py", "def helper() -> int:\n    return 1\n")
+    workspace = _ws(root, "repo_bnd_fullread")
+    Indexer().index(stores, workspace)
+
+    # 改 b.py 触发一次增量：a.py 未变，作为 known 符号需要从库里全量读回。
+    _write(root, "pkg/b.py", "def helper() -> int:\n    return 2\n")
+    calls = {"n": 0}
+    original = stores.symbols.list_by_repo
+
+    def counting(rid: str):
+        calls["n"] += 1
+        return original(rid)
+
+    stores.symbols.list_by_repo = counting
+    try:
+        stats = Indexer().index(stores, workspace)
+    finally:
+        stores.symbols.list_by_repo = original
+
+    assert stats.incremental
+    assert stats.parsed_paths == ("pkg/b.py",)
+    assert calls["n"] >= 1  # known 符号加载走了一次全量 list_by_repo

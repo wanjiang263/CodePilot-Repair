@@ -230,6 +230,33 @@ def test_symbol_churn_maps_hunks_to_base_symbols(tmp_path: Path) -> None:
     assert result.commits_examined == 3
 
 
+def test_symbol_churn_uses_base_coordinates_so_line_drift_misattributes(tmp_path: Path) -> None:
+    """钉住遗留边界 #4（git_history 模块 docstring）：symbol churn 的行范围是
+    **base 版本坐标的近似** —— 历史 hunk 的行号是"那个提交"的坐标，直接与 base
+    版本的 symbol 行范围求交，不做逐提交的行漂移还原。提交越老、base 与它之间的
+    漂移越大，归属误差越大。
+
+    构造：c1 创建 a.py 时只有 ``f``（在 1-2 行）；c2(=base) 在**顶部**新增 ``z``，
+    把 ``f`` 挤到 5-6 行。base 符号表里 z=1-2、f=5-6。归属时拿 c1 的整文件新增
+    hunk（c1 坐标 1-2）去和 base 范围求交 → 命中的是 **z**（base 的 1-2 行），
+    而不是当时真正被创建的 f。于是当前行为是：z 记 2 次修改、f 记 0 次——f 的真实
+    创建被近似到 z 名下。本用例只钉这个已知的近似行为，不修正它。
+    """
+    repo = init_repo(tmp_path / "r", {"a.py": "def f():\n    return 1\n"})
+    repo.write("a.py", "def z():\n    return 0\n\n\ndef f():\n    return 1\n")
+    base = repo.commit("c2-add-z-above")
+
+    symbols = _base_symbols(repo, {"a.py": "def z():\n    return 0\n\n\ndef f():\n    return 1\n"})
+    by_name = {s.qualified_name: s for s in symbols}
+
+    result = GitHistory(repo.path, base).symbol_churn(symbols)
+
+    assert result.commits_examined == 2  # 只走 base 的祖先 c1/c2
+    # 近似误差本身：顶部新增的 z 抢到了 c1 的创建 hunk，f 一次都没记上。
+    assert result.churn[by_name["a.z"].id].modifications == 2
+    assert by_name["a.f"].id not in result.churn  # f 的创建被归属到了 z 的 base 行段
+
+
 def test_symbol_churn_post_base_edits_do_not_change_counts(tmp_path: Path) -> None:
     repo, base = _build_history_repo(tmp_path)
     symbols = _base_symbols(repo, {"a.py": A_V2})
