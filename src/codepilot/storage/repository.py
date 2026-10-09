@@ -15,8 +15,9 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from datetime import datetime
+from typing import Any, cast
 
-from sqlalchemy import delete, func, insert, select
+from sqlalchemy import CursorResult, delete, func, insert, select
 from sqlalchemy.orm import Session
 
 from codepilot.clock import utcnow
@@ -190,6 +191,13 @@ class SymbolStore:
         stmt = select(SymbolRow).where(SymbolRow.file_id == file_id).order_by(SymbolRow.start_line)
         return list(self._s.execute(stmt).scalars())
 
+    def list_ids_for_files(self, file_ids: Sequence[str]) -> list[str]:
+        """一批文件的全部 symbol id。增量索引在删除前取出，用于清理相关的边。"""
+        if not file_ids:
+            return []
+        stmt = select(SymbolRow.id).where(SymbolRow.file_id.in_(file_ids))
+        return list(self._s.execute(stmt).scalars())
+
     def count_by_kind(self, repository_id: str) -> dict[str, int]:
         stmt = (
             select(SymbolRow.kind, func.count())
@@ -253,6 +261,50 @@ class EdgeStore:
             .group_by(GraphEdge.kind, GraphEdge.confidence)
         )
         return {(kind, conf): count for kind, conf, count in self._s.execute(stmt)}
+
+    def get(self, edge_id: str) -> GraphEdge | None:
+        return self._s.get(GraphEdge, edge_id)
+
+    def delete_by_ids(self, repository_id: str, edge_ids: Sequence[str]) -> int:
+        if not edge_ids:
+            return 0
+        # DML 的 execute 运行时返回 CursorResult（带 rowcount），但桩把 Session.execute
+        # 声明为 Result；cast 补上这个已知的类型缺口，不改变运行时行为。
+        result = cast(
+            "CursorResult[Any]",
+            self._s.execute(
+                delete(GraphEdge).where(
+                    GraphEdge.repository_id == repository_id,
+                    GraphEdge.id.in_(edge_ids),
+                )
+            ),
+        )
+        self._s.flush()
+        return result.rowcount or 0
+
+    def delete_by_kind(self, repository_id: str, kind: str) -> int:
+        """删除某仓库下指定种类的全部边。索引层用它整体替换 TEST 边集合。"""
+        result = cast(
+            "CursorResult[Any]",
+            self._s.execute(
+                delete(GraphEdge).where(
+                    GraphEdge.repository_id == repository_id,
+                    GraphEdge.kind == kind,
+                )
+            ),
+        )
+        self._s.flush()
+        return result.rowcount or 0
+
+    def list_dangling_targets(self, repository_id: str) -> list[GraphEdge]:
+        """``target_id`` 指向已不存在 symbol 的边（增量重建后由索引层处理）。"""
+        valid = select(SymbolRow.id).where(SymbolRow.repository_id == repository_id)
+        stmt = select(GraphEdge).where(
+            GraphEdge.repository_id == repository_id,
+            GraphEdge.target_id.is_not(None),
+            GraphEdge.target_id.notin_(valid),
+        )
+        return list(self._s.execute(stmt).scalars())
 
 
 class TaskStore:

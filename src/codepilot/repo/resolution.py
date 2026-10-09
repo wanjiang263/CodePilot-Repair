@@ -172,14 +172,19 @@ class NameResolver:
         return None
 
     def base_expressions(self, clazz: Symbol) -> tuple[SyntaxNode, ...]:
-        node = self.class_nodes[clazz.id].field("superclasses")
+        # 增量上下文中，未变化文件的类没有解析树（R-16）：返回空，让 MRO 退化为
+        # 只用该类自身的方法表，而不是在这里抛 KeyError 中断整个提取。
+        node = self.class_nodes.get(clazz.id)
+        if node is None:
+            return ()
+        superclasses = node.field("superclasses")
         return (
             tuple(
                 child
-                for child in node.children
+                for child in superclasses.children
                 if child.kind not in {"(", ")", ",", "keyword_argument", "comment"}
             )
-            if node
+            if superclasses
             else ()
         )
 

@@ -11,12 +11,37 @@ from __future__ import annotations
 
 import logging
 import sys
+from typing import TextIO, cast
 
 import structlog
 
 __all__ = ["configure_logging", "get_logger"]
 
 _configured = False
+
+
+class _LiveStderr:
+    """把每次写入转发到"此刻的 ``sys.stderr``"，而不是配置时被固化的那个流对象。
+
+    ``typer.testing.CliRunner`` 每次 invoke 会把 ``sys.stderr`` 换成它的捕获缓冲、
+    invoke 结束就关闭它；pytest 的 ``capsys`` 也会临时换流。若把这些瞬时流对象按值
+    存进 structlog 的全局 logger factory，之后**整个进程**的日志都会写向一个已关闭
+    的缓冲，抛 ``ValueError: I/O operation on closed file``——而且是否触发取决于测试
+    执行顺序（哪个测试第一次写下第一行日志），是典型的跨测试状态污染。代理在每次
+    write/flush 时重新解析 ``sys.stderr``，永远跟随真实目标，与 logger 是否被缓存无关。
+
+    不实现 ``__slots__``：structlog 用 ``weakref.WeakKeyDictionary`` 按文件对象存写锁，
+    实例必须可弱引用。
+    """
+
+    def write(self, message: str) -> int:
+        return sys.stderr.write(message)
+
+    def flush(self) -> None:
+        sys.stderr.flush()
+
+
+_stderr = _LiveStderr()
 
 
 def configure_logging(level: str = "INFO", *, json_output: bool = False) -> None:
@@ -46,7 +71,9 @@ def configure_logging(level: str = "INFO", *, json_output: bool = False) -> None
             renderer,
         ],
         wrapper_class=structlog.make_filtering_bound_logger(numeric),
-        logger_factory=structlog.PrintLoggerFactory(file=sys.stderr),
+        # 传活代理而非 sys.stderr 本身：见 _LiveStderr。cast 只是向 structlog 的
+        # TextIO 注解声明它按 duck typing 提供 write/flush。
+        logger_factory=structlog.PrintLoggerFactory(file=cast("TextIO", _stderr)),
         cache_logger_on_first_use=True,
     )
     _configured = True
