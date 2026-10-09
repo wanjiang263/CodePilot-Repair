@@ -1,0 +1,108 @@
+# LLM 接入配置。
+#
+# 三条硬规则（来自 docs/02-实现方案.md「多 Provider 接入」与 docs/03-AGENTS.md「LLM 边界」）：
+#   1. 代码里不出现任何具体模型名。换模型只改这个文件。
+#   2. 密钥只写环境变量名（api_key_env），值放 .env，绝不写在这里。
+#   3. 业务代码里不写 `if provider == "..."`。能力差异用下面的能力字段表达。
+#
+# ⚠️ 带尖括号的值是**待人工核实的占位符**，不是可用配置。
+#    用 `uv run codepilot config check` 查看还缺哪些。
+#    填写时请以各家官方文档为准；这些值随服务商发版变化，
+#    本项目不在这里写未经验证的数字。
+
+providers:
+  deepseek:
+    # 编写时的公开地址，接入前请再核对一次。
+    base_url: https://api.deepseek.com
+    api_key_env: DEEPSEEK_API_KEY
+    max_concurrency: 4
+    timeout_seconds: 120
+
+  kimi:
+    base_url: https://api.moonshot.cn/v1
+    api_key_env: MOONSHOT_API_KEY
+    max_concurrency: 3
+    timeout_seconds: 120
+
+  glm:
+    base_url: https://open.bigmodel.cn/api/paas/v4
+    api_key_env: ZHIPU_API_KEY
+    max_concurrency: 4
+    timeout_seconds: 120
+
+  # 保留位：任何兼容 OpenAI Chat Completions 协议的服务都可以这样接进来。
+  # 启用前请先在 .env 中设置 OPENAI_API_KEY，并填写 models 下的 model 字段。
+  openai:
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    max_concurrency: 4
+    timeout_seconds: 120
+
+models:
+  # key 是本项目内的模型别名，roles 段引用的是它，不是官方模型 ID。
+  deepseek-chat:
+    provider: deepseek
+    model: "<官方模型 ID，以平台文档为准>"
+    context_window: 128000          # 编写时的公开值，需核实
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: true
+    max_output_tokens: 4096
+    price:
+      currency: CNY
+      input_per_mtok: "<单价>"
+      output_per_mtok: "<单价>"
+      cached_input_per_mtok: "<单价，无缓存计价时留空>"
+
+  kimi-main:
+    provider: kimi
+    model: "<官方模型 ID，以平台文档为准>"
+    context_window: 128000          # 需核实
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: true
+    max_output_tokens: 4096
+    price:
+      currency: CNY
+      input_per_mtok: "<单价>"
+      output_per_mtok: "<单价>"
+      cached_input_per_mtok: "<单价，无缓存计价时留空>"
+
+  glm-main:
+    provider: glm
+    model: "<官方模型 ID，以平台文档为准>"
+    context_window: 128000          # 需核实
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: true
+    max_output_tokens: 4096
+    price:
+      currency: CNY
+      input_per_mtok: "<单价>"
+      output_per_mtok: "<单价>"
+      cached_input_per_mtok: "<单价，无缓存计价时留空>"
+
+# 每个 Agent 角色使用哪个模型别名。
+# 角色名固定为这 8 个（见 codepilot/llm/config.py 的 KNOWN_ROLES），
+# 拼错会在 `codepilot config check` 里报出来。
+roles:
+  issue_analyzer: deepseek-chat
+  localizer: deepseek-chat
+  planner: deepseek-chat
+  coder: deepseek-chat
+  reproducer: deepseek-chat
+  diagnoser: deepseek-chat
+  reviewer: deepseek-chat
+  failure_classifier: deepseek-chat
+
+# 数据外发白名单（02「数据外发」）。
+# 非 null 时，未列出的 provider 会直接拒绝调用，防止私有仓库代码
+# 因为一次误配被发到未授权的服务商。
+# allowed_providers:
+#   - deepseek
+
+# 汇率：币种 -> 1 单位该币种等于多少 budget_currency（默认 CNY）。
+# 仅用于把不同 provider 的费用统一到同一币种后比较预算。
+# 缺汇率的币种按 1.0 处理，并在 Run Report 中标注。
+exchange_rates:
+  CNY: 1.0

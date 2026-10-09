@@ -1,0 +1,183 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "codepilot-repair"
+version = "0.1.0"
+description = "Repository-level autonomous software engineering agent"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "CodePilot-Repair" }]
+keywords = ["software-engineering-agent", "automated-program-repair", "llm", "swe-bench"]
+
+dependencies = [
+    # CLI / 配置
+    "typer>=0.12",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "python-dotenv>=1.0",
+    "pyyaml>=6.0",
+    # LLM 调用层（02「多 Provider 接入」兼容性测试明确要求 httpx.MockTransport）
+    "httpx>=0.27",
+    # 存储与可观测
+    "sqlalchemy>=2.0",
+    "structlog>=24.1",
+    # Repository Intelligence
+    "tree-sitter>=0.23",
+    "tree-sitter-python>=0.23",
+    "networkx>=3.3",
+    # Retrieval
+    "rank-bm25>=0.2.2",
+    "numpy>=1.26",
+    # Context 构造
+    "tiktoken>=0.7",
+    # Sandbox
+    "docker>=7.1",
+    # LangGraph 编排
+    "langgraph>=0.2",
+    "langgraph-checkpoint-sqlite>=2.0",
+    # Run Report / 静态 HTML 报告降级
+    "jinja2>=3.1",
+    # API（Phase 13；Phase 0 只用到 GET /health）
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "sse-starlette>=2.1",
+]
+
+[project.optional-dependencies]
+embeddings = ["sentence-transformers>=3.0"]
+faiss = ["faiss-cpu>=1.8"]
+swebench = ["swebench", "datasets", "huggingface-hub"]
+postgres = ["psycopg[binary]>=3.2"]
+redis = ["redis>=5.0"]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=5.0",
+    "pytest-timeout>=2.3",
+    "ruff>=0.5",
+    "mypy>=1.10",
+    "types-pyyaml",
+]
+
+[project.scripts]
+codepilot = "codepilot.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/codepilot"]
+
+# ----------------------------------------------------------------------------
+# Ruff
+# ----------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+# docs/ 是设计文档，不是代码。新版 ruff 会连 Markdown 里的 ```python 代码块
+# 一起格式化，而 02 的示例刻意用对齐注释（`cost: float      # ...`）标注
+# 字段含义，格式化会把这些对齐压掉，让文档变难读。文档不该被代码格式化器管。
+extend-exclude = ["tests/fixtures", "benchmarks/synthetic", "artifacts", "docs", ".codex-pytest-tmp"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+    "RET", # flake8-return
+    "ARG", # unused arguments
+    "PTH", # flake8-use-pathlib
+    "G",   # flake8-logging-format
+    "LOG", # flake8-logging
+    "RUF", # ruff-specific
+]
+ignore = [
+    "E501",   # 行长度由 formatter 处理
+    "B008",   # Typer / FastAPI 依赖注入惯用法
+    "RUF001", # 中文全角标点在字符串中是刻意的
+    "RUF002",
+    "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["ARG", "S101"]
+"docs/**" = ["ALL"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["codepilot"]
+
+# ----------------------------------------------------------------------------
+# mypy
+# ----------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+files = ["src"]
+mypy_path = "src"
+strict = true
+warn_unreachable = true
+warn_no_return = true
+show_error_codes = true
+pretty = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = [
+    "tree_sitter.*",
+    "rank_bm25.*",
+    "tiktoken.*",
+    "docker.*",
+    "sentence_transformers.*",
+    "faiss.*",
+    "swebench.*",
+    "datasets.*",
+    "langgraph.*",
+]
+ignore_missing_imports = true
+
+# ----------------------------------------------------------------------------
+# pytest
+# ----------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+# tests/fixtures/repos/ 下是**被解析的对象**，不是被测代码。它们长得就像真
+# 仓库——`tests/test_session.py`、`conftest.py` 一应俱全，其中一个还故意带
+# 语法错误。不排除的话 pytest 会去收集它们：轻则多出一堆无夹具的失败，
+# 重则在导入 `calc/broken.py` 时直接 SyntaxError 让整次收集崩掉。
+norecursedirs = ["fixtures"]
+addopts = "-ra --strict-markers --strict-config"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+timeout = 300
+markers = [
+    "docker: 需要可用的 Docker daemon（不可用时自动 skip）",
+    "llm: 需要真实 LLM API key（CI 中永不运行）",
+    "slow: 长耗时测试",
+]
+log_cli_level = "INFO"
+
+# ----------------------------------------------------------------------------
+# coverage（NFR-03：核心模块行覆盖率 >= 80%）
+# ----------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["codepilot"]
+branch = true
+omit = ["*/tests/*", "*/cli.py"]
+
+[tool.coverage.report]
+# X-07 的覆盖率门禁。写在配置里而不是只写在文档里：没有 fail_under 的
+# 覆盖率要求是一句口号，读数再低 CI 也是绿的。
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    # 只排除空实现的省略号，不能匹配 tuple[Symbol, ...] 等类型注解。
+    "^\\s*(?:\\.\\.\\.|(?:async\\s+)?def\\b.*:\\s*\\.\\.\\.)\\s*(?:#.*)?$",
+]

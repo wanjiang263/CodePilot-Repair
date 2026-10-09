@@ -1,0 +1,43 @@
+# ---- 密钥与本地环境 ----
+.env
+.env.*
+!.env.example
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# ---- 工具缓存 ----
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# ---- CodePilot 运行产物（02「Artifact 目录」：运行产物不提交）----
+artifacts/
+!artifacts/.gitkeep
+runs/
+cache/
+
+# ---- 数据库 ----
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# ---- Docker / 沙箱 ----
+sandbox/out/
+
+# ---- 编辑器 / 系统 ----
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
