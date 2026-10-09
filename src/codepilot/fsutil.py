@@ -38,7 +38,8 @@ def pid_alive(pid: int) -> bool:
     if os.name == "nt":
         import ctypes
 
-        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        # getattr 而非直接引用：直接写 ctypes.WinDLL 会被 Linux 平台（CI）的 mypy 判为无此属性。
+        kernel32 = getattr(ctypes, "WinDLL")("kernel32", use_last_error=True)  # noqa: B009  (见上行)
         # PROCESS_QUERY_LIMITED_INFORMATION 在 Vista 之后可用，权限要求比
         # PROCESS_QUERY_INFORMATION 低，足以读退出码。
         handle = kernel32.OpenProcess(0x1000, False, pid)

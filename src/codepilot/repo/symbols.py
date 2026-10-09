@@ -1,6 +1,6 @@
-"""从已有解析树提取符号名称与类型（R-06）。
+"""从已有解析树提取符号及属性（R-06 / R-07）。
 
-这里只保留符号的最小描述；属性、标识符、图边和持久化由后续任务补全。
+提供 repository_id 时返回完整属性，并保留原有名称提取接口。
 嵌套函数仍属于 ``function``，通过 qualified name 中的 ``<locals>`` 表达作用域。
 """
 
@@ -179,7 +179,15 @@ def _signature(node: SyntaxNode, body: SyntaxNode | None) -> str:
     row = body.start_line - node.start_line
     column = body.start_col - (node.start_col if row == 0 else 0)
     offset = sum(len(line) for line in lines[:row]) + column
-    return b"".join(lines)[:offset].decode("utf-8").rstrip().removesuffix(":").rstrip()
+    header = b"".join(lines)[:offset].decode("utf-8").rstrip()
+    # 多行体前可能有行尾注释；冒号必须定位在语法 token，而非注释文本中。
+    colon = next((child for child in reversed(node.children) if child.kind == ":"), None)
+    if colon is not None:
+        colon_row = colon.start_line - node.start_line
+        colon_col = colon.start_col - (node.start_col if colon_row == 0 else 0)
+        end = sum(len(line) for line in lines[:colon_row]) + colon_col
+        header = b"".join(lines)[:end].decode("utf-8").rstrip()
+    return header.removesuffix(":").rstrip()
 
 
 def _docstring(body: SyntaxNode | None) -> str | None:

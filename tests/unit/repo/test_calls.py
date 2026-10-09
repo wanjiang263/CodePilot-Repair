@@ -192,3 +192,23 @@ def test_unknown_or_duplicate_bases_never_imply_certain_method_order(bases: str)
         "mod.Base#2.work",
     }
     assert all(e.confidence == "low" for e in edges)
+
+
+@pytest.mark.parametrize(
+    "body", ["return lambda helper: helper()", "return [helper() for helper in items]"]
+)
+def test_anonymous_and_comprehension_bindings_do_not_fake_high_calls(body: str) -> None:
+    context = make_context({"mod.py": "def helper(): pass\ndef f(items):\n    " + body})
+    edge = extract_calls(context)[0]
+    assert edge.target_id is None and edge.confidence == "low"
+
+
+def test_cyclic_base_lookup_does_not_loop_or_choose_medium_target() -> None:
+    context = make_context(
+        {
+            "mod.py": "class A(B):\n    def work(self): pass\nclass B(A):\n    def run(self):\n        self.work()"
+        }
+    )
+    edge = extract_calls(context)[0]
+    assert context.by_id[edge.target_id].qualified_name == "mod.A.work"
+    assert edge.confidence == "low"

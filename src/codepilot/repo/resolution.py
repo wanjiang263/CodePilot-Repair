@@ -52,9 +52,23 @@ class NameResolver:
                     "for_statement",
                     "named_expression",
                     "as_pattern",
+                    "for_in_clause",
                 }:
                     left = node.field("left") or node.field("name") or node.field("alias")
                     self.assignments.setdefault(owner.id, set()).update(_pattern_names(left))
+                if node.kind == "lambda_parameters":
+                    # lambda 不创建索引符号；保守阻止其参数误绑到外层同名定义。
+                    bound = set()
+                    for parameter in node.children:
+                        if parameter.kind in {
+                            "identifier",
+                            "list_splat_pattern",
+                            "dictionary_splat_pattern",
+                        }:
+                            bound.update(_pattern_names(parameter))
+                        else:
+                            bound.update(_pattern_names(parameter.field("name")))
+                    self.assignments.setdefault(owner.id, set()).update(bound)
 
     def resolve(self, owner: Symbol, expression: str) -> Resolution:
         parts = expression.split(".")

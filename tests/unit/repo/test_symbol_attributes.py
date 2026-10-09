@@ -77,6 +77,11 @@ def test_signature_preserves_multiline_async_header_and_crlf() -> None:
     assert result[1].end_line == 4
 
 
+def test_signature_excludes_trailing_comment_before_multiline_body() -> None:
+    result = symbols('def f(value: str = ":"):  # header comment: colon\n    return value\n')
+    assert result[1].signature == 'def f(value: str = ":")'
+
+
 @pytest.mark.parametrize(
     ("literal", "expected"),
     [
