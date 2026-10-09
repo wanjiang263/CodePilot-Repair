@@ -17,11 +17,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-# networkx 不自带类型桩（需另装 types-networkx）。项目约定是把这类无桩依赖列进
-# pyproject 的 mypy overrides（tree_sitter / rank_bm25 等 9 个都在那里），但本批次
-# pyproject.toml 被冻结（属上一轮未提交工作），故在此就地抑制 import-untyped，
-# 语义与 overrides 里的 ignore_missing_imports 一致。后续解冻后应移回 overrides。
-import networkx as nx  # type: ignore[import-untyped]
+import networkx as nx
 
 from codepilot.repo.index import RepositoryIndex
 from codepilot.repo.models import Confidence, EdgeKind, Symbol, score_to_confidence

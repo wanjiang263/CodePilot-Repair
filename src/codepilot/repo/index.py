@@ -45,6 +45,7 @@ import hashlib
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 from codepilot.clock import utcnow
 from codepilot.observability.logging import get_logger
@@ -56,6 +57,7 @@ from codepilot.repo.models import (
     Confidence,
     GraphEdge,
     Symbol,
+    SymbolKind,
     confidence_to_score,
     score_to_confidence,
 )
@@ -309,7 +311,9 @@ def _symbol_object(row: SymbolRow, path: str) -> Symbol:
     return Symbol(
         name=row.name,
         qualified_name=row.qualified_name,
-        kind=row.kind,  # type: ignore[arg-type]
+        # 表里 kind 存成 str，读回时它必然是 SymbolKind 之一（写入侧已约束）。
+        # 用 cast 显式表达这层信任，而非 blanket type: ignore。
+        kind=cast("SymbolKind", row.kind),
         id=row.id,
         file_id=row.file_id,
         path=path,
