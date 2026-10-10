@@ -24,8 +24,10 @@ dependencies = [
     "sqlalchemy>=2.0",
     "structlog>=24.1",
     # Repository Intelligence
-    "tree-sitter>=0.23",
-    "tree-sitter-python>=0.23",
+    # 0.26.0 Point.row/column return borrowed references and corrupt memory on
+    # real repositories. R-23 reproducer and evidence: docs/notes/phase1.md.
+    "tree-sitter==0.25.2",
+    "tree-sitter-python==0.25.0",
     "networkx>=3.3",
     # Retrieval
     "rank-bm25>=0.2.2",

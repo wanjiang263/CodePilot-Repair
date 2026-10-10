@@ -1,0 +1,28 @@
+{
+  "command": [
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+    "-X",
+    "faulthandler",
+    "-u",
+    "scripts/index_real_repo.py",
+    "--repo",
+    "https://github.com/pallets/flask.git",
+    "--commit",
+    "c12a5d874c5a014495eb2db8a73f40037bc813ac",
+    "--local-repo",
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\r23-repair-20261010\\flask",
+    "--workdir",
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\r23-repair-20261010\\index-flask"
+  ],
+  "cwd": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair",
+  "returncode": 0,
+  "exit_hex": "0x00000000",
+  "seconds": 30.918900100004976,
+  "timestamp": "2026-10-10T03:02:40.378488+00:00",
+  "python": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "packages": {
+    "tree-sitter": "0.25.2",
+    "tree-sitter-python": "0.25.0"
+  }
+}

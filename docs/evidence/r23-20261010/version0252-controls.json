@@ -1,0 +1,34 @@
+[
+  {
+    "path": "artifacts/r23-repair-20261010/requests/src/requests/models.py",
+    "mode": "extract",
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "{\"python\": \"3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]\", \"executable\": \"C:\\\\Users\\\\lenovo\\\\Desktop\\\\CodePilot-Repair\\\\.venv\\\\Scripts\\\\python.exe\", \"windows\": \"Windows-11-10.0.22631-SP0\", \"packages\": {\"tree-sitter\": \"0.25.2\", \"tree-sitter-python\": \"0.25.0\"}}\r\nBEGIN artifacts/r23-repair-20261010/requests/src/requests/models.py mode=extract bytes=35418 sha256=938daba17cc2f2efce6a000f422f54e0c91f3bb8b8af615d6aabccaacb4f7a17\r\nPARSED\r\nOK symbols=50\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "artifacts/r23-repair-20261010/requests/src/requests/models.py",
+    "mode": "points",
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "{\"python\": \"3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]\", \"executable\": \"C:\\\\Users\\\\lenovo\\\\Desktop\\\\CodePilot-Repair\\\\.venv\\\\Scripts\\\\python.exe\", \"windows\": \"Windows-11-10.0.22631-SP0\", \"packages\": {\"tree-sitter\": \"0.25.2\", \"tree-sitter-python\": \"0.25.0\"}}\r\nBEGIN artifacts/r23-repair-20261010/requests/src/requests/models.py mode=points bytes=35418 sha256=938daba17cc2f2efce6a000f422f54e0c91f3bb8b8af615d6aabccaacb4f7a17\r\nOK nodes=5861\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "artifacts/r23-repair-20261010/flask/src/flask/app.py",
+    "mode": "extract",
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "{\"python\": \"3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]\", \"executable\": \"C:\\\\Users\\\\lenovo\\\\Desktop\\\\CodePilot-Repair\\\\.venv\\\\Scripts\\\\python.exe\", \"windows\": \"Windows-11-10.0.22631-SP0\", \"packages\": {\"tree-sitter\": \"0.25.2\", \"tree-sitter-python\": \"0.25.0\"}}\r\nBEGIN artifacts/r23-repair-20261010/flask/src/flask/app.py mode=extract bytes=60143 sha256=efe961e9c223dbbae24c4d50d7c3a4d69e67399f2a62232ec7806d73aa3a98d7\r\nPARSED\r\nOK symbols=37\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "artifacts/r23-repair-20261010/flask/src/flask/app.py",
+    "mode": "points",
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "{\"python\": \"3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]\", \"executable\": \"C:\\\\Users\\\\lenovo\\\\Desktop\\\\CodePilot-Repair\\\\.venv\\\\Scripts\\\\python.exe\", \"windows\": \"Windows-11-10.0.22631-SP0\", \"packages\": {\"tree-sitter\": \"0.25.2\", \"tree-sitter-python\": \"0.25.0\"}}\r\nBEGIN artifacts/r23-repair-20261010/flask/src/flask/app.py mode=points bytes=60143 sha256=efe961e9c223dbbae24c4d50d7c3a4d69e67399f2a62232ec7806d73aa3a98d7\r\nOK nodes=6322\r\n",
+    "stderr": ""
+  }
+]

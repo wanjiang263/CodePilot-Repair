@@ -1,0 +1,92 @@
+[
+  {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "returncode": 0,
+    "stdout": " M pyproject.toml\n M scripts/index_real_repo.py\n M uv.lock\n?? tests/unit/repo/test_parser_subprocess.py\n?? tests/unit/test_index_real_repo.py\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "returncode": 0,
+    "stdout": "65e4c25183b4811ea2f81716a2f87decd6212471\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-list",
+      "--count",
+      "@{upstream}..HEAD"
+    ],
+    "returncode": 0,
+    "stdout": "5\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "log",
+      "--format=%h %s",
+      "@{upstream}..HEAD"
+    ],
+    "returncode": 0,
+    "stdout": "65e4c25 docs: R-23 真实仓库索引实测暴露 tree-sitter 崩溃缺口（followup 步骤 3）\n83c0d42 test: 消除 UTF-8 解码告警并钉住 Phase 1 遗留边界（followup 步骤 2b + 4）\n3ecd0a6 refactor: 还 §23 Q18 债 —— networkx 走 mypy overrides（followup 步骤 1）\nb057e55 feat: LLM config round — model IDs/prices, SOCKS proxy, config-check tests\n208e668 feat: complete Phase 1 repo index (R-13–R-18, R-21, R-22)\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\r23-repair-20261010\\flask",
+      "rev-parse",
+      "HEAD"
+    ],
+    "returncode": 0,
+    "stdout": "c12a5d874c5a014495eb2db8a73f40037bc813ac\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\r23-repair-20261010\\flask",
+      "status",
+      "--porcelain"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\r23-repair-20261010\\requests",
+      "rev-parse",
+      "HEAD"
+    ],
+    "returncode": 0,
+    "stdout": "0e322af87745eff34caffe4df68456ebc20d9068\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\r23-repair-20261010\\requests",
+      "status",
+      "--porcelain"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

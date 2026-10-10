@@ -1,0 +1,28 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/integration/test_docker_phase1.py",
+    "-m",
+    "docker",
+    "-s",
+    "-v",
+    "--basetemp",
+    "artifacts/ci-docker-20261010/docker-final-tmp",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=artifacts/ci-docker-20261010/docker-local-results.xml"
+  ],
+  "cwd": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair",
+  "returncode": 0,
+  "exit_hex": "0x00000000",
+  "seconds": 63.00003999999899,
+  "timestamp": "2026-10-10T08:16:30.763347+00:00",
+  "python": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "packages": {
+    "tree-sitter": "0.25.2",
+    "tree-sitter-python": "0.25.0"
+  }
+}

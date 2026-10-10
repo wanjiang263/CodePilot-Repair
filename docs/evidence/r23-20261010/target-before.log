@@ -1,0 +1,103 @@
+FFF.                                                                     [100%]
+================================== FAILURES ===================================
+____________________ test_native_parser_in_subprocess[row] ____________________
+
+case = 'row'
+
+    @pytest.mark.parametrize("case", ["row", "column", "extract", "lifetime"])
+    def test_native_parser_in_subprocess(case: str) -> None:
+        root = Path(__file__).resolve().parents[3]
+        env = {**os.environ, "PYTHONPATH": str(root / "src"), "PYTHONUTF8": "1"}
+        result = subprocess.run(
+            [sys.executable, "-X", "faulthandler", "-u", "-c", CHILD, case],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=60,
+            env=env,
+            check=False,
+        )
+>       assert result.returncode == 0, (
+            f"exit={result.returncode} (0x{result.returncode & 0xFFFFFFFF:08X})\n"
+            f"{result.stdout}\n{result.stderr}"
+        )
+E       AssertionError: exit=1 (0x00000001)
+E         
+E         Traceback (most recent call last):
+E           File "<string>", line 21, in <module>
+E         AssertionError: ('row', 3, 3)
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe', '-X', 'faulthandler...tderr='Traceback (most recent call last):\n  File "<string>", line 21, in <module>\nAssertionError: (\'row\', 3, 3)\n').returncode
+
+tests\unit\repo\test_parser_subprocess.py:84: AssertionError
+__________________ test_native_parser_in_subprocess[column] ___________________
+
+case = 'column'
+
+    @pytest.mark.parametrize("case", ["row", "column", "extract", "lifetime"])
+    def test_native_parser_in_subprocess(case: str) -> None:
+        root = Path(__file__).resolve().parents[3]
+        env = {**os.environ, "PYTHONPATH": str(root / "src"), "PYTHONUTF8": "1"}
+        result = subprocess.run(
+            [sys.executable, "-X", "faulthandler", "-u", "-c", CHILD, case],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=60,
+            env=env,
+            check=False,
+        )
+>       assert result.returncode == 0, (
+            f"exit={result.returncode} (0x{result.returncode & 0xFFFFFFFF:08X})\n"
+            f"{result.stdout}\n{result.stderr}"
+        )
+E       AssertionError: exit=1 (0x00000001)
+E         
+E         Traceback (most recent call last):
+E           File "<string>", line 21, in <module>
+E         AssertionError: ('column', 3, 3)
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe', '-X', 'faulthandler...rr='Traceback (most recent call last):\n  File "<string>", line 21, in <module>\nAssertionError: (\'column\', 3, 3)\n').returncode
+
+tests\unit\repo\test_parser_subprocess.py:84: AssertionError
+__________________ test_native_parser_in_subprocess[extract] __________________
+
+case = 'extract'
+
+    @pytest.mark.parametrize("case", ["row", "column", "extract", "lifetime"])
+    def test_native_parser_in_subprocess(case: str) -> None:
+        root = Path(__file__).resolve().parents[3]
+        env = {**os.environ, "PYTHONPATH": str(root / "src"), "PYTHONUTF8": "1"}
+        result = subprocess.run(
+            [sys.executable, "-X", "faulthandler", "-u", "-c", CHILD, case],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=60,
+            env=env,
+            check=False,
+        )
+>       assert result.returncode == 0, (
+            f"exit={result.returncode} (0x{result.returncode & 0xFFFFFFFF:08X})\n"
+            f"{result.stdout}\n{result.stderr}"
+        )
+E       AssertionError: exit=3221225477 (0xC0000005)
+E         
+E         Windows fatal exception: access violation
+E         
+E         Current thread 0x00018544 (most recent call first):
+E           File "C:\Users\lenovo\Desktop\CodePilot-Repair\src\codepilot\repo\parser.py", line 284 in text
+E           File "C:\Users\lenovo\Desktop\CodePilot-Repair\src\codepilot\repo\symbols.py", line 116 in extract_symbols
+E           File "<string>", line 28 in <module>
+E         
+E       assert 3221225477 == 0
+E        +  where 3221225477 = CompletedProcess(args=['C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe', '-X', 'faulthandler...ilot-Repair\\src\\codepilot\\repo\\symbols.py", line 116 in extract_symbols\n  File "<string>", line 28 in <module>\n').returncode
+
+tests\unit\repo\test_parser_subprocess.py:84: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/unit/repo/test_parser_subprocess.py::test_native_parser_in_subprocess[row]
+FAILED tests/unit/repo/test_parser_subprocess.py::test_native_parser_in_subprocess[column]
+FAILED tests/unit/repo/test_parser_subprocess.py::test_native_parser_in_subprocess[extract]
+3 failed, 1 passed in 7.98s

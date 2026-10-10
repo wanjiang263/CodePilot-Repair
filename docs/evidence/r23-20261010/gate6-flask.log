@@ -1,0 +1,14 @@
+[1/3] bare clone：C:\Users\lenovo\Desktop\CodePilot-Repair\artifacts\r23-repair-20261010\flask → C:\Users\lenovo\Desktop\CodePilot-Repair\artifacts\r23-repair-20261010\index-flask\repo.bare
+[2/3] 索引 base commit c12a5d874c5a014495eb2db8a73f40037bc813ac（fetch workspace，本地不联网）…
+2026-10-10T03:02:38.910327Z [info     ] repo.index.done                changed=241 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=19.218 incremental=False removed=0 repository_id=repo_b2dce45ef37bf016 reused=0
+[3/3] 实测结果：
+- 仓库：`https://github.com/pallets/flask.git`
+- base commit：`c12a5d874c5a014495eb2db8a73f40037bc813ac`
+- 模式：fetch workspace（自包含、只含 base 祖先）
+- 索引耗时：**19.31s**
+- Files：**241**；Symbols：**1644** （class=156, function=665, method=357, module=82, test_function=355, test_method=29）
+- Edges：**10839**（CALL=3434, IMPORT=642, INHERIT=71, REFERENCE=428, TEST=6264）
+- Tests：**384**
+- 解析错误文件：0；扫描跳过：{'files': 241, 'ignored': 0, 'too_large': 0, 'binary': 8, 'symlinks': 0, 'unreadable': 0}
+
+已写入 C:\Users\lenovo\Desktop\CodePilot-Repair\docs\notes\phase1.md

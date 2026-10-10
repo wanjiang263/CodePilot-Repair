@@ -21,16 +21,21 @@ base commit 跑一次真实索引，把耗时与 Files / Symbols / Edges / Tests
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import os
+import platform
+import re
 import subprocess
 import sys
 import time
+from importlib.metadata import version
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from codepilot.fsutil import remove_tree
-from codepilot.repo.index import Indexer
+from codepilot.repo.index import Indexer, IndexStats
 from codepilot.repo.workspace import WorkspaceManager
 from codepilot.storage.db import (
     create_engine_from_url,
@@ -63,7 +68,7 @@ def bare_clone(url: str, dest: Path, git_proxy: str) -> None:
         raise SystemExit(f"git clone --bare 失败：{done.stderr.strip()}")
 
 
-def run_index(bare: Path, commit: str, workdir: Path) -> tuple[object, float]:
+def run_index(bare: Path, commit: str, workdir: Path) -> tuple[IndexStats, float]:
     """用 WorkspaceManager 从本地 bare 仓库取 fetch workspace 并真实计时索引。"""
     manager = WorkspaceManager(cache_root=workdir / "cache")
     workspace = manager.create(
@@ -84,7 +89,7 @@ def run_index(bare: Path, commit: str, workdir: Path) -> tuple[object, float]:
     return stats, elapsed
 
 
-def render(repo: str, commit: str, stats, elapsed: float) -> str:
+def render(repo: str, commit: str, stats: IndexStats, elapsed: float) -> str:
     symbols_by_kind = ", ".join(f"{k}={v}" for k, v in sorted(stats.symbols_by_kind.items()))
     edges_by_kind: dict[str, int] = {}
     for (kind, _conf), count in stats.edges_by_kind_confidence.items():
@@ -111,6 +116,9 @@ def main() -> int:
     parser.add_argument("--commit", default=DEFAULT_COMMIT)
     parser.add_argument("--git-proxy", default=os.environ.get("CODEPILOT_GIT_HTTP_PROXY", ""))
     parser.add_argument("--workdir", default=None, help="临时目录（默认系统 temp 下一次性目录）")
+    parser.add_argument(
+        "--local-repo", type=Path, help="从已获取的本地仓库复制；--repo 仍记录原始 URL"
+    )
     args = parser.parse_args()
 
     ephemeral = args.workdir is None
@@ -122,16 +130,40 @@ def main() -> int:
     base_tmp.mkdir(parents=True, exist_ok=True)
 
     bare = base_tmp / "repo.bare"
-    print(f"[1/3] bare clone（联网）：{args.repo} → {bare}")
-    bare_clone(args.repo, bare, args.git_proxy)
+    source = str(args.local_repo.resolve()) if args.local_repo else args.repo
+    print(f"[1/3] bare clone：{source} → {bare}", flush=True)
+    bare_clone(source, bare, args.git_proxy)
 
-    print(f"[2/3] 索引 base commit {args.commit}（fetch workspace，本地不联网）…")
+    print(f"[2/3] 索引 base commit {args.commit}（fetch workspace，本地不联网）…", flush=True)
     stats, elapsed = run_index(bare, args.commit, base_tmp)
 
     body = render(args.repo, args.commit, stats, elapsed)
     print("[3/3] 实测结果：\n" + body)
 
-    write_notes(body)
+    result = {
+        "repo": args.repo,
+        "commit": args.commit,
+        "python": sys.version,
+        "platform": platform.platform(),
+        "packages": {name: version(name) for name in ("tree-sitter", "tree-sitter-python")},
+        "files": stats.files,
+        "symbols": sum(stats.symbols_by_kind.values()),
+        "symbols_by_kind": stats.symbols_by_kind,
+        "edges": sum(stats.edges_by_kind_confidence.values()),
+        "edges_by_kind_confidence": [
+            {"kind": kind, "confidence": confidence, "count": count}
+            for (kind, confidence), count in sorted(stats.edges_by_kind_confidence.items())
+        ],
+        "tests": stats.tests,
+        "seconds": elapsed,
+        "parse_errors": stats.parse_errors,
+        "scan": stats.scan,
+        "parsed_paths": stats.parsed_paths,
+    }
+    (base_tmp / "result.json").write_text(
+        json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    write_notes(body, repo=args.repo, commit=args.commit)
     print(f"已写入 {NOTES}")
 
     if ephemeral:
@@ -139,16 +171,20 @@ def main() -> int:
     return 0
 
 
-def write_notes(body: str) -> None:
-    """把实测数字原样追加/写入 docs/notes/phase1.md（幂等：同 base 段落替换）。"""
+def write_notes(body: str, *, repo: str, commit: str) -> None:
+    """按 repo + commit 替换受标记的实测段落，保留其他结果与历史证据。"""
     NOTES.parent.mkdir(parents=True, exist_ok=True)
     header = "# Phase 1 实测记录\n\n> 数字来自真实运行，不预设、不美化。\n\n"
-    if NOTES.exists():
-        text = NOTES.read_text(encoding="utf-8")
-        text = text.rstrip() + "\n\n" + body
-        NOTES.write_text(text + "\n", encoding="utf-8")
+    key = hashlib.sha256(f"{repo}\0{commit}".encode()).hexdigest()
+    start, end = f"<!-- R23:{key}:start -->", f"<!-- R23:{key}:end -->"
+    block = f"{start}\n{body.rstrip()}\n{end}"
+    text = NOTES.read_text(encoding="utf-8") if NOTES.exists() else header
+    pattern = re.compile(re.escape(start) + r".*?" + re.escape(end), re.DOTALL)
+    if pattern.search(text):
+        text = pattern.sub(lambda _: block, text)
     else:
-        NOTES.write_text(header + body + "\n", encoding="utf-8")
+        text = text.rstrip() + "\n\n" + block + "\n"
+    NOTES.write_text(text, encoding="utf-8")
 
 
 if __name__ == "__main__":

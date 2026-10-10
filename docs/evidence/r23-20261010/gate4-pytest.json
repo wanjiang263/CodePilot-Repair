@@ -1,0 +1,24 @@
+{
+  "command": [
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\pytest.exe",
+    "-m",
+    "not docker and not llm",
+    "--cov",
+    "--cov-report=term-missing",
+    "--basetemp",
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\r23-repair-20261010\\gate4-tmp",
+    "-p",
+    "no:cacheprovider"
+  ],
+  "cwd": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair",
+  "returncode": 0,
+  "exit_hex": "0x00000000",
+  "seconds": 677.5294721999962,
+  "timestamp": "2026-10-10T03:01:56.289694+00:00",
+  "python": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "packages": {
+    "tree-sitter": "0.25.2",
+    "tree-sitter-python": "0.25.0"
+  }
+}
