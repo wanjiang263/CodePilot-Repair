@@ -1,0 +1,12 @@
+{
+  "fixture_commit": "a1f1dd7b04161d2d8be73e2fb979a86d2a8a35de",
+  "channels": [
+    "bm25",
+    "ripgrep"
+  ],
+  "query": "Session.login password",
+  "exit_codes": [
+    0,
+    0
+  ]
+}

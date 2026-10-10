@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "tests/test_login.py", line 12, in test_expired_token
+  File "src/auth.py", line 8, in getUserName
+  File "/opt/python/site-packages/vendor/auth.py", line 2, in check
+ValueError: invalid token [expired]
+Calling `getUserName` with user_id in src/auth.py should return a user name.

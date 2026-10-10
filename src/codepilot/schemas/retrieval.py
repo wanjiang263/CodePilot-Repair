@@ -11,6 +11,8 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
+from codepilot.schemas.common import TraceFrame
+
 __all__ = [
     "ChannelScore",
     "FusionMethod",
@@ -24,6 +26,7 @@ __all__ = [
 class FusionMethod(StrEnum):
     """02 §8.3 要求对比两种融合方式，选更好的作为默认。"""
 
+    NONE = "none"
     WEIGHTED = "weighted"
     RRF = "rrf"
 
@@ -32,10 +35,10 @@ class ChannelScore(BaseModel):
     """某个候选在某个通道上的得分。"""
 
     channel: str
-    raw: float
+    raw: float = Field(allow_inf_nan=False)
     """通道内原始分（BM25 分、余弦相似度、图扩展衰减分……）。"""
 
-    normalized: float
+    normalized: float = Field(ge=0, le=1, allow_inf_nan=False)
     """在本次查询候选集内 min-max 归一化后的分。"""
 
 
@@ -49,7 +52,7 @@ class RankedSymbol(BaseModel):
     symbol_id: str
     qualified_name: str
     file: str
-    score: float
+    score: float = Field(allow_inf_nan=False)
     kind: str | None = None
     channel_scores: list[ChannelScore] = Field(default_factory=list)
 
@@ -83,6 +86,8 @@ class RetrievalQuery(BaseModel):
     error_messages: list[str] = Field(default_factory=list)
     file_paths: list[str] = Field(default_factory=list)
     traceback_frames: list[str] = Field(default_factory=list)
+    parsed_frames: list[TraceFrame] = Field(default_factory=list)
+    """结构化帧；traceback_frames 保留原始帧文本以兼容 Phase 0 schema。"""
     test_names: list[str] = Field(default_factory=list)
 
 
@@ -96,6 +101,8 @@ class RetrievalResult(BaseModel):
     channel_weights: dict[str, float] = Field(default_factory=dict)
     fusion_method: FusionMethod = FusionMethod.WEIGHTED
     enabled_channels: list[str] = Field(default_factory=list)
+    per_channel: dict[str, list[RankedSymbol]] = Field(default_factory=dict)
+    """完整通道候选，排序按 raw 降序、file/start_line/qualified_name/id 升序。"""
 
     snapshot_id: str = ""
     """指向持久化的完整检索结果，供 LocalizationResult 事后引用。"""

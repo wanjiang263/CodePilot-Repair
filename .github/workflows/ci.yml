@@ -81,7 +81,13 @@ jobs:
         run: uv run python -c "import platform; from importlib.metadata import version; print(platform.platform()); print(platform.python_version()); print('tree-sitter', version('tree-sitter')); print('tree-sitter-python', version('tree-sitter-python'))" | tee environment.log
 
       - name: pytest
-        run: uv run pytest -m "not docker and not llm" --cov --cov-report=term-missing --junitxml=pytest-results.xml 2>&1 | tee pytest.log
+        # V-04 tests exercise the real executable, never silently skip the channel.
+        run: |
+          if ! command -v rg >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y ripgrep
+          fi
+          uv run pytest -m "not docker and not llm" --cov --cov-report=term-missing --junitxml=pytest-results.xml 2>&1 | tee pytest.log
 
       - name: Preserve test evidence
         if: always()
