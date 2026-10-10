@@ -133,7 +133,16 @@ class Indexer:
             else:
                 changed.append(scanned_file)
         scanned_paths = {f.path for f in scan.files}
-        removed_paths = sorted(path for path in stored_files if path not in scanned_paths)
+        hidden_paths = {
+            path
+            for path in stored_files
+            if path not in scanned_paths
+            and any(
+                blocked == "." or path == blocked or path.startswith(blocked.rstrip("/") + "/")
+                for blocked in scan.unreadable
+            )
+        }
+        removed_paths = sorted(set(stored_files) - scanned_paths - hidden_paths)
 
         parsed_files: dict[str, ParsedFile] = {}
         parse_errors: list[str] = []
@@ -146,7 +155,9 @@ class Indexer:
             if parsed.parse_error:
                 parse_errors.append(f"{scanned_file.path}: {parsed.parse_error}")
 
-        known = self._load_reused_symbols(stores, repository_id, [f.path for f in reused])
+        known = self._load_reused_symbols(
+            stores, repository_id, [*[f.path for f in reused], *sorted(hidden_paths)]
+        )
         context = AnalysisContext(repository_id, parsed_files, known_symbols=known)
 
         new_symbol_ids: set[str] = set()

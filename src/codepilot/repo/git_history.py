@@ -58,7 +58,7 @@ DEFAULT_MAX_COMMITS = 200
 
 _FULL_SHA = re.compile(r"^[0-9a-f]{40}(?:[0-9a-f]{24})?$")
 _COMMIT_MARKER = "COMMIT:"
-_NUMSTAT_COMMIT = re.compile(r"^COMMIT:([0-9a-f]{40})\x00?$")
+_NUMSTAT_COMMIT = re.compile(r"^COMMIT:([0-9a-f]{40}(?:[0-9a-f]{24})?)\x00?$")
 _HUNK_HEADER = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 
 
@@ -327,7 +327,7 @@ def _parse_patch(output: str) -> list[_CommitPatch]:
     for line in output.splitlines():
         if line.startswith(_COMMIT_MARKER):
             sha = line[len(_COMMIT_MARKER) :].strip("\x00").strip()
-            if re.fullmatch(r"[0-9a-f]{40}", sha):
+            if _FULL_SHA.fullmatch(sha):
                 current = _CommitPatch(sha)
                 commits.append(current)
                 old_path = None

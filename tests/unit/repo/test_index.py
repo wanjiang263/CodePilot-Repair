@@ -512,3 +512,36 @@ def test_incremental_reads_known_symbols_via_full_repo_query(
     assert stats.incremental
     assert stats.parsed_paths == ("pkg/b.py",)
     assert calls["n"] >= 1  # known 符号加载走了一次全量 list_by_repo
+
+
+@pytest.mark.parametrize("blocked", ["src/miniauth/session.py", "src/miniauth", "."])
+def test_unreadable_paths_preserve_index_until_confirmed_deleted(stores, tmp_path, blocked):
+    from dataclasses import replace
+
+    from codepilot.repo.scanner import RepositoryScanner
+
+    root = _copy_fixture(tmp_path)
+    ws = _ws(root)
+    Indexer().index(stores, ws)
+    before = _dump(stores, ws.repository_id)
+
+    class UnreadableScanner(RepositoryScanner):
+        def scan(self, root):
+            result = super().scan(root)
+            return replace(
+                result,
+                files=tuple(
+                    f
+                    for f in result.files
+                    if not (blocked == "." or f.path == blocked or f.path.startswith(blocked + "/"))
+                ),
+                unreadable=(blocked,),
+            )
+
+    stats = Indexer(scanner=UnreadableScanner()).index(stores, ws)
+    assert stats.removed_paths == ()
+    assert _dump(stores, ws.repository_id) == before
+    assert Indexer().index(stores, ws).changed_paths == ()
+    (root / "src/miniauth/session.py").unlink()
+    stats = Indexer().index(stores, ws)
+    assert stats.removed_paths == ("src/miniauth/session.py",)

@@ -337,3 +337,12 @@ def test_unquote_diff_path() -> None:
     assert _unquote_diff_path("b/src/app.py") == "src/app.py"
     assert _unquote_diff_path('"b/r\\303\\251nzh\\303\\254.py"') == "rénzhì.py"
     assert _unquote_diff_path("plain.py") == "plain.py"
+
+
+@pytest.mark.parametrize("length", [40, 64])
+def test_history_parsers_accept_full_object_ids(length):
+    sha = "a" * length
+    commits = _parse_numstat(f"COMMIT:{sha}\0\n1\t0\ta.py\0")
+    assert [(c.sha, c.paths) for c in commits] == [(sha, ["a.py"])]
+    patches = _parse_patch(f"COMMIT:{sha}\n--- a/a.py\n+++ b/a.py\n@@ -0,0 +1 @@\n+x\n")
+    assert [(c.sha, c.hunks) for c in patches] == [(sha, {"a.py": [(1, 1)]})]
