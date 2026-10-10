@@ -2,10 +2,10 @@ from dataclasses import replace
 
 import numpy as np
 import pytest
-from tests.unit.retrieval.test_embeddings import FakeEmbedding
 
 from codepilot.retrieval.documents import RetrievalError
 from codepilot.retrieval.embeddings import CachedEmbeddingProvider
+from support.retrieval import FakeEmbedding
 
 
 def test_persistent_hits_dedup_order_and_no_source_saved(tmp_path):

@@ -12,20 +12,7 @@ from codepilot.retrieval.embeddings import (
     SentenceTransformerProvider,
     validate_vectors,
 )
-
-
-class FakeEmbedding:
-    def __init__(self, identity=None):
-        self.identity = identity or EmbeddingIdentity("fake", "code", 2, "v1")
-        self.calls = []
-        self.closed = False
-
-    def embed(self, texts):
-        self.calls.append(list(texts))
-        return np.array([[len(text), 1] for text in texts], dtype=float).reshape(-1, 2)
-
-    def close(self):
-        self.closed = True
+from support.retrieval import FakeEmbedding
 
 
 def test_provider_protocol_and_empty_batch():

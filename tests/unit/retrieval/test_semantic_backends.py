@@ -3,10 +3,10 @@ from types import SimpleNamespace
 
 import numpy as np
 import pytest
-from tests.unit.retrieval.test_semantic import MappingEmbedding, document, fixture_channel
 
 from codepilot.retrieval.semantic import SemanticChannel
 from codepilot.schemas.retrieval import RetrievalQuery
+from support.retrieval import MappingEmbedding, document, fixture_channel
 
 
 class FakeFlatIP:

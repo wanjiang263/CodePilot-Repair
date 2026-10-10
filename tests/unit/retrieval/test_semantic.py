@@ -1,62 +1,14 @@
-import json
 from dataclasses import replace
-from pathlib import Path
 
 import numpy as np
 import pytest
 
-from codepilot.repo.models import Symbol
-from codepilot.retrieval.documents import RetrievalError, SymbolDocument
-from codepilot.retrieval.embeddings import CachedEmbeddingProvider, EmbeddingIdentity
+from codepilot.retrieval.documents import RetrievalError
+from codepilot.retrieval.embeddings import CachedEmbeddingProvider
 from codepilot.retrieval.semantic import SemanticChannel
 from codepilot.retrieval.service import retrieve_symbols
 from codepilot.schemas.retrieval import RetrievalQuery, RetrievalResult
-
-FIXTURE = Path(__file__).resolve().parents[2] / "fixtures/retrieval/semantic-vectors.json"
-
-
-class MappingEmbedding:
-    def __init__(self, mapping):
-        self.mapping = mapping
-        self.identity = EmbeddingIdentity("fake", "code", 2, "v1")
-        self.calls = []
-
-    def embed(self, texts):
-        self.calls.append(list(texts))
-        return np.array([self.mapping[text] for text in texts])
-
-    def close(self):
-        pass
-
-
-def document(sid, text, path="a.py", start=1, qualified_name=None):
-    return SymbolDocument(
-        Symbol(
-            sid,
-            qualified_name or sid,
-            "function",
-            id=sid,
-            path=path,
-            start_line=start,
-            end_line=start,
-        ),
-        text,
-        text,
-        False,
-    )
-
-
-def fixture_channel(provider_wrapper=lambda p: p):
-    fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
-    docs = [document(row["id"], row["text"], row["path"]) for row in fixture["documents"]]
-    mapping = {row["text"]: row["vector"] for row in fixture["documents"]}
-    mapping[fixture["issue"]] = fixture["query_vector"]
-    provider = MappingEmbedding(mapping)
-    return (
-        SemanticChannel(docs, provider_wrapper(provider)),
-        RetrievalQuery(raw_issue=fixture["issue"]),
-        provider,
-    )
+from support.retrieval import MappingEmbedding, document, fixture_channel
 
 
 def test_hand_cosine_negative_zero_vectors_top_k_and_normalization():

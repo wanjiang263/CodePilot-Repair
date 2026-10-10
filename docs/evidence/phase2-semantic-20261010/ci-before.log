@@ -1,0 +1,175 @@
+Phase 1 index in Docker	Docker acceptance	﻿2026-10-10T15:45:36.6175960Z ##[group]Run uv run pytest -s -m docker --junitxml=docker-results.xml 2>&1 | tee docker-test.log
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:36.6176683Z ^[[36;1muv run pytest -s -m docker --junitxml=docker-results.xml 2>&1 | tee docker-test.log^[[0m
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:36.6233219Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:36.6233431Z env:
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:36.6233553Z   UV_FROZEN: 1
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:36.6233879Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:36.6234058Z ##[endgroup]
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3977562Z ============================= test session starts ==============================
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3978422Z platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3979012Z rootdir: /home/runner/work/CodePilot-Repair/CodePilot-Repair
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3979461Z configfile: pyproject.toml
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3979798Z testpaths: tests
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3980284Z plugins: asyncio-1.4.0, langsmith-0.14.4, timeout-2.4.0, cov-7.1.0, anyio-4.15.1
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3981071Z asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3981658Z timeout: 300.0s
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3981971Z timeout method: signal
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3982297Z timeout func_only: False
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3982688Z collected 843 items / 2 errors / 842 deselected / 1 selected
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3983037Z 
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3983284Z ==================================== ERRORS ====================================
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3983998Z ________ ERROR collecting tests/unit/retrieval/test_embedding_cache.py _________
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3993326Z ImportError while importing test module '/home/runner/work/CodePilot-Repair/CodePilot-Repair/tests/unit/retrieval/test_embedding_cache.py'.
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3994210Z Hint: make sure your test modules/packages have valid Python names.
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3994790Z Traceback:
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3995338Z ../../../.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py:90: in import_module
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3996020Z     return _bootstrap._gcd_import(name[level:], package, level)
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3996473Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3996915Z tests/unit/retrieval/test_embedding_cache.py:5: in <module>
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3997408Z     from tests.unit.retrieval.test_embeddings import FakeEmbedding
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3997881Z E   ModuleNotFoundError: No module named 'tests'
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3998395Z _______ ERROR collecting tests/unit/retrieval/test_semantic_backends.py ________
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3999164Z ImportError while importing test module '/home/runner/work/CodePilot-Repair/CodePilot-Repair/tests/unit/retrieval/test_semantic_backends.py'.
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.3999891Z Hint: make sure your test modules/packages have valid Python names.
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4000308Z Traceback:
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4000826Z ../../../.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py:90: in import_module
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4001474Z     return _bootstrap._gcd_import(name[level:], package, level)
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4001909Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4002336Z tests/unit/retrieval/test_semantic_backends.py:6: in <module>
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4002902Z     from tests.unit.retrieval.test_semantic import MappingEmbedding, document, fixture_channel
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4003463Z E   ModuleNotFoundError: No module named 'tests'
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4004024Z - generated xml file: /home/runner/work/CodePilot-Repair/CodePilot-Repair/docker-results.xml -
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4004722Z =========================== short test summary info ============================
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4005172Z ERROR tests/unit/retrieval/test_embedding_cache.py
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4005595Z ERROR tests/unit/retrieval/test_semantic_backends.py
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4006053Z !!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.4007260Z ====================== 842 deselected, 2 errors in 2.00s =======================
+Phase 1 index in Docker	Docker acceptance	2026-10-10T15:45:40.7076370Z ##[error]Process completed with exit code 2.
+pytest (no docker, no llm)	pytest	﻿2026-10-10T15:45:32.3792121Z ##[group]Run if ! command -v rg >/dev/null; then
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.3792795Z ^[[36;1mif ! command -v rg >/dev/null; then^[[0m
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.3793314Z ^[[36;1m  sudo apt-get update^[[0m
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.3793778Z ^[[36;1m  sudo apt-get install -y ripgrep^[[0m
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.3794246Z ^[[36;1mfi^[[0m
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.3795131Z ^[[36;1muv run pytest -m "not docker and not llm" --cov --cov-report=term-missing --junitxml=pytest-results.xml 2>&1 | tee pytest.log^[[0m
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.3882496Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.3883083Z env:
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.3883393Z   UV_FROZEN: 1
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.3883831Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.3884576Z ##[endgroup]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.6506354Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.6817360Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.6896790Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.7137314Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.7138903Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.7307250Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.8649660Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [12.3 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.8666464Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main all Packages [640 B]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.8765491Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [492 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:32.8857004Z Get:10 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [548 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.0274702Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1375 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.0517074Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [306 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.0592790Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1702 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.0947422Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [342 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.1032364Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1761 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.1637203Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [401 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.1758227Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [55.0 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.1781525Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse Translation-en [14.3 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.3977607Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1121 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.4096823Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [228 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.4617136Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1220 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.4776886Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [245 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.4816817Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1669 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.5096919Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [383 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.5136797Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [49.8 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:33.5176881Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse Translation-en [12.4 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:36.7652711Z Fetched 12.3 MB in 2s (6229 kB/s)
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:37.8777246Z Reading package lists...
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:37.9105670Z Reading package lists...
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.0746905Z Building dependency tree...
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.0754819Z Reading state information...
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.2201903Z The following NEW packages will be installed:
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.2216910Z   ripgrep
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.2418795Z 0 upgraded, 1 newly installed, 0 to remove and 23 not upgraded.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.2419605Z Need to get 1551 kB of archives.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.2421320Z After this operation, 5335 kB of additional disk space will be used.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.2436854Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.2817340Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 ripgrep amd64 14.1.0-1 [1551 kB]
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.5414784Z Fetched 1551 kB in 0s (22.1 MB/s)
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.5658409Z Selecting previously unselected package ripgrep.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.5966255Z (Reading database ... 
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.6006703Z (Reading database ... 5%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.6011417Z (Reading database ... 10%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.6012845Z (Reading database ... 15%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.6014812Z (Reading database ... 20%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.6015554Z (Reading database ... 25%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.6016963Z (Reading database ... 30%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.6017696Z (Reading database ... 35%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.6027460Z (Reading database ... 40%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.6028131Z (Reading database ... 45%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.6029191Z (Reading database ... 50%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.6039989Z (Reading database ... 55%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.7297241Z (Reading database ... 60%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:38.9359268Z (Reading database ... 65%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:39.1280422Z (Reading database ... 70%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:39.3270045Z (Reading database ... 75%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:39.4735206Z (Reading database ... 80%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:39.6792410Z (Reading database ... 85%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:39.9240831Z (Reading database ... 90%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.0866700Z (Reading database ... 95%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.0867278Z (Reading database ... 100%
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.0882298Z (Reading database ... 203191 files and directories currently installed.)
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.0898904Z Preparing to unpack .../ripgrep_14.1.0-1_amd64.deb ...
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.0924716Z Unpacking ripgrep (14.1.0-1) ...
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.1589506Z Setting up ripgrep (14.1.0-1) ...
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.1617463Z Processing triggers for man-db (2.12.0-4build2) ...
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.1641557Z Not building database; man-db/auto-update is not 'true'.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.8036972Z 
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.8037804Z Running kernel seems to be up-to-date.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.8038466Z 
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.8039058Z No services need to be restarted.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.8039524Z 
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.8039878Z No containers need to be restarted.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.8040368Z 
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.8040751Z No user sessions are running outdated binaries.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.8041336Z 
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:40.8041835Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1490368Z ============================= test session starts ==============================
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1491600Z platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1492703Z rootdir: /home/runner/work/CodePilot-Repair/CodePilot-Repair
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1493633Z configfile: pyproject.toml
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1494349Z testpaths: tests
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1495110Z plugins: asyncio-1.4.0, langsmith-0.14.4, timeout-2.4.0, cov-7.1.0, anyio-4.15.1
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1496845Z asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1497886Z timeout: 300.0s
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1498352Z timeout method: signal
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1498837Z timeout func_only: False
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1499417Z collected 843 items / 2 errors / 1 deselected / 842 selected
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1499941Z 
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1500254Z ==================================== ERRORS ====================================
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1501053Z ________ ERROR collecting tests/unit/retrieval/test_embedding_cache.py _________
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1502372Z ImportError while importing test module '/home/runner/work/CodePilot-Repair/CodePilot-Repair/tests/unit/retrieval/test_embedding_cache.py'.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1504001Z Hint: make sure your test modules/packages have valid Python names.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1504669Z Traceback:
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1505496Z ../../../.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py:90: in import_module
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1506817Z     return _bootstrap._gcd_import(name[level:], package, level)
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1507502Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1508167Z tests/unit/retrieval/test_embedding_cache.py:5: in <module>
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1508941Z     from tests.unit.retrieval.test_embeddings import FakeEmbedding
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1509921Z E   ModuleNotFoundError: No module named 'tests'
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1510681Z _______ ERROR collecting tests/unit/retrieval/test_semantic_backends.py ________
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1511982Z ImportError while importing test module '/home/runner/work/CodePilot-Repair/CodePilot-Repair/tests/unit/retrieval/test_semantic_backends.py'.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1513225Z Hint: make sure your test modules/packages have valid Python names.
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1513849Z Traceback:
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1514653Z ../../../.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py:90: in import_module
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1515706Z     return _bootstrap._gcd_import(name[level:], package, level)
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1516569Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1517228Z tests/unit/retrieval/test_semantic_backends.py:6: in <module>
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1518127Z     from tests.unit.retrieval.test_semantic import MappingEmbedding, document, fixture_channel
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1518996Z E   ModuleNotFoundError: No module named 'tests'
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1519846Z - generated xml file: /home/runner/work/CodePilot-Repair/CodePilot-Repair/pytest-results.xml -
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1520811Z =========================== short test summary info ============================
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1521550Z ERROR tests/unit/retrieval/test_embedding_cache.py
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1522415Z ERROR tests/unit/retrieval/test_semantic_backends.py
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1531500Z !!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.1532368Z ======================= 1 deselected, 2 errors in 6.62s ========================
+pytest (no docker, no llm)	pytest	2026-10-10T15:45:51.4339115Z ##[error]Process completed with exit code 2.
