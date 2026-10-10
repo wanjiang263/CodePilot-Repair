@@ -1,0 +1,4 @@
+Windows-11-10.0.22631-SP0
+3.12.7
+{'rank-bm25': '0.2.2', 'tree-sitter': '0.25.2', 'tree-sitter-python': '0.25.0', 'pytest': '9.1.1'}
+ripgrep 15.2.0

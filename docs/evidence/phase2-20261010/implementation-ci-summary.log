@@ -1,0 +1,6 @@
+lint + types	Ruff	2026-10-10T09:09:33.1003146Z All checks passed!
+lint + types	Ruff format check	2026-10-10T09:09:33.1747965Z 123 files already formatted
+lint + types	mypy	2026-10-10T09:09:40.3023514Z Success: no issues found in 71 source files
+Phase 1 index in Docker	Docker acceptance	2026-10-10T09:10:12.9835641Z ====================== 1 passed, 782 deselected in 37.10s ======================
+pytest (no docker, no llm)	pytest	2026-10-10T09:10:25.9224082Z Required test coverage of 80.0% reached. Total coverage: 93.92%
+pytest (no docker, no llm)	pytest	2026-10-10T09:10:25.9228885Z ================ 777 passed, 5 skipped, 1 deselected in 31.52s =================

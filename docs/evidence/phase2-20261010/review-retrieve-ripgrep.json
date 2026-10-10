@@ -1,0 +1,392 @@
+{
+  "query": {
+    "raw_issue": "Session.login password",
+    "identifiers": [
+      "Session.login"
+    ],
+    "keywords": [
+      "session.login",
+      "session",
+      "login",
+      "password"
+    ],
+    "error_messages": [],
+    "file_paths": [],
+    "traceback_frames": [],
+    "parsed_frames": [],
+    "test_names": []
+  },
+  "symbols": [
+    {
+      "symbol_id": "8e8a92aa14e80fa9fbc862107b0c7983e37b341f",
+      "qualified_name": "tests.test_session.TestSession.test_login_with_correct_password",
+      "file": "tests/test_session.py",
+      "score": 4.0,
+      "kind": "test_method",
+      "channel_scores": [
+        {
+          "channel": "ripgrep",
+          "raw": 4.0,
+          "normalized": 1.0
+        }
+      ],
+      "pinned": false,
+      "start_line": 10,
+      "end_line": 12,
+      "reason": null
+    },
+    {
+      "symbol_id": "67efe59d740f2949e3de3d5175efd344b34e426c",
+      "qualified_name": "tests.test_session.TestSession.test_login_with_wrong_password",
+      "file": "tests/test_session.py",
+      "score": 4.0,
+      "kind": "test_method",
+      "channel_scores": [
+        {
+          "channel": "ripgrep",
+          "raw": 4.0,
+          "normalized": 1.0
+        }
+      ],
+      "pinned": false,
+      "start_line": 14,
+      "end_line": 16,
+      "reason": null
+    },
+    {
+      "symbol_id": "fe8013484988350061f11dfe5232b667a623fe4a",
+      "qualified_name": "miniauth.session.Session.login",
+      "file": "src/miniauth/session.py",
+      "score": 2.0,
+      "kind": "method",
+      "channel_scores": [
+        {
+          "channel": "ripgrep",
+          "raw": 2.0,
+          "normalized": 0.3333333333333333
+        }
+      ],
+      "pinned": false,
+      "start_line": 20,
+      "end_line": 24,
+      "reason": null
+    },
+    {
+      "symbol_id": "b2f490d9721a1e089a10da8f2caf5b243ad1521d",
+      "qualified_name": "miniauth.session.AdminSession.login",
+      "file": "src/miniauth/session.py",
+      "score": 2.0,
+      "kind": "method",
+      "channel_scores": [
+        {
+          "channel": "ripgrep",
+          "raw": 2.0,
+          "normalized": 0.3333333333333333
+        }
+      ],
+      "pinned": false,
+      "start_line": 40,
+      "end_line": 43,
+      "reason": null
+    },
+    {
+      "symbol_id": "e67004205adf186d95557e83f2d970ca165719a9",
+      "qualified_name": "miniauth.session.AuditedSession.login",
+      "file": "src/miniauth/session.py",
+      "score": 2.0,
+      "kind": "method",
+      "channel_scores": [
+        {
+          "channel": "ripgrep",
+          "raw": 2.0,
+          "normalized": 0.3333333333333333
+        }
+      ],
+      "pinned": false,
+      "start_line": 53,
+      "end_line": 55,
+      "reason": null
+    }
+  ],
+  "files": [],
+  "channel_weights": {},
+  "fusion_method": "none",
+  "enabled_channels": [
+    "ripgrep"
+  ],
+  "per_channel": {
+    "ripgrep": [
+      {
+        "symbol_id": "8e8a92aa14e80fa9fbc862107b0c7983e37b341f",
+        "qualified_name": "tests.test_session.TestSession.test_login_with_correct_password",
+        "file": "tests/test_session.py",
+        "score": 4.0,
+        "kind": "test_method",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 4.0,
+            "normalized": 1.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 10,
+        "end_line": 12,
+        "reason": null
+      },
+      {
+        "symbol_id": "67efe59d740f2949e3de3d5175efd344b34e426c",
+        "qualified_name": "tests.test_session.TestSession.test_login_with_wrong_password",
+        "file": "tests/test_session.py",
+        "score": 4.0,
+        "kind": "test_method",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 4.0,
+            "normalized": 1.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 14,
+        "end_line": 16,
+        "reason": null
+      },
+      {
+        "symbol_id": "fe8013484988350061f11dfe5232b667a623fe4a",
+        "qualified_name": "miniauth.session.Session.login",
+        "file": "src/miniauth/session.py",
+        "score": 2.0,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 2.0,
+            "normalized": 0.3333333333333333
+          }
+        ],
+        "pinned": false,
+        "start_line": 20,
+        "end_line": 24,
+        "reason": null
+      },
+      {
+        "symbol_id": "b2f490d9721a1e089a10da8f2caf5b243ad1521d",
+        "qualified_name": "miniauth.session.AdminSession.login",
+        "file": "src/miniauth/session.py",
+        "score": 2.0,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 2.0,
+            "normalized": 0.3333333333333333
+          }
+        ],
+        "pinned": false,
+        "start_line": 40,
+        "end_line": 43,
+        "reason": null
+      },
+      {
+        "symbol_id": "e67004205adf186d95557e83f2d970ca165719a9",
+        "qualified_name": "miniauth.session.AuditedSession.login",
+        "file": "src/miniauth/session.py",
+        "score": 2.0,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 2.0,
+            "normalized": 0.3333333333333333
+          }
+        ],
+        "pinned": false,
+        "start_line": 53,
+        "end_line": 55,
+        "reason": null
+      },
+      {
+        "symbol_id": "d2d12025ae27cc18ab1cbc4ab6ad9d6c7a2de979",
+        "qualified_name": "tests.test_session.TestAdminSession.test_plain_user_cannot_use_admin_session",
+        "file": "tests/test_session.py",
+        "score": 2.0,
+        "kind": "test_method",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 2.0,
+            "normalized": 0.3333333333333333
+          }
+        ],
+        "pinned": false,
+        "start_line": 23,
+        "end_line": 25,
+        "reason": null
+      },
+      {
+        "symbol_id": "7710fc50bffc6326309574e5e5f269cf4dfe5726",
+        "qualified_name": "miniauth",
+        "file": "src/miniauth/__init__.py",
+        "score": 1.0,
+        "kind": "module",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 1.0,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 1,
+        "end_line": 12,
+        "reason": null
+      },
+      {
+        "symbol_id": "8b6166d167553319d0a7576f1d2a89476fefce5c",
+        "qualified_name": "miniauth.app",
+        "file": "src/miniauth/app.py",
+        "score": 1.0,
+        "kind": "module",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 1.0,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 1,
+        "end_line": 38,
+        "reason": null
+      },
+      {
+        "symbol_id": "5ada4849afcd6e7b046dc715cf844a1ac26ad402",
+        "qualified_name": "miniauth.app.build_session",
+        "file": "src/miniauth/app.py",
+        "score": 1.0,
+        "kind": "function",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 1.0,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 11,
+        "end_line": 24,
+        "reason": null
+      },
+      {
+        "symbol_id": "27a067a63ed0bb83d6d17ef234b337a572f0d93b",
+        "qualified_name": "miniauth.backends.base.AuthBackend.check_password",
+        "file": "src/miniauth/backends/base.py",
+        "score": 1.0,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 1.0,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 16,
+        "end_line": 18,
+        "reason": null
+      },
+      {
+        "symbol_id": "39d2ae53df3e5f28431301c50bcf244aac43b530",
+        "qualified_name": "miniauth.backends.memory.MemoryBackend.__init__",
+        "file": "src/miniauth/backends/memory.py",
+        "score": 1.0,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 1.0,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 12,
+        "end_line": 15,
+        "reason": null
+      },
+      {
+        "symbol_id": "8a6a2f39ffad4d3ab12ab4f69ec10a3e7db7fd37",
+        "qualified_name": "miniauth.backends.memory.MemoryBackend.add",
+        "file": "src/miniauth/backends/memory.py",
+        "score": 1.0,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 1.0,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 17,
+        "end_line": 19,
+        "reason": null
+      },
+      {
+        "symbol_id": "9d097be4de2b744d5d99d17894cc8cebf17007c1",
+        "qualified_name": "miniauth.backends.memory.MemoryBackend.check_password",
+        "file": "src/miniauth/backends/memory.py",
+        "score": 1.0,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 1.0,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 21,
+        "end_line": 22,
+        "reason": null
+      },
+      {
+        "symbol_id": "4a6bb97acf7be6680f410d4d563d8c2a059f2275",
+        "qualified_name": "tests.test_session",
+        "file": "tests/test_session.py",
+        "score": 1.0,
+        "kind": "module",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 1.0,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 1,
+        "end_line": 25,
+        "reason": null
+      },
+      {
+        "symbol_id": "2b19e563a4d65bbd83933e86a2c04e695e4c23e4",
+        "qualified_name": "tests.test_session.TestAdminSession.test_admin_can_login",
+        "file": "tests/test_session.py",
+        "score": 1.0,
+        "kind": "test_method",
+        "channel_scores": [
+          {
+            "channel": "ripgrep",
+            "raw": 1.0,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 20,
+        "end_line": 21,
+        "reason": null
+      }
+    ]
+  },
+  "snapshot_id": ""
+}

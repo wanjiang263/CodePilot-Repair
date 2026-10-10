@@ -33,7 +33,6 @@ __all__ = ["app"]
 #: ``index`` 已在 R-18 落地，不再列在这里——``test_unimplemented_commands_fail_loudly``
 #: 以 ``sorted(_PLANNED)`` 参数化，删键即自动不再要求 index 退出码 2。
 _PLANNED: dict[str, str] = {
-    "retrieve": "Phase 2（多通道检索与融合）",
     "run-tests": "Phase 4（Docker 沙箱）",
     "solve": "Phase 5（最小单轮闭环，M1）",
     "bench": "Phase 11（SWE-bench Lite，M3）",
@@ -166,7 +165,7 @@ def doctor() -> None:
     rows.append(("docker", docker is not None, docker_note))
 
     rg = shutil.which("rg")
-    rows.append(("ripgrep", rg is not None, rg or "未找到——将退回 Python 实现（较慢）"))
+    rows.append(("ripgrep", rg is not None, rg or "未找到——ripgrep 检索通道不可用"))
 
     llm_path = settings.resolved_llm_config
     rows.append(("LLM 配置文件", llm_path.exists(), str(llm_path)))
@@ -334,10 +333,55 @@ def _not_yet(command: str) -> None:
 @app.command("retrieve")
 def retrieve(
     query: str = typer.Argument(..., help="检索语句。"),
+    repo: str = typer.Option(..., "--repo", help="仓库路径或 URL。"),
+    base_commit: str = typer.Option("HEAD", "--base-commit", help="基准提交。"),
+    channel: str = typer.Option("bm25", "--channel", help="独立通道：bm25 / ripgrep。"),
+    limit: int = typer.Option(20, "--limit", min=1, help="最多返回的 symbol 数量。"),
 ) -> None:
-    """[未实现] 多通道检索并融合排序。"""
-    del query
-    _not_yet("retrieve")
+    """Phase 2 首批：在基准提交中执行单通道检索，输出 JSON（尚未融合）。"""
+    from codepilot.repo.index import Indexer, RepositoryIndex
+    from codepilot.repo.workspace import WorkspaceError, WorkspaceManager
+    from codepilot.retrieval.documents import RetrievalError
+    from codepilot.retrieval.service import retrieve_symbols
+    from codepilot.storage.db import (
+        create_engine_from_url,
+        create_session_factory,
+        init_db,
+        session_scope,
+    )
+    from codepilot.storage.repository import Stores
+
+    if channel not in ("bm25", "ripgrep"):
+        raise typer.BadParameter("请选择 bm25 或 ripgrep", param_hint="--channel")
+    settings = get_settings()
+    settings.ensure_dirs()
+    manager = WorkspaceManager(cache_root=settings.repo_cache_dir())
+    target = settings.cache_dir / "cli-workspaces" / f"retrieve-{secrets.token_hex(6)}"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    engine = create_engine_from_url("sqlite://")
+    try:
+        init_db(engine)
+        workspace = manager.create(source=repo, base_commit=base_commit, target=target)
+        try:
+            with session_scope(create_session_factory(engine)) as session:
+                stores = Stores(session)
+                Indexer().index(stores, workspace)
+                symbols = RepositoryIndex(stores, workspace.repository_id).symbol_objects()
+                result = retrieve_symbols(
+                    workspace.path,
+                    symbols,
+                    query,
+                    channel="bm25" if channel == "bm25" else "ripgrep",
+                    limit=limit,
+                )
+                typer.echo(result.model_dump_json(indent=2))
+        finally:
+            manager.remove(workspace)
+    except (WorkspaceError, RetrievalError) as error:
+        typer.secho(str(error), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1) from error
+    finally:
+        engine.dispose()
 
 
 @app.command("run-tests")
