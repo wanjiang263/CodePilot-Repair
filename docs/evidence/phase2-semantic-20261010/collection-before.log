@@ -1,0 +1,27 @@
+
+=================================== ERRORS ====================================
+________ ERROR collecting tests/unit/retrieval/test_embedding_cache.py ________
+ImportError while importing test module 'C:\Users\lenovo\Desktop\CodePilot-Repair\tests\unit\retrieval\test_embedding_cache.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+D:\Anaconda\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\retrieval\test_embedding_cache.py:5: in <module>
+    from tests.unit.retrieval.test_embeddings import FakeEmbedding
+E   ModuleNotFoundError: No module named 'tests'
+_______ ERROR collecting tests/unit/retrieval/test_semantic_backends.py _______
+ImportError while importing test module 'C:\Users\lenovo\Desktop\CodePilot-Repair\tests\unit\retrieval\test_semantic_backends.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+D:\Anaconda\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\retrieval\test_semantic_backends.py:6: in <module>
+    from tests.unit.retrieval.test_semantic import MappingEmbedding, document, fixture_channel
+E   ModuleNotFoundError: No module named 'tests'
+=========================== short test summary info ===========================
+ERROR tests/unit/retrieval/test_embedding_cache.py
+ERROR tests/unit/retrieval/test_semantic_backends.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!
+no tests collected, 2 errors in 1.77s

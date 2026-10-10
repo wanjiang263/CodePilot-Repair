@@ -1,0 +1,11 @@
+{
+  "issue": "login fails for inactive users",
+  "query_vector": [3, 4],
+  "documents": [
+    {"id": "negative", "path": "z.py", "text": "reject inactive user", "vector": [-3, -4]},
+    {"id": "x", "path": "a.py", "text": "password check", "vector": [1, 0]},
+    {"id": "same", "path": "b.py", "text": "login session", "vector": [6, 8]},
+    {"id": "y", "path": "a.py", "text": "active user", "vector": [0, 1]},
+    {"id": "zero", "path": "a.py", "text": "no signal", "vector": [0, 0]}
+  ]
+}

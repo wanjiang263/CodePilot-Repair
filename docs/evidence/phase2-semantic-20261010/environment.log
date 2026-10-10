@@ -1,0 +1,7 @@
+Windows-11-10.0.22631-SP0
+Python 3.12.7
+numpy 2.5.3
+faiss-cpu 1.15.1
+httpx 0.28.1
+pytest 9.1.1
+sentence-transformers: NOT INSTALLED

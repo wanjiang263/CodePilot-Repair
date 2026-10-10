@@ -1,0 +1,82 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+_________________ test_api_batch_size_preserves_global_order __________________
+
+    def test_api_batch_size_preserves_global_order():
+        requests = []
+    
+        def handler(request):
+            inputs = json.loads(request.content)["input"]
+            requests.append(inputs)
+            assert len(inputs) <= 2
+            return httpx.Response(200, json={"data": list(reversed([
+                {"index": index, "embedding": [len(text), 1]} for index, text in enumerate(inputs)
+            ]))})
+    
+>       provider = make_provider(handler, batch_size=2)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\retrieval\test_embedding_api.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+handler = <function test_api_batch_size_preserves_global_order.<locals>.handler at 0x0000026AAA875800>
+options = {'batch_size': 2}
+
+    def make_provider(handler, **options):
+        client = httpx.Client(transport=httpx.MockTransport(handler), base_url="https://wrong.test")
+        spec = ProviderSpec(
+            name="test",
+            base_url="https://embedding.test/api/v1/",
+            api_key_env="TEST_KEY",
+            extra_headers={"X-Test": "value"},
+        )
+>       return OpenAICompatibleEmbeddingProvider(
+            provider=spec,
+            model="configured-code-model",
+            dimensions=2,
+            revision="deploy-v1",
+            api_key="test-secret",
+            client=client,
+            sleep=lambda _: None,
+            **options,
+        )
+E       TypeError: OpenAICompatibleEmbeddingProvider.__init__() got an unexpected keyword argument 'batch_size'
+
+tests\unit\retrieval\test_embedding_api.py:25: TypeError
+_________________________ test_api_invalid_batch_size _________________________
+
+    def test_api_invalid_batch_size():
+        with pytest.raises(ValueError, match="batch_size"):
+>           make_provider(lambda _: httpx.Response(200), batch_size=0)
+
+tests\unit\retrieval\test_embedding_api.py:211: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+handler = <function test_api_invalid_batch_size.<locals>.<lambda> at 0x0000026AAA874400>
+options = {'batch_size': 0}
+
+    def make_provider(handler, **options):
+        client = httpx.Client(transport=httpx.MockTransport(handler), base_url="https://wrong.test")
+        spec = ProviderSpec(
+            name="test",
+            base_url="https://embedding.test/api/v1/",
+            api_key_env="TEST_KEY",
+            extra_headers={"X-Test": "value"},
+        )
+>       return OpenAICompatibleEmbeddingProvider(
+            provider=spec,
+            model="configured-code-model",
+            dimensions=2,
+            revision="deploy-v1",
+            api_key="test-secret",
+            client=client,
+            sleep=lambda _: None,
+            **options,
+        )
+E       TypeError: OpenAICompatibleEmbeddingProvider.__init__() got an unexpected keyword argument 'batch_size'
+
+tests\unit\retrieval\test_embedding_api.py:25: TypeError
+=========================== short test summary info ===========================
+FAILED tests/unit/retrieval/test_embedding_api.py::test_api_batch_size_preserves_global_order
+FAILED tests/unit/retrieval/test_embedding_api.py::test_api_invalid_batch_size
+2 failed, 20 deselected in 2.49s

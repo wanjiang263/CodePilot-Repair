@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "embedding": "MockTransport synthetic vectors; no real API",
+  "fixture_commit": "a1f1dd7b04161d2d8be73e2fb979a86d2a8a35de",
+  "files": 14,
+  "symbols": 58,
+  "first_request_batch_sizes": [
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    2,
+    1
+  ],
+  "second_request_count": 0,
+  "numpy_faiss_result_equal": true,
+  "repository_clean": true
+}

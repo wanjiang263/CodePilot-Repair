@@ -1,0 +1,6 @@
+Resolved 3 packages in 1.99s
+Downloading faiss-cpu (15.5MiB)
+ Downloaded faiss-cpu
+Prepared 1 package in 5.38s
+Installed 1 package in 85ms
+ + faiss-cpu==1.15.1

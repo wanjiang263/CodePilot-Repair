@@ -1,0 +1,38 @@
+2026-10-10T15:50:43.487166Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.218 incremental=False removed=0 repository_id=semantic_smoke reused=0
+HTTP Request: POST https://mock.invalid/v1/embeddings "HTTP/1.1 200 OK"
+HTTP Request: POST https://mock.invalid/v1/embeddings "HTTP/1.1 200 OK"
+HTTP Request: POST https://mock.invalid/v1/embeddings "HTTP/1.1 200 OK"
+HTTP Request: POST https://mock.invalid/v1/embeddings "HTTP/1.1 200 OK"
+HTTP Request: POST https://mock.invalid/v1/embeddings "HTTP/1.1 200 OK"
+HTTP Request: POST https://mock.invalid/v1/embeddings "HTTP/1.1 200 OK"
+HTTP Request: POST https://mock.invalid/v1/embeddings "HTTP/1.1 200 OK"
+HTTP Request: POST https://mock.invalid/v1/embeddings "HTTP/1.1 200 OK"
+HTTP Request: POST https://mock.invalid/v1/embeddings "HTTP/1.1 200 OK"
+HTTP Request: POST https://mock.invalid/v1/embeddings "HTTP/1.1 200 OK"
+Loading faiss with AVX2 support.
+Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+Loading faiss.
+Successfully loaded faiss.
+{
+  "status": "PASS",
+  "embedding": "MockTransport synthetic vectors; no real API",
+  "fixture_commit": "a1f1dd7b04161d2d8be73e2fb979a86d2a8a35de",
+  "files": 14,
+  "symbols": 58,
+  "first_request_batch_sizes": [
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    2,
+    1
+  ],
+  "second_request_count": 0,
+  "numpy_faiss_result_equal": true,
+  "repository_clean": true
+}
