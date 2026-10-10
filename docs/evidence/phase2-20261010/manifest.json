@@ -14,6 +14,10 @@
   "retrieve-bm25.stderr.log": "9c217a530320ae8bfd7e9660b90a885716822eec8921d23909a8680647f762c4",
   "retrieve-ripgrep.json": "5e7663239a9ad0138a7ffd7dadef25f23d122ea2124c1ef76dffe4876b1bd885",
   "retrieve-ripgrep.stderr.log": "7da644d38a9eb8d77f5c2c51cc3cc25e24f23cbafeb458763be0537dff5a92f6",
+  "review-format.log": "875a21eb7522c817878d30ceb9fb3ae1fe140fd169ec37dc163997fd8a5ae11a",
+  "review-mypy.log": "ebc452c04843a6e276fcbcb457bb24c28fd326ffd6dbabb8c368b2549602046e",
+  "review-ruff.log": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+  "review-targeted.log": "3206da2232c7c65d463614265bc0f78f28796f37517f801ad1bc15b5f1ec20ed",
   "ruff.log": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
   "smoke.json": "69d9614ea6eb83e5bcae5149f29748ceb39833c86c2491cdf54312d7f50adb7c",
   "targeted.log": "98a4603dadc2fa0e9b16469fb026974874a0976973ae4ca2e8f6f36f19f7bfbb"

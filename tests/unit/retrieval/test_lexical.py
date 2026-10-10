@@ -172,3 +172,17 @@ def test_ripgrep_nested_method_owns_match(tmp_path):
     )
     assert len(result) == 1
     assert result[0].qualified_name.endswith("inner")
+
+
+def test_unquoted_pascalcase_class_is_retrieved(tmp_path):
+    code = "class Session:\n    pass\n"
+    (tmp_path / "a.py").write_text(code, encoding="utf-8")
+    symbols = extract_symbols(
+        TreeSitterParser().parse(code.encode(), path="a.py"), path="a.py", repository_id="r"
+    )
+    query = build_query("Session is broken")
+    assert "Session" in query.identifiers
+    result = RipgrepChannel(tmp_path, build_documents(tmp_path, symbols)).search(query)
+    assert [(candidate.qualified_name, candidate.score) for candidate in result] == [
+        ("a.Session", 5)
+    ]

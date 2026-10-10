@@ -68,3 +68,35 @@ def test_apostrophe_in_frame_path_and_empty_exception_message():
     assert query.parsed_frames[0].file == "src/owner's auth.py"
     assert query.parsed_frames[0].in_repo
     assert query.error_messages == ["ValueError:"]
+
+
+def test_windows_traceback_case_and_boundary_are_normalized():
+    from unittest.mock import Mock
+
+    root = Mock(spec=Path)
+    root.resolve.return_value.as_posix.return_value = "C:/Repo"
+    query = build_query(
+        'File "c:\\rEpO\\SRC\\a.py", line 2, in f\n'
+        'File "C:/Repo-other/src/a.py", line 3, in f\n'
+        'File "src/A.py", line 4, in f',
+        repo_root=root,
+        repo_files=["src/a.py"],
+    )
+    assert [(f.file, f.in_repo) for f in query.parsed_frames] == [
+        ("src/a.py", True),
+        ("C:/Repo-other/src/a.py", False),
+        ("src/a.py", True),
+    ]
+
+
+def test_posix_traceback_paths_remain_case_sensitive():
+    from unittest.mock import Mock
+
+    root = Mock(spec=Path)
+    root.resolve.return_value.as_posix.return_value = "/repo"
+    query = build_query(
+        'File "/Repo/src/a.py", line 1, in f\nFile "src/A.py", line 2, in f',
+        repo_root=root,
+        repo_files=["src/a.py"],
+    )
+    assert all(not frame.in_repo for frame in query.parsed_frames)

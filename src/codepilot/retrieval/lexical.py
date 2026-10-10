@@ -177,6 +177,7 @@ class RipgrepChannel:
                     key=lambda d: (
                         d.symbol.end_line - d.symbol.start_line,
                         -d.symbol.start_line,
+                        {"module": 2, "class": 1}.get(d.symbol.kind, 0),
                         d.symbol.qualified_name,
                         d.symbol.id,
                     ),

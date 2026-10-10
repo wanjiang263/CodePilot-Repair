@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from codepilot.schemas.common import TraceFrame
 from codepilot.schemas.retrieval import RetrievalQuery
@@ -86,14 +86,29 @@ def tokenize(text: str) -> list[str]:
 
 def _frame_path(raw: str, files: set[str], root: Path | None) -> tuple[str, bool]:
     path = raw.replace("\\", "/")
+    windows_paths = False
     if root is not None:
         prefix = root.resolve().as_posix().rstrip("/") + "/"
-        if path.startswith(prefix):
+        windows_paths = bool(PureWindowsPath(prefix).drive)
+        matches_root = (
+            path.casefold().startswith(prefix.casefold())
+            if windows_paths
+            else path.startswith(prefix)
+        )
+        if matches_root:
             path = path[len(prefix) :]
     relative = PurePosixPath(path)
     if ".." in relative.parts or relative.is_absolute() or re.match(r"^[A-Za-z]:", path):
         return path, False
     path = relative.as_posix()
+    if windows_paths:
+        # Return the indexed spelling; keep case-sensitive POSIX paths distinct.
+        matches = sorted(
+            candidate for candidate in files if candidate.casefold() == path.casefold()
+        )
+        if len(matches) == 1:
+            return matches[0], True
+        return path, False
     return path, path in files
 
 
@@ -117,7 +132,7 @@ def build_query(
         for match in _WORD.finditer(issue)
         if "_" in match.group()
         or "." in match.group()
-        or re.search(r"[a-z][A-Z]|[A-Z]{2}[a-z]", match.group())
+        or re.search(r"[a-z][A-Z]|[A-Z]{2}[a-z]|^[A-Z][a-z]", match.group())
     )
     errors: list[str] = []
     for match in _ERROR.finditer(issue):
