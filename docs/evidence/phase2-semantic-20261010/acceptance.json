@@ -1,0 +1,261 @@
+{
+  "runtime_commit": "aa7eaa569e7adece3b9c1e786b5723ed50c84ea8",
+  "ci_commit": "3dde3ae9e39717a6ab548389dadd790773a56f9b",
+  "coverage": {
+    "covered_lines": 4392,
+    "num_statements": 4580,
+    "percent_covered": 94.58609849807894,
+    "percent_covered_display": "95",
+    "missing_lines": 188,
+    "excluded_lines": 53,
+    "percent_statements_covered": 95.89519650655022,
+    "percent_statements_covered_display": "96",
+    "num_branches": 1146,
+    "num_partial_branches": 108,
+    "covered_branches": 1024,
+    "missing_branches": 122,
+    "percent_branches_covered": 89.3542757417103,
+    "percent_branches_covered_display": "89"
+  },
+  "module_coverage": {
+    "src\\codepilot\\retrieval\\__init__.py": {
+      "covered_lines": 0,
+      "num_statements": 0,
+      "percent_covered": 100.0,
+      "percent_covered_display": "100",
+      "missing_lines": 0,
+      "excluded_lines": 0,
+      "percent_statements_covered": 100.0,
+      "percent_statements_covered_display": "100",
+      "num_branches": 0,
+      "num_partial_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "percent_branches_covered": 100.0,
+      "percent_branches_covered_display": "100"
+    },
+    "src\\codepilot\\retrieval\\documents.py": {
+      "covered_lines": 48,
+      "num_statements": 49,
+      "percent_covered": 97.01492537313433,
+      "percent_covered_display": "97",
+      "missing_lines": 1,
+      "excluded_lines": 0,
+      "percent_statements_covered": 97.95918367346938,
+      "percent_statements_covered_display": "98",
+      "num_branches": 18,
+      "num_partial_branches": 1,
+      "covered_branches": 17,
+      "missing_branches": 1,
+      "percent_branches_covered": 94.44444444444444,
+      "percent_branches_covered_display": "94"
+    },
+    "src\\codepilot\\retrieval\\embeddings.py": {
+      "covered_lines": 173,
+      "num_statements": 175,
+      "percent_covered": 98.64253393665159,
+      "percent_covered_display": "99",
+      "missing_lines": 2,
+      "excluded_lines": 8,
+      "percent_statements_covered": 98.85714285714286,
+      "percent_statements_covered_display": "99",
+      "num_branches": 46,
+      "num_partial_branches": 1,
+      "covered_branches": 45,
+      "missing_branches": 1,
+      "percent_branches_covered": 97.82608695652173,
+      "percent_branches_covered_display": "98"
+    },
+    "src\\codepilot\\retrieval\\lexical.py": {
+      "covered_lines": 96,
+      "num_statements": 100,
+      "percent_covered": 94.8529411764706,
+      "percent_covered_display": "95",
+      "missing_lines": 4,
+      "excluded_lines": 0,
+      "percent_statements_covered": 96.0,
+      "percent_statements_covered_display": "96",
+      "num_branches": 36,
+      "num_partial_branches": 3,
+      "covered_branches": 33,
+      "missing_branches": 3,
+      "percent_branches_covered": 91.66666666666667,
+      "percent_branches_covered_display": "92"
+    },
+    "src\\codepilot\\retrieval\\query.py": {
+      "covered_lines": 61,
+      "num_statements": 62,
+      "percent_covered": 97.43589743589743,
+      "percent_covered_display": "97",
+      "missing_lines": 1,
+      "excluded_lines": 0,
+      "percent_statements_covered": 98.38709677419355,
+      "percent_statements_covered_display": "98",
+      "num_branches": 16,
+      "num_partial_branches": 1,
+      "covered_branches": 15,
+      "missing_branches": 1,
+      "percent_branches_covered": 93.75,
+      "percent_branches_covered_display": "94"
+    },
+    "src\\codepilot\\retrieval\\semantic.py": {
+      "covered_lines": 77,
+      "num_statements": 77,
+      "percent_covered": 100.0,
+      "percent_covered_display": "100",
+      "missing_lines": 0,
+      "excluded_lines": 0,
+      "percent_statements_covered": 100.0,
+      "percent_statements_covered_display": "100",
+      "num_branches": 22,
+      "num_partial_branches": 0,
+      "covered_branches": 22,
+      "missing_branches": 0,
+      "percent_branches_covered": 100.0,
+      "percent_branches_covered_display": "100"
+    },
+    "src\\codepilot\\retrieval\\service.py": {
+      "covered_lines": 25,
+      "num_statements": 26,
+      "percent_covered": 94.44444444444444,
+      "percent_covered_display": "94",
+      "missing_lines": 1,
+      "excluded_lines": 0,
+      "percent_statements_covered": 96.15384615384616,
+      "percent_statements_covered_display": "96",
+      "num_branches": 10,
+      "num_partial_branches": 1,
+      "covered_branches": 9,
+      "missing_branches": 1,
+      "percent_branches_covered": 90.0,
+      "percent_branches_covered_display": "90"
+    },
+    "src\\codepilot\\schemas\\retrieval.py": {
+      "covered_lines": 53,
+      "num_statements": 53,
+      "percent_covered": 100.0,
+      "percent_covered_display": "100",
+      "missing_lines": 0,
+      "excluded_lines": 0,
+      "percent_statements_covered": 100.0,
+      "percent_statements_covered_display": "100",
+      "num_branches": 0,
+      "num_partial_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "percent_branches_covered": 100.0,
+      "percent_branches_covered_display": "100"
+    }
+  },
+  "tests": {
+    "v06": {
+      "collected": 19,
+      "passed": 18,
+      "skipped": 1,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "v07": {
+      "collected": 38,
+      "passed": 37,
+      "skipped": 1,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "v08": {
+      "collected": 53,
+      "passed": 52,
+      "skipped": 1,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "v09": {
+      "collected": 97,
+      "passed": 96,
+      "skipped": 1,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "v10": {
+      "collected": 111,
+      "passed": 109,
+      "skipped": 2,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "native-faiss": {
+      "collected": 34,
+      "passed": 34,
+      "skipped": 0,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "api-batching-after": {
+      "collected": 36,
+      "passed": 36,
+      "skipped": 0,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "collection-after": {
+      "collected": 114,
+      "passed": 113,
+      "skipped": 1,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "pytest": {
+      "collected": 870,
+      "passed": 868,
+      "skipped": 2,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "final-pytest": {
+      "collected": 872,
+      "passed": 870,
+      "skipped": 2,
+      "failed": 0,
+      "exit_code": 0
+    }
+  },
+  "expected_failure_proofs": {
+    "api-batching-before.log": {
+      "exit_code": 1,
+      "failed": 2
+    },
+    "collection-before.log": {
+      "exit_code": 2,
+      "collection_errors": 2
+    }
+  },
+  "checks": {
+    "ruff": {
+      "exit_code": 0
+    },
+    "format": {
+      "exit_code": 0
+    },
+    "mypy_src": {
+      "exit_code": 0
+    },
+    "semantic-smoke": {
+      "exit_code": 0
+    },
+    "real_local_model": "NOT RUN: dependency/model not installed; opt-in unset",
+    "real_embedding_api": "NOT RUN: deterministic Fake/MockTransport only",
+    "L-18_structured_tools": "NOT RUN: independent existing unfinished item",
+    "phase2_full_acceptance": "NOT RUN: V-11 and later out of scope"
+  },
+  "unchanged_interfaces": {
+    "src/codepilot/schemas/retrieval.py": "3e3842de5365ab398a0c7811f0238c81f16511a1f828b71a4572e1eea3e978ed",
+    "src/codepilot/retrieval/query.py": "a4e973911cb885cbe0fe5d23207c29fc2ca964ce5e61c7b8a8a1d06aafcd374c",
+    "src/codepilot/retrieval/documents.py": "97d341795925681ce8f6a66807b5c223e8f37934ef1fce79e28794a7b4ee1ed4",
+    "src/codepilot/retrieval/lexical.py": "16637f7361170046baa001f931de0a3c9a9abf9dc442078842686025bbc7b86d"
+  },
+  "source_sha256": {
+    "src/codepilot/retrieval/embeddings.py": "11328f13882f3ec9cf74ee963aba2009b77557691447427c11cc09146ac427cf",
+    "src/codepilot/retrieval/semantic.py": "5f25ae46741c2e09bc00397591e2550ab85109cf8b6c7300666397f36f83c9c6",
+    "src/codepilot/retrieval/service.py": "8485cd499a7ed85de87722ad0b39bd59b06e6eee23a7958f84081aac9f4bbd01"
+  }
+}
