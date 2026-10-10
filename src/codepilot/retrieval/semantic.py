@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import importlib
+import warnings
 from collections.abc import Sequence
+from typing import Any, Literal
 
 import numpy as np
 
@@ -23,15 +26,71 @@ def normalize_vectors(vectors: Vectors) -> Vectors:
 class SemanticChannel:
     name = "semantic"
 
-    def __init__(self, documents: Sequence[SymbolDocument], provider: EmbeddingProvider) -> None:
+    def __init__(
+        self,
+        documents: Sequence[SymbolDocument],
+        provider: EmbeddingProvider,
+        *,
+        backend: Literal["numpy", "faiss"] = "numpy",
+    ) -> None:
+        if backend not in ("numpy", "faiss"):
+            raise ValueError(f"Unknown semantic backend: {backend}")
         self.documents = list(documents)
         ids = [doc.symbol.id for doc in documents]
         if any(not sid for sid in ids) or len(set(ids)) != len(ids):
             raise RetrievalError("Semantic documents require unique nonempty symbol IDs")
         self.provider = provider
         self.identity = provider.identity
-        self.backend = "numpy"
+        self.requested_backend = backend
+        self.backend = backend
+        self.fallback_reason: str | None = None
+        self._faiss: Any = None
+        self._index: Any = None
         self._vectors: Vectors | None = None
+        if backend == "faiss":
+            try:
+                self._faiss = importlib.import_module("faiss")
+            except (ImportError, OSError) as exc:
+                self._fallback(
+                    f"FAISS unavailable ({type(exc).__name__}); install the [faiss] extra"
+                )
+
+    def _fallback(self, reason: str) -> None:
+        self.backend = "numpy"
+        self.fallback_reason = reason
+        self._index = None
+        warnings.warn(
+            f"{reason}; falling back to numpy cosine retrieval", RuntimeWarning, stacklevel=3
+        )
+
+    def _scores(self, query_vector: Vectors) -> Vectors:
+        assert self._vectors is not None
+        if self.backend == "faiss":
+            try:
+                if self._index is None:
+                    self._index = self._faiss.IndexFlatIP(self.identity.dimensions)
+                    self._index.add(np.ascontiguousarray(self._vectors, dtype=np.float32))
+                # Fetch every candidate: min-max explanations and ties at the K
+                # boundary must use the same full corpus as the NumPy backend.
+                distances, indices = self._index.search(
+                    np.ascontiguousarray(query_vector, dtype=np.float32), len(self.documents)
+                )
+                scores = validate_vectors(distances, 1, len(self.documents))[0]
+                ids = np.asarray(indices)
+                if (
+                    ids.shape != (1, len(self.documents))
+                    or ids.dtype.kind not in "iu"
+                    or set(ids[0].tolist()) != set(range(len(self.documents)))
+                ):
+                    raise ValueError("Invalid FAISS candidate IDs")
+                ordered = np.empty(len(self.documents), dtype=np.float64)
+                ordered[ids[0]] = scores
+                return np.clip(ordered, -1.0, 1.0)
+            except (RuntimeError, ValueError, TypeError, AttributeError, OSError) as exc:
+                # Malformed FAISS results also raise RetrievalError (RuntimeError).
+                self._fallback(f"FAISS failed ({type(exc).__name__})")
+        result: Vectors = np.clip(self._vectors @ query_vector[0], -1.0, 1.0)
+        return result
 
     def search(self, query: RetrievalQuery, *, limit: int | None = None) -> list[RankedSymbol]:
         if limit is not None and (isinstance(limit, bool) or limit < 1):
@@ -52,7 +111,7 @@ class SemanticChannel:
         )
         if not query_vector.any():
             return []  # Cosine is undefined for a zero vector.
-        raw_scores = np.clip(self._vectors @ query_vector[0], -1.0, 1.0)
+        raw_scores = self._scores(query_vector)
         scores = {
             doc.symbol.id: float(raw_scores[index])
             for index, doc in enumerate(self.documents)

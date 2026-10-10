@@ -21,6 +21,7 @@ def retrieve_symbols(
     channel: Literal["bm25", "ripgrep", "semantic"] = "bm25",
     limit: int = 20,
     embedding_provider: EmbeddingProvider | None = None,
+    semantic_backend: Literal["numpy", "faiss"] = "numpy",
 ) -> RetrievalResult:
     if limit < 1:
         raise ValueError("limit must be positive")
@@ -32,7 +33,9 @@ def retrieve_symbols(
     query = build_query(issue, repo_files=(s.path for s in symbols), repo_root=root)
     if channel == "semantic":
         assert embedding_provider is not None
-        candidates = SemanticChannel(documents, embedding_provider).search(query)
+        candidates = SemanticChannel(
+            documents, embedding_provider, backend=semantic_backend
+        ).search(query)
     elif channel == "bm25":
         candidates = BM25Channel(documents).search(query)
     else:
