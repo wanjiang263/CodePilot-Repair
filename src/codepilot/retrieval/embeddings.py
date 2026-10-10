@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib
+import json
+import logging
+import tempfile
 import time
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
 import httpx
@@ -219,3 +224,75 @@ class OpenAICompatibleEmbeddingProvider:
 
     def __exit__(self, *exc_info: object) -> None:
         self.close()
+
+
+class CachedEmbeddingProvider:
+    """Content-addressed disk cache, isolated by provider/model/revision/dimensions.
+
+    Store only vectors, never source text or credentials. Each atomic file is a
+    separate entry; concurrent readers cannot observe a partially written array.
+    """
+
+    def __init__(self, provider: EmbeddingProvider, directory: Path) -> None:
+        self.provider = provider
+        self.identity = provider.identity
+        self.directory = directory
+        self.directory.mkdir(parents=True, exist_ok=True)
+
+    def cache_key(self, text: str) -> str:
+        payload = json.dumps(
+            {"version": 1, "identity": asdict(self.identity), "text": text},
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+    def embed(self, texts: Sequence[str]) -> Vectors:
+        if self.provider.identity != self.identity:
+            raise RetrievalError("Embedding provider identity changed after cache construction")
+        if not texts:
+            return np.empty((0, self.identity.dimensions), dtype=np.float64)
+        keys = [self.cache_key(text) for text in texts]
+        unique_inputs = dict(zip(keys, texts, strict=True))
+        found: dict[str, Vectors] = {}
+        missing: dict[str, str] = {}
+        for key, text in unique_inputs.items():
+            path = self.directory / f"{key}.npy"
+            if not path.exists():
+                missing[key] = text
+                continue
+            try:
+                with path.open("rb") as stream:
+                    raw = np.load(stream, allow_pickle=False)
+                found[key] = validate_vectors(raw, 1, self.identity.dimensions)
+            except (OSError, ValueError, EOFError, RetrievalError):
+                logging.getLogger(__name__).warning(
+                    "Invalid embedding cache entry %s; recomputing", key
+                )
+                missing[key] = text
+        if missing:
+            vectors = validate_vectors(
+                self.provider.embed(list(missing.values())), len(missing), self.identity.dimensions
+            )
+            for index, key in enumerate(missing):
+                row = vectors[index : index + 1]
+                self._write(key, row)
+                found[key] = row
+        return np.vstack([found[key] for key in keys])
+
+    def _write(self, key: str, vectors: Vectors) -> None:
+        temporary: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                dir=self.directory, suffix=".tmp", delete=False
+            ) as stream:
+                temporary = Path(stream.name)
+                np.save(stream, vectors, allow_pickle=False)
+            temporary.replace(self.directory / f"{key}.npy")
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+
+    def close(self) -> None:
+        self.provider.close()
