@@ -1,13 +1,15 @@
 """Minimal single-channel acceptance path; full Phase 2 fusion is still pending."""
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Literal
 
+from codepilot.repo.git_history import FileChurn
 from codepilot.repo.models import Symbol
 from codepilot.retrieval.documents import SymbolDocument, build_documents
 from codepilot.retrieval.embeddings import EmbeddingProvider
 from codepilot.retrieval.graph_source import GraphSource
+from codepilot.retrieval.history import HistoryChannel
 from codepilot.retrieval.lexical import BM25Channel, RipgrepChannel
 from codepilot.retrieval.query import build_query
 from codepilot.retrieval.semantic import SemanticChannel
@@ -21,7 +23,7 @@ from codepilot.schemas.retrieval import (
 )
 
 SeedChannel = Literal["bm25", "ripgrep", "semantic"]
-ServiceChannel = Literal["bm25", "ripgrep", "semantic", "structural", "test"]
+ServiceChannel = Literal["bm25", "ripgrep", "semantic", "structural", "test", "history"]
 _GRAPH_CHANNELS = ("structural", "test")
 
 
@@ -57,13 +59,16 @@ def retrieve_symbols(
     graph: GraphSource | None = None,
     seeds: Sequence[RankedSymbol] | None = None,
     seed_channel: SeedChannel = "bm25",
+    churn: Mapping[str, FileChurn] | None = None,
 ) -> RetrievalResult:
     if limit < 1:
         raise ValueError("limit must be positive")
-    if channel not in ("bm25", "ripgrep", "semantic", "structural", "test"):
+    if channel not in ("bm25", "ripgrep", "semantic", "structural", "test", "history"):
         raise ValueError(f"Unknown retrieval channel: {channel}")
     if channel in _GRAPH_CHANNELS and graph is None:
         raise ValueError(f"{channel} channel requires a graph")
+    if channel == "history" and churn is None:
+        raise ValueError("history channel requires churn from GitHistory.file_churn()")
     documents = build_documents(root, symbols)
     query = build_query(issue, repo_files=(s.path for s in symbols), repo_root=root)
     if channel == "structural":
@@ -80,6 +85,9 @@ def retrieve_symbols(
     elif channel == "test":
         assert graph is not None
         candidates = TestProximityChannel(graph, documents).search(query)
+    elif channel == "history":
+        assert churn is not None
+        candidates = HistoryChannel(documents, churn).search()
     else:
         candidates = _query_candidates(
             channel, root, documents, query, embedding_provider, semantic_backend

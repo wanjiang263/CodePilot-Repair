@@ -329,7 +329,7 @@ def test_service_structural_requires_a_graph(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="graph"):
         retrieve_symbols(tmp_path, [alpha], "alpha", channel="structural")
     with pytest.raises(ValueError, match="Unknown retrieval channel"):
-        retrieve_symbols(tmp_path, [alpha], "alpha", channel="history")
+        retrieve_symbols(tmp_path, [alpha], "alpha", channel="fusion")
 
 
 def test_service_existing_channels_keep_their_contracts(tmp_path: Path) -> None:
