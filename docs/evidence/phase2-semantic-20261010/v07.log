@@ -1,0 +1,4 @@
+.....................................s                                   [100%]
+=========================== short test summary info ===========================
+SKIPPED [1] tests\unit\retrieval\test_embeddings.py:117: NOT RUN: set CODEPILOT_TEST_EMBEDDING_MODEL to a preinstalled code model
+37 passed, 1 skipped in 3.32s

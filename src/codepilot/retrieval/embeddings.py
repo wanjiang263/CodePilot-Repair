@@ -3,13 +3,18 @@
 from __future__ import annotations
 
 import importlib
-from collections.abc import Sequence
+import time
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
+import httpx
 import numpy as np
 from numpy.typing import NDArray
 
+from codepilot.llm.config import ProviderSpec
+from codepilot.llm.errors import ProviderError, ProviderNotAllowedError, RateLimitError
+from codepilot.llm.retry import ConcurrencyLimiter, RetryPolicy, call_with_retry
 from codepilot.retrieval.documents import RetrievalError
 
 type Vectors = NDArray[np.float64]
@@ -107,3 +112,110 @@ class SentenceTransformerProvider:
 
     def close(self) -> None:
         self._model = None
+
+
+class OpenAICompatibleEmbeddingProvider:
+    """Embedding endpoint using the L-layer configuration, retry and concurrency policy."""
+
+    def __init__(
+        self,
+        *,
+        provider: ProviderSpec,
+        model: str,
+        dimensions: int,
+        revision: str,
+        api_key: str,
+        client: httpx.Client | None = None,
+        policy: RetryPolicy | None = None,
+        limiter: ConcurrencyLimiter | None = None,
+        allowed_providers: Sequence[str] | None = None,
+        sleep: Callable[[float], None] = time.sleep,
+    ) -> None:
+        if allowed_providers is not None and provider.name not in allowed_providers:
+            raise ProviderNotAllowedError(
+                "Embedding provider is not allowed", provider=provider.name
+            )
+        self._url = provider.base_url.rstrip("/") + "/embeddings"
+        self.identity = EmbeddingIdentity(
+            f"openai-compatible:{provider.name}:{self._url}", model, dimensions, revision
+        )
+        self.provider = provider
+        self.policy = policy or RetryPolicy()
+        self.limiter = limiter or ConcurrencyLimiter(provider.max_concurrency)
+        self.sleep = sleep
+        self._headers = {"Authorization": f"Bearer {api_key}", **provider.extra_headers}
+        self._owns_client = client is None
+        self._client = client or httpx.Client(timeout=provider.timeout_seconds)
+
+    def embed(self, texts: Sequence[str]) -> Vectors:
+        if not texts:
+            return np.empty((0, self.identity.dimensions), dtype=np.float64)
+        body: dict[str, object] = {
+            "model": self.identity.model,
+            "input": list(texts),
+            "encoding_format": "float",
+        }
+        with self.limiter:
+            response = call_with_retry(
+                lambda: self._post(body), policy=self.policy, sleep=self.sleep
+            )
+        try:
+            data = response.json()["data"]
+            if not isinstance(data, list) or len(data) != len(texts):
+                raise ValueError("incorrect batch size")
+            by_index = {}
+            for item in data:
+                index = item["index"]
+                if type(index) is not int or index in by_index or not 0 <= index < len(texts):
+                    raise ValueError("invalid embedding index")
+                by_index[index] = item["embedding"]
+            raw = [by_index[index] for index in range(len(texts))]
+        except (ValueError, KeyError, TypeError) as exc:
+            raise RetrievalError("Malformed embedding API response") from exc
+        return validate_vectors(raw, len(texts), self.identity.dimensions)
+
+    def _post(self, body: dict[str, object]) -> httpx.Response:
+        try:
+            response = self._client.post(
+                self._url,
+                json=body,
+                headers=self._headers,
+                timeout=self.provider.timeout_seconds,
+            )
+        except httpx.TransportError as exc:
+            raise ProviderError(
+                "Embedding transport failure",
+                provider=self.provider.name,
+                model_alias=self.identity.model,
+            ) from exc
+        if response.is_success:
+            return response
+        if response.status_code == 429:
+            header = response.headers.get("retry-after", "")
+            try:
+                retry_after = float(header)
+            except ValueError:
+                retry_after = None
+            raise RateLimitError(
+                "Embedding rate limit",
+                status=429,
+                retry_after=retry_after,
+                provider=self.provider.name,
+                model_alias=self.identity.model,
+            )
+        raise ProviderError(
+            "Embedding request rejected",
+            status=response.status_code,
+            provider=self.provider.name,
+            model_alias=self.identity.model,
+        )
+
+    def close(self) -> None:
+        if self._owns_client:
+            self._client.close()
+
+    def __enter__(self) -> OpenAICompatibleEmbeddingProvider:
+        return self
+
+    def __exit__(self, *exc_info: object) -> None:
+        self.close()
