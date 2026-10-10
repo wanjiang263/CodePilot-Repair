@@ -22,11 +22,11 @@ are worth stating because they change the result:
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Protocol
 
-from codepilot.repo.graph import STRUCTURAL_KINDS, GraphNeighbor
+from codepilot.repo.graph import STRUCTURAL_KINDS
 from codepilot.repo.models import EdgeKind
 from codepilot.retrieval.documents import RetrievalError, SymbolDocument
+from codepilot.retrieval.graph_source import GraphSource
 from codepilot.retrieval.lexical import rank_candidates
 from codepilot.schemas.retrieval import RankedSymbol
 
@@ -35,18 +35,12 @@ DEFAULT_MAX_DEPTH = 2
 DEFAULT_DECAY = 0.5
 
 
-class StructureSource(Protocol):
-    """The only graph capability this channel needs (``RepoGraph`` satisfies it)."""
-
-    def adjacent(self, qname: str, kinds: Sequence[EdgeKind]) -> Sequence[GraphNeighbor]: ...
-
-
 class StructuralChannel:
     name = "structural"
 
     def __init__(
         self,
-        source: StructureSource,
+        source: GraphSource,
         documents: Sequence[SymbolDocument],
         *,
         kinds: Sequence[EdgeKind] = STRUCTURAL_KINDS,

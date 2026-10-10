@@ -7,14 +7,22 @@ from typing import Literal
 from codepilot.repo.models import Symbol
 from codepilot.retrieval.documents import SymbolDocument, build_documents
 from codepilot.retrieval.embeddings import EmbeddingProvider
+from codepilot.retrieval.graph_source import GraphSource
 from codepilot.retrieval.lexical import BM25Channel, RipgrepChannel
 from codepilot.retrieval.query import build_query
 from codepilot.retrieval.semantic import SemanticChannel
-from codepilot.retrieval.structural import StructuralChannel, StructureSource
-from codepilot.schemas.retrieval import FusionMethod, RankedSymbol, RetrievalQuery, RetrievalResult
+from codepilot.retrieval.structural import StructuralChannel
+from codepilot.retrieval.test_proximity import TestProximityChannel
+from codepilot.schemas.retrieval import (
+    FusionMethod,
+    RankedSymbol,
+    RetrievalQuery,
+    RetrievalResult,
+)
 
 SeedChannel = Literal["bm25", "ripgrep", "semantic"]
-ServiceChannel = Literal["bm25", "ripgrep", "semantic", "structural"]
+ServiceChannel = Literal["bm25", "ripgrep", "semantic", "structural", "test"]
+_GRAPH_CHANNELS = ("structural", "test")
 
 
 def _query_candidates(
@@ -46,16 +54,16 @@ def retrieve_symbols(
     limit: int = 20,
     embedding_provider: EmbeddingProvider | None = None,
     semantic_backend: Literal["numpy", "faiss"] = "numpy",
-    graph: StructureSource | None = None,
+    graph: GraphSource | None = None,
     seeds: Sequence[RankedSymbol] | None = None,
     seed_channel: SeedChannel = "bm25",
 ) -> RetrievalResult:
     if limit < 1:
         raise ValueError("limit must be positive")
-    if channel not in ("bm25", "ripgrep", "semantic", "structural"):
+    if channel not in ("bm25", "ripgrep", "semantic", "structural", "test"):
         raise ValueError(f"Unknown retrieval channel: {channel}")
-    if channel == "structural" and graph is None:
-        raise ValueError("structural channel requires a graph")
+    if channel in _GRAPH_CHANNELS and graph is None:
+        raise ValueError(f"{channel} channel requires a graph")
     documents = build_documents(root, symbols)
     query = build_query(issue, repo_files=(s.path for s in symbols), repo_root=root)
     if channel == "structural":
@@ -69,6 +77,9 @@ def retrieve_symbols(
             )
         )
         candidates = StructuralChannel(graph, documents).search(source)
+    elif channel == "test":
+        assert graph is not None
+        candidates = TestProximityChannel(graph, documents).search(query)
     else:
         candidates = _query_candidates(
             channel, root, documents, query, embedding_provider, semantic_backend
