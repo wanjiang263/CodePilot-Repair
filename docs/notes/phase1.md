@@ -141,7 +141,23 @@ LLM smoke 已运行且成功（deepseek-chat 1/1），不等同于 `@pytest.mark
 本机最终版本已真实执行：外层 1 passed / 0 skipped（60.66s）；Linux 容器内 11 项回归全部成功，
 额外 CLI + SQLite 核对 14 Files / 58 Symbols / 200 Edges / 7 Tests / 0 解析错误。
 原始日志、版本、退出码、JUnit 与构建输入哈希见 [Docker 本机证据](../evidence/docker-20261010/README.md)。
-Ubuntu CI 的最终运行结果、提交及日志链接待实际执行后登记，Linux CI 暂不记为 PASS。
+**Linux CI 与 Docker 均已实际运行并通过。** 修复提交为 `16dfa9b184ee7489617eddfce44a143b44ac432c`：
+[Ubuntu push 运行](https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38037605606) 与
+[PR 运行](https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38037648144) 的三个 job 均 success。
+
+- Linux：Python 3.12.14、tree-sitter 0.25.2 / grammar 0.25.0；ruff check、format、mypy 全部成功。
+- 离线测试：**747 passed / 5 skipped / 1 deselected，覆盖率 93.77%**（31.04s）；5 个 skip 全为 Windows taskkill/junction 专属测试。
+- CI Docker daemon 28.0.4：**1 passed / 0 skipped / 752 deselected**（28.32s）；容器内 Python 3.12.7，11 项既有回归全部成功。
+  额外 CLI + SQLite 得到 14 Files / 58 Symbols / 200 Edges / 7 Tests / 0 解析错误。
+  容器 fixture 的实际 commit 为 `70fff789a6edbce33e87fda34475661867aa36bb`，在日志中回显。
+- CI 的 daemon 检查及 JUnit 非空、零跳过门禁均通过；全部原始输出、环境、JUnit、任务结论与 SHA-256
+  见 [Ubuntu CI 证据](../evidence/linux-ci-20261010/README.md)，GitHub 运行页亦附三个可下载 artifact。
+
+[PR #1](https://github.com/wanjiang263/CodePilot-Repair/pull/1) 已创建，分支为 `codex/phase1-closeout-ci-docker`。
+此前本地已有 **5 个 commit** 已随分支推送，本轮另提交 R-23 修复、7 项新增回归（6 项解析/幂等 + 1 项 Docker）与证据；
+后续文档证据提交的运行结论以 PR 最新 checks 为准，以上链接对应明确的已验证实现提交。
+仓库保持私有，未合并 PR，原 artifact 全部保留。Phase 2 未启动；Phase 4 产品沙箱未实现，
+本次 Docker 测试仅验收 Phase 1 索引管线。Phase 1 整阶段仍不在本记录中标为完成。
 
 R-23 的精选原始证据另保存在可提交的 [`docs/evidence/r23-20261010/`](../evidence/r23-20261010/README.md)，
 原 `artifacts/r23-repair-20261010/` 全部保留。
