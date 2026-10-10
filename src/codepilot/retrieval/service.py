@@ -5,12 +5,36 @@ from pathlib import Path
 from typing import Literal
 
 from codepilot.repo.models import Symbol
-from codepilot.retrieval.documents import build_documents
+from codepilot.retrieval.documents import SymbolDocument, build_documents
 from codepilot.retrieval.embeddings import EmbeddingProvider
 from codepilot.retrieval.lexical import BM25Channel, RipgrepChannel
 from codepilot.retrieval.query import build_query
 from codepilot.retrieval.semantic import SemanticChannel
-from codepilot.schemas.retrieval import FusionMethod, RetrievalResult
+from codepilot.retrieval.structural import StructuralChannel, StructureSource
+from codepilot.schemas.retrieval import FusionMethod, RankedSymbol, RetrievalQuery, RetrievalResult
+
+SeedChannel = Literal["bm25", "ripgrep", "semantic"]
+ServiceChannel = Literal["bm25", "ripgrep", "semantic", "structural"]
+
+
+def _query_candidates(
+    channel: SeedChannel,
+    root: Path,
+    documents: Sequence[SymbolDocument],
+    query: RetrievalQuery,
+    embedding_provider: EmbeddingProvider | None,
+    semantic_backend: Literal["numpy", "faiss"],
+) -> list[RankedSymbol]:
+    """Issue-text channels; also the default seed source for the structural channel."""
+    if channel == "semantic":
+        if embedding_provider is None:
+            raise ValueError("semantic channel requires an embedding_provider")
+        return SemanticChannel(documents, embedding_provider, backend=semantic_backend).search(
+            query
+        )
+    if channel == "ripgrep":
+        return RipgrepChannel(root, documents).search(query)
+    return BM25Channel(documents).search(query)
 
 
 def retrieve_symbols(
@@ -18,28 +42,37 @@ def retrieve_symbols(
     symbols: Sequence[Symbol],
     issue: str,
     *,
-    channel: Literal["bm25", "ripgrep", "semantic"] = "bm25",
+    channel: ServiceChannel = "bm25",
     limit: int = 20,
     embedding_provider: EmbeddingProvider | None = None,
     semantic_backend: Literal["numpy", "faiss"] = "numpy",
+    graph: StructureSource | None = None,
+    seeds: Sequence[RankedSymbol] | None = None,
+    seed_channel: SeedChannel = "bm25",
 ) -> RetrievalResult:
     if limit < 1:
         raise ValueError("limit must be positive")
-    if channel not in ("bm25", "ripgrep", "semantic"):
+    if channel not in ("bm25", "ripgrep", "semantic", "structural"):
         raise ValueError(f"Unknown retrieval channel: {channel}")
-    if channel == "semantic" and embedding_provider is None:
-        raise ValueError("semantic channel requires an embedding_provider")
+    if channel == "structural" and graph is None:
+        raise ValueError("structural channel requires a graph")
     documents = build_documents(root, symbols)
     query = build_query(issue, repo_files=(s.path for s in symbols), repo_root=root)
-    if channel == "semantic":
-        assert embedding_provider is not None
-        candidates = SemanticChannel(
-            documents, embedding_provider, backend=semantic_backend
-        ).search(query)
-    elif channel == "bm25":
-        candidates = BM25Channel(documents).search(query)
+    if channel == "structural":
+        assert graph is not None
+        # 种子默认取词法通道的完整排名；结构通道自己截 Top-20。
+        source = (
+            seeds
+            if seeds is not None
+            else _query_candidates(
+                seed_channel, root, documents, query, embedding_provider, semantic_backend
+            )
+        )
+        candidates = StructuralChannel(graph, documents).search(source)
     else:
-        candidates = RipgrepChannel(root, documents).search(query)
+        candidates = _query_candidates(
+            channel, root, documents, query, embedding_provider, semantic_backend
+        )
     return RetrievalResult(
         query=query,
         symbols=candidates[:limit],

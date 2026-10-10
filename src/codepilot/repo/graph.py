@@ -15,7 +15,9 @@ REFERENCE、INHERIT 等不同 kind 的边，所以必须用 Multi 变体。
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Any, Literal
 
 import networkx as nx
 
@@ -26,6 +28,11 @@ from codepilot.storage.repository import Stores
 __all__ = ["GraphNeighbor", "RepoGraph"]
 
 _CONFIDENCE_RANK: dict[Confidence, int] = {"high": 2, "medium": 1, "low": 0}
+
+#: V-11 结构扩展的默认边种类（02 §8.2：沿 CALL / INHERIT / IMPORT 扩展）。
+STRUCTURAL_KINDS: tuple[EdgeKind, ...] = ("CALL", "INHERIT", "IMPORT")
+
+Direction = Literal["in", "out", "both"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,7 +48,7 @@ class GraphNeighbor:
 
 
 class RepoGraph:
-    """``callers`` / ``callees`` / ``related_tests`` 查询封装。"""
+    """``callers`` / ``callees`` / ``related_tests`` / ``adjacent`` 查询封装。"""
 
     def __init__(self, index: RepositoryIndex) -> None:
         self.repository_id = index.repository_id
@@ -71,31 +78,57 @@ class RepoGraph:
 
     def callers(self, qname: str) -> list[GraphNeighbor]:
         """谁调用了它（CALL 入边）。"""
-        return self._neighbors(qname, "CALL", incoming=True)
+        return self._lookup(qname, ("CALL",), incoming=True, outgoing=False)
 
     def callees(self, qname: str) -> list[GraphNeighbor]:
         """它调用了谁（CALL 出边，仅已解析目标）。"""
-        return self._neighbors(qname, "CALL", incoming=False)
+        return self._lookup(qname, ("CALL",), incoming=False, outgoing=True)
 
     def related_tests(self, qname: str) -> list[GraphNeighbor]:
         """关联到它的测试（TEST 入边，R-12 的三级关联）。"""
-        return self._neighbors(qname, "TEST", incoming=True)
+        return self._lookup(qname, ("TEST",), incoming=True, outgoing=False)
 
-    def _neighbors(self, qname: str, kind: EdgeKind, *, incoming: bool) -> list[GraphNeighbor]:
+    def adjacent(
+        self,
+        qname: str,
+        kinds: Sequence[EdgeKind] = STRUCTURAL_KINDS,
+        *,
+        direction: Direction = "both",
+    ) -> list[GraphNeighbor]:
+        """按种类过滤的邻域，方向可选（V-11 结构扩展、V-12 TEST 反查的输入）。
+
+        ``"out"`` 是"它指向谁"，``"in"`` 是"谁指向它"；``"both"`` 把两侧合在一起，
+        即"结构上相邻"——02 §8.2 的结构通道不区分调用方向，只问谁与谁相连。
+        同一邻居在两个方向或多种 kind 下都出现时，只保留最强的一条（与
+        ``callers`` 等既有查询同一套收敛规则）。
+        """
+        return self._lookup(
+            qname,
+            tuple(kinds),
+            incoming=direction in ("in", "both"),
+            outgoing=direction in ("out", "both"),
+        )
+
+    def _lookup(
+        self, qname: str, kinds: tuple[EdgeKind, ...], *, incoming: bool, outgoing: bool
+    ) -> list[GraphNeighbor]:
         symbol_id = self._by_qname.get(qname)
         if symbol_id is None:
             return []
-        found: dict[str, GraphNeighbor] = {}
+        wanted = set(kinds)
+        pairs: list[tuple[str, dict[str, Any]]] = []
         if incoming:
-            pairs = (
+            pairs += [
                 (source, data) for source, _, data in self.graph.in_edges(symbol_id, data=True)
-            )
-        else:
-            pairs = (
+            ]
+        if outgoing:
+            pairs += [
                 (target, data) for _, target, data in self.graph.out_edges(symbol_id, data=True)
-            )
+            ]
+        found: dict[str, GraphNeighbor] = {}
         for other_id, data in pairs:
-            if data["kind"] != kind:
+            kind = data["kind"]
+            if kind not in wanted:
                 continue
             neighbor = GraphNeighbor(
                 self._symbols[other_id], kind, data["confidence"], data["line"]
@@ -109,6 +142,8 @@ class RepoGraph:
                 n.symbol.qualified_name,
                 -_CONFIDENCE_RANK[n.confidence],
                 n.line,
+                n.kind,
+                n.symbol.id,
             ),
         )
 
