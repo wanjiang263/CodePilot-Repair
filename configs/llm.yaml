@@ -5,14 +5,13 @@
 #   2. 密钥只写环境变量名（api_key_env），值放 .env，绝不写在这里。
 #   3. 业务代码里不写 `if provider == "..."`。能力差异用下面的能力字段表达。
 #
-# ⚠️ 带尖括号的值是**待人工核实的占位符**，不是可用配置。
-#    用 `uv run codepilot config check` 查看还缺哪些。
-#    填写时请以各家官方文档为准；这些值随服务商发版变化，
-#    本项目不在这里写未经验证的数字。
+# 模型与单价核实日期：2026-10-09；来源与估算口径见 docs/llm-config.md。
+# 单价均为 CNY / 百万 token。分时或分档计费取公开最高档用于预算估算，
+# 不代表实际账单；厂商调整后只需更新此文件。
+# 用 `uv run codepilot config check` 检查缺失密钥、模型与价格。
 
 providers:
   deepseek:
-    # 编写时的公开地址，接入前请再核对一次。
     base_url: https://api.deepseek.com
     api_key_env: DEEPSEEK_API_KEY
     max_concurrency: 4
@@ -42,45 +41,62 @@ models:
   # key 是本项目内的模型别名，roles 段引用的是它，不是官方模型 ID。
   deepseek-chat:
     provider: deepseek
-    model: "<官方模型 ID，以平台文档为准>"
-    context_window: 128000          # 编写时的公开值，需核实
+    # https://api-docs.deepseek.com/zh-cn/quick_start/pricing/
+    model: deepseek-flash
+    context_window: 1000000
     supports_tools: true
     supports_json_mode: true
     supports_temperature: true
     max_output_tokens: 4096
+    # https://api-docs.deepseek.com/zh-cn/guides/thinking_mode/
+    # 官方默认开启思考；显式关闭以兼容短输出预算及现有 Agent 消息协议。
+    extra_body:
+      thinking:
+        type: disabled
     price:
       currency: CNY
-      input_per_mtok: "<单价>"
-      output_per_mtok: "<单价>"
-      cached_input_per_mtok: "<单价，无缓存计价时留空>"
+      # 高峰价；闲时价格更低。预算估算保持保守。
+      input_per_mtok: 2.0
+      output_per_mtok: 8.0
+      cached_input_per_mtok: 0.04
 
   kimi-main:
     provider: kimi
-    model: "<官方模型 ID，以平台文档为准>"
-    context_window: 128000          # 需核实
+    # https://platform.kimi.com/ 与 /docs/guide/kimi-k2-6-quickstart
+    model: kimi-k2.6
+    context_window: 256000
     supports_tools: true
     supports_json_mode: true
-    supports_temperature: true
+    # 温度只接受模式固定值；省略参数，使用服务端对应模式的默认值。
+    supports_temperature: false
     max_output_tokens: 4096
+    extra_body:
+      thinking:
+        type: disabled
     price:
       currency: CNY
-      input_per_mtok: "<单价>"
-      output_per_mtok: "<单价>"
-      cached_input_per_mtok: "<单价，无缓存计价时留空>"
+      input_per_mtok: 6.5
+      output_per_mtok: 27.0
+      cached_input_per_mtok: 1.1
 
   glm-main:
     provider: glm
-    model: "<官方模型 ID，以平台文档为准>"
-    context_window: 128000          # 需核实
+    # https://docs.bigmodel.cn/cn/guide/models/text/glm-4.7
+    model: glm-4.7
+    context_window: 200000
     supports_tools: true
     supports_json_mode: true
     supports_temperature: true
     max_output_tokens: 4096
+    extra_body:
+      thinking:
+        type: disabled
     price:
       currency: CNY
-      input_per_mtok: "<单价>"
-      output_per_mtok: "<单价>"
-      cached_input_per_mtok: "<单价，无缓存计价时留空>"
+      # https://docs.bigmodel.cn/cn/guide/start/pricing，取长输入最高档。
+      input_per_mtok: 4.0
+      output_per_mtok: 16.0
+      cached_input_per_mtok: 0.8
 
 # 每个 Agent 角色使用哪个模型别名。
 # 角色名固定为这 8 个（见 codepilot/llm/config.py 的 KNOWN_ROLES），

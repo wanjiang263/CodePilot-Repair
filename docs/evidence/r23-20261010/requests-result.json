@@ -1,0 +1,127 @@
+{
+  "repo": "https://github.com/psf/requests.git",
+  "commit": "0e322af87745eff34caffe4df68456ebc20d9068",
+  "python": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "packages": {
+    "tree-sitter": "0.25.2",
+    "tree-sitter-python": "0.25.0"
+  },
+  "files": 120,
+  "symbols": 789,
+  "symbols_by_kind": {
+    "class": 86,
+    "function": 121,
+    "method": 213,
+    "module": 36,
+    "test_function": 53,
+    "test_method": 280
+  },
+  "edges": 7059,
+  "edges_by_kind_confidence": [
+    {
+      "kind": "CALL",
+      "confidence": "high",
+      "count": 336
+    },
+    {
+      "kind": "CALL",
+      "confidence": "low",
+      "count": 1868
+    },
+    {
+      "kind": "CALL",
+      "confidence": "medium",
+      "count": 294
+    },
+    {
+      "kind": "IMPORT",
+      "confidence": "high",
+      "count": 189
+    },
+    {
+      "kind": "IMPORT",
+      "confidence": "low",
+      "count": 282
+    },
+    {
+      "kind": "INHERIT",
+      "confidence": "high",
+      "count": 36
+    },
+    {
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "count": 149
+    },
+    {
+      "kind": "REFERENCE",
+      "confidence": "medium",
+      "count": 10
+    },
+    {
+      "kind": "TEST",
+      "confidence": "high",
+      "count": 359
+    },
+    {
+      "kind": "TEST",
+      "confidence": "low",
+      "count": 3120
+    },
+    {
+      "kind": "TEST",
+      "confidence": "medium",
+      "count": 416
+    }
+  ],
+  "tests": 333,
+  "seconds": 9.814483699999982,
+  "parse_errors": [],
+  "scan": {
+    "files": 120,
+    "ignored": 0,
+    "too_large": 1,
+    "binary": 10,
+    "symlinks": 0,
+    "unreadable": 0
+  },
+  "parsed_paths": [
+    "docs/_themes/flask_theme_support.py",
+    "docs/conf.py",
+    "setup.py",
+    "src/requests/__init__.py",
+    "src/requests/__version__.py",
+    "src/requests/_internal_utils.py",
+    "src/requests/adapters.py",
+    "src/requests/api.py",
+    "src/requests/auth.py",
+    "src/requests/certs.py",
+    "src/requests/compat.py",
+    "src/requests/cookies.py",
+    "src/requests/exceptions.py",
+    "src/requests/help.py",
+    "src/requests/hooks.py",
+    "src/requests/models.py",
+    "src/requests/packages.py",
+    "src/requests/sessions.py",
+    "src/requests/status_codes.py",
+    "src/requests/structures.py",
+    "src/requests/utils.py",
+    "tests/__init__.py",
+    "tests/compat.py",
+    "tests/conftest.py",
+    "tests/test_adapters.py",
+    "tests/test_help.py",
+    "tests/test_hooks.py",
+    "tests/test_lowlevel.py",
+    "tests/test_packages.py",
+    "tests/test_requests.py",
+    "tests/test_structures.py",
+    "tests/test_testserver.py",
+    "tests/test_utils.py",
+    "tests/testserver/__init__.py",
+    "tests/testserver/server.py",
+    "tests/utils.py"
+  ]
+}

@@ -1,0 +1,254 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\lenovo\Desktop\CodePilot-Repair\.venv\Scripts\python.exe
+rootdir: C:\Users\lenovo\Desktop\CodePilot-Repair
+configfile: pyproject.toml
+plugins: anyio-4.15.1, langsmith-0.14.4, asyncio-1.4.0, cov-7.1.0, timeout-2.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 1 item
+
+tests/integration/test_docker_phase1.py::test_phase1_contracts_in_linux_container #0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.phase1
+#1 transferring dockerfile: 702B 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12.7-slim-bookworm
+#2 DONE 2.2s
+
+#3 [internal] load metadata for ghcr.io/astral-sh/uv:0.12.9
+#3 DONE 4.3s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [stage-1 1/6] FROM docker.io/library/python:3.12.7-slim-bookworm@sha256:60d9996b6a8a3689d36db740b49f4327be3be09a21122bd02fb8895abb38b50d
+#5 resolve docker.io/library/python:3.12.7-slim-bookworm@sha256:60d9996b6a8a3689d36db740b49f4327be3be09a21122bd02fb8895abb38b50d 0.0s done
+#5 DONE 0.1s
+
+#6 [uv 1/1] FROM ghcr.io/astral-sh/uv:0.12.9@sha256:8b940d3a9d65bed080436972241af2e21c84b5e8c9193f7014ed71479ee795ff
+#6 resolve ghcr.io/astral-sh/uv:0.12.9@sha256:8b940d3a9d65bed080436972241af2e21c84b5e8c9193f7014ed71479ee795ff 0.0s done
+#6 DONE 0.1s
+
+#7 [internal] load build context
+#7 transferring context: 1.39MB 0.3s done
+#7 DONE 0.3s
+
+#8 [stage-1 2/6] COPY --from=uv /uv /uvx /usr/local/bin/
+#8 CACHED
+
+#9 [stage-1 3/6] RUN apt-get update     && apt-get install --yes --no-install-recommends git ca-certificates     && rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [stage-1 4/6] WORKDIR /app
+#10 CACHED
+
+#11 [stage-1 5/6] COPY . /app
+#11 DONE 0.1s
+
+#12 [stage-1 6/6] RUN uv sync --frozen --extra dev --no-cache
+#12 0.937 Using CPython 3.12.7 interpreter at: /usr/local/bin/python3
+#12 0.938 Creating virtual environment at: .venv
+#12 1.004    Building codepilot-repair @ file:///app
+#12 3.029 Downloading mypy (14.8MiB)
+#12 3.036 Downloading numpy (15.9MiB)
+#12 3.049 Downloading sqlalchemy (4.5MiB)
+#12 3.049 Downloading zstandard (5.3MiB)
+#12 3.055 Downloading tiktoken (1.1MiB)
+#12 3.055 Downloading pygments (1.2MiB)
+#12 3.064 Downloading ast-serialize (1.3MiB)
+#12 3.064 Downloading pydantic-core (2.0MiB)
+#12 3.064 Downloading networkx (2.0MiB)
+#12 3.086 Downloading ruff (9.9MiB)
+#12 8.212  Downloaded tiktoken
+#12 8.230  Downloaded pygments
+#12 8.290  Downloaded ast-serialize
+#12 9.343  Downloaded networkx
+#12 9.384  Downloaded pydantic-core
+#12 20.08  Downloaded sqlalchemy
+#12 20.48  Downloaded zstandard
+#12 22.40       Built codepilot-repair @ file:///app
+#12 32.36  Downloaded ruff
+#12 34.27  Downloaded mypy
+#12 34.35  Downloaded numpy
+#12 34.35 Prepared 84 packages in 33.39s
+#12 34.40 Installed 84 packages in 56ms
+#12 34.40  + aiosqlite==0.22.1
+#12 34.40  + annotated-doc==0.0.5
+#12 34.40  + annotated-types==0.8.0
+#12 34.40  + anyio==4.15.1
+#12 34.40  + ast-serialize==0.12.1
+#12 34.40  + certifi==2026.7.22
+#12 34.40  + charset-normalizer==3.5.2
+#12 34.40  + click==8.5.0
+#12 34.40  + codepilot-repair==0.1.0 (from file:///app)
+#12 34.40  + coverage==7.16.2
+#12 34.40  + distro==1.9.0
+#12 34.40  + docker==7.2.0
+#12 34.40  + fastapi==0.142.4
+#12 34.40  + h11==0.16.0
+#12 34.40  + httpcore==1.0.9
+#12 34.40  + httpcore2==2.13.1
+#12 34.40  + httpx==0.28.1
+#12 34.40  + httpx2==2.13.1
+#12 34.40  + idna==3.20
+#12 34.40  + iniconfig==2.3.1
+#12 34.40  + jinja2==3.1.6
+#12 34.40  + jsonpatch==1.33
+#12 34.40  + jsonpointer==3.2.0
+#12 34.40  + langchain-core==1.6.7
+#12 34.40  + langchain-protocol==0.0.19
+#12 34.40  + langgraph==1.2.14
+#12 34.40  + langgraph-checkpoint==4.2.0
+#12 34.40  + langgraph-checkpoint-sqlite==3.1.1
+#12 34.40  + langgraph-prebuilt==1.1.0
+#12 34.41  + langgraph-sdk==0.4.6
+#12 34.41  + langsmith==0.14.4
+#12 34.41  + librt==0.16.0
+#12 34.41  + markdown-it-py==4.2.0
+#12 34.41  + markupsafe==3.0.4
+#12 34.41  + mdurl==0.1.2
+#12 34.41  + mypy==2.4.0
+#12 34.41  + mypy-extensions==1.1.0
+#12 34.41  + networkx==3.7
+#12 34.41  + numpy==2.5.3
+#12 34.41  + opentelemetry-api==1.45.1
+#12 34.41  + orjson==3.13.0
+#12 34.41  + ormsgpack==1.12.2
+#12 34.41  + packaging==26.3
+#12 34.41  + pathspec==1.1.1
+#12 34.41  + pluggy==1.6.0
+#12 34.41  + pydantic==2.13.5
+#12 34.41  + pydantic-core==2.46.5
+#12 34.41  + pydantic-settings==2.15.0
+#12 34.41  + pygments==2.21.0
+#12 34.41  + pytest==9.1.1
+#12 34.41  + pytest-asyncio==1.4.0
+#12 34.41  + pytest-cov==7.1.0
+#12 34.41  + pytest-timeout==2.4.0
+#12 34.41  + python-dotenv==1.2.4
+#12 34.41  + pyyaml==6.0.3
+#12 34.41  + rank-bm25==0.2.2
+#12 34.41  + regex==2026.9.29
+#12 34.41  + requests==2.34.2
+#12 34.41  + requests-toolbelt==1.0.0
+#12 34.41  + rich==15.0.0
+#12 34.41  + ruff==0.16.10
+#12 34.41  + shellingham==1.5.4
+#12 34.41  + sniffio==1.3.1
+#12 34.41  + socksio==1.0.0
+#12 34.41  + sqlalchemy==2.1.4
+#12 34.41  + sqlite-vec==0.1.9
+#12 34.41  + sse-starlette==3.5.0
+#12 34.41  + starlette==1.7.0
+#12 34.41  + structlog==26.1.0
+#12 34.41  + tenacity==9.2.1
+#12 34.41  + tiktoken==0.14.0
+#12 34.41  + tree-sitter==0.25.2
+#12 34.41  + tree-sitter-python==0.25.0
+#12 34.41  + truststore==0.10.4
+#12 34.41  + typer==0.27.3
+#12 34.41  + types-pyyaml==6.0.12.20260906
+#12 34.41  + typing-extensions==4.16.0
+#12 34.41  + typing-inspection==0.4.4
+#12 34.41  + urllib3==2.8.0
+#12 34.41  + uuid-utils==0.17.1
+#12 34.41  + uvicorn==0.54.0
+#12 34.41  + websockets==16.1.1
+#12 34.41  + xxhash==4.0.1
+#12 34.41  + zstandard==0.25.0
+#12 DONE 34.6s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 6.8s done
+#13 exporting manifest sha256:6c548c4d8700a63b219e694b97d51f93a10683546195c654675f8fca10ec5df8 done
+#13 exporting config sha256:73633eef39423205ec2372c5da2861768d75fc0c78c88badbf7b056d9203d23f done
+#13 exporting attestation manifest sha256:91be3570fdc8cfca6b6324160e0209e32fbcdacd1a78502818c77e22fb29ea2f 0.0s done
+#13 exporting manifest list sha256:58ade08d8d30fbf5ae442bc9687d0924eb224cf98092c8f78546fb0cf5934316 done
+#13 naming to docker.io/library/codepilot-phase1-test:75720f63a2e449c38eb28408807ac941 done
+#13 unpacking to docker.io/library/codepilot-phase1-test:75720f63a2e449c38eb28408807ac941
+#13 unpacking to docker.io/library/codepilot-phase1-test:75720f63a2e449c38eb28408807ac941 4.9s done
+#13 DONE 11.8s
+ENVIRONMENT {"python": "3.12.7 (main, Dec  3 2024, 02:26:04) [GCC 12.2.0]", "tree-sitter": "0.25.2", "tree-sitter-python": "0.25.0", "pytest": "9.1.1", "codepilot-repair": "0.1.0"}
+COMMAND ["git", "--version"]
+git version 2.39.5
+EXIT 0
+COMMAND ["uv", "--version"]
+uv 0.12.9 (x86_64-unknown-linux-musl)
+EXIT 0
+COMMAND ["/app/.venv/bin/python", "-X", "faulthandler", "-m", "pytest", "-v", "-p", "no:cacheprovider", "--basetemp", "/tmp/codepilot-phase1-4ibyn7kl/pytest", "--junitxml", "/tmp/codepilot-phase1-4ibyn7kl/contracts.xml", "tests/unit/repo/test_parser_subprocess.py", "tests/integration/test_index_golden.py", "tests/integration/test_cli_index.py", "tests/integration/test_incremental.py"]
+============================= test session starts ==============================
+platform linux -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0 -- /app/.venv/bin/python
+rootdir: /app
+configfile: pyproject.toml
+plugins: langsmith-0.14.4, cov-7.1.0, timeout-2.4.0, anyio-4.15.1, asyncio-1.4.0
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 11 items
+
+tests/unit/repo/test_parser_subprocess.py::test_native_parser_in_subprocess[row] PASSED [  9%]
+tests/unit/repo/test_parser_subprocess.py::test_native_parser_in_subprocess[column] PASSED [ 18%]
+tests/unit/repo/test_parser_subprocess.py::test_native_parser_in_subprocess[extract] PASSED [ 27%]
+tests/unit/repo/test_parser_subprocess.py::test_native_parser_in_subprocess[lifetime] PASSED [ 36%]
+tests/integration/test_index_golden.py::test_golden_index_matches_field_by_field PASSED [ 45%]
+tests/integration/test_cli_index.py::test_index_cli_prints_four_counts PASSED [ 54%]
+tests/integration/test_cli_index.py::test_index_cli_defaults_to_head_and_reports_tests PASSED [ 63%]
+tests/integration/test_cli_index.py::test_index_cli_rejects_non_git_directory PASSED [ 72%]
+tests/integration/test_cli_index.py::test_index_cli_rejects_unknown_mode PASSED [ 81%]
+tests/integration/test_incremental.py::test_incremental_reindex_over_real_workspace PASSED [ 90%]
+tests/integration/test_incremental.py::test_history_never_leaks_post_base_commits_through_shared_cache PASSED [100%]
+
+------- generated xml file: /tmp/codepilot-phase1-4ibyn7kl/contracts.xml -------
+============================== 11 passed in 1.62s ==============================
+EXIT 0
+CONTRACTS {"tests": 11, "failures": 0, "errors": 0, "skipped": 0}
+COMMAND ["git", "-c", "core.autocrlf=false", "-c", "commit.gpgsign=false", "-C", "/tmp/codepilot-phase1-4ibyn7kl/mini_auth", "init", "--initial-branch=main"]
+Initialized empty Git repository in /tmp/codepilot-phase1-4ibyn7kl/mini_auth/.git/
+EXIT 0
+COMMAND ["git", "-c", "core.autocrlf=false", "-c", "commit.gpgsign=false", "-C", "/tmp/codepilot-phase1-4ibyn7kl/mini_auth", "add", "--all"]
+EXIT 0
+COMMAND ["git", "-c", "core.autocrlf=false", "-c", "commit.gpgsign=false", "-C", "/tmp/codepilot-phase1-4ibyn7kl/mini_auth", "commit", "--quiet", "-m", "Phase 1 fixture"]
+EXIT 0
+COMMAND ["git", "-c", "core.autocrlf=false", "-c", "commit.gpgsign=false", "-C", "/tmp/codepilot-phase1-4ibyn7kl/mini_auth", "rev-parse", "HEAD"]
+533cf280dcb2f3e908bc7ba4be8d0d3016b1ebb9
+EXIT 0
+COMMAND ["codepilot", "index", "/tmp/codepilot-phase1-4ibyn7kl/mini_auth", "--base-commit", "533cf280dcb2f3e908bc7ba4be8d0d3016b1ebb9", "--database-url", "sqlite:////tmp/codepilot-phase1-4ibyn7kl/index.db"]
+Repository  : repo_202315a47df2bc80
+Base commit : 533cf280dcb2f3e908bc7ba4be8d0d3016b1ebb9
+Index mode  : full
+Duration    : 0.07s
+
+Files       : 14
+Symbols     :
+  class          8
+  function       14
+  method         17
+  module         12
+  test_function  3
+  test_method    4
+Edges       :
+  CALL       high    11
+  CALL       low     65
+  CALL       medium  7
+  IMPORT     high    27
+  IMPORT     low     11
+  INHERIT    high    3
+  REFERENCE  high    19
+  TEST       high    8
+  TEST       low     37
+  TEST       medium  12
+Tests       : 7
+2026-10-10T08:16:29.659741Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.065 incremental=False removed=0 repository_id=repo_202315a47df2bc80 reused=0
+EXIT 0
+MINI_AUTH {"commit": "533cf280dcb2f3e908bc7ba4be8d0d3016b1ebb9", "Files": 14, "Symbols": 58, "Edges": 200, "Tests": 7, "Parse errors": 0}
+PHASE1_DOCKER_ACCEPTANCE_OK
+PASSED
+
+- generated xml file: C:\Users\lenovo\Desktop\CodePilot-Repair\artifacts\ci-docker-20261010\docker-local-results.xml -
+======================== 1 passed in 60.66s (0:01:00) =========================

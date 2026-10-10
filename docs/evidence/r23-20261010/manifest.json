@@ -1,0 +1,335 @@
+{
+  "evidence_date": "2026-10-10",
+  "historical_platform": "Windows-11-10.0.22631-SP0",
+  "manifest_excludes_itself": true,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "source": "New directory-scoped Git attributes to preserve evidence bytes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "api-isolation.json",
+      "bytes": 4049,
+      "sha256": "7432c83233a84241eeb98989a1b13fae5d00da4670dee7589194d452a193f372",
+      "source": "artifacts/r23-repair-20261010/api-isolation.json",
+      "source_sha256": "7432c83233a84241eeb98989a1b13fae5d00da4670dee7589194d452a193f372",
+      "byte_identical": true
+    },
+    {
+      "path": "check.json",
+      "bytes": 645,
+      "sha256": "7c2f27d397ffe1567f42327e87edcd74b038b50cf40b270b56b5a1b99a12f506",
+      "source": "New documentation, portable replay helper, or validation metadata"
+    },
+    {
+      "path": "fixture-verified.json",
+      "bytes": 3043,
+      "sha256": "8c694f3557d5aaeb8e9cac10ba550a2d856e94bc2c83e0686ec78fc598b6d3cc",
+      "source": "artifacts/r23-repair-20261010/fixture-verified.json",
+      "source_sha256": "8c694f3557d5aaeb8e9cac10ba550a2d856e94bc2c83e0686ec78fc598b6d3cc",
+      "byte_identical": true
+    },
+    {
+      "path": "fixture.json",
+      "bytes": 1607,
+      "sha256": "fc52ea2f4c6fff3e97a411f2f61a7f492cf8bdc1f89095c1ad38169ceffa16d7",
+      "source": "artifacts/r23-repair-20261010/fixture.json",
+      "source_sha256": "fc52ea2f4c6fff3e97a411f2f61a7f492cf8bdc1f89095c1ad38169ceffa16d7",
+      "byte_identical": true
+    },
+    {
+      "path": "flask-after.jsonl",
+      "bytes": 59516,
+      "sha256": "4a42c685b1be384a4bef3a8538682cefa7ecacf234459dc0556c0514993eaed2",
+      "source": "artifacts/r23-repair-20261010/flask-after.jsonl",
+      "source_sha256": "4a42c685b1be384a4bef3a8538682cefa7ecacf234459dc0556c0514993eaed2",
+      "byte_identical": true
+    },
+    {
+      "path": "flask-before.jsonl",
+      "bytes": 70985,
+      "sha256": "b4cac5a4e91e12ec5c45d5ac30153ae6e2d09f74a1ced7783d975340327b13a2",
+      "source": "artifacts/r23-repair-20261010/flask-before.jsonl",
+      "source_sha256": "b4cac5a4e91e12ec5c45d5ac30153ae6e2d09f74a1ced7783d975340327b13a2",
+      "byte_identical": true
+    },
+    {
+      "path": "flask-result.json",
+      "bytes": 4994,
+      "sha256": "429ea4b5e081b77bd1f361ab7e799a2993eb519f57300d4633267087c9fc9127",
+      "source": "artifacts/r23-repair-20261010/index-flask/result.json",
+      "source_sha256": "429ea4b5e081b77bd1f361ab7e799a2993eb519f57300d4633267087c9fc9127",
+      "byte_identical": true
+    },
+    {
+      "path": "gate1-ruff.json",
+      "bytes": 565,
+      "sha256": "cd39491e4348f2ad9893dcc33a5f0b2dc2c96b83ba3961833fa0b60a3510cb58",
+      "source": "artifacts/r23-repair-20261010/gate1-ruff.json",
+      "source_sha256": "cd39491e4348f2ad9893dcc33a5f0b2dc2c96b83ba3961833fa0b60a3510cb58",
+      "byte_identical": true
+    },
+    {
+      "path": "gate1-ruff.log",
+      "bytes": 19,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "source": "artifacts/r23-repair-20261010/gate1-ruff.log",
+      "source_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "byte_identical": true
+    },
+    {
+      "path": "gate2-format.json",
+      "bytes": 583,
+      "sha256": "b608c3a3740d44b2b5bc835cc335c558d6ca3068c9ba7f15c299f4f80495e77a",
+      "source": "artifacts/r23-repair-20261010/gate2-format.json",
+      "source_sha256": "b608c3a3740d44b2b5bc835cc335c558d6ca3068c9ba7f15c299f4f80495e77a",
+      "byte_identical": true
+    },
+    {
+      "path": "gate2-format.log",
+      "bytes": 28,
+      "sha256": "f4d501ad7405c927e0a57b16f24ccd530ee06a8c4da5838f861086d20077e073",
+      "source": "artifacts/r23-repair-20261010/gate2-format.log",
+      "source_sha256": "f4d501ad7405c927e0a57b16f24ccd530ee06a8c4da5838f861086d20077e073",
+      "byte_identical": true
+    },
+    {
+      "path": "gate3-mypy.json",
+      "bytes": 552,
+      "sha256": "27a9638e306bacc748ba02aa2c4846e25b5b624660e941192a50fbc53029d87d",
+      "source": "artifacts/r23-repair-20261010/gate3-mypy.json",
+      "source_sha256": "27a9638e306bacc748ba02aa2c4846e25b5b624660e941192a50fbc53029d87d",
+      "byte_identical": true
+    },
+    {
+      "path": "gate3-mypy.log",
+      "bytes": 45,
+      "sha256": "ff7fa338160fc834760e2981fabb96c5026e1c7b5fbf91dba5fe0364c0f97c94",
+      "source": "artifacts/r23-repair-20261010/gate3-mypy.log",
+      "source_sha256": "ff7fa338160fc834760e2981fabb96c5026e1c7b5fbf91dba5fe0364c0f97c94",
+      "byte_identical": true
+    },
+    {
+      "path": "gate4-pytest.json",
+      "bytes": 783,
+      "sha256": "ffdd1a49adfae15299befd29b238ccfcd8aad35830c10de82a45dc5fa4185770",
+      "source": "artifacts/r23-repair-20261010/gate4-pytest.json",
+      "source_sha256": "ffdd1a49adfae15299befd29b238ccfcd8aad35830c10de82a45dc5fa4185770",
+      "byte_identical": true
+    },
+    {
+      "path": "gate4-pytest.log",
+      "bytes": 10722,
+      "sha256": "f1d153a88689b63cd4cee76d164d86ed45620693ab7ec22cf395735642ccb330",
+      "source": "artifacts/r23-repair-20261010/gate4-pytest.log",
+      "source_sha256": "f1d153a88689b63cd4cee76d164d86ed45620693ab7ec22cf395735642ccb330",
+      "byte_identical": true
+    },
+    {
+      "path": "gate5-mini-auth.json",
+      "bytes": 844,
+      "sha256": "72a090b1e492e3cc7e7a9e10cde362836b9d59f9a6068805813e3da25cc9d9e2",
+      "source": "artifacts/r23-repair-20261010/gate5-mini-auth.json",
+      "source_sha256": "72a090b1e492e3cc7e7a9e10cde362836b9d59f9a6068805813e3da25cc9d9e2",
+      "byte_identical": true
+    },
+    {
+      "path": "gate5-mini-auth.log",
+      "bytes": 803,
+      "sha256": "c8dd63de1b328a1987fc10afab6157e9911bdcde1a14320562d0f1bb33324a09",
+      "source": "artifacts/r23-repair-20261010/gate5-mini-auth.log",
+      "source_sha256": "c8dd63de1b328a1987fc10afab6157e9911bdcde1a14320562d0f1bb33324a09",
+      "byte_identical": true
+    },
+    {
+      "path": "gate6-flask.json",
+      "bytes": 976,
+      "sha256": "84169dac88c0ebe17b3a719d17e7944afea2a7413110a551bf613132a67d4b26",
+      "source": "artifacts/r23-repair-20261010/gate6-flask.json",
+      "source_sha256": "84169dac88c0ebe17b3a719d17e7944afea2a7413110a551bf613132a67d4b26",
+      "byte_identical": true
+    },
+    {
+      "path": "gate6-flask.log",
+      "bytes": 1205,
+      "sha256": "e4e146d71a8a6619fc38c87eab0399e9ef67a37c2c3e270bc6adce896142a4ec",
+      "source": "artifacts/r23-repair-20261010/gate6-flask.log",
+      "source_sha256": "e4e146d71a8a6619fc38c87eab0399e9ef67a37c2c3e270bc6adce896142a4ec",
+      "byte_identical": true
+    },
+    {
+      "path": "gate7-requests.json",
+      "bytes": 979,
+      "sha256": "f8b8995630f2e61317fa67f4e55f9de8a852baa6ea4549ffe0cf4f660a83037b",
+      "source": "artifacts/r23-repair-20261010/gate7-requests.json",
+      "source_sha256": "f8b8995630f2e61317fa67f4e55f9de8a852baa6ea4549ffe0cf4f660a83037b",
+      "byte_identical": true
+    },
+    {
+      "path": "gate7-requests.log",
+      "bytes": 1206,
+      "sha256": "27049a3c1e999c8413c7e4b124136b565c16f258d136278bd2274c24255b7b6a",
+      "source": "artifacts/r23-repair-20261010/gate7-requests.log",
+      "source_sha256": "27049a3c1e999c8413c7e4b124136b565c16f258d136278bd2274c24255b7b6a",
+      "byte_identical": true
+    },
+    {
+      "path": "git-evidence.json",
+      "bytes": 2382,
+      "sha256": "b4a8ee6bab19c46ffc86cbd929a56bf80ed7f0db658bf1a5704600a46010c152",
+      "source": "artifacts/r23-repair-20261010/git-evidence.json",
+      "source_sha256": "b4a8ee6bab19c46ffc86cbd929a56bf80ed7f0db658bf1a5704600a46010c152",
+      "byte_identical": true
+    },
+    {
+      "path": "minimal-version-matrix.json",
+      "bytes": 4962,
+      "sha256": "58bf46fae43d6eb8184ce27affec188e9c4382af65827f82aa673d77e224aae8",
+      "source": "artifacts/r23-repair-20261010/minimal-version-matrix.json",
+      "source_sha256": "58bf46fae43d6eb8184ce27affec188e9c4382af65827f82aa673d77e224aae8",
+      "byte_identical": true
+    },
+    {
+      "path": "minimal_child.py",
+      "bytes": 2303,
+      "sha256": "5311d2c246bfc65a95647cb3c6de28fdb113fe8d5828e1ffbef6caf456c2ada5",
+      "source": "tests/unit/repo/test_parser_subprocess.py",
+      "source_sha256": "332335c53e0784954475fbd60b2acdede853583a40a8f292c86a5b27a1518d79",
+      "adaptation": "Extracted historical CHILD string; removed leading blank line"
+    },
+    {
+      "path": "performance-comparison.json",
+      "bytes": 32350,
+      "sha256": "a43b946bd5e50ad348a42c7b7c606c4725fb34b192f653e6d7c4fd408c3f8060",
+      "source": "artifacts/r23-repair-20261010/performance-comparison.json",
+      "source_sha256": "a43b946bd5e50ad348a42c7b7c606c4725fb34b192f653e6d7c4fd408c3f8060",
+      "byte_identical": true
+    },
+    {
+      "path": "probe-summary.json",
+      "bytes": 4626,
+      "sha256": "5f034ba635bf7cd4d03ed15b62f6ec4dff42129678edf8492bd731da278f63f0",
+      "source": "artifacts/r23-repair-20261010/probe-summary.json",
+      "source_sha256": "5f034ba635bf7cd4d03ed15b62f6ec4dff42129678edf8492bd731da278f63f0",
+      "byte_identical": true
+    },
+    {
+      "path": "probe.py",
+      "bytes": 2969,
+      "sha256": "54ddf3fc395cc4ece95f872b399e0bb39b30fa0c6a9960e2fa66493201f4a261",
+      "source": "artifacts/r23-repair-20261010/probe.py",
+      "source_sha256": "c2b14c319665e03f9405196b3d4d72e247b07b7b07986a0e8d8ab8cea34a031d",
+      "adaptation": "Project root parents[2] -> parents[3] only"
+    },
+    {
+      "path": "README.md",
+      "bytes": 9960,
+      "sha256": "185be5549f2a46c64ecba3a3bbbf035ae2e42e4400a299ef748978f18d1c2603",
+      "source": "New documentation, portable replay helper, or validation metadata"
+    },
+    {
+      "path": "repeat-before.json",
+      "bytes": 18546,
+      "sha256": "c967cb2d652d7be5a9b21536e8b71ca44771e88cfde7c45ef1344e4884866b3b",
+      "source": "artifacts/r23-repair-20261010/repeat-before.json",
+      "source_sha256": "c967cb2d652d7be5a9b21536e8b71ca44771e88cfde7c45ef1344e4884866b3b",
+      "byte_identical": true
+    },
+    {
+      "path": "replay_minimal.py",
+      "bytes": 4890,
+      "sha256": "b601625eb9799fec79e2b39e78357e3ffeeb588a72fc501cd458982a7d49824d",
+      "source": "New documentation, portable replay helper, or validation metadata"
+    },
+    {
+      "path": "requests-after.jsonl",
+      "bytes": 25818,
+      "sha256": "8f23b0fdb15115baf3f2ed5c8738fd7ebba22a038a613a3a251375ec5097322c",
+      "source": "artifacts/r23-repair-20261010/requests-after.jsonl",
+      "source_sha256": "8f23b0fdb15115baf3f2ed5c8738fd7ebba22a038a613a3a251375ec5097322c",
+      "byte_identical": true
+    },
+    {
+      "path": "requests-before.jsonl",
+      "bytes": 31073,
+      "sha256": "d8e5ce344c2a28da7fb788024c84732f17a854e7f2da38cd1819486c315e71a9",
+      "source": "artifacts/r23-repair-20261010/requests-before.jsonl",
+      "source_sha256": "d8e5ce344c2a28da7fb788024c84732f17a854e7f2da38cd1819486c315e71a9",
+      "byte_identical": true
+    },
+    {
+      "path": "requests-result.json",
+      "bytes": 2933,
+      "sha256": "72aac609d23de927eed4f785f26693da786b6e2db7291307840b304d3e9a8ec6",
+      "source": "artifacts/r23-repair-20261010/index-requests/result.json",
+      "source_sha256": "72aac609d23de927eed4f785f26693da786b6e2db7291307840b304d3e9a8ec6",
+      "byte_identical": true
+    },
+    {
+      "path": "target-before.json",
+      "bytes": 592,
+      "sha256": "0d6e610a82a57bedb4348c899535b5e4ca6422ee846eba5624b7a4a0a78ee3df",
+      "source": "artifacts/r23-repair-20261010/target-before.json",
+      "source_sha256": "0d6e610a82a57bedb4348c899535b5e4ca6422ee846eba5624b7a4a0a78ee3df",
+      "byte_identical": true
+    },
+    {
+      "path": "target-before.log",
+      "bytes": 5096,
+      "sha256": "f8f736b46a457d77446ed6c9dc569bab91b0b1412c8534379203eaa91dba67c2",
+      "source": "artifacts/r23-repair-20261010/target-before.log",
+      "source_sha256": "f8f736b46a457d77446ed6c9dc569bab91b0b1412c8534379203eaa91dba67c2",
+      "byte_identical": true
+    },
+    {
+      "path": "target-unsandboxed.json",
+      "bytes": 715,
+      "sha256": "d416107cd7bfad89e02190b35c040af7aa8203a51ea0c7904159c54125d5d63a",
+      "source": "artifacts/r23-repair-20261010/target-unsandboxed.json",
+      "source_sha256": "d416107cd7bfad89e02190b35c040af7aa8203a51ea0c7904159c54125d5d63a",
+      "byte_identical": true
+    },
+    {
+      "path": "target-unsandboxed.log",
+      "bytes": 100,
+      "sha256": "815c8a45bcace3d8804aed208b60479477dceb9ff151823100f889266399940c",
+      "source": "artifacts/r23-repair-20261010/target-unsandboxed.log",
+      "source_sha256": "815c8a45bcace3d8804aed208b60479477dceb9ff151823100f889266399940c",
+      "byte_identical": true
+    },
+    {
+      "path": "upstream-LICENSE.txt",
+      "bytes": 1109,
+      "sha256": "c40a115b3d7d429c839bc51ace3464c2f37c9559bad6c6251a86281c27ea5431",
+      "source": "artifacts/r23-repair-20261010/ts0260/tree_sitter-0.26.0.dist-info/licenses/LICENSE",
+      "source_sha256": "c40a115b3d7d429c839bc51ace3464c2f37c9559bad6c6251a86281c27ea5431",
+      "byte_identical": true
+    },
+    {
+      "path": "upstream-node-0.26.0.c",
+      "bytes": 36485,
+      "sha256": "69c53393b79e98c7e6d92ef83d303ba059a406eff640eeaea67eae0f5a5057ea",
+      "source": "artifacts/r23-repair-20261010/upstream-node-0.26.0.c",
+      "source_sha256": "69c53393b79e98c7e6d92ef83d303ba059a406eff640eeaea67eae0f5a5057ea",
+      "byte_identical": true
+    },
+    {
+      "path": "upstream-point-0.26.0.c",
+      "bytes": 4265,
+      "sha256": "cb5c1384fdb2ef8fea78da888bb7f10cc62bbfc6757217758123cb9d047d7efb",
+      "source": "artifacts/r23-repair-20261010/upstream-point-0.26.0.c",
+      "source_sha256": "cb5c1384fdb2ef8fea78da888bb7f10cc62bbfc6757217758123cb9d047d7efb",
+      "byte_identical": true
+    },
+    {
+      "path": "version0252-controls.json",
+      "bytes": 2935,
+      "sha256": "f5d4b4524412182889c6e1ce62b73b44f86731c7fb5de7a659d681e2179c55e7",
+      "source": "artifacts/r23-repair-20261010/version0252-controls.json",
+      "source_sha256": "f5d4b4524412182889c6e1ce62b73b44f86731c7fb5de7a659d681e2179c55e7",
+      "byte_identical": true
+    }
+  ]
+}

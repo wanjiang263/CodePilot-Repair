@@ -109,6 +109,27 @@ def test_json_mode_omitted_when_unsupported() -> None:
     assert "response_format" not in body
 
 
+@pytest.mark.parametrize("provider", ["first-service", "second-service"])
+@pytest.mark.parametrize("mode", ["enabled", "disabled"])
+def test_extra_body_forwarded_without_provider_branches(provider: str, mode: str) -> None:
+    spec = _spec(provider=provider, extra_body={"thinking": {"type": mode}})
+    request = LLMRequest(messages=MESSAGES)
+    body = build_request_body(request, spec, request.messages)
+    assert body["thinking"] == {"type": mode}
+    assert body["model"] == spec.model
+    assert body["max_tokens"] == request.max_output_tokens
+
+
+def test_request_body_does_not_share_nested_extra_body_values() -> None:
+    spec = _spec(extra_body={"thinking": {"type": "disabled"}})
+    request = LLMRequest(messages=MESSAGES)
+    first = build_request_body(request, spec, request.messages)
+    first["thinking"]["type"] = "enabled"
+    second = build_request_body(request, spec, request.messages)
+    assert spec.extra_body["thinking"] == {"type": "disabled"}
+    assert second["thinking"] == {"type": "disabled"}
+
+
 # --------------------------------------------------------------- prompt 补齐
 
 

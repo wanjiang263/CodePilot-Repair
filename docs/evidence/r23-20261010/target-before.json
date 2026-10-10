@@ -1,0 +1,20 @@
+{
+  "command": [
+    ".venv/Scripts/pytest.exe",
+    "tests/unit/repo/test_parser_subprocess.py",
+    "-q",
+    "-p",
+    "no:cacheprovider"
+  ],
+  "cwd": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair",
+  "returncode": 1,
+  "exit_hex": "0x00000001",
+  "seconds": 12.371830399992177,
+  "timestamp": "2026-10-10T02:44:01.760435+00:00",
+  "python": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "packages": {
+    "tree-sitter": "0.26.0",
+    "tree-sitter-python": "0.25.0"
+  }
+}

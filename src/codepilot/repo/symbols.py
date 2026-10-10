@@ -15,7 +15,7 @@ from codepilot.repo.models import Symbol, SymbolKind
 from codepilot.repo.parser import ParsedFile, SyntaxNode
 from codepilot.repo.scanner import is_test_path
 
-__all__ = ["Symbol", "SymbolKind", "extract_symbols", "module_name", "symbol_id"]
+__all__ = ["Symbol", "SymbolKind", "extract_symbols", "file_id", "module_name", "symbol_id"]
 
 
 def symbol_id(repository_id: str, qualified_name: str, kind: SymbolKind) -> str:
@@ -23,6 +23,12 @@ def symbol_id(repository_id: str, qualified_name: str, kind: SymbolKind) -> str:
     return hashlib.sha1(
         (repository_id + qualified_name + kind).encode("utf-8"), usedforsecurity=False
     ).hexdigest()
+
+
+def file_id(repository_id: str, path: str) -> str:
+    """``FileNode`` 的稳定标识。索引层与符号提取必须用同一个公式，
+    否则 ``Symbol.file_id`` 关联不上 ``files`` 表。"""
+    return hashlib.sha1((repository_id + path).encode(), usedforsecurity=False).hexdigest()
 
 
 def module_name(path: str) -> str:
@@ -160,7 +166,7 @@ def _symbol(
         qualified_name,
         kind,
         id=symbol_id(repository_id, qualified_name, kind),
-        file_id=hashlib.sha1((repository_id + path).encode(), usedforsecurity=False).hexdigest(),
+        file_id=file_id(repository_id, path),
         path=path,
         start_line=node.start_line if start_line is None else start_line,
         end_line=node.end_line,

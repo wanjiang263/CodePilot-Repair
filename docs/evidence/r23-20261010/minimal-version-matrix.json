@@ -1,0 +1,164 @@
+[
+  {
+    "version": "0.26.0",
+    "case": "row",
+    "repeat": 0,
+    "returncode": 1,
+    "exit_hex": "0x00000001",
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\r\n  File \"<string>\", line 21, in <module>\r\nAssertionError: ('row', 3, 3)\r\n"
+  },
+  {
+    "version": "0.26.0",
+    "case": "row",
+    "repeat": 1,
+    "returncode": 1,
+    "exit_hex": "0x00000001",
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\r\n  File \"<string>\", line 21, in <module>\r\nAssertionError: ('row', 3, 3)\r\n"
+  },
+  {
+    "version": "0.26.0",
+    "case": "row",
+    "repeat": 2,
+    "returncode": 1,
+    "exit_hex": "0x00000001",
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\r\n  File \"<string>\", line 21, in <module>\r\nAssertionError: ('row', 3, 3)\r\n"
+  },
+  {
+    "version": "0.26.0",
+    "case": "column",
+    "repeat": 0,
+    "returncode": 1,
+    "exit_hex": "0x00000001",
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\r\n  File \"<string>\", line 21, in <module>\r\nAssertionError: ('column', 3, 3)\r\n"
+  },
+  {
+    "version": "0.26.0",
+    "case": "column",
+    "repeat": 1,
+    "returncode": 1,
+    "exit_hex": "0x00000001",
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\r\n  File \"<string>\", line 21, in <module>\r\nAssertionError: ('column', 3, 3)\r\n"
+  },
+  {
+    "version": "0.26.0",
+    "case": "column",
+    "repeat": 2,
+    "returncode": 1,
+    "exit_hex": "0x00000001",
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\r\n  File \"<string>\", line 21, in <module>\r\nAssertionError: ('column', 3, 3)\r\n"
+  },
+  {
+    "version": "0.26.0",
+    "case": "extract",
+    "repeat": 0,
+    "returncode": 3221225477,
+    "exit_hex": "0xC0000005",
+    "stdout": "",
+    "stderr": "Windows fatal exception: access violation\n\nCurrent thread 0x00018818 (most recent call first):\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\src\\codepilot\\repo\\parser.py\", line 284 in text\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\src\\codepilot\\repo\\symbols.py\", line 116 in extract_symbols\n  File \"<string>\", line 28 in <module>\n"
+  },
+  {
+    "version": "0.26.0",
+    "case": "extract",
+    "repeat": 1,
+    "returncode": 3221225477,
+    "exit_hex": "0xC0000005",
+    "stdout": "",
+    "stderr": "Windows fatal exception: access violation\n\nCurrent thread 0x0001bf20 (most recent call first):\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\src\\codepilot\\repo\\parser.py\", line 284 in text\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\src\\codepilot\\repo\\symbols.py\", line 116 in extract_symbols\n  File \"<string>\", line 28 in <module>\n"
+  },
+  {
+    "version": "0.26.0",
+    "case": "extract",
+    "repeat": 2,
+    "returncode": 3221225477,
+    "exit_hex": "0xC0000005",
+    "stdout": "",
+    "stderr": "Windows fatal exception: access violation\n\nCurrent thread 0x0001c694 (most recent call first):\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\src\\codepilot\\repo\\parser.py\", line 284 in text\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\src\\codepilot\\repo\\symbols.py\", line 116 in extract_symbols\n  File \"<string>\", line 28 in <module>\n"
+  },
+  {
+    "version": "0.25.2",
+    "case": "row",
+    "repeat": 0,
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "OK row\r\n",
+    "stderr": ""
+  },
+  {
+    "version": "0.25.2",
+    "case": "row",
+    "repeat": 1,
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "OK row\r\n",
+    "stderr": ""
+  },
+  {
+    "version": "0.25.2",
+    "case": "row",
+    "repeat": 2,
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "OK row\r\n",
+    "stderr": ""
+  },
+  {
+    "version": "0.25.2",
+    "case": "column",
+    "repeat": 0,
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "OK column\r\n",
+    "stderr": ""
+  },
+  {
+    "version": "0.25.2",
+    "case": "column",
+    "repeat": 1,
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "OK column\r\n",
+    "stderr": ""
+  },
+  {
+    "version": "0.25.2",
+    "case": "column",
+    "repeat": 2,
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "OK column\r\n",
+    "stderr": ""
+  },
+  {
+    "version": "0.25.2",
+    "case": "extract",
+    "repeat": 0,
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "OK extract\r\n",
+    "stderr": ""
+  },
+  {
+    "version": "0.25.2",
+    "case": "extract",
+    "repeat": 1,
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "OK extract\r\n",
+    "stderr": ""
+  },
+  {
+    "version": "0.25.2",
+    "case": "extract",
+    "repeat": 2,
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "OK extract\r\n",
+    "stderr": ""
+  }
+]

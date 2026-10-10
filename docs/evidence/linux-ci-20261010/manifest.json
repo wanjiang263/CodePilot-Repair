@@ -1,0 +1,92 @@
+{
+  "run": "https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38037605606",
+  "tested_head_sha": "16dfa9b184ee7489617eddfce44a143b44ac432c",
+  "summary": {
+    "pytest": {
+      "total": 752,
+      "skipped": 5,
+      "failures": 0,
+      "passed": 747
+    },
+    "docker": {
+      "total": 1,
+      "skipped": 0,
+      "failures": 0,
+      "passed": 1
+    }
+  },
+  "files": [
+    {
+      "path": "docker-evidence/docker-info.log",
+      "source": "artifacts/ci-docker-20261010/ci-push/docker-evidence/docker-info.log",
+      "sha256": "6bd60857f0062defe4edbffc3b3e49ecd7b055a2598326793fc1cfb435587e0d",
+      "bytes": 7
+    },
+    {
+      "path": "docker-evidence/docker-results.xml",
+      "source": "artifacts/ci-docker-20261010/ci-push/docker-evidence/docker-results.xml",
+      "sha256": "fc0167a55731d9c7fc74122d3797512588ea49ce7f9a6f656a6914f5f6a613c6",
+      "bytes": 373
+    },
+    {
+      "path": "docker-evidence/docker-test.log",
+      "source": "artifacts/ci-docker-20261010/ci-push/docker-evidence/docker-test.log",
+      "sha256": "3991cb01f3d1ff2544f9bcc316f7f8c1165e38a449260f0eb1e0af3f67e0343e",
+      "bytes": 24758
+    },
+    {
+      "path": "docker-evidence/environment.log",
+      "source": "artifacts/ci-docker-20261010/ci-push/docker-evidence/environment.log",
+      "sha256": "29fe7024b57c75fd1f6aba27630c1e9023491895f0741dc6e80fb9b936236abe",
+      "bytes": 99
+    },
+    {
+      "path": "pytest-evidence/environment.log",
+      "source": "artifacts/ci-docker-20261010/ci-push/pytest-evidence/environment.log",
+      "sha256": "29fe7024b57c75fd1f6aba27630c1e9023491895f0741dc6e80fb9b936236abe",
+      "bytes": 99
+    },
+    {
+      "path": "pytest-evidence/pytest-results.xml",
+      "source": "artifacts/ci-docker-20261010/ci-push/pytest-evidence/pytest-results.xml",
+      "sha256": "b95e14ddb0e080c299e1de3f847b90cf01e485b661fbef61eedd6b94889c8583",
+      "bytes": 91662
+    },
+    {
+      "path": "pytest-evidence/pytest.log",
+      "source": "artifacts/ci-docker-20261010/ci-push/pytest-evidence/pytest.log",
+      "sha256": "f9c50bd24745058ed871231ee5b2c66e6578a488122c29b2816d31613c885780",
+      "bytes": 11284
+    },
+    {
+      "path": "quality-evidence/environment.log",
+      "source": "artifacts/ci-docker-20261010/ci-push/quality-evidence/environment.log",
+      "sha256": "29fe7024b57c75fd1f6aba27630c1e9023491895f0741dc6e80fb9b936236abe",
+      "bytes": 99
+    },
+    {
+      "path": "quality-evidence/mypy.log",
+      "source": "artifacts/ci-docker-20261010/ci-push/quality-evidence/mypy.log",
+      "sha256": "e01191578d3a3bac202cef72aec747f3048def999e4a0906368a5b91b8849682",
+      "bytes": 44
+    },
+    {
+      "path": "quality-evidence/ruff-check.log",
+      "source": "artifacts/ci-docker-20261010/ci-push/quality-evidence/ruff-check.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "bytes": 19
+    },
+    {
+      "path": "quality-evidence/ruff-format.log",
+      "source": "artifacts/ci-docker-20261010/ci-push/quality-evidence/ruff-format.log",
+      "sha256": "291d91fd4256e9a8b5d743c5c5fcb04dfee353294a3741d1ec385150e1711bf6",
+      "bytes": 28
+    },
+    {
+      "path": "github-run.json",
+      "source": "artifacts/ci-docker-20261010/ci-push-view.log",
+      "sha256": "93a90d4c393bec100430c11a72796ba9727f453e56cf2de7433d3f6c232d14fe",
+      "bytes": 6810
+    }
+  ]
+}

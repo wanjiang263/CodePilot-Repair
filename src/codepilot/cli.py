@@ -10,23 +10,29 @@ Phase 0 只把 ``config`` 与 ``doctor`` 做实。其余子命令**注册但不�
 
 from __future__ import annotations
 
+import secrets
 import shutil
 import subprocess
 import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import typer
 
 from codepilot.config import PROJECT_ROOT, get_settings
 from codepilot.observability.logging import configure_logging
 
+if TYPE_CHECKING:
+    from codepilot.repo.index import IndexStats
+
 __all__ = ["app"]
 
 #: 尚未实现的子命令 → 计划落地的阶段。值会出现在报错信息里。
+#: ``index`` 已在 R-18 落地，不再列在这里——``test_unimplemented_commands_fail_loudly``
+#: 以 ``sorted(_PLANNED)`` 参数化，删键即自动不再要求 index 退出码 2。
 _PLANNED: dict[str, str] = {
-    "index": "Phase 1（Repository Intelligence）",
     "retrieve": "Phase 2（多通道检索与融合）",
     "run-tests": "Phase 4（Docker 沙箱）",
     "solve": "Phase 5（最小单轮闭环，M1）",
@@ -194,6 +200,118 @@ def doctor() -> None:
     typer.echo("      相关验收项必须记为「未执行」，而不是「通过」。")
 
 
+# ---------------------------------------------------------------- index (R-18)
+
+
+@app.command("index")
+def index(
+    repo: str = typer.Argument(..., help="仓库路径或 URL。"),
+    base_commit: str = typer.Option("HEAD", "--base-commit", help="基准提交（默认 HEAD）。"),
+    database_url: str = typer.Option("", "--database-url", help="覆盖默认数据库 URL。"),
+    mode: str = typer.Option(
+        "fetch", "--mode", help="workspace 模式：fetch（默认）/ copy / worktree。"
+    ),
+    keep_workspace: bool = typer.Option(
+        False, "--keep-workspace", help="保留临时 workspace 目录（默认索引完即删）。"
+    ),
+) -> None:
+    """建立仓库索引：文件树、符号表、调用/依赖/继承/测试图，并打印四类计数。
+
+    走的是与运行时完全相同的路径：先把仓库 clone 进共享缓存，再从缓存取出一份
+    **临时 workspace**（默认 ``fetch`` 模式，看不到 base 之后的提交），索引它，
+    结束后删掉。原目录绝不修改（02 §6）。
+    """
+    from codepilot.repo.index import Indexer
+    from codepilot.repo.workspace import WorkspaceError, WorkspaceManager, WorkspaceMode
+    from codepilot.storage.db import (
+        create_engine_from_url,
+        create_session_factory,
+        init_db,
+        session_scope,
+    )
+    from codepilot.storage.repository import Stores
+
+    if mode == "fetch":
+        ws_mode: WorkspaceMode = "fetch"
+    elif mode == "copy":
+        ws_mode = "copy"
+    elif mode == "worktree":
+        ws_mode = "worktree"
+    else:
+        typer.secho(
+            f"✗ 未知的 workspace 模式: {mode!r}（可选 fetch / copy / worktree）",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=2)
+
+    settings = get_settings()
+    settings.ensure_dirs()
+    engine = create_engine_from_url(database_url or settings.database_url)
+    init_db(engine)
+    factory = create_session_factory(engine)
+
+    manager = WorkspaceManager(cache_root=settings.repo_cache_dir())
+    workspace_root = settings.cache_dir / "cli-workspaces"
+    workspace_root.mkdir(parents=True, exist_ok=True)
+    target = workspace_root / f"index-{secrets.token_hex(6)}"
+
+    try:
+        try:
+            workspace = manager.create(
+                source=repo, base_commit=base_commit, target=target, mode=ws_mode
+            )
+        except WorkspaceError as exc:
+            typer.secho(f"✗ 无法准备 workspace: {exc}", fg=typer.colors.RED, err=True)
+            raise typer.Exit(code=1) from exc
+        try:
+            with session_scope(factory) as session:
+                stats = Indexer().index(Stores(session), workspace)
+        finally:
+            if keep_workspace:
+                typer.echo(f"workspace 保留在: {workspace.path}")
+            else:
+                manager.remove(workspace)
+    finally:
+        engine.dispose()
+
+    _render_index_stats(stats)
+
+
+def _render_index_stats(stats: IndexStats) -> None:
+    """打印 Files / Symbols（按类型）/ Edges（按类型与 confidence）/ Tests 四类计数。"""
+    typer.echo(f"Repository  : {stats.repository_id}")
+    typer.echo(f"Base commit : {stats.base_commit}")
+    typer.echo(f"Index mode  : {'incremental' if stats.incremental else 'full'}")
+    typer.echo(f"Duration    : {stats.duration_seconds:.2f}s")
+    typer.echo()
+
+    typer.echo(f"Files       : {stats.files}")
+    skipped = {k: v for k, v in stats.scan.items() if k != "files" and v}
+    if skipped:
+        detail = ", ".join(f"{k}={v}" for k, v in sorted(skipped.items()))
+        typer.echo(f"  scan skipped: {detail}")
+
+    typer.echo("Symbols     :")
+    for kind, count in sorted(stats.symbols_by_kind.items()):
+        typer.echo(f"  {kind:<14} {count}")
+
+    typer.echo("Edges       :")
+    for (kind, confidence), count in sorted(stats.edges_by_kind_confidence.items()):
+        typer.echo(f"  {kind:<10} {confidence:<7} {count}")
+
+    typer.echo(f"Tests       : {stats.tests}")
+
+    if stats.parse_errors:
+        typer.echo()
+        typer.secho(
+            f"解析失败 {len(stats.parse_errors)} 个文件（已跳过其符号，未中断索引）：",
+            fg=typer.colors.YELLOW,
+        )
+        for error in stats.parse_errors:
+            typer.echo(f"  {error}")
+
+
 # ---------------------------------------------------------------- 未实现的子命令
 
 
@@ -211,16 +329,6 @@ def _not_yet(command: str) -> None:
     )
     typer.echo(f"  进度见 {PROJECT_ROOT / 'docs' / '05-精细化待办清单.md'}", err=True)
     raise typer.Exit(code=2)
-
-
-@app.command("index")
-def index(
-    repo: str = typer.Argument(..., help="仓库路径或 URL。"),
-    base_commit: str = typer.Option(..., "--base-commit", help="基准提交。"),
-) -> None:
-    """[未实现] 建立仓库索引：文件树、符号表、调用图。"""
-    del repo, base_commit
-    _not_yet("index")
 
 
 @app.command("retrieve")

@@ -137,6 +137,10 @@ class GraphEdge(Base):
 
     confidence: Mapped[float] = mapped_column(Float, default=1.0)
 
+    line: Mapped[int] = mapped_column(Integer, default=0)
+    """边在**源文件**中的行号（02 §7.1）。同一对节点在同一文件中可能有多条
+    调用边；持久化按 ``uq_edge_identity`` 去重，保留最强 confidence 中最早的一处。"""
+
     __table_args__ = (
         UniqueConstraint(
             "repository_id",

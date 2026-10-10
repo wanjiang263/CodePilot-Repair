@@ -120,15 +120,21 @@ def _smoke(provider_spec: ProviderSpec, model_spec: ModelSpec, rates: dict[str, 
         provider.close()
 
     text = (response.content or "").strip().replace("\n", " ")
-    print(f"  ✓ 回复: {text[:80]!r}")
+    choices = (response.raw or {}).get("choices") or []
+    finish_reason = choices[0].get("finish_reason") if choices else None
+    ok = bool(text) and finish_reason != "length"
+    if ok:
+        print(f"  ✓ 回复: {text[:80]!r}")
+    else:
+        print(f"  ✗ 未取得完整文本回复（finish_reason={finish_reason!r}）")
     cost_note = "" if response.cost_known else "  ⚠️ 未配置单价，费用不可信（cost_known=False）"
     print(
         f"    tokens: {response.input_tokens} in / {response.output_tokens} out, "
-        f"费用: {response.cost:.6f} {BUDGET_CURRENCY}{cost_note}"
+        f"按配置估算费用: {response.cost:.6f} {BUDGET_CURRENCY}{cost_note}"
     )
     if response.reasoning_content:
         print(f"    思考内容已单独捕获（{len(response.reasoning_content)} 字符）")
-    return True
+    return ok
 
 
 def main() -> int:

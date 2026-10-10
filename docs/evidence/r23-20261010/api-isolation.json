@@ -1,0 +1,34 @@
+[
+  {
+    "path": "artifacts/r23-repair-20261010/requests/src/requests/models.py",
+    "mode": "extract",
+    "returncode": 3221225477,
+    "exit_hex": "0xC0000005",
+    "stdout": "{\"python\": \"3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]\", \"executable\": \"C:\\\\Users\\\\lenovo\\\\Desktop\\\\CodePilot-Repair\\\\.venv\\\\Scripts\\\\python.exe\", \"windows\": \"Windows-11-10.0.22631-SP0\", \"packages\": {\"tree-sitter\": \"0.26.0\", \"tree-sitter-python\": \"0.25.0\"}}\r\nBEGIN artifacts/r23-repair-20261010/requests/src/requests/models.py mode=extract bytes=35418 sha256=938daba17cc2f2efce6a000f422f54e0c91f3bb8b8af615d6aabccaacb4f7a17\r\nPARSED\r\n",
+    "stderr": "Windows fatal exception: access violation\n\nCurrent thread 0x0001acac (most recent call first):\n  Garbage-collecting\n  File \"D:\\Anaconda\\Lib\\ast.py\", line 56 in literal_eval\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\src\\codepilot\\repo\\symbols.py\", line 213 in _docstring\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\src\\codepilot\\repo\\symbols.py\", line 174 in _symbol\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\src\\codepilot\\repo\\symbols.py\", line 128 in extract_symbols\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\r23-repair-20261010\\probe.py\", line 28 in child\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\r23-repair-20261010\\probe.py\", line 62 in <module>\n"
+  },
+  {
+    "path": "artifacts/r23-repair-20261010/requests/src/requests/models.py",
+    "mode": "children",
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "{\"python\": \"3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]\", \"executable\": \"C:\\\\Users\\\\lenovo\\\\Desktop\\\\CodePilot-Repair\\\\.venv\\\\Scripts\\\\python.exe\", \"windows\": \"Windows-11-10.0.22631-SP0\", \"packages\": {\"tree-sitter\": \"0.26.0\", \"tree-sitter-python\": \"0.25.0\"}}\r\nBEGIN artifacts/r23-repair-20261010/requests/src/requests/models.py mode=children bytes=35418 sha256=938daba17cc2f2efce6a000f422f54e0c91f3bb8b8af615d6aabccaacb4f7a17\r\nOK nodes=5861\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "artifacts/r23-repair-20261010/requests/src/requests/models.py",
+    "mode": "fields",
+    "returncode": 0,
+    "exit_hex": "0x00000000",
+    "stdout": "{\"python\": \"3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]\", \"executable\": \"C:\\\\Users\\\\lenovo\\\\Desktop\\\\CodePilot-Repair\\\\.venv\\\\Scripts\\\\python.exe\", \"windows\": \"Windows-11-10.0.22631-SP0\", \"packages\": {\"tree-sitter\": \"0.26.0\", \"tree-sitter-python\": \"0.25.0\"}}\r\nBEGIN artifacts/r23-repair-20261010/requests/src/requests/models.py mode=fields bytes=35418 sha256=938daba17cc2f2efce6a000f422f54e0c91f3bb8b8af615d6aabccaacb4f7a17\r\nOK nodes=5861\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "artifacts/r23-repair-20261010/requests/src/requests/models.py",
+    "mode": "points",
+    "returncode": 3221225477,
+    "exit_hex": "0xC0000005",
+    "stdout": "{\"python\": \"3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]\", \"executable\": \"C:\\\\Users\\\\lenovo\\\\Desktop\\\\CodePilot-Repair\\\\.venv\\\\Scripts\\\\python.exe\", \"windows\": \"Windows-11-10.0.22631-SP0\", \"packages\": {\"tree-sitter\": \"0.26.0\", \"tree-sitter-python\": \"0.25.0\"}}\r\nBEGIN artifacts/r23-repair-20261010/requests/src/requests/models.py mode=points bytes=35418 sha256=938daba17cc2f2efce6a000f422f54e0c91f3bb8b8af615d6aabccaacb4f7a17\r\n",
+    "stderr": "Windows fatal exception: access violation\n\nCurrent thread 0x0001642c (most recent call first):\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\r23-repair-20261010\\probe.py\", line 44 in child\n  File \"C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\r23-repair-20261010\\probe.py\", line 62 in <module>\n"
+  }
+]

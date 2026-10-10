@@ -1,0 +1,14 @@
+[1/3] bare clone：C:\Users\lenovo\Desktop\CodePilot-Repair\artifacts\r23-repair-20261010\requests → C:\Users\lenovo\Desktop\CodePilot-Repair\artifacts\r23-repair-20261010\index-requests\repo.bare
+[2/3] 索引 base commit 0e322af87745eff34caffe4df68456ebc20d9068（fetch workspace，本地不联网）…
+2026-10-10T03:02:59.863351Z [info     ] repo.index.done                changed=120 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=9.734 incremental=False removed=0 repository_id=repo_0521e609cf527cf3 reused=0
+[3/3] 实测结果：
+- 仓库：`https://github.com/psf/requests.git`
+- base commit：`0e322af87745eff34caffe4df68456ebc20d9068`
+- 模式：fetch workspace（自包含、只含 base 祖先）
+- 索引耗时：**9.81s**
+- Files：**120**；Symbols：**789** （class=86, function=121, method=213, module=36, test_function=53, test_method=280）
+- Edges：**7059**（CALL=2498, IMPORT=471, INHERIT=36, REFERENCE=159, TEST=3895）
+- Tests：**333**
+- 解析错误文件：0；扫描跳过：{'files': 120, 'ignored': 0, 'too_large': 1, 'binary': 10, 'symlinks': 0, 'unreadable': 0}
+
+已写入 C:\Users\lenovo\Desktop\CodePilot-Repair\docs\notes\phase1.md

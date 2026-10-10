@@ -19,13 +19,15 @@ dependencies = [
     "python-dotenv>=1.0",
     "pyyaml>=6.0",
     # LLM 调用层（02「多 Provider 接入」兼容性测试明确要求 httpx.MockTransport）
-    "httpx>=0.27",
+    "httpx[socks]>=0.27",
     # 存储与可观测
     "sqlalchemy>=2.0",
     "structlog>=24.1",
     # Repository Intelligence
-    "tree-sitter>=0.23",
-    "tree-sitter-python>=0.23",
+    # 0.26.0 Point.row/column return borrowed references and corrupt memory on
+    # real repositories. R-23 reproducer and evidence: docs/notes/phase1.md.
+    "tree-sitter==0.25.2",
+    "tree-sitter-python==0.25.0",
     "networkx>=3.3",
     # Retrieval
     "rank-bm25>=0.2.2",
@@ -137,6 +139,7 @@ module = [
     "swebench.*",
     "datasets.*",
     "langgraph.*",
+    "networkx.*",
 ]
 ignore_missing_imports = true
 

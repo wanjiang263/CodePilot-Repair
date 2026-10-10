@@ -1,0 +1,2460 @@
+{
+  "repository_id": "repo_mini_auth_golden",
+  "symbols": [
+    {
+      "name": "miniauth",
+      "qualified_name": "miniauth",
+      "kind": "module",
+      "id": "51fc321e5a3d2e14692ed07ad4d12352926be69e",
+      "file_id": "ca83c705a3a837b90112d7d0504f62bb2a9ec8d6",
+      "path": "src/miniauth/__init__.py",
+      "start_line": 1,
+      "end_line": 12,
+      "signature": null,
+      "docstring": "mini_auth：一个刻意做小的认证库。\n\n存在的唯一目的是给 R 簇的解析器提供一份**覆盖每条规则**的输入：\n相对导入（含多级）、继承、带参数与不带参数的装饰器、嵌套函数、\n测试类、src/ layout。",
+      "decorators": [],
+      "parent_id": null
+    },
+    {
+      "name": "app",
+      "qualified_name": "miniauth.app",
+      "kind": "module",
+      "id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e",
+      "file_id": "1f22be34b140d8d378b58927fdd928f52a026967",
+      "path": "src/miniauth/app.py",
+      "start_line": 1,
+      "end_line": 38,
+      "signature": null,
+      "docstring": "装配层：演示多行装饰器与递归调用。",
+      "decorators": [],
+      "parent_id": null
+    },
+    {
+      "name": "build_session",
+      "qualified_name": "miniauth.app.build_session",
+      "kind": "function",
+      "id": "ec234e153d20d1b8a77d96a43d482c88e23a7f10",
+      "file_id": "1f22be34b140d8d378b58927fdd928f52a026967",
+      "path": "src/miniauth/app.py",
+      "start_line": 11,
+      "end_line": 24,
+      "signature": "def build_session(backend: AuthBackend, name: str) -> Session | None",
+      "docstring": "按名字装出一个会话。\n\n两个装饰器，其中一个是**跨行**写的（``@retry(`` 与 ``)`` 不在同一行）\n——R-07 要求装饰器列表能正确解析出 ``audited`` 与 ``retry`` 两项。",
+      "decorators": [
+        "audited",
+        "retry(\n    times=5,\n)"
+      ],
+      "parent_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e"
+    },
+    {
+      "name": "count_down",
+      "qualified_name": "miniauth.app.count_down",
+      "kind": "function",
+      "id": "6cf5d7048220c918c1a1624f549d500f3fdecff1",
+      "file_id": "1f22be34b140d8d378b58927fdd928f52a026967",
+      "path": "src/miniauth/app.py",
+      "start_line": 27,
+      "end_line": 31,
+      "signature": "def count_down(n: int) -> int",
+      "docstring": "递归函数：R-09 要求 ``count_down`` 内部对自己的调用建出边。",
+      "decorators": [],
+      "parent_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e"
+    },
+    {
+      "name": "bootstrap",
+      "qualified_name": "miniauth.app.bootstrap",
+      "kind": "function",
+      "id": "7ced5451d72450948950d6b59fe1f3b3f482aa9b",
+      "file_id": "1f22be34b140d8d378b58927fdd928f52a026967",
+      "path": "src/miniauth/app.py",
+      "start_line": 34,
+      "end_line": 38,
+      "signature": "def bootstrap() -> MemoryBackend",
+      "docstring": "建一个装了 demo 用户的后端。",
+      "decorators": [],
+      "parent_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e"
+    },
+    {
+      "name": "backends",
+      "qualified_name": "miniauth.backends",
+      "kind": "module",
+      "id": "f9a73482028af3d65a1efcc5091ba72cdd75e547",
+      "file_id": "0856a87edb45ad31633f81a35f37dbfc2bd9a60c",
+      "path": "src/miniauth/backends/__init__.py",
+      "start_line": 1,
+      "end_line": 6,
+      "signature": null,
+      "docstring": "认证后端。",
+      "decorators": [],
+      "parent_id": null
+    },
+    {
+      "name": "base",
+      "qualified_name": "miniauth.backends.base",
+      "kind": "module",
+      "id": "a160b31ddd67058af50caaf002cd07956aa7abdd",
+      "file_id": "0d1b694b3c41656a5bb2eec0e82a586fadec9633",
+      "path": "src/miniauth/backends/base.py",
+      "start_line": 1,
+      "end_line": 25,
+      "signature": null,
+      "docstring": "后端抽象：只定义接口，不实现。",
+      "decorators": [],
+      "parent_id": null
+    },
+    {
+      "name": "AuthBackend",
+      "qualified_name": "miniauth.backends.base.AuthBackend",
+      "kind": "class",
+      "id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5",
+      "file_id": "0d1b694b3c41656a5bb2eec0e82a586fadec9633",
+      "path": "src/miniauth/backends/base.py",
+      "start_line": 10,
+      "end_line": 25,
+      "signature": "class AuthBackend(ABC)",
+      "docstring": "所有后端的基类。**仓库内的基类**——R-11 要求为它建边。\n\n``ABC`` 本身是仓库外的基类，不该建边。",
+      "decorators": [],
+      "parent_id": "a160b31ddd67058af50caaf002cd07956aa7abdd"
+    },
+    {
+      "name": "check_password",
+      "qualified_name": "miniauth.backends.base.AuthBackend.check_password",
+      "kind": "method",
+      "id": "cc2488b23b13715d5b7da8a3d674743003cc07a1",
+      "file_id": "0d1b694b3c41656a5bb2eec0e82a586fadec9633",
+      "path": "src/miniauth/backends/base.py",
+      "start_line": 16,
+      "end_line": 18,
+      "signature": "def check_password(self, name: str, password: str) -> bool",
+      "docstring": "校验密码。",
+      "decorators": [
+        "abstractmethod"
+      ],
+      "parent_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5"
+    },
+    {
+      "name": "load",
+      "qualified_name": "miniauth.backends.base.AuthBackend.load",
+      "kind": "method",
+      "id": "a7562557bbd8de4b7ff69601ef9d055184707d82",
+      "file_id": "0d1b694b3c41656a5bb2eec0e82a586fadec9633",
+      "path": "src/miniauth/backends/base.py",
+      "start_line": 20,
+      "end_line": 22,
+      "signature": "def load(self, name: str) -> User | None",
+      "docstring": "按名字取用户。",
+      "decorators": [
+        "abstractmethod"
+      ],
+      "parent_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5"
+    },
+    {
+      "name": "revoke",
+      "qualified_name": "miniauth.backends.base.AuthBackend.revoke",
+      "kind": "method",
+      "id": "3ffd012cd6007804f7ae9b06485dbd7d555929c8",
+      "file_id": "0d1b694b3c41656a5bb2eec0e82a586fadec9633",
+      "path": "src/miniauth/backends/base.py",
+      "start_line": 24,
+      "end_line": 25,
+      "signature": "def revoke(self, token: str) -> None",
+      "docstring": "吊销令牌。默认什么也不做——不是所有后端都有状态。",
+      "decorators": [],
+      "parent_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5"
+    },
+    {
+      "name": "memory",
+      "qualified_name": "miniauth.backends.memory",
+      "kind": "module",
+      "id": "96e6a79f582041333ac9bc86dfc161bbf598ba3a",
+      "file_id": "d29e43aedc314bb5c11738103fd95d11c6229e7f",
+      "path": "src/miniauth/backends/memory.py",
+      "start_line": 1,
+      "end_line": 28,
+      "signature": null,
+      "docstring": "内存后端：子包里的实现。",
+      "decorators": [],
+      "parent_id": null
+    },
+    {
+      "name": "MemoryBackend",
+      "qualified_name": "miniauth.backends.memory.MemoryBackend",
+      "kind": "class",
+      "id": "98e066f3e006195b809cd1fa715e8ddac5463b9a",
+      "file_id": "d29e43aedc314bb5c11738103fd95d11c6229e7f",
+      "path": "src/miniauth/backends/memory.py",
+      "start_line": 9,
+      "end_line": 28,
+      "signature": "class MemoryBackend(AuthBackend)",
+      "docstring": "把用户存在字典里。",
+      "decorators": [],
+      "parent_id": "96e6a79f582041333ac9bc86dfc161bbf598ba3a"
+    },
+    {
+      "name": "__init__",
+      "qualified_name": "miniauth.backends.memory.MemoryBackend.__init__",
+      "kind": "method",
+      "id": "bc29b55a4c972c06fb8d1a10ce25e2205318d24d",
+      "file_id": "d29e43aedc314bb5c11738103fd95d11c6229e7f",
+      "path": "src/miniauth/backends/memory.py",
+      "start_line": 12,
+      "end_line": 15,
+      "signature": "def __init__(self, users: dict[str, User] | None = None) -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a"
+    },
+    {
+      "name": "add",
+      "qualified_name": "miniauth.backends.memory.MemoryBackend.add",
+      "kind": "method",
+      "id": "7ff65859fda07b0a662fbf420a0ee224343e32bb",
+      "file_id": "d29e43aedc314bb5c11738103fd95d11c6229e7f",
+      "path": "src/miniauth/backends/memory.py",
+      "start_line": 17,
+      "end_line": 19,
+      "signature": "def add(self, user: User, password: str) -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a"
+    },
+    {
+      "name": "check_password",
+      "qualified_name": "miniauth.backends.memory.MemoryBackend.check_password",
+      "kind": "method",
+      "id": "ac7d9555d33e61013cdd5e692d2b465bc8e7c582",
+      "file_id": "d29e43aedc314bb5c11738103fd95d11c6229e7f",
+      "path": "src/miniauth/backends/memory.py",
+      "start_line": 21,
+      "end_line": 22,
+      "signature": "def check_password(self, name: str, password: str) -> bool",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a"
+    },
+    {
+      "name": "load",
+      "qualified_name": "miniauth.backends.memory.MemoryBackend.load",
+      "kind": "method",
+      "id": "a42d8bd4473fba36433ac67ee97d1332423ec09c",
+      "file_id": "d29e43aedc314bb5c11738103fd95d11c6229e7f",
+      "path": "src/miniauth/backends/memory.py",
+      "start_line": 24,
+      "end_line": 25,
+      "signature": "def load(self, name: str) -> User | None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a"
+    },
+    {
+      "name": "revoke",
+      "qualified_name": "miniauth.backends.memory.MemoryBackend.revoke",
+      "kind": "method",
+      "id": "fcc1e1638549aa584c687225bdc9344f058e7558",
+      "file_id": "d29e43aedc314bb5c11738103fd95d11c6229e7f",
+      "path": "src/miniauth/backends/memory.py",
+      "start_line": 27,
+      "end_line": 28,
+      "signature": "def revoke(self, token: str) -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a"
+    },
+    {
+      "name": "models",
+      "qualified_name": "miniauth.models",
+      "kind": "module",
+      "id": "eb453281acc25de06968ef097c5497febfac744a",
+      "file_id": "4c1ba0177684c51db03dd983461ea4fbb779c943",
+      "path": "src/miniauth/models.py",
+      "start_line": 1,
+      "end_line": 29,
+      "signature": null,
+      "docstring": "数据模型。",
+      "decorators": [],
+      "parent_id": null
+    },
+    {
+      "name": "User",
+      "qualified_name": "miniauth.models.User",
+      "kind": "class",
+      "id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "file_id": "4c1ba0177684c51db03dd983461ea4fbb779c943",
+      "path": "src/miniauth/models.py",
+      "start_line": 8,
+      "end_line": 29,
+      "signature": "class User",
+      "docstring": "一个账户。",
+      "decorators": [
+        "dataclass"
+      ],
+      "parent_id": "eb453281acc25de06968ef097c5497febfac744a"
+    },
+    {
+      "name": "has_role",
+      "qualified_name": "miniauth.models.User.has_role",
+      "kind": "method",
+      "id": "41bfa4a8fd567bab31223397acdf9f4fd58640a6",
+      "file_id": "4c1ba0177684c51db03dd983461ea4fbb779c943",
+      "path": "src/miniauth/models.py",
+      "start_line": 15,
+      "end_line": 17,
+      "signature": "def has_role(self, role: str) -> bool",
+      "docstring": "是否拥有某个角色。",
+      "decorators": [],
+      "parent_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e"
+    },
+    {
+      "name": "display",
+      "qualified_name": "miniauth.models.User.display",
+      "kind": "method",
+      "id": "1e0c9852a80c38f41d42cfdf87161e34c4726056",
+      "file_id": "4c1ba0177684c51db03dd983461ea4fbb779c943",
+      "path": "src/miniauth/models.py",
+      "start_line": 19,
+      "end_line": 29,
+      "signature": "def display(self) -> str",
+      "docstring": "展示名。\n\n故意带一个**嵌套函数**：R-06 要求它的 qualified name 是\n``miniauth.models.User.display.<locals>.render``。",
+      "decorators": [],
+      "parent_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e"
+    },
+    {
+      "name": "render",
+      "qualified_name": "miniauth.models.User.display.<locals>.render",
+      "kind": "function",
+      "id": "6d6630ff7098f9e0be0ef86ba565f8cdbff4e1af",
+      "file_id": "4c1ba0177684c51db03dd983461ea4fbb779c943",
+      "path": "src/miniauth/models.py",
+      "start_line": 26,
+      "end_line": 27,
+      "signature": "def render(prefix: str) -> str",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "1e0c9852a80c38f41d42cfdf87161e34c4726056"
+    },
+    {
+      "name": "plugins",
+      "qualified_name": "miniauth.plugins",
+      "kind": "module",
+      "id": "03ac2f8ccf75e10bebc6062380163b5862f96b6d",
+      "file_id": "a87f679b7bf7de9fbc19dbe6873899c53587ff71",
+      "path": "src/miniauth/plugins.py",
+      "start_line": 1,
+      "end_line": 36,
+      "signature": null,
+      "docstring": "装饰器：覆盖无参、带参、嵌套三种写法。",
+      "decorators": [],
+      "parent_id": null
+    },
+    {
+      "name": "retry",
+      "qualified_name": "miniauth.plugins.retry",
+      "kind": "function",
+      "id": "87d5a0e9b522485b0cb15b90871510909a6c6f2f",
+      "file_id": "a87f679b7bf7de9fbc19dbe6873899c53587ff71",
+      "path": "src/miniauth/plugins.py",
+      "start_line": 10,
+      "end_line": 26,
+      "signature": "def retry(times: int = 3) -> Callable[[Callable[..., Any]], Callable[..., Any]]",
+      "docstring": "**带参数**的装饰器。",
+      "decorators": [],
+      "parent_id": "03ac2f8ccf75e10bebc6062380163b5862f96b6d"
+    },
+    {
+      "name": "decorate",
+      "qualified_name": "miniauth.plugins.retry.<locals>.decorate",
+      "kind": "function",
+      "id": "bf58b4398f55f1ba9fb3e9f94706e404772b5017",
+      "file_id": "a87f679b7bf7de9fbc19dbe6873899c53587ff71",
+      "path": "src/miniauth/plugins.py",
+      "start_line": 13,
+      "end_line": 24,
+      "signature": "def decorate(function: Callable[..., Any]) -> Callable[..., Any]",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "87d5a0e9b522485b0cb15b90871510909a6c6f2f"
+    },
+    {
+      "name": "wrapper",
+      "qualified_name": "miniauth.plugins.retry.<locals>.decorate.<locals>.wrapper",
+      "kind": "function",
+      "id": "d8de6c53a449ad61a1ae41f7eb6d774b9d780168",
+      "file_id": "a87f679b7bf7de9fbc19dbe6873899c53587ff71",
+      "path": "src/miniauth/plugins.py",
+      "start_line": 14,
+      "end_line": 22,
+      "signature": "def wrapper(*args: Any, **kwargs: Any) -> Any",
+      "docstring": null,
+      "decorators": [
+        "wraps(function)"
+      ],
+      "parent_id": "bf58b4398f55f1ba9fb3e9f94706e404772b5017"
+    },
+    {
+      "name": "audited",
+      "qualified_name": "miniauth.plugins.audited",
+      "kind": "function",
+      "id": "e76d598475c56c5c24955ae84c02204bbddf6384",
+      "file_id": "a87f679b7bf7de9fbc19dbe6873899c53587ff71",
+      "path": "src/miniauth/plugins.py",
+      "start_line": 29,
+      "end_line": 36,
+      "signature": "def audited(function: Callable[..., Any]) -> Callable[..., Any]",
+      "docstring": "**无参数**的装饰器。",
+      "decorators": [],
+      "parent_id": "03ac2f8ccf75e10bebc6062380163b5862f96b6d"
+    },
+    {
+      "name": "wrapper",
+      "qualified_name": "miniauth.plugins.audited.<locals>.wrapper",
+      "kind": "function",
+      "id": "76ef5d3b44db24b2630357c136b94964c92debd2",
+      "file_id": "a87f679b7bf7de9fbc19dbe6873899c53587ff71",
+      "path": "src/miniauth/plugins.py",
+      "start_line": 32,
+      "end_line": 34,
+      "signature": "def wrapper(*args: Any, **kwargs: Any) -> Any",
+      "docstring": null,
+      "decorators": [
+        "wraps(function)"
+      ],
+      "parent_id": "e76d598475c56c5c24955ae84c02204bbddf6384"
+    },
+    {
+      "name": "session",
+      "qualified_name": "miniauth.session",
+      "kind": "module",
+      "id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81",
+      "file_id": "94d8bcfab12b34efabdda0ca57500b8f78210152",
+      "path": "src/miniauth/session.py",
+      "start_line": 1,
+      "end_line": 55,
+      "signature": null,
+      "docstring": "会话对象：演示继承与多级导入。",
+      "decorators": [],
+      "parent_id": null
+    },
+    {
+      "name": "Session",
+      "qualified_name": "miniauth.session.Session",
+      "kind": "class",
+      "id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "file_id": "94d8bcfab12b34efabdda0ca57500b8f78210152",
+      "path": "src/miniauth/session.py",
+      "start_line": 10,
+      "end_line": 34,
+      "signature": "class Session",
+      "docstring": "一次登录会话。\n\n``AuthBackend`` 在仓库内——R-11 要求为它建出 INHERIT 边。",
+      "decorators": [],
+      "parent_id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81"
+    },
+    {
+      "name": "__init__",
+      "qualified_name": "miniauth.session.Session.__init__",
+      "kind": "method",
+      "id": "963d7fa5f35f74a73bda3bc37121c5150ee44413",
+      "file_id": "94d8bcfab12b34efabdda0ca57500b8f78210152",
+      "path": "src/miniauth/session.py",
+      "start_line": 16,
+      "end_line": 18,
+      "signature": "def __init__(self, backend: AuthBackend, user: User) -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84"
+    },
+    {
+      "name": "login",
+      "qualified_name": "miniauth.session.Session.login",
+      "kind": "method",
+      "id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "file_id": "94d8bcfab12b34efabdda0ca57500b8f78210152",
+      "path": "src/miniauth/session.py",
+      "start_line": 20,
+      "end_line": 24,
+      "signature": "def login(self, password: str) -> str | None",
+      "docstring": "登录成功返回令牌。",
+      "decorators": [],
+      "parent_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84"
+    },
+    {
+      "name": "logout",
+      "qualified_name": "miniauth.session.Session.logout",
+      "kind": "method",
+      "id": "02754cd8d6841879ecb99222f6720fdb67c7dba0",
+      "file_id": "94d8bcfab12b34efabdda0ca57500b8f78210152",
+      "path": "src/miniauth/session.py",
+      "start_line": 26,
+      "end_line": 27,
+      "signature": "def logout(self, token: str) -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84"
+    },
+    {
+      "name": "resume",
+      "qualified_name": "miniauth.session.Session.resume",
+      "kind": "method",
+      "id": "745d1639e1eeb4bcc9d2669ab0cd81c63435ce68",
+      "file_id": "94d8bcfab12b34efabdda0ca57500b8f78210152",
+      "path": "src/miniauth/session.py",
+      "start_line": 29,
+      "end_line": 34,
+      "signature": "def resume(self, token: str) -> User | None",
+      "docstring": "用令牌恢复会话。",
+      "decorators": [],
+      "parent_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84"
+    },
+    {
+      "name": "AdminSession",
+      "qualified_name": "miniauth.session.AdminSession",
+      "kind": "class",
+      "id": "1d16f0d69e54794b9d5884f716f4a79ee0860abf",
+      "file_id": "94d8bcfab12b34efabdda0ca57500b8f78210152",
+      "path": "src/miniauth/session.py",
+      "start_line": 37,
+      "end_line": 43,
+      "signature": "class AdminSession(Session)",
+      "docstring": "管理员会话：演示单继承 + 方法覆盖。",
+      "decorators": [],
+      "parent_id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81"
+    },
+    {
+      "name": "login",
+      "qualified_name": "miniauth.session.AdminSession.login",
+      "kind": "method",
+      "id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "file_id": "94d8bcfab12b34efabdda0ca57500b8f78210152",
+      "path": "src/miniauth/session.py",
+      "start_line": 40,
+      "end_line": 43,
+      "signature": "def login(self, password: str) -> str | None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "1d16f0d69e54794b9d5884f716f4a79ee0860abf"
+    },
+    {
+      "name": "AuditedSession",
+      "qualified_name": "miniauth.session.AuditedSession",
+      "kind": "class",
+      "id": "c133c1f9af939d8cd174a42b94a305b977e05493",
+      "file_id": "94d8bcfab12b34efabdda0ca57500b8f78210152",
+      "path": "src/miniauth/session.py",
+      "start_line": 46,
+      "end_line": 55,
+      "signature": "class AuditedSession(Session)",
+      "docstring": "演示子类调用父类方法。",
+      "decorators": [],
+      "parent_id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81"
+    },
+    {
+      "name": "__init__",
+      "qualified_name": "miniauth.session.AuditedSession.__init__",
+      "kind": "method",
+      "id": "4ce0d4927a0c0b42cbda43598e515a0d3cd01f59",
+      "file_id": "94d8bcfab12b34efabdda0ca57500b8f78210152",
+      "path": "src/miniauth/session.py",
+      "start_line": 49,
+      "end_line": 51,
+      "signature": "def __init__(self, backend: AuthBackend, user: User, log: list[str]) -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "c133c1f9af939d8cd174a42b94a305b977e05493"
+    },
+    {
+      "name": "login",
+      "qualified_name": "miniauth.session.AuditedSession.login",
+      "kind": "method",
+      "id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "file_id": "94d8bcfab12b34efabdda0ca57500b8f78210152",
+      "path": "src/miniauth/session.py",
+      "start_line": 53,
+      "end_line": 55,
+      "signature": "def login(self, password: str) -> str | None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "c133c1f9af939d8cd174a42b94a305b977e05493"
+    },
+    {
+      "name": "tokens",
+      "qualified_name": "miniauth.tokens",
+      "kind": "module",
+      "id": "54a3159f0cd320d2726f7be7e26a1cb0b598a44e",
+      "file_id": "9acc12dee19a8374e741047ef50e49c675a7b948",
+      "path": "src/miniauth/tokens.py",
+      "start_line": 1,
+      "end_line": 33,
+      "signature": null,
+      "docstring": "令牌签发与校验。",
+      "decorators": [],
+      "parent_id": null
+    },
+    {
+      "name": "_sign",
+      "qualified_name": "miniauth.tokens._sign",
+      "kind": "function",
+      "id": "733aea79f49175dee48632adc49907c5f088d8dd",
+      "file_id": "9acc12dee19a8374e741047ef50e49c675a7b948",
+      "path": "src/miniauth/tokens.py",
+      "start_line": 12,
+      "end_line": 14,
+      "signature": "def _sign(payload: bytes, *, key: bytes = SECRET) -> str",
+      "docstring": "给负载签名。",
+      "decorators": [],
+      "parent_id": "54a3159f0cd320d2726f7be7e26a1cb0b598a44e"
+    },
+    {
+      "name": "issue_token",
+      "qualified_name": "miniauth.tokens.issue_token",
+      "kind": "function",
+      "id": "0846223922da1365387e5c21349e0190598a2518",
+      "file_id": "9acc12dee19a8374e741047ef50e49c675a7b948",
+      "path": "src/miniauth/tokens.py",
+      "start_line": 17,
+      "end_line": 21,
+      "signature": "def issue_token(user: str, ttl: int = 3600) -> str",
+      "docstring": "签发一个令牌。",
+      "decorators": [],
+      "parent_id": "54a3159f0cd320d2726f7be7e26a1cb0b598a44e"
+    },
+    {
+      "name": "verify_token",
+      "qualified_name": "miniauth.tokens.verify_token",
+      "kind": "function",
+      "id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "file_id": "9acc12dee19a8374e741047ef50e49c675a7b948",
+      "path": "src/miniauth/tokens.py",
+      "start_line": 24,
+      "end_line": 33,
+      "signature": "def verify_token(token: str, *, key: bytes = SECRET) -> str | None",
+      "docstring": "校验令牌，失败返回 None。",
+      "decorators": [],
+      "parent_id": "54a3159f0cd320d2726f7be7e26a1cb0b598a44e"
+    },
+    {
+      "name": "conftest",
+      "qualified_name": "tests.conftest",
+      "kind": "module",
+      "id": "31d9618b6968fcf610dee9af0378088c9c7e6bfc",
+      "file_id": "ac5dda45f3b31aea27b1d3cd34fe11e6a065dbe2",
+      "path": "tests/conftest.py",
+      "start_line": 1,
+      "end_line": 20,
+      "signature": null,
+      "docstring": "pytest 夹具。",
+      "decorators": [],
+      "parent_id": null
+    },
+    {
+      "name": "user",
+      "qualified_name": "tests.conftest.user",
+      "kind": "function",
+      "id": "774b9441e98e9c19d05d7fcf63491feb91e47e66",
+      "file_id": "ac5dda45f3b31aea27b1d3cd34fe11e6a065dbe2",
+      "path": "tests/conftest.py",
+      "start_line": 11,
+      "end_line": 13,
+      "signature": "def user() -> User",
+      "docstring": null,
+      "decorators": [
+        "pytest.fixture"
+      ],
+      "parent_id": "31d9618b6968fcf610dee9af0378088c9c7e6bfc"
+    },
+    {
+      "name": "backend",
+      "qualified_name": "tests.conftest.backend",
+      "kind": "function",
+      "id": "1206dfdc8326c7f4cb252fdf81a005dd3d39119a",
+      "file_id": "ac5dda45f3b31aea27b1d3cd34fe11e6a065dbe2",
+      "path": "tests/conftest.py",
+      "start_line": 16,
+      "end_line": 20,
+      "signature": "def backend() -> MemoryBackend",
+      "docstring": null,
+      "decorators": [
+        "pytest.fixture"
+      ],
+      "parent_id": "31d9618b6968fcf610dee9af0378088c9c7e6bfc"
+    },
+    {
+      "name": "test_session",
+      "qualified_name": "tests.test_session",
+      "kind": "module",
+      "id": "408513cad35c86d22aa3ddcfd474ea34c8e163e8",
+      "file_id": "2db3f8f4d0ebf157e1138fde8b90228e9da9beb7",
+      "path": "tests/test_session.py",
+      "start_line": 1,
+      "end_line": 25,
+      "signature": null,
+      "docstring": "会话测试：演示测试类（test_method）。",
+      "decorators": [],
+      "parent_id": null
+    },
+    {
+      "name": "TestSession",
+      "qualified_name": "tests.test_session.TestSession",
+      "kind": "class",
+      "id": "d060b56a0d368d1e600666d462af680e3a447a0f",
+      "file_id": "2db3f8f4d0ebf157e1138fde8b90228e9da9beb7",
+      "path": "tests/test_session.py",
+      "start_line": 9,
+      "end_line": 16,
+      "signature": "class TestSession",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "408513cad35c86d22aa3ddcfd474ea34c8e163e8"
+    },
+    {
+      "name": "test_login_with_correct_password",
+      "qualified_name": "tests.test_session.TestSession.test_login_with_correct_password",
+      "kind": "test_method",
+      "id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "file_id": "2db3f8f4d0ebf157e1138fde8b90228e9da9beb7",
+      "path": "tests/test_session.py",
+      "start_line": 10,
+      "end_line": 12,
+      "signature": "def test_login_with_correct_password(self, backend, user) -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "d060b56a0d368d1e600666d462af680e3a447a0f"
+    },
+    {
+      "name": "test_login_with_wrong_password",
+      "qualified_name": "tests.test_session.TestSession.test_login_with_wrong_password",
+      "kind": "test_method",
+      "id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "file_id": "2db3f8f4d0ebf157e1138fde8b90228e9da9beb7",
+      "path": "tests/test_session.py",
+      "start_line": 14,
+      "end_line": 16,
+      "signature": "def test_login_with_wrong_password(self, backend, user) -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "d060b56a0d368d1e600666d462af680e3a447a0f"
+    },
+    {
+      "name": "TestAdminSession",
+      "qualified_name": "tests.test_session.TestAdminSession",
+      "kind": "class",
+      "id": "490eaa9e4eda9f1d7924d829247a0de44de65c77",
+      "file_id": "2db3f8f4d0ebf157e1138fde8b90228e9da9beb7",
+      "path": "tests/test_session.py",
+      "start_line": 19,
+      "end_line": 25,
+      "signature": "class TestAdminSession",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "408513cad35c86d22aa3ddcfd474ea34c8e163e8"
+    },
+    {
+      "name": "test_admin_can_login",
+      "qualified_name": "tests.test_session.TestAdminSession.test_admin_can_login",
+      "kind": "test_method",
+      "id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "file_id": "2db3f8f4d0ebf157e1138fde8b90228e9da9beb7",
+      "path": "tests/test_session.py",
+      "start_line": 20,
+      "end_line": 21,
+      "signature": "def test_admin_can_login(self, backend, user) -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "490eaa9e4eda9f1d7924d829247a0de44de65c77"
+    },
+    {
+      "name": "test_plain_user_cannot_use_admin_session",
+      "qualified_name": "tests.test_session.TestAdminSession.test_plain_user_cannot_use_admin_session",
+      "kind": "test_method",
+      "id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "file_id": "2db3f8f4d0ebf157e1138fde8b90228e9da9beb7",
+      "path": "tests/test_session.py",
+      "start_line": 23,
+      "end_line": 25,
+      "signature": "def test_plain_user_cannot_use_admin_session(self, backend) -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "490eaa9e4eda9f1d7924d829247a0de44de65c77"
+    },
+    {
+      "name": "test_tokens",
+      "qualified_name": "tests.test_tokens",
+      "kind": "module",
+      "id": "746f07a92970e8fbf8a41ef45767440e2785bea4",
+      "file_id": "5073df7d56de01475f3a86184b8cc99626facb67",
+      "path": "tests/test_tokens.py",
+      "start_line": 1,
+      "end_line": 18,
+      "signature": null,
+      "docstring": "令牌测试：演示测试函数与直接调用被测算符。",
+      "decorators": [],
+      "parent_id": null
+    },
+    {
+      "name": "test_issue_returns_three_parts",
+      "qualified_name": "tests.test_tokens.test_issue_returns_three_parts",
+      "kind": "test_function",
+      "id": "e054eecc206a67dc002de8d673069ee1ff223550",
+      "file_id": "5073df7d56de01475f3a86184b8cc99626facb67",
+      "path": "tests/test_tokens.py",
+      "start_line": 8,
+      "end_line": 10,
+      "signature": "def test_issue_returns_three_parts() -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "746f07a92970e8fbf8a41ef45767440e2785bea4"
+    },
+    {
+      "name": "test_verify_accepts_a_fresh_token",
+      "qualified_name": "tests.test_tokens.test_verify_accepts_a_fresh_token",
+      "kind": "test_function",
+      "id": "e07280dea630c8ae03cd6e571e9a2bbede9e1135",
+      "file_id": "5073df7d56de01475f3a86184b8cc99626facb67",
+      "path": "tests/test_tokens.py",
+      "start_line": 13,
+      "end_line": 14,
+      "signature": "def test_verify_accepts_a_fresh_token() -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "746f07a92970e8fbf8a41ef45767440e2785bea4"
+    },
+    {
+      "name": "test_verify_rejects_garbage",
+      "qualified_name": "tests.test_tokens.test_verify_rejects_garbage",
+      "kind": "test_function",
+      "id": "af837a0f210c76ff455e036d6e9acf59c06bd760",
+      "file_id": "5073df7d56de01475f3a86184b8cc99626facb67",
+      "path": "tests/test_tokens.py",
+      "start_line": 17,
+      "end_line": 18,
+      "signature": "def test_verify_rejects_garbage() -> None",
+      "docstring": null,
+      "decorators": [],
+      "parent_id": "746f07a92970e8fbf8a41ef45767440e2785bea4"
+    }
+  ],
+  "edges": [
+    {
+      "source_id": "02754cd8d6841879ecb99222f6720fdb67c7dba0",
+      "target_id": "3ffd012cd6007804f7ae9b06485dbd7d555929c8",
+      "target_name": "self.backend.revoke",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 27
+    },
+    {
+      "source_id": "02754cd8d6841879ecb99222f6720fdb67c7dba0",
+      "target_id": "fcc1e1638549aa584c687225bdc9344f058e7558",
+      "target_name": "self.backend.revoke",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 27
+    },
+    {
+      "source_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_id": null,
+      "target_name": "body.decode",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 21
+    },
+    {
+      "source_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_id": null,
+      "target_name": "f\"{user}:{expiry}\".encode",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 20
+    },
+    {
+      "source_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_id": null,
+      "target_name": "int",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 19
+    },
+    {
+      "source_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_id": null,
+      "target_name": "time.time",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 19
+    },
+    {
+      "source_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_id": "733aea79f49175dee48632adc49907c5f088d8dd",
+      "target_name": "_sign",
+      "kind": "CALL",
+      "confidence": "high",
+      "line": 21
+    },
+    {
+      "source_id": "1206dfdc8326c7f4cb252fdf81a005dd3d39119a",
+      "target_id": null,
+      "target_name": "User",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 19
+    },
+    {
+      "source_id": "1206dfdc8326c7f4cb252fdf81a005dd3d39119a",
+      "target_id": "7ff65859fda07b0a662fbf420a0ee224343e32bb",
+      "target_name": "backend.add",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 19
+    },
+    {
+      "source_id": "1206dfdc8326c7f4cb252fdf81a005dd3d39119a",
+      "target_id": "bc29b55a4c972c06fb8d1a10ce25e2205318d24d",
+      "target_name": "MemoryBackend",
+      "kind": "CALL",
+      "confidence": "medium",
+      "line": 18
+    },
+    {
+      "source_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_name": "issue_token",
+      "kind": "CALL",
+      "confidence": "high",
+      "line": 24
+    },
+    {
+      "source_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_id": "ac7d9555d33e61013cdd5e692d2b465bc8e7c582",
+      "target_name": "self.backend.check_password",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 22
+    },
+    {
+      "source_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_id": "cc2488b23b13715d5b7da8a3d674743003cc07a1",
+      "target_name": "self.backend.check_password",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 22
+    },
+    {
+      "source_id": "1e0c9852a80c38f41d42cfdf87161e34c4726056",
+      "target_id": "6d6630ff7098f9e0be0ef86ba565f8cdbff4e1af",
+      "target_name": "render",
+      "kind": "CALL",
+      "confidence": "high",
+      "line": 29
+    },
+    {
+      "source_id": "4ce0d4927a0c0b42cbda43598e515a0d3cd01f59",
+      "target_id": null,
+      "target_name": "super",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 50
+    },
+    {
+      "source_id": "4ce0d4927a0c0b42cbda43598e515a0d3cd01f59",
+      "target_id": "4ce0d4927a0c0b42cbda43598e515a0d3cd01f59",
+      "target_name": "super().__init__",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 50
+    },
+    {
+      "source_id": "4ce0d4927a0c0b42cbda43598e515a0d3cd01f59",
+      "target_id": "963d7fa5f35f74a73bda3bc37121c5150ee44413",
+      "target_name": "super().__init__",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 50
+    },
+    {
+      "source_id": "4ce0d4927a0c0b42cbda43598e515a0d3cd01f59",
+      "target_id": "bc29b55a4c972c06fb8d1a10ce25e2205318d24d",
+      "target_name": "super().__init__",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 50
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_name": "session.login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 12
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "963d7fa5f35f74a73bda3bc37121c5150ee44413",
+      "target_name": "Session",
+      "kind": "CALL",
+      "confidence": "medium",
+      "line": 11
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_name": "session.login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 12
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_name": "session.login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 12
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": null,
+      "target_name": "User",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 24
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_name": "AdminSession(backend, plain).login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 25
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "963d7fa5f35f74a73bda3bc37121c5150ee44413",
+      "target_name": "AdminSession",
+      "kind": "CALL",
+      "confidence": "medium",
+      "line": 25
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_name": "AdminSession(backend, plain).login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 25
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_name": "AdminSession(backend, plain).login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 25
+    },
+    {
+      "source_id": "6cf5d7048220c918c1a1624f549d500f3fdecff1",
+      "target_id": "6cf5d7048220c918c1a1624f549d500f3fdecff1",
+      "target_name": "count_down",
+      "kind": "CALL",
+      "confidence": "high",
+      "line": 31
+    },
+    {
+      "source_id": "733aea79f49175dee48632adc49907c5f088d8dd",
+      "target_id": null,
+      "target_name": "hmac.new",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 14
+    },
+    {
+      "source_id": "733aea79f49175dee48632adc49907c5f088d8dd",
+      "target_id": null,
+      "target_name": "hmac.new(key, payload, hashlib.sha256).hexdigest",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 14
+    },
+    {
+      "source_id": "745d1639e1eeb4bcc9d2669ab0cd81c63435ce68",
+      "target_id": "a42d8bd4473fba36433ac67ee97d1332423ec09c",
+      "target_name": "self.backend.load",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 34
+    },
+    {
+      "source_id": "745d1639e1eeb4bcc9d2669ab0cd81c63435ce68",
+      "target_id": "a7562557bbd8de4b7ff69601ef9d055184707d82",
+      "target_name": "self.backend.load",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 34
+    },
+    {
+      "source_id": "745d1639e1eeb4bcc9d2669ab0cd81c63435ce68",
+      "target_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_name": "verify_token",
+      "kind": "CALL",
+      "confidence": "high",
+      "line": 31
+    },
+    {
+      "source_id": "76ef5d3b44db24b2630357c136b94964c92debd2",
+      "target_id": null,
+      "target_name": "function",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 34
+    },
+    {
+      "source_id": "774b9441e98e9c19d05d7fcf63491feb91e47e66",
+      "target_id": null,
+      "target_name": "User",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 13
+    },
+    {
+      "source_id": "7ced5451d72450948950d6b59fe1f3b3f482aa9b",
+      "target_id": null,
+      "target_name": "User",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 37
+    },
+    {
+      "source_id": "7ced5451d72450948950d6b59fe1f3b3f482aa9b",
+      "target_id": "7ff65859fda07b0a662fbf420a0ee224343e32bb",
+      "target_name": "backend.add",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 37
+    },
+    {
+      "source_id": "7ced5451d72450948950d6b59fe1f3b3f482aa9b",
+      "target_id": "bc29b55a4c972c06fb8d1a10ce25e2205318d24d",
+      "target_name": "MemoryBackend",
+      "kind": "CALL",
+      "confidence": "medium",
+      "line": 36
+    },
+    {
+      "source_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_id": null,
+      "target_name": "field",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 13
+    },
+    {
+      "source_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e",
+      "target_id": "87d5a0e9b522485b0cb15b90871510909a6c6f2f",
+      "target_name": "retry",
+      "kind": "CALL",
+      "confidence": "high",
+      "line": 12
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_name": "session.login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 16
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "963d7fa5f35f74a73bda3bc37121c5150ee44413",
+      "target_name": "Session",
+      "kind": "CALL",
+      "confidence": "medium",
+      "line": 15
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_name": "session.login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 16
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_name": "session.login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 16
+    },
+    {
+      "source_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_id": null,
+      "target_name": "super",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 43
+    },
+    {
+      "source_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_name": "super().login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 43
+    },
+    {
+      "source_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_id": "41bfa4a8fd567bab31223397acdf9f4fd58640a6",
+      "target_name": "self.user.has_role",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 41
+    },
+    {
+      "source_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_name": "super().login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 43
+    },
+    {
+      "source_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_name": "super().login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 43
+    },
+    {
+      "source_id": "a42d8bd4473fba36433ac67ee97d1332423ec09c",
+      "target_id": null,
+      "target_name": "self._users.get",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 25
+    },
+    {
+      "source_id": "ac7d9555d33e61013cdd5e692d2b465bc8e7c582",
+      "target_id": null,
+      "target_name": "self._passwords.get",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 22
+    },
+    {
+      "source_id": "af837a0f210c76ff455e036d6e9acf59c06bd760",
+      "target_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_name": "verify_token",
+      "kind": "CALL",
+      "confidence": "high",
+      "line": 18
+    },
+    {
+      "source_id": "bc29b55a4c972c06fb8d1a10ce25e2205318d24d",
+      "target_id": null,
+      "target_name": "dict",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 13
+    },
+    {
+      "source_id": "bc29b55a4c972c06fb8d1a10ce25e2205318d24d",
+      "target_id": null,
+      "target_name": "set",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 15
+    },
+    {
+      "source_id": "bf58b4398f55f1ba9fb3e9f94706e404772b5017",
+      "target_id": null,
+      "target_name": "wraps",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 14
+    },
+    {
+      "source_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_id": null,
+      "target_name": "f\"{user}:{expiry}\".encode",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 30
+    },
+    {
+      "source_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_id": null,
+      "target_name": "hmac.compare_digest",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 31
+    },
+    {
+      "source_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_id": null,
+      "target_name": "int",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 33
+    },
+    {
+      "source_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_id": null,
+      "target_name": "len",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 27
+    },
+    {
+      "source_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_id": null,
+      "target_name": "time.time",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 33
+    },
+    {
+      "source_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_id": null,
+      "target_name": "token.split",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 26
+    },
+    {
+      "source_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_id": "733aea79f49175dee48632adc49907c5f088d8dd",
+      "target_name": "_sign",
+      "kind": "CALL",
+      "confidence": "high",
+      "line": 31
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_name": "AdminSession(backend, user).login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 21
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "963d7fa5f35f74a73bda3bc37121c5150ee44413",
+      "target_name": "AdminSession",
+      "kind": "CALL",
+      "confidence": "medium",
+      "line": 21
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_name": "AdminSession(backend, user).login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 21
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_name": "AdminSession(backend, user).login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 21
+    },
+    {
+      "source_id": "d8de6c53a449ad61a1ae41f7eb6d774b9d780168",
+      "target_id": null,
+      "target_name": "function",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 19
+    },
+    {
+      "source_id": "d8de6c53a449ad61a1ae41f7eb6d774b9d780168",
+      "target_id": null,
+      "target_name": "range",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 17
+    },
+    {
+      "source_id": "e054eecc206a67dc002de8d673069ee1ff223550",
+      "target_id": null,
+      "target_name": "len",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 10
+    },
+    {
+      "source_id": "e054eecc206a67dc002de8d673069ee1ff223550",
+      "target_id": null,
+      "target_name": "token.split",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 10
+    },
+    {
+      "source_id": "e054eecc206a67dc002de8d673069ee1ff223550",
+      "target_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_name": "issue_token",
+      "kind": "CALL",
+      "confidence": "high",
+      "line": 9
+    },
+    {
+      "source_id": "e07280dea630c8ae03cd6e571e9a2bbede9e1135",
+      "target_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_name": "issue_token",
+      "kind": "CALL",
+      "confidence": "high",
+      "line": 14
+    },
+    {
+      "source_id": "e07280dea630c8ae03cd6e571e9a2bbede9e1135",
+      "target_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_name": "verify_token",
+      "kind": "CALL",
+      "confidence": "high",
+      "line": 14
+    },
+    {
+      "source_id": "e76d598475c56c5c24955ae84c02204bbddf6384",
+      "target_id": null,
+      "target_name": "wraps",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 32
+    },
+    {
+      "source_id": "ec234e153d20d1b8a77d96a43d482c88e23a7f10",
+      "target_id": "963d7fa5f35f74a73bda3bc37121c5150ee44413",
+      "target_name": "Session",
+      "kind": "CALL",
+      "confidence": "medium",
+      "line": 24
+    },
+    {
+      "source_id": "ec234e153d20d1b8a77d96a43d482c88e23a7f10",
+      "target_id": "a42d8bd4473fba36433ac67ee97d1332423ec09c",
+      "target_name": "backend.load",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 21
+    },
+    {
+      "source_id": "ec234e153d20d1b8a77d96a43d482c88e23a7f10",
+      "target_id": "a7562557bbd8de4b7ff69601ef9d055184707d82",
+      "target_name": "backend.load",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 21
+    },
+    {
+      "source_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_id": null,
+      "target_name": "self.log.append",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 54
+    },
+    {
+      "source_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_id": null,
+      "target_name": "super",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 55
+    },
+    {
+      "source_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_name": "super().login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 55
+    },
+    {
+      "source_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_name": "super().login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 55
+    },
+    {
+      "source_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_name": "super().login",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 55
+    },
+    {
+      "source_id": "fcc1e1638549aa584c687225bdc9344f058e7558",
+      "target_id": "7ff65859fda07b0a662fbf420a0ee224343e32bb",
+      "target_name": "self._revoked.add",
+      "kind": "CALL",
+      "confidence": "low",
+      "line": 28
+    },
+    {
+      "source_id": "03ac2f8ccf75e10bebc6062380163b5862f96b6d",
+      "target_id": null,
+      "target_name": "collections.abc.Callable",
+      "kind": "IMPORT",
+      "confidence": "low",
+      "line": 5
+    },
+    {
+      "source_id": "03ac2f8ccf75e10bebc6062380163b5862f96b6d",
+      "target_id": null,
+      "target_name": "functools.wraps",
+      "kind": "IMPORT",
+      "confidence": "low",
+      "line": 6
+    },
+    {
+      "source_id": "03ac2f8ccf75e10bebc6062380163b5862f96b6d",
+      "target_id": null,
+      "target_name": "typing.Any",
+      "kind": "IMPORT",
+      "confidence": "low",
+      "line": 7
+    },
+    {
+      "source_id": "31d9618b6968fcf610dee9af0378088c9c7e6bfc",
+      "target_id": null,
+      "target_name": "pytest",
+      "kind": "IMPORT",
+      "confidence": "low",
+      "line": 5
+    },
+    {
+      "source_id": "31d9618b6968fcf610dee9af0378088c9c7e6bfc",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "miniauth.models.User",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 8
+    },
+    {
+      "source_id": "31d9618b6968fcf610dee9af0378088c9c7e6bfc",
+      "target_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a",
+      "target_name": "miniauth.backends.MemoryBackend",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 7
+    },
+    {
+      "source_id": "408513cad35c86d22aa3ddcfd474ea34c8e163e8",
+      "target_id": "1d16f0d69e54794b9d5884f716f4a79ee0860abf",
+      "target_name": "miniauth.session.AdminSession",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 6
+    },
+    {
+      "source_id": "408513cad35c86d22aa3ddcfd474ea34c8e163e8",
+      "target_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_name": "miniauth.session.Session",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 6
+    },
+    {
+      "source_id": "408513cad35c86d22aa3ddcfd474ea34c8e163e8",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "miniauth.models.User",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 5
+    },
+    {
+      "source_id": "51fc321e5a3d2e14692ed07ad4d12352926be69e",
+      "target_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_name": "miniauth.tokens.issue_token",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 10
+    },
+    {
+      "source_id": "51fc321e5a3d2e14692ed07ad4d12352926be69e",
+      "target_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_name": "miniauth.session.Session",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 9
+    },
+    {
+      "source_id": "51fc321e5a3d2e14692ed07ad4d12352926be69e",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "miniauth.models.User",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 8
+    },
+    {
+      "source_id": "51fc321e5a3d2e14692ed07ad4d12352926be69e",
+      "target_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_name": "miniauth.tokens.verify_token",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 10
+    },
+    {
+      "source_id": "54a3159f0cd320d2726f7be7e26a1cb0b598a44e",
+      "target_id": null,
+      "target_name": "hashlib",
+      "kind": "IMPORT",
+      "confidence": "low",
+      "line": 5
+    },
+    {
+      "source_id": "54a3159f0cd320d2726f7be7e26a1cb0b598a44e",
+      "target_id": null,
+      "target_name": "hmac",
+      "kind": "IMPORT",
+      "confidence": "low",
+      "line": 6
+    },
+    {
+      "source_id": "54a3159f0cd320d2726f7be7e26a1cb0b598a44e",
+      "target_id": null,
+      "target_name": "time",
+      "kind": "IMPORT",
+      "confidence": "low",
+      "line": 7
+    },
+    {
+      "source_id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81",
+      "target_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_name": "miniauth.tokens.issue_token",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 7
+    },
+    {
+      "source_id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81",
+      "target_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5",
+      "target_name": "miniauth.backends.AuthBackend",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 5
+    },
+    {
+      "source_id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "miniauth.models.User",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 6
+    },
+    {
+      "source_id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81",
+      "target_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a",
+      "target_name": "miniauth.backends.MemoryBackend",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 5
+    },
+    {
+      "source_id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81",
+      "target_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_name": "miniauth.tokens.verify_token",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 7
+    },
+    {
+      "source_id": "746f07a92970e8fbf8a41ef45767440e2785bea4",
+      "target_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_name": "miniauth.tokens.issue_token",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 5
+    },
+    {
+      "source_id": "746f07a92970e8fbf8a41ef45767440e2785bea4",
+      "target_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_name": "miniauth.tokens.verify_token",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 5
+    },
+    {
+      "source_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e",
+      "target_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_name": "miniauth.session.Session",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 8
+    },
+    {
+      "source_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e",
+      "target_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5",
+      "target_name": "miniauth.backends.AuthBackend",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 5
+    },
+    {
+      "source_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e",
+      "target_id": "87d5a0e9b522485b0cb15b90871510909a6c6f2f",
+      "target_name": "miniauth.plugins.retry",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 7
+    },
+    {
+      "source_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "miniauth.models.User",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 6
+    },
+    {
+      "source_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e",
+      "target_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a",
+      "target_name": "miniauth.backends.MemoryBackend",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 5
+    },
+    {
+      "source_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e",
+      "target_id": "e76d598475c56c5c24955ae84c02204bbddf6384",
+      "target_name": "miniauth.plugins.audited",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 7
+    },
+    {
+      "source_id": "96e6a79f582041333ac9bc86dfc161bbf598ba3a",
+      "target_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5",
+      "target_name": "miniauth.backends.base.AuthBackend",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 5
+    },
+    {
+      "source_id": "96e6a79f582041333ac9bc86dfc161bbf598ba3a",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "miniauth.models.User",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 6
+    },
+    {
+      "source_id": "a160b31ddd67058af50caaf002cd07956aa7abdd",
+      "target_id": null,
+      "target_name": "abc.ABC",
+      "kind": "IMPORT",
+      "confidence": "low",
+      "line": 5
+    },
+    {
+      "source_id": "a160b31ddd67058af50caaf002cd07956aa7abdd",
+      "target_id": null,
+      "target_name": "abc.abstractmethod",
+      "kind": "IMPORT",
+      "confidence": "low",
+      "line": 5
+    },
+    {
+      "source_id": "a160b31ddd67058af50caaf002cd07956aa7abdd",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "miniauth.models.User",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 7
+    },
+    {
+      "source_id": "eb453281acc25de06968ef097c5497febfac744a",
+      "target_id": null,
+      "target_name": "dataclasses.dataclass",
+      "kind": "IMPORT",
+      "confidence": "low",
+      "line": 5
+    },
+    {
+      "source_id": "eb453281acc25de06968ef097c5497febfac744a",
+      "target_id": null,
+      "target_name": "dataclasses.field",
+      "kind": "IMPORT",
+      "confidence": "low",
+      "line": 5
+    },
+    {
+      "source_id": "f9a73482028af3d65a1efcc5091ba72cdd75e547",
+      "target_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5",
+      "target_name": "miniauth.backends.base.AuthBackend",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 3
+    },
+    {
+      "source_id": "f9a73482028af3d65a1efcc5091ba72cdd75e547",
+      "target_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a",
+      "target_name": "miniauth.backends.memory.MemoryBackend",
+      "kind": "IMPORT",
+      "confidence": "high",
+      "line": 4
+    },
+    {
+      "source_id": "1d16f0d69e54794b9d5884f716f4a79ee0860abf",
+      "target_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_name": "Session",
+      "kind": "INHERIT",
+      "confidence": "high",
+      "line": 37
+    },
+    {
+      "source_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a",
+      "target_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5",
+      "target_name": "AuthBackend",
+      "kind": "INHERIT",
+      "confidence": "high",
+      "line": 9
+    },
+    {
+      "source_id": "c133c1f9af939d8cd174a42b94a305b977e05493",
+      "target_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_name": "Session",
+      "kind": "INHERIT",
+      "confidence": "high",
+      "line": 46
+    },
+    {
+      "source_id": "1d16f0d69e54794b9d5884f716f4a79ee0860abf",
+      "target_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_name": "Session",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 37
+    },
+    {
+      "source_id": "31d9618b6968fcf610dee9af0378088c9c7e6bfc",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "User",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 12
+    },
+    {
+      "source_id": "31d9618b6968fcf610dee9af0378088c9c7e6bfc",
+      "target_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a",
+      "target_name": "MemoryBackend",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 17
+    },
+    {
+      "source_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5",
+      "target_name": "AuthBackend",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 16
+    },
+    {
+      "source_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "User",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 16
+    },
+    {
+      "source_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "User",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 29
+    },
+    {
+      "source_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "User",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 21
+    },
+    {
+      "source_id": "87d5a0e9b522485b0cb15b90871510909a6c6f2f",
+      "target_id": "bf58b4398f55f1ba9fb3e9f94706e404772b5017",
+      "target_name": "decorate",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 26
+    },
+    {
+      "source_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e",
+      "target_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_name": "Session",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 15
+    },
+    {
+      "source_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e",
+      "target_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5",
+      "target_name": "AuthBackend",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 15
+    },
+    {
+      "source_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e",
+      "target_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a",
+      "target_name": "MemoryBackend",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 34
+    },
+    {
+      "source_id": "9298d1e7baedd4602bd888cdfbe326603cb0cc2e",
+      "target_id": "e76d598475c56c5c24955ae84c02204bbddf6384",
+      "target_name": "audited",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 11
+    },
+    {
+      "source_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a",
+      "target_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5",
+      "target_name": "AuthBackend",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 9
+    },
+    {
+      "source_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "User",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 12
+    },
+    {
+      "source_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "User",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 17
+    },
+    {
+      "source_id": "98e066f3e006195b809cd1fa715e8ddac5463b9a",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "User",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 24
+    },
+    {
+      "source_id": "bc29b55a4c972c06fb8d1a10ce25e2205318d24d",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "User",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 13
+    },
+    {
+      "source_id": "bf58b4398f55f1ba9fb3e9f94706e404772b5017",
+      "target_id": "d8de6c53a449ad61a1ae41f7eb6d774b9d780168",
+      "target_name": "wrapper",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 24
+    },
+    {
+      "source_id": "c133c1f9af939d8cd174a42b94a305b977e05493",
+      "target_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_name": "Session",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 46
+    },
+    {
+      "source_id": "c133c1f9af939d8cd174a42b94a305b977e05493",
+      "target_id": "66f18b9a029459b3411dca50d3a4ecf7f0fd91e5",
+      "target_name": "AuthBackend",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 49
+    },
+    {
+      "source_id": "c133c1f9af939d8cd174a42b94a305b977e05493",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "User",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 49
+    },
+    {
+      "source_id": "e76d598475c56c5c24955ae84c02204bbddf6384",
+      "target_id": "76ef5d3b44db24b2630357c136b94964c92debd2",
+      "target_name": "wrapper",
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "line": 36
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "02754cd8d6841879ecb99222f6720fdb67c7dba0",
+      "target_name": "miniauth.session.Session.logout",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 10
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_name": "miniauth.session.Session.login",
+      "kind": "TEST",
+      "confidence": "medium",
+      "line": 10
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "1d16f0d69e54794b9d5884f716f4a79ee0860abf",
+      "target_name": "miniauth.session.AdminSession",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 10
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "4ce0d4927a0c0b42cbda43598e515a0d3cd01f59",
+      "target_name": "miniauth.session.AuditedSession.__init__",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 10
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_name": "miniauth.session.Session",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 10
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81",
+      "target_name": "miniauth.session",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 10
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "745d1639e1eeb4bcc9d2669ab0cd81c63435ce68",
+      "target_name": "miniauth.session.Session.resume",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 10
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "963d7fa5f35f74a73bda3bc37121c5150ee44413",
+      "target_name": "miniauth.session.Session.__init__",
+      "kind": "TEST",
+      "confidence": "high",
+      "line": 11
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_name": "miniauth.session.AdminSession.login",
+      "kind": "TEST",
+      "confidence": "medium",
+      "line": 10
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "c133c1f9af939d8cd174a42b94a305b977e05493",
+      "target_name": "miniauth.session.AuditedSession",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 10
+    },
+    {
+      "source_id": "55c44671eb0467cf5682522f4310bb28b5d29eb0",
+      "target_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_name": "miniauth.session.AuditedSession.login",
+      "kind": "TEST",
+      "confidence": "medium",
+      "line": 10
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "02754cd8d6841879ecb99222f6720fdb67c7dba0",
+      "target_name": "miniauth.session.Session.logout",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 23
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_name": "miniauth.session.Session.login",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 25
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "1d16f0d69e54794b9d5884f716f4a79ee0860abf",
+      "target_name": "miniauth.session.AdminSession",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 23
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "4ce0d4927a0c0b42cbda43598e515a0d3cd01f59",
+      "target_name": "miniauth.session.AuditedSession.__init__",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 23
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_name": "miniauth.session.Session",
+      "kind": "TEST",
+      "confidence": "medium",
+      "line": 23
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81",
+      "target_name": "miniauth.session",
+      "kind": "TEST",
+      "confidence": "medium",
+      "line": 23
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "745d1639e1eeb4bcc9d2669ab0cd81c63435ce68",
+      "target_name": "miniauth.session.Session.resume",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 23
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "8b48a85faf9172b475912fca1967e98cf9c3eb7e",
+      "target_name": "miniauth.models.User",
+      "kind": "TEST",
+      "confidence": "medium",
+      "line": 23
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "963d7fa5f35f74a73bda3bc37121c5150ee44413",
+      "target_name": "miniauth.session.Session.__init__",
+      "kind": "TEST",
+      "confidence": "high",
+      "line": 25
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_name": "miniauth.session.AdminSession.login",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 25
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "c133c1f9af939d8cd174a42b94a305b977e05493",
+      "target_name": "miniauth.session.AuditedSession",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 23
+    },
+    {
+      "source_id": "569408f756da667527a8ff2ceed3f5199f92b46b",
+      "target_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_name": "miniauth.session.AuditedSession.login",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 25
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "02754cd8d6841879ecb99222f6720fdb67c7dba0",
+      "target_name": "miniauth.session.Session.logout",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 14
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_name": "miniauth.session.Session.login",
+      "kind": "TEST",
+      "confidence": "medium",
+      "line": 14
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "1d16f0d69e54794b9d5884f716f4a79ee0860abf",
+      "target_name": "miniauth.session.AdminSession",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 14
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "4ce0d4927a0c0b42cbda43598e515a0d3cd01f59",
+      "target_name": "miniauth.session.AuditedSession.__init__",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 14
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_name": "miniauth.session.Session",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 14
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81",
+      "target_name": "miniauth.session",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 14
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "745d1639e1eeb4bcc9d2669ab0cd81c63435ce68",
+      "target_name": "miniauth.session.Session.resume",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 14
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "963d7fa5f35f74a73bda3bc37121c5150ee44413",
+      "target_name": "miniauth.session.Session.__init__",
+      "kind": "TEST",
+      "confidence": "high",
+      "line": 15
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_name": "miniauth.session.AdminSession.login",
+      "kind": "TEST",
+      "confidence": "medium",
+      "line": 14
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "c133c1f9af939d8cd174a42b94a305b977e05493",
+      "target_name": "miniauth.session.AuditedSession",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 14
+    },
+    {
+      "source_id": "9586933eb02768597dfe8056e25c8c9a14483184",
+      "target_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_name": "miniauth.session.AuditedSession.login",
+      "kind": "TEST",
+      "confidence": "medium",
+      "line": 14
+    },
+    {
+      "source_id": "af837a0f210c76ff455e036d6e9acf59c06bd760",
+      "target_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_name": "miniauth.tokens.issue_token",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 17
+    },
+    {
+      "source_id": "af837a0f210c76ff455e036d6e9acf59c06bd760",
+      "target_id": "54a3159f0cd320d2726f7be7e26a1cb0b598a44e",
+      "target_name": "miniauth.tokens",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 17
+    },
+    {
+      "source_id": "af837a0f210c76ff455e036d6e9acf59c06bd760",
+      "target_id": "733aea79f49175dee48632adc49907c5f088d8dd",
+      "target_name": "miniauth.tokens._sign",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 17
+    },
+    {
+      "source_id": "af837a0f210c76ff455e036d6e9acf59c06bd760",
+      "target_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_name": "miniauth.tokens.verify_token",
+      "kind": "TEST",
+      "confidence": "high",
+      "line": 18
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "02754cd8d6841879ecb99222f6720fdb67c7dba0",
+      "target_name": "miniauth.session.Session.logout",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 20
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "1265aa31add06ddf4b190c4ec817d979443a8353",
+      "target_name": "miniauth.session.Session.login",
+      "kind": "TEST",
+      "confidence": "medium",
+      "line": 20
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "1d16f0d69e54794b9d5884f716f4a79ee0860abf",
+      "target_name": "miniauth.session.AdminSession",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 20
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "4ce0d4927a0c0b42cbda43598e515a0d3cd01f59",
+      "target_name": "miniauth.session.AuditedSession.__init__",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 20
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "61df4b9b0e6e53ab0b8611db2bb09755bc1bbf84",
+      "target_name": "miniauth.session.Session",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 20
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "6cc0550ab3b021e72a9c9da9986998da49ebfd81",
+      "target_name": "miniauth.session",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 20
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "745d1639e1eeb4bcc9d2669ab0cd81c63435ce68",
+      "target_name": "miniauth.session.Session.resume",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 20
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "963d7fa5f35f74a73bda3bc37121c5150ee44413",
+      "target_name": "miniauth.session.Session.__init__",
+      "kind": "TEST",
+      "confidence": "high",
+      "line": 21
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "a15c5e621af0994f0329a6331f8c91c6d2b4666d",
+      "target_name": "miniauth.session.AdminSession.login",
+      "kind": "TEST",
+      "confidence": "medium",
+      "line": 20
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "c133c1f9af939d8cd174a42b94a305b977e05493",
+      "target_name": "miniauth.session.AuditedSession",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 20
+    },
+    {
+      "source_id": "d882cee0d7079e059cf3eee8566cb18eaf9416b3",
+      "target_id": "efc125b9be7eb2b209e3a5d14b2952405ccff63a",
+      "target_name": "miniauth.session.AuditedSession.login",
+      "kind": "TEST",
+      "confidence": "medium",
+      "line": 20
+    },
+    {
+      "source_id": "e054eecc206a67dc002de8d673069ee1ff223550",
+      "target_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_name": "miniauth.tokens.issue_token",
+      "kind": "TEST",
+      "confidence": "high",
+      "line": 9
+    },
+    {
+      "source_id": "e054eecc206a67dc002de8d673069ee1ff223550",
+      "target_id": "54a3159f0cd320d2726f7be7e26a1cb0b598a44e",
+      "target_name": "miniauth.tokens",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 8
+    },
+    {
+      "source_id": "e054eecc206a67dc002de8d673069ee1ff223550",
+      "target_id": "733aea79f49175dee48632adc49907c5f088d8dd",
+      "target_name": "miniauth.tokens._sign",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 8
+    },
+    {
+      "source_id": "e054eecc206a67dc002de8d673069ee1ff223550",
+      "target_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_name": "miniauth.tokens.verify_token",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 8
+    },
+    {
+      "source_id": "e07280dea630c8ae03cd6e571e9a2bbede9e1135",
+      "target_id": "0846223922da1365387e5c21349e0190598a2518",
+      "target_name": "miniauth.tokens.issue_token",
+      "kind": "TEST",
+      "confidence": "high",
+      "line": 14
+    },
+    {
+      "source_id": "e07280dea630c8ae03cd6e571e9a2bbede9e1135",
+      "target_id": "54a3159f0cd320d2726f7be7e26a1cb0b598a44e",
+      "target_name": "miniauth.tokens",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 13
+    },
+    {
+      "source_id": "e07280dea630c8ae03cd6e571e9a2bbede9e1135",
+      "target_id": "733aea79f49175dee48632adc49907c5f088d8dd",
+      "target_name": "miniauth.tokens._sign",
+      "kind": "TEST",
+      "confidence": "low",
+      "line": 13
+    },
+    {
+      "source_id": "e07280dea630c8ae03cd6e571e9a2bbede9e1135",
+      "target_id": "cc17c4dd30a54b380a27238a77fe942b2c996bef",
+      "target_name": "miniauth.tokens.verify_token",
+      "kind": "TEST",
+      "confidence": "high",
+      "line": 14
+    }
+  ]
+}

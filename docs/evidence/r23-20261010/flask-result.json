@@ -1,0 +1,178 @@
+{
+  "repo": "https://github.com/pallets/flask.git",
+  "commit": "c12a5d874c5a014495eb2db8a73f40037bc813ac",
+  "python": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "packages": {
+    "tree-sitter": "0.25.2",
+    "tree-sitter-python": "0.25.0"
+  },
+  "files": 241,
+  "symbols": 1644,
+  "symbols_by_kind": {
+    "class": 156,
+    "function": 665,
+    "method": 357,
+    "module": 82,
+    "test_function": 355,
+    "test_method": 29
+  },
+  "edges": 10839,
+  "edges_by_kind_confidence": [
+    {
+      "kind": "CALL",
+      "confidence": "high",
+      "count": 276
+    },
+    {
+      "kind": "CALL",
+      "confidence": "low",
+      "count": 2842
+    },
+    {
+      "kind": "CALL",
+      "confidence": "medium",
+      "count": 316
+    },
+    {
+      "kind": "IMPORT",
+      "confidence": "high",
+      "count": 218
+    },
+    {
+      "kind": "IMPORT",
+      "confidence": "low",
+      "count": 424
+    },
+    {
+      "kind": "INHERIT",
+      "confidence": "high",
+      "count": 71
+    },
+    {
+      "kind": "REFERENCE",
+      "confidence": "high",
+      "count": 374
+    },
+    {
+      "kind": "REFERENCE",
+      "confidence": "low",
+      "count": 36
+    },
+    {
+      "kind": "REFERENCE",
+      "confidence": "medium",
+      "count": 18
+    },
+    {
+      "kind": "TEST",
+      "confidence": "high",
+      "count": 208
+    },
+    {
+      "kind": "TEST",
+      "confidence": "low",
+      "count": 5916
+    },
+    {
+      "kind": "TEST",
+      "confidence": "medium",
+      "count": 140
+    }
+  ],
+  "tests": 384,
+  "seconds": 19.307163099991158,
+  "parse_errors": [],
+  "scan": {
+    "files": 241,
+    "ignored": 0,
+    "too_large": 0,
+    "binary": 8,
+    "symlinks": 0,
+    "unreadable": 0
+  },
+  "parsed_paths": [
+    "docs/conf.py",
+    "examples/celery/make_celery.py",
+    "examples/celery/src/task_app/__init__.py",
+    "examples/celery/src/task_app/tasks.py",
+    "examples/celery/src/task_app/views.py",
+    "examples/javascript/js_example/__init__.py",
+    "examples/javascript/js_example/views.py",
+    "examples/javascript/tests/conftest.py",
+    "examples/javascript/tests/test_js_example.py",
+    "examples/tutorial/flaskr/__init__.py",
+    "examples/tutorial/flaskr/auth.py",
+    "examples/tutorial/flaskr/blog.py",
+    "examples/tutorial/flaskr/db.py",
+    "examples/tutorial/tests/conftest.py",
+    "examples/tutorial/tests/test_auth.py",
+    "examples/tutorial/tests/test_blog.py",
+    "examples/tutorial/tests/test_db.py",
+    "examples/tutorial/tests/test_factory.py",
+    "src/flask/__init__.py",
+    "src/flask/__main__.py",
+    "src/flask/app.py",
+    "src/flask/blueprints.py",
+    "src/flask/cli.py",
+    "src/flask/config.py",
+    "src/flask/ctx.py",
+    "src/flask/debughelpers.py",
+    "src/flask/globals.py",
+    "src/flask/helpers.py",
+    "src/flask/json/__init__.py",
+    "src/flask/json/provider.py",
+    "src/flask/json/tag.py",
+    "src/flask/logging.py",
+    "src/flask/sansio/app.py",
+    "src/flask/sansio/blueprints.py",
+    "src/flask/sansio/scaffold.py",
+    "src/flask/sessions.py",
+    "src/flask/signals.py",
+    "src/flask/templating.py",
+    "src/flask/testing.py",
+    "src/flask/typing.py",
+    "src/flask/views.py",
+    "src/flask/wrappers.py",
+    "tests/conftest.py",
+    "tests/test_appctx.py",
+    "tests/test_apps/blueprintapp/__init__.py",
+    "tests/test_apps/blueprintapp/apps/__init__.py",
+    "tests/test_apps/blueprintapp/apps/admin/__init__.py",
+    "tests/test_apps/blueprintapp/apps/frontend/__init__.py",
+    "tests/test_apps/cliapp/__init__.py",
+    "tests/test_apps/cliapp/app.py",
+    "tests/test_apps/cliapp/factory.py",
+    "tests/test_apps/cliapp/importerrorapp.py",
+    "tests/test_apps/cliapp/inner1/__init__.py",
+    "tests/test_apps/cliapp/inner1/inner2/__init__.py",
+    "tests/test_apps/cliapp/inner1/inner2/flask.py",
+    "tests/test_apps/cliapp/multiapp.py",
+    "tests/test_apps/helloworld/hello.py",
+    "tests/test_apps/helloworld/wsgi.py",
+    "tests/test_apps/subdomaintestmodule/__init__.py",
+    "tests/test_async.py",
+    "tests/test_basic.py",
+    "tests/test_blueprints.py",
+    "tests/test_cli.py",
+    "tests/test_config.py",
+    "tests/test_converters.py",
+    "tests/test_helpers.py",
+    "tests/test_instance_config.py",
+    "tests/test_json.py",
+    "tests/test_json_tag.py",
+    "tests/test_logging.py",
+    "tests/test_regression.py",
+    "tests/test_reqctx.py",
+    "tests/test_session_interface.py",
+    "tests/test_signals.py",
+    "tests/test_subclassing.py",
+    "tests/test_templating.py",
+    "tests/test_testing.py",
+    "tests/test_user_error_handler.py",
+    "tests/test_views.py",
+    "tests/typing/typing_app_decorators.py",
+    "tests/typing/typing_error_handler.py",
+    "tests/typing/typing_route.py"
+  ]
+}

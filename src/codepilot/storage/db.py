@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 
-from sqlalchemy import Engine, create_engine, event
+from sqlalchemy import Engine, create_engine, event, inspect, text
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -70,7 +70,7 @@ def create_session_factory(engine: Engine) -> sessionmaker[Session]:
 def init_db(engine: Engine) -> None:
     """建表。
 
-    V1 不使用迁移工具：表结构尚未定型，且历史数据随时可以从 artifacts 重建。
+    兼容旧索引：增补 edges.line 并将既有边的未知行号设为 0。
 
     这里对 ``models`` 做函数内导入，是为了触发"把表注册到 ``Base.metadata``"
     这个副作用。放在模块顶层会重新引入循环导入。
@@ -78,6 +78,10 @@ def init_db(engine: Engine) -> None:
     from codepilot.storage import models  # noqa: F401  (注册表定义的副作用)
 
     Base.metadata.create_all(engine)
+    with engine.begin() as connection:
+        columns = {column["name"] for column in inspect(connection).get_columns("edges")}
+        if "line" not in columns:
+            connection.execute(text("ALTER TABLE edges ADD COLUMN line INTEGER NOT NULL DEFAULT 0"))
 
 
 @contextmanager

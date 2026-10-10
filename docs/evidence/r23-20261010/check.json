@@ -1,0 +1,26 @@
+{
+  "byte_identical_copies": true,
+  "raw_copy_count": 36,
+  "missing_local_links": [],
+  "secret_scan_patterns": [
+    "OpenAI-style-key",
+    "GitHub-token",
+    "AWS-access-key",
+    "private-key",
+    "Authorization-bearer",
+    "assigned-api-key"
+  ],
+  "secret_candidates": [],
+  "minimal_replay_smoke": {
+    "command": "python docs/evidence/r23-20261010/replay_minimal.py --repeat 1",
+    "binding": "0.25.2",
+    "grammar": "0.25.0",
+    "returncode": 0,
+    "cases": {
+      "row": 0,
+      "column": 0,
+      "extract": 0
+    }
+  },
+  "scope": "New evidence directory only; historical artifacts untouched"
+}

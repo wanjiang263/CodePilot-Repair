@@ -1,0 +1,38 @@
+{
+  "commit": "a1f1dd7b04161d2d8be73e2fb979a86d2a8a35de",
+  "source": "tests\\fixtures\\repos\\mini_auth",
+  "copy": "artifacts\\r23-repair-20261010\\fixture-cli\\tests\\fixtures\\repos\\mini_auth",
+  "files": {
+    "pyproject.toml": "22a654d3c9f73ecbbafdcd0d2b74bd4bfeefb0d5023298726f1b6ff91ec93a27",
+    "README.md": "e95469402e21d5ef9e21fe5b8c3a851985ab36caf762c215ac6c09a5d02c0b0d",
+    "tests/conftest.py": "3a8eb3b8eaa77a02053d6cdbb16285588adde300273311fefe05895b4fecd002",
+    "tests/test_session.py": "8eac485e651b97806771fc7535e93f2b4b095281609e5f0f009c3ea99dd68ef0",
+    "tests/test_tokens.py": "63f58f28af5262c9dbbbb6a4de7aa332f8e1b3f8dcde1f5a68cfdd58dcfc0508",
+    "src/miniauth/app.py": "280696bb1bda4f8fd0af274c51b2e2509b01aa3f219212b83673ae507c30fbbb",
+    "src/miniauth/models.py": "ac354b03e82127ef220cd186011cbc5e307f3508d62d9412ed0b1d4521e13ddf",
+    "src/miniauth/plugins.py": "fc124b2a1af7eaeeecec73a851f2ca042abd6ca0e8eac46902de4543edaa2f05",
+    "src/miniauth/session.py": "f1d4e0d7930ef261e876a65fc734ea33a7598041e426a9becb380ea17b0abc90",
+    "src/miniauth/tokens.py": "060b91e1a93cb0748228763c604fdbc7cad9ec7cd038b1eed54e175b6438ff25",
+    "src/miniauth/__init__.py": "c630ac0aa1273882984e515a8fe4d1fa340de34ff45887032f7141223a57d35c",
+    "src/miniauth/backends/base.py": "c8486530b457a3cef7f8832688dd24b201bfd035237dedcaca05490e3d661b16",
+    "src/miniauth/backends/memory.py": "165e7ce355ec046915cb908f410d42adbbfaabcc6741518259b91c7594d3f9a9",
+    "src/miniauth/backends/__init__.py": "36b9816ffa91912ac200c435c5a33b1afc35281e465bf24960052991179c2c33"
+  },
+  "copy_files": {
+    "pyproject.toml": "22a654d3c9f73ecbbafdcd0d2b74bd4bfeefb0d5023298726f1b6ff91ec93a27",
+    "README.md": "e95469402e21d5ef9e21fe5b8c3a851985ab36caf762c215ac6c09a5d02c0b0d",
+    "tests/conftest.py": "3a8eb3b8eaa77a02053d6cdbb16285588adde300273311fefe05895b4fecd002",
+    "tests/test_session.py": "8eac485e651b97806771fc7535e93f2b4b095281609e5f0f009c3ea99dd68ef0",
+    "tests/test_tokens.py": "63f58f28af5262c9dbbbb6a4de7aa332f8e1b3f8dcde1f5a68cfdd58dcfc0508",
+    "src/miniauth/app.py": "280696bb1bda4f8fd0af274c51b2e2509b01aa3f219212b83673ae507c30fbbb",
+    "src/miniauth/models.py": "ac354b03e82127ef220cd186011cbc5e307f3508d62d9412ed0b1d4521e13ddf",
+    "src/miniauth/plugins.py": "fc124b2a1af7eaeeecec73a851f2ca042abd6ca0e8eac46902de4543edaa2f05",
+    "src/miniauth/session.py": "f1d4e0d7930ef261e876a65fc734ea33a7598041e426a9becb380ea17b0abc90",
+    "src/miniauth/tokens.py": "060b91e1a93cb0748228763c604fdbc7cad9ec7cd038b1eed54e175b6438ff25",
+    "src/miniauth/__init__.py": "c630ac0aa1273882984e515a8fe4d1fa340de34ff45887032f7141223a57d35c",
+    "src/miniauth/backends/base.py": "c8486530b457a3cef7f8832688dd24b201bfd035237dedcaca05490e3d661b16",
+    "src/miniauth/backends/memory.py": "165e7ce355ec046915cb908f410d42adbbfaabcc6741518259b91c7594d3f9a9",
+    "src/miniauth/backends/__init__.py": "36b9816ffa91912ac200c435c5a33b1afc35281e465bf24960052991179c2c33"
+  },
+  "byte_identical": true
+}

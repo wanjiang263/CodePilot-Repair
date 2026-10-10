@@ -29,14 +29,23 @@ def test_config_check_runs_against_repository_config() -> None:
     assert "llm.yaml" in result.stdout
 
 
-def test_config_check_strict_can_fail() -> None:
-    """仓库里的配置现在确实不完整（模型 ID 与单价是占位符）。
+def test_config_check_strict_can_fail(monkeypatch: pytest.MonkeyPatch) -> None:
+    """缺 key 时严格检查必须失败，不依赖开发者本机密钥或模型占位值。"""
+    from codepilot.llm.config import ProviderSpec
 
-    这条测试同时是一个断言：configs/llm.yaml 中的占位符必须被 check() 看见。
-    等到有人把真实值填进去，这条测试会失败，提醒把断言改成非 strict 路径。
-    """
+    monkeypatch.setattr(ProviderSpec, "has_api_key", lambda self: False)
     result = runner.invoke(app, ["config", "check", "--strict"])
     assert result.exit_code == 1
+    assert "缺 API key" in result.stdout
+
+
+def test_config_check_strict_passes_with_complete_config(monkeypatch: pytest.MonkeyPatch) -> None:
+    from codepilot.llm.config import ProviderSpec
+
+    monkeypatch.setattr(ProviderSpec, "has_api_key", lambda self: True)
+    result = runner.invoke(app, ["config", "check", "--strict"])
+    assert result.exit_code == 0
+    assert "配置完整" in result.stdout
 
 
 def test_config_show_does_not_leak_secrets() -> None:

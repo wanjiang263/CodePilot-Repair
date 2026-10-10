@@ -1,6 +1,7 @@
 name: CI
 
 # 04 通用完成标准：ruff + mypy + 非 docker、非 llm 的 pytest。
+# Phase 1 的真实 Docker 验收独立运行，缺 daemon / 全部 skip 均不算通过。
 # 真实 LLM 的验收（@pytest.mark.llm）永不进入 CI（03 §22）。
 on:
   push:
@@ -15,6 +16,11 @@ concurrency:
 env:
   UV_FROZEN: "1"
 
+# Explicit bash enables pipefail, so preserving output with tee cannot hide failures.
+defaults:
+  run:
+    shell: bash
+
 jobs:
   quality:
     name: lint + types
@@ -26,21 +32,32 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          version: "0.12.9"
 
       - name: Set up Python
         run: uv python install 3.12
 
       - name: Install dependencies
-        run: uv sync --extra dev
+        run: uv sync --frozen --extra dev --python 3.12
+
+      - name: Environment
+        run: uv run python -c "import platform; from importlib.metadata import version; print(platform.platform()); print(platform.python_version()); print('tree-sitter', version('tree-sitter')); print('tree-sitter-python', version('tree-sitter-python'))" | tee environment.log
 
       - name: Ruff
-        run: uv run ruff check .
+        run: uv run ruff check . 2>&1 | tee ruff-check.log
 
       - name: Ruff format check
-        run: uv run ruff format --check .
+        run: uv run ruff format --check . 2>&1 | tee ruff-format.log
 
       - name: mypy
-        run: uv run mypy src
+        run: uv run mypy src 2>&1 | tee mypy.log
+
+      - name: Preserve quality evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-evidence
+          path: '*.log'
 
   test:
     name: pytest (no docker, no llm)
@@ -52,13 +69,74 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          version: "0.12.9"
 
       - name: Set up Python
         run: uv python install 3.12
 
       - name: Install dependencies
-        run: uv sync --extra dev
+        run: uv sync --frozen --extra dev --python 3.12
 
-      # Docker 在 CI 中可用，但 docker 测试按 04 的规则不进入默认 CI 流程
+      - name: Environment
+        run: uv run python -c "import platform; from importlib.metadata import version; print(platform.platform()); print(platform.python_version()); print('tree-sitter', version('tree-sitter')); print('tree-sitter-python', version('tree-sitter-python'))" | tee environment.log
+
       - name: pytest
-        run: uv run pytest -m "not docker and not llm" --cov --cov-report=term-missing
+        run: uv run pytest -m "not docker and not llm" --cov --cov-report=term-missing --junitxml=pytest-results.xml 2>&1 | tee pytest.log
+
+      - name: Preserve test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-evidence
+          path: |
+            environment.log
+            pytest.log
+            pytest-results.xml
+
+  docker:
+    name: Phase 1 index in Docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "0.12.9"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen --extra dev --python 3.12
+
+      - name: Environment
+        run: uv run python -c "import platform; from importlib.metadata import version; print(platform.platform()); print(platform.python_version()); print('tree-sitter', version('tree-sitter')); print('tree-sitter-python', version('tree-sitter-python'))" | tee environment.log
+
+      - name: Require a working Docker daemon
+        run: docker info --format '{{.ServerVersion}}' 2>&1 | tee docker-info.log
+
+      - name: Docker acceptance
+        run: uv run pytest -s -m docker --junitxml=docker-results.xml 2>&1 | tee docker-test.log
+
+      - name: Require executed Docker tests
+        run: |
+          uv run python - <<'PY'
+          from xml.etree import ElementTree
+          cases = ElementTree.parse('docker-results.xml').findall('.//testcase')
+          assert cases, 'No Docker tests collected'
+          assert all(case.find('skipped') is None for case in cases), 'Docker tests skipped'
+          PY
+
+      - name: Preserve Docker evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-evidence
+          path: |
+            environment.log
+            docker-info.log
+            docker-test.log
+            docker-results.xml

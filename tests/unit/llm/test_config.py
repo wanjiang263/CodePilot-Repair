@@ -1,8 +1,7 @@
 """L-04 的证明：配置里允许留占位符，但 `check()` 必须把它们全部报出来。
 
-真实配置文件（configs/llm.yaml）里现在就留着占位符，因为模型 ID 与单价
-随服务商发版变化，写未经核实的数字比留空更危险。所以这个模块的重点不是
-"配置完整"，而是"不完整时必须可见"。
+模型 ID 与单价随服务商发版变化；验证已核实配置可加载、可修改，以及
+未填写配置的缺口始终可见。
 """
 
 from __future__ import annotations
@@ -11,7 +10,9 @@ from pathlib import Path
 
 import pytest
 import yaml
+from pydantic import ValidationError
 
+from codepilot.llm.capabilities import build_request_body
 from codepilot.llm.config import (
     KNOWN_ROLES,
     LLMConfig,
@@ -21,6 +22,7 @@ from codepilot.llm.config import (
     is_placeholder,
     load_llm_config,
 )
+from codepilot.llm.types import LLMRequest, Message
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -218,3 +220,64 @@ def test_repository_config_file_loads() -> None:
     assert set(config.roles) == KNOWN_ROLES
     for spec in config.models.values():
         assert spec.provider in config.providers
+        assert spec.missing_fields() == []
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "model",
+        "messages",
+        "max_tokens",
+        "temperature",
+        "tools",
+        "tool_choice",
+        "response_format",
+        "stream",
+    ],
+)
+def test_extra_body_rejects_managed_request_fields(field: str) -> None:
+    with pytest.raises(ValidationError, match="extra_body 不可覆盖"):
+        ModelSpec(alias="m", provider="p", model="real", extra_body={field: None})
+
+
+def test_editing_yaml_changes_model_price_and_request_options(tmp_path: Path) -> None:
+    path = tmp_path / "llm.yaml"
+    raw = {
+        "providers": {
+            "custom": {"base_url": "https://custom.test/v1", "api_key_env": "CUSTOM_KEY"}
+        },
+        "models": {
+            "main": {
+                "provider": "custom",
+                "model": "first-model",
+                "supports_temperature": False,
+                "extra_body": {"thinking": {"type": "disabled"}},
+                "price": {"input_per_mtok": 1.0, "output_per_mtok": 2.0},
+            }
+        },
+        "roles": {"coder": "main"},
+    }
+    path.write_text(yaml.safe_dump(raw), encoding="utf-8")
+    first = load_llm_config(path).resolve_role("coder")
+    request = LLMRequest(messages=[Message.user("hello")])
+    first_body = build_request_body(request, first, request.messages)
+    assert first_body["model"] == "first-model"
+    assert first_body["thinking"] == {"type": "disabled"}
+    assert "temperature" not in first_body
+
+    raw["models"]["main"].update(
+        model="second-model",
+        supports_temperature=True,
+        extra_body={"thinking": {"type": "enabled"}},
+        price={"input_per_mtok": 3.0, "output_per_mtok": 4.0},
+    )
+    path.write_text(yaml.safe_dump(raw), encoding="utf-8")
+    second = load_llm_config(path).resolve_role("coder")
+    second_body = build_request_body(request, second, request.messages)
+    assert second_body["model"] == "second-model"
+    assert second_body["thinking"] == {"type": "enabled"}
+    assert second_body["temperature"] == request.temperature
+    assert first.price is not None and first.price.input_per_mtok == 1.0
+    assert second.price is not None and second.price.input_per_mtok == 3.0
+    assert second.price.output_per_mtok == 4.0

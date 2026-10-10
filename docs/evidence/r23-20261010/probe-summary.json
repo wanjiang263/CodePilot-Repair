@@ -1,0 +1,148 @@
+{
+  "flask": {
+    "before": {
+      "files": 82,
+      "failed": 21,
+      "failures": [
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\src\\flask\\app.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\src\\flask\\cli.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\src\\flask\\config.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\src\\flask\\ctx.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\src\\flask\\helpers.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\src\\flask\\json\\tag.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\src\\flask\\sansio\\app.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\src\\flask\\sansio\\blueprints.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\src\\flask\\sansio\\scaffold.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\src\\flask\\sessions.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\src\\flask\\testing.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\tests\\test_basic.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\tests\\test_blueprints.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\tests\\test_cli.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\tests\\test_helpers.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\tests\\test_json.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\tests\\test_reqctx.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\tests\\test_templating.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\tests\\test_testing.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\tests\\test_user_error_handler.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\flask\\tests\\test_views.py",
+          "exit": "0xC0000005"
+        }
+      ]
+    },
+    "after": {
+      "files": 82,
+      "failed": 0,
+      "failures": []
+    }
+  },
+  "requests": {
+    "before": {
+      "files": 36,
+      "failed": 9,
+      "failures": [
+        {
+          "path": "artifacts\\r23-repair-20261010\\requests\\docs\\conf.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\requests\\src\\requests\\adapters.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\requests\\src\\requests\\cookies.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\requests\\src\\requests\\models.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\requests\\src\\requests\\sessions.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\requests\\src\\requests\\utils.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\requests\\tests\\test_lowlevel.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\requests\\tests\\test_requests.py",
+          "exit": "0xC0000005"
+        },
+        {
+          "path": "artifacts\\r23-repair-20261010\\requests\\tests\\test_utils.py",
+          "exit": "0xC0000005"
+        }
+      ]
+    },
+    "after": {
+      "files": 36,
+      "failed": 0,
+      "failures": []
+    }
+  }
+}
