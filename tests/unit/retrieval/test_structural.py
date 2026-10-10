@@ -1,7 +1,7 @@
-"""V-11：结构通道以种子分沿 CALL / INHERIT / IMPORT 按深度 0.5^d 扩展。
+"""V-11: the structural channel expands seeds along CALL / INHERIT / IMPORT by 0.5^depth.
 
-期望值全部写成精确数字：衰减与 min-max 归一化都是纯算术，写成"约等于"会让
-0.25 变成 0.3 这类真实错误溜过去。
+Expectations are written as exact numbers. Decay and min-max normalization are pure
+arithmetic, and "approximately equal" is how a 0.25 that really became 0.3 survives.
 """
 
 import shutil
@@ -24,7 +24,7 @@ FIXTURE_REPOS = Path(__file__).resolve().parents[2] / "fixtures" / "repos"
 
 
 def _chain(*ids):
-    """``a -> b -> c`` 的 CALL 边链；每个符号同时是一份文档。"""
+    """A ``a -> b -> c`` CALL chain where every symbol is also a document."""
     docs = [document(sid, f"{sid} body", f"{sid}.py", index + 1) for index, sid in enumerate(ids)]
     edges = [
         (docs[index].symbol, docs[index + 1].symbol, "CALL", "high", 1)
@@ -48,7 +48,7 @@ def test_depth_three_produces_no_candidates_and_is_never_queried():
     graph = FakeGraph(edges)
     found = StructuralChannel(graph, docs).search([seed("s", 1.0)])
     assert [c.symbol_id for c in found] == ["one", "two"]
-    # 不只是被丢弃：深度 2 的节点根本不会再被展开。
+    # Not merely dropped: depth-2 nodes are never expanded again.
     assert graph.queries == ["s", "one"]
     deep = StructuralChannel(graph, docs, max_depth=3).search([seed("s", 1.0)])
     assert [c.score for c in deep] == [0.5, 0.25, 0.125]
@@ -100,7 +100,8 @@ def test_a_seed_reached_through_an_edge_is_genuine_structural_evidence():
     found = StructuralChannel(FakeGraph(edges), docs).search(
         [seed("first", 1.0), seed("second", 0.8)]
     )
-    # second 是种子，但它同时是 first 的深度 1 邻居；first 也能经 second 的反向边到达。
+    # second is a seed, but also first's depth-1 neighbour; first is reachable back
+    # through second's reverse edge.
     assert {c.symbol_id: c.score for c in found} == {"second": 0.5, "third": 0.4, "first": 0.4}
 
 
@@ -122,7 +123,7 @@ def test_seeds_outside_the_candidate_set_and_isolated_seeds_are_skipped():
     isolated = document("iso", "iso body", "iso.py", 9)
     channel = StructuralChannel(FakeGraph(edges), [*docs, isolated])
     assert channel.search([seed("unknown", 1.0)]) == []
-    assert channel.search([seed("iso", 1.0)]) == []  # 图上没有边不是错误
+    assert channel.search([seed("iso", 1.0)]) == []  # a seed with no edges is not an error
     assert [c.symbol_id for c in channel.search([seed("unknown", 1.0), seed("s", 1.0)])] == ["one"]
 
 
@@ -155,7 +156,7 @@ def test_strongest_seed_wins_and_result_is_seed_order_independent():
     forward = channel.search([seed("s1", 1.0), seed("s2", 0.6)])
     backward = channel.search([seed("s2", 0.6), seed("s1", 1.0)])
     assert forward == backward
-    # shared 取两个种子里更强的 1.0*0.5；s1/s2 也能通过对方的边被 reach 到。
+    # shared keeps the stronger seed's 1.0*0.5; s1/s2 are also reachable via each other.
     assert {c.symbol_id: c.score for c in forward} == {
         "shared": 0.5,
         "weak": 0.3,
@@ -254,13 +255,13 @@ def test_real_graph_expands_lexical_seeds_on_mini_auth(stores, tmp_path: Path) -
     seeds = BM25Channel(docs).search(query)
     channel = StructuralChannel(graph, docs)
     found = channel.search(seeds)
-    assert found, "真实调用图上应当至少扩展出一个候选"
+    assert found, "the real call graph should expand at least one candidate"
     assert [c.score for c in found] == sorted((c.score for c in found), reverse=True)
 
     seed_ids = {c.symbol_id for c in seeds[: channel.seed_limit] if c.score > 0}
-    assert seed_ids, "BM25 在 mini_auth 上应当给出正分种子"
+    assert seed_ids, "BM25 should give positive seeds on mini_auth"
 
-    # 每个候选都在某个正分种子的两步邻域内。
+    # Every candidate lies within two hops of some positively scored seed.
     reachable: set[str] = set()
     level = {by_id[sid].qualified_name for sid in seed_ids}
     for _ in range(channel.max_depth):
@@ -289,7 +290,8 @@ def test_service_structural_preserves_result_contract(tmp_path: Path) -> None:
     beta = next(symbol for symbol in symbols if symbol.id == "beta")
     graph = FakeGraph([(alpha, beta, "CALL", "high", 1)])
 
-    # 默认种子来自词法通道：BM25 的分不是整数，这里只断言扩展关系。
+    # Default seeds come from the lexical channel, whose BM25 scores are not round
+    # numbers, so this half only asserts the expansion relation.
     default = retrieve_symbols(tmp_path, symbols, "alpha", channel="structural", graph=graph)
     assert [c.symbol_id for c in default.symbols] == ["beta"]
     assert 0 < default.symbols[0].score < 1
@@ -299,7 +301,7 @@ def test_service_structural_preserves_result_contract(tmp_path: Path) -> None:
     assert default.files == [] and default.channel_weights == {}
     assert RetrievalResult.model_validate_json(default.model_dump_json()) == default
 
-    # 显式种子绕过词法通道，衰减分精确可复算。
+    # Explicit seeds bypass the lexical channel, so the decayed score is exact.
     explicit = retrieve_symbols(
         tmp_path,
         symbols,

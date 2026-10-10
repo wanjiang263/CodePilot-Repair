@@ -1,7 +1,8 @@
-"""V-13：History 通道把文件近期修改次数做成 log 归一化的检索分。
+"""V-13: the history channel scores files by log-normalized recent churn.
 
-单调性与"无历史返回空而非报错"是 docs/05 写死的两条证明；另外三条（未触及文件
-不占候选、base 之后的提交不进来、同分稳定序）都是通道语义的一部分。
+Monotonicity and "no history is an empty result, not an error" are the two proofs
+docs/05 names; untouched files staying out of the candidate set, post-base commits
+staying out of the ranking, and a stable tie order are part of the channel's contract.
 """
 
 import math
@@ -34,7 +35,8 @@ def test_log_normalization_is_monotone_and_compresses_the_tail():
     scores = [churn_score(count) for count in counts]
     assert scores == sorted(scores)
     assert scores == [math.log1p(count) for count in counts]
-    # 次线性：修改次数翻倍，分数不到两倍，热门文件不会压过其他通道。
+    # Sublinear: doubling the count less than doubles the score, so a hot file
+    # cannot outshout every other channel.
     assert all(churn_score(2 * count) < 2 * churn_score(count) for count in counts)
     assert churn_score(400) < 6
     assert churn_score(1) == pytest.approx(0.6931471805599453)
@@ -68,7 +70,7 @@ def test_untouched_files_are_absent_not_zero_candidates():
 def test_no_history_returns_empty_not_an_error():
     docs = _docs()
     assert HistoryChannel(docs, {}).search() == []
-    # 窗口里的路径与候选集没有交集，同样是空结果。
+    # A churn window whose paths do not intersect the candidates is also an empty result.
     assert HistoryChannel(docs, _churn(**{"deleted.py": 9, "renamed.py": 4})).search() == []
     assert HistoryChannel([], _churn(**{"a.py": 3})).search() == []
 
@@ -108,7 +110,7 @@ def test_duplicate_or_missing_ids_rejected():
 
 
 def test_post_base_commits_cannot_reach_the_ranking(tmp_path):
-    """真实 git：base 之后新建/修改的文件不进 history 通道（03 §11.2）。"""
+    """Real git: files created or edited after the base never reach the channel (03 §11.2)."""
     repo = init_repo(tmp_path / "r", {"a.py": "def one():\n    return 1\n", "z.py": "Z = 1\n"})
     repo.write("a.py", "def one():\n    return 2\n")
     base = repo.commit("touch a")
@@ -126,7 +128,7 @@ def test_post_base_commits_cannot_reach_the_ranking(tmp_path):
     ]
     found = HistoryChannel(docs, churn).search()
     assert [c.symbol_id for c in found] == ["one", "z"]
-    assert found[0].score == math.log1p(2)  # 只有 c1 创建 + base 这次修改
+    assert found[0].score == math.log1p(2)  # creation commit + the base commit itself
     assert found[1].score == math.log1p(1)
 
 

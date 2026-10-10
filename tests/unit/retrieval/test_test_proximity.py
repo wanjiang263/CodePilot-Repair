@@ -1,8 +1,8 @@
-"""V-12：从 Issue 提到的测试名 / traceback 测试帧，经 TEST 边反推被测 symbol。
+"""V-12: walk TEST edges backwards from tests named in the issue to the code under test.
 
-分值全部来自 R-12 的三档 confidence（high 1.0 / medium 0.6 / low 0.3），
-所以断言可以写成精确数字；多个测试对同一个 symbol 的贡献按测试 id 排序后
-相加，保证同输入同数字。
+Scores come straight from R-12's three confidence tiers (high 1.0 / medium 0.6 /
+low 0.3), so every expectation is an exact number; several tests contributing to one
+symbol are summed in test-ID order so the same input always yields the same float.
 """
 
 import shutil
@@ -78,7 +78,7 @@ def test_traceback_test_frames_count_as_evidence():
     channel = TestProximityChannel(FakeGraph(edges), docs)
     frame = TraceFrame(file=TESTS, line=6, function="t1", in_repo=True)
     assert [c.symbol_id for c in channel.search(_query(parsed_frames=[frame]))] == ["p1"]
-    # 仓库外帧与生产文件里的帧都不是这个通道的证据。
+    # Third-party frames and frames inside production files are not this channel's evidence.
     assert (
         channel.search(
             _query(parsed_frames=[TraceFrame(file=TESTS, line=6, function="t1", in_repo=False)])
@@ -140,10 +140,11 @@ def test_only_test_symbols_are_evidence_and_only_production_is_reported():
     ]
     docs = [production_named_test, test, other_test]
     channel = TestProximityChannel(FakeGraph(edges), docs)
-    # 名字像测试但不是 test kind 的 symbol 不提供证据。
+    # A symbol whose name looks like a test but is not a test kind gives no evidence.
     assert channel.search(_query(test_names=["legacy"])) == []
     found = channel.search(_query(test_names=["t1"]))
-    # 只报生产侧：t2 是测试、gone 不在候选集、入边方向的 legacy_test 不算反推结果。
+    # Only the production side is reported: t2 is a test, gone is outside the candidate
+    # set, and an incoming edge is not a reverse lookup.
     assert [(c.symbol_id, c.score) for c in found] == [("legacy", 0.6)]
 
 
@@ -202,7 +203,7 @@ def test_results_are_independent_of_document_and_edge_order():
         query
     )
     assert forward == backward
-    # p1 = 0.6 + 0.3，p2 = 1.0 + 0.6；贡献按测试 id 排序相加。
+    # p1 = 0.6 + 0.3 and p2 = 1.0 + 0.6, each summed in test-ID order.
     assert [c.symbol_id for c in forward] == ["p2", "p1"]
     assert [c.score for c in forward] == pytest.approx([1.6, 0.9])
 
@@ -287,7 +288,7 @@ def test_real_test_edges_localize_the_symbol_under_test_on_mini_auth(
     query = build_query(issue, repo_files=(s.path for s in symbols), repo_root=root)
     channel = TestProximityChannel(graph, docs)
     found = channel.search(query)
-    assert found, "真实 TEST 边应当反推出被测 symbol"
+    assert found, "real TEST edges should point back at the symbol under test"
     assert found[0].qualified_name == "miniauth.tokens.issue_token"
     assert query.test_names or query.parsed_frames
     assert channel.search(query) == found

@@ -1,8 +1,9 @@
-"""V-11~V-13 收口：三个二段式通道在同一份真实仓库上独立跑、独立评分、可复现。
+"""V-11~V-13 closeout: the three second-stage channels, independently scored on one real repo.
 
-这里刻意用真 git + 真索引 + 真 SQLite：通道单测用内存邻域表证明算法，这一支证明
-接线是对的（GraphSource / GitHistory / RepositoryIndex 与 service 的契约），
-并且 base 之后的提交不会通过 history 通道渗进排序。
+Real git, real index, real SQLite on purpose. The channel unit tests prove the
+algorithms against an in-memory adjacency table; this file proves the wiring
+(GraphSource / GitHistory / RepositoryIndex against the service contract) and that
+commits after the base cannot leak into the ranking through the history channel.
 """
 
 from pathlib import Path
@@ -34,7 +35,7 @@ FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "repos" / "mini_aut
 
 @pytest.fixture
 def repo(tmp_path: Path):
-    """一份真 git 化的 mini_auth；base 之前多一次 tokens.py 修改，制造 churn 差异。"""
+    """mini_auth as a real git repo; one extra pre-base tokens.py edit gives churn spread."""
     files = {
         path.relative_to(FIXTURE).as_posix(): path.read_text(encoding="utf-8")
         for path in FIXTURE.rglob("*")
@@ -73,7 +74,7 @@ def test_each_channel_reads_only_its_declared_inputs(stores, indexed) -> None:
     proximity = retrieve_symbols(root, symbols, ISSUE, channel="test", graph=graph, limit=10)
     history = retrieve_symbols(root, symbols, ISSUE, channel="history", churn=churn, limit=10)
 
-    # 与直接构造通道、只喂它声明的输入，结果必须逐字段一致。
+    # Feeding each channel only its declared inputs must reproduce the service result.
     assert (
         structural.symbols
         == StructuralChannel(graph, documents).search(BM25Channel(documents).search(query))[:10]
@@ -89,7 +90,7 @@ def test_each_channel_reads_only_its_declared_inputs(stores, indexed) -> None:
         assert result.enabled_channels == [name]
         assert list(result.per_channel) == [name]
         assert result.fusion_method.value == "none"
-        assert result.symbols, f"{name} 通道在 mini_auth 上应当给出候选"
+        assert result.symbols, f"the {name} channel should rank candidates on mini_auth"
         assert all(
             score.channel == name for c in result.per_channel[name] for score in c.channel_scores
         )
@@ -133,7 +134,7 @@ def test_history_channel_cannot_see_commits_after_the_base(stores, repo, indexed
     documents = build_documents(root, symbols)
     before = HistoryChannel(documents, GitHistory(root, base).file_churn()).search()
 
-    # base 之后新增文件并提交：索引与通道输入都不应看到它。
+    # Add and commit a file after the base: neither the index nor the channel input sees it.
     (root / "src" / "miniauth" / "post_base.py").write_text(
         "def added_after_base():\n    return 1\n", encoding="utf-8"
     )
@@ -150,5 +151,5 @@ def test_the_base_tree_still_yields_test_symbols(indexed) -> None:
     documents = build_documents(root, symbols)
     assert all(isinstance(document, SymbolDocument) for document in documents)
     assert any(document.symbol.kind == "test_function" for document in documents), (
-        "mini_auth 的测试文件应当给出 test_function，供 V-12 反推"
+        "mini_auth's test files should yield test_function symbols for V-12 to follow"
     )

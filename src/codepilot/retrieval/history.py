@@ -12,7 +12,7 @@ have to reverse-engineer:
 - **Untouched files are absent, not zero.** Emitting ``0`` for every file outside
   the churn window would put the whole repository into the candidate set and pin
   the min-max floor to a value that means "no evidence".
-- **No query, by design.** 02 §8.2 lists this channel's input as 无: churn does
+- **No query, by design.** 02 §8.2 gives this channel no input at all: churn does
   not depend on the issue text. Fusion (V-16) consumes per-channel candidate
   lists, so the channels do not have to share a call signature.
 

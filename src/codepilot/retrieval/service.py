@@ -73,7 +73,8 @@ def retrieve_symbols(
     query = build_query(issue, repo_files=(s.path for s in symbols), repo_root=root)
     if channel == "structural":
         assert graph is not None
-        # 种子默认取词法通道的完整排名；结构通道自己截 Top-20。
+        # Seeds default to the lexical channel's full ranking; the structural
+        # channel truncates to its own Top-20.
         source = (
             seeds
             if seeds is not None

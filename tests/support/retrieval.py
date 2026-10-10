@@ -86,10 +86,13 @@ def seed(sid, score, qualified_name=None, path="a.py", start=1):
 
 
 class FakeGraph:
-    """``RepoGraph.adjacent`` 的内存替身：边表 + 相同的方向、种类与最强边收敛规则。
+    """In-memory stand-in for ``RepoGraph.adjacent``: an edge table with the same
+    direction, kind filter and strongest-edge collapse rules.
 
-    边为 ``(source_symbol, target_symbol, kind, confidence, line)``。通道单测用它
-    而不是真图，才能把「深度衰减」「种类过滤」「TEST 反推」这些行为与索引层解耦。
+    Edges are ``(source_symbol, target_symbol, kind, confidence, line)``. Channels
+    are built against this instead of a real graph so that depth decay, kind
+    filtering and TEST reverse-lookup stay testable without an index, a database or
+    a repository on disk.
     """
 
     def __init__(self, edges=()):

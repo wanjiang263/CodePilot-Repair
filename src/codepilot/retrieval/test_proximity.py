@@ -74,18 +74,13 @@ class TestProximityChannel:
         for test in matched:
             for neighbor in self.source.adjacent(test.qualified_name, self.kinds, direction="out"):
                 target = neighbor.symbol
-                if (
-                    target.kind in TEST_KINDS
-                    or target.id not in self._by_id
-                    or target.id == test.id
-                ):
+                # Duplicate edges from one test to one target are already collapsed
+                # to the strongest by ``adjacent`` (R-17 semantics).
+                if target.kind in TEST_KINDS or target.id not in self._by_id:
                     continue
-                weights = evidence.setdefault(target.id, {})
-                previous = weights.get(test.id)
-                weight = confidence_to_score(neighbor.confidence)
-                if previous is None or weight > previous:
-                    # 同一测试对同一目标有多条边时只算最强的一条。
-                    weights[test.id] = weight
+                evidence.setdefault(target.id, {})[test.id] = confidence_to_score(
+                    neighbor.confidence
+                )
         scores = {
             target_id: sum(weights[key] for key in sorted(weights))
             for target_id, weights in evidence.items()
