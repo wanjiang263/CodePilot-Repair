@@ -130,6 +130,7 @@ class OpenAICompatibleEmbeddingProvider:
         dimensions: int,
         revision: str,
         api_key: str,
+        batch_size: int = 32,
         client: httpx.Client | None = None,
         policy: RetryPolicy | None = None,
         limiter: ConcurrencyLimiter | None = None,
@@ -140,6 +141,9 @@ class OpenAICompatibleEmbeddingProvider:
             raise ProviderNotAllowedError(
                 "Embedding provider is not allowed", provider=provider.name
             )
+        if batch_size < 1:
+            raise ValueError("batch_size must be positive")
+        self.batch_size = batch_size
         self._url = provider.base_url.rstrip("/") + "/embeddings"
         self.identity = EmbeddingIdentity(
             f"openai-compatible:{provider.name}:{self._url}", model, dimensions, revision
@@ -155,6 +159,13 @@ class OpenAICompatibleEmbeddingProvider:
     def embed(self, texts: Sequence[str]) -> Vectors:
         if not texts:
             return np.empty((0, self.identity.dimensions), dtype=np.float64)
+        batches = [
+            self._embed_batch(texts[start : start + self.batch_size])
+            for start in range(0, len(texts), self.batch_size)
+        ]
+        return np.vstack(batches)
+
+    def _embed_batch(self, texts: Sequence[str]) -> Vectors:
         body: dict[str, object] = {
             "model": self.identity.model,
             "input": list(texts),

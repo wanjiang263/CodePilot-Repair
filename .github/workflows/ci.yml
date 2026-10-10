@@ -75,7 +75,8 @@ jobs:
         run: uv python install 3.12
 
       - name: Install dependencies
-        run: uv sync --frozen --extra dev --python 3.12
+        # Exercise the optional native backend, while runtime installation stays optional.
+        run: uv sync --frozen --extra dev --extra faiss --python 3.12
 
       - name: Environment
         run: uv run python -c "import platform; from importlib.metadata import version; print(platform.platform()); print(platform.python_version()); print('tree-sitter', version('tree-sitter')); print('tree-sitter-python', version('tree-sitter-python'))" | tee environment.log

@@ -8,7 +8,10 @@ from codepilot.llm.config import ProviderSpec
 from codepilot.llm.errors import LLMError, ProviderError, ProviderNotAllowedError
 from codepilot.llm.retry import RetryPolicy
 from codepilot.retrieval.documents import RetrievalError
-from codepilot.retrieval.embeddings import OpenAICompatibleEmbeddingProvider
+from codepilot.retrieval.embeddings import (
+    CachedEmbeddingProvider,
+    OpenAICompatibleEmbeddingProvider,
+)
 
 
 def make_provider(handler, **options):
@@ -154,3 +157,67 @@ def test_owned_client_close():
     ) as provider:
         assert not provider._client.is_closed
     assert provider._client.is_closed
+
+
+def test_cached_api_hits_make_zero_requests_after_restart(tmp_path):
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        inputs = json.loads(request.content)["input"]
+        return httpx.Response(
+            200,
+            json={
+                "data": [
+                    {"index": index, "embedding": [len(text), 1]}
+                    for index, text in enumerate(inputs)
+                ]
+            },
+        )
+
+    provider = make_provider(handler)
+    try:
+        first = CachedEmbeddingProvider(provider, tmp_path).embed(["source", "issue", "source"])
+        assert len(requests) == 1
+        requests.clear()
+        second = CachedEmbeddingProvider(provider, tmp_path).embed(["source", "issue", "source"])
+        np.testing.assert_array_equal(first, second)
+        assert requests == []
+    finally:
+        provider._client.close()
+
+
+def test_api_batch_size_preserves_global_order():
+    requests = []
+
+    def handler(request):
+        inputs = json.loads(request.content)["input"]
+        requests.append(inputs)
+        assert len(inputs) <= 2
+        return httpx.Response(
+            200,
+            json={
+                "data": list(
+                    reversed(
+                        [
+                            {"index": index, "embedding": [len(text), 1]}
+                            for index, text in enumerate(inputs)
+                        ]
+                    )
+                )
+            },
+        )
+
+    provider = make_provider(handler, batch_size=2)
+    try:
+        np.testing.assert_array_equal(
+            provider.embed(["a", "bb", "ccc", "d", "ee"]), [[1, 1], [2, 1], [3, 1], [1, 1], [2, 1]]
+        )
+        assert requests == [["a", "bb"], ["ccc", "d"], ["ee"]]
+    finally:
+        provider._client.close()
+
+
+def test_api_invalid_batch_size():
+    with pytest.raises(ValueError, match="batch_size"):
+        make_provider(lambda _: httpx.Response(200), batch_size=0)
