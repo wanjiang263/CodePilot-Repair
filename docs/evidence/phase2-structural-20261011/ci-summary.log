@@ -1,0 +1,6 @@
+PR #4 head e0ed728 Linux CI (run 38075460519, event pull_request): conclusion success
+  lint + types: PASS
+  pytest (no docker, no llm): 931 passed / 6 skipped / 1 deselected, coverage 94.52%, exit 0
+    skips: 5 Windows-only (taskkill, junction) + 1 slow real-embedding opt-in
+  Phase 1 index in Docker: host marker 1 passed / 937 deselected / 0 skipped; container suite 11 passed
+Faiss extra installed in the pytest job (faiss-cpu downloaded by uv).

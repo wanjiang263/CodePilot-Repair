@@ -20,4 +20,8 @@
 
 `structural-smoke.py` 不使用任何测试替身：mini_auth 被真实 `git init` 成仓库，索引写入真实 SQLite（tree-sitter 解析），结构通道查真实 NetworkX 图，历史通道读真实 `GitHistory`，只有 Issue 文本是手写。它在 base 之前多打一次 `tokens.py` 修改以制造 churn 差异，在索引之后再加一个 base 之后的新文件提交，断言该文件既不进 `file_churn` 也不进排序，并且两次运行逐字节一致、workspace `git status --porcelain` 为空。输出为 `structural-smoke.json` / `.log` 与四份 `channel-*.json`（bm25 / structural / test / history 各一份完整 `RetrievalResult`）。
 
-Linux CI（quality、离线 pytest、Phase 1 Docker）由 PR #4 触发，运行结果与提交 SHA 记录在 `docs/notes/phase2-structural-retrieval.md`。本机 Docker daemon 不可用，`pytest -m docker` 自动 skip，真实容器验收只在 CI 完成。真实本地 code model、真实 Embedding API、真实 LLM 与 04 Phase 2 的 Recall@K / 融合 / 多通道 CLI 验收均为 NOT RUN：本批不产生任何付费调用，也不用 Fake 结果宣称检索质量。
+Linux CI 由 PR #4 触发：`implementation-ci.json` 保存 run `38075460519`（head `e0ed728`）的六个检查链接、时间与实测数字，`ci-summary.log` 是人读摘要——离线 pytest **931 passed / 6 skipped / 1 deselected、覆盖率 94.52%**（6 个 skip 为 5 个 Windows 专属 + 1 个 slow 真实模型），Phase 1 Docker 主机标记 **1 passed / 0 skipped** 且容器内 11 项全通过，pytest job 安装锁定的 `--extra faiss`。结论与链接同步登记在 `docs/notes/phase2-structural-retrieval.md`。
+
+最终全量：Windows **936 passed / 2 skipped / 覆盖率 94.89%**（exit 0，242.60s）。
+
+本机 Docker daemon 不可用，`pytest -m docker` 自动 skip（`docker.log`，exit 0），真实容器验收只在 CI 完成。真实本地 code model、真实 Embedding API、真实 LLM 与 04 Phase 2 的 Recall@K / 融合 / 多通道 CLI 验收均为 NOT RUN：本批不产生任何付费调用，也不用 Fake 结果宣称检索质量。

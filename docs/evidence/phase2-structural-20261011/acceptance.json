@@ -250,6 +250,46 @@
     "真实本地 code model 推理（未安装 sentence-transformers/模型，本批也不需要 embedding）",
     "真实 Embedding API 与真实 LLM（本批零付费调用）",
     "V-14~V-25：通道开关配置、归一化/融合、文件聚合、Recall@K 评估集、多通道 CLI 与跨通道确定性验收",
-    "本机 Docker（daemon 不可用，由 CI 执行）"
-  ]
+    "本机 Docker（daemon 不可用 → 1 skipped；真实容器验收已在 Linux CI 通过）"
+  ],
+  "linux_ci": {
+    "pr": "https://github.com/wanjiang263/CodePilot-Repair/pull/4",
+    "run_id": 38075460519,
+    "head_sha": "e0ed7289cfeb7e502c426b704164fa085e6137c7",
+    "conclusion": "success",
+    "measurements": {
+      "lint + types": "ruff check / ruff format --check / mypy src: success",
+      "pytest (no docker, no llm)": {
+        "collected": 938,
+        "deselected": 1,
+        "passed": 931,
+        "skipped": 6,
+        "skipped_reasons": "5 Windows-only (taskkill / junction) + 1 slow real-embedding opt-in",
+        "coverage": "94.52%",
+        "exit": 0,
+        "dependencies": "uv sync --frozen --extra dev --extra faiss (faiss-cpu installed)"
+      },
+      "Phase 1 index in Docker": {
+        "in_container": "11 passed / 0 skipped",
+        "host_marker": "1 passed, 937 deselected, 0 skipped"
+      }
+    },
+    "jobs": [
+      {
+        "name": "lint + types",
+        "conclusion": "success",
+        "url": "https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38075460519/job/114281383783"
+      },
+      {
+        "name": "pytest (no docker, no llm)",
+        "conclusion": "success",
+        "url": "https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38075460519/job/114281383953"
+      },
+      {
+        "name": "Phase 1 index in Docker",
+        "conclusion": "success",
+        "url": "https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38075460519/job/114281383992"
+      }
+    ]
+  }
 }

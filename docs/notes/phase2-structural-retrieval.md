@@ -35,7 +35,7 @@ PR #3 已合并为 `b0dcf94`，同步本地 main 后从 main 创建 `codex/phase
 | ruff check / ruff format --check / mypy src | PASS（exit 0）/ PASS（139 files already formatted，exit 0）/ PASS（77 source files，exit 0） | ruff.log / format.log / mypy.log |
 | `pytest -m docker`（本机） | SKIP：1 skipped / 937 deselected，exit 0——daemon 不可用时按 03 §13 自动跳过，真实容器验收由 CI 执行 | docker.log |
 | 模块覆盖率 | structural 100%、test_proximity 100%、history 100%、service 100%、graph_source 88.89%（Protocol 声明体）、`repo/graph.py` 97.75%（唯一未覆盖行是 Phase 1 既有的"边源不在符号表"分支，本批未改 `__init__`） | acceptance.json |
-| Linux CI（quality + 离线 pytest + Phase 1 Docker） | PENDING：PR #4 触发后回填真实链接与数字 | — |
+| Linux CI（quality + 离线 pytest + Phase 1 Docker） | PASS：[run 38075460519](https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38075460519) 对 head `e0ed728` 六个检查全绿——lint+types PASS；离线 pytest 931 passed / 6 skipped（5 个 Windows 专属 + 1 个 slow 真实模型）/ 1 deselected，覆盖率 94.52%，exit 0；Phase 1 Docker 主机标记 1 passed / 0 skipped，容器内 11 项全通过 | implementation-ci.json / ci-summary.log |
 | 真实本地 code model 推理 / 真实 Embedding API / 真实 LLM | NOT RUN：本批三个通道不需要 embedding，未产生任何付费调用 | 确定性单测 |
 | 04 Phase 2 完整 Recall@K / 融合 / 多通道 CLI 验收 | NOT RUN：依赖 V-14～V-25，超出本批 | 保留后续任务未完成 |
 
