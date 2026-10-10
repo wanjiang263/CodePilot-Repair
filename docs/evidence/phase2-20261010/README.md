@@ -11,3 +11,11 @@
 源代码和接口约定见 ../../notes/phase2-retrieval.md。未执行真实 LLM、embedding 或产品沙箱验收。
 
 - implementation-ci.json / implementation-ci-summary.log：实现提交 5d61201 的 PR CI 三个 job 全通过；Ubuntu 离线 777 passed / 5 Windows 专属 skip / 1 deselected，覆盖率 93.92%；Docker 1 passed / 0 skipped。完整原始 CI 日志保留在 artifacts/phase2-v01-v05/implementation-ci.log，远端运行 https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38040385681 。
+
+## 最终审查修复版本 9fb1802
+
+- review-pytest.log/xml：本地非 docker/llm 785 passed / 1 deselected，覆盖率 94.31%。
+- review-targeted.log：28 项独立测试通过；review-ruff/format/mypy.log 均 PASS。
+- review-ci.json / review-ci-summary.log：PR CI 三个 job 全绿；Ubuntu 离线 780 passed / 5 Windows 专属 skip / 1 deselected，覆盖率 93.90%；Docker 1 passed / 0 skipped。运行 https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38062687320 。
+- review-retrieve-*.json / stderr.log：同一固定 mini_auth 提交上，两通道再次 exit 0。完整原始 CI 日志留在 artifacts/phase2-v01-v05/review-ci.log。
+- 不带 review- 前缀的日志是初版实现提交 5d61201 的历史证据。

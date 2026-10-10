@@ -16,7 +16,7 @@ ripgrep 参数与 JSON match 格式已通过 Context7 核对官方源码：https
 
 PR #1 收口：修复不可读扫描路径误删、64 位 SHA 历史解析、旧 edges 表迁移；针对性 38 passed，全量离线 758 passed / 1 deselected。合并提交 fd91cd5；[main CI](https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38039498393) 的 quality、offline pytest、Phase 1 Docker 全绿。仓库仍为 private。
 
-本批独立测试 25 passed：traceback 顺序及重复帧、路径引号与空错误信息、仓库内外路径、camel/snake 拆词、60/61 行截断、越界/链接路径、BM25 手算数值及顺序、空语料/零匹配/负分、稳定排序、真实 rg 特殊字符/空格路径/未索引文件/最内层 symbol、缺 rg/失败/超时，以及两个通道的真实 mini_auth CLI。
+初版独立测试 25 passed：traceback 顺序及重复帧、路径引号与空错误信息、仓库内外路径、camel/snake 拆词、60/61 行截断、越界/链接路径、BM25 手算数值及顺序、空语料/零匹配/负分、稳定排序、真实 rg 特殊字符/空格路径/未索引文件/最内层 symbol、缺 rg/失败/超时，以及两个通道的真实 mini_auth CLI。
 
 真实 retrieve 验收（非模拟）：从 mini_auth 新建独立 fixture Git 仓库，在固定提交上执行以下命令，两条均 exit 0。完整 JSON、stderr、fixture commit 和最终质量门禁见 `docs/evidence/phase2-20261010/`，本地原始产物保留在 `artifacts/phase2-v01-v05/`。
 
@@ -34,3 +34,5 @@ codepilot retrieve "Session.login password" --repo <fixture> --base-commit <固�
 ## PR #2 审查补充
 
 修复未加引号的 PascalCase 类名原始拼写丢失、Windows traceback 大小写误判，并通过真实 rg 回归发现并修复 module/class 同范围时的命中归属。最终针对性 **28 passed**；ruff/format/mypy 全通过。旧日志保留为初版证据，审查修复后的日志使用 review- 前缀。
+
+最终审查修复提交 `9fb1802`：本地非 docker/llm **785 passed / 1 deselected / 覆盖率 94.31%**，28 项独立测试、ruff、format、mypy 均 PASS；[最终代码 PR CI](https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38062687320) 三个 job 全绿，Ubuntu **780 passed / 5 Windows 专属 skip / 1 deselected / 覆盖率 93.90%**、Docker **1 passed / 0 skipped**。两条 PR 审查线程已解决，两个 mini_auth retrieve 命令再次 exit 0；最终证据为 `docs/evidence/phase2-20261010/review-*`。
