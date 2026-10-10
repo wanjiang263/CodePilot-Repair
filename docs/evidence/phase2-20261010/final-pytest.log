@@ -1,0 +1,90 @@
+........................................................................ [  9%]
+........................................................................ [ 18%]
+........................................................................ [ 27%]
+........................................................................ [ 36%]
+........................................................................ [ 46%]
+........................................................................ [ 55%]
+........................................................................ [ 64%]
+........................................................................ [ 73%]
+........................................................................ [ 82%]
+........................................................................ [ 92%]
+..............................................................           [100%]
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.12.7-final-0 _______________
+
+Name                                       Stmts   Miss Branch BrPart  Cover
+----------------------------------------------------------------------------
+src\codepilot\__init__.py                      3      0      0      0   100%
+src\codepilot\__main__.py                      4      4      2      0     0%
+src\codepilot\api\__init__.py                  3      0      0      0   100%
+src\codepilot\api\app.py                      26      1      6      1    94%
+src\codepilot\artifacts.py                    75      1      8      0    99%
+src\codepilot\clock.py                         5      0      0      0   100%
+src\codepilot\config.py                       53      2      6      1    95%
+src\codepilot\fsutil.py                       84     29     28      6    65%
+src\codepilot\llm\__init__.py                 12      0      0      0   100%
+src\codepilot\llm\base.py                      8      0      0      0   100%
+src\codepilot\llm\capabilities.py             87      4     36      4    93%
+src\codepilot\llm\config.py                  160     12     50      6    90%
+src\codepilot\llm\cost.py                     29      0      4      0   100%
+src\codepilot\llm\errors.py                   36      0      6      0   100%
+src\codepilot\llm\fake.py                     65      1     24      1    98%
+src\codepilot\llm\openai_compatible.py       121      5     28      1    96%
+src\codepilot\llm\record.py                   83      4      6      2    93%
+src\codepilot\llm\registry.py                 93      2     20      2    96%
+src\codepilot\llm\replay.py                   57      2     14      0    97%
+src\codepilot\llm\retry.py                    77      3     22      1    96%
+src\codepilot\llm\structured.py               67      2     22      1    97%
+src\codepilot\llm\tracking.py                 40      2      4      2    91%
+src\codepilot\llm\types.py                    83      1      2      0    99%
+src\codepilot\observability\__init__.py        4      0      0      0   100%
+src\codepilot\observability\events.py         80      0      8      2    98%
+src\codepilot\observability\logging.py        23      0      2      0   100%
+src\codepilot\observability\redaction.py      35      0     16      0   100%
+src\codepilot\repo\__init__.py                 2      0      0      0   100%
+src\codepilot\repo\calls.py                   44      1     26      4    93%
+src\codepilot\repo\context.py                 68      1     24      2    97%
+src\codepilot\repo\edges.py                   60      1     48      3    96%
+src\codepilot\repo\git_history.py            202      6     78      6    96%
+src\codepilot\repo\gitcmd.py                  76      7     14      5    87%
+src\codepilot\repo\graph.py                   59      4     18      2    92%
+src\codepilot\repo\imports.py                 84      1     38      0    99%
+src\codepilot\repo\index.py                  211      2     52      2    98%
+src\codepilot\repo\models.py                  45      0      0      0   100%
+src\codepilot\repo\parser.py                 151      4     34      3    96%
+src\codepilot\repo\resolution.py             170     12    102     13    91%
+src\codepilot\repo\scanner.py                136      7     34      1    95%
+src\codepilot\repo\symbols.py                106      2     40      4    96%
+src\codepilot\repo\test_links.py              40      0     20      0   100%
+src\codepilot\repo\workspace.py              314     29    108     22    87%
+src\codepilot\retrieval\__init__.py            0      0      0      0   100%
+src\codepilot\retrieval\documents.py          49      1     18      1    97%
+src\codepilot\retrieval\lexical.py           100      4     36      3    95%
+src\codepilot\retrieval\query.py              54      0     12      0   100%
+src\codepilot\retrieval\service.py            17      1      4      1    90%
+src\codepilot\schemas\__init__.py             19      0      0      0   100%
+src\codepilot\schemas\budget.py               19      1      0      0    95%
+src\codepilot\schemas\common.py               10      0      0      0   100%
+src\codepilot\schemas\diagnosis.py            24      0      0      0   100%
+src\codepilot\schemas\enums.py                75      0      0      0   100%
+src\codepilot\schemas\execution.py            35      2      0      0    94%
+src\codepilot\schemas\impact.py               26      0      0      0   100%
+src\codepilot\schemas\issue.py                16      0      0      0   100%
+src\codepilot\schemas\localization.py          9      0      0      0   100%
+src\codepilot\schemas\plan.py                 17      0      0      0   100%
+src\codepilot\schemas\progress.py             16      0      4      0   100%
+src\codepilot\schemas\regression.py           23      1      0      0    96%
+src\codepilot\schemas\reproduction.py         18      0      0      0   100%
+src\codepilot\schemas\retrieval.py            53      0      0      0   100%
+src\codepilot\schemas\review.py               17      1      0      0    94%
+src\codepilot\schemas\state.py                63      2      0      0    97%
+src\codepilot\schemas\usage.py                36      1      2      0    97%
+src\codepilot\schemas\validation.py           42      2      0      0    95%
+src\codepilot\storage\base.py                  5      0      0      0   100%
+src\codepilot\storage\db.py                   41      4      6      1    89%
+src\codepilot\storage\models.py              115      0      0      0   100%
+src\codepilot\storage\repository.py          231     13     36      3    94%
+----------------------------------------------------------------------------
+TOTAL                                       4311    185   1068    106    94%
+Required test coverage of 80.0% reached. Total coverage: 94.33%
+782 passed, 1 deselected in 323.60s (0:05:23)

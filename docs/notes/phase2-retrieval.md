@@ -28,3 +28,5 @@ codepilot retrieve "Session.login password" --repo <fixture> --base-commit <固�
 此次 BM25 首位是 `tests.test_session.TestSession`，ripgrep 首位是 `tests.test_session.TestSession.test_login_with_correct_password`；`miniauth.session.Session.login` 在 ripgrep 第 3 位。这里只验证可运行性和接口，不宣称检索质量提高；尚未实现的融合、traceback 置顶和 Recall@K 评估均不算本批成果。
 
 限制：自然语言采用 Unicode 词抽取与英文停用词表，未提供中文分词器；绝对 traceback 路径只能在当前 workspace 根目录下精确映射；CLI 目前每次建立内存索引，无持久检索缓存或完整 snapshot 管理。旧 RetrievalQuery.traceback_frames 和 RetrievalResult 既有字段保持兼容。
+
+最终验收：本地非 docker/llm **782 passed / 1 deselected / 覆盖率 94.33%**；ruff check、format check、mypy src 全 PASS。实现提交 `5d61201` 的 [PR #2 CI](https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38040385681) 三个 job 全绿：Ubuntu 离线 **777 passed / 5 Windows 专属 skip / 1 deselected / 覆盖率 93.92%**，Phase 1 Docker **1 passed / 0 skipped**。本地本批未重复运行 Docker；CI 已执行既有真实验收，未新增产品 sandbox。
