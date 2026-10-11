@@ -159,3 +159,32 @@ def test_invalid_runtime_config_preflight(data):
 
     with pytest.raises(ValueError):
         RetrievalOptions.model_validate(data)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Please fix handling of README.md",
+        "Attach the revoked session log to incident-notes.txt",
+        "Sessions end too early.\nUpdate expiry handling in notes.md",
+    ],
+)
+def test_issue_prose_ending_like_a_file_name_stays_text(isolated, text):
+    result = CliRunner().invoke(app, ["retrieve", "--repo", str(FIXTURE), "--issue", text])
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert json.loads(result.stdout)["query"]["raw_issue"] == text
+
+
+def test_issue_reads_a_real_file_whose_name_contains_spaces(isolated):
+    issue = isolated / "my issue.md"
+    issue.write_text("Tokens stop working at the expiry second.", encoding="utf-8")
+    result = CliRunner().invoke(app, ["retrieve", "--repo", str(FIXTURE), "--issue", str(issue)])
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert json.loads(result.stdout)["query"]["raw_issue"] == issue.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("path", ["missing.md", "docs/missing.md", "no/such/issue.txt"])
+def test_an_absent_issue_path_still_fails_before_retrieval(isolated, path):
+    result = CliRunner().invoke(app, ["retrieve", "--repo", str(FIXTURE), "--issue", path])
+    assert result.exit_code == 2, result.stdout + result.stderr
+    assert "Issue 文件不存在" in result.stdout + result.stderr

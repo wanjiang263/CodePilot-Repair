@@ -330,6 +330,20 @@ def _not_yet(command: str) -> None:
     raise typer.Exit(code=2)
 
 
+def _looks_like_path(text: str) -> bool:
+    """Decide whether ``--issue`` carried a file path rather than issue prose.
+
+    ``Please fix handling of README.md`` is a one-line issue, not a missing file, so
+    only separated, prefixed or single-token spellings ask for the path lookup. An
+    existing path always wins that check because ``retrieve`` probes it first.
+    """
+    if "/" in text or "\\" in text:
+        return True
+    if text.startswith((".", "~")):
+        return True
+    return " " not in text.strip()
+
+
 @app.command("retrieve")
 def retrieve(
     query: str | None = typer.Argument(None, help="检索语句（兼容原有位置参数）。"),
@@ -367,7 +381,11 @@ def retrieve(
             file = Path(issue)
             if file.is_file():
                 text = file.read_text(encoding="utf-8")
-            elif "\n" not in issue and file.suffix.lower() in {".md", ".txt"}:
+            elif (
+                "\n" not in issue
+                and file.suffix.lower() in {".md", ".txt"}
+                and _looks_like_path(issue)
+            ):
                 raise ValueError(f"Issue 文件不存在: {file}")
         if not text.strip():
             raise ValueError("Issue 不能为空")
