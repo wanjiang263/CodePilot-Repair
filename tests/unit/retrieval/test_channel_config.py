@@ -1,4 +1,4 @@
-"""V-14: independent switches, preflight dependencies and frozen defaults."""
+"""V-14 channel configuration: independent switches, dependencies and frozen defaults."""
 
 from pathlib import Path
 
