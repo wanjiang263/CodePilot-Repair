@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="7" time="27.632" timestamp="2026-10-11T23:29:27.931485+08:00" hostname="LAPTOP-H0FUOTNB"><testcase classname="tests.integration.test_retrieval_repository_kinds" name="test_normal_repository_is_a_git_source" time="2.597" /><testcase classname="tests.integration.test_retrieval_repository_kinds" name="test_bare_repository_is_a_git_source_and_indexes_the_checked_out_tree" time="4.998"><failure message="AssertionError: assert 'directory_snapshot' == 'git'&#10;  &#10;  - git&#10;  + directory_snapshot">isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-559/test_bare_repository_is_a_git_0')
+
+    def test_bare_repository_is_a_git_source_and_indexes_the_checked_out_tree(isolated):
+        repo = init_repo(isolated / "normal", SOURCE_FILES)
+        bare = isolated / "bare.git"
+        assert _bare_clone(repo, bare) == repo.head
+    
+        with indexed_repository(_task(bare), isolated / "cache") as indexed:
+&gt;           assert indexed.source_kind == "git"
+E           AssertionError: assert 'directory_snapshot' == 'git'
+E             
+E             - git
+E             + directory_snapshot
+
+tests\integration\test_retrieval_repository_kinds.py:67: AssertionError</failure></testcase><testcase classname="tests.integration.test_retrieval_repository_kinds" name="test_bare_repository_keeps_base_commit_isolation" time="1.405"><failure message="ValueError: Directory snapshot has no Git history; base_commit must be HEAD or snapshot">isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-559/test_bare_repository_keeps_bas0')
+
+    def test_bare_repository_keeps_base_commit_isolation(isolated):
+        repo = init_repo(isolated / "normal", SOURCE_FILES)
+        base = repo.head
+        repo.write("src/miniauth/late.py", "def only_after_base() -&gt; None:\n    return None\n")
+        after = repo.commit("after base")
+        assert base != after
+        bare = isolated / "late.git"
+        _bare_clone(repo, bare)
+    
+        for commit, expected in ((base, False), (after, True)):
+&gt;           with indexed_repository(_task(bare, commit), isolated / "cache") as indexed:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_retrieval_repository_kinds.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+D:\Anaconda\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task = RetrievalInput(task_id='p2-1', repo='C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-559\\test_bare_...mit='a1f1dd7b04161d2d8be73e2fb979a86d2a8a35de', issue='Freshly issued tokens stop working at the exact expiry second.')
+cache_dir = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-559/test_bare_repository_keeps_bas0/cache')
+
+    @contextmanager
+    def indexed_repository(task: RetrievalInput, cache_dir: Path) -&gt; Iterator[IndexedRepository]:
+        """Owned temporary workspace and in-memory DB; no task labels accepted."""
+        source = normalize_source(task.repo)
+        if source.local_path is not None and not source.local_path.is_dir():
+            raise FileNotFoundError(f"Repository directory missing: {source.local_path}")
+        snapshot = source.local_path is not None and not (source.local_path / ".git").exists()
+        if snapshot and task.base_commit not in {"HEAD", "snapshot"}:
+&gt;           raise ValueError(
+                "Directory snapshot has no Git history; base_commit must be HEAD or snapshot"
+            )
+E           ValueError: Directory snapshot has no Git history; base_commit must be HEAD or snapshot
+
+src\codepilot\retrieval\runner.py:243: ValueError</failure></testcase><testcase classname="tests.integration.test_retrieval_repository_kinds" name="test_linked_worktree_is_a_git_source" time="2.882" /><testcase classname="tests.integration.test_retrieval_repository_kinds" name="test_plain_directory_keeps_the_snapshot_behaviour" time="2.622" /><testcase classname="tests.integration.test_retrieval_repository_kinds" name="test_git_source_still_rejects_the_snapshot_sentinel" time="4.917"><failure message="Failed: A Git source accepted base_commit=snapshot">isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-559/test_git_source_still_rejects_0')
+
+    def test_git_source_still_rejects_the_snapshot_sentinel(isolated):
+        repo = init_repo(isolated / "normal", SOURCE_FILES)
+        bare = isolated / "rejected.git"
+        _bare_clone(repo, bare)
+        for path in (repo.path, bare):
+            with (
+                pytest.raises(ValueError, match="requires an explicit full base SHA"),
+                indexed_repository(_task(path, "snapshot"), isolated / "cache"),
+            ):
+&gt;               pytest.fail("A Git source accepted base_commit=snapshot")
+E               Failed: A Git source accepted base_commit=snapshot
+
+tests\integration\test_retrieval_repository_kinds.py:127: Failed</failure></testcase><testcase classname="tests.integration.test_retrieval_repository_kinds" name="test_cli_retrieve_reports_a_git_source_for_a_bare_repository" time="4.719"><failure message="AssertionError: assert 'directory_snapshot' == 'git'&#10;  &#10;  - git&#10;  + directory_snapshot">isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-559/test_cli_retrieve_reports_a_gi0')
+
+    def test_cli_retrieve_reports_a_git_source_for_a_bare_repository(isolated):
+        repo = init_repo(isolated / "normal", SOURCE_FILES)
+        bare = isolated / "cli.git"
+        _bare_clone(repo, bare)
+    
+        result = CliRunner().invoke(
+            app,
+            [
+                "--log-level",
+                "ERROR",
+                "retrieve",
+                "--repo",
+                str(bare),
+                "--issue",
+                "token expiry boundary",
+            ],
+        )
+        assert result.exit_code == 0, result.stdout + result.stderr
+        data = json.loads(result.stdout)
+&gt;       assert data["execution"]["source_kind"] == "git"
+E       AssertionError: assert 'directory_snapshot' == 'git'
+E         
+E         - git
+E         + directory_snapshot
+
+tests\integration\test_retrieval_repository_kinds.py:149: AssertionError</failure></testcase></testsuite></testsuites>

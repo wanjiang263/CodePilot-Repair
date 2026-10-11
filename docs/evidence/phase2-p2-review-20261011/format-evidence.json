@@ -1,0 +1,11 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "ruff",
+    "format",
+    "docs/evidence/phase2-p2-review-20261011",
+    "docs/evidence/phase2-p2-review-20261011/../../notes/phase2-p2-review.md"
+  ],
+  "exit_code": 0
+}

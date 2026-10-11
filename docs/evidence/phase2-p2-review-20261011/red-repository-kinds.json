@@ -1,0 +1,11 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/integration/test_retrieval_repository_kinds.py",
+    "-q",
+    "--junitxml=docs/evidence/phase2-p2-review-20261011/red-repository-kinds.xml"
+  ],
+  "exit_code": 1
+}

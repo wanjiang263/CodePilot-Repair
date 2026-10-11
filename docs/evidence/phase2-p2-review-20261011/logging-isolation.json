@@ -1,0 +1,13 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/integration/test_retrieval_repository_kinds.py",
+    "tests/unit/retrieval/test_embedding_cache.py",
+    "tests/unit/test_cli.py",
+    "-q",
+    "--junitxml=docs/evidence/phase2-p2-review-20261011/logging-isolation.xml"
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,11 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/integration/test_cli_multichannel_retrieve.py",
+    "-q",
+    "--junitxml=docs/evidence/phase2-p2-review-20261011/green-issue-text.xml"
+  ],
+  "exit_code": 0
+}
