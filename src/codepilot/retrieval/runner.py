@@ -232,13 +232,35 @@ def _snapshot(source: Path, target: Path) -> None:
         run_git(args, cwd=target, env=env)
 
 
+def _is_git_repository(path: Path) -> bool:
+    """Ask Git whether ``path`` itself is a repository: normal, bare or a worktree.
+
+    Probing for a ``.git`` **directory** misses both shapes without one — a bare
+    repository has no ``.git`` child at all, and a linked worktree keeps ``.git`` as
+    a file pointing elsewhere. Classifying them as plain directories would snapshot
+    ``objects/`` and ``refs/`` as source files and index no real candidates.
+    """
+    resolved = path.resolve()
+    toplevel = run_git(["rev-parse", "--show-toplevel"], cwd=path, check=False)
+    if toplevel.returncode == 0 and Path(toplevel.stdout.strip()).resolve() == resolved:
+        return True
+    bare = run_git(["rev-parse", "--is-bare-repository"], cwd=path, check=False)
+    git_dir = run_git(["rev-parse", "--git-dir"], cwd=path, check=False)
+    return (
+        bare.returncode == 0
+        and bare.stdout.strip() == "true"
+        and git_dir.returncode == 0
+        and (path / git_dir.stdout.strip()).resolve() == resolved
+    )
+
+
 @contextmanager
 def indexed_repository(task: RetrievalInput, cache_dir: Path) -> Iterator[IndexedRepository]:
     """Owned temporary workspace and in-memory DB; no task labels accepted."""
     source = normalize_source(task.repo)
     if source.local_path is not None and not source.local_path.is_dir():
         raise FileNotFoundError(f"Repository directory missing: {source.local_path}")
-    snapshot = source.local_path is not None and not (source.local_path / ".git").exists()
+    snapshot = source.local_path is not None and not _is_git_repository(source.local_path)
     if snapshot and task.base_commit not in {"HEAD", "snapshot"}:
         raise ValueError(
             "Directory snapshot has no Git history; base_commit must be HEAD or snapshot"
