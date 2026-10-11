@@ -1,0 +1,36 @@
+{
+  "mode": "Original Mock PermissionError injection; real scanner/index/evaluation, no fake candidates",
+  "original_script": "artifacts\\phase2-final-review-20261011-a097005\\reproduce-index-diagnostics.py",
+  "original_script_sha256": "063b159ce10d35fe7b7e28f0602001029a51fdb41a68ee0051d3206afc04cab5",
+  "original_script_unchanged": true,
+  "old_zero_failure_assertion_failed_as_expected": true,
+  "original_before_evidence_unchanged": true,
+  "row_failures": {
+    "bm25": 1,
+    "ripgrep": 1,
+    "semantic": 1,
+    "structural": 1,
+    "test": 1,
+    "history": 1,
+    "fused": 1
+  },
+  "row_result_count": {
+    "bm25": 0,
+    "ripgrep": 0,
+    "semantic": 0,
+    "structural": 0,
+    "test": 0,
+    "history": 0,
+    "fused": 0
+  },
+  "scan_counts": {
+    "binary": 0,
+    "files": 13,
+    "ignored": 0,
+    "symlinks": 0,
+    "too_large": 0,
+    "unreadable": 1
+  },
+  "denominator": 1,
+  "verifier_exit_code": 0
+}

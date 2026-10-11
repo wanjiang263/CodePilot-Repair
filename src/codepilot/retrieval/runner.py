@@ -11,9 +11,16 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    SerializerFunctionWrapHandler,
+    model_serializer,
+    model_validator,
+)
 
 from codepilot.fsutil import remove_tree
 from codepilot.repo.git_history import FileChurn, GitHistory
@@ -21,6 +28,7 @@ from codepilot.repo.gitcmd import run_git
 from codepilot.repo.graph import RepoGraph
 from codepilot.repo.index import Indexer, RepositoryIndex
 from codepilot.repo.models import Symbol
+from codepilot.repo.scanner import RepositoryScanner, ScanResult
 from codepilot.repo.workspace import WorkspaceManager, normalize_source, repository_id
 from codepilot.retrieval.config import CHANNELS, RetrievalConfig, SeedChannel
 from codepilot.retrieval.input import RetrievalInput
@@ -66,12 +74,58 @@ class RetrievalOptions(BaseModel):
         return self
 
 
+class IndexDiagnostics(BaseModel):
+    scan_counts: dict[str, int]
+    parse_errors: list[str]
+
+
+class IndexingError(OSError):
+    """A task-level index failure; never yield a partial repository as success."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str,
+        exception_type: str,
+        category: Literal["environment", "execution"],
+        count: int = 1,
+        paths: tuple[str, ...] = (),
+        scan_counts: dict[str, int] | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.code = code
+        self.exception_type = exception_type
+        self.category = category
+        self.count = count
+        self.paths = paths
+        self.scan_counts = scan_counts or {}
+
+
+class _DiagnosticScanner(RepositoryScanner):
+    """Retain the actual scan once, including relative unreadable paths."""
+
+    result: ScanResult | None = None
+
+    def scan(self, root: Path) -> ScanResult:
+        self.result = super().scan(root)
+        return self.result
+
+
 class ExecutionInfo(BaseModel):
     source_kind: Literal["git", "directory_snapshot"]
     base_commit: str
     embedding_description: str
     structural_seed: str | None
     options: RetrievalOptions
+    index_diagnostics: IndexDiagnostics | None = None
+
+    @model_serializer(mode="wrap")
+    def serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if self.index_diagnostics is None:
+            data.pop("index_diagnostics", None)
+        return data
 
 
 @dataclass(frozen=True)
@@ -82,6 +136,7 @@ class IndexedRepository:
     churn: dict[str, FileChurn]
     base_commit: str
     source_kind: Literal["git", "directory_snapshot"]
+    index_diagnostics: IndexDiagnostics | None = None
 
     def retrieve(
         self, task: RetrievalInput, options: RetrievalOptions, *, limit: int = 20
@@ -127,6 +182,7 @@ class IndexedRepository:
                 else None
             ),
             options=options,
+            index_diagnostics=self.index_diagnostics,
         )
         return result, info
 
@@ -216,9 +272,51 @@ def indexed_repository(task: RetrievalInput, cache_dir: Path) -> Iterator[Indexe
         init_db(engine)
         with session_scope(create_session_factory(engine)) as session:
             stores = Stores(session)
-            Indexer().index(stores, workspace)
-            symbols = tuple(RepositoryIndex(stores, workspace.repository_id).symbol_objects())
-            graph = RepoGraph.from_stores(stores, workspace.repository_id)
+            scanner = _DiagnosticScanner()
+            try:
+                stats = Indexer(scanner=scanner).index(stores, workspace)
+                paths = (
+                    tuple(sorted(set(scanner.result.unreadable)))
+                    if scanner.result is not None
+                    else ()
+                )
+                unreadable = max(stats.scan.get("unreadable", 0), len(paths))
+                if unreadable:
+                    message = f"Repository index incomplete: {unreadable} unreadable path(s)"
+                    if paths:
+                        message += ": " + ", ".join(paths)
+                    raise IndexingError(
+                        message,
+                        code="unreadable",
+                        exception_type="IndexingError",
+                        category="environment",
+                        count=unreadable,
+                        paths=paths,
+                        scan_counts=dict(sorted(stats.scan.items())),
+                    )
+                symbols = tuple(RepositoryIndex(stores, workspace.repository_id).symbol_objects())
+                graph = RepoGraph.from_stores(stores, workspace.repository_id)
+            except IndexingError:
+                raise
+            except Exception as exc:
+                # Index/backend exceptions end this task, preserving their type and
+                # cause. This boundary never returns an empty or partial fallback.
+                message = str(exc).replace(str(workspace.path), "<repo>")
+                message = message.replace(workspace.path.as_posix(), "<repo>")
+                raise IndexingError(
+                    message,
+                    code="index_execution",
+                    exception_type=type(exc).__name__,
+                    category="environment" if isinstance(exc, OSError) else "execution",
+                ) from exc
+        diagnostics = (
+            IndexDiagnostics(
+                scan_counts=dict(sorted(stats.scan.items())),
+                parse_errors=sorted(stats.parse_errors),
+            )
+            if stats.parse_errors or any(v for k, v in stats.scan.items() if k != "files")
+            else None
+        )
         yield IndexedRepository(
             workspace.path,
             symbols,
@@ -226,6 +324,7 @@ def indexed_repository(task: RetrievalInput, cache_dir: Path) -> Iterator[Indexe
             history,
             workspace.base_commit,
             "directory_snapshot" if snapshot else "git",
+            diagnostics,
         )
     finally:
         engine.dispose()

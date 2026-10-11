@@ -1,0 +1,24 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______ test_unreadable_root_keeps_its_path_when_no_files_were_scanned ________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-444/test_unreadable_root_keeps_its0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000014542F32600>
+
+    def test_unreadable_root_keeps_its_path_when_no_files_were_scanned(isolated, monkeypatch):
+        monkeypatch.setattr(
+            RepositoryScanner, "scan", lambda self, root: ScanResult(files=(), unreadable=(".",))
+        )
+        report = run_evaluation(load_dataset(DATASET)[:1], FIXTURES, isolated / "cache")
+        for row in report.rows:
+            detail = next(iter(row.failure_details.values()))
+>           assert detail.paths == ["."]
+E           AssertionError: assert [] == ['.']
+E             
+E             Right contains one more item: '.'
+E             Use -v to get more diff
+
+tests\integration\test_retrieval_index_failures.py:110: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_retrieval_index_failures.py::test_unreadable_root_keeps_its_path_when_no_files_were_scanned
+1 failed in 10.64s

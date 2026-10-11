@@ -4,19 +4,34 @@ import hashlib
 import platform
 from importlib.metadata import version
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, SerializerFunctionWrapHandler, model_serializer
 
 from codepilot.repo.gitcmd import GitError
 from codepilot.repo.workspace import WorkspaceError
 from codepilot.retrieval.config import CHANNELS, RetrievalConfig, SeedChannel
 from codepilot.retrieval.dataset import RetrievalCase, validate_gold
-from codepilot.retrieval.documents import RetrievalError
 from codepilot.retrieval.eval import EvaluationReport, Prediction, evaluate
 from codepilot.retrieval.offline import OFFLINE_DESCRIPTION
-from codepilot.retrieval.runner import ExecutionInfo, RetrievalOptions, indexed_repository
+from codepilot.retrieval.runner import (
+    ExecutionInfo,
+    IndexingError,
+    RetrievalOptions,
+    indexed_repository,
+)
 from codepilot.schemas.retrieval import FusionMethod, RetrievalResult
+
+
+class RetrievalFailure(BaseModel):
+    category: Literal["environment", "execution"]
+    stage: Literal["workspace", "index", "retrieval"]
+    code: str
+    exception_type: str
+    message: str
+    count: int = 1
+    paths: list[str] = Field(default_factory=list)
+    scan_counts: dict[str, int] = Field(default_factory=dict)
 
 
 class AblationRow(BaseModel):
@@ -27,6 +42,45 @@ class AblationRow(BaseModel):
     results: dict[str, RetrievalResult] = {}
     execution: dict[str, ExecutionInfo] = {}
     failures: dict[str, str] = {}
+    failure_details: dict[str, RetrievalFailure] = Field(default_factory=dict)
+
+    @model_serializer(mode="wrap")
+    def serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if not self.failure_details:
+            data.pop("failure_details", None)
+        return data
+
+
+def _record_failure(
+    row: AblationRow,
+    task_id: str,
+    error: Exception,
+    stage: Literal["workspace", "retrieval"],
+) -> None:
+    row.failures[task_id] = f"{type(error).__name__}: {error}"
+    if isinstance(error, IndexingError):
+        detail = RetrievalFailure(
+            category=error.category,
+            stage="index",
+            code=error.code,
+            exception_type=error.exception_type,
+            message=str(error),
+            count=error.count,
+            paths=list(error.paths),
+            scan_counts=error.scan_counts,
+        )
+    else:
+        detail = RetrievalFailure(
+            category="environment"
+            if isinstance(error, (WorkspaceError, GitError, OSError))
+            else "execution",
+            stage=stage,
+            code=type(error).__name__,
+            exception_type=type(error).__name__,
+            message=str(error),
+        )
+    row.failure_details[task_id] = detail
 
 
 class RetrievalEvaluation(BaseModel):
@@ -116,8 +170,10 @@ def run_evaluation(
                         result, info = indexed.retrieve(task, row.options, limit=10)
                         row.results[task.task_id] = result
                         row.execution[task.task_id] = info
-                    except (RetrievalError, ValueError, OSError, GitError) as exc:
-                        row.failures[task.task_id] = f"{type(exc).__name__}: {exc}"
+                    except Exception as exc:
+                        # Only retrieval execution is classified here; Gold validation
+                        # below still aborts invalid datasets instead of scoring them.
+                        _record_failure(row, task.task_id, exc, "retrieval")
                 # Gold parsing / mapping occurs on the evaluation side AFTER all inference.
                 try:
                     validate_gold(case, indexed.root, indexed.symbols, dataset_root)
@@ -126,7 +182,7 @@ def run_evaluation(
         except (WorkspaceError, GitError, OSError) as exc:
             for row in rows:
                 if row.options is not None:
-                    row.failures[task.task_id] = f"{type(exc).__name__}: {exc}"
+                    _record_failure(row, task.task_id, exc, "workspace")
     gold = {case.task_id: case.labels() for case in ordered}
     for row in rows:
         if row.options is None:
@@ -190,5 +246,11 @@ def render_table(report: RetrievalEvaluation) -> str:
             else ["NOT RUN"] * 6
         )
         lines.append(" | ".join([row.name, *values, str(len(row.failures))]))
+    for row in report.rows:
+        for task_id, detail in sorted(row.failure_details.items()):
+            lines.append(
+                f"FAILURE {row.name}/{task_id} "
+                f"[{detail.category}/{detail.stage}/{detail.code}] {detail.message}"
+            )
     lines.append("NOT RUN: " + "; ".join(report.not_run))
     return "\n".join(lines)

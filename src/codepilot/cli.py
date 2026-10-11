@@ -472,6 +472,8 @@ def eval_retrieval(
         )
         typer.echo(render_table(report))
         typer.echo(f"Evidence: {destination}")
+        if any(row.failures for row in report.rows):
+            raise typer.Exit(code=1)
     except (ValueError, OSError) as error:
         raise typer.BadParameter(str(error)) from error
 

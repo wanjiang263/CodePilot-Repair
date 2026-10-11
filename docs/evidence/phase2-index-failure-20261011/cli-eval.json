@@ -1,0 +1,18 @@
+{
+  "command": [
+    "uv",
+    "run",
+    "codepilot",
+    "eval-retrieval",
+    "--dataset",
+    "tests/fixtures/retrieval_cases.jsonl"
+  ],
+  "exit_code": 0,
+  "environment": {
+    "UV_OFFLINE": "1",
+    "UV_NO_SYNC": "1",
+    "PYTHONIOENCODING": "utf-8"
+  },
+  "stdout_sha256": "e15b59cc82c08098e24201d7824cd25444802f4f86786e3a4e03a575ccd2bad5",
+  "stderr_sha256": "9681e01230e49bfadbab9832824eaa173df714c4e431dd398185993180682dc3"
+}

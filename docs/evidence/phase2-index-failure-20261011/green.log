@@ -1,0 +1,162 @@
+...FFFF..........                                                        [100%]
+================================== FAILURES ===================================
+_ test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args0] _
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_retrieve_cli_rejects_inco0')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_retrieve_cli_rejects_inco0/cache/cli...pytest-441/test_retrieve_cli_rejects_inco0/cache/cli-workspaces/retrieval-6ntte_5j/workspace/src/miniauth/plugins.py')]
+args = ['verify_token']
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            ["verify_token"],
+            ["--issue", "verify_token"],
+            ["--issue", "verify_token", "--channel", "bm25,ripgrep"],
+        ],
+    )
+    def test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes(
+        isolated, unreadable, args
+    ):
+        command = [
+            "--log-level",
+            "ERROR",
+            "retrieve",
+            "--repo",
+            str(FIXTURES / "repos/mini_auth"),
+            *args,
+        ]
+        first = CliRunner().invoke(app, command)
+        second = CliRunner().invoke(app, command)
+        assert first.exit_code == second.exit_code == 1
+        assert first.stdout == second.stdout == ""
+>       assert first.stderr == second.stderr
+E       AssertionError: assert '2026-10-11T1.../plugins.py\n' == '2026-10-11T1.../plugins.py\n'
+E         
+E         Skipping 140 identical trailing characters in diff, use -v to show
+E         - 2026-10-11T10:21:57.512353Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.109 incremen
+E         ?                   ^   ^^^^                                                                                                                                 ^^
+E         + 2026-10-11T10:21:55.524191Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremen
+E         ?              ...
+E         
+E         ...Full output truncated (1 line hidden), use '-vv' to show
+
+tests\integration\test_retrieval_index_failures.py:118: AssertionError
+_ test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args1] _
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_retrieve_cli_rejects_inco1')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_retrieve_cli_rejects_inco1/cache/cli...pytest-441/test_retrieve_cli_rejects_inco1/cache/cli-workspaces/retrieval-o0lj1esg/workspace/src/miniauth/plugins.py')]
+args = ['--issue', 'verify_token']
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            ["verify_token"],
+            ["--issue", "verify_token"],
+            ["--issue", "verify_token", "--channel", "bm25,ripgrep"],
+        ],
+    )
+    def test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes(
+        isolated, unreadable, args
+    ):
+        command = [
+            "--log-level",
+            "ERROR",
+            "retrieve",
+            "--repo",
+            str(FIXTURES / "repos/mini_auth"),
+            *args,
+        ]
+        first = CliRunner().invoke(app, command)
+        second = CliRunner().invoke(app, command)
+        assert first.exit_code == second.exit_code == 1
+        assert first.stdout == second.stdout == ""
+>       assert first.stderr == second.stderr
+E       AssertionError: assert '2026-10-11T1.../plugins.py\n' == '2026-10-11T1.../plugins.py\n'
+E         
+E         - 2026-10-11T10:22:02.111882Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.11 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+E         ?                   ^^^^^^^^                                                                                                                                 ^
+E         + 2026-10-11T10:22:00.036449Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremental=False removed=0...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+tests\integration\test_retrieval_index_failures.py:118: AssertionError
+_ test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args2] _
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_retrieve_cli_rejects_inco2')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_retrieve_cli_rejects_inco2/cache/cli...pytest-441/test_retrieve_cli_rejects_inco2/cache/cli-workspaces/retrieval-64qerkft/workspace/src/miniauth/plugins.py')]
+args = ['--issue', 'verify_token', '--channel', 'bm25,ripgrep']
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            ["verify_token"],
+            ["--issue", "verify_token"],
+            ["--issue", "verify_token", "--channel", "bm25,ripgrep"],
+        ],
+    )
+    def test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes(
+        isolated, unreadable, args
+    ):
+        command = [
+            "--log-level",
+            "ERROR",
+            "retrieve",
+            "--repo",
+            str(FIXTURES / "repos/mini_auth"),
+            *args,
+        ]
+        first = CliRunner().invoke(app, command)
+        second = CliRunner().invoke(app, command)
+        assert first.exit_code == second.exit_code == 1
+        assert first.stdout == second.stdout == ""
+>       assert first.stderr == second.stderr
+E       AssertionError: assert '2026-10-11T1.../plugins.py\n' == '2026-10-11T1.../plugins.py\n'
+E         
+E         Skipping 140 identical trailing characters in diff, use -v to show
+E         - 2026-10-11T10:22:06.694232Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremen
+E         ?                   ^ ^^  --                                                                                                                                 ^^
+E         + 2026-10-11T10:22:04.338042Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.141 incremen
+E         ?              ...
+E         
+E         ...Full output truncated (1 line hidden), use '-vv' to show
+
+tests\integration\test_retrieval_index_failures.py:118: AssertionError
+________ test_eval_cli_saves_failures_prints_reasons_and_exits_nonzero ________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_eval_cli_saves_failures_p0')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_eval_cli_saves_failures_p0/cache/cli...t-441/test_eval_cli_saves_failures_p0/cache/cli-workspaces/retrieval-3cnhm8ub/workspace/src/miniauth/plugins.py'), ...]
+
+    def test_eval_cli_saves_failures_prints_reasons_and_exits_nonzero(isolated, unreadable):
+        output = isolated / "failed.json"
+        command = [
+            "--log-level",
+            "ERROR",
+            "eval-retrieval",
+            "--dataset",
+            str(DATASET),
+            "--output",
+            str(output),
+        ]
+        first = CliRunner().invoke(app, command)
+        first_json = output.read_bytes()
+        second = CliRunner().invoke(app, command)
+        assert first.exit_code == second.exit_code == 1
+>       assert first.stdout == second.stdout and first.stderr == second.stderr == ""
+E       AssertionError: assert ('Dataset: 12 ...failed.json\n' == 'Dataset: 12 ...failed.json\n'
+E         
+E         Skipping 12465 identical leading characters in diff, use -v to show
+E           ailed.json and '2026-10-11T1...b8 reused=0\n' == '2026-10-11T1...b8 reused=0\n'
+E         
+E         + 2026-10-11T10:22:08.959617Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.187 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+E         + 2026-10-11T10:22:11.157050Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+E         + 2026-10-11T10:22:13.182569Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dan...
+E         
+E         ...Full output truncated (32 lines hidden), use '-vv' to show)
+
+tests\integration\test_retrieval_index_failures.py:137: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_retrieval_index_failures.py::test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args0]
+FAILED tests/integration/test_retrieval_index_failures.py::test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args1]
+FAILED tests/integration/test_retrieval_index_failures.py::test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args2]
+FAILED tests/integration/test_retrieval_index_failures.py::test_eval_cli_saves_failures_prints_reasons_and_exits_nonzero
+4 failed, 13 passed in 115.96s (0:01:55)

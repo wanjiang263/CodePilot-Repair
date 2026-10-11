@@ -1,0 +1,16 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/unit/retrieval/test_retrieval_eval.py",
+    "tests/unit/retrieval/test_retrieval_dataset.py",
+    "tests/integration/test_cli_multichannel_retrieve.py",
+    "tests/integration/test_cli_retrieval_evaluation.py",
+    "tests/integration/test_retrieval_determinism.py",
+    "tests/integration/test_retrieval_index_failures.py",
+    "--junitxml=docs/evidence/phase2-index-failure-20261011/targeted.xml",
+    "-q"
+  ],
+  "exit_code": 0
+}

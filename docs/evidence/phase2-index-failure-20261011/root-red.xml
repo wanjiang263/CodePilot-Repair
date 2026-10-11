@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="10.320" timestamp="2026-10-11T18:26:20.796242+08:00" hostname="LAPTOP-H0FUOTNB"><testcase classname="tests.integration.test_retrieval_index_failures" name="test_unreadable_root_keeps_its_path_when_no_files_were_scanned" time="4.250"><failure message="AssertionError: assert [] == ['.']&#10;  &#10;  Right contains one more item: '.'&#10;  Use -v to get more diff">isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-444/test_unreadable_root_keeps_its0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x0000014542F32600&gt;
+
+    def test_unreadable_root_keeps_its_path_when_no_files_were_scanned(isolated, monkeypatch):
+        monkeypatch.setattr(
+            RepositoryScanner, "scan", lambda self, root: ScanResult(files=(), unreadable=(".",))
+        )
+        report = run_evaluation(load_dataset(DATASET)[:1], FIXTURES, isolated / "cache")
+        for row in report.rows:
+            detail = next(iter(row.failure_details.values()))
+&gt;           assert detail.paths == ["."]
+E           AssertionError: assert [] == ['.']
+E             
+E             Right contains one more item: '.'
+E             Use -v to get more diff
+
+tests\integration\test_retrieval_index_failures.py:110: AssertionError</failure></testcase></testsuite></testsuites>

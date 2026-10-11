@@ -1,0 +1,96 @@
+Dataset: 12 synthetic development tasks (denominator includes failures)
+offline token-hash baseline; not a learned semantic model
+channel | File@1 | File@5 | File@10 | Function@1 | Function@5 | Function@10 | failures
+bm25 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 12
+ripgrep | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 12
+semantic | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 12
+structural | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 12
+test | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 12
+history | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 12
+fused | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 12
+FAILURE bm25/01-expiry-boundary [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE bm25/02-malformed-expiry [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE bm25/03-zero-ttl [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE bm25/04-missing-password [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE bm25/05-missing-account [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE bm25/06-empty-revocation [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE bm25/07-negative-count [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE bm25/08-role-case [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE bm25/09-missing-session [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE bm25/10-empty-logout [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE bm25/11-default-key [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE bm25/12-retry-zero [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE ripgrep/01-expiry-boundary [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE ripgrep/02-malformed-expiry [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE ripgrep/03-zero-ttl [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE ripgrep/04-missing-password [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE ripgrep/05-missing-account [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE ripgrep/06-empty-revocation [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE ripgrep/07-negative-count [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE ripgrep/08-role-case [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE ripgrep/09-missing-session [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE ripgrep/10-empty-logout [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE ripgrep/11-default-key [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE ripgrep/12-retry-zero [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE semantic/01-expiry-boundary [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE semantic/02-malformed-expiry [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE semantic/03-zero-ttl [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE semantic/04-missing-password [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE semantic/05-missing-account [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE semantic/06-empty-revocation [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE semantic/07-negative-count [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE semantic/08-role-case [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE semantic/09-missing-session [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE semantic/10-empty-logout [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE semantic/11-default-key [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE semantic/12-retry-zero [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE structural/01-expiry-boundary [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE structural/02-malformed-expiry [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE structural/03-zero-ttl [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE structural/04-missing-password [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE structural/05-missing-account [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE structural/06-empty-revocation [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE structural/07-negative-count [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE structural/08-role-case [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE structural/09-missing-session [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE structural/10-empty-logout [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE structural/11-default-key [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE structural/12-retry-zero [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE test/01-expiry-boundary [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE test/02-malformed-expiry [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE test/03-zero-ttl [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE test/04-missing-password [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE test/05-missing-account [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE test/06-empty-revocation [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE test/07-negative-count [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE test/08-role-case [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE test/09-missing-session [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE test/10-empty-logout [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE test/11-default-key [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE test/12-retry-zero [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE history/01-expiry-boundary [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE history/02-malformed-expiry [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE history/03-zero-ttl [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE history/04-missing-password [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE history/05-missing-account [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE history/06-empty-revocation [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE history/07-negative-count [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE history/08-role-case [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE history/09-missing-session [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE history/10-empty-logout [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE history/11-default-key [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE history/12-retry-zero [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE fused/01-expiry-boundary [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE fused/02-malformed-expiry [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE fused/03-zero-ttl [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE fused/04-missing-password [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE fused/05-missing-account [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE fused/06-empty-revocation [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE fused/07-negative-count [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE fused/08-role-case [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE fused/09-missing-session [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE fused/10-empty-logout [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE fused/11-default-key [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+FAILURE fused/12-retry-zero [environment/index/unreadable] Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py
+NOT RUN: trained semantic embedding model
+Evidence: C:\Users\lenovo\Desktop\CodePilot-Repair\artifacts\phase2-index-failure-20261011\cli\failed.json

@@ -1,0 +1,18 @@
+{
+  "command": [
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\docs\\evidence\\phase2-index-failure-20261011\\verify-failure-cli.py",
+    "--fault",
+    "--log-level",
+    "ERROR",
+    "eval-retrieval",
+    "--dataset",
+    "tests/fixtures/retrieval_cases.jsonl",
+    "--output",
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase2-index-failure-20261011\\cli\\failed.json"
+  ],
+  "exit_code": 1,
+  "pythonhashseed": "123",
+  "stdout_sha256": "cadd92a998d39f87171ea1446733c1f5d93a4ade665b387d9f5e9c2f64ad0e6a",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

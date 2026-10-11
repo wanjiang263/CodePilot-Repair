@@ -1,0 +1,11 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/integration/test_retrieval_index_failures.py",
+    "--junitxml=docs/evidence/phase2-index-failure-20261011/red.xml",
+    "-q"
+  ],
+  "exit_code": 1
+}
