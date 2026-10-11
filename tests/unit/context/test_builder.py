@@ -366,6 +366,8 @@ def test_gold_patch_and_eval_labels_never_enter_the_context() -> None:
         part(ContextLevel.TARGET_SOURCE, "gold patch", "+fixed", source="gold/patch.diff"),
         part(ContextLevel.CANDIDATE_SIGNATURES, "候选", "x", source="retrieval_gold/solution.py"),
         part(ContextLevel.ISSUE_TEXT, "隐藏测试", "answer=42", source="hidden_test.py"),
+        part(ContextLevel.TARGET_SOURCE, "评测标签", "1 2 3", source="fail_to_pass.json"),
+        part(ContextLevel.ISSUE_TEXT, "提示", "看这里", source="swebench_hints_text.md"),
     ]
     context = builder().build("p", *parts, budget=500)
 
@@ -374,6 +376,9 @@ def test_gold_patch_and_eval_labels_never_enter_the_context() -> None:
     assert "gold_isolation:patch.diff" in joined
     assert "gold_isolation:retrieval_gold" in joined
     assert "gold_isolation:hidden_test" in joined
+    assert "gold_isolation:fail_to_pass" in joined
+    assert "gold_isolation:hints_text" in joined
+    assert "看这里" not in context.text and "1 2 3" not in context.text
     assert "+fixed" not in context.text
     assert "answer=42" not in context.text
     assert "def divide" in context.text
