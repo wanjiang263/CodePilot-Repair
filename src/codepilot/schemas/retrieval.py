@@ -75,6 +75,8 @@ class RankedFile(BaseModel):
     score: float
     top_symbols: list[str] = Field(default_factory=list)
     reason: str | None = None
+    pinned: bool = False
+    """Contains a traceback-pinned symbol; sorts before ordinary files without a score bonus."""
 
 
 class RetrievalQuery(BaseModel):
