@@ -196,6 +196,36 @@ def test_normal_empty_candidates_are_successful_zero_recall(isolated, monkeypatc
     assert "FAILURE" not in render_table(report)
 
 
+_IDENTITY_KEYS = ("qualified_name", "kind", "file")
+
+
+def _symbol_identities(payload: object, found: dict[str, str]) -> dict[str, str]:
+    """Bind each opaque ``symbol_id`` to the identity it must encode."""
+    if isinstance(payload, dict):
+        symbol_id = payload.get("symbol_id")
+        if isinstance(symbol_id, str):
+            identity = "|".join(str(payload.get(key)) for key in _IDENTITY_KEYS)
+            if found.setdefault(symbol_id, identity) != identity:
+                raise AssertionError(f"{symbol_id} encodes two different symbols")
+        for value in payload.values():
+            _symbol_identities(value, found)
+    elif isinstance(payload, list):
+        for item in payload:
+            _symbol_identities(item, found)
+    return found
+
+
+def _replace_symbol_ids(payload: object, identities: dict[str, str]) -> object:
+    """Rewrite ids and bare id lists so the comparison is checkout independent."""
+    if isinstance(payload, dict):
+        return {key: _replace_symbol_ids(value, identities) for key, value in payload.items()}
+    if isinstance(payload, list):
+        return [_replace_symbol_ids(item, identities) for item in payload]
+    if isinstance(payload, str):
+        return identities.get(payload, payload)
+    return payload
+
+
 def test_complete_index_success_retains_prior_raw_candidates_and_execution_json(isolated):
     report = run_evaluation(load_dataset(DATASET)[:1], FIXTURES, isolated / "cache")
     previous = json.loads(
@@ -210,7 +240,15 @@ def test_complete_index_success_retains_prior_raw_candidates_and_execution_json(
         assert row.failures == {}
         assert "failure_details" not in row.model_dump()
         task = next(iter(row.results))
-        assert row.results[task].model_dump(mode="json") == old["results"][task]
+        current = row.results[task].model_dump(mode="json")
+        prior = old["results"][task]
+        # symbol_id is sha1(repository_id + qualified_name + kind) and repository_id
+        # hashes the absolute source path, so recorded ids only ever match the machine
+        # that produced the evidence. Ranks, scores, explanations and ordering still
+        # have to match byte-for-byte; only the opaque id is bound to its identity.
+        current_ids = _symbol_identities(current, {})
+        prior_ids = _symbol_identities(prior, {})
+        assert _replace_symbol_ids(current, current_ids) == _replace_symbol_ids(prior, prior_ids)
         assert row.execution[task].model_dump(mode="json") == old["execution"][task]
 
 

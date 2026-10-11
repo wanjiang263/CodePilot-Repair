@@ -69,3 +69,27 @@ Push / 创建 Stacked PR 的本地准备条件；Retrieval Eval 的建议 base �
 真实模型 / Embedding API / GPU / 产品 Docker Sandbox / LLM / 远端 CI / 正式真实
 问题基准 NOT RUN；Semantic 仍为明确标识的 offline-hash 非学习基线。
 L-18 保持独立待办，真实验收及预算授权后再考虑 Phase 3。
+
+## 发布轮补充：Linux CI 的一次跨平台断言修正
+
+获授权 Push 并创建 Stacked PR 后，远端 CI 首次实际运行本分支（PR #6）。
+`lint + types`、`Phase 1 index in Docker` 通过；Linux pytest 只有
+`test_complete_index_success_retains_prior_raw_candidates_and_execution_json`
+失败（`1 failed / 1141 passed / 6 skipped / 1 deselected`），Windows 本地为全绿。
+
+失败差异共 174 行，逐行核对全部是 40 位 Symbol ID（`symbol_id` 字段与文件级
+`top_symbols` 列表），分数、归一化、rank、weight、排序、`reason`、query 解析与
+`execution` 均无一行不同。根因是既有设计而非本轮回归：`symbol_id =
+sha1(repository_id + qualified_name + kind)`，`repository_id` 又哈希源仓库的绝对
+路径（`workspace.py` 的 `repository_id()`），所以 Windows 生成的证据 ID 不可能与
+Linux checkout 相同。断言直接比较整份结果 JSON 因此把机器路径当成了验收条件。
+
+最小修正只在该测试内把 Symbol ID 绑定到它必须编码的身份
+（`qualified_name|kind|file`），再比较两份完整结果：ID↔身份冲突会在收集阶段报错，
+其余字段仍逐字节等价比较，排序与解释没有放宽。既有 18 项测试仍全部通过，
+`ruff check` / `format --check`（163 files）/ `mypy src`（87 files）exit 0。
+Linux 与 Windows 的用例总数同为 1148（本地 1147 passed + 1 skipped，
+CI 1142 passed + 6 skipped），差异只是平台门控用例，非本轮引入。
+
+真实模型 / Embedding API / GPU / 产品 Docker Sandbox / LLM / 正式真实问题基准
+仍为 NOT RUN；Phase 2 的远端工程验收以 PR 的 CI 结果为准。
