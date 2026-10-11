@@ -434,17 +434,6 @@ class ContextBuilder:
                     dedup_key="issue_raw",
                 )
             )
-        digest = _analysis_text(analysis)
-        if digest:
-            parts.append(
-                ContextPart(
-                    level=ContextLevel.ISSUE_TEXT,
-                    label="Issue 结构化分析",
-                    text=digest,
-                    source="issue_analysis",
-                    dedup_key="issue_digest",
-                )
-            )
         errors = _errors_text(analysis.traceback_frames, analysis.error_messages)
         if errors:
             parts.append(
@@ -454,6 +443,17 @@ class ContextBuilder:
                     text=errors,
                     source="issue_traceback",
                     dedup_key="issue_traceback",
+                )
+            )
+        digest = _analysis_text(analysis)
+        if digest:
+            parts.append(
+                ContextPart(
+                    level=ContextLevel.ISSUE_TEXT,
+                    label="Issue 结构化分析",
+                    text=digest,
+                    source="issue_analysis",
+                    dedup_key="issue_digest",
                 )
             )
 
