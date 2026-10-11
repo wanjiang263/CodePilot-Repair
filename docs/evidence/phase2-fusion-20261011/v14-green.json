@@ -1,0 +1,13 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/unit/retrieval/test_config.py",
+    "tests/unit/retrieval/test_lexical.py",
+    "tests/integration/test_retrieval_channels.py",
+    "-q",
+    "--junitxml=docs/evidence/phase2-fusion-20261011/v14-green.xml"
+  ],
+  "exit_code": 0
+}

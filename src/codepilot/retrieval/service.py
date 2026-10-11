@@ -1,11 +1,13 @@
-"""Minimal single-channel acceptance path; full Phase 2 fusion is still pending."""
+"""Single-channel compatibility and configurable channel collection (V-14)."""
 
+import shutil
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Literal
 
 from codepilot.repo.git_history import FileChurn
 from codepilot.repo.models import Symbol
+from codepilot.retrieval.config import CHANNELS, RetrievalConfig, SeedChannel, ServiceChannel
 from codepilot.retrieval.documents import SymbolDocument, build_documents
 from codepilot.retrieval.embeddings import EmbeddingProvider
 from codepilot.retrieval.graph_source import GraphSource
@@ -22,8 +24,6 @@ from codepilot.schemas.retrieval import (
     RetrievalResult,
 )
 
-SeedChannel = Literal["bm25", "ripgrep", "semantic"]
-ServiceChannel = Literal["bm25", "ripgrep", "semantic", "structural", "test", "history"]
 _GRAPH_CHANNELS = ("structural", "test")
 
 
@@ -60,9 +60,24 @@ def retrieve_symbols(
     seeds: Sequence[RankedSymbol] | None = None,
     seed_channel: SeedChannel = "bm25",
     churn: Mapping[str, FileChurn] | None = None,
+    config: RetrievalConfig | None = None,
 ) -> RetrievalResult:
     if limit < 1:
         raise ValueError("limit must be positive")
+    if config is not None:
+        return _configured_result(
+            root,
+            symbols,
+            issue,
+            config,
+            limit,
+            embedding_provider,
+            semantic_backend,
+            graph,
+            seeds,
+            seed_channel,
+            churn,
+        )
     if channel not in ("bm25", "ripgrep", "semantic", "structural", "test", "history"):
         raise ValueError(f"Unknown retrieval channel: {channel}")
     if channel in _GRAPH_CHANNELS and graph is None:
@@ -98,5 +113,65 @@ def retrieve_symbols(
         symbols=candidates[:limit],
         per_channel={channel: candidates},
         enabled_channels=[channel],
+        fusion_method=FusionMethod.NONE,
+    )
+
+
+def _configured_result(
+    root: Path,
+    symbols: Sequence[Symbol],
+    issue: str,
+    config: RetrievalConfig,
+    limit: int,
+    embedding_provider: EmbeddingProvider | None,
+    semantic_backend: Literal["numpy", "faiss"],
+    graph: GraphSource | None,
+    seeds: Sequence[RankedSymbol] | None,
+    seed_channel: SeedChannel,
+    churn: Mapping[str, FileChurn] | None,
+) -> RetrievalResult:
+    """Collect full raw rankings. Cross-channel ranking is a separate fusion step.
+
+    Structural seeds come from an enabled upstream channel or explicit ``seeds``;
+    collection never runs a disabled channel behind the caller's back.
+    """
+    enabled = config.enabled_channels
+    if "semantic" in enabled and embedding_provider is None:
+        raise ValueError("semantic channel requires an embedding_provider")
+    for name in _GRAPH_CHANNELS:
+        if name in enabled and graph is None:
+            raise ValueError(f"{name} channel requires a graph")
+    if "history" in enabled and churn is None:
+        raise ValueError("history channel requires churn from GitHistory.file_churn()")
+    if "ripgrep" in enabled and shutil.which("rg") is None:
+        raise ValueError("ripgrep channel requires the rg executable")
+    if "structural" in enabled and seeds is None and seed_channel not in enabled:
+        raise ValueError("structural seed_channel must be enabled or explicit seeds provided")
+    documents = build_documents(root, symbols)
+    query = build_query(issue, repo_files=(s.path for s in symbols), repo_root=root)
+    collected: dict[str, list[RankedSymbol]] = {}
+    for name in CHANNELS:
+        if name not in enabled:
+            continue
+        if name == "structural":
+            assert graph is not None
+            source = seeds if seeds is not None else collected[seed_channel]
+            candidates = StructuralChannel(graph, documents).search(source)
+        elif name == "test":
+            assert graph is not None
+            candidates = TestProximityChannel(graph, documents).search(query)
+        elif name == "history":
+            assert churn is not None
+            candidates = HistoryChannel(documents, churn).search()
+        else:
+            candidates = _query_candidates(
+                name, root, documents, query, embedding_provider, semantic_backend
+            )
+        collected[name] = candidates
+    return RetrievalResult(
+        query=query,
+        symbols=collected[enabled[0]][:limit] if len(enabled) == 1 else [],
+        per_channel=collected,
+        enabled_channels=list(enabled),
         fusion_method=FusionMethod.NONE,
     )
