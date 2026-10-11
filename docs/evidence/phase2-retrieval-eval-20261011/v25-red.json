@@ -1,0 +1,11 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/integration/test_retrieval_determinism.py",
+    "-q",
+    "--junitxml=docs/evidence/phase2-retrieval-eval-20261011/v25-red.xml"
+  ],
+  "exit_code": 1
+}
