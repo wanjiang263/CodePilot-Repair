@@ -1,4 +1,4 @@
-"""Single-channel compatibility and configurable channel collection (V-14)."""
+"""Frozen single-channel calls plus opt-in multi-channel fusion (V-14 / V-20)."""
 
 import shutil
 from collections.abc import Mapping, Sequence
@@ -14,6 +14,7 @@ from codepilot.retrieval.graph_source import GraphSource
 from codepilot.retrieval.history import HistoryChannel
 from codepilot.retrieval.lexical import BM25Channel, RipgrepChannel
 from codepilot.retrieval.query import build_query
+from codepilot.retrieval.result import build_result
 from codepilot.retrieval.semantic import SemanticChannel
 from codepilot.retrieval.structural import StructuralChannel
 from codepilot.retrieval.test_proximity import TestProximityChannel
@@ -61,11 +62,23 @@ def retrieve_symbols(
     seed_channel: SeedChannel = "bm25",
     churn: Mapping[str, FileChurn] | None = None,
     config: RetrievalConfig | None = None,
+    fusion_method: FusionMethod | None = None,
+    channel_weights: Mapping[str, float] | None = None,
+    rrf_k: int = 60,
+    snapshot_id: str = "",
 ) -> RetrievalResult:
+    """Legacy calls retain raw rankings. Configured multi-channel calls fuse.
+
+    A single configured channel keeps legacy behavior unless fusion_method or
+    channel_weights is explicit. For fused results, limit truncates views, never the raw candidates
+    or complete fused_symbols. CLI and graph query contracts are unchanged.
+    """
     if limit < 1:
         raise ValueError("limit must be positive")
+    if rrf_k != 60 and fusion_method != FusionMethod.RRF:
+        raise ValueError("rrf_k requires fusion_method=rrf")
     if config is not None:
-        return _configured_result(
+        collected = _configured_result(
             root,
             symbols,
             issue,
@@ -78,6 +91,23 @@ def retrieve_symbols(
             seed_channel,
             churn,
         )
+        if (
+            len(collected.enabled_channels) > 1
+            or fusion_method is not None
+            or channel_weights is not None
+        ):
+            return build_result(
+                collected.query,
+                collected.per_channel,
+                repository_symbols=symbols,
+                fusion_method=fusion_method or FusionMethod.WEIGHTED,
+                weights=channel_weights,
+                k=rrf_k,
+                limit=limit,
+                snapshot_id=snapshot_id,
+            )
+        collected.snapshot_id = snapshot_id
+        return collected
     if channel not in ("bm25", "ripgrep", "semantic", "structural", "test", "history"):
         raise ValueError(f"Unknown retrieval channel: {channel}")
     if channel in _GRAPH_CHANNELS and graph is None:
@@ -108,13 +138,26 @@ def retrieve_symbols(
         candidates = _query_candidates(
             channel, root, documents, query, embedding_provider, semantic_backend
         )
-    return RetrievalResult(
+    result = RetrievalResult(
         query=query,
         symbols=candidates[:limit],
         per_channel={channel: candidates},
         enabled_channels=[channel],
         fusion_method=FusionMethod.NONE,
+        snapshot_id=snapshot_id,
     )
+    if fusion_method is not None or channel_weights is not None:
+        return build_result(
+            query,
+            result.per_channel,
+            repository_symbols=symbols,
+            fusion_method=fusion_method or FusionMethod.WEIGHTED,
+            weights=channel_weights,
+            k=rrf_k,
+            limit=limit,
+            snapshot_id=snapshot_id,
+        )
+    return result
 
 
 def _configured_result(

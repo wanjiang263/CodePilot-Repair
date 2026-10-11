@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="2" failures="0" skipped="0" tests="2" time="2.281" timestamp="2026-10-11T12:05:23.603245+08:00" hostname="LAPTOP-H0FUOTNB"><testcase classname="" name="tests.unit.retrieval.test_result" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\Desktop\CodePilot-Repair\tests\unit\retrieval\test_result.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+D:\Anaconda\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\retrieval\test_result.py:9: in &lt;module&gt;
+    from codepilot.retrieval.result import build_result, validate_result
+E   ModuleNotFoundError: No module named 'codepilot.retrieval.result'</error></testcase><testcase classname="" name="tests.integration.test_retrieval_fusion" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\Desktop\CodePilot-Repair\tests\integration\test_retrieval_fusion.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+D:\Anaconda\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_retrieval_fusion.py:9: in &lt;module&gt;
+    from codepilot.retrieval.result import validate_result
+E   ModuleNotFoundError: No module named 'codepilot.retrieval.result'</error></testcase></testsuite></testsuites>

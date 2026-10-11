@@ -1,0 +1,11 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/unit/retrieval/test_result.py::test_nondefault_rrf_k_survives_standalone_roundtrip_and_validation",
+    "-q",
+    "--junitxml=docs/evidence/phase2-fusion-20261011/v20-k-red.xml"
+  ],
+  "exit_code": 1
+}

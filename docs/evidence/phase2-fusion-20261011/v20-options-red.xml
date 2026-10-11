@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="5" time="4.013" timestamp="2026-10-11T12:11:05.929868+08:00" hostname="LAPTOP-H0FUOTNB"><testcase classname="tests.integration.test_retrieval_fusion" name="test_explicit_single_channel_weights_are_applied[None]" time="0.202"><failure message="AssertionError: assert &lt;FusionMethod.NONE: 'none'&gt; == 'weighted'&#10;  &#10;  - weighted&#10;  + none">repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-318/test_explicit_single_channel_w0'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+config = None
+
+    @pytest.mark.parametrize("config", [None, RetrievalConfig()])
+    def test_explicit_single_channel_weights_are_applied(repository, config):
+        root, symbols, _, _ = repository
+        result = retrieve_symbols(root, symbols, "one", config=config, channel_weights={"bm25": 0.7})
+&gt;       assert result.fusion_method == "weighted"
+E       AssertionError: assert &lt;FusionMethod.NONE: 'none'&gt; == 'weighted'
+E         
+E         - weighted
+E         + none
+
+tests\integration\test_retrieval_fusion.py:154: AssertionError</failure></testcase><testcase classname="tests.integration.test_retrieval_fusion" name="test_explicit_single_channel_weights_are_applied[config1]" time="0.017"><failure message="AssertionError: assert &lt;FusionMethod.NONE: 'none'&gt; == 'weighted'&#10;  &#10;  - weighted&#10;  + none">repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-318/test_explicit_single_channel_w1'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+config = RetrievalConfig(bm25=True, ripgrep=False, semantic=False, structural=False, test=False, history=False)
+
+    @pytest.mark.parametrize("config", [None, RetrievalConfig()])
+    def test_explicit_single_channel_weights_are_applied(repository, config):
+        root, symbols, _, _ = repository
+        result = retrieve_symbols(root, symbols, "one", config=config, channel_weights={"bm25": 0.7})
+&gt;       assert result.fusion_method == "weighted"
+E       AssertionError: assert &lt;FusionMethod.NONE: 'none'&gt; == 'weighted'
+E         
+E         - weighted
+E         + none
+
+tests\integration\test_retrieval_fusion.py:154: AssertionError</failure></testcase><testcase classname="tests.integration.test_retrieval_fusion" name="test_caller_snapshot_id_is_preserved_without_persistence[None]" time="0.020"><failure message="AssertionError: assert '' == 'caller-reference'&#10;  &#10;  - caller-reference">repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-318/test_caller_snapshot_id_is_pre0'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+config = None
+
+    @pytest.mark.parametrize("config", [None, RetrievalConfig()])
+    def test_caller_snapshot_id_is_preserved_without_persistence(repository, config):
+        root, symbols, _, _ = repository
+        result = retrieve_symbols(root, symbols, "one", config=config, snapshot_id="caller-reference")
+&gt;       assert result.snapshot_id == "caller-reference"
+E       AssertionError: assert '' == 'caller-reference'
+E         
+E         - caller-reference
+
+tests\integration\test_retrieval_fusion.py:163: AssertionError</failure></testcase><testcase classname="tests.integration.test_retrieval_fusion" name="test_caller_snapshot_id_is_preserved_without_persistence[config1]" time="0.023"><failure message="AssertionError: assert '' == 'caller-reference'&#10;  &#10;  - caller-reference">repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-318/test_caller_snapshot_id_is_pre1'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+config = RetrievalConfig(bm25=True, ripgrep=False, semantic=False, structural=False, test=False, history=False)
+
+    @pytest.mark.parametrize("config", [None, RetrievalConfig()])
+    def test_caller_snapshot_id_is_preserved_without_persistence(repository, config):
+        root, symbols, _, _ = repository
+        result = retrieve_symbols(root, symbols, "one", config=config, snapshot_id="caller-reference")
+&gt;       assert result.snapshot_id == "caller-reference"
+E       AssertionError: assert '' == 'caller-reference'
+E         
+E         - caller-reference
+
+tests\integration\test_retrieval_fusion.py:163: AssertionError</failure></testcase><testcase classname="tests.integration.test_retrieval_fusion" name="test_rrf_parameter_cannot_be_silently_ignored" time="0.019"><failure message="Failed: DID NOT RAISE ValueError">repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-318/test_rrf_parameter_cannot_be_s0'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+
+    def test_rrf_parameter_cannot_be_silently_ignored(repository):
+        root, symbols, _, _ = repository
+&gt;       with pytest.raises(ValueError, match="rrf_k"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\integration\test_retrieval_fusion.py:169: Failed</failure></testcase></testsuite></testsuites>

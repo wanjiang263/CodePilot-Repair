@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="55" time="7.055" timestamp="2026-10-11T12:07:34.151302+08:00" hostname="LAPTOP-H0FUOTNB"><testcase classname="tests.unit.retrieval.test_result" name="test_weighted_result_keeps_all_raw_normalized_and_final_scores" time="0.008" /><testcase classname="tests.unit.retrieval.test_result" name="test_lexical_default_budget_splits_across_enabled_channels" time="0.001" /><testcase classname="tests.unit.retrieval.test_result" name="test_explicit_weights_and_absent_weights_are_respected" time="0.002" /><testcase classname="tests.unit.retrieval.test_result" name="test_rrf_result_has_ranks_normalized_scores_and_no_weights" time="0.002" /><testcase classname="tests.unit.retrieval.test_result" name="test_pin_without_any_channel_hit_remains_visible_and_verified" time="0.001" /><testcase classname="tests.unit.retrieval.test_result" name="test_pins_do_not_enter_normalization_or_rrf_rank[weighted]" time="0.002" /><testcase classname="tests.unit.retrieval.test_result" name="test_pins_do_not_enter_normalization_or_rrf_rank[rrf]" time="0.002" /><testcase classname="tests.unit.retrieval.test_result" name="test_top_k_does_not_lose_full_scores_or_change_file_aggregation" time="0.003" /><testcase classname="tests.unit.retrieval.test_result" name="test_duplicate_raw_hits_preserved_but_fused_once" time="0.001" /><testcase classname="tests.unit.retrieval.test_result" name="test_business_key_overrides_id_order_for_equal_fusion_scores" time="0.001" /><testcase classname="tests.unit.retrieval.test_result" name="test_roundtrip_and_input_order_perturbation_are_byte_identical" time="0.005" /><testcase classname="tests.unit.retrieval.test_result" name="test_legacy_schema_roundtrip_still_accepts_missing_additive_fields" time="0.001" /><testcase classname="tests.unit.retrieval.test_result" name="test_consistency_validation_detects_tampered_snapshot[score]" time="0.002" /><testcase classname="tests.unit.retrieval.test_result" name="test_consistency_validation_detects_tampered_snapshot[rank]" time="0.002" /><testcase classname="tests.unit.retrieval.test_result" name="test_consistency_validation_detects_tampered_snapshot[files]" time="0.002" /><testcase classname="tests.unit.retrieval.test_result" name="test_consistency_validation_detects_tampered_snapshot[per_channel]" time="0.002" /><testcase classname="tests.unit.retrieval.test_result" name="test_consistency_validation_detects_tampered_snapshot[normalized]" time="0.002" /><testcase classname="tests.unit.retrieval.test_result" name="test_consistency_validation_detects_tampered_snapshot[enabled]" time="0.001" /><testcase classname="tests.unit.retrieval.test_result" name="test_consistency_validation_detects_tampered_snapshot[pin]" time="0.002" /><testcase classname="tests.unit.retrieval.test_result" name="test_nonfinite_raw_candidate_is_rejected[nan]" time="0.001" /><testcase classname="tests.unit.retrieval.test_result" name="test_nonfinite_raw_candidate_is_rejected[inf]" time="0.001" /><testcase classname="tests.unit.retrieval.test_result" name="test_nonfinite_raw_candidate_is_rejected[-inf]" time="0.001" /><testcase classname="tests.unit.retrieval.test_result" name="test_invalid_limit_is_rejected[0]" time="0.001" /><testcase classname="tests.unit.retrieval.test_result" name="test_invalid_limit_is_rejected[-1]" time="0.001" /><testcase classname="tests.unit.retrieval.test_result" name="test_invalid_limit_is_rejected[True]" time="0.002" /><testcase classname="tests.unit.retrieval.test_result" name="test_empty_candidates_and_invalid_options" time="0.001" /><testcase classname="tests.unit.retrieval.test_result" name="test_conflicting_identity_and_unconfirmed_pin_flag" time="0.001" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_all_six_channels_integrate_repeat_and_roundtrip[weighted]" time="0.902"><failure message="assert False&#10; +  where False = all(&lt;generator object test_all_six_channels_integrate_repeat_and_roundtrip.&lt;locals&gt;.&lt;genexpr&gt; at 0x000002067F7FF9F0&gt;)">repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-314/test_all_six_channels_integrat0'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+method = &lt;FusionMethod.WEIGHTED: 'weighted'&gt;
+
+    @pytest.mark.parametrize("method", [FusionMethod.WEIGHTED, FusionMethod.RRF])
+    def test_all_six_channels_integrate_repeat_and_roundtrip(repository, method):
+        root, symbols, graph, churn = repository
+        config = RetrievalConfig(
+            bm25=True, ripgrep=True, semantic=True, structural=True, test=True, history=True
+        )
+        issue = (
+            'one calls two incorrectly\nFile "a.py", line 2, in one\nValueError: one fails\ntest_one'
+        )
+        kwargs = {
+            "config": config,
+            "fusion_method": method,
+            "embedding_provider": FakeEmbedding(),
+            "graph": graph,
+            "churn": churn,
+        }
+        first = retrieve_symbols(root, symbols, issue, **kwargs)
+        second = retrieve_symbols(root, symbols, issue, **kwargs)
+        reordered = retrieve_symbols(root, list(reversed(symbols)), issue, **kwargs)
+        assert (
+            first.model_dump_json().encode()
+            == second.model_dump_json().encode()
+            == reordered.model_dump_json().encode()
+        )
+        assert list(first.per_channel) == [
+            "bm25",
+            "ripgrep",
+            "semantic",
+            "structural",
+            "test",
+            "history",
+        ]
+&gt;       assert all(first.per_channel[name] for name in first.enabled_channels)
+E       assert False
+E        +  where False = all(&lt;generator object test_all_six_channels_integrate_repeat_and_roundtrip.&lt;locals&gt;.&lt;genexpr&gt; at 0x000002067F7FF9F0&gt;)
+
+tests\integration\test_retrieval_fusion.py:67: AssertionError</failure></testcase><testcase classname="tests.integration.test_retrieval_fusion" name="test_all_six_channels_integrate_repeat_and_roundtrip[rrf]" time="0.873"><failure message="assert False&#10; +  where False = all(&lt;generator object test_all_six_channels_integrate_repeat_and_roundtrip.&lt;locals&gt;.&lt;genexpr&gt; at 0x000002067F899E50&gt;)">repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-314/test_all_six_channels_integrat1'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+method = &lt;FusionMethod.RRF: 'rrf'&gt;
+
+    @pytest.mark.parametrize("method", [FusionMethod.WEIGHTED, FusionMethod.RRF])
+    def test_all_six_channels_integrate_repeat_and_roundtrip(repository, method):
+        root, symbols, graph, churn = repository
+        config = RetrievalConfig(
+            bm25=True, ripgrep=True, semantic=True, structural=True, test=True, history=True
+        )
+        issue = (
+            'one calls two incorrectly\nFile "a.py", line 2, in one\nValueError: one fails\ntest_one'
+        )
+        kwargs = {
+            "config": config,
+            "fusion_method": method,
+            "embedding_provider": FakeEmbedding(),
+            "graph": graph,
+            "churn": churn,
+        }
+        first = retrieve_symbols(root, symbols, issue, **kwargs)
+        second = retrieve_symbols(root, symbols, issue, **kwargs)
+        reordered = retrieve_symbols(root, list(reversed(symbols)), issue, **kwargs)
+        assert (
+            first.model_dump_json().encode()
+            == second.model_dump_json().encode()
+            == reordered.model_dump_json().encode()
+        )
+        assert list(first.per_channel) == [
+            "bm25",
+            "ripgrep",
+            "semantic",
+            "structural",
+            "test",
+            "history",
+        ]
+&gt;       assert all(first.per_channel[name] for name in first.enabled_channels)
+E       assert False
+E        +  where False = all(&lt;generator object test_all_six_channels_integrate_repeat_and_roundtrip.&lt;locals&gt;.&lt;genexpr&gt; at 0x000002067F899E50&gt;)
+
+tests\integration\test_retrieval_fusion.py:67: AssertionError</failure></testcase><testcase classname="tests.integration.test_retrieval_fusion" name="test_default_multichannel_fuses_and_single_channel_remains_compatible" time="0.028" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_opt_in_single_channel_fusion_and_unconfirmed_external_frame" time="0.019" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_top_k_keeps_full_channel_results_and_full_fused_ranking" time="0.025" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_all_disabled_can_still_pin_from_verified_repository_frame" time="0.016" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_single_channel_cli_remains_frozen" time="0.409" /><testcase classname="tests.unit.retrieval.test_config" name="test_default_configuration_keeps_single_channel_contract" time="0.025" /><testcase classname="tests.unit.retrieval.test_config" name="test_each_channel_can_run_alone[bm25]" time="0.012" /><testcase classname="tests.unit.retrieval.test_config" name="test_each_channel_can_run_alone[ripgrep]" time="0.323" /><testcase classname="tests.unit.retrieval.test_config" name="test_each_channel_can_run_alone[semantic]" time="0.012" /><testcase classname="tests.unit.retrieval.test_config" name="test_each_channel_can_run_alone[structural]" time="0.010" /><testcase classname="tests.unit.retrieval.test_config" name="test_each_channel_can_run_alone[test]" time="0.010" /><testcase classname="tests.unit.retrieval.test_config" name="test_each_channel_can_run_alone[history]" time="0.010" /><testcase classname="tests.unit.retrieval.test_config" name="test_disabled_channels_are_not_invoked[bm25]" time="0.147" /><testcase classname="tests.unit.retrieval.test_config" name="test_disabled_channels_are_not_invoked[ripgrep]" time="0.011" /><testcase classname="tests.unit.retrieval.test_config" name="test_disabled_channels_are_not_invoked[semantic]" time="0.131" /><testcase classname="tests.unit.retrieval.test_config" name="test_disabled_channels_are_not_invoked[structural]" time="0.155" /><testcase classname="tests.unit.retrieval.test_config" name="test_disabled_channels_are_not_invoked[test]" time="0.155" /><testcase classname="tests.unit.retrieval.test_config" name="test_disabled_channels_are_not_invoked[history]" time="0.173" /><testcase classname="tests.unit.retrieval.test_config" name="test_missing_dependencies_fail_before_reading_repository[semantic-embedding_provider]" time="0.001" /><testcase classname="tests.unit.retrieval.test_config" name="test_missing_dependencies_fail_before_reading_repository[structural-graph]" time="0.001" /><testcase classname="tests.unit.retrieval.test_config" name="test_missing_dependencies_fail_before_reading_repository[test-graph]" time="0.001" /><testcase classname="tests.unit.retrieval.test_config" name="test_missing_dependencies_fail_before_reading_repository[history-churn]" time="0.001" /><testcase classname="tests.unit.retrieval.test_config" name="test_configured_ripgrep_requires_executable_even_with_empty_input" time="0.001" /><testcase classname="tests.unit.retrieval.test_config" name="test_disabled_seed_channel_is_not_implicitly_run" time="0.014" /><testcase classname="tests.unit.retrieval.test_config" name="test_all_disabled_is_empty_and_has_no_dependency_side_effects" time="0.014" /><testcase classname="tests.unit.retrieval.test_config" name="test_configuration_validation_and_roundtrip" time="0.001" /></testsuite></testsuites>

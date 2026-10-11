@@ -54,8 +54,8 @@ def weighted_fusion(
     """Sum query-local normalized evidence, with missing weights/evidence as 0.
 
     Weights need not sum to one: explicit caller weights retain their meaning.
-    The ``lexical`` group is assembled by the result layer from independently
-    normalized BM25/Ripgrep evidence; no raw quantities are added here.
+    The result layer splits the ``lexical`` weight across enabled BM25/Ripgrep
+    channels; no raw quantities from different channels are added here.
     """
     if any(not math.isfinite(value) or value < 0 for value in weights.values()):
         raise ValueError("weights must be finite and nonnegative")
