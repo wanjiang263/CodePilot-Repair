@@ -1,0 +1,11 @@
+--- a/src/miniauth/tokens.py
++++ b/src/miniauth/tokens.py
+@@ -6,7 +6,7 @@
+ import hmac
+ import time
+ 
+-SECRET = b"not-a-real-secret"
++SECRET = b"fixture-specific-secret"
+ 
+ 
+ def _sign(payload: bytes, *, key: bytes = SECRET) -> str:

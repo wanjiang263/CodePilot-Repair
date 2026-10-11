@@ -1,0 +1,63 @@
+F.........................                                               [100%]
+================================== FAILURES ===================================
+______ test_at_least_ten_valid_traceable_samples_and_gold_symbol_mapping ______
+
+    def test_at_least_ten_valid_traceable_samples_and_gold_symbol_mapping():
+        cases = load_dataset(DATASET)
+        assert len(cases) >= 10 and len({c.task_id for c in cases}) == len(cases)
+        root = DATASET.parent / "repos/mini_auth"
+        indexed = symbols(root)
+        for case in cases:
+>           validate_gold(case, root, indexed, DATASET.parent)
+
+tests\unit\retrieval\test_retrieval_dataset.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+case = RetrievalCase(task_id='06-empty-revocation', repo='repos/mini_auth', base_commit='snapshot', issue='MemoryBackend.revo... source_hashes={'src/miniauth/backends/memory.py': '165e7ce355ec046915cb908f410d42adbbfaabcc6741518259b91c7594d3f9a9'})
+root = WindowsPath('C:/Users/lenovo/Desktop/CodePilot-Repair/tests/fixtures/repos/mini_auth')
+symbols = [Symbol(name='miniauth', qualified_name='miniauth', kind='module', id='eac8ec39ed81e125d8720207422a57821cfa2561', file...ackends/__init__.py', start_line=1, end_line=6, signature=None, docstring='认证后端。', decorators=(), parent_id=None), ...]
+dataset_root = WindowsPath('C:/Users/lenovo/Desktop/CodePilot-Repair/tests/fixtures')
+
+    def validate_gold(
+        case: RetrievalCase, root: Path, symbols: Sequence[Symbol], dataset_root: Path
+    ) -> None:
+        """Run only on the evaluation side, against the indexed base snapshot."""
+        patch_path = contained(dataset_root, case.gold_patch)
+        if patch_path.is_relative_to(root.resolve()):
+            raise ValueError("Gold patch must be outside inference repository")
+        patch = patch_path.read_bytes()
+        if hashlib.sha256(patch).hexdigest() != case.patch_sha256:
+            raise ValueError("Gold patch digest mismatch")
+        changes = patch_lines(patch.decode("utf-8"), root)
+        if set(changes) != set(case.gold_files):
+            raise ValueError("Gold files differ from patch")
+        for path, digest in case.source_hashes.items():
+            text = contained(root, path).read_text(encoding="utf-8")
+            if hashlib.sha256(text.encode("utf-8")).hexdigest() != digest:
+                raise ValueError("Gold source digest mismatch")
+        for loc in case.gold_locations:
+            matching = [
+                s
+                for s in symbols
+                if s.path == loc.file
+                and s.qualified_name == loc.qualified_name
+                and s.start_line <= loc.line <= s.end_line
+            ]
+            if len(matching) != 1 or loc.line not in changes[loc.file]:
+>               raise ValueError("Gold location not mapped to changed base Symbol")
+E               ValueError: Gold location not mapped to changed base Symbol
+
+src\codepilot\retrieval\dataset.py:203: ValueError
+============================== warnings summary ===============================
+tests/unit/retrieval/test_retrieval_dataset.py::test_at_least_ten_valid_traceable_samples_and_gold_symbol_mapping
+tests/unit/retrieval/test_retrieval_dataset.py::test_at_least_ten_valid_traceable_samples_and_gold_symbol_mapping
+tests/unit/retrieval/test_retrieval_dataset.py::test_at_least_ten_valid_traceable_samples_and_gold_symbol_mapping
+tests/unit/retrieval/test_retrieval_dataset.py::test_at_least_ten_valid_traceable_samples_and_gold_symbol_mapping
+tests/unit/retrieval/test_retrieval_dataset.py::test_at_least_ten_valid_traceable_samples_and_gold_symbol_mapping
+  C:\Users\lenovo\Desktop\CodePilot-Repair\tests\unit\retrieval\test_retrieval_dataset.py:35: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert set(inference.model_fields) == {"task_id", "repo", "base_commit", "issue"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/unit/retrieval/test_retrieval_dataset.py::test_at_least_ten_valid_traceable_samples_and_gold_symbol_mapping
+1 failed, 25 passed, 5 warnings in 2.57s

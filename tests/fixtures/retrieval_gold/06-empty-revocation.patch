@@ -1,0 +1,9 @@
+--- a/src/miniauth/backends/memory.py
++++ b/src/miniauth/backends/memory.py
+@@ -25,4 +25,6 @@
+         return self._users.get(name)
+ 
+     def revoke(self, token: str) -> None:
++        if not token:
++            raise ValueError("empty token")
+         self._revoked.add(token)

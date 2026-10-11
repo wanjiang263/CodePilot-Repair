@@ -1,0 +1,11 @@
+--- a/src/miniauth/app.py
++++ b/src/miniauth/app.py
+@@ -20,7 +20,7 @@
+     """
+     user = backend.load(name)
+     if user is None:
+-        return None
++        raise KeyError(name)
+     return Session(backend, user)
+ 
+ 

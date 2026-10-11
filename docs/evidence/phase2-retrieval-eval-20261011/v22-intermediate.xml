@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="26" time="2.306" timestamp="2026-10-11T12:38:58.795693+08:00" hostname="LAPTOP-H0FUOTNB"><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_at_least_ten_valid_traceable_samples_and_gold_symbol_mapping" time="0.109"><failure message="ValueError: Gold location not mapped to changed base Symbol">def test_at_least_ten_valid_traceable_samples_and_gold_symbol_mapping():
+        cases = load_dataset(DATASET)
+        assert len(cases) &gt;= 10 and len({c.task_id for c in cases}) == len(cases)
+        root = DATASET.parent / "repos/mini_auth"
+        indexed = symbols(root)
+        for case in cases:
+&gt;           validate_gold(case, root, indexed, DATASET.parent)
+
+tests\unit\retrieval\test_retrieval_dataset.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+case = RetrievalCase(task_id='06-empty-revocation', repo='repos/mini_auth', base_commit='snapshot', issue='MemoryBackend.revo... source_hashes={'src/miniauth/backends/memory.py': '165e7ce355ec046915cb908f410d42adbbfaabcc6741518259b91c7594d3f9a9'})
+root = WindowsPath('C:/Users/lenovo/Desktop/CodePilot-Repair/tests/fixtures/repos/mini_auth')
+symbols = [Symbol(name='miniauth', qualified_name='miniauth', kind='module', id='eac8ec39ed81e125d8720207422a57821cfa2561', file...ackends/__init__.py', start_line=1, end_line=6, signature=None, docstring='认证后端。', decorators=(), parent_id=None), ...]
+dataset_root = WindowsPath('C:/Users/lenovo/Desktop/CodePilot-Repair/tests/fixtures')
+
+    def validate_gold(
+        case: RetrievalCase, root: Path, symbols: Sequence[Symbol], dataset_root: Path
+    ) -&gt; None:
+        """Run only on the evaluation side, against the indexed base snapshot."""
+        patch_path = contained(dataset_root, case.gold_patch)
+        if patch_path.is_relative_to(root.resolve()):
+            raise ValueError("Gold patch must be outside inference repository")
+        patch = patch_path.read_bytes()
+        if hashlib.sha256(patch).hexdigest() != case.patch_sha256:
+            raise ValueError("Gold patch digest mismatch")
+        changes = patch_lines(patch.decode("utf-8"), root)
+        if set(changes) != set(case.gold_files):
+            raise ValueError("Gold files differ from patch")
+        for path, digest in case.source_hashes.items():
+            text = contained(root, path).read_text(encoding="utf-8")
+            if hashlib.sha256(text.encode("utf-8")).hexdigest() != digest:
+                raise ValueError("Gold source digest mismatch")
+        for loc in case.gold_locations:
+            matching = [
+                s
+                for s in symbols
+                if s.path == loc.file
+                and s.qualified_name == loc.qualified_name
+                and s.start_line &lt;= loc.line &lt;= s.end_line
+            ]
+            if len(matching) != 1 or loc.line not in changes[loc.file]:
+&gt;               raise ValueError("Gold location not mapped to changed base Symbol")
+E               ValueError: Gold location not mapped to changed base Symbol
+
+src\codepilot\retrieval\dataset.py:203: ValueError</failure></testcase><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_dataset_gold_is_external_to_repository" time="0.004" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_invalid_format_rejected[mutation0]" time="0.032" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_invalid_format_rejected[mutation1]" time="0.017" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_invalid_format_rejected[mutation2]" time="0.020" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_invalid_format_rejected[mutation3]" time="0.017" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_invalid_format_rejected[mutation4]" time="0.017" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_invalid_format_rejected[mutation5]" time="0.019" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_invalid_format_rejected[mutation6]" time="0.015" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_duplicate_ids_and_empty_file_rejected" time="0.015" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_untraceable_gold_rejected[qname]" time="0.026" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_untraceable_gold_rejected[line]" time="0.026" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_untraceable_gold_rejected[hash]" time="0.022" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_untraceable_gold_rejected[patch]" time="0.024" /><testcase classname="tests.unit.retrieval.test_retrieval_dataset" name="test_inference_modules_do_not_import_gold_evaluator" time="0.016" /><testcase classname="tests.unit.retrieval.test_retrieval_eval" name="test_hand_computed_task_metrics" time="0.001" /><testcase classname="tests.unit.retrieval.test_retrieval_eval" name="test_report_preserves_integer_counts_and_stable_json" time="0.002" /><testcase classname="tests.unit.retrieval.test_retrieval_eval" name="test_empty_tasks_and_missing_predictions[file_recall]" time="0.001" /><testcase classname="tests.unit.retrieval.test_retrieval_eval" name="test_empty_tasks_and_missing_predictions[function_recall]" time="0.001" /><testcase classname="tests.unit.retrieval.test_retrieval_eval" name="test_empty_tasks_and_missing_predictions[localization_exact]" time="0.001" /><testcase classname="tests.unit.retrieval.test_retrieval_eval" name="test_invalid_k_is_explicit[0]" time="0.001" /><testcase classname="tests.unit.retrieval.test_retrieval_eval" name="test_invalid_k_is_explicit[-1]" time="0.001" /><testcase classname="tests.unit.retrieval.test_retrieval_eval" name="test_invalid_k_is_explicit[True]" time="0.001" /><testcase classname="tests.unit.retrieval.test_retrieval_eval" name="test_invalid_k_is_explicit[1.5]" time="0.001" /><testcase classname="tests.unit.retrieval.test_retrieval_eval" name="test_duplicate_predictions_do_not_consume_top_k_and_module_is_a_function_target" time="0.001" /><testcase classname="tests.unit.retrieval.test_retrieval_eval" name="test_metrics_do_not_mutate_inputs" time="0.001" /></testsuite></testsuites>

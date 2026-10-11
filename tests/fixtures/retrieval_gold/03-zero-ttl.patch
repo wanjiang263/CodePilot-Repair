@@ -1,0 +1,11 @@
+--- a/src/miniauth/tokens.py
++++ b/src/miniauth/tokens.py
+@@ -16,6 +16,8 @@
+ 
+ def issue_token(user: str, ttl: int = 3600) -> str:
+     """签发一个令牌。"""
++    if ttl <= 0:
++        raise ValueError("ttl must be positive")
+     expiry = int(time.time()) + ttl
+     body = f"{user}:{expiry}".encode()
+     return f"{body.decode()}:{_sign(body)}"
