@@ -163,3 +163,16 @@ def test_environment_failure_counts_as_a_miss(isolated, monkeypatch):
         row.metrics.total_tasks == 1 and row.metrics.file_recall[10] == 0 and len(row.failures) == 1
         for row in report.rows
     )
+
+
+def test_actual_missing_repository_is_an_environment_miss(isolated):
+    from codepilot.retrieval.dataset import load_dataset
+    from codepilot.retrieval.evaluation import run_evaluation
+
+    cases = load_dataset(DATASET)[:1]
+    cases[0].repo = "not-present"
+    report = run_evaluation(cases, isolated, isolated / "cache")
+    assert all(
+        row.metrics.total_tasks == 1 and row.metrics.file_hits[10] == 0 and len(row.failures) == 1
+        for row in report.rows
+    )

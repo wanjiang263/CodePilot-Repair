@@ -63,6 +63,8 @@ class RetrievalCase(BaseModel):
 
     @model_validator(mode="after")
     def check_labels(self) -> "RetrievalCase":
+        if PurePosixPath(self.gold_patch).is_relative_to(PurePosixPath(self.repo)):
+            raise ValueError("Gold patch must be outside inference repository")
         for path in self.gold_files:
             relative_path(path)
         if len(set(self.gold_files)) != len(self.gold_files):
@@ -84,9 +86,12 @@ class RetrievalCase(BaseModel):
         return self
 
     def inference(self, dataset_root: Path) -> RetrievalInput:
+        repo = contained(dataset_root, self.repo)
+        if contained(dataset_root, self.gold_patch).is_relative_to(repo):
+            raise ValueError("Gold patch must be outside inference repository")
         return RetrievalInput(
             task_id=self.task_id,
-            repo=str(contained(dataset_root, self.repo)),
+            repo=str(repo),
             base_commit=self.base_commit,
             issue=self.issue,
         )
@@ -130,13 +135,20 @@ def patch_lines(patch: str, root: Path) -> dict[str, set[int]]:
         changes[path] = set()
         i += 2
         previous_end = 0
+        delta = 0
         while i < len(lines) and not lines[i].startswith("--- a/"):
             match = _HUNK.match(lines[i])
             if not match:
                 raise ValueError("Expected unified diff hunk")
-            cursor = int(match[1]) - 1
+            old_start = int(match[1])
             old_count = int(match[2]) if match[2] is not None else 1
             new_count = int(match[4]) if match[4] is not None else 1
+            expected_new = (
+                old_start + delta + (1 if old_count == 0 else -1 if new_count == 0 else 0)
+            )
+            if int(match[3]) != expected_new:
+                raise ValueError("Patch new-side coordinates mismatch")
+            cursor = old_start if old_count == 0 else old_start - 1
             if cursor < previous_end:
                 raise ValueError("Overlapping patch hunks")
             used_old = used_new = 0
@@ -167,6 +179,7 @@ def patch_lines(patch: str, root: Path) -> dict[str, set[int]]:
             if used_old != old_count or used_new != new_count:
                 raise ValueError("Patch hunk line counts mismatch")
             previous_end = cursor
+            delta += new_count - old_count
         if not changes[path]:
             raise ValueError("Patch has no changes")
     if not changes:

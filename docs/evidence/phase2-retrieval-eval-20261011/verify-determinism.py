@@ -27,6 +27,8 @@ from codepilot.schemas.retrieval import RetrievalResult
 
 
 def main(output):
+    if (output / "source").exists():
+        raise ValueError("Choose a fresh output directory; existing fixture Git history is preserved")
     output.mkdir(parents=True, exist_ok=True)
     fixture = ROOT / "tests/fixtures/repos/mini_auth"
     files = {p.relative_to(fixture).as_posix(): p.read_text(encoding="utf-8")

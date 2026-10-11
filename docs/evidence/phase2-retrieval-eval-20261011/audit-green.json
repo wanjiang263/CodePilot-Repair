@@ -1,0 +1,14 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/unit/retrieval/test_retrieval_dataset.py",
+    "tests/integration/test_cli_retrieval_evaluation.py",
+    "-k",
+    "under_repository or malformed_patch or actual_missing or valid_traceable",
+    "-q",
+    "--junitxml=docs/evidence/phase2-retrieval-eval-20261011/audit-green.xml"
+  ],
+  "exit_code": 0
+}

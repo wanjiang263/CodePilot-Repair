@@ -1,0 +1,67 @@
+F...FF                                                                   [100%]
+================================== FAILURES ===================================
+____ test_gold_patch_under_repository_is_rejected_before_input_projection _____
+
+    def test_gold_patch_under_repository_is_rejected_before_input_projection():
+        from codepilot.retrieval.dataset import RetrievalCase
+        row = json.loads(DATASET.read_text(encoding="utf-8").splitlines()[0])
+        row["gold_patch"] = "repos/mini_auth/reference.patch"
+>       with pytest.raises(ValueError, match="outside"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\unit\retrieval\test_retrieval_dataset.py:110: Failed
+_ test_malformed_patch_is_not_a_traceable_gold[--- a/a.py\n+++ b/a.py\n@@ -1 +99 @@\n-old\n+new\n] _
+
+tmp_path = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-348/test_malformed_patch_is_not_a_3')
+patch = '--- a/a.py\n+++ b/a.py\n@@ -1 +99 @@\n-old\n+new\n'
+
+    @pytest.mark.parametrize("patch", ["", "garbage", "--- a/a.py\n+++ b/b.py\n",
+        "--- a/a.py\n+++ b/a.py\n@@ -1 +99 @@\n-old\n+new\n"])
+    def test_malformed_patch_is_not_a_traceable_gold(tmp_path, patch):
+        from codepilot.retrieval.dataset import patch_lines
+        (tmp_path / "a.py").write_text("old\n", encoding="utf-8")
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\unit\retrieval\test_retrieval_dataset.py:119: Failed
+____________ test_actual_missing_repository_is_an_environment_miss ____________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-348/test_actual_missing_repository0')
+
+    def test_actual_missing_repository_is_an_environment_miss(isolated):
+        from codepilot.retrieval.dataset import load_dataset
+        from codepilot.retrieval.evaluation import run_evaluation
+        cases = load_dataset(DATASET)[:1]
+        cases[0].repo = "not-present"
+>       report = run_evaluation(cases, isolated, isolated / "cache")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_cli_retrieval_evaluation.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\codepilot\retrieval\evaluation.py:111: in run_evaluation
+    with indexed_repository(task, cache_dir) as indexed:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\Anaconda\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task = RetrievalInput(task_id='01-expiry-boundary', repo='C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-3...sued tokens stop working at the exact expiry second. The session policy expects that boundary second to remain valid.')
+cache_dir = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-348/test_actual_missing_repository0/cache')
+
+    @contextmanager
+    def indexed_repository(task: RetrievalInput, cache_dir: Path) -> Iterator[IndexedRepository]:
+        """Owned temporary workspace and in-memory DB; no task labels accepted."""
+        source = normalize_source(task.repo)
+        if source.local_path is not None and not source.local_path.is_dir():
+>           raise ValueError(f"Repository directory missing: {source.local_path}")
+E           ValueError: Repository directory missing: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-348\test_actual_missing_repository0\not-present
+
+src\codepilot\retrieval\runner.py:184: ValueError
+=========================== short test summary info ===========================
+FAILED tests/unit/retrieval/test_retrieval_dataset.py::test_gold_patch_under_repository_is_rejected_before_input_projection
+FAILED tests/unit/retrieval/test_retrieval_dataset.py::test_malformed_patch_is_not_a_traceable_gold[--- a/a.py\n+++ b/a.py\n@@ -1 +99 @@\n-old\n+new\n]
+FAILED tests/integration/test_cli_retrieval_evaluation.py::test_actual_missing_repository_is_an_environment_miss
+3 failed, 3 passed, 24 deselected in 5.42s

@@ -181,7 +181,7 @@ def indexed_repository(task: RetrievalInput, cache_dir: Path) -> Iterator[Indexe
     """Owned temporary workspace and in-memory DB; no task labels accepted."""
     source = normalize_source(task.repo)
     if source.local_path is not None and not source.local_path.is_dir():
-        raise ValueError(f"Repository directory missing: {source.local_path}")
+        raise FileNotFoundError(f"Repository directory missing: {source.local_path}")
     snapshot = source.local_path is not None and not (source.local_path / ".git").exists()
     if snapshot and task.base_commit not in {"HEAD", "snapshot"}:
         raise ValueError(

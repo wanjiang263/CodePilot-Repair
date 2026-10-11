@@ -101,3 +101,29 @@ def test_inference_modules_do_not_import_gold_evaluator():
             and n.module in {"codepilot.retrieval.dataset", "codepilot.retrieval.eval"}
             for n in ast.walk(tree)
         )
+
+
+def test_gold_patch_under_repository_is_rejected_before_input_projection():
+    from codepilot.retrieval.dataset import RetrievalCase
+
+    row = json.loads(DATASET.read_text(encoding="utf-8").splitlines()[0])
+    row["gold_patch"] = "repos/mini_auth/reference.patch"
+    with pytest.raises(ValueError, match="outside"):
+        RetrievalCase.model_validate(row).inference(DATASET.parent)
+
+
+@pytest.mark.parametrize(
+    "patch",
+    [
+        "",
+        "garbage",
+        "--- a/a.py\n+++ b/b.py\n",
+        "--- a/a.py\n+++ b/a.py\n@@ -1 +99 @@\n-old\n+new\n",
+    ],
+)
+def test_malformed_patch_is_not_a_traceable_gold(tmp_path, patch):
+    from codepilot.retrieval.dataset import patch_lines
+
+    (tmp_path / "a.py").write_text("old\n", encoding="utf-8")
+    with pytest.raises(ValueError):
+        patch_lines(patch, tmp_path)
