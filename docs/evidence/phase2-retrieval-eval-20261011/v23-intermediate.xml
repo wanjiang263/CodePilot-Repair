@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="41" time="35.380" timestamp="2026-10-11T12:43:31.542403+08:00" hostname="LAPTOP-H0FUOTNB"><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_documented_issue_file_command_and_snapshot_copy" time="4.928" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_all_six_channels_real_repo_with_explicit_offline_embedding[weighted]" time="4.796" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_all_six_channels_real_repo_with_explicit_offline_embedding[rrf]" time="3.846"><failure message="AssertionError: 2026-10-11T04:43:48.108162Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.234 incremental=False removed=0 repository_id=repo_483b6c496dd4c0a0 reused=0&#10;  weights apply only to weighted fusion&#10;  &#10;assert 1 == 0&#10; +  where 1 = &lt;Result SystemExit(1)&gt;.exit_code">isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-338/test_all_six_channels_real_rep1')
+method = 'rrf'
+
+    @pytest.mark.parametrize("method", ["weighted", "rrf"])
+    def test_all_six_channels_real_repo_with_explicit_offline_embedding(isolated, method):
+        repo = init_repo(
+            isolated / "repo",
+            {
+                p.relative_to(FIXTURE).as_posix(): p.read_text(encoding="utf-8")
+                for p in FIXTURE.rglob("*")
+                if p.is_file()
+            },
+        )
+        config = isolated / "retrieval.json"
+        config.write_text(
+            json.dumps(
+                {
+                    "channels": dict.fromkeys(
+                        ["bm25", "ripgrep", "semantic", "structural", "test", "history"], True
+                    ),
+                    "method": method,
+                    "embedding": "offline-hash",
+                    "weights": {"bm25": 0.4, "semantic": 0.6},
+                }
+            )
+        )
+        result = CliRunner().invoke(
+            app,
+            [
+                "retrieve",
+                "--repo",
+                str(repo.path),
+                "--issue",
+                "test_verify_rejects_garbage verify_token",
+                "--config",
+                str(config),
+                "--limit",
+                "5",
+            ],
+        )
+&gt;       assert result.exit_code == 0, result.output
+E       AssertionError: 2026-10-11T04:43:48.108162Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.234 incremental=False removed=0 repository_id=repo_483b6c496dd4c0a0 reused=0
+E         weights apply only to weighted fusion
+E         
+E       assert 1 == 0
+E        +  where 1 = &lt;Result SystemExit(1)&gt;.exit_code
+
+tests\integration\test_cli_multichannel_retrieve.py:79: AssertionError</failure></testcase><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_cli_structural_only_has_explicit_seed_provenance" time="3.784" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_bad_inputs_fail_explicitly_before_retrieval[extra0]" time="0.315" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_bad_inputs_fail_explicitly_before_retrieval[extra1]" time="0.017" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_bad_inputs_fail_explicitly_before_retrieval[extra2]" time="0.015" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_bad_inputs_fail_explicitly_before_retrieval[extra3]" time="0.019" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_bad_inputs_fail_explicitly_before_retrieval[extra4]" time="0.020" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_bad_inputs_fail_explicitly_before_retrieval[extra5]" time="0.019" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_bad_inputs_fail_explicitly_before_retrieval[extra6]" time="0.015" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_offline_vectors_are_order_independent_and_never_use_python_hash" time="0.002" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_inference_runner_cannot_import_evaluation_modules" time="0.008" /><testcase classname="tests.integration.test_cli_retrieve" name="test_retrieve_mini_auth[bm25]" time="4.431" /><testcase classname="tests.integration.test_cli_retrieve" name="test_retrieve_mini_auth[ripgrep]" time="4.558" /><testcase classname="tests.integration.test_cli_retrieve" name="test_retrieve_rejects_unknown_channel" time="0.010" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_all_six_channels_integrate_repeat_and_roundtrip[weighted]" time="1.136" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_all_six_channels_integrate_repeat_and_roundtrip[rrf]" time="1.046" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_default_multichannel_fuses_and_single_channel_remains_compatible" time="0.046" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_opt_in_single_channel_fusion_and_unconfirmed_external_frame" time="0.028" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_top_k_keeps_full_channel_results_and_full_fused_ranking" time="0.037" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_all_disabled_can_still_pin_from_verified_repository_frame" time="0.027" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_single_channel_cli_remains_frozen" time="0.027" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_explicit_single_channel_weights_are_applied[None]" time="0.027" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_explicit_single_channel_weights_are_applied[config1]" time="0.029" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_caller_snapshot_id_is_preserved_without_persistence[None]" time="0.026" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_caller_snapshot_id_is_preserved_without_persistence[config1]" time="0.028" /><testcase classname="tests.integration.test_retrieval_fusion" name="test_rrf_parameter_cannot_be_silently_ignored" time="0.010" /><testcase classname="tests.unit.test_cli" name="test_version_flag" time="0.011" /><testcase classname="tests.unit.test_cli" name="test_help_lists_all_planned_commands" time="0.015" /><testcase classname="tests.unit.test_cli" name="test_config_check_runs_against_repository_config" time="0.020" /><testcase classname="tests.unit.test_cli" name="test_config_check_strict_can_fail" time="0.016" /><testcase classname="tests.unit.test_cli" name="test_config_check_strict_passes_with_complete_config" time="0.015" /><testcase classname="tests.unit.test_cli" name="test_config_show_does_not_leak_secrets" time="0.008" /><testcase classname="tests.unit.test_cli" name="test_doctor_runs" time="0.937" /><testcase classname="tests.unit.test_cli" name="test_doctor_survives_a_stopped_docker_daemon" time="0.212" /><testcase classname="tests.unit.test_cli" name="test_unimplemented_commands_fail_loudly[bench]" time="0.008" /><testcase classname="tests.unit.test_cli" name="test_unimplemented_commands_fail_loudly[report]" time="0.005" /><testcase classname="tests.unit.test_cli" name="test_unimplemented_commands_fail_loudly[run-tests]" time="0.006" /><testcase classname="tests.unit.test_cli" name="test_unimplemented_commands_fail_loudly[solve]" time="0.006" /><testcase classname="tests.unit.test_cli" name="test_unimplemented_message_names_the_phase" time="0.007" /></testsuite></testsuites>

@@ -1,0 +1,136 @@
+FFFF.......FF                                                            [100%]
+================================== FAILURES ===================================
+____________ test_documented_issue_file_command_and_snapshot_copy _____________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-337/test_documented_issue_file_com0')
+
+    def test_documented_issue_file_command_and_snapshot_copy(isolated):
+        issue = FIXTURE.parents[1] / "issues/expired_token.md"
+        result = CliRunner().invoke(app, ["retrieve", "--repo", str(FIXTURE), "--issue", str(issue)])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: codepilot retrieve [OPTIONS] {query}
+E         Try 'codepilot retrieve --help' for help.
+E         ┌─ Error ─────────────────────────────────────────────────────────────────────┐
+E         │ No such option: --issue                                                     │
+E         └─────────────────────────────────────────────────────────────────────────────┘
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+tests\integration\test_cli_multichannel_retrieve.py:30: AssertionError
+__ test_all_six_channels_real_repo_with_explicit_offline_embedding[weighted] __
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-337/test_all_six_channels_real_rep0')
+method = 'weighted'
+
+    @pytest.mark.parametrize("method", ["weighted", "rrf"])
+    def test_all_six_channels_real_repo_with_explicit_offline_embedding(isolated, method):
+        repo = init_repo(isolated / "repo", {p.relative_to(FIXTURE).as_posix(): p.read_text(encoding="utf-8")
+                                            for p in FIXTURE.rglob("*") if p.is_file()})
+        config = isolated / "retrieval.json"
+        config.write_text(json.dumps({"channels": {name: True for name in
+             ["bm25", "ripgrep", "semantic", "structural", "test", "history"]},
+             "method": method, "embedding": "offline-hash", "weights": {"bm25": 0.4, "semantic": 0.6}}))
+        result = CliRunner().invoke(app, ["retrieve", "--repo", str(repo.path), "--issue",
+             "test_verify_rejects_garbage verify_token", "--config", str(config), "--limit", "5"])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: codepilot retrieve [OPTIONS] {query}
+E         Try 'codepilot retrieve --help' for help.
+E         ┌─ Error ─────────────────────────────────────────────────────────────────────┐
+E         │ No such option: --issue                                                     │
+E         └─────────────────────────────────────────────────────────────────────────────┘
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+tests\integration\test_cli_multichannel_retrieve.py:48: AssertionError
+____ test_all_six_channels_real_repo_with_explicit_offline_embedding[rrf] _____
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-337/test_all_six_channels_real_rep1')
+method = 'rrf'
+
+    @pytest.mark.parametrize("method", ["weighted", "rrf"])
+    def test_all_six_channels_real_repo_with_explicit_offline_embedding(isolated, method):
+        repo = init_repo(isolated / "repo", {p.relative_to(FIXTURE).as_posix(): p.read_text(encoding="utf-8")
+                                            for p in FIXTURE.rglob("*") if p.is_file()})
+        config = isolated / "retrieval.json"
+        config.write_text(json.dumps({"channels": {name: True for name in
+             ["bm25", "ripgrep", "semantic", "structural", "test", "history"]},
+             "method": method, "embedding": "offline-hash", "weights": {"bm25": 0.4, "semantic": 0.6}}))
+        result = CliRunner().invoke(app, ["retrieve", "--repo", str(repo.path), "--issue",
+             "test_verify_rejects_garbage verify_token", "--config", str(config), "--limit", "5"])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: codepilot retrieve [OPTIONS] {query}
+E         Try 'codepilot retrieve --help' for help.
+E         ┌─ Error ─────────────────────────────────────────────────────────────────────┐
+E         │ No such option: --issue                                                     │
+E         └─────────────────────────────────────────────────────────────────────────────┘
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+tests\integration\test_cli_multichannel_retrieve.py:48: AssertionError
+____________ test_cli_structural_only_has_explicit_seed_provenance ____________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-337/test_cli_structural_only_has_e0')
+
+    def test_cli_structural_only_has_explicit_seed_provenance(isolated):
+        result = CliRunner().invoke(app, ["retrieve", "--repo", str(FIXTURE), "--issue", "Session.login",
+                                         "--channel", "structural"])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: codepilot retrieve [OPTIONS] {query}
+E         Try 'codepilot retrieve --help' for help.
+E         ┌─ Error ─────────────────────────────────────────────────────────────────────┐
+E         │ No such option: --issue                                                     │
+E         └─────────────────────────────────────────────────────────────────────────────┘
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+tests\integration\test_cli_multichannel_retrieve.py:62: AssertionError
+____ test_offline_vectors_are_order_independent_and_never_use_python_hash _____
+
+    def test_offline_vectors_are_order_independent_and_never_use_python_hash():
+>       from codepilot.retrieval.offline import OfflineHashEmbedding
+E       ModuleNotFoundError: No module named 'codepilot.retrieval.offline'
+
+tests\integration\test_cli_multichannel_retrieve.py:77: ModuleNotFoundError
+___________ test_inference_runner_cannot_import_evaluation_modules ____________
+
+    def test_inference_runner_cannot_import_evaluation_modules():
+        import ast
+        source = Path(__file__).resolve().parents[2] / "src/codepilot/retrieval/runner.py"
+>       tree = ast.parse(source.read_text(encoding="utf-8"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_cli_multichannel_retrieve.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+D:\Anaconda\Lib\pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/lenovo/Desktop/CodePilot-Repair/src/codepilot/retrieval/runner.py')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\src\\codepilot\\retrieval\\runner.py'
+
+D:\Anaconda\Lib\pathlib.py:1013: FileNotFoundError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_cli_multichannel_retrieve.py::test_documented_issue_file_command_and_snapshot_copy
+FAILED tests/integration/test_cli_multichannel_retrieve.py::test_all_six_channels_real_repo_with_explicit_offline_embedding[weighted]
+FAILED tests/integration/test_cli_multichannel_retrieve.py::test_all_six_channels_real_repo_with_explicit_offline_embedding[rrf]
+FAILED tests/integration/test_cli_multichannel_retrieve.py::test_cli_structural_only_has_explicit_seed_provenance
+FAILED tests/integration/test_cli_multichannel_retrieve.py::test_offline_vectors_are_order_independent_and_never_use_python_hash
+FAILED tests/integration/test_cli_multichannel_retrieve.py::test_inference_runner_cannot_import_evaluation_modules
+6 failed, 7 passed in 5.66s

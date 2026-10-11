@@ -332,56 +332,84 @@ def _not_yet(command: str) -> None:
 
 @app.command("retrieve")
 def retrieve(
-    query: str = typer.Argument(..., help="检索语句。"),
+    query: str | None = typer.Argument(None, help="检索语句（兼容原有位置参数）。"),
     repo: str = typer.Option(..., "--repo", help="仓库路径或 URL。"),
     base_commit: str = typer.Option("HEAD", "--base-commit", help="基准提交。"),
-    channel: str = typer.Option("bm25", "--channel", help="独立通道：bm25 / ripgrep。"),
+    channel: str = typer.Option(
+        "bm25", "--channel", help="逗号分隔：bm25/ripgrep/semantic/structural/test/history。"
+    ),
     limit: int = typer.Option(20, "--limit", min=1, help="最多返回的 symbol 数量。"),
+    issue: str | None = typer.Option(None, "--issue", help="Issue 文本或 UTF-8 文件路径。"),
+    config: Path | None = typer.Option(
+        None, "--config", help="检索 JSON 配置（channels/method/weights/embedding）。"
+    ),
+    ranking: str | None = typer.Option(None, "--ranking", help="weighted 或 rrf。"),
+    embedding: str | None = typer.Option(
+        None, "--embedding", help="none 或 offline-hash（非学习语义模型）。"
+    ),
 ) -> None:
-    """Phase 2 首批：在基准提交中执行单通道检索，输出 JSON（尚未融合）。"""
-    from codepilot.repo.index import Indexer, RepositoryIndex
-    from codepilot.repo.workspace import WorkspaceError, WorkspaceManager
-    from codepilot.retrieval.documents import RetrievalError
-    from codepilot.retrieval.service import retrieve_symbols
-    from codepilot.storage.db import (
-        create_engine_from_url,
-        create_session_factory,
-        init_db,
-        session_scope,
-    )
-    from codepilot.storage.repository import Stores
+    """在隔离基准版本中检索，输出 Symbol / File 与完整通道评分 JSON。"""
+    import json
 
-    if channel not in ("bm25", "ripgrep"):
-        raise typer.BadParameter("请选择 bm25 或 ripgrep", param_hint="--channel")
+    from codepilot.repo.gitcmd import GitError
+    from codepilot.repo.workspace import WorkspaceError
+    from codepilot.retrieval.config import CHANNELS
+    from codepilot.retrieval.documents import RetrievalError
+    from codepilot.retrieval.input import RetrievalInput
+    from codepilot.retrieval.runner import RetrievalOptions, indexed_repository
+
+    if (query is None) == (issue is None):
+        raise typer.BadParameter("请提供位置参数 query 或 --issue，二者只能选一项")
+    try:
+        text = issue if issue is not None else query
+        assert text is not None
+        if issue is not None:
+            file = Path(issue)
+            if file.is_file():
+                text = file.read_text(encoding="utf-8")
+            elif "\n" not in issue and file.suffix.lower() in {".md", ".txt"}:
+                raise ValueError(f"Issue 文件不存在: {file}")
+        if not text.strip():
+            raise ValueError("Issue 不能为空")
+        if config is not None:
+            if channel != "bm25":
+                raise ValueError("--config 与 --channel 不能同时指定")
+            options_data = json.loads(config.read_text(encoding="utf-8"))
+            if not isinstance(options_data, dict):
+                raise ValueError("配置必须是 JSON 对象")
+        else:
+            names = channel.split(",")
+            if (
+                not names
+                or any(name not in CHANNELS for name in names)
+                or len(set(names)) != len(names)
+            ):
+                raise ValueError(f"未知或重复通道: {channel}")
+            options_data = {"channels": {name: name in names for name in CHANNELS}}
+        if ranking is not None:
+            options_data["method"] = ranking
+        elif issue is not None and "method" not in options_data:
+            options_data["method"] = "weighted"
+        if embedding is not None:
+            options_data["embedding"] = embedding
+        options = RetrievalOptions.model_validate(options_data)
+        task = RetrievalInput(task_id="cli", repo=repo, base_commit=base_commit, issue=text)
+    except (ValueError, OSError) as error:
+        raise typer.BadParameter(str(error)) from error
     settings = get_settings()
     settings.ensure_dirs()
-    manager = WorkspaceManager(cache_root=settings.repo_cache_dir())
-    target = settings.cache_dir / "cli-workspaces" / f"retrieve-{secrets.token_hex(6)}"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    engine = create_engine_from_url("sqlite://")
     try:
-        init_db(engine)
-        workspace = manager.create(source=repo, base_commit=base_commit, target=target)
-        try:
-            with session_scope(create_session_factory(engine)) as session:
-                stores = Stores(session)
-                Indexer().index(stores, workspace)
-                symbols = RepositoryIndex(stores, workspace.repository_id).symbol_objects()
-                result = retrieve_symbols(
-                    workspace.path,
-                    symbols,
-                    query,
-                    channel="bm25" if channel == "bm25" else "ripgrep",
-                    limit=limit,
-                )
+        with indexed_repository(task, settings.cache_dir) as indexed:
+            result, info = indexed.retrieve(task, options, limit=limit)
+            if issue is None and config is None and ranking is None and embedding is None:
                 typer.echo(result.model_dump_json(indent=2))
-        finally:
-            manager.remove(workspace)
-    except (WorkspaceError, RetrievalError) as error:
+            else:
+                data = result.model_dump(mode="json")
+                data["execution"] = info.model_dump(mode="json")
+                typer.echo(json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False))
+    except (WorkspaceError, RetrievalError, GitError, ValueError, OSError) as error:
         typer.secho(str(error), fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1) from error
-    finally:
-        engine.dispose()
 
 
 @app.command("run-tests")
