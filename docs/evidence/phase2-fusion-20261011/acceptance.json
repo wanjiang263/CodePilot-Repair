@@ -1,0 +1,696 @@
+{
+  "date": "2026-10-11",
+  "branch": "codex/phase2-fusion",
+  "base": "04132b829fca2ef2ec6296092052100e0068eca8",
+  "implementation_commit": "652028aca46608178b6b273717a88536a638ea2e",
+  "suggested_stacked_pr_base": "codex/phase2-structural-retrieval",
+  "original_branch_head": "04132b829fca2ef2ec6296092052100e0068eca8",
+  "frozen_file_changes": [],
+  "tasks": {
+    "V-14": {
+      "commit": "3af52b7a3320e4043c9cc85783efac13b20a87a3",
+      "test_modules": [
+        "tests.unit.retrieval.test_channel_config"
+      ],
+      "new_tests": 21
+    },
+    "V-15": {
+      "commit": "327c16dae3e6145c8c6589ff159bca8537b0d14f",
+      "test_modules": [
+        "tests.unit.retrieval.test_normalization"
+      ],
+      "new_tests": 15
+    },
+    "V-16": {
+      "commit": "126df8d51b7ae14692ff5a7ba267b8c5965ae2b3",
+      "test_modules": [
+        "tests.unit.retrieval.test_weighted_fusion"
+      ],
+      "new_tests": 14
+    },
+    "V-17": {
+      "commit": "4cff042974600446a2084d1326add873d40e9e74",
+      "test_modules": [
+        "tests.unit.retrieval.test_rrf"
+      ],
+      "new_tests": 13
+    },
+    "V-18": {
+      "commit": "7d3a0f1c2e1b53f35e97ecd0e5e286ccc801f0a6",
+      "test_modules": [
+        "tests.unit.retrieval.test_pinning"
+      ],
+      "new_tests": 13
+    },
+    "V-19": {
+      "commit": "9d43fc881b5c6a45ca5ca1493b1cb9fa9a7ecd92",
+      "test_modules": [
+        "tests.unit.retrieval.test_aggregate"
+      ],
+      "new_tests": 15
+    },
+    "V-20": {
+      "commit": "652028aca46608178b6b273717a88536a638ea2e",
+      "test_modules": [
+        "tests.unit.retrieval.test_result",
+        "tests.integration.test_retrieval_fusion"
+      ],
+      "new_tests": 40
+    }
+  },
+  "new_tests": 131,
+  "checks": {
+    "v14-red": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_config.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v14-red.xml"
+      ],
+      "exit_code": 2,
+      "pytest": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 1,
+        "skipped": 0,
+        "passed": 0,
+        "deselected": 0
+      },
+      "duration_seconds": 1.323
+    },
+    "v14": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_config.py",
+        "tests/unit/retrieval/test_lexical.py",
+        "tests/integration/test_retrieval_channels.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v14.xml"
+      ],
+      "exit_code": 1,
+      "pytest": {
+        "tests": 37,
+        "failures": 0,
+        "errors": 24,
+        "skipped": 0,
+        "passed": 13,
+        "deselected": 0
+      },
+      "duration_seconds": 5.299
+    },
+    "v14-green": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_config.py",
+        "tests/unit/retrieval/test_lexical.py",
+        "tests/integration/test_retrieval_channels.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v14-green.xml"
+      ],
+      "exit_code": 0,
+      "pytest": {
+        "tests": 37,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 37,
+        "deselected": 0
+      },
+      "duration_seconds": 10.351
+    },
+    "v15-red": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_normalization.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v15-red.xml"
+      ],
+      "exit_code": 2,
+      "pytest": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 1,
+        "skipped": 0,
+        "passed": 0,
+        "deselected": 0
+      },
+      "duration_seconds": 1.624
+    },
+    "v15": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_normalization.py",
+        "tests/unit/retrieval/test_lexical.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v15.xml"
+      ],
+      "exit_code": 0,
+      "pytest": {
+        "tests": 26,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 26,
+        "deselected": 0
+      },
+      "duration_seconds": 6.789
+    },
+    "v16-red": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_weighted_fusion.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v16-red.xml"
+      ],
+      "exit_code": 2,
+      "pytest": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 1,
+        "skipped": 0,
+        "passed": 0,
+        "deselected": 0
+      },
+      "duration_seconds": 2.374
+    },
+    "v16": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_weighted_fusion.py",
+        "tests/unit/retrieval/test_normalization.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v16.xml"
+      ],
+      "exit_code": 0,
+      "pytest": {
+        "tests": 29,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 29,
+        "deselected": 0
+      },
+      "duration_seconds": 2.903
+    },
+    "v17-red": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_rrf.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v17-red.xml"
+      ],
+      "exit_code": 2,
+      "pytest": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 1,
+        "skipped": 0,
+        "passed": 0,
+        "deselected": 0
+      },
+      "duration_seconds": 1.995
+    },
+    "v17": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_rrf.py",
+        "tests/unit/retrieval/test_weighted_fusion.py",
+        "tests/unit/retrieval/test_normalization.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v17.xml"
+      ],
+      "exit_code": 0,
+      "pytest": {
+        "tests": 42,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 42,
+        "deselected": 0
+      },
+      "duration_seconds": 1.945
+    },
+    "v18-red": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_pinning.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v18-red.xml"
+      ],
+      "exit_code": 2,
+      "pytest": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 1,
+        "skipped": 0,
+        "passed": 0,
+        "deselected": 0
+      },
+      "duration_seconds": 1.876
+    },
+    "v18": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_pinning.py",
+        "tests/unit/retrieval/test_rrf.py",
+        "tests/unit/retrieval/test_weighted_fusion.py",
+        "tests/unit/retrieval/test_normalization.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v18.xml"
+      ],
+      "exit_code": 0,
+      "pytest": {
+        "tests": 55,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 55,
+        "deselected": 0
+      },
+      "duration_seconds": 3.6
+    },
+    "v19-red": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_aggregate.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v19-red.xml"
+      ],
+      "exit_code": 2,
+      "pytest": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 1,
+        "skipped": 0,
+        "passed": 0,
+        "deselected": 0
+      },
+      "duration_seconds": 2.436
+    },
+    "v19": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_aggregate.py",
+        "tests/unit/retrieval/test_pinning.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v19.xml"
+      ],
+      "exit_code": 0,
+      "pytest": {
+        "tests": 28,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 28,
+        "deselected": 0
+      },
+      "duration_seconds": 2.93
+    },
+    "v20-red": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_result.py",
+        "tests/integration/test_retrieval_fusion.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v20-red.xml"
+      ],
+      "exit_code": 2,
+      "pytest": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 2,
+        "skipped": 0,
+        "passed": 0,
+        "deselected": 0
+      },
+      "duration_seconds": 2.281
+    },
+    "v20-first": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_result.py",
+        "tests/integration/test_retrieval_fusion.py",
+        "tests/unit/retrieval/test_config.py",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v20-first.xml"
+      ],
+      "exit_code": 1,
+      "pytest": {
+        "tests": 55,
+        "failures": 2,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 53,
+        "deselected": 0
+      },
+      "duration_seconds": 7.055
+    },
+    "v20-k-red": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval/test_result.py::test_nondefault_rrf_k_survives_standalone_roundtrip_and_validation",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v20-k-red.xml"
+      ],
+      "exit_code": 1,
+      "pytest": {
+        "tests": 1,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 0,
+        "deselected": 0
+      },
+      "duration_seconds": 4.083
+    },
+    "v20-options-red": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/integration/test_retrieval_fusion.py",
+        "-k",
+        "explicit_single or caller_snapshot or rrf_parameter",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v20-options-red.xml"
+      ],
+      "exit_code": 1,
+      "pytest": {
+        "tests": 5,
+        "failures": 5,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 0,
+        "deselected": 7
+      },
+      "duration_seconds": 4.013
+    },
+    "v20": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval",
+        "tests/integration/test_retrieval_fusion.py",
+        "tests/integration/test_retrieval_channels.py",
+        "tests/integration/test_cli_retrieve.py",
+        "tests/unit/schemas",
+        "-m",
+        "not docker and not llm",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v20.xml"
+      ],
+      "exit_code": 0,
+      "pytest": {
+        "tests": 335,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "passed": 334,
+        "deselected": 0
+      },
+      "duration_seconds": 32.831
+    },
+    "v20-final": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/unit/retrieval",
+        "tests/integration/test_retrieval_fusion.py",
+        "tests/integration/test_retrieval_channels.py",
+        "tests/integration/test_cli_retrieve.py",
+        "tests/unit/schemas",
+        "-m",
+        "not docker and not llm",
+        "-q",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/v20-final.xml"
+      ],
+      "exit_code": 0,
+      "pytest": {
+        "tests": 340,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "passed": 339,
+        "deselected": 0
+      },
+      "duration_seconds": 25.957
+    },
+    "ruff": {
+      "command": [
+        ".venv/Scripts/ruff.exe",
+        "check",
+        "."
+      ],
+      "exit_code": 0
+    },
+    "format": {
+      "command": [
+        ".venv/Scripts/ruff.exe",
+        "format",
+        "--check",
+        "."
+      ],
+      "exit_code": 0
+    },
+    "mypy": {
+      "command": [
+        ".venv/Scripts/mypy.exe",
+        "src"
+      ],
+      "exit_code": 0
+    },
+    "full-pytest": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "-m",
+        "not docker and not llm",
+        "--cov",
+        "--cov-report=term-missing",
+        "--cov-report=json:docs/evidence/phase2-fusion-20261011/coverage.json",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/full-pytest.xml",
+        "-q"
+      ],
+      "exit_code": 2,
+      "pytest": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 1,
+        "skipped": 0,
+        "passed": 0,
+        "deselected": 1
+      },
+      "duration_seconds": 4.473
+    },
+    "final-ruff": {
+      "command": [
+        ".venv/Scripts/ruff.exe",
+        "check",
+        "."
+      ],
+      "exit_code": 0
+    },
+    "final-format": {
+      "command": [
+        ".venv/Scripts/ruff.exe",
+        "format",
+        "--check",
+        "."
+      ],
+      "exit_code": 0
+    },
+    "final-mypy": {
+      "command": [
+        ".venv/Scripts/mypy.exe",
+        "src"
+      ],
+      "exit_code": 0
+    },
+    "final-pytest": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "-m",
+        "not docker and not llm",
+        "--cov",
+        "--cov-report=term-missing",
+        "--cov-report=json:docs/evidence/phase2-fusion-20261011/final-coverage.json",
+        "--junitxml=docs/evidence/phase2-fusion-20261011/final-pytest.xml",
+        "-q"
+      ],
+      "exit_code": 0,
+      "pytest": {
+        "tests": 1068,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "passed": 1067,
+        "deselected": 1
+      },
+      "duration_seconds": 317.671
+    }
+  },
+  "coverage": {
+    "covered_lines": 4825,
+    "num_statements": 5011,
+    "percent_covered": 95.12233622730861,
+    "percent_covered_display": "95",
+    "missing_lines": 186,
+    "excluded_lines": 53,
+    "percent_statements_covered": 96.2881660347236,
+    "percent_statements_covered_display": "96",
+    "num_branches": 1324,
+    "num_partial_branches": 109,
+    "covered_branches": 1201,
+    "missing_branches": 123,
+    "percent_branches_covered": 90.70996978851964,
+    "percent_branches_covered_display": "91"
+  },
+  "module_coverage": {
+    "src/codepilot/retrieval/aggregate.py": {
+      "covered_lines": 35,
+      "num_statements": 35,
+      "percent_covered": 100.0,
+      "percent_covered_display": "100",
+      "missing_lines": 0,
+      "excluded_lines": 0,
+      "percent_statements_covered": 100.0,
+      "percent_statements_covered_display": "100",
+      "num_branches": 16,
+      "num_partial_branches": 0,
+      "covered_branches": 16,
+      "missing_branches": 0,
+      "percent_branches_covered": 100.0,
+      "percent_branches_covered_display": "100"
+    },
+    "src/codepilot/retrieval/config.py": {
+      "covered_lines": 16,
+      "num_statements": 16,
+      "percent_covered": 100.0,
+      "percent_covered_display": "100",
+      "missing_lines": 0,
+      "excluded_lines": 0,
+      "percent_statements_covered": 100.0,
+      "percent_statements_covered_display": "100",
+      "num_branches": 0,
+      "num_partial_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "percent_branches_covered": 100.0,
+      "percent_branches_covered_display": "100"
+    },
+    "src/codepilot/retrieval/fusion.py": {
+      "covered_lines": 73,
+      "num_statements": 74,
+      "percent_covered": 98.07692307692308,
+      "percent_covered_display": "98",
+      "missing_lines": 1,
+      "excluded_lines": 0,
+      "percent_statements_covered": 98.64864864864865,
+      "percent_statements_covered_display": "99",
+      "num_branches": 30,
+      "num_partial_branches": 1,
+      "covered_branches": 29,
+      "missing_branches": 1,
+      "percent_branches_covered": 96.66666666666667,
+      "percent_branches_covered_display": "97"
+    },
+    "src/codepilot/retrieval/result.py": {
+      "covered_lines": 81,
+      "num_statements": 82,
+      "percent_covered": 98.30508474576271,
+      "percent_covered_display": "98",
+      "missing_lines": 1,
+      "excluded_lines": 0,
+      "percent_statements_covered": 98.78048780487805,
+      "percent_statements_covered_display": "99",
+      "num_branches": 36,
+      "num_partial_branches": 1,
+      "covered_branches": 35,
+      "missing_branches": 1,
+      "percent_branches_covered": 97.22222222222223,
+      "percent_branches_covered_display": "97"
+    },
+    "src/codepilot/retrieval/service.py": {
+      "covered_lines": 93,
+      "num_statements": 93,
+      "percent_covered": 100.0,
+      "percent_covered_display": "100",
+      "missing_lines": 0,
+      "excluded_lines": 0,
+      "percent_statements_covered": 100.0,
+      "percent_statements_covered_display": "100",
+      "num_branches": 50,
+      "num_partial_branches": 0,
+      "covered_branches": 50,
+      "missing_branches": 0,
+      "percent_branches_covered": 100.0,
+      "percent_branches_covered_display": "100"
+    }
+  },
+  "gate_completion_local": {
+    "ruff": "2026-10-11T12:15:03.495136",
+    "format": "2026-10-11T12:15:15.079482",
+    "mypy": "2026-10-11T12:15:31.286011"
+  },
+  "pytest_suite_timestamp": "2026-10-11T12:15:44.736965+08:00",
+  "environment": {
+    "python": "3.12.7",
+    "platform": "Windows-11-10.0.22631-SP0",
+    "executable": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+    "versions": {
+      "pydantic": "2.13.5",
+      "numpy": "2.5.3",
+      "pytest": "9.1.1",
+      "ruff": "0.16.10",
+      "mypy": "2.4.0"
+    }
+  },
+  "not_run": {
+    "docker": "scope does not touch sandbox; offline marker excludes docker",
+    "real_embedding_model": "not configured; actual pytest skip retained",
+    "real_embedding_api": "offline fixtures only",
+    "real_llm_and_L18": "outside scope; no paid calls",
+    "linux_ci": "no push",
+    "recall_at_k": "V-21/V-22 pending",
+    "multichannel_cli_and_phase2_acceptance": "V-23/V-24/V-25 pending"
+  },
+  "phase2_complete": false,
+  "push_or_pr_mutation": false
+}
