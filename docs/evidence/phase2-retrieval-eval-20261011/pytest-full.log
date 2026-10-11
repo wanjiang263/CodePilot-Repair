@@ -1,0 +1,183 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\lenovo\Desktop\CodePilot-Repair
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.15.1, langsmith-0.14.4, asyncio-1.4.0, cov-7.1.0, timeout-2.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: thread
+timeout func_only: False
+collected 1131 items / 1 deselected / 1130 selected
+
+tests\integration\test_cli_index.py ....                                 [  0%]
+tests\integration\test_cli_multichannel_retrieve.py .................... [  2%]
+                                                                         [  2%]
+tests\integration\test_cli_retrieval_evaluation.py ..........            [  3%]
+tests\integration\test_cli_retrieve.py ...                               [  3%]
+tests\integration\test_incremental.py ..                                 [  3%]
+tests\integration\test_index_golden.py .                                 [  3%]
+tests\integration\test_retrieval_channels.py .....                       [  3%]
+tests\integration\test_retrieval_determinism.py .                        [  4%]
+tests\integration\test_retrieval_fusion.py ............                  [  5%]
+tests\unit\api\test_app.py ...........                                   [  6%]
+tests\unit\llm\test_capabilities.py ................................     [  8%]
+tests\unit\llm\test_config.py ....................................       [ 12%]
+tests\unit\llm\test_cost.py ............                                 [ 13%]
+tests\unit\llm\test_fake.py .................                            [ 14%]
+tests\unit\llm\test_openai_compatible.py ............................... [ 17%]
+.....                                                                    [ 17%]
+tests\unit\llm\test_record_replay.py ........................            [ 20%]
+tests\unit\llm\test_registry.py .................                        [ 21%]
+tests\unit\llm\test_retry.py ............................                [ 23%]
+tests\unit\llm\test_smoke.py ....                                        [ 24%]
+tests\unit\llm\test_structured.py ......................                 [ 26%]
+tests\unit\observability\test_events.py ............                     [ 27%]
+tests\unit\observability\test_redaction.py ............................. [ 29%]
+............                                                             [ 30%]
+tests\unit\repo\test_call_suppression.py ........                        [ 31%]
+tests\unit\repo\test_calls.py ..........................                 [ 33%]
+tests\unit\repo\test_edges.py ........                                   [ 34%]
+tests\unit\repo\test_git_history.py ....................                 [ 36%]
+tests\unit\repo\test_gitcmd.py ...................                       [ 38%]
+tests\unit\repo\test_graph.py ......                                     [ 38%]
+tests\unit\repo\test_imports.py ............                             [ 39%]
+tests\unit\repo\test_index.py .................                          [ 41%]
+tests\unit\repo\test_parser.py ......................................... [ 44%]
+......                                                                   [ 45%]
+tests\unit\repo\test_parser_subprocess.py ....                           [ 45%]
+tests\unit\repo\test_scanner.py ........................................ [ 49%]
+...............                                                          [ 50%]
+tests\unit\repo\test_symbol_attributes.py ...............                [ 51%]
+tests\unit\repo\test_symbols.py ........................................ [ 55%]
+...........                                                              [ 56%]
+tests\unit\repo\test_test_links.py ............                          [ 57%]
+tests\unit\repo\test_workspace.py ...................................... [ 60%]
+.......................                                                  [ 62%]
+tests\unit\retrieval\test_aggregate.py ...............                   [ 64%]
+tests\unit\retrieval\test_channel_config.py .....................        [ 66%]
+tests\unit\retrieval\test_documents.py .......                           [ 66%]
+tests\unit\retrieval\test_embedding_api.py ......................        [ 68%]
+tests\unit\retrieval\test_embedding_cache.py ...............             [ 70%]
+tests\unit\retrieval\test_embeddings.py ..................s              [ 71%]
+tests\unit\retrieval\test_history.py ...............                     [ 73%]
+tests\unit\retrieval\test_lexical.py ...........                         [ 73%]
+tests\unit\retrieval\test_normalization.py ...............               [ 75%]
+tests\unit\retrieval\test_pinning.py .............                       [ 76%]
+tests\unit\retrieval\test_query.py .......                               [ 77%]
+tests\unit\retrieval\test_result.py ............................         [ 79%]
+tests\unit\retrieval\test_retrieval_dataset.py ....................      [ 81%]
+tests\unit\retrieval\test_retrieval_eval.py ...........                  [ 82%]
+tests\unit\retrieval\test_rrf.py .............                           [ 83%]
+tests\unit\retrieval\test_semantic.py ................                   [ 84%]
+tests\unit\retrieval\test_semantic_backends.py ..............            [ 86%]
+tests\unit\retrieval\test_structural.py ............................     [ 88%]
+tests\unit\retrieval\test_test_proximity.py ..................           [ 90%]
+tests\unit\retrieval\test_weighted_fusion.py ..............              [ 91%]
+tests\unit\schemas\test_progress.py .............                        [ 92%]
+tests\unit\schemas\test_state_roundtrip.py ................              [ 93%]
+tests\unit\storage\test_migration.py .                                   [ 94%]
+tests\unit\storage\test_repository.py ...........................        [ 96%]
+tests\unit\test_artifacts.py .........................                   [ 98%]
+tests\unit\test_cli.py .............                                     [ 99%]
+tests\unit\test_index_real_repo.py ..                                    [100%]
+
+- generated xml file: C:\Users\lenovo\Desktop\CodePilot-Repair\docs\evidence\phase2-retrieval-eval-20261011\pytest-full.xml -
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.12.7-final-0 _______________
+
+Name                                        Stmts   Miss Branch BrPart  Cover   Missing
+---------------------------------------------------------------------------------------
+src\codepilot\__init__.py                       3      0      0      0   100%
+src\codepilot\__main__.py                       4      4      2      0     0%   3-8
+src\codepilot\api\__init__.py                   3      0      0      0   100%
+src\codepilot\api\app.py                       26      1      6      1    94%   38
+src\codepilot\artifacts.py                     75      1      8      0    99%   61
+src\codepilot\clock.py                          5      0      0      0   100%
+src\codepilot\config.py                        53      2      6      1    95%   115, 148
+src\codepilot\fsutil.py                        84     29     28      6    65%   37, 48-61, 96, 100-106, 130->exit, 151, 165-166, 181-184
+src\codepilot\llm\__init__.py                  12      0      0      0   100%
+src\codepilot\llm\base.py                       8      0      0      0   100%
+src\codepilot\llm\capabilities.py              87      4     36      4    93%   89, 156, 170, 203
+src\codepilot\llm\config.py                   160     12     50      6    90%   192-194, 196-198, 200-201, 203-204, 237, 252
+src\codepilot\llm\cost.py                      29      0      4      0   100%
+src\codepilot\llm\errors.py                    36      0      6      0   100%
+src\codepilot\llm\fake.py                      65      1     24      1    98%   104
+src\codepilot\llm\openai_compatible.py        121      5     28      1    96%   137, 159-161, 335-336
+src\codepilot\llm\record.py                    83      4      6      2    93%   136, 175, 179, 234
+src\codepilot\llm\registry.py                  93      2     20      2    96%   94, 118, 165->167
+src\codepilot\llm\replay.py                    57      2     14      0    97%   87, 122
+src\codepilot\llm\retry.py                     77      3     22      1    96%   58, 144-145
+src\codepilot\llm\structured.py                67      2     22      1    97%   61->63, 77-78
+src\codepilot\llm\tracking.py                  40      2      4      2    91%   67->71, 85, 98
+src\codepilot\llm\types.py                     83      1      2      0    99%   131
+src\codepilot\observability\__init__.py         4      0      0      0   100%
+src\codepilot\observability\events.py          80      0      8      2    98%   111->113, 177->exit
+src\codepilot\observability\logging.py         23      0      2      0   100%
+src\codepilot\observability\redaction.py       35      0     16      0   100%
+src\codepilot\repo\__init__.py                  2      0      0      0   100%
+src\codepilot\repo\calls.py                    44      1     26      4    93%   26, 31->46, 37->46, 60->47
+src\codepilot\repo\context.py                  68      1     24      2    97%   31->43, 112
+src\codepilot\repo\edges.py                    60      1     48      3    96%   48, 53->52, 89->91
+src\codepilot\repo\git_history.py             202      6     78      6    96%   302, 305, 309->291, 330->335, 337, 385-397
+src\codepilot\repo\gitcmd.py                   76      6     14      4    89%   55->57, 57->59, 154, 173-178
+src\codepilot\repo\graph.py                    69      1     20      1    98%   66
+src\codepilot\repo\imports.py                  84      1     38      0    99%   121
+src\codepilot\repo\index.py                   211      2     52      2    98%   386, 470
+src\codepilot\repo\models.py                   45      0      0      0   100%
+src\codepilot\repo\parser.py                  151      4     34      3    96%   206, 232, 237, 299
+src\codepilot\repo\resolution.py              170     12    102     13    91%   35-36, 37->49, 70, 101->99, 104, 121, 128, 168, 172, 179, 195->193, 231, 259, 269
+src\codepilot\repo\scanner.py                 136      7     34      1    95%   107, 194-196, 299, 326-330
+src\codepilot\repo\symbols.py                 106      2     40      4    96%   92->111, 182, 191->196, 201
+src\codepilot\repo\test_links.py               40      0     20      0   100%
+src\codepilot\repo\workspace.py               314     29    108     22    87%   95, 115, 140, 143, 146, 324-328, 349->345, 406->415, 449->456, 505->exit, 561-562, 570-573, 581, 640, 670, 682, 699, 711, 725, 737, 788, 814->825, 820-821, 833, 853->855, 866, 870-871
+src\codepilot\retrieval\__init__.py             0      0      0      0   100%
+src\codepilot\retrieval\aggregate.py           35      0     16      0   100%
+src\codepilot\retrieval\config.py              16      0      0      0   100%
+src\codepilot\retrieval\dataset.py            155     16     80     16    86%   37, 71, 73, 81, 83, 85, 91, 110, 142, 153, 166, 180, 184, 196, 202, 229
+src\codepilot\retrieval\documents.py           49      1     18      1    97%   27
+src\codepilot\retrieval\embeddings.py         175      2     46      1    99%   213-214, 305->exit
+src\codepilot\retrieval\eval.py                53      0      8      0   100%
+src\codepilot\retrieval\evaluation.py          88      3     26      3    95%   67, 72, 125, 128->127
+src\codepilot\retrieval\fusion.py              74      1     30      1    98%   46
+src\codepilot\retrieval\graph_source.py         7      0      2      1    89%   18->exit
+src\codepilot\retrieval\history.py             29      0     10      0   100%
+src\codepilot\retrieval\input.py                7      0      0      0   100%
+src\codepilot\retrieval\lexical.py            100      4     36      3    95%   82, 124-125, 174
+src\codepilot\retrieval\offline.py             18      0      4      0   100%
+src\codepilot\retrieval\query.py               62      1     16      1    97%   111
+src\codepilot\retrieval\result.py              82      1     36      1    98%   53
+src\codepilot\retrieval\runner.py             121      4     36      4    95%   140, 142, 187, 191
+src\codepilot\retrieval\semantic.py            77      0     22      0   100%
+src\codepilot\retrieval\service.py             93      0     50      0   100%
+src\codepilot\retrieval\structural.py          63      0     30      0   100%
+src\codepilot\retrieval\test_proximity.py      42      0     12      0   100%
+src\codepilot\schemas\__init__.py              19      0      0      0   100%
+src\codepilot\schemas\budget.py                19      1      0      0    95%   46
+src\codepilot\schemas\common.py                10      0      0      0   100%
+src\codepilot\schemas\diagnosis.py             24      0      0      0   100%
+src\codepilot\schemas\enums.py                 75      0      0      0   100%
+src\codepilot\schemas\execution.py             35      2      0      0    94%   55, 60
+src\codepilot\schemas\impact.py                26      0      0      0   100%
+src\codepilot\schemas\issue.py                 16      0      0      0   100%
+src\codepilot\schemas\localization.py           9      0      0      0   100%
+src\codepilot\schemas\plan.py                  17      0      0      0   100%
+src\codepilot\schemas\progress.py              16      0      4      0   100%
+src\codepilot\schemas\regression.py            23      1      0      0    96%   47
+src\codepilot\schemas\reproduction.py          18      0      0      0   100%
+src\codepilot\schemas\retrieval.py             59      0      0      0   100%
+src\codepilot\schemas\review.py                17      1      0      0    94%   34
+src\codepilot\schemas\state.py                 63      2      0      0    97%   98, 102
+src\codepilot\schemas\usage.py                 36      1      2      0    97%   26
+src\codepilot\schemas\validation.py            42      2      0      0    95%   86, 90
+src\codepilot\storage\base.py                   5      0      0      0   100%
+src\codepilot\storage\db.py                    41      4      6      1    89%   53, 94-96
+src\codepilot\storage\models.py               115      0      0      0   100%
+src\codepilot\storage\repository.py           231     13     36      3    94%   139->141, 163, 175-184, 270, 337-338, 343, 346-347, 396-397, 516-517
+---------------------------------------------------------------------------------------
+TOTAL                                        5453    208   1478    131    95%
+Coverage JSON written to file docs/evidence/phase2-retrieval-eval-20261011/coverage.json
+Required test coverage of 80.0% reached. Total coverage: 94.91%
+=========================== short test summary info ===========================
+SKIPPED [1] tests\unit\retrieval\test_embeddings.py:104: NOT RUN: set CODEPILOT_TEST_EMBEDDING_MODEL to a preinstalled code model
+========== 1129 passed, 1 skipped, 1 deselected in 504.92s (0:08:24) ==========

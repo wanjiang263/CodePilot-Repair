@@ -1,0 +1,9 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "docs/evidence/phase2-retrieval-eval-20261011/verify-determinism.py",
+    "--output",
+    "artifacts/phase2/v25-20261011"
+  ],
+  "exit_code": 0
+}

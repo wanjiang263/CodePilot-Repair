@@ -1,0 +1,12 @@
+Dataset: 1 synthetic development tasks (denominator includes failures)
+offline token-hash baseline; not a learned semantic model
+channel | File@1 | File@5 | File@10 | Function@1 | Function@5 | Function@10 | failures
+bm25 | 1.0000 | 1.0000 | 1.0000 | 0.0000 | 1.0000 | 1.0000 | 0
+ripgrep | 0.0000 | 1.0000 | 1.0000 | 0.0000 | 0.0000 | 1.0000 | 0
+semantic | 0.0000 | 0.0000 | 1.0000 | 0.0000 | 0.0000 | 0.0000 | 0
+structural | 0.0000 | 1.0000 | 1.0000 | 0.0000 | 0.0000 | 0.0000 | 0
+test | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0
+history | 0.0000 | 0.0000 | 1.0000 | 0.0000 | 0.0000 | 0.0000 | 0
+fused | 0.0000 | 1.0000 | 1.0000 | 0.0000 | 0.0000 | 1.0000 | 0
+NOT RUN: trained semantic embedding model
+Evidence: C:\Users\lenovo\Desktop\CodePilot-Repair\artifacts\phase2\v25-20261011\evaluation.json

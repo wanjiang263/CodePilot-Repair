@@ -1,0 +1,462 @@
+{
+  "date": "2026-10-11",
+  "branch": "codex/phase2-retrieval-eval",
+  "base": "96883889868934613f3c55aea781a0a6a6d0c609",
+  "validated_implementation_commit": "a7c7e52b0c6f52dd531797295aad9d96c177dcf1",
+  "suggested_stacked_pr_base": "codex/phase2-fusion",
+  "preserved_branches": {
+    "codex/phase2-fusion": "96883889868934613f3c55aea781a0a6a6d0c609",
+    "codex/phase2-structural-retrieval": "04132b829fca2ef2ec6296092052100e0068eca8"
+  },
+  "tasks": {
+    "V-21": {
+      "commit": "3394744f86fcb781a7f54dfaa1234274b0a1dd75",
+      "test_module": "tests.unit.retrieval.test_retrieval_eval",
+      "new_tests": 11
+    },
+    "V-22": {
+      "commit": "3773f0824dd497ead76d53aa6106484f98c3b4d5",
+      "test_module": "tests.unit.retrieval.test_retrieval_dataset",
+      "new_tests": 20
+    },
+    "V-23": {
+      "commit": "44d2a57c8d742fdb9fa7a4b99cc5ada6227a222f",
+      "test_module": "tests.integration.test_cli_multichannel_retrieve",
+      "new_tests": 20
+    },
+    "V-24": {
+      "commit": "1f10641df44dcda90311341a5de369b459c3a0b5",
+      "test_module": "tests.integration.test_cli_retrieval_evaluation",
+      "new_tests": 10
+    },
+    "V-25": {
+      "commit": "5d2b7635979096eba40f23536ce73ea9c58b93f4",
+      "test_module": "tests.integration.test_retrieval_determinism",
+      "new_tests": 1
+    }
+  },
+  "audit_fix_commit": "a7c7e52b0c6f52dd531797295aad9d96c177dcf1",
+  "pytest": {
+    "passed": 1129,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 1,
+    "deselected": 1,
+    "new_tests": 62,
+    "exit_code": 0
+  },
+  "coverage": {
+    "covered_lines": 5245,
+    "num_statements": 5453,
+    "percent_covered": 94.90693983552157,
+    "percent_covered_display": "95",
+    "missing_lines": 208,
+    "excluded_lines": 53,
+    "percent_statements_covered": 96.18558591600953,
+    "percent_statements_covered_display": "96",
+    "num_branches": 1478,
+    "num_partial_branches": 131,
+    "covered_branches": 1333,
+    "missing_branches": 145,
+    "percent_branches_covered": 90.1894451962111,
+    "percent_branches_covered_display": "90"
+  },
+  "quality_gates": {
+    "ruff-check": {
+      "command": [
+        ".venv/Scripts/ruff.exe",
+        "check",
+        "."
+      ],
+      "exit_code": 0
+    },
+    "ruff-format": {
+      "command": [
+        ".venv/Scripts/ruff.exe",
+        "format",
+        "--check",
+        "."
+      ],
+      "exit_code": 0
+    },
+    "mypy": {
+      "command": [
+        ".venv/Scripts/mypy.exe",
+        "src"
+      ],
+      "exit_code": 0
+    },
+    "pytest-full": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "-m",
+        "not docker and not llm",
+        "--cov",
+        "--cov-report=term-missing",
+        "--cov-report=json:docs/evidence/phase2-retrieval-eval-20261011/coverage.json",
+        "--junitxml=docs/evidence/phase2-retrieval-eval-20261011/pytest-full.xml"
+      ],
+      "exit_code": 0
+    },
+    "cli-retrieve": {
+      "command": [
+        "uv",
+        "run",
+        "codepilot",
+        "retrieve",
+        "--repo",
+        "tests/fixtures/repos/mini_auth",
+        "--issue",
+        "tests/fixtures/issues/expired_token.md"
+      ],
+      "exit_code": 0,
+      "environment": {
+        "UV_OFFLINE": "1",
+        "UV_NO_SYNC": "1",
+        "PYTHONIOENCODING": "utf-8"
+      },
+      "stdout_sha256": "13a4d91d81b593a149dd5fc7e4f52c6ac5c5e3cde32af33a076b6a9e6cc624f8",
+      "stderr_sha256": "94fd5c74357fd0ff19e27f2dcb01e66057b815b1bfca620d8e7c12386b691702"
+    },
+    "cli-eval": {
+      "command": [
+        "uv",
+        "run",
+        "codepilot",
+        "eval-retrieval",
+        "--dataset",
+        "tests/fixtures/retrieval_cases.jsonl"
+      ],
+      "exit_code": 0,
+      "environment": {
+        "UV_OFFLINE": "1",
+        "UV_NO_SYNC": "1",
+        "PYTHONIOENCODING": "utf-8"
+      },
+      "stdout_sha256": "e15b59cc82c08098e24201d7824cd25444802f4f86786e3a4e03a575ccd2bad5",
+      "stderr_sha256": "440a559ce817f571eeeb93d3c39b5496da6947769339634127781217c10a8696"
+    }
+  },
+  "recall": [
+    {
+      "channel": "bm25",
+      "metrics": {
+        "total_tasks": 12,
+        "missing_predictions": [],
+        "file_hits": {
+          "1": 8,
+          "5": 12,
+          "10": 12
+        },
+        "function_hits": {
+          "1": 5,
+          "5": 11,
+          "10": 12
+        },
+        "exact_hits": {
+          "1": 7,
+          "5": 12,
+          "10": 12
+        },
+        "file_recall": {
+          "1": 0.6666666666666666,
+          "5": 1.0,
+          "10": 1.0
+        },
+        "function_recall": {
+          "1": 0.4166666666666667,
+          "5": 0.9166666666666666,
+          "10": 1.0
+        },
+        "localization_exact": {
+          "1": 0.5833333333333334,
+          "5": 1.0,
+          "10": 1.0
+        }
+      },
+      "failures": {}
+    },
+    {
+      "channel": "ripgrep",
+      "metrics": {
+        "total_tasks": 12,
+        "missing_predictions": [],
+        "file_hits": {
+          "1": 6,
+          "5": 9,
+          "10": 12
+        },
+        "function_hits": {
+          "1": 5,
+          "5": 9,
+          "10": 11
+        },
+        "exact_hits": {
+          "1": 5,
+          "5": 8,
+          "10": 12
+        },
+        "file_recall": {
+          "1": 0.5,
+          "5": 0.75,
+          "10": 1.0
+        },
+        "function_recall": {
+          "1": 0.4166666666666667,
+          "5": 0.75,
+          "10": 0.9166666666666666
+        },
+        "localization_exact": {
+          "1": 0.4166666666666667,
+          "5": 0.6666666666666666,
+          "10": 1.0
+        }
+      },
+      "failures": {}
+    },
+    {
+      "channel": "semantic",
+      "metrics": {
+        "total_tasks": 12,
+        "missing_predictions": [],
+        "file_hits": {
+          "1": 5,
+          "5": 10,
+          "10": 12
+        },
+        "function_hits": {
+          "1": 3,
+          "5": 9,
+          "10": 10
+        },
+        "exact_hits": {
+          "1": 4,
+          "5": 9,
+          "10": 12
+        },
+        "file_recall": {
+          "1": 0.4166666666666667,
+          "5": 0.8333333333333334,
+          "10": 1.0
+        },
+        "function_recall": {
+          "1": 0.25,
+          "5": 0.75,
+          "10": 0.8333333333333334
+        },
+        "localization_exact": {
+          "1": 0.3333333333333333,
+          "5": 0.75,
+          "10": 1.0
+        }
+      },
+      "failures": {}
+    },
+    {
+      "channel": "structural",
+      "metrics": {
+        "total_tasks": 12,
+        "missing_predictions": [],
+        "file_hits": {
+          "1": 5,
+          "5": 10,
+          "10": 10
+        },
+        "function_hits": {
+          "1": 2,
+          "5": 3,
+          "10": 6
+        },
+        "exact_hits": {
+          "1": 4,
+          "5": 10,
+          "10": 10
+        },
+        "file_recall": {
+          "1": 0.4166666666666667,
+          "5": 0.8333333333333334,
+          "10": 0.8333333333333334
+        },
+        "function_recall": {
+          "1": 0.16666666666666666,
+          "5": 0.25,
+          "10": 0.5
+        },
+        "localization_exact": {
+          "1": 0.3333333333333333,
+          "5": 0.8333333333333334,
+          "10": 0.8333333333333334
+        }
+      },
+      "failures": {}
+    },
+    {
+      "channel": "test",
+      "metrics": {
+        "total_tasks": 12,
+        "missing_predictions": [],
+        "file_hits": {
+          "1": 1,
+          "5": 2,
+          "10": 2
+        },
+        "function_hits": {
+          "1": 1,
+          "5": 1,
+          "10": 1
+        },
+        "exact_hits": {
+          "1": 1,
+          "5": 2,
+          "10": 2
+        },
+        "file_recall": {
+          "1": 0.08333333333333333,
+          "5": 0.16666666666666666,
+          "10": 0.16666666666666666
+        },
+        "function_recall": {
+          "1": 0.08333333333333333,
+          "5": 0.08333333333333333,
+          "10": 0.08333333333333333
+        },
+        "localization_exact": {
+          "1": 0.08333333333333333,
+          "5": 0.16666666666666666,
+          "10": 0.16666666666666666
+        }
+      },
+      "failures": {}
+    },
+    {
+      "channel": "history",
+      "metrics": {
+        "total_tasks": 12,
+        "missing_predictions": [],
+        "file_hits": {
+          "1": 2,
+          "5": 8,
+          "10": 12
+        },
+        "function_hits": {
+          "1": 0,
+          "5": 2,
+          "10": 2
+        },
+        "exact_hits": {
+          "1": 2,
+          "5": 7,
+          "10": 12
+        },
+        "file_recall": {
+          "1": 0.16666666666666666,
+          "5": 0.6666666666666666,
+          "10": 1.0
+        },
+        "function_recall": {
+          "1": 0.0,
+          "5": 0.16666666666666666,
+          "10": 0.16666666666666666
+        },
+        "localization_exact": {
+          "1": 0.16666666666666666,
+          "5": 0.5833333333333334,
+          "10": 1.0
+        }
+      },
+      "failures": {}
+    },
+    {
+      "channel": "fused",
+      "metrics": {
+        "total_tasks": 12,
+        "missing_predictions": [],
+        "file_hits": {
+          "1": 7,
+          "5": 12,
+          "10": 12
+        },
+        "function_hits": {
+          "1": 7,
+          "5": 8,
+          "10": 10
+        },
+        "exact_hits": {
+          "1": 6,
+          "5": 12,
+          "10": 12
+        },
+        "file_recall": {
+          "1": 0.5833333333333334,
+          "5": 1.0,
+          "10": 1.0
+        },
+        "function_recall": {
+          "1": 0.5833333333333334,
+          "5": 0.6666666666666666,
+          "10": 0.8333333333333334
+        },
+        "localization_exact": {
+          "1": 0.5,
+          "5": 1.0,
+          "10": 1.0
+        }
+      },
+      "failures": {}
+    }
+  ],
+  "dataset_kind": "synthetic-development; not a performance benchmark",
+  "embedding_description": "offline token-hash baseline; not a learned semantic model",
+  "raw_report_sha256": "cdc5d81253cbd0c389275d0dd54c221a462495ab11ff9d49404d832fa301f957",
+  "determinism": [
+    {
+      "scenario": "weighted",
+      "first_exit": 0,
+      "second_exit": 0,
+      "stdout_equal": true,
+      "stderr_equal": true,
+      "first_sha256": "5d0dbbbd6b7000b46a393d085e8bf9d904eeb4ce44e60ea090fa567cc9c54ac3",
+      "second_sha256": "5d0dbbbd6b7000b46a393d085e8bf9d904eeb4ce44e60ea090fa567cc9c54ac3"
+    },
+    {
+      "scenario": "rrf",
+      "first_exit": 0,
+      "second_exit": 0,
+      "stdout_equal": true,
+      "stderr_equal": true,
+      "first_sha256": "0c2ed2f944ebbf80fac49345086c627acba5bc9ba36ae5a6bbb8e2a1d0a57f5b",
+      "second_sha256": "0c2ed2f944ebbf80fac49345086c627acba5bc9ba36ae5a6bbb8e2a1d0a57f5b"
+    },
+    {
+      "scenario": "legacy",
+      "first_exit": 0,
+      "second_exit": 0,
+      "stdout_equal": true,
+      "stderr_equal": true,
+      "first_sha256": "e0bd5911c555055f7b473da67b326ff3fb0d5fa4727fbf90605d26b1dac09616",
+      "second_sha256": "e0bd5911c555055f7b473da67b326ff3fb0d5fa4727fbf90605d26b1dac09616"
+    },
+    {
+      "scenario": "eval",
+      "first_exit": 0,
+      "second_exit": 0,
+      "stdout_equal": true,
+      "stderr_equal": true,
+      "first_sha256": "41030c181220e10e200dcb860cd4e769865094cbf583924704a14228e15f9c28",
+      "second_sha256": "41030c181220e10e200dcb860cd4e769865094cbf583924704a14228e15f9c28"
+    }
+  ],
+  "phase2_local_offline_exit": "PASS (04 Phase 2 commands, pure functions, tables and deterministic JSON)",
+  "not_run": [
+    "trained local semantic embedding model",
+    "real Embedding API",
+    "GPU",
+    "product Docker Sandbox",
+    "real LLM",
+    "remote CI",
+    "formal real-issue retrieval benchmark"
+  ],
+  "scope": "V-21 to V-25 only; no Push, no PR actions, no Phase 3"
+}

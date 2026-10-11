@@ -1,0 +1,17 @@
+{
+  "command": [
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+    "-m",
+    "codepilot.cli",
+    "--log-level",
+    "ERROR",
+    "retrieve",
+    "--repo",
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase2\\v25-20261011\\source",
+    "--base-commit",
+    "a1f1dd7b04161d2d8be73e2fb979a86d2a8a35de",
+    "test_verify_rejects_garbage verify_token Session.login\nFile \"src/miniauth/tokens.py\", line 32, in verify_token\nFile \"src/miniauth/tokens.py\", line 32, in verify_token\nFile \"src/miniauth/session.py\", line 23, in login\nFile \"/third-party/library.py\", line 23, in login"
+  ],
+  "exit_code": 0,
+  "pythonhashseed": 123
+}

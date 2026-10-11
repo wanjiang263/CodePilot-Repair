@@ -1,0 +1,16 @@
+{
+  "command": [
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+    "-m",
+    "codepilot.cli",
+    "--log-level",
+    "ERROR",
+    "eval-retrieval",
+    "--dataset",
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase2\\v25-20261011\\cases.jsonl",
+    "--output",
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase2\\v25-20261011\\evaluation.json"
+  ],
+  "exit_code": 0,
+  "pythonhashseed": 123
+}
