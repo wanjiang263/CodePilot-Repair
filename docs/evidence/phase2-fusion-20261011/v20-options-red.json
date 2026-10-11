@@ -1,0 +1,13 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/integration/test_retrieval_fusion.py",
+    "-k",
+    "explicit_single or caller_snapshot or rrf_parameter",
+    "-q",
+    "--junitxml=docs/evidence/phase2-fusion-20261011/v20-options-red.xml"
+  ],
+  "exit_code": 1
+}

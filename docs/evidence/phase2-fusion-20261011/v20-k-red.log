@@ -1,0 +1,49 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_____ test_nondefault_rrf_k_survives_standalone_roundtrip_and_validation ______
+
+    def test_nondefault_rrf_k_survives_standalone_roundtrip_and_validation():
+        result = build_result(query(), channels(), fusion_method=FusionMethod.RRF, k=3)
+>       assert result.rrf_k == 3
+               ^^^^^^^^^^^^
+
+tests\unit\retrieval\test_result.py:215: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = RetrievalResult(query=RetrievalQuery(raw_issue='broken', identifiers=[], keywords=[], error_messages=[], file_paths=[]..._line=1, reason='rrf fusion: bm25 raw=200 normalized=1 rank=1; semantic raw=0.1 normalized=0 rank=2')], snapshot_id='')
+item = 'rrf_k'
+
+    def __getattr__(self, item: str) -> Any:
+        private_attributes = object.__getattribute__(self, '__private_attributes__')
+        if item in private_attributes:
+            attribute = private_attributes[item]
+            if hasattr(attribute, '__get__'):
+                return attribute.__get__(self, type(self))  # type: ignore
+    
+            try:
+                # Note: self.__pydantic_private__ cannot be None if self.__private_attributes__ has items
+                return self.__pydantic_private__[item]  # type: ignore
+            except KeyError as exc:
+                raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}') from exc
+        else:
+            # `__pydantic_extra__` can fail to be set if the model is not yet fully initialized.
+            # See `BaseModel.__repr_args__` for more details
+            try:
+                pydantic_extra = object.__getattribute__(self, '__pydantic_extra__')
+            except AttributeError:
+                pydantic_extra = None
+    
+            if pydantic_extra and item in pydantic_extra:
+                return pydantic_extra[item]
+            else:
+                if hasattr(self.__class__, item):
+                    return super().__getattribute__(item)  # Raises AttributeError if appropriate
+                else:
+                    # this is the current error
+>                   raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+E                   AttributeError: 'RetrievalResult' object has no attribute 'rrf_k'
+
+.venv\Lib\site-packages\pydantic\main.py:1042: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/unit/retrieval/test_result.py::test_nondefault_rrf_k_survives_standalone_roundtrip_and_validation
+1 failed in 4.09s

@@ -1,0 +1,90 @@
+...........................FF..........................                  [100%]
+================================== FAILURES ===================================
+_______ test_all_six_channels_integrate_repeat_and_roundtrip[weighted] ________
+
+repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-314/test_all_six_channels_integrat0'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+method = <FusionMethod.WEIGHTED: 'weighted'>
+
+    @pytest.mark.parametrize("method", [FusionMethod.WEIGHTED, FusionMethod.RRF])
+    def test_all_six_channels_integrate_repeat_and_roundtrip(repository, method):
+        root, symbols, graph, churn = repository
+        config = RetrievalConfig(
+            bm25=True, ripgrep=True, semantic=True, structural=True, test=True, history=True
+        )
+        issue = (
+            'one calls two incorrectly\nFile "a.py", line 2, in one\nValueError: one fails\ntest_one'
+        )
+        kwargs = {
+            "config": config,
+            "fusion_method": method,
+            "embedding_provider": FakeEmbedding(),
+            "graph": graph,
+            "churn": churn,
+        }
+        first = retrieve_symbols(root, symbols, issue, **kwargs)
+        second = retrieve_symbols(root, symbols, issue, **kwargs)
+        reordered = retrieve_symbols(root, list(reversed(symbols)), issue, **kwargs)
+        assert (
+            first.model_dump_json().encode()
+            == second.model_dump_json().encode()
+            == reordered.model_dump_json().encode()
+        )
+        assert list(first.per_channel) == [
+            "bm25",
+            "ripgrep",
+            "semantic",
+            "structural",
+            "test",
+            "history",
+        ]
+>       assert all(first.per_channel[name] for name in first.enabled_channels)
+E       assert False
+E        +  where False = all(<generator object test_all_six_channels_integrate_repeat_and_roundtrip.<locals>.<genexpr> at 0x000002067F7FF9F0>)
+
+tests\integration\test_retrieval_fusion.py:67: AssertionError
+__________ test_all_six_channels_integrate_repeat_and_roundtrip[rrf] __________
+
+repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-314/test_all_six_channels_integrat1'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+method = <FusionMethod.RRF: 'rrf'>
+
+    @pytest.mark.parametrize("method", [FusionMethod.WEIGHTED, FusionMethod.RRF])
+    def test_all_six_channels_integrate_repeat_and_roundtrip(repository, method):
+        root, symbols, graph, churn = repository
+        config = RetrievalConfig(
+            bm25=True, ripgrep=True, semantic=True, structural=True, test=True, history=True
+        )
+        issue = (
+            'one calls two incorrectly\nFile "a.py", line 2, in one\nValueError: one fails\ntest_one'
+        )
+        kwargs = {
+            "config": config,
+            "fusion_method": method,
+            "embedding_provider": FakeEmbedding(),
+            "graph": graph,
+            "churn": churn,
+        }
+        first = retrieve_symbols(root, symbols, issue, **kwargs)
+        second = retrieve_symbols(root, symbols, issue, **kwargs)
+        reordered = retrieve_symbols(root, list(reversed(symbols)), issue, **kwargs)
+        assert (
+            first.model_dump_json().encode()
+            == second.model_dump_json().encode()
+            == reordered.model_dump_json().encode()
+        )
+        assert list(first.per_channel) == [
+            "bm25",
+            "ripgrep",
+            "semantic",
+            "structural",
+            "test",
+            "history",
+        ]
+>       assert all(first.per_channel[name] for name in first.enabled_channels)
+E       assert False
+E        +  where False = all(<generator object test_all_six_channels_integrate_repeat_and_roundtrip.<locals>.<genexpr> at 0x000002067F899E50>)
+
+tests\integration\test_retrieval_fusion.py:67: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_retrieval_fusion.py::test_all_six_channels_integrate_repeat_and_roundtrip[weighted]
+FAILED tests/integration/test_retrieval_fusion.py::test_all_six_channels_integrate_repeat_and_roundtrip[rrf]
+2 failed, 53 passed in 7.11s

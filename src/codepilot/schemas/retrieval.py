@@ -75,6 +75,8 @@ class RankedFile(BaseModel):
     score: float
     top_symbols: list[str] = Field(default_factory=list)
     reason: str | None = None
+    pinned: bool = False
+    """Contains a traceback-pinned symbol; sorts before ordinary files without a score bonus."""
 
 
 class RetrievalQuery(BaseModel):
@@ -103,6 +105,11 @@ class RetrievalResult(BaseModel):
     enabled_channels: list[str] = Field(default_factory=list)
     per_channel: dict[str, list[RankedSymbol]] = Field(default_factory=dict)
     """完整通道候选，排序按 raw 降序、file/start_line/qualified_name/id 升序。"""
+
+    fused_symbols: list[RankedSymbol] = Field(default_factory=list)
+    """完整融合排名（Top-K 截断前）；旧单通道结果仍为空，旧 JSON 可省略。"""
+    rrf_k: int = Field(default=60, ge=0)
+    """RRF 快照的实际参数；反序列化后可独立复算，旧 JSON 默认 60。"""
 
     snapshot_id: str = ""
     """指向持久化的完整检索结果，供 LocalizationResult 事后引用。"""

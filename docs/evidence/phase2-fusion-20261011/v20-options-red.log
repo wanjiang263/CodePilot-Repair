@@ -1,0 +1,82 @@
+FFFFF                                                                    [100%]
+================================== FAILURES ===================================
+___________ test_explicit_single_channel_weights_are_applied[None] ____________
+
+repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-318/test_explicit_single_channel_w0'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+config = None
+
+    @pytest.mark.parametrize("config", [None, RetrievalConfig()])
+    def test_explicit_single_channel_weights_are_applied(repository, config):
+        root, symbols, _, _ = repository
+        result = retrieve_symbols(root, symbols, "one", config=config, channel_weights={"bm25": 0.7})
+>       assert result.fusion_method == "weighted"
+E       AssertionError: assert <FusionMethod.NONE: 'none'> == 'weighted'
+E         
+E         - weighted
+E         + none
+
+tests\integration\test_retrieval_fusion.py:154: AssertionError
+__________ test_explicit_single_channel_weights_are_applied[config1] __________
+
+repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-318/test_explicit_single_channel_w1'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+config = RetrievalConfig(bm25=True, ripgrep=False, semantic=False, structural=False, test=False, history=False)
+
+    @pytest.mark.parametrize("config", [None, RetrievalConfig()])
+    def test_explicit_single_channel_weights_are_applied(repository, config):
+        root, symbols, _, _ = repository
+        result = retrieve_symbols(root, symbols, "one", config=config, channel_weights={"bm25": 0.7})
+>       assert result.fusion_method == "weighted"
+E       AssertionError: assert <FusionMethod.NONE: 'none'> == 'weighted'
+E         
+E         - weighted
+E         + none
+
+tests\integration\test_retrieval_fusion.py:154: AssertionError
+_______ test_caller_snapshot_id_is_preserved_without_persistence[None] ________
+
+repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-318/test_caller_snapshot_id_is_pre0'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+config = None
+
+    @pytest.mark.parametrize("config", [None, RetrievalConfig()])
+    def test_caller_snapshot_id_is_preserved_without_persistence(repository, config):
+        root, symbols, _, _ = repository
+        result = retrieve_symbols(root, symbols, "one", config=config, snapshot_id="caller-reference")
+>       assert result.snapshot_id == "caller-reference"
+E       AssertionError: assert '' == 'caller-reference'
+E         
+E         - caller-reference
+
+tests\integration\test_retrieval_fusion.py:163: AssertionError
+______ test_caller_snapshot_id_is_preserved_without_persistence[config1] ______
+
+repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-318/test_caller_snapshot_id_is_pre1'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+config = RetrievalConfig(bm25=True, ripgrep=False, semantic=False, structural=False, test=False, history=False)
+
+    @pytest.mark.parametrize("config", [None, RetrievalConfig()])
+    def test_caller_snapshot_id_is_preserved_without_persistence(repository, config):
+        root, symbols, _, _ = repository
+        result = retrieve_symbols(root, symbols, "one", config=config, snapshot_id="caller-reference")
+>       assert result.snapshot_id == "caller-reference"
+E       AssertionError: assert '' == 'caller-reference'
+E         
+E         - caller-reference
+
+tests\integration\test_retrieval_fusion.py:163: AssertionError
+________________ test_rrf_parameter_cannot_be_silently_ignored ________________
+
+repository = (WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-318/test_rrf_parameter_cannot_be_s0'), [Symbo...ons=2, last_modified_distance=0), 'test_a.py': FileChurn(path='test_a.py', modifications=1, last_modified_distance=1)})
+
+    def test_rrf_parameter_cannot_be_silently_ignored(repository):
+        root, symbols, _, _ = repository
+>       with pytest.raises(ValueError, match="rrf_k"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\integration\test_retrieval_fusion.py:169: Failed
+=========================== short test summary info ===========================
+FAILED tests/integration/test_retrieval_fusion.py::test_explicit_single_channel_weights_are_applied[None]
+FAILED tests/integration/test_retrieval_fusion.py::test_explicit_single_channel_weights_are_applied[config1]
+FAILED tests/integration/test_retrieval_fusion.py::test_caller_snapshot_id_is_preserved_without_persistence[None]
+FAILED tests/integration/test_retrieval_fusion.py::test_caller_snapshot_id_is_preserved_without_persistence[config1]
+FAILED tests/integration/test_retrieval_fusion.py::test_rrf_parameter_cannot_be_silently_ignored
+5 failed, 7 deselected in 4.26s

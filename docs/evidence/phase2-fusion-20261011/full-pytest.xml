@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="4.473" timestamp="2026-10-11T12:13:48.406031+08:00" hostname="LAPTOP-H0FUOTNB"><testcase classname="" name="tests.unit.retrieval.test_config" time="0.000"><error message="collection failure">import file mismatch:
+imported module 'test_config' has this __file__ attribute:
+  C:\Users\lenovo\Desktop\CodePilot-Repair\tests\unit\llm\test_config.py
+which is not the same as the test file we want to collect:
+  C:\Users\lenovo\Desktop\CodePilot-Repair\tests\unit\retrieval\test_config.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules</error></testcase></testsuite></testsuites>

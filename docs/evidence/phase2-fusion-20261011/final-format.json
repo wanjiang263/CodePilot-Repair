@@ -1,0 +1,9 @@
+{
+  "command": [
+    ".venv/Scripts/ruff.exe",
+    "format",
+    "--check",
+    "."
+  ],
+  "exit_code": 0
+}

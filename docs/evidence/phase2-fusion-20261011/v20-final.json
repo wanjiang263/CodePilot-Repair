@@ -1,0 +1,17 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/unit/retrieval",
+    "tests/integration/test_retrieval_fusion.py",
+    "tests/integration/test_retrieval_channels.py",
+    "tests/integration/test_cli_retrieve.py",
+    "tests/unit/schemas",
+    "-m",
+    "not docker and not llm",
+    "-q",
+    "--junitxml=docs/evidence/phase2-fusion-20261011/v20-final.xml"
+  ],
+  "exit_code": 0
+}
