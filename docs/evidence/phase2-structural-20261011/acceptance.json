@@ -1,0 +1,295 @@
+{
+  "batch": "Phase 2 third wave: V-11 structural, V-12 test proximity, V-13 history",
+  "date": "2026-10-11",
+  "commits": {
+    "V-11": "2617e6d",
+    "V-12": "951383f",
+    "V-13": "23e5c41",
+    "merged_PR_3": "b0dcf94"
+  },
+  "environment": {
+    "os": "Windows-11-10.0.22631-SP0",
+    "python": "3.12.7 (Anaconda, Inc.) [MSC v.1929 64 bit (AMD64)]",
+    "numpy": "2.5.3",
+    "faiss_cpu": "1.15.1",
+    "note": "本批三个通道不使用 embedding；版本仅作环境登记"
+  },
+  "targeted_pytest": {
+    "v11_structural_only": {
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "v12_retrieval_plus_cli": {
+      "tests": 160,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "v13_retrieval_repo_integration": {
+      "tests": 549,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2
+    }
+  },
+  "final_pytest": {
+    "tests": 938,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "exit_code": 0,
+    "duration_seconds": 242.6
+  },
+  "intermediate_pytest": {
+    "tests": 938,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "exit_code": 0,
+    "note": "test_proximity 冗余分支收敛之前的中间轮全量，保留作对照"
+  },
+  "coverage": {
+    "covered_lines": 4570,
+    "num_statements": 4754,
+    "percent_covered": 94.88769694937982,
+    "missing_lines": 184,
+    "excluded_lines": 53,
+    "num_branches": 1212,
+    "num_partial_branches": 107,
+    "covered_branches": 1091,
+    "missing_branches": 121,
+    "percent_branches_covered": 90.01650165016501
+  },
+  "module_coverage": {
+    "src\\codepilot\\repo\\git_history.py": {
+      "percent_covered": 95.71428571428571,
+      "num_statements": 202,
+      "missing_lines": 6,
+      "num_branches": 78,
+      "num_partial_branches": 6
+    },
+    "src\\codepilot\\repo\\graph.py": {
+      "percent_covered": 97.75280898876404,
+      "num_statements": 69,
+      "missing_lines": 1,
+      "num_branches": 20,
+      "num_partial_branches": 1
+    },
+    "src\\codepilot\\retrieval\\graph_source.py": {
+      "percent_covered": 88.88888888888889,
+      "num_statements": 7,
+      "missing_lines": 0,
+      "num_branches": 2,
+      "num_partial_branches": 1
+    },
+    "src\\codepilot\\retrieval\\history.py": {
+      "percent_covered": 100.0,
+      "num_statements": 29,
+      "missing_lines": 0,
+      "num_branches": 10,
+      "num_partial_branches": 0
+    },
+    "src\\codepilot\\retrieval\\service.py": {
+      "percent_covered": 100.0,
+      "num_statements": 49,
+      "missing_lines": 0,
+      "num_branches": 20,
+      "num_partial_branches": 0
+    },
+    "src\\codepilot\\retrieval\\structural.py": {
+      "percent_covered": 100.0,
+      "num_statements": 63,
+      "missing_lines": 0,
+      "num_branches": 30,
+      "num_partial_branches": 0
+    },
+    "src\\codepilot\\retrieval\\test_proximity.py": {
+      "percent_covered": 100.0,
+      "num_statements": 42,
+      "missing_lines": 0,
+      "num_branches": 12,
+      "num_partial_branches": 0
+    }
+  },
+  "docker_marker": {
+    "collected": 1,
+    "skipped": 1,
+    "deselected": 937,
+    "exit_code": 0,
+    "reason": "本机 Docker daemon 不可用；真实容器验收在 Linux CI 执行"
+  },
+  "gates": {
+    "ruff_check": 0,
+    "ruff_format_check": 0,
+    "mypy_src": 0,
+    "mypy_source_files": 77
+  },
+  "smoke": {
+    "status": "PASS",
+    "doubles_used": "none (real git repository, real tree-sitter index, real NetworkX graph)",
+    "base_commit": "fdec59d816275157062c97c61c842c5b03f1775f",
+    "post_base_commit": "0f30d32e9f7078b980f4287a016c115c4a8dd894",
+    "repository_id": "structural_smoke",
+    "indexed_files": 14,
+    "indexed_symbols": 58,
+    "edges_by_kind_confidence": {
+      "CALL/0.3": 65,
+      "CALL/0.6": 7,
+      "CALL/1.0": 11,
+      "IMPORT/0.3": 11,
+      "IMPORT/1.0": 27,
+      "INHERIT/1.0": 3,
+      "REFERENCE/1.0": 19,
+      "TEST/0.3": 37,
+      "TEST/0.6": 12,
+      "TEST/1.0": 8
+    },
+    "files_with_churn": 14,
+    "structural_seeds": [
+      "tests.test_tokens.test_issue_returns_three_parts",
+      "tests.test_tokens",
+      "miniauth.tokens.issue_token"
+    ],
+    "structural_top": [
+      [
+        "src/miniauth/tokens.py",
+        "miniauth.tokens.issue_token",
+        6.012396133191952
+      ],
+      [
+        "src/miniauth/tokens.py",
+        "miniauth.tokens.verify_token",
+        4.844035167895931
+      ],
+      [
+        "src/miniauth/__init__.py",
+        "miniauth",
+        3.295028914203327
+      ],
+      [
+        "src/miniauth/session.py",
+        "miniauth.session",
+        3.295028914203327
+      ],
+      [
+        "src/miniauth/session.py",
+        "miniauth.session.Session.login",
+        3.295028914203327
+      ]
+    ],
+    "test_top": [
+      [
+        "src/miniauth/tokens.py",
+        "miniauth.tokens.issue_token",
+        1.0
+      ],
+      [
+        "src/miniauth/tokens.py",
+        "miniauth.tokens",
+        0.3
+      ],
+      [
+        "src/miniauth/tokens.py",
+        "miniauth.tokens._sign",
+        0.3
+      ],
+      [
+        "src/miniauth/tokens.py",
+        "miniauth.tokens.verify_token",
+        0.3
+      ]
+    ],
+    "history_top": [
+      [
+        "src/miniauth/tokens.py",
+        "miniauth.tokens",
+        1.0986122886681098
+      ],
+      [
+        "src/miniauth/tokens.py",
+        "miniauth.tokens._sign",
+        1.0986122886681098
+      ],
+      [
+        "src/miniauth/tokens.py",
+        "miniauth.tokens.issue_token",
+        1.0986122886681098
+      ],
+      [
+        "src/miniauth/tokens.py",
+        "miniauth.tokens.verify_token",
+        1.0986122886681098
+      ],
+      [
+        "src/miniauth/__init__.py",
+        "miniauth",
+        0.6931471805599453
+      ]
+    ],
+    "lexical_top": [
+      [
+        "tests.test_tokens.test_issue_returns_three_parts",
+        12.024792266383905
+      ],
+      [
+        "tests.test_tokens",
+        9.688070335791862
+      ],
+      [
+        "miniauth.tokens.issue_token",
+        6.590057828406654
+      ]
+    ],
+    "post_base_file_in_history": false,
+    "deterministic_rerun_identical": true,
+    "workspace_clean_after_run": true
+  },
+  "not_run": [
+    "真实本地 code model 推理（未安装 sentence-transformers/模型，本批也不需要 embedding）",
+    "真实 Embedding API 与真实 LLM（本批零付费调用）",
+    "V-14~V-25：通道开关配置、归一化/融合、文件聚合、Recall@K 评估集、多通道 CLI 与跨通道确定性验收",
+    "本机 Docker（daemon 不可用 → 1 skipped；真实容器验收已在 Linux CI 通过）"
+  ],
+  "linux_ci": {
+    "pr": "https://github.com/wanjiang263/CodePilot-Repair/pull/4",
+    "run_id": 38075460519,
+    "head_sha": "e0ed7289cfeb7e502c426b704164fa085e6137c7",
+    "conclusion": "success",
+    "measurements": {
+      "lint + types": "ruff check / ruff format --check / mypy src: success",
+      "pytest (no docker, no llm)": {
+        "collected": 938,
+        "deselected": 1,
+        "passed": 931,
+        "skipped": 6,
+        "skipped_reasons": "5 Windows-only (taskkill / junction) + 1 slow real-embedding opt-in",
+        "coverage": "94.52%",
+        "exit": 0,
+        "dependencies": "uv sync --frozen --extra dev --extra faiss (faiss-cpu installed)"
+      },
+      "Phase 1 index in Docker": {
+        "in_container": "11 passed / 0 skipped",
+        "host_marker": "1 passed, 937 deselected, 0 skipped"
+      }
+    },
+    "jobs": [
+      {
+        "name": "lint + types",
+        "conclusion": "success",
+        "url": "https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38075460519/job/114281383783"
+      },
+      {
+        "name": "pytest (no docker, no llm)",
+        "conclusion": "success",
+        "url": "https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38075460519/job/114281383953"
+      },
+      {
+        "name": "Phase 1 index in Docker",
+        "conclusion": "success",
+        "url": "https://github.com/wanjiang263/CodePilot-Repair/actions/runs/38075460519/job/114281383992"
+      }
+    ]
+  }
+}

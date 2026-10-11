@@ -1,0 +1,122 @@
+2026-10-10T18:09:31.044859Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.188 incremental=False removed=0 repository_id=structural_smoke reused=0
+{
+  "status": "PASS",
+  "doubles_used": "none (real git repository, real tree-sitter index, real NetworkX graph)",
+  "base_commit": "fdec59d816275157062c97c61c842c5b03f1775f",
+  "post_base_commit": "0f30d32e9f7078b980f4287a016c115c4a8dd894",
+  "repository_id": "structural_smoke",
+  "indexed_files": 14,
+  "indexed_symbols": 58,
+  "edges_by_kind_confidence": {
+    "CALL/0.3": 65,
+    "CALL/0.6": 7,
+    "CALL/1.0": 11,
+    "IMPORT/0.3": 11,
+    "IMPORT/1.0": 27,
+    "INHERIT/1.0": 3,
+    "REFERENCE/1.0": 19,
+    "TEST/0.3": 37,
+    "TEST/0.6": 12,
+    "TEST/1.0": 8
+  },
+  "files_with_churn": 14,
+  "structural_seeds": [
+    "tests.test_tokens.test_issue_returns_three_parts",
+    "tests.test_tokens",
+    "miniauth.tokens.issue_token"
+  ],
+  "structural_top": [
+    [
+      "src/miniauth/tokens.py",
+      "miniauth.tokens.issue_token",
+      6.012396133191952
+    ],
+    [
+      "src/miniauth/tokens.py",
+      "miniauth.tokens.verify_token",
+      4.844035167895931
+    ],
+    [
+      "src/miniauth/__init__.py",
+      "miniauth",
+      3.295028914203327
+    ],
+    [
+      "src/miniauth/session.py",
+      "miniauth.session",
+      3.295028914203327
+    ],
+    [
+      "src/miniauth/session.py",
+      "miniauth.session.Session.login",
+      3.295028914203327
+    ]
+  ],
+  "test_top": [
+    [
+      "src/miniauth/tokens.py",
+      "miniauth.tokens.issue_token",
+      1.0
+    ],
+    [
+      "src/miniauth/tokens.py",
+      "miniauth.tokens",
+      0.3
+    ],
+    [
+      "src/miniauth/tokens.py",
+      "miniauth.tokens._sign",
+      0.3
+    ],
+    [
+      "src/miniauth/tokens.py",
+      "miniauth.tokens.verify_token",
+      0.3
+    ]
+  ],
+  "history_top": [
+    [
+      "src/miniauth/tokens.py",
+      "miniauth.tokens",
+      1.0986122886681098
+    ],
+    [
+      "src/miniauth/tokens.py",
+      "miniauth.tokens._sign",
+      1.0986122886681098
+    ],
+    [
+      "src/miniauth/tokens.py",
+      "miniauth.tokens.issue_token",
+      1.0986122886681098
+    ],
+    [
+      "src/miniauth/tokens.py",
+      "miniauth.tokens.verify_token",
+      1.0986122886681098
+    ],
+    [
+      "src/miniauth/__init__.py",
+      "miniauth",
+      0.6931471805599453
+    ]
+  ],
+  "lexical_top": [
+    [
+      "tests.test_tokens.test_issue_returns_three_parts",
+      12.024792266383905
+    ],
+    [
+      "tests.test_tokens",
+      9.688070335791862
+    ],
+    [
+      "miniauth.tokens.issue_token",
+      6.590057828406654
+    ]
+  ],
+  "post_base_file_in_history": false,
+  "deterministic_rerun_identical": true,
+  "workspace_clean_after_run": true
+}
+exit=0

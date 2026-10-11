@@ -1,0 +1,184 @@
+{
+  "query": {
+    "raw_issue": "test_issue_returns_three_parts fails: the token has only two parts",
+    "identifiers": [
+      "test_issue_returns_three_parts"
+    ],
+    "keywords": [
+      "test_issue_returns_three_parts",
+      "test",
+      "issue",
+      "returns",
+      "three",
+      "parts",
+      "fails",
+      "token",
+      "only",
+      "two"
+    ],
+    "error_messages": [],
+    "file_paths": [],
+    "traceback_frames": [],
+    "parsed_frames": [],
+    "test_names": [
+      "test_issue_returns_three_parts"
+    ]
+  },
+  "symbols": [
+    {
+      "symbol_id": "aac9087a6208e200695597028ba64a1958cd25ce",
+      "qualified_name": "miniauth.tokens.issue_token",
+      "file": "src/miniauth/tokens.py",
+      "score": 1.0,
+      "kind": "function",
+      "channel_scores": [
+        {
+          "channel": "test",
+          "raw": 1.0,
+          "normalized": 1.0
+        }
+      ],
+      "pinned": false,
+      "start_line": 17,
+      "end_line": 21,
+      "reason": null
+    },
+    {
+      "symbol_id": "6e7a618cbc0b2469b4bf5899a7283067297e4ba3",
+      "qualified_name": "miniauth.tokens",
+      "file": "src/miniauth/tokens.py",
+      "score": 0.3,
+      "kind": "module",
+      "channel_scores": [
+        {
+          "channel": "test",
+          "raw": 0.3,
+          "normalized": 0.0
+        }
+      ],
+      "pinned": false,
+      "start_line": 1,
+      "end_line": 34,
+      "reason": null
+    },
+    {
+      "symbol_id": "de9e043e7ebd4e6de35eea4e391f801f635fdbd1",
+      "qualified_name": "miniauth.tokens._sign",
+      "file": "src/miniauth/tokens.py",
+      "score": 0.3,
+      "kind": "function",
+      "channel_scores": [
+        {
+          "channel": "test",
+          "raw": 0.3,
+          "normalized": 0.0
+        }
+      ],
+      "pinned": false,
+      "start_line": 12,
+      "end_line": 14,
+      "reason": null
+    },
+    {
+      "symbol_id": "560d756899aa2dc0555a643a6b4d1c1568a4f318",
+      "qualified_name": "miniauth.tokens.verify_token",
+      "file": "src/miniauth/tokens.py",
+      "score": 0.3,
+      "kind": "function",
+      "channel_scores": [
+        {
+          "channel": "test",
+          "raw": 0.3,
+          "normalized": 0.0
+        }
+      ],
+      "pinned": false,
+      "start_line": 24,
+      "end_line": 33,
+      "reason": null
+    }
+  ],
+  "files": [],
+  "channel_weights": {},
+  "fusion_method": "none",
+  "enabled_channels": [
+    "test"
+  ],
+  "per_channel": {
+    "test": [
+      {
+        "symbol_id": "aac9087a6208e200695597028ba64a1958cd25ce",
+        "qualified_name": "miniauth.tokens.issue_token",
+        "file": "src/miniauth/tokens.py",
+        "score": 1.0,
+        "kind": "function",
+        "channel_scores": [
+          {
+            "channel": "test",
+            "raw": 1.0,
+            "normalized": 1.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 17,
+        "end_line": 21,
+        "reason": null
+      },
+      {
+        "symbol_id": "6e7a618cbc0b2469b4bf5899a7283067297e4ba3",
+        "qualified_name": "miniauth.tokens",
+        "file": "src/miniauth/tokens.py",
+        "score": 0.3,
+        "kind": "module",
+        "channel_scores": [
+          {
+            "channel": "test",
+            "raw": 0.3,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 1,
+        "end_line": 34,
+        "reason": null
+      },
+      {
+        "symbol_id": "de9e043e7ebd4e6de35eea4e391f801f635fdbd1",
+        "qualified_name": "miniauth.tokens._sign",
+        "file": "src/miniauth/tokens.py",
+        "score": 0.3,
+        "kind": "function",
+        "channel_scores": [
+          {
+            "channel": "test",
+            "raw": 0.3,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 12,
+        "end_line": 14,
+        "reason": null
+      },
+      {
+        "symbol_id": "560d756899aa2dc0555a643a6b4d1c1568a4f318",
+        "qualified_name": "miniauth.tokens.verify_token",
+        "file": "src/miniauth/tokens.py",
+        "score": 0.3,
+        "kind": "function",
+        "channel_scores": [
+          {
+            "channel": "test",
+            "raw": 0.3,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 24,
+        "end_line": 33,
+        "reason": null
+      }
+    ]
+  },
+  "snapshot_id": ""
+}
