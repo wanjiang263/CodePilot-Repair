@@ -1,0 +1,12 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/integration/test_retrieval_index_failures.py::test_partial_environment_failure_keeps_full_denominator_and_not_run_state",
+    "tests/unit/retrieval/test_embedding_cache.py",
+    "--junitxml=docs/evidence/phase2-index-failure-20261011/logging-isolation.xml",
+    "-q"
+  ],
+  "exit_code": 0
+}

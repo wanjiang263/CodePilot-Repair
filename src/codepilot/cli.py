@@ -330,58 +330,170 @@ def _not_yet(command: str) -> None:
     raise typer.Exit(code=2)
 
 
+def _looks_like_path(text: str) -> bool:
+    """Decide whether ``--issue`` carried a file path rather than issue prose.
+
+    ``Please fix handling of README.md`` is a one-line issue, not a missing file, so
+    only separated, prefixed or single-token spellings ask for the path lookup. An
+    existing path always wins that check because ``retrieve`` probes it first.
+    """
+    if "/" in text or "\\" in text:
+        return True
+    if text.startswith((".", "~")):
+        return True
+    return " " not in text.strip()
+
+
 @app.command("retrieve")
 def retrieve(
-    query: str = typer.Argument(..., help="检索语句。"),
+    query: str | None = typer.Argument(None, help="检索语句（兼容原有位置参数）。"),
     repo: str = typer.Option(..., "--repo", help="仓库路径或 URL。"),
     base_commit: str = typer.Option("HEAD", "--base-commit", help="基准提交。"),
-    channel: str = typer.Option("bm25", "--channel", help="独立通道：bm25 / ripgrep。"),
+    channel: str = typer.Option(
+        "bm25", "--channel", help="逗号分隔：bm25/ripgrep/semantic/structural/test/history。"
+    ),
     limit: int = typer.Option(20, "--limit", min=1, help="最多返回的 symbol 数量。"),
+    issue: str | None = typer.Option(None, "--issue", help="Issue 文本或 UTF-8 文件路径。"),
+    config: Path | None = typer.Option(
+        None, "--config", help="检索 JSON 配置（channels/method/weights/embedding）。"
+    ),
+    ranking: str | None = typer.Option(None, "--ranking", help="weighted 或 rrf。"),
+    embedding: str | None = typer.Option(
+        None, "--embedding", help="none 或 offline-hash（非学习语义模型）。"
+    ),
 ) -> None:
-    """Phase 2 首批：在基准提交中执行单通道检索，输出 JSON（尚未融合）。"""
-    from codepilot.repo.index import Indexer, RepositoryIndex
-    from codepilot.repo.workspace import WorkspaceError, WorkspaceManager
-    from codepilot.retrieval.documents import RetrievalError
-    from codepilot.retrieval.service import retrieve_symbols
-    from codepilot.storage.db import (
-        create_engine_from_url,
-        create_session_factory,
-        init_db,
-        session_scope,
-    )
-    from codepilot.storage.repository import Stores
+    """在隔离基准版本中检索，输出 Symbol / File 与完整通道评分 JSON。"""
+    import json
 
-    if channel not in ("bm25", "ripgrep"):
-        raise typer.BadParameter("请选择 bm25 或 ripgrep", param_hint="--channel")
+    from codepilot.repo.gitcmd import GitError
+    from codepilot.repo.workspace import WorkspaceError
+    from codepilot.retrieval.config import CHANNELS
+    from codepilot.retrieval.documents import RetrievalError
+    from codepilot.retrieval.input import RetrievalInput
+    from codepilot.retrieval.runner import RetrievalOptions, indexed_repository
+
+    if (query is None) == (issue is None):
+        raise typer.BadParameter("请提供位置参数 query 或 --issue，二者只能选一项")
+    try:
+        text = issue if issue is not None else query
+        assert text is not None
+        if issue is not None:
+            file = Path(issue)
+            if file.is_file():
+                text = file.read_text(encoding="utf-8")
+            elif (
+                "\n" not in issue
+                and file.suffix.lower() in {".md", ".txt"}
+                and _looks_like_path(issue)
+            ):
+                raise ValueError(f"Issue 文件不存在: {file}")
+        if not text.strip():
+            raise ValueError("Issue 不能为空")
+        if config is not None:
+            if channel != "bm25":
+                raise ValueError("--config 与 --channel 不能同时指定")
+            options_data = json.loads(config.read_text(encoding="utf-8"))
+            if not isinstance(options_data, dict):
+                raise ValueError("配置必须是 JSON 对象")
+        else:
+            names = channel.split(",")
+            if (
+                not names
+                or any(name not in CHANNELS for name in names)
+                or len(set(names)) != len(names)
+            ):
+                raise ValueError(f"未知或重复通道: {channel}")
+            options_data = {"channels": {name: name in names for name in CHANNELS}}
+        if ranking is not None:
+            options_data["method"] = ranking
+        elif issue is not None and "method" not in options_data:
+            options_data["method"] = "weighted"
+        if embedding is not None:
+            options_data["embedding"] = embedding
+        options = RetrievalOptions.model_validate(options_data)
+        task = RetrievalInput(task_id="cli", repo=repo, base_commit=base_commit, issue=text)
+    except (ValueError, OSError) as error:
+        raise typer.BadParameter(str(error)) from error
     settings = get_settings()
     settings.ensure_dirs()
-    manager = WorkspaceManager(cache_root=settings.repo_cache_dir())
-    target = settings.cache_dir / "cli-workspaces" / f"retrieve-{secrets.token_hex(6)}"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    engine = create_engine_from_url("sqlite://")
     try:
-        init_db(engine)
-        workspace = manager.create(source=repo, base_commit=base_commit, target=target)
-        try:
-            with session_scope(create_session_factory(engine)) as session:
-                stores = Stores(session)
-                Indexer().index(stores, workspace)
-                symbols = RepositoryIndex(stores, workspace.repository_id).symbol_objects()
-                result = retrieve_symbols(
-                    workspace.path,
-                    symbols,
-                    query,
-                    channel="bm25" if channel == "bm25" else "ripgrep",
-                    limit=limit,
-                )
+        with indexed_repository(task, settings.cache_dir) as indexed:
+            result, info = indexed.retrieve(task, options, limit=limit)
+            if issue is None and config is None and ranking is None and embedding is None:
                 typer.echo(result.model_dump_json(indent=2))
-        finally:
-            manager.remove(workspace)
-    except (WorkspaceError, RetrievalError) as error:
+            else:
+                data = result.model_dump(mode="json")
+                data["execution"] = info.model_dump(mode="json")
+                typer.echo(json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False))
+    except (WorkspaceError, RetrievalError, GitError, ValueError, OSError) as error:
         typer.secho(str(error), fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1) from error
-    finally:
-        engine.dispose()
+
+
+@app.command("eval-retrieval")
+def eval_retrieval(
+    dataset: Path = typer.Option(..., "--dataset", help="合成检索评估 JSONL。"),
+    output: Path | None = typer.Option(None, "--output", help="完整统计 / 配置 / 原始排名 JSON。"),
+    embedding: str = typer.Option(
+        "offline-hash", "--embedding", help="offline-hash（明确的非学习基线）或 none。"
+    ),
+    ranking: str = typer.Option("weighted", "--ranking", help="融合方法 weighted 或 rrf。"),
+    config: Path | None = typer.Option(
+        None, "--config", help="融合配置 JSON，独立消融行仍分别启用每个通道。"
+    ),
+) -> None:
+    """运行六个独立通道与融合的离线 Recall@1/5/10 消融，保存可复现证据。"""
+    from codepilot.retrieval.dataset import load_dataset
+    from codepilot.retrieval.evaluation import render_table, run_evaluation
+    from codepilot.retrieval.runner import RetrievalOptions
+    from codepilot.schemas.retrieval import FusionMethod
+
+    try:
+        cases = load_dataset(dataset)
+        if embedding not in {"none", "offline-hash"} or ranking not in {"weighted", "rrf"}:
+            raise ValueError("embedding 必须为 offline-hash/none；ranking 必须为 weighted/rrf")
+        options = (
+            RetrievalOptions.model_validate_json(config.read_text(encoding="utf-8"))
+            if config
+            else None
+        )
+        if options and (
+            options.method not in {None, FusionMethod(ranking)} or options.embedding != embedding
+        ):
+            raise ValueError("配置 method/embedding 必须与命令行一致")
+        if options and any(
+            not getattr(options.channels, name)
+            for name in ("bm25", "ripgrep", "structural", "test", "history")
+        ):
+            raise ValueError("融合配置必须启用所有消融通道（semantic 可由 none 禁用）")
+        if options and options.channels.semantic != (embedding == "offline-hash"):
+            raise ValueError("融合配置 semantic 开关必须与 embedding 模式一致")
+    except (ValueError, OSError) as error:
+        raise typer.BadParameter(str(error)) from error
+    settings = get_settings()
+    settings.ensure_dirs()
+    try:
+        report = run_evaluation(
+            cases,
+            dataset.resolve().parent,
+            settings.cache_dir,
+            embedding="offline-hash" if embedding == "offline-hash" else "none",
+            method=FusionMethod(ranking),
+            weights=options.weights if options else None,
+            rrf_k=options.rrf_k if options else 60,
+            seed_channel=options.seed_channel if options else "bm25",
+        )
+        destination = output or settings.artifacts_dir / "phase2/retrieval-evaluation.json"
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(
+            report.model_dump_json(indent=2) + "\n", encoding="utf-8", newline="\n"
+        )
+        typer.echo(render_table(report))
+        typer.echo(f"Evidence: {destination}")
+        if any(row.failures for row in report.rows):
+            raise typer.Exit(code=1)
+    except (ValueError, OSError) as error:
+        raise typer.BadParameter(str(error)) from error
 
 
 @app.command("run-tests")

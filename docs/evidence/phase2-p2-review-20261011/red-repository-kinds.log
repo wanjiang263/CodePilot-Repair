@@ -1,0 +1,117 @@
+.FF..FF                                                                  [100%]
+================================== FAILURES ===================================
+____ test_bare_repository_is_a_git_source_and_indexes_the_checked_out_tree ____
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-559/test_bare_repository_is_a_git_0')
+
+    def test_bare_repository_is_a_git_source_and_indexes_the_checked_out_tree(isolated):
+        repo = init_repo(isolated / "normal", SOURCE_FILES)
+        bare = isolated / "bare.git"
+        assert _bare_clone(repo, bare) == repo.head
+    
+        with indexed_repository(_task(bare), isolated / "cache") as indexed:
+>           assert indexed.source_kind == "git"
+E           AssertionError: assert 'directory_snapshot' == 'git'
+E             
+E             - git
+E             + directory_snapshot
+
+tests\integration\test_retrieval_repository_kinds.py:67: AssertionError
+---------------------------- Captured stderr call -----------------------------
+2026-10-11T15:29:37.235988Z [info     ] repo.index.done                changed=25 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.14 incremental=False removed=0 repository_id=repo_dd23339eb287f5e4 reused=0
+______________ test_bare_repository_keeps_base_commit_isolation _______________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-559/test_bare_repository_keeps_bas0')
+
+    def test_bare_repository_keeps_base_commit_isolation(isolated):
+        repo = init_repo(isolated / "normal", SOURCE_FILES)
+        base = repo.head
+        repo.write("src/miniauth/late.py", "def only_after_base() -> None:\n    return None\n")
+        after = repo.commit("after base")
+        assert base != after
+        bare = isolated / "late.git"
+        _bare_clone(repo, bare)
+    
+        for commit, expected in ((base, False), (after, True)):
+>           with indexed_repository(_task(bare, commit), isolated / "cache") as indexed:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_retrieval_repository_kinds.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+D:\Anaconda\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task = RetrievalInput(task_id='p2-1', repo='C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-559\\test_bare_...mit='a1f1dd7b04161d2d8be73e2fb979a86d2a8a35de', issue='Freshly issued tokens stop working at the exact expiry second.')
+cache_dir = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-559/test_bare_repository_keeps_bas0/cache')
+
+    @contextmanager
+    def indexed_repository(task: RetrievalInput, cache_dir: Path) -> Iterator[IndexedRepository]:
+        """Owned temporary workspace and in-memory DB; no task labels accepted."""
+        source = normalize_source(task.repo)
+        if source.local_path is not None and not source.local_path.is_dir():
+            raise FileNotFoundError(f"Repository directory missing: {source.local_path}")
+        snapshot = source.local_path is not None and not (source.local_path / ".git").exists()
+        if snapshot and task.base_commit not in {"HEAD", "snapshot"}:
+>           raise ValueError(
+                "Directory snapshot has no Git history; base_commit must be HEAD or snapshot"
+            )
+E           ValueError: Directory snapshot has no Git history; base_commit must be HEAD or snapshot
+
+src\codepilot\retrieval\runner.py:243: ValueError
+_____________ test_git_source_still_rejects_the_snapshot_sentinel _____________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-559/test_git_source_still_rejects_0')
+
+    def test_git_source_still_rejects_the_snapshot_sentinel(isolated):
+        repo = init_repo(isolated / "normal", SOURCE_FILES)
+        bare = isolated / "rejected.git"
+        _bare_clone(repo, bare)
+        for path in (repo.path, bare):
+            with (
+                pytest.raises(ValueError, match="requires an explicit full base SHA"),
+                indexed_repository(_task(path, "snapshot"), isolated / "cache"),
+            ):
+>               pytest.fail("A Git source accepted base_commit=snapshot")
+E               Failed: A Git source accepted base_commit=snapshot
+
+tests\integration\test_retrieval_repository_kinds.py:127: Failed
+---------------------------- Captured stderr call -----------------------------
+2026-10-11T15:29:50.331947Z [info     ] repo.index.done                changed=25 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremental=False removed=0 repository_id=repo_32308fce73d3faea reused=0
+________ test_cli_retrieve_reports_a_git_source_for_a_bare_repository _________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-559/test_cli_retrieve_reports_a_gi0')
+
+    def test_cli_retrieve_reports_a_git_source_for_a_bare_repository(isolated):
+        repo = init_repo(isolated / "normal", SOURCE_FILES)
+        bare = isolated / "cli.git"
+        _bare_clone(repo, bare)
+    
+        result = CliRunner().invoke(
+            app,
+            [
+                "--log-level",
+                "ERROR",
+                "retrieve",
+                "--repo",
+                str(bare),
+                "--issue",
+                "token expiry boundary",
+            ],
+        )
+        assert result.exit_code == 0, result.stdout + result.stderr
+        data = json.loads(result.stdout)
+>       assert data["execution"]["source_kind"] == "git"
+E       AssertionError: assert 'directory_snapshot' == 'git'
+E         
+E         - git
+E         + directory_snapshot
+
+tests\integration\test_retrieval_repository_kinds.py:149: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_retrieval_repository_kinds.py::test_bare_repository_is_a_git_source_and_indexes_the_checked_out_tree
+FAILED tests/integration/test_retrieval_repository_kinds.py::test_bare_repository_keeps_base_commit_isolation
+FAILED tests/integration/test_retrieval_repository_kinds.py::test_git_source_still_rejects_the_snapshot_sentinel
+FAILED tests/integration/test_retrieval_repository_kinds.py::test_cli_retrieve_reports_a_git_source_for_a_bare_repository
+4 failed, 3 passed in 28.73s

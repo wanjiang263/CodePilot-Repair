@@ -1,0 +1,20 @@
+{
+  "command": [
+    "uv",
+    "run",
+    "codepilot",
+    "retrieve",
+    "--repo",
+    "tests/fixtures/repos/mini_auth",
+    "--issue",
+    "tests/fixtures/issues/expired_token.md"
+  ],
+  "exit_code": 0,
+  "environment": {
+    "UV_OFFLINE": "1",
+    "UV_NO_SYNC": "1",
+    "PYTHONIOENCODING": "utf-8"
+  },
+  "stdout_sha256": "13a4d91d81b593a149dd5fc7e4f52c6ac5c5e3cde32af33a076b6a9e6cc624f8",
+  "stderr_sha256": "47c5ea3b461fc2f4d5f85c1112e27f35f05851d1b5804084517d2ef032c09bb1"
+}

@@ -1,0 +1,42 @@
+2026-10-11T04:55:46.932856Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.343 incremental=False removed=0 repository_id=repo_2e9bcedd6d61c122 reused=0
+{
+  "comparisons": [
+    {
+      "scenario": "weighted",
+      "first_exit": 0,
+      "second_exit": 0,
+      "stdout_equal": true,
+      "stderr_equal": true,
+      "first_sha256": "5d0dbbbd6b7000b46a393d085e8bf9d904eeb4ce44e60ea090fa567cc9c54ac3",
+      "second_sha256": "5d0dbbbd6b7000b46a393d085e8bf9d904eeb4ce44e60ea090fa567cc9c54ac3"
+    },
+    {
+      "scenario": "rrf",
+      "first_exit": 0,
+      "second_exit": 0,
+      "stdout_equal": true,
+      "stderr_equal": true,
+      "first_sha256": "0c2ed2f944ebbf80fac49345086c627acba5bc9ba36ae5a6bbb8e2a1d0a57f5b",
+      "second_sha256": "0c2ed2f944ebbf80fac49345086c627acba5bc9ba36ae5a6bbb8e2a1d0a57f5b"
+    },
+    {
+      "scenario": "legacy",
+      "first_exit": 0,
+      "second_exit": 0,
+      "stdout_equal": true,
+      "stderr_equal": true,
+      "first_sha256": "e0bd5911c555055f7b473da67b326ff3fb0d5fa4727fbf90605d26b1dac09616",
+      "second_sha256": "e0bd5911c555055f7b473da67b326ff3fb0d5fa4727fbf90605d26b1dac09616"
+    },
+    {
+      "scenario": "eval",
+      "first_exit": 0,
+      "second_exit": 0,
+      "stdout_equal": true,
+      "stderr_equal": true,
+      "first_sha256": "41030c181220e10e200dcb860cd4e769865094cbf583924704a14228e15f9c28",
+      "second_sha256": "41030c181220e10e200dcb860cd4e769865094cbf583924704a14228e15f9c28"
+    }
+  ],
+  "base_isolation": true
+}

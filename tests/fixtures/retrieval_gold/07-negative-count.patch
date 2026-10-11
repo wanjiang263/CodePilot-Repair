@@ -1,0 +1,13 @@
+--- a/src/miniauth/app.py
++++ b/src/miniauth/app.py
+@@ -26,7 +26,9 @@
+ 
+ def count_down(n: int) -> int:
+     """递归函数：R-09 要求 ``count_down`` 内部对自己的调用建出边。"""
+-    if n <= 0:
++    if n < 0:
++        raise ValueError("negative count")
++    if n == 0:
+         return 0
+     return 1 + count_down(n - 1)
+ 

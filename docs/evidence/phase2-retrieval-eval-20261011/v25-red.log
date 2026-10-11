@@ -1,0 +1,23 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________________ test_end_to_end_cli_determinism_certificate _________________
+
+tmp_path = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-346/test_end_to_end_cli_determinis0')
+
+    def test_end_to_end_cli_determinism_certificate(tmp_path):
+        root = Path(__file__).resolve().parents[2]
+        script = root / "docs/evidence/phase2-retrieval-eval-20261011/verify-determinism.py"
+        run = subprocess.run([sys.executable, str(script), "--output", str(tmp_path / "evidence")],
+                             cwd=root, capture_output=True, env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+                             timeout=240)
+>       assert run.returncode == 0, (run.stdout + run.stderr).decode("utf-8", errors="replace")
+E       AssertionError: D:\Anaconda\python.exe: can't open file 'C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\docs\\evidence\\phase2-retrieval-eval-20261011\\verify-determinism.py': [Errno 2] No such file or directory
+
+E         
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe', 'C:\\Users\\lenovo\...docs\\\\evidence\\\\phase2-retrieval-eval-20261011\\\\verify-determinism.py': [Errno 2] No such file or directory\r\n").returncode
+
+tests\integration\test_retrieval_determinism.py:16: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_retrieval_determinism.py::test_end_to_end_cli_determinism_certificate
+1 failed in 3.29s

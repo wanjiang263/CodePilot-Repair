@@ -1,0 +1,14 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "-m",
+    "not docker and not llm",
+    "--cov",
+    "--cov-report=term-missing",
+    "--junitxml=docs/evidence/phase2-p2-review-20261011/full-pytest.xml",
+    "-q"
+  ],
+  "exit_code": 0
+}

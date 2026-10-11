@@ -1,0 +1,626 @@
+FFFFFFF..FFFFFFFF                                                        [100%]
+================================== FAILURES ===================================
+_ test_unreadable_non_gold_file_is_an_index_failure_with_deterministic_evidence[none] _
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_unreadable_non_gold_file_0')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_unreadable_non_gold_file_0/cache/cli...pytest-439/test_unreadable_non_gold_file_0/cache/cli-workspaces/retrieval-g7in2dvs/workspace/src/miniauth/plugins.py')]
+embedding = 'none'
+
+    @pytest.mark.parametrize("embedding", ["none", "offline-hash"])
+    def test_unreadable_non_gold_file_is_an_index_failure_with_deterministic_evidence(
+        isolated, unreadable, embedding
+    ):
+        cases = load_dataset(DATASET)[:1]
+        first = run_evaluation(cases, FIXTURES, isolated / "cache", embedding=embedding)
+        second = run_evaluation(cases, FIXTURES, isolated / "cache", embedding=embedding)
+        assert len(unreadable) == 2
+        assert first.model_dump_json() == second.model_dump_json()
+        assert render_table(first) == render_table(second)
+        assert RetrievalEvaluation.model_validate_json(first.model_dump_json()) == first
+        task = cases[0].task_id
+        for row in first.rows:
+            if row.status == "NOT RUN":
+                assert row.failures == {} and row.metrics is None
+                continue
+>           assert len(row.failures) == 1 and row.results == {} and row.execution == {}
+E           AssertionError: assert (0 == 1)
+E            +  where 0 = len({})
+E            +    where {} = AblationRow(name='bm25', status='RUN', options=RetrievalOptions(channels=RetrievalConfig(bm25=True, ripgrep=False, sem...hod=<FusionMethod.WEIGHTED: 'weighted'>, weights=None, rrf_k=60, seed_channel='bm25', embedding='none'))}, failures={}).failures
+
+tests\integration\test_retrieval_index_failures.py:64: AssertionError
+---------------------------- Captured stderr call -----------------------------
+2026-10-11T10:18:13.391986Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.313 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+2026-10-11T10:18:17.256382Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.219 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+_ test_unreadable_non_gold_file_is_an_index_failure_with_deterministic_evidence[offline-hash] _
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_unreadable_non_gold_file_1')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_unreadable_non_gold_file_1/cache/cli...pytest-439/test_unreadable_non_gold_file_1/cache/cli-workspaces/retrieval-0a3bul32/workspace/src/miniauth/plugins.py')]
+embedding = 'offline-hash'
+
+    @pytest.mark.parametrize("embedding", ["none", "offline-hash"])
+    def test_unreadable_non_gold_file_is_an_index_failure_with_deterministic_evidence(
+        isolated, unreadable, embedding
+    ):
+        cases = load_dataset(DATASET)[:1]
+        first = run_evaluation(cases, FIXTURES, isolated / "cache", embedding=embedding)
+        second = run_evaluation(cases, FIXTURES, isolated / "cache", embedding=embedding)
+        assert len(unreadable) == 2
+        assert first.model_dump_json() == second.model_dump_json()
+        assert render_table(first) == render_table(second)
+        assert RetrievalEvaluation.model_validate_json(first.model_dump_json()) == first
+        task = cases[0].task_id
+        for row in first.rows:
+            if row.status == "NOT RUN":
+                assert row.failures == {} and row.metrics is None
+                continue
+>           assert len(row.failures) == 1 and row.results == {} and row.execution == {}
+E           AssertionError: assert (0 == 1)
+E            +  where 0 = len({})
+E            +    where {} = AblationRow(name='bm25', status='RUN', options=RetrievalOptions(channels=RetrievalConfig(bm25=True, ripgrep=False, sem...ionMethod.WEIGHTED: 'weighted'>, weights=None, rrf_k=60, seed_channel='bm25', embedding='offline-hash'))}, failures={}).failures
+
+tests\integration\test_retrieval_index_failures.py:64: AssertionError
+---------------------------- Captured stderr call -----------------------------
+2026-10-11T10:18:22.126170Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.187 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+2026-10-11T10:18:25.943057Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.172 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+______ test_indexstats_unreadable_count_alone_cannot_be_silently_ignored ______
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_indexstats_unreadable_cou0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000026C4BA3C110>
+
+    def test_indexstats_unreadable_count_alone_cannot_be_silently_ignored(isolated, monkeypatch):
+        index = Indexer.index
+    
+        def incomplete(self, stores, workspace):
+            stats = index(self, stores, workspace)
+            stats.scan["unreadable"] = 2
+            return stats
+    
+        monkeypatch.setattr(Indexer, "index", incomplete)
+        task = load_dataset(DATASET)[0].inference(FIXTURES)
+        with pytest.raises(OSError, match="incomplete"):
+            with indexed_repository(task, isolated / "cache"):
+>               pytest.fail("Incomplete index was yielded")
+E               Failed: Incomplete index was yielded
+
+tests\integration\test_retrieval_index_failures.py:90: Failed
+---------------------------- Captured stderr call -----------------------------
+2026-10-11T10:18:29.792142Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.219 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+_ test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args0] _
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_retrieve_cli_rejects_inco0')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_retrieve_cli_rejects_inco0/cache/cli...pytest-439/test_retrieve_cli_rejects_inco0/cache/cli-workspaces/retrieval-kfhqxdxe/workspace/src/miniauth/plugins.py')]
+args = ['verify_token']
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            ["verify_token"],
+            ["--issue", "verify_token"],
+            ["--issue", "verify_token", "--channel", "bm25,ripgrep"],
+        ],
+    )
+    def test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes(
+        isolated, unreadable, args
+    ):
+        command = ["--log-level", "ERROR", "retrieve", "--repo", str(FIXTURES / "repos/mini_auth"), *args]
+        first = CliRunner().invoke(app, command)
+        second = CliRunner().invoke(app, command)
+>       assert first.exit_code == second.exit_code == 1
+E       assert 0 == 1
+E        +  where 0 = <Result okay>.exit_code
+
+tests\integration\test_retrieval_index_failures.py:107: AssertionError
+_ test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args1] _
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_retrieve_cli_rejects_inco1')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_retrieve_cli_rejects_inco1/cache/cli...pytest-439/test_retrieve_cli_rejects_inco1/cache/cli-workspaces/retrieval-ui88614x/workspace/src/miniauth/plugins.py')]
+args = ['--issue', 'verify_token']
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            ["verify_token"],
+            ["--issue", "verify_token"],
+            ["--issue", "verify_token", "--channel", "bm25,ripgrep"],
+        ],
+    )
+    def test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes(
+        isolated, unreadable, args
+    ):
+        command = ["--log-level", "ERROR", "retrieve", "--repo", str(FIXTURES / "repos/mini_auth"), *args]
+        first = CliRunner().invoke(app, command)
+        second = CliRunner().invoke(app, command)
+>       assert first.exit_code == second.exit_code == 1
+E       assert 0 == 1
+E        +  where 0 = <Result okay>.exit_code
+
+tests\integration\test_retrieval_index_failures.py:107: AssertionError
+_ test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args2] _
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_retrieve_cli_rejects_inco2')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_retrieve_cli_rejects_inco2/cache/cli...pytest-439/test_retrieve_cli_rejects_inco2/cache/cli-workspaces/retrieval-rijbs00d/workspace/src/miniauth/plugins.py')]
+args = ['--issue', 'verify_token', '--channel', 'bm25,ripgrep']
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            ["verify_token"],
+            ["--issue", "verify_token"],
+            ["--issue", "verify_token", "--channel", "bm25,ripgrep"],
+        ],
+    )
+    def test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes(
+        isolated, unreadable, args
+    ):
+        command = ["--log-level", "ERROR", "retrieve", "--repo", str(FIXTURES / "repos/mini_auth"), *args]
+        first = CliRunner().invoke(app, command)
+        second = CliRunner().invoke(app, command)
+>       assert first.exit_code == second.exit_code == 1
+E       assert 0 == 1
+E        +  where 0 = <Result okay>.exit_code
+
+tests\integration\test_retrieval_index_failures.py:107: AssertionError
+________ test_eval_cli_saves_failures_prints_reasons_and_exits_nonzero ________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_eval_cli_saves_failures_p0')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_eval_cli_saves_failures_p0/cache/cli...t-439/test_eval_cli_saves_failures_p0/cache/cli-workspaces/retrieval-ruagvu78/workspace/src/miniauth/plugins.py'), ...]
+
+    def test_eval_cli_saves_failures_prints_reasons_and_exits_nonzero(isolated, unreadable):
+        output = isolated / "failed.json"
+        command = ["--log-level", "ERROR", "eval-retrieval", "--dataset", str(DATASET), "--output", str(output)]
+        first = CliRunner().invoke(app, command)
+>       first_json = output.read_bytes()
+                     ^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_retrieval_index_failures.py:117: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\integration\test_retrieval_index_failures.py:42: in deny
+    return read(path)
+           ^^^^^^^^^^
+D:\Anaconda\Lib\pathlib.py:1019: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_eval_cli_saves_failures_p0/failed.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-439\\test_eval_cli_saves_failures_p0\\failed.json'
+
+D:\Anaconda\Lib\pathlib.py:1013: FileNotFoundError
+___________ test_policy_skips_are_nonfatal_and_observable[ignored] ____________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_policy_skips_are_nonfatal0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000026C4F015E50>
+diagnostic = 'ignored'
+
+    @pytest.mark.parametrize("diagnostic", ["ignored", "too_large", "binary"])
+    def test_policy_skips_are_nonfatal_and_observable(isolated, monkeypatch, diagnostic):
+        index = Indexer.index
+    
+        def skipped(self, stores, workspace):
+            stats = index(self, stores, workspace)
+            stats.scan[diagnostic] = 1
+            return stats
+    
+        monkeypatch.setattr(Indexer, "index", skipped)
+        report = run_evaluation(load_dataset(DATASET)[:1], FIXTURES, isolated / "cache")
+        assert all(row.failures == {} for row in report.rows)
+>       assert all(next(iter(row.execution.values())).index_diagnostics.scan_counts[diagnostic] == 1 for row in report.rows)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_retrieval_index_failures.py:170: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\integration\test_retrieval_index_failures.py:170: in <genexpr>
+    assert all(next(iter(row.execution.values())).index_diagnostics.scan_counts[diagnostic] == 1 for row in report.rows)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = ExecutionInfo(source_kind='directory_snapshot', base_commit='950f8f32d59ef1f37565721c6a501a1ef3991b8c', embedding_desc...e), method=<FusionMethod.WEIGHTED: 'weighted'>, weights=None, rrf_k=60, seed_channel='bm25', embedding='offline-hash'))
+item = 'index_diagnostics'
+
+    def __getattr__(self, item: str) -> Any:
+        private_attributes = object.__getattribute__(self, '__private_attributes__')
+        if item in private_attributes:
+            attribute = private_attributes[item]
+            if hasattr(attribute, '__get__'):
+                return attribute.__get__(self, type(self))  # type: ignore
+    
+            try:
+                # Note: self.__pydantic_private__ cannot be None if self.__private_attributes__ has items
+                return self.__pydantic_private__[item]  # type: ignore
+            except KeyError as exc:
+                raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}') from exc
+        else:
+            # `__pydantic_extra__` can fail to be set if the model is not yet fully initialized.
+            # See `BaseModel.__repr_args__` for more details
+            try:
+                pydantic_extra = object.__getattribute__(self, '__pydantic_extra__')
+            except AttributeError:
+                pydantic_extra = None
+    
+            if pydantic_extra and item in pydantic_extra:
+                return pydantic_extra[item]
+            else:
+                if hasattr(self.__class__, item):
+                    return super().__getattribute__(item)  # Raises AttributeError if appropriate
+                else:
+                    # this is the current error
+>                   raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+E                   AttributeError: 'ExecutionInfo' object has no attribute 'index_diagnostics'
+
+.venv\Lib\site-packages\pydantic\main.py:1042: AttributeError
+---------------------------- Captured stderr call -----------------------------
+2026-10-11T10:19:39.460786Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.141 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+__________ test_policy_skips_are_nonfatal_and_observable[too_large] ___________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_policy_skips_are_nonfatal1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000026C4F015370>
+diagnostic = 'too_large'
+
+    @pytest.mark.parametrize("diagnostic", ["ignored", "too_large", "binary"])
+    def test_policy_skips_are_nonfatal_and_observable(isolated, monkeypatch, diagnostic):
+        index = Indexer.index
+    
+        def skipped(self, stores, workspace):
+            stats = index(self, stores, workspace)
+            stats.scan[diagnostic] = 1
+            return stats
+    
+        monkeypatch.setattr(Indexer, "index", skipped)
+        report = run_evaluation(load_dataset(DATASET)[:1], FIXTURES, isolated / "cache")
+        assert all(row.failures == {} for row in report.rows)
+>       assert all(next(iter(row.execution.values())).index_diagnostics.scan_counts[diagnostic] == 1 for row in report.rows)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_retrieval_index_failures.py:170: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\integration\test_retrieval_index_failures.py:170: in <genexpr>
+    assert all(next(iter(row.execution.values())).index_diagnostics.scan_counts[diagnostic] == 1 for row in report.rows)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = ExecutionInfo(source_kind='directory_snapshot', base_commit='950f8f32d59ef1f37565721c6a501a1ef3991b8c', embedding_desc...e), method=<FusionMethod.WEIGHTED: 'weighted'>, weights=None, rrf_k=60, seed_channel='bm25', embedding='offline-hash'))
+item = 'index_diagnostics'
+
+    def __getattr__(self, item: str) -> Any:
+        private_attributes = object.__getattribute__(self, '__private_attributes__')
+        if item in private_attributes:
+            attribute = private_attributes[item]
+            if hasattr(attribute, '__get__'):
+                return attribute.__get__(self, type(self))  # type: ignore
+    
+            try:
+                # Note: self.__pydantic_private__ cannot be None if self.__private_attributes__ has items
+                return self.__pydantic_private__[item]  # type: ignore
+            except KeyError as exc:
+                raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}') from exc
+        else:
+            # `__pydantic_extra__` can fail to be set if the model is not yet fully initialized.
+            # See `BaseModel.__repr_args__` for more details
+            try:
+                pydantic_extra = object.__getattribute__(self, '__pydantic_extra__')
+            except AttributeError:
+                pydantic_extra = None
+    
+            if pydantic_extra and item in pydantic_extra:
+                return pydantic_extra[item]
+            else:
+                if hasattr(self.__class__, item):
+                    return super().__getattribute__(item)  # Raises AttributeError if appropriate
+                else:
+                    # this is the current error
+>                   raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+E                   AttributeError: 'ExecutionInfo' object has no attribute 'index_diagnostics'
+
+.venv\Lib\site-packages\pydantic\main.py:1042: AttributeError
+---------------------------- Captured stderr call -----------------------------
+2026-10-11T10:19:42.730679Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.141 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+____________ test_policy_skips_are_nonfatal_and_observable[binary] ____________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_policy_skips_are_nonfatal2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000026C4F0170B0>
+diagnostic = 'binary'
+
+    @pytest.mark.parametrize("diagnostic", ["ignored", "too_large", "binary"])
+    def test_policy_skips_are_nonfatal_and_observable(isolated, monkeypatch, diagnostic):
+        index = Indexer.index
+    
+        def skipped(self, stores, workspace):
+            stats = index(self, stores, workspace)
+            stats.scan[diagnostic] = 1
+            return stats
+    
+        monkeypatch.setattr(Indexer, "index", skipped)
+        report = run_evaluation(load_dataset(DATASET)[:1], FIXTURES, isolated / "cache")
+        assert all(row.failures == {} for row in report.rows)
+>       assert all(next(iter(row.execution.values())).index_diagnostics.scan_counts[diagnostic] == 1 for row in report.rows)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_retrieval_index_failures.py:170: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\integration\test_retrieval_index_failures.py:170: in <genexpr>
+    assert all(next(iter(row.execution.values())).index_diagnostics.scan_counts[diagnostic] == 1 for row in report.rows)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = ExecutionInfo(source_kind='directory_snapshot', base_commit='950f8f32d59ef1f37565721c6a501a1ef3991b8c', embedding_desc...e), method=<FusionMethod.WEIGHTED: 'weighted'>, weights=None, rrf_k=60, seed_channel='bm25', embedding='offline-hash'))
+item = 'index_diagnostics'
+
+    def __getattr__(self, item: str) -> Any:
+        private_attributes = object.__getattribute__(self, '__private_attributes__')
+        if item in private_attributes:
+            attribute = private_attributes[item]
+            if hasattr(attribute, '__get__'):
+                return attribute.__get__(self, type(self))  # type: ignore
+    
+            try:
+                # Note: self.__pydantic_private__ cannot be None if self.__private_attributes__ has items
+                return self.__pydantic_private__[item]  # type: ignore
+            except KeyError as exc:
+                raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}') from exc
+        else:
+            # `__pydantic_extra__` can fail to be set if the model is not yet fully initialized.
+            # See `BaseModel.__repr_args__` for more details
+            try:
+                pydantic_extra = object.__getattribute__(self, '__pydantic_extra__')
+            except AttributeError:
+                pydantic_extra = None
+    
+            if pydantic_extra and item in pydantic_extra:
+                return pydantic_extra[item]
+            else:
+                if hasattr(self.__class__, item):
+                    return super().__getattribute__(item)  # Raises AttributeError if appropriate
+                else:
+                    # this is the current error
+>                   raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+E                   AttributeError: 'ExecutionInfo' object has no attribute 'index_diagnostics'
+
+.venv\Lib\site-packages\pydantic\main.py:1042: AttributeError
+---------------------------- Captured stderr call -----------------------------
+2026-10-11T10:19:45.776049Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.172 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+______ test_real_parser_errors_keep_existing_tolerant_indexing_semantics ______
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_real_parser_errors_keep_e0')
+
+    def test_real_parser_errors_keep_existing_tolerant_indexing_semantics(isolated):
+        files = {p.relative_to(FIXTURES / "repos/mini_auth").as_posix(): p.read_text(encoding="utf-8") for p in (FIXTURES / "repos/mini_auth").rglob("*") if p.is_file()}
+        files["damaged.py"] = "def broken(:\n    pass\n"
+        repo = init_repo(isolated / "repo", files)
+        case = load_dataset(DATASET)[0]
+        (isolated / "reference.patch").write_bytes((FIXTURES / case.gold_patch).read_bytes())
+        case = case.model_copy(update={"repo": "repo", "base_commit": repo.head, "gold_patch": "reference.patch"})
+        report = run_evaluation([case], isolated, isolated / "cache")
+        assert all(row.failures == {} for row in report.rows)
+>       assert all("damaged.py" in next(iter(row.execution.values())).index_diagnostics.parse_errors[0] for row in report.rows)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_retrieval_index_failures.py:182: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\integration\test_retrieval_index_failures.py:182: in <genexpr>
+    assert all("damaged.py" in next(iter(row.execution.values())).index_diagnostics.parse_errors[0] for row in report.rows)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = ExecutionInfo(source_kind='git', base_commit='6eafe189f676f7f93bc9a83ab6878fe566ac11ca', embedding_description='offlin...e), method=<FusionMethod.WEIGHTED: 'weighted'>, weights=None, rrf_k=60, seed_channel='bm25', embedding='offline-hash'))
+item = 'index_diagnostics'
+
+    def __getattr__(self, item: str) -> Any:
+        private_attributes = object.__getattribute__(self, '__private_attributes__')
+        if item in private_attributes:
+            attribute = private_attributes[item]
+            if hasattr(attribute, '__get__'):
+                return attribute.__get__(self, type(self))  # type: ignore
+    
+            try:
+                # Note: self.__pydantic_private__ cannot be None if self.__private_attributes__ has items
+                return self.__pydantic_private__[item]  # type: ignore
+            except KeyError as exc:
+                raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}') from exc
+        else:
+            # `__pydantic_extra__` can fail to be set if the model is not yet fully initialized.
+            # See `BaseModel.__repr_args__` for more details
+            try:
+                pydantic_extra = object.__getattribute__(self, '__pydantic_extra__')
+            except AttributeError:
+                pydantic_extra = None
+    
+            if pydantic_extra and item in pydantic_extra:
+                return pydantic_extra[item]
+            else:
+                if hasattr(self.__class__, item):
+                    return super().__getattribute__(item)  # Raises AttributeError if appropriate
+                else:
+                    # this is the current error
+>                   raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+E                   AttributeError: 'ExecutionInfo' object has no attribute 'index_diagnostics'
+
+.venv\Lib\site-packages\pydantic\main.py:1042: AttributeError
+---------------------------- Captured stderr call -----------------------------
+2026-10-11T10:19:51.735811Z [info     ] repo.index.done                changed=15 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.625 incremental=False removed=0 repository_id=repo_2b3ec3f1c4d57d91 reused=0
+_____ test_index_backend_exceptions_are_reported_as_failed_tasks[error0] ______
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_index_backend_exceptions_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000026C4F1F2270>
+error = PermissionError('index read denied')
+
+    @pytest.mark.parametrize("error", [PermissionError("index read denied"), RuntimeError("index backend crashed")])
+    def test_index_backend_exceptions_are_reported_as_failed_tasks(isolated, monkeypatch, error):
+        def fail(*args, **kwargs):
+            raise error
+    
+        monkeypatch.setattr(Indexer, "index", fail)
+        report = run_evaluation(load_dataset(DATASET)[:1], FIXTURES, isolated / "cache")
+        for row in report.rows:
+            assert len(row.failures) == 1 and row.results == {}
+>           detail = next(iter(row.failure_details.values()))
+                               ^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_retrieval_index_failures.py:195: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = AblationRow(name='bm25', status='RUN', options=RetrievalOptions(channels=RetrievalConfig(bm25=True, ripgrep=False, sem....0, 5: 0.0, 10: 0.0}), results={}, execution={}, failures={'01-expiry-boundary': 'PermissionError: index read denied'})
+item = 'failure_details'
+
+    def __getattr__(self, item: str) -> Any:
+        private_attributes = object.__getattribute__(self, '__private_attributes__')
+        if item in private_attributes:
+            attribute = private_attributes[item]
+            if hasattr(attribute, '__get__'):
+                return attribute.__get__(self, type(self))  # type: ignore
+    
+            try:
+                # Note: self.__pydantic_private__ cannot be None if self.__private_attributes__ has items
+                return self.__pydantic_private__[item]  # type: ignore
+            except KeyError as exc:
+                raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}') from exc
+        else:
+            # `__pydantic_extra__` can fail to be set if the model is not yet fully initialized.
+            # See `BaseModel.__repr_args__` for more details
+            try:
+                pydantic_extra = object.__getattribute__(self, '__pydantic_extra__')
+            except AttributeError:
+                pydantic_extra = None
+    
+            if pydantic_extra and item in pydantic_extra:
+                return pydantic_extra[item]
+            else:
+                if hasattr(self.__class__, item):
+                    return super().__getattribute__(item)  # Raises AttributeError if appropriate
+                else:
+                    # this is the current error
+>                   raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+E                   AttributeError: 'AblationRow' object has no attribute 'failure_details'
+
+.venv\Lib\site-packages\pydantic\main.py:1042: AttributeError
+_____ test_index_backend_exceptions_are_reported_as_failed_tasks[error1] ______
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_index_backend_exceptions_1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000026C4F035D60>
+error = RuntimeError('index backend crashed')
+
+    @pytest.mark.parametrize("error", [PermissionError("index read denied"), RuntimeError("index backend crashed")])
+    def test_index_backend_exceptions_are_reported_as_failed_tasks(isolated, monkeypatch, error):
+        def fail(*args, **kwargs):
+            raise error
+    
+        monkeypatch.setattr(Indexer, "index", fail)
+>       report = run_evaluation(load_dataset(DATASET)[:1], FIXTURES, isolated / "cache")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_retrieval_index_failures.py:192: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\codepilot\retrieval\evaluation.py:111: in run_evaluation
+    with indexed_repository(task, cache_dir) as indexed:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\Anaconda\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+src\codepilot\retrieval\runner.py:219: in indexed_repository
+    Indexer().index(stores, workspace)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+args = (<codepilot.repo.index.Indexer object at 0x0000026C4F0355E0>, <codepilot.storage.repository.Stores object at 0x0000026...val-x2x3x_to/source')), base_commit='950f8f32d59ef1f37565721c6a501a1ef3991b8c', repository_id='repo_8423aafa18b3a2b8'))
+kwargs = {}
+
+    def fail(*args, **kwargs):
+>       raise error
+E       RuntimeError: index backend crashed
+
+tests\integration\test_retrieval_index_failures.py:189: RuntimeError
+_____ test_retrieval_backend_exception_is_distinct_from_empty_candidates ______
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_retrieval_backend_excepti0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000026C4F0355B0>
+
+    def test_retrieval_backend_exception_is_distinct_from_empty_candidates(isolated, monkeypatch):
+        retrieve = IndexedRepository.retrieve
+    
+        def fail(self, task, options, **kwargs):
+            if options.channels.enabled_channels == ("ripgrep",):
+                raise RuntimeError("retrieval backend crashed")
+            return retrieve(self, task, options, **kwargs)
+    
+        monkeypatch.setattr(IndexedRepository, "retrieve", fail)
+>       report = run_evaluation(load_dataset(DATASET)[:1], FIXTURES, isolated / "cache")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_retrieval_index_failures.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\codepilot\retrieval\evaluation.py:116: in run_evaluation
+    result, info = indexed.retrieve(task, row.options, limit=10)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = IndexedRepository(root=WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_retrieval_back..., last_modified_distance=0)}, base_commit='950f8f32d59ef1f37565721c6a501a1ef3991b8c', source_kind='directory_snapshot')
+task = RetrievalInput(task_id='01-expiry-boundary', repo='C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\tests\\fixtures\\repo...sued tokens stop working at the exact expiry second. The session policy expects that boundary second to remain valid.')
+options = RetrievalOptions(channels=RetrievalConfig(bm25=False, ripgrep=True, semantic=False, structural=False, test=False, hist...se), method=<FusionMethod.WEIGHTED: 'weighted'>, weights=None, rrf_k=60, seed_channel='bm25', embedding='offline-hash')
+kwargs = {'limit': 10}
+
+    def fail(self, task, options, **kwargs):
+        if options.channels.enabled_channels == ("ripgrep",):
+>           raise RuntimeError("retrieval backend crashed")
+E           RuntimeError: retrieval backend crashed
+
+tests\integration\test_retrieval_index_failures.py:206: RuntimeError
+---------------------------- Captured stderr call -----------------------------
+2026-10-11T10:20:11.571734Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.312 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+__ test_partial_environment_failure_keeps_full_denominator_and_not_run_state __
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-439/test_partial_environment_failu0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000026C4F0146E0>
+
+    def test_partial_environment_failure_keeps_full_denominator_and_not_run_state(isolated, monkeypatch):
+        read = Path.read_bytes
+        denied = []
+    
+        def deny_once(path):
+            if path.as_posix().endswith("/workspace/src/miniauth/plugins.py") and not denied:
+                denied.append(path)
+                raise PermissionError("one task only")
+            return read(path)
+    
+        monkeypatch.setattr(Path, "read_bytes", deny_once)
+        cases = load_dataset(DATASET)[:2]
+        report = run_evaluation(cases, FIXTURES, isolated / "cache", embedding="none")
+        for row in report.rows:
+            if row.status == "NOT RUN":
+                assert row.failures == {} and row.metrics is None
+                continue
+>           assert len(row.failures) == 1 and len(row.results) == 1
+E           AssertionError: assert (0 == 1)
+E            +  where 0 = len({})
+E            +    where {} = AblationRow(name='bm25', status='RUN', options=RetrievalOptions(channels=RetrievalConfig(bm25=True, ripgrep=False, sem...hod=<FusionMethod.WEIGHTED: 'weighted'>, weights=None, rrf_k=60, seed_channel='bm25', embedding='none'))}, failures={}).failures
+
+tests\integration\test_retrieval_index_failures.py:236: AssertionError
+---------------------------- Captured stderr call -----------------------------
+2026-10-11T10:20:16.354408Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.188 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+2026-10-11T10:20:20.349094Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.266 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+=========================== short test summary info ===========================
+FAILED tests/integration/test_retrieval_index_failures.py::test_unreadable_non_gold_file_is_an_index_failure_with_deterministic_evidence[none]
+FAILED tests/integration/test_retrieval_index_failures.py::test_unreadable_non_gold_file_is_an_index_failure_with_deterministic_evidence[offline-hash]
+FAILED tests/integration/test_retrieval_index_failures.py::test_indexstats_unreadable_count_alone_cannot_be_silently_ignored
+FAILED tests/integration/test_retrieval_index_failures.py::test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args0]
+FAILED tests/integration/test_retrieval_index_failures.py::test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args1]
+FAILED tests/integration/test_retrieval_index_failures.py::test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args2]
+FAILED tests/integration/test_retrieval_index_failures.py::test_eval_cli_saves_failures_prints_reasons_and_exits_nonzero
+FAILED tests/integration/test_retrieval_index_failures.py::test_policy_skips_are_nonfatal_and_observable[ignored]
+FAILED tests/integration/test_retrieval_index_failures.py::test_policy_skips_are_nonfatal_and_observable[too_large]
+FAILED tests/integration/test_retrieval_index_failures.py::test_policy_skips_are_nonfatal_and_observable[binary]
+FAILED tests/integration/test_retrieval_index_failures.py::test_real_parser_errors_keep_existing_tolerant_indexing_semantics
+FAILED tests/integration/test_retrieval_index_failures.py::test_index_backend_exceptions_are_reported_as_failed_tasks[error0]
+FAILED tests/integration/test_retrieval_index_failures.py::test_index_backend_exceptions_are_reported_as_failed_tasks[error1]
+FAILED tests/integration/test_retrieval_index_failures.py::test_retrieval_backend_exception_is_distinct_from_empty_candidates
+FAILED tests/integration/test_retrieval_index_failures.py::test_partial_environment_failure_keeps_full_denominator_and_not_run_state
+15 failed, 2 passed in 135.04s (0:02:15)

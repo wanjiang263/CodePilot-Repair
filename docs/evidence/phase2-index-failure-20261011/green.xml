@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="17" time="104.408" timestamp="2026-10-11T18:21:39.179795+08:00" hostname="LAPTOP-H0FUOTNB"><testcase classname="tests.integration.test_retrieval_index_failures" name="test_unreadable_non_gold_file_is_an_index_failure_with_deterministic_evidence[none]" time="4.481" /><testcase classname="tests.integration.test_retrieval_index_failures" name="test_unreadable_non_gold_file_is_an_index_failure_with_deterministic_evidence[offline-hash]" time="4.411" /><testcase classname="tests.integration.test_retrieval_index_failures" name="test_indexstats_unreadable_count_alone_cannot_be_silently_ignored" time="2.196" /><testcase classname="tests.integration.test_retrieval_index_failures" name="test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args0]" time="4.019"><failure message="AssertionError: assert '2026-10-11T1.../plugins.py\n' == '2026-10-11T1.../plugins.py\n'&#10;  &#10;  Skipping 140 identical trailing characters in diff, use -v to show&#10;  - 2026-10-11T10:21:57.512353Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.109 incremen&#10;  ?                   ^   ^^^^                                                                                                                                 ^^&#10;  + 2026-10-11T10:21:55.524191Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremen&#10;  ?              ...&#10;  &#10;  ...Full output truncated (1 line hidden), use '-vv' to show">isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_retrieve_cli_rejects_inco0')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_retrieve_cli_rejects_inco0/cache/cli...pytest-441/test_retrieve_cli_rejects_inco0/cache/cli-workspaces/retrieval-6ntte_5j/workspace/src/miniauth/plugins.py')]
+args = ['verify_token']
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            ["verify_token"],
+            ["--issue", "verify_token"],
+            ["--issue", "verify_token", "--channel", "bm25,ripgrep"],
+        ],
+    )
+    def test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes(
+        isolated, unreadable, args
+    ):
+        command = [
+            "--log-level",
+            "ERROR",
+            "retrieve",
+            "--repo",
+            str(FIXTURES / "repos/mini_auth"),
+            *args,
+        ]
+        first = CliRunner().invoke(app, command)
+        second = CliRunner().invoke(app, command)
+        assert first.exit_code == second.exit_code == 1
+        assert first.stdout == second.stdout == ""
+&gt;       assert first.stderr == second.stderr
+E       AssertionError: assert '2026-10-11T1.../plugins.py\n' == '2026-10-11T1.../plugins.py\n'
+E         
+E         Skipping 140 identical trailing characters in diff, use -v to show
+E         - 2026-10-11T10:21:57.512353Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.109 incremen
+E         ?                   ^   ^^^^                                                                                                                                 ^^
+E         + 2026-10-11T10:21:55.524191Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremen
+E         ?              ...
+E         
+E         ...Full output truncated (1 line hidden), use '-vv' to show
+
+tests\integration\test_retrieval_index_failures.py:118: AssertionError</failure></testcase><testcase classname="tests.integration.test_retrieval_index_failures" name="test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args1]" time="4.020"><failure message="AssertionError: assert '2026-10-11T1.../plugins.py\n' == '2026-10-11T1.../plugins.py\n'&#10;  &#10;  - 2026-10-11T10:22:02.111882Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.11 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0&#10;  ?                   ^^^^^^^^                                                                                                                                 ^&#10;  + 2026-10-11T10:22:00.036449Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremental=False removed=0...&#10;  &#10;  ...Full output truncated (3 lines hidden), use '-vv' to show">isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_retrieve_cli_rejects_inco1')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_retrieve_cli_rejects_inco1/cache/cli...pytest-441/test_retrieve_cli_rejects_inco1/cache/cli-workspaces/retrieval-o0lj1esg/workspace/src/miniauth/plugins.py')]
+args = ['--issue', 'verify_token']
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            ["verify_token"],
+            ["--issue", "verify_token"],
+            ["--issue", "verify_token", "--channel", "bm25,ripgrep"],
+        ],
+    )
+    def test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes(
+        isolated, unreadable, args
+    ):
+        command = [
+            "--log-level",
+            "ERROR",
+            "retrieve",
+            "--repo",
+            str(FIXTURES / "repos/mini_auth"),
+            *args,
+        ]
+        first = CliRunner().invoke(app, command)
+        second = CliRunner().invoke(app, command)
+        assert first.exit_code == second.exit_code == 1
+        assert first.stdout == second.stdout == ""
+&gt;       assert first.stderr == second.stderr
+E       AssertionError: assert '2026-10-11T1.../plugins.py\n' == '2026-10-11T1.../plugins.py\n'
+E         
+E         - 2026-10-11T10:22:02.111882Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.11 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+E         ?                   ^^^^^^^^                                                                                                                                 ^
+E         + 2026-10-11T10:22:00.036449Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremental=False removed=0...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+tests\integration\test_retrieval_index_failures.py:118: AssertionError</failure></testcase><testcase classname="tests.integration.test_retrieval_index_failures" name="test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes[args2]" time="4.577"><failure message="AssertionError: assert '2026-10-11T1.../plugins.py\n' == '2026-10-11T1.../plugins.py\n'&#10;  &#10;  Skipping 140 identical trailing characters in diff, use -v to show&#10;  - 2026-10-11T10:22:06.694232Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremen&#10;  ?                   ^ ^^  --                                                                                                                                 ^^&#10;  + 2026-10-11T10:22:04.338042Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.141 incremen&#10;  ?              ...&#10;  &#10;  ...Full output truncated (1 line hidden), use '-vv' to show">isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_retrieve_cli_rejects_inco2')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_retrieve_cli_rejects_inco2/cache/cli...pytest-441/test_retrieve_cli_rejects_inco2/cache/cli-workspaces/retrieval-64qerkft/workspace/src/miniauth/plugins.py')]
+args = ['--issue', 'verify_token', '--channel', 'bm25,ripgrep']
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            ["verify_token"],
+            ["--issue", "verify_token"],
+            ["--issue", "verify_token", "--channel", "bm25,ripgrep"],
+        ],
+    )
+    def test_retrieve_cli_rejects_incomplete_index_in_legacy_single_and_multi_modes(
+        isolated, unreadable, args
+    ):
+        command = [
+            "--log-level",
+            "ERROR",
+            "retrieve",
+            "--repo",
+            str(FIXTURES / "repos/mini_auth"),
+            *args,
+        ]
+        first = CliRunner().invoke(app, command)
+        second = CliRunner().invoke(app, command)
+        assert first.exit_code == second.exit_code == 1
+        assert first.stdout == second.stdout == ""
+&gt;       assert first.stderr == second.stderr
+E       AssertionError: assert '2026-10-11T1.../plugins.py\n' == '2026-10-11T1.../plugins.py\n'
+E         
+E         Skipping 140 identical trailing characters in diff, use -v to show
+E         - 2026-10-11T10:22:06.694232Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremen
+E         ?                   ^ ^^  --                                                                                                                                 ^^
+E         + 2026-10-11T10:22:04.338042Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.141 incremen
+E         ?              ...
+E         
+E         ...Full output truncated (1 line hidden), use '-vv' to show
+
+tests\integration\test_retrieval_index_failures.py:118: AssertionError</failure></testcase><testcase classname="tests.integration.test_retrieval_index_failures" name="test_eval_cli_saves_failures_prints_reasons_and_exits_nonzero" time="49.933"><failure message="AssertionError: assert ('Dataset: 12 ...failed.json\n' == 'Dataset: 12 ...failed.json\n'&#10;  &#10;  Skipping 12465 identical leading characters in diff, use -v to show&#10;    ailed.json and '2026-10-11T1...b8 reused=0\n' == '2026-10-11T1...b8 reused=0\n'&#10;  &#10;  + 2026-10-11T10:22:08.959617Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.187 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0&#10;  + 2026-10-11T10:22:11.157050Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0&#10;  + 2026-10-11T10:22:13.182569Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dan...&#10;  &#10;  ...Full output truncated (32 lines hidden), use '-vv' to show)">isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_eval_cli_saves_failures_p0')
+unreadable = [WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-441/test_eval_cli_saves_failures_p0/cache/cli...t-441/test_eval_cli_saves_failures_p0/cache/cli-workspaces/retrieval-3cnhm8ub/workspace/src/miniauth/plugins.py'), ...]
+
+    def test_eval_cli_saves_failures_prints_reasons_and_exits_nonzero(isolated, unreadable):
+        output = isolated / "failed.json"
+        command = [
+            "--log-level",
+            "ERROR",
+            "eval-retrieval",
+            "--dataset",
+            str(DATASET),
+            "--output",
+            str(output),
+        ]
+        first = CliRunner().invoke(app, command)
+        first_json = output.read_bytes()
+        second = CliRunner().invoke(app, command)
+        assert first.exit_code == second.exit_code == 1
+&gt;       assert first.stdout == second.stdout and first.stderr == second.stderr == ""
+E       AssertionError: assert ('Dataset: 12 ...failed.json\n' == 'Dataset: 12 ...failed.json\n'
+E         
+E         Skipping 12465 identical leading characters in diff, use -v to show
+E           ailed.json and '2026-10-11T1...b8 reused=0\n' == '2026-10-11T1...b8 reused=0\n'
+E         
+E         + 2026-10-11T10:22:08.959617Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.187 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+E         + 2026-10-11T10:22:11.157050Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 incremental=False removed=0 repository_id=repo_8423aafa18b3a2b8 reused=0
+E         + 2026-10-11T10:22:13.182569Z [info     ] repo.index.done                changed=13 dangling_edges_deleted=0 dan...
+E         
+E         ...Full output truncated (32 lines hidden), use '-vv' to show)
+
+tests\integration\test_retrieval_index_failures.py:137: AssertionError</failure></testcase><testcase classname="tests.integration.test_retrieval_index_failures" name="test_normal_empty_candidates_are_successful_zero_recall" time="2.171" /><testcase classname="tests.integration.test_retrieval_index_failures" name="test_complete_index_success_retains_prior_raw_candidates_and_execution_json" time="2.803" /><testcase classname="tests.integration.test_retrieval_index_failures" name="test_policy_skips_are_nonfatal_and_observable[ignored]" time="2.701" /><testcase classname="tests.integration.test_retrieval_index_failures" name="test_policy_skips_are_nonfatal_and_observable[too_large]" time="2.604" /><testcase classname="tests.integration.test_retrieval_index_failures" name="test_policy_skips_are_nonfatal_and_observable[binary]" time="2.620" /><testcase classname="tests.integration.test_retrieval_index_failures" name="test_real_parser_errors_keep_existing_tolerant_indexing_semantics" time="2.933" /><testcase classname="tests.integration.test_retrieval_index_failures" name="test_index_backend_exceptions_are_reported_as_failed_tasks[error0]" time="1.850" /><testcase classname="tests.integration.test_retrieval_index_failures" name="test_index_backend_exceptions_are_reported_as_failed_tasks[error1]" time="1.901" /><testcase classname="tests.integration.test_retrieval_index_failures" name="test_retrieval_backend_exception_is_distinct_from_empty_candidates" time="2.539" /><testcase classname="tests.integration.test_retrieval_index_failures" name="test_partial_environment_failure_keeps_full_denominator_and_not_run_state" time="4.701" /></testsuite></testsuites>

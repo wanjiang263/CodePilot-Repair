@@ -1,0 +1,569 @@
+{
+  "date": "2026-10-11",
+  "branch": "codex/phase2-retrieval-eval",
+  "validated_worktree_parent": "a0970054242d2d18a2a3fffc2070b5867c91f442",
+  "source_sha256": {
+    "src/codepilot/retrieval/runner.py": "8057c184085c6c26037d1ef68d27aec009f23cce1e7afd1b70ce29a4f66a8ffc",
+    "src/codepilot/retrieval/evaluation.py": "e3a10ce8be5ec4fa47e86933f6858ba33387e8f58a8748439eb108bb9d11d930",
+    "src/codepilot/cli.py": "431bdca79ccbed6d239362f3cdb726d978b26dfbea6d062a2ac1d182e8543688",
+    "tests/integration/test_retrieval_index_failures.py": "1dede5188c99e14bbc07d9f2ac1adc0bf6e77b1c249a479a55a5d43b9a6b4de3"
+  },
+  "preserved_branches": {
+    "codex/phase2-structural-retrieval": "04132b829fca2ef2ec6296092052100e0068eca8",
+    "codex/phase2-fusion": "96883889868934613f3c55aea781a0a6a6d0c609"
+  },
+  "tests": {
+    "red": {
+      "passed": 2,
+      "failed": 15,
+      "errors": 0,
+      "skipped": 0,
+      "exit_code": 1
+    },
+    "green": {
+      "passed": 13,
+      "failed": 4,
+      "errors": 0,
+      "skipped": 0,
+      "exit_code": 1
+    },
+    "root-red": {
+      "passed": 0,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "exit_code": 1
+    },
+    "green-final": {
+      "passed": 18,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "exit_code": 0
+    },
+    "targeted": {
+      "passed": 80,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "exit_code": 0
+    },
+    "pytest-full-first": {
+      "passed": 1142,
+      "failed": 5,
+      "errors": 0,
+      "skipped": 1,
+      "exit_code": 1,
+      "deselected": 1
+    },
+    "logging-isolation": {
+      "passed": 16,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "exit_code": 0
+    },
+    "pytest-full": {
+      "passed": 1147,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 1,
+      "exit_code": 0,
+      "deselected": 1
+    }
+  },
+  "new_tests": 18,
+  "coverage": {
+    "covered_lines": 5316,
+    "num_statements": 5519,
+    "percent_covered": 95.03637141634574,
+    "percent_covered_display": "95",
+    "missing_lines": 203,
+    "excluded_lines": 53,
+    "percent_statements_covered": 96.32179742707012,
+    "percent_statements_covered_display": "96",
+    "num_branches": 1492,
+    "num_partial_branches": 131,
+    "covered_branches": 1347,
+    "missing_branches": 145,
+    "percent_branches_covered": 90.28150134048258,
+    "percent_branches_covered_display": "90"
+  },
+  "first_full_coverage": {
+    "covered_lines": 5316,
+    "num_statements": 5519,
+    "percent_covered": 95.03637141634574,
+    "percent_covered_display": "95",
+    "missing_lines": 203,
+    "excluded_lines": 53,
+    "percent_statements_covered": 96.32179742707012,
+    "percent_statements_covered_display": "96",
+    "num_branches": 1492,
+    "num_partial_branches": 131,
+    "covered_branches": 1347,
+    "missing_branches": 145,
+    "percent_branches_covered": 90.28150134048258,
+    "percent_branches_covered_display": "90"
+  },
+  "previous_coverage": 94.90693983552157,
+  "commands": {
+    "ruff-check": {
+      "command": [
+        ".venv/Scripts/ruff.exe",
+        "check",
+        "."
+      ],
+      "exit_code": 0
+    },
+    "ruff-format": {
+      "command": [
+        ".venv/Scripts/ruff.exe",
+        "format",
+        "--check",
+        "."
+      ],
+      "exit_code": 0
+    },
+    "mypy": {
+      "command": [
+        ".venv/Scripts/mypy.exe",
+        "src"
+      ],
+      "exit_code": 0
+    },
+    "pytest-full": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "-m",
+        "not docker and not llm",
+        "--cov",
+        "--cov-report=term-missing",
+        "--cov-report=json:docs/evidence/phase2-index-failure-20261011/coverage.json",
+        "--junitxml=docs/evidence/phase2-index-failure-20261011/pytest-full.xml"
+      ],
+      "exit_code": 0
+    },
+    "cli-retrieve": {
+      "command": [
+        "uv",
+        "run",
+        "codepilot",
+        "retrieve",
+        "--repo",
+        "tests/fixtures/repos/mini_auth",
+        "--issue",
+        "tests/fixtures/issues/expired_token.md"
+      ],
+      "exit_code": 0,
+      "environment": {
+        "UV_OFFLINE": "1",
+        "UV_NO_SYNC": "1",
+        "PYTHONIOENCODING": "utf-8"
+      },
+      "stdout_sha256": "13a4d91d81b593a149dd5fc7e4f52c6ac5c5e3cde32af33a076b6a9e6cc624f8",
+      "stderr_sha256": "47c5ea3b461fc2f4d5f85c1112e27f35f05851d1b5804084517d2ef032c09bb1"
+    },
+    "cli-eval": {
+      "command": [
+        "uv",
+        "run",
+        "codepilot",
+        "eval-retrieval",
+        "--dataset",
+        "tests/fixtures/retrieval_cases.jsonl"
+      ],
+      "exit_code": 0,
+      "environment": {
+        "UV_OFFLINE": "1",
+        "UV_NO_SYNC": "1",
+        "PYTHONIOENCODING": "utf-8"
+      },
+      "stdout_sha256": "e15b59cc82c08098e24201d7824cd25444802f4f86786e3a4e03a575ccd2bad5",
+      "stderr_sha256": "9681e01230e49bfadbab9832824eaa173df714c4e431dd398185993180682dc3"
+    },
+    "failure-cli": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "docs/evidence/phase2-index-failure-20261011/verify-failure-cli.py"
+      ],
+      "exit_code": 0
+    },
+    "normal-verification": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "docs/evidence/phase2-index-failure-20261011/verify-normal.py"
+      ],
+      "exit_code": 0
+    },
+    "reproduction-final": {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "docs/evidence/phase2-index-failure-20261011/verify-reproduction.py"
+      ],
+      "exit_code": 0
+    }
+  },
+  "reproduction": {
+    "mode": "Original Mock PermissionError injection; real scanner/index/evaluation, no fake candidates",
+    "original_script": "artifacts\\phase2-final-review-20261011-a097005\\reproduce-index-diagnostics.py",
+    "original_script_sha256": "063b159ce10d35fe7b7e28f0602001029a51fdb41a68ee0051d3206afc04cab5",
+    "original_script_unchanged": true,
+    "old_zero_failure_assertion_failed_as_expected": true,
+    "original_before_evidence_unchanged": true,
+    "row_failures": {
+      "bm25": 1,
+      "ripgrep": 1,
+      "semantic": 1,
+      "structural": 1,
+      "test": 1,
+      "history": 1,
+      "fused": 1
+    },
+    "row_result_count": {
+      "bm25": 0,
+      "ripgrep": 0,
+      "semantic": 0,
+      "structural": 0,
+      "test": 0,
+      "history": 0,
+      "fused": 0
+    },
+    "scan_counts": {
+      "binary": 0,
+      "files": 13,
+      "ignored": 0,
+      "symlinks": 0,
+      "too_large": 0,
+      "unreadable": 1
+    },
+    "denominator": 1,
+    "verifier_exit_code": 0
+  },
+  "normal_comparison": {
+    "report_bytes_equal": true,
+    "before_sha256": "cdc5d81253cbd0c389275d0dd54c221a462495ab11ff9d49404d832fa301f957",
+    "after_sha256": "cdc5d81253cbd0c389275d0dd54c221a462495ab11ff9d49404d832fa301f957",
+    "retrieve_stdout_bytes_equal": true,
+    "tasks": 12,
+    "row_failures": {
+      "bm25": 0,
+      "ripgrep": 0,
+      "semantic": 0,
+      "structural": 0,
+      "test": 0,
+      "history": 0,
+      "fused": 0
+    },
+    "metrics": [
+      {
+        "channel": "bm25",
+        "metrics": {
+          "total_tasks": 12,
+          "missing_predictions": [],
+          "file_hits": {
+            "1": 8,
+            "5": 12,
+            "10": 12
+          },
+          "function_hits": {
+            "1": 5,
+            "5": 11,
+            "10": 12
+          },
+          "exact_hits": {
+            "1": 7,
+            "5": 12,
+            "10": 12
+          },
+          "file_recall": {
+            "1": 0.6666666666666666,
+            "5": 1.0,
+            "10": 1.0
+          },
+          "function_recall": {
+            "1": 0.4166666666666667,
+            "5": 0.9166666666666666,
+            "10": 1.0
+          },
+          "localization_exact": {
+            "1": 0.5833333333333334,
+            "5": 1.0,
+            "10": 1.0
+          }
+        }
+      },
+      {
+        "channel": "ripgrep",
+        "metrics": {
+          "total_tasks": 12,
+          "missing_predictions": [],
+          "file_hits": {
+            "1": 6,
+            "5": 9,
+            "10": 12
+          },
+          "function_hits": {
+            "1": 5,
+            "5": 9,
+            "10": 11
+          },
+          "exact_hits": {
+            "1": 5,
+            "5": 8,
+            "10": 12
+          },
+          "file_recall": {
+            "1": 0.5,
+            "5": 0.75,
+            "10": 1.0
+          },
+          "function_recall": {
+            "1": 0.4166666666666667,
+            "5": 0.75,
+            "10": 0.9166666666666666
+          },
+          "localization_exact": {
+            "1": 0.4166666666666667,
+            "5": 0.6666666666666666,
+            "10": 1.0
+          }
+        }
+      },
+      {
+        "channel": "semantic",
+        "metrics": {
+          "total_tasks": 12,
+          "missing_predictions": [],
+          "file_hits": {
+            "1": 5,
+            "5": 10,
+            "10": 12
+          },
+          "function_hits": {
+            "1": 3,
+            "5": 9,
+            "10": 10
+          },
+          "exact_hits": {
+            "1": 4,
+            "5": 9,
+            "10": 12
+          },
+          "file_recall": {
+            "1": 0.4166666666666667,
+            "5": 0.8333333333333334,
+            "10": 1.0
+          },
+          "function_recall": {
+            "1": 0.25,
+            "5": 0.75,
+            "10": 0.8333333333333334
+          },
+          "localization_exact": {
+            "1": 0.3333333333333333,
+            "5": 0.75,
+            "10": 1.0
+          }
+        }
+      },
+      {
+        "channel": "structural",
+        "metrics": {
+          "total_tasks": 12,
+          "missing_predictions": [],
+          "file_hits": {
+            "1": 5,
+            "5": 10,
+            "10": 10
+          },
+          "function_hits": {
+            "1": 2,
+            "5": 3,
+            "10": 6
+          },
+          "exact_hits": {
+            "1": 4,
+            "5": 10,
+            "10": 10
+          },
+          "file_recall": {
+            "1": 0.4166666666666667,
+            "5": 0.8333333333333334,
+            "10": 0.8333333333333334
+          },
+          "function_recall": {
+            "1": 0.16666666666666666,
+            "5": 0.25,
+            "10": 0.5
+          },
+          "localization_exact": {
+            "1": 0.3333333333333333,
+            "5": 0.8333333333333334,
+            "10": 0.8333333333333334
+          }
+        }
+      },
+      {
+        "channel": "test",
+        "metrics": {
+          "total_tasks": 12,
+          "missing_predictions": [],
+          "file_hits": {
+            "1": 1,
+            "5": 2,
+            "10": 2
+          },
+          "function_hits": {
+            "1": 1,
+            "5": 1,
+            "10": 1
+          },
+          "exact_hits": {
+            "1": 1,
+            "5": 2,
+            "10": 2
+          },
+          "file_recall": {
+            "1": 0.08333333333333333,
+            "5": 0.16666666666666666,
+            "10": 0.16666666666666666
+          },
+          "function_recall": {
+            "1": 0.08333333333333333,
+            "5": 0.08333333333333333,
+            "10": 0.08333333333333333
+          },
+          "localization_exact": {
+            "1": 0.08333333333333333,
+            "5": 0.16666666666666666,
+            "10": 0.16666666666666666
+          }
+        }
+      },
+      {
+        "channel": "history",
+        "metrics": {
+          "total_tasks": 12,
+          "missing_predictions": [],
+          "file_hits": {
+            "1": 2,
+            "5": 8,
+            "10": 12
+          },
+          "function_hits": {
+            "1": 0,
+            "5": 2,
+            "10": 2
+          },
+          "exact_hits": {
+            "1": 2,
+            "5": 7,
+            "10": 12
+          },
+          "file_recall": {
+            "1": 0.16666666666666666,
+            "5": 0.6666666666666666,
+            "10": 1.0
+          },
+          "function_recall": {
+            "1": 0.0,
+            "5": 0.16666666666666666,
+            "10": 0.16666666666666666
+          },
+          "localization_exact": {
+            "1": 0.16666666666666666,
+            "5": 0.5833333333333334,
+            "10": 1.0
+          }
+        }
+      },
+      {
+        "channel": "fused",
+        "metrics": {
+          "total_tasks": 12,
+          "missing_predictions": [],
+          "file_hits": {
+            "1": 7,
+            "5": 12,
+            "10": 12
+          },
+          "function_hits": {
+            "1": 7,
+            "5": 8,
+            "10": 10
+          },
+          "exact_hits": {
+            "1": 6,
+            "5": 12,
+            "10": 12
+          },
+          "file_recall": {
+            "1": 0.5833333333333334,
+            "5": 1.0,
+            "10": 1.0
+          },
+          "function_recall": {
+            "1": 0.5833333333333334,
+            "5": 0.6666666666666666,
+            "10": 0.8333333333333334
+          },
+          "localization_exact": {
+            "1": 0.5,
+            "5": 1.0,
+            "10": 1.0
+          }
+        }
+      }
+    ]
+  },
+  "failure_cli": {
+    "mode": "Mock filesystem PermissionError; real index and CLI, no mocked retrieval results",
+    "comparisons": [
+      {
+        "scenario": "legacy",
+        "first_exit": 1,
+        "second_exit": 1,
+        "stdout_equal": true,
+        "stderr_equal": true,
+        "report_equal": null
+      },
+      {
+        "scenario": "single",
+        "first_exit": 1,
+        "second_exit": 1,
+        "stdout_equal": true,
+        "stderr_equal": true,
+        "report_equal": null
+      },
+      {
+        "scenario": "multi",
+        "first_exit": 1,
+        "second_exit": 1,
+        "stdout_equal": true,
+        "stderr_equal": true,
+        "report_equal": null
+      },
+      {
+        "scenario": "eval",
+        "first_exit": 1,
+        "second_exit": 1,
+        "stdout_equal": true,
+        "stderr_equal": true,
+        "report_equal": true
+      }
+    ]
+  },
+  "p1": "resolved in validated local worktree; no remote publication performed",
+  "not_run": [
+    "real LLM / L-18",
+    "trained semantic model",
+    "Embedding API",
+    "GPU",
+    "product Docker Sandbox",
+    "remote CI",
+    "formal real-issue benchmark"
+  ],
+  "scope": "one local fix(retrieval) commit; no Push, PR actions, history rewriting, or Phase 3"
+}

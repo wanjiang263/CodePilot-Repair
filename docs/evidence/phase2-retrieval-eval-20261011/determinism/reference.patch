@@ -1,0 +1,8 @@
+--- a/src/miniauth/tokens.py
++++ b/src/miniauth/tokens.py
+@@ -30,4 +30,4 @@
+     body = f"{user}:{expiry}".encode()
+     if not hmac.compare_digest(_sign(body, key=key), signature):
+         return None
+-    return user if int(expiry) > time.time() else None
++    return user if int(expiry) >= time.time() else None

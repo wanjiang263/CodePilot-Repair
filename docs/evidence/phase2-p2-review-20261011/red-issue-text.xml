@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="7" time="8.366" timestamp="2026-10-11T23:30:07.197942+08:00" hostname="LAPTOP-H0FUOTNB"><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_issue_prose_ending_like_a_file_name_stays_text[Please fix handling of README.md]" time="1.181"><failure message="AssertionError: Usage: codepilot retrieve [OPTIONS] [query]&#10;  Try 'codepilot retrieve --help' for help.&#10;  ┌─ Error ─────────────────────────────────────────────────────────────────────┐&#10;  │ Invalid value: Issue 文件不存在: Please fix handling of README.md           │&#10;  └─────────────────────────────────────────────────────────────────────────────┘&#10;  &#10;assert 2 == 0&#10; +  where 2 = &lt;Result SystemExit(2)&gt;.exit_code">isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-560/test_issue_prose_ending_like_a0')
+text = 'Please fix handling of README.md'
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Please fix handling of README.md",
+            "Attach the revoked session log to incident-notes.txt",
+            "Sessions end too early.\nUpdate expiry handling in notes.md",
+        ],
+    )
+    def test_issue_prose_ending_like_a_file_name_stays_text(isolated, text):
+        result = CliRunner().invoke(app, ["retrieve", "--repo", str(FIXTURE), "--issue", text])
+&gt;       assert result.exit_code == 0, result.stdout + result.stderr
+E       AssertionError: Usage: codepilot retrieve [OPTIONS] [query]
+E         Try 'codepilot retrieve --help' for help.
+E         ┌─ Error ─────────────────────────────────────────────────────────────────────┐
+E         │ Invalid value: Issue 文件不存在: Please fix handling of README.md           │
+E         └─────────────────────────────────────────────────────────────────────────────┘
+E         
+E       assert 2 == 0
+E        +  where 2 = &lt;Result SystemExit(2)&gt;.exit_code
+
+tests\integration\test_cli_multichannel_retrieve.py:174: AssertionError</failure></testcase><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_issue_prose_ending_like_a_file_name_stays_text[Attach the revoked session log to incident-notes.txt]" time="0.010"><failure message="AssertionError: Usage: codepilot retrieve [OPTIONS] [query]&#10;  Try 'codepilot retrieve --help' for help.&#10;  ┌─ Error ─────────────────────────────────────────────────────────────────────┐&#10;  │ Invalid value: Issue 文件不存在: Attach the revoked session log to          │&#10;  │ incident-notes.txt                                                          │&#10;  └─────────────────────────────────────────────────────────────────────────────┘&#10;  &#10;assert 2 == 0&#10; +  where 2 = &lt;Result SystemExit(2)&gt;.exit_code">isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-560/test_issue_prose_ending_like_a1')
+text = 'Attach the revoked session log to incident-notes.txt'
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Please fix handling of README.md",
+            "Attach the revoked session log to incident-notes.txt",
+            "Sessions end too early.\nUpdate expiry handling in notes.md",
+        ],
+    )
+    def test_issue_prose_ending_like_a_file_name_stays_text(isolated, text):
+        result = CliRunner().invoke(app, ["retrieve", "--repo", str(FIXTURE), "--issue", text])
+&gt;       assert result.exit_code == 0, result.stdout + result.stderr
+E       AssertionError: Usage: codepilot retrieve [OPTIONS] [query]
+E         Try 'codepilot retrieve --help' for help.
+E         ┌─ Error ─────────────────────────────────────────────────────────────────────┐
+E         │ Invalid value: Issue 文件不存在: Attach the revoked session log to          │
+E         │ incident-notes.txt                                                          │
+E         └─────────────────────────────────────────────────────────────────────────────┘
+E         
+E       assert 2 == 0
+E        +  where 2 = &lt;Result SystemExit(2)&gt;.exit_code
+
+tests\integration\test_cli_multichannel_retrieve.py:174: AssertionError</failure></testcase><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_issue_prose_ending_like_a_file_name_stays_text[Sessions end too early.\nUpdate expiry handling in notes.md]" time="2.599" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_issue_reads_a_real_file_whose_name_contains_spaces" time="2.447" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_an_absent_issue_path_still_fails_before_retrieval[missing.md]" time="0.011" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_an_absent_issue_path_still_fails_before_retrieval[docs/missing.md]" time="0.014" /><testcase classname="tests.integration.test_cli_multichannel_retrieve" name="test_an_absent_issue_path_still_fails_before_retrieval[no/such/issue.txt]" time="0.011" /></testsuite></testsuites>

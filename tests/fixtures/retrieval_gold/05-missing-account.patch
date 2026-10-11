@@ -1,0 +1,11 @@
+--- a/src/miniauth/backends/memory.py
++++ b/src/miniauth/backends/memory.py
+@@ -22,7 +22,7 @@
+         return self._passwords.get(name) == password
+ 
+     def load(self, name: str) -> User | None:
+-        return self._users.get(name)
++        return self._users[name]
+ 
+     def revoke(self, token: str) -> None:
+         self._revoked.add(token)

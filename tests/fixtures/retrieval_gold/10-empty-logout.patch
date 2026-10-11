@@ -1,0 +1,20 @@
+--- a/src/miniauth/session.py
++++ b/src/miniauth/session.py
+@@ -24,6 +24,8 @@
+         return issue_token(self.user.name)
+ 
+     def logout(self, token: str) -> None:
++        if not token:
++            raise ValueError("empty token")
+         self.backend.revoke(token)
+ 
+     def resume(self, token: str) -> User | None:
+--- a/src/miniauth/backends/memory.py
++++ b/src/miniauth/backends/memory.py
+@@ -25,4 +25,6 @@
+         return self._users.get(name)
+ 
+     def revoke(self, token: str) -> None:
++        if not token:
++            raise ValueError("empty token")
+         self._revoked.add(token)

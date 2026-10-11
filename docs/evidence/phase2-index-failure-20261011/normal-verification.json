@@ -1,0 +1,7 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "docs/evidence/phase2-index-failure-20261011/verify-normal.py"
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,11 @@
+--- a/src/miniauth/models.py
++++ b/src/miniauth/models.py
+@@ -14,7 +14,7 @@
+ 
+     def has_role(self, role: str) -> bool:
+         """是否拥有某个角色。"""
+-        return role in self.roles
++        return role.casefold() in {value.casefold() for value in self.roles}
+ 
+     def display(self) -> str:
+         """展示名。

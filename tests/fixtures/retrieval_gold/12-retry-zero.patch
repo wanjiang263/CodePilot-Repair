@@ -1,0 +1,12 @@
+--- a/src/miniauth/plugins.py
++++ b/src/miniauth/plugins.py
+@@ -9,6 +9,9 @@
+ 
+ def retry(times: int = 3) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+     """**带参数**的装饰器。"""
++
++    if times < 1:
++        raise ValueError("times must be positive")
+ 
+     def decorate(function: Callable[..., Any]) -> Callable[..., Any]:
+         @wraps(function)

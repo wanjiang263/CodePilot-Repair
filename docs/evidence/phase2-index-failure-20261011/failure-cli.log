@@ -1,0 +1,34 @@
+[
+  {
+    "scenario": "legacy",
+    "first_exit": 1,
+    "second_exit": 1,
+    "stdout_equal": true,
+    "stderr_equal": true,
+    "report_equal": null
+  },
+  {
+    "scenario": "single",
+    "first_exit": 1,
+    "second_exit": 1,
+    "stdout_equal": true,
+    "stderr_equal": true,
+    "report_equal": null
+  },
+  {
+    "scenario": "multi",
+    "first_exit": 1,
+    "second_exit": 1,
+    "stdout_equal": true,
+    "stderr_equal": true,
+    "report_equal": null
+  },
+  {
+    "scenario": "eval",
+    "first_exit": 1,
+    "second_exit": 1,
+    "stdout_equal": true,
+    "stderr_equal": true,
+    "report_equal": true
+  }
+]

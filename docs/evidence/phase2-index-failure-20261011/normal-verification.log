@@ -1,0 +1,16 @@
+{
+  "report_bytes_equal": true,
+  "before_sha256": "cdc5d81253cbd0c389275d0dd54c221a462495ab11ff9d49404d832fa301f957",
+  "after_sha256": "cdc5d81253cbd0c389275d0dd54c221a462495ab11ff9d49404d832fa301f957",
+  "retrieve_stdout_bytes_equal": true,
+  "tasks": 12,
+  "row_failures": {
+    "bm25": 0,
+    "ripgrep": 0,
+    "semantic": 0,
+    "structural": 0,
+    "test": 0,
+    "history": 0,
+    "fused": 0
+  }
+}

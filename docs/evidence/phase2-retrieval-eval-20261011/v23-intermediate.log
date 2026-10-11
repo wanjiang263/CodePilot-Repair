@@ -1,0 +1,55 @@
+..F......................................                                [100%]
+================================== FAILURES ===================================
+____ test_all_six_channels_real_repo_with_explicit_offline_embedding[rrf] _____
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-338/test_all_six_channels_real_rep1')
+method = 'rrf'
+
+    @pytest.mark.parametrize("method", ["weighted", "rrf"])
+    def test_all_six_channels_real_repo_with_explicit_offline_embedding(isolated, method):
+        repo = init_repo(
+            isolated / "repo",
+            {
+                p.relative_to(FIXTURE).as_posix(): p.read_text(encoding="utf-8")
+                for p in FIXTURE.rglob("*")
+                if p.is_file()
+            },
+        )
+        config = isolated / "retrieval.json"
+        config.write_text(
+            json.dumps(
+                {
+                    "channels": dict.fromkeys(
+                        ["bm25", "ripgrep", "semantic", "structural", "test", "history"], True
+                    ),
+                    "method": method,
+                    "embedding": "offline-hash",
+                    "weights": {"bm25": 0.4, "semantic": 0.6},
+                }
+            )
+        )
+        result = CliRunner().invoke(
+            app,
+            [
+                "retrieve",
+                "--repo",
+                str(repo.path),
+                "--issue",
+                "test_verify_rejects_garbage verify_token",
+                "--config",
+                str(config),
+                "--limit",
+                "5",
+            ],
+        )
+>       assert result.exit_code == 0, result.output
+E       AssertionError: 2026-10-11T04:43:48.108162Z [info     ] repo.index.done                changed=14 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.234 incremental=False removed=0 repository_id=repo_483b6c496dd4c0a0 reused=0
+E         weights apply only to weighted fusion
+E         
+E       assert 1 == 0
+E        +  where 1 = <Result SystemExit(1)>.exit_code
+
+tests\integration\test_cli_multichannel_retrieve.py:79: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_cli_multichannel_retrieve.py::test_all_six_channels_real_repo_with_explicit_offline_embedding[rrf]
+1 failed, 40 passed in 35.46s

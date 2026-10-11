@@ -1,0 +1,48 @@
+FFF...                                                                   [100%]
+================================== FAILURES ===================================
+_ test_documented_eval_command_outputs_all_rows_and_reproducible_raw_evidence _
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-343/test_documented_eval_command_o0')
+
+    def test_documented_eval_command_outputs_all_rows_and_reproducible_raw_evidence(isolated):
+        output = isolated / "report.json"
+        run = CliRunner().invoke(app, ["eval-retrieval", "--dataset", str(DATASET), "--output", str(output)])
+>       assert run.exit_code == 0, run.output
+E       AssertionError: Usage: codepilot [OPTIONS] COMMAND [ARGS]...
+E         Try 'codepilot --help' for help.
+E         ┌─ Error ─────────────────────────────────────────────────────────────────────┐
+E         │ No such command 'eval-retrieval'. Did you mean 'retrieve'?                  │
+E         └─────────────────────────────────────────────────────────────────────────────┘
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+tests\integration\test_cli_retrieval_evaluation.py:27: AssertionError
+___ test_no_embedding_mode_reports_semantic_not_run_instead_of_fabricating ____
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-343/test_no_embedding_mode_reports0')
+
+    def test_no_embedding_mode_reports_semantic_not_run_instead_of_fabricating(isolated):
+        output = isolated / "report.json"
+        # A one-case dev subset retains valid paths relative to the original dataset.
+        subset = DATASET.parent / "unused"
+        del subset
+>       from codepilot.retrieval.evaluation import run_evaluation
+E       ModuleNotFoundError: No module named 'codepilot.retrieval.evaluation'
+
+tests\integration\test_cli_retrieval_evaluation.py:52: ModuleNotFoundError
+_____________ test_gold_change_does_not_change_inference_outputs ______________
+
+isolated = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-343/test_gold_change_does_not_chan0')
+
+    def test_gold_change_does_not_change_inference_outputs(isolated):
+        from codepilot.retrieval.dataset import load_dataset
+>       from codepilot.retrieval.evaluation import run_evaluation
+E       ModuleNotFoundError: No module named 'codepilot.retrieval.evaluation'
+
+tests\integration\test_cli_retrieval_evaluation.py:63: ModuleNotFoundError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_cli_retrieval_evaluation.py::test_documented_eval_command_outputs_all_rows_and_reproducible_raw_evidence
+FAILED tests/integration/test_cli_retrieval_evaluation.py::test_no_embedding_mode_reports_semantic_not_run_instead_of_fabricating
+FAILED tests/integration/test_cli_retrieval_evaluation.py::test_gold_change_does_not_change_inference_outputs
+3 failed, 3 passed in 3.81s

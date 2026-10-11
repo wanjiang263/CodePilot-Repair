@@ -1,0 +1,1541 @@
+{
+  "query": {
+    "raw_issue": "Freshly issued tokens stop working at the exact expiry second. The session policy expects that boundary second to remain valid.\n",
+    "identifiers": [
+      "Freshly",
+      "The"
+    ],
+    "keywords": [
+      "freshly",
+      "issued",
+      "tokens",
+      "stop",
+      "working",
+      "exact",
+      "expiry",
+      "second",
+      "session",
+      "policy",
+      "expects",
+      "boundary",
+      "remain",
+      "valid"
+    ],
+    "error_messages": [],
+    "file_paths": [],
+    "traceback_frames": [],
+    "parsed_frames": [],
+    "test_names": []
+  },
+  "symbols": [
+    {
+      "symbol_id": "c7dc59fa1faf6b5c4956d2121730e771ffe794a0",
+      "qualified_name": "miniauth.tokens.issue_token",
+      "file": "src/miniauth/tokens.py",
+      "score": 0.2,
+      "kind": "function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 6.481319966739331,
+          "normalized": 1.0
+        }
+      ],
+      "pinned": false,
+      "start_line": 17,
+      "end_line": 21,
+      "reason": "weighted fusion: bm25 raw=6.48131996674 normalized=1 rank=1 weight=0.2"
+    },
+    {
+      "symbol_id": "5509f36e4fa78ec81b3e8144969125aeef4ad4f7",
+      "qualified_name": "miniauth.tokens.verify_token",
+      "file": "src/miniauth/tokens.py",
+      "score": 0.19519415503000204,
+      "kind": "function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 6.345864360841482,
+          "normalized": 0.9759707751500101
+        }
+      ],
+      "pinned": false,
+      "start_line": 24,
+      "end_line": 33,
+      "reason": "weighted fusion: bm25 raw=6.34586436084 normalized=0.97597077515 rank=2 weight=0.2"
+    },
+    {
+      "symbol_id": "e27970d97a939517721bfe2d2a0c54e4eeddf016",
+      "qualified_name": "miniauth.tokens",
+      "file": "src/miniauth/tokens.py",
+      "score": 0.1890064561658923,
+      "kind": "module",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 6.171460379026859,
+          "normalized": 0.9450322808294613
+        }
+      ],
+      "pinned": false,
+      "start_line": 1,
+      "end_line": 33,
+      "reason": "weighted fusion: bm25 raw=6.17146037903 normalized=0.945032280829 rank=3 weight=0.2"
+    },
+    {
+      "symbol_id": "4398c6e60b004d6fbc2d2d04a3d23302c292d820",
+      "qualified_name": "tests.test_tokens.test_verify_rejects_garbage",
+      "file": "tests/test_tokens.py",
+      "score": 0.05965192008701725,
+      "kind": "test_function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 2.5255256537944284,
+          "normalized": 0.29825960043508626
+        }
+      ],
+      "pinned": false,
+      "start_line": 17,
+      "end_line": 18,
+      "reason": "weighted fusion: bm25 raw=2.52552565379 normalized=0.298259600435 rank=4 weight=0.2"
+    },
+    {
+      "symbol_id": "71aabb99e94cd3c621ef2718de6ed31f833ecfcb",
+      "qualified_name": "miniauth.tokens._sign",
+      "file": "src/miniauth/tokens.py",
+      "score": 0.05613360508838794,
+      "kind": "function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 2.4263598478115056,
+          "normalized": 0.2806680254419397
+        }
+      ],
+      "pinned": false,
+      "start_line": 12,
+      "end_line": 14,
+      "reason": "weighted fusion: bm25 raw=2.42635984781 normalized=0.280668025442 rank=5 weight=0.2"
+    },
+    {
+      "symbol_id": "a3324cdbecf9e67f8c372efd17b31c4f498332b5",
+      "qualified_name": "tests.test_tokens.test_issue_returns_three_parts",
+      "file": "tests/test_tokens.py",
+      "score": 0.05613360508838794,
+      "kind": "test_function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 2.4263598478115056,
+          "normalized": 0.2806680254419397
+        }
+      ],
+      "pinned": false,
+      "start_line": 8,
+      "end_line": 10,
+      "reason": "weighted fusion: bm25 raw=2.42635984781 normalized=0.280668025442 rank=6 weight=0.2"
+    },
+    {
+      "symbol_id": "d055c22651fd869c4a5827681049fc3b070e876d",
+      "qualified_name": "tests.test_tokens.test_verify_accepts_a_fresh_token",
+      "file": "tests/test_tokens.py",
+      "score": 0.05613360508838794,
+      "kind": "test_function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 2.4263598478115056,
+          "normalized": 0.2806680254419397
+        }
+      ],
+      "pinned": false,
+      "start_line": 13,
+      "end_line": 14,
+      "reason": "weighted fusion: bm25 raw=2.42635984781 normalized=0.280668025442 rank=7 weight=0.2"
+    },
+    {
+      "symbol_id": "7028c46362839e645cd11d65959cad804d5e0c18",
+      "qualified_name": "tests.test_tokens",
+      "file": "tests/test_tokens.py",
+      "score": 0.05474026237916921,
+      "kind": "module",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 2.387087652790896,
+          "normalized": 0.273701311895846
+        }
+      ],
+      "pinned": false,
+      "start_line": 1,
+      "end_line": 18,
+      "reason": "weighted fusion: bm25 raw=2.38708765279 normalized=0.273701311896 rank=8 weight=0.2"
+    },
+    {
+      "symbol_id": "0e0df7d8aa88d2471aee4f62644f71e590e19b00",
+      "qualified_name": "miniauth",
+      "file": "src/miniauth/__init__.py",
+      "score": 0.05177140399618824,
+      "kind": "module",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 2.303408609125914,
+          "normalized": 0.2588570199809412
+        }
+      ],
+      "pinned": false,
+      "start_line": 1,
+      "end_line": 12,
+      "reason": "weighted fusion: bm25 raw=2.30340860913 normalized=0.258857019981 rank=9 weight=0.2"
+    },
+    {
+      "symbol_id": "0542837eafd2eb13930e63ae8a8e156f3f7da752",
+      "qualified_name": "miniauth.session",
+      "file": "src/miniauth/session.py",
+      "score": 0.027579267231971606,
+      "kind": "module",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.621538810200215,
+          "normalized": 0.13789633615985802
+        }
+      ],
+      "pinned": false,
+      "start_line": 1,
+      "end_line": 55,
+      "reason": "weighted fusion: bm25 raw=1.6215388102 normalized=0.13789633616 rank=10 weight=0.2"
+    },
+    {
+      "symbol_id": "3859a3a2bbf83bcbf74fade22f58d2326481d8d1",
+      "qualified_name": "tests.test_session.TestSession",
+      "file": "tests/test_session.py",
+      "score": 0.013060246065582605,
+      "kind": "class",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.212311541860398,
+          "normalized": 0.06530123032791302
+        }
+      ],
+      "pinned": false,
+      "start_line": 9,
+      "end_line": 16,
+      "reason": "weighted fusion: bm25 raw=1.21231154186 normalized=0.0653012303279 rank=11 weight=0.2"
+    },
+    {
+      "symbol_id": "3575020ed77ea3c95583c952e78605da8a30a21f",
+      "qualified_name": "tests.test_session",
+      "file": "tests/test_session.py",
+      "score": 0.012164148383952678,
+      "kind": "module",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.1870544944178354,
+          "normalized": 0.06082074191976339
+        }
+      ],
+      "pinned": false,
+      "start_line": 1,
+      "end_line": 25,
+      "reason": "weighted fusion: bm25 raw=1.18705449442 normalized=0.0608207419198 rank=12 weight=0.2"
+    },
+    {
+      "symbol_id": "dce06c1bd46cce17143a1e664ba6b224bb8cea8a",
+      "qualified_name": "miniauth.session.AdminSession",
+      "file": "src/miniauth/session.py",
+      "score": 0.011029769939161707,
+      "kind": "class",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.1550813615939761,
+          "normalized": 0.05514884969580853
+        }
+      ],
+      "pinned": false,
+      "start_line": 37,
+      "end_line": 43,
+      "reason": "weighted fusion: bm25 raw=1.15508136159 normalized=0.0551488496958 rank=13 weight=0.2"
+    },
+    {
+      "symbol_id": "42194b2fe22dbe6f2e98eb4972cdf553271658d0",
+      "qualified_name": "tests.test_session.TestAdminSession",
+      "file": "tests/test_session.py",
+      "score": 0.010231450411454441,
+      "kind": "class",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.1325802497185928,
+          "normalized": 0.0511572520572722
+        }
+      ],
+      "pinned": false,
+      "start_line": 19,
+      "end_line": 25,
+      "reason": "weighted fusion: bm25 raw=1.13258024972 normalized=0.0511572520573 rank=14 weight=0.2"
+    },
+    {
+      "symbol_id": "dfebf6f32bb5f90b76e95c99855d273bd69f91fc",
+      "qualified_name": "tests.test_session.TestSession.test_login_with_correct_password",
+      "file": "tests/test_session.py",
+      "score": 0.009799510875569867,
+      "kind": "test_method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.1204057763617243,
+          "normalized": 0.048997554377849334
+        }
+      ],
+      "pinned": false,
+      "start_line": 10,
+      "end_line": 12,
+      "reason": "weighted fusion: bm25 raw=1.12040577636 normalized=0.0489975543778 rank=15 weight=0.2"
+    },
+    {
+      "symbol_id": "de1e7d3339458fc55465c80afbce98260179f662",
+      "qualified_name": "tests.test_session.TestSession.test_login_with_wrong_password",
+      "file": "tests/test_session.py",
+      "score": 0.009799510875569867,
+      "kind": "test_method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.1204057763617243,
+          "normalized": 0.048997554377849334
+        }
+      ],
+      "pinned": false,
+      "start_line": 14,
+      "end_line": 16,
+      "reason": "weighted fusion: bm25 raw=1.12040577636 normalized=0.0489975543778 rank=16 weight=0.2"
+    },
+    {
+      "symbol_id": "364f6807cf904443b4267c1a82a0509e0fdb307e",
+      "qualified_name": "miniauth.session.AuditedSession",
+      "file": "src/miniauth/session.py",
+      "score": 0.009116632922949936,
+      "kind": "class",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.1011584541106167,
+          "normalized": 0.045583164614749684
+        }
+      ],
+      "pinned": false,
+      "start_line": 46,
+      "end_line": 55,
+      "reason": "weighted fusion: bm25 raw=1.10115845411 normalized=0.0455831646147 rank=17 weight=0.2"
+    },
+    {
+      "symbol_id": "bf7b468765f82e1f801502d61f35ba47518d61a7",
+      "qualified_name": "tests.test_session.TestAdminSession.test_plain_user_cannot_use_admin_session",
+      "file": "tests/test_session.py",
+      "score": 0.008698018442690164,
+      "kind": "test_method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.089359555391413,
+          "normalized": 0.04349009221345082
+        }
+      ],
+      "pinned": false,
+      "start_line": 23,
+      "end_line": 25,
+      "reason": "weighted fusion: bm25 raw=1.08935955539 normalized=0.0434900922135 rank=18 weight=0.2"
+    },
+    {
+      "symbol_id": "7b2bf5d3c4dc8019c8365a6580d095966b806d3a",
+      "qualified_name": "miniauth.app.build_session",
+      "file": "src/miniauth/app.py",
+      "score": 0.007795035987653228,
+      "kind": "function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.063908456505423,
+          "normalized": 0.03897517993826614
+        }
+      ],
+      "pinned": false,
+      "start_line": 11,
+      "end_line": 24,
+      "reason": "weighted fusion: bm25 raw=1.06390845651 normalized=0.0389751799383 rank=19 weight=0.2"
+    },
+    {
+      "symbol_id": "67cbe4420893a97b8234fc38630d749dc65b5b93",
+      "qualified_name": "tests.test_session.TestAdminSession.test_admin_can_login",
+      "file": "tests/test_session.py",
+      "score": 0.005841509475105609,
+      "kind": "test_method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.0088471469861604,
+          "normalized": 0.029207547375528043
+        }
+      ],
+      "pinned": false,
+      "start_line": 20,
+      "end_line": 21,
+      "reason": "weighted fusion: bm25 raw=1.00884714699 normalized=0.0292075473755 rank=20 weight=0.2"
+    }
+  ],
+  "files": [
+    {
+      "path": "src/miniauth/tokens.py",
+      "score": 0.24403342162842825,
+      "top_symbols": [
+        "c7dc59fa1faf6b5c4956d2121730e771ffe794a0",
+        "5509f36e4fa78ec81b3e8144969125aeef4ad4f7",
+        "e27970d97a939517721bfe2d2a0c54e4eeddf016",
+        "71aabb99e94cd3c621ef2718de6ed31f833ecfcb"
+      ],
+      "reason": "max=0.2 + 0.1 * (0.19519415503 + 0.189006456166 + 0.0561336050884); unique symbols=4",
+      "pinned": false
+    },
+    {
+      "path": "tests/test_tokens.py",
+      "score": 0.07635266734261176,
+      "top_symbols": [
+        "4398c6e60b004d6fbc2d2d04a3d23302c292d820",
+        "a3324cdbecf9e67f8c372efd17b31c4f498332b5",
+        "d055c22651fd869c4a5827681049fc3b070e876d",
+        "7028c46362839e645cd11d65959cad804d5e0c18"
+      ],
+      "reason": "max=0.059651920087 + 0.1 * (0.0561336050884 + 0.0561336050884 + 0.0547402623792); unique symbols=4",
+      "pinned": false
+    },
+    {
+      "path": "src/miniauth/__init__.py",
+      "score": 0.05177140399618824,
+      "top_symbols": [
+        "0e0df7d8aa88d2471aee4f62644f71e590e19b00"
+      ],
+      "reason": "max=0.0517714039962 + 0.1 * (); unique symbols=1",
+      "pinned": false
+    },
+    {
+      "path": "src/miniauth/session.py",
+      "score": 0.029974476500805904,
+      "top_symbols": [
+        "0542837eafd2eb13930e63ae8a8e156f3f7da752",
+        "dce06c1bd46cce17143a1e664ba6b224bb8cea8a",
+        "364f6807cf904443b4267c1a82a0509e0fdb307e",
+        "48998a280c495961346cd4900790b1504822e274"
+      ],
+      "reason": "max=0.027579267232 + 0.1 * (0.0110297699392 + 0.00911663292295 + 0.00380568982623); unique symbols=11",
+      "pinned": false
+    },
+    {
+      "path": "tests/test_session.py",
+      "score": 0.016279757032680302,
+      "top_symbols": [
+        "3859a3a2bbf83bcbf74fade22f58d2326481d8d1",
+        "3575020ed77ea3c95583c952e78605da8a30a21f",
+        "42194b2fe22dbe6f2e98eb4972cdf553271658d0",
+        "dfebf6f32bb5f90b76e95c99855d273bd69f91fc"
+      ],
+      "reason": "max=0.0130602460656 + 0.1 * (0.012164148384 + 0.0102314504115 + 0.00979951087557); unique symbols=7",
+      "pinned": false
+    },
+    {
+      "path": "src/miniauth/app.py",
+      "score": 0.007992492604369896,
+      "top_symbols": [
+        "7b2bf5d3c4dc8019c8365a6580d095966b806d3a",
+        "dafba234e09be0e001fdbf4c178d08f0136bb814"
+      ],
+      "reason": "max=0.00779503598765 + 0.1 * (0.00197456616717); unique symbols=2",
+      "pinned": false
+    }
+  ],
+  "channel_weights": {
+    "bm25": 0.2
+  },
+  "fusion_method": "weighted",
+  "enabled_channels": [
+    "bm25"
+  ],
+  "per_channel": {
+    "bm25": [
+      {
+        "symbol_id": "c7dc59fa1faf6b5c4956d2121730e771ffe794a0",
+        "qualified_name": "miniauth.tokens.issue_token",
+        "file": "src/miniauth/tokens.py",
+        "score": 6.481319966739331,
+        "kind": "function",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 6.481319966739331,
+            "normalized": 1.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 17,
+        "end_line": 21,
+        "reason": null
+      },
+      {
+        "symbol_id": "5509f36e4fa78ec81b3e8144969125aeef4ad4f7",
+        "qualified_name": "miniauth.tokens.verify_token",
+        "file": "src/miniauth/tokens.py",
+        "score": 6.345864360841482,
+        "kind": "function",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 6.345864360841482,
+            "normalized": 0.9759707751500101
+          }
+        ],
+        "pinned": false,
+        "start_line": 24,
+        "end_line": 33,
+        "reason": null
+      },
+      {
+        "symbol_id": "e27970d97a939517721bfe2d2a0c54e4eeddf016",
+        "qualified_name": "miniauth.tokens",
+        "file": "src/miniauth/tokens.py",
+        "score": 6.171460379026859,
+        "kind": "module",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 6.171460379026859,
+            "normalized": 0.9450322808294613
+          }
+        ],
+        "pinned": false,
+        "start_line": 1,
+        "end_line": 33,
+        "reason": null
+      },
+      {
+        "symbol_id": "4398c6e60b004d6fbc2d2d04a3d23302c292d820",
+        "qualified_name": "tests.test_tokens.test_verify_rejects_garbage",
+        "file": "tests/test_tokens.py",
+        "score": 2.5255256537944284,
+        "kind": "test_function",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 2.5255256537944284,
+            "normalized": 0.29825960043508626
+          }
+        ],
+        "pinned": false,
+        "start_line": 17,
+        "end_line": 18,
+        "reason": null
+      },
+      {
+        "symbol_id": "71aabb99e94cd3c621ef2718de6ed31f833ecfcb",
+        "qualified_name": "miniauth.tokens._sign",
+        "file": "src/miniauth/tokens.py",
+        "score": 2.4263598478115056,
+        "kind": "function",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 2.4263598478115056,
+            "normalized": 0.2806680254419397
+          }
+        ],
+        "pinned": false,
+        "start_line": 12,
+        "end_line": 14,
+        "reason": null
+      },
+      {
+        "symbol_id": "a3324cdbecf9e67f8c372efd17b31c4f498332b5",
+        "qualified_name": "tests.test_tokens.test_issue_returns_three_parts",
+        "file": "tests/test_tokens.py",
+        "score": 2.4263598478115056,
+        "kind": "test_function",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 2.4263598478115056,
+            "normalized": 0.2806680254419397
+          }
+        ],
+        "pinned": false,
+        "start_line": 8,
+        "end_line": 10,
+        "reason": null
+      },
+      {
+        "symbol_id": "d055c22651fd869c4a5827681049fc3b070e876d",
+        "qualified_name": "tests.test_tokens.test_verify_accepts_a_fresh_token",
+        "file": "tests/test_tokens.py",
+        "score": 2.4263598478115056,
+        "kind": "test_function",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 2.4263598478115056,
+            "normalized": 0.2806680254419397
+          }
+        ],
+        "pinned": false,
+        "start_line": 13,
+        "end_line": 14,
+        "reason": null
+      },
+      {
+        "symbol_id": "7028c46362839e645cd11d65959cad804d5e0c18",
+        "qualified_name": "tests.test_tokens",
+        "file": "tests/test_tokens.py",
+        "score": 2.387087652790896,
+        "kind": "module",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 2.387087652790896,
+            "normalized": 0.273701311895846
+          }
+        ],
+        "pinned": false,
+        "start_line": 1,
+        "end_line": 18,
+        "reason": null
+      },
+      {
+        "symbol_id": "0e0df7d8aa88d2471aee4f62644f71e590e19b00",
+        "qualified_name": "miniauth",
+        "file": "src/miniauth/__init__.py",
+        "score": 2.303408609125914,
+        "kind": "module",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 2.303408609125914,
+            "normalized": 0.2588570199809412
+          }
+        ],
+        "pinned": false,
+        "start_line": 1,
+        "end_line": 12,
+        "reason": null
+      },
+      {
+        "symbol_id": "0542837eafd2eb13930e63ae8a8e156f3f7da752",
+        "qualified_name": "miniauth.session",
+        "file": "src/miniauth/session.py",
+        "score": 1.621538810200215,
+        "kind": "module",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.621538810200215,
+            "normalized": 0.13789633615985802
+          }
+        ],
+        "pinned": false,
+        "start_line": 1,
+        "end_line": 55,
+        "reason": null
+      },
+      {
+        "symbol_id": "3859a3a2bbf83bcbf74fade22f58d2326481d8d1",
+        "qualified_name": "tests.test_session.TestSession",
+        "file": "tests/test_session.py",
+        "score": 1.212311541860398,
+        "kind": "class",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.212311541860398,
+            "normalized": 0.06530123032791302
+          }
+        ],
+        "pinned": false,
+        "start_line": 9,
+        "end_line": 16,
+        "reason": null
+      },
+      {
+        "symbol_id": "3575020ed77ea3c95583c952e78605da8a30a21f",
+        "qualified_name": "tests.test_session",
+        "file": "tests/test_session.py",
+        "score": 1.1870544944178354,
+        "kind": "module",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.1870544944178354,
+            "normalized": 0.06082074191976339
+          }
+        ],
+        "pinned": false,
+        "start_line": 1,
+        "end_line": 25,
+        "reason": null
+      },
+      {
+        "symbol_id": "dce06c1bd46cce17143a1e664ba6b224bb8cea8a",
+        "qualified_name": "miniauth.session.AdminSession",
+        "file": "src/miniauth/session.py",
+        "score": 1.1550813615939761,
+        "kind": "class",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.1550813615939761,
+            "normalized": 0.05514884969580853
+          }
+        ],
+        "pinned": false,
+        "start_line": 37,
+        "end_line": 43,
+        "reason": null
+      },
+      {
+        "symbol_id": "42194b2fe22dbe6f2e98eb4972cdf553271658d0",
+        "qualified_name": "tests.test_session.TestAdminSession",
+        "file": "tests/test_session.py",
+        "score": 1.1325802497185928,
+        "kind": "class",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.1325802497185928,
+            "normalized": 0.0511572520572722
+          }
+        ],
+        "pinned": false,
+        "start_line": 19,
+        "end_line": 25,
+        "reason": null
+      },
+      {
+        "symbol_id": "dfebf6f32bb5f90b76e95c99855d273bd69f91fc",
+        "qualified_name": "tests.test_session.TestSession.test_login_with_correct_password",
+        "file": "tests/test_session.py",
+        "score": 1.1204057763617243,
+        "kind": "test_method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.1204057763617243,
+            "normalized": 0.048997554377849334
+          }
+        ],
+        "pinned": false,
+        "start_line": 10,
+        "end_line": 12,
+        "reason": null
+      },
+      {
+        "symbol_id": "de1e7d3339458fc55465c80afbce98260179f662",
+        "qualified_name": "tests.test_session.TestSession.test_login_with_wrong_password",
+        "file": "tests/test_session.py",
+        "score": 1.1204057763617243,
+        "kind": "test_method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.1204057763617243,
+            "normalized": 0.048997554377849334
+          }
+        ],
+        "pinned": false,
+        "start_line": 14,
+        "end_line": 16,
+        "reason": null
+      },
+      {
+        "symbol_id": "364f6807cf904443b4267c1a82a0509e0fdb307e",
+        "qualified_name": "miniauth.session.AuditedSession",
+        "file": "src/miniauth/session.py",
+        "score": 1.1011584541106167,
+        "kind": "class",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.1011584541106167,
+            "normalized": 0.045583164614749684
+          }
+        ],
+        "pinned": false,
+        "start_line": 46,
+        "end_line": 55,
+        "reason": null
+      },
+      {
+        "symbol_id": "bf7b468765f82e1f801502d61f35ba47518d61a7",
+        "qualified_name": "tests.test_session.TestAdminSession.test_plain_user_cannot_use_admin_session",
+        "file": "tests/test_session.py",
+        "score": 1.089359555391413,
+        "kind": "test_method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.089359555391413,
+            "normalized": 0.04349009221345082
+          }
+        ],
+        "pinned": false,
+        "start_line": 23,
+        "end_line": 25,
+        "reason": null
+      },
+      {
+        "symbol_id": "7b2bf5d3c4dc8019c8365a6580d095966b806d3a",
+        "qualified_name": "miniauth.app.build_session",
+        "file": "src/miniauth/app.py",
+        "score": 1.063908456505423,
+        "kind": "function",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.063908456505423,
+            "normalized": 0.03897517993826614
+          }
+        ],
+        "pinned": false,
+        "start_line": 11,
+        "end_line": 24,
+        "reason": null
+      },
+      {
+        "symbol_id": "67cbe4420893a97b8234fc38630d749dc65b5b93",
+        "qualified_name": "tests.test_session.TestAdminSession.test_admin_can_login",
+        "file": "tests/test_session.py",
+        "score": 1.0088471469861604,
+        "kind": "test_method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.0088471469861604,
+            "normalized": 0.029207547375528043
+          }
+        ],
+        "pinned": false,
+        "start_line": 20,
+        "end_line": 21,
+        "reason": null
+      },
+      {
+        "symbol_id": "48998a280c495961346cd4900790b1504822e274",
+        "qualified_name": "miniauth.session.Session.logout",
+        "file": "src/miniauth/session.py",
+        "score": 0.9514663563533889,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 0.9514663563533889,
+            "normalized": 0.019028449131156675
+          }
+        ],
+        "pinned": false,
+        "start_line": 26,
+        "end_line": 27,
+        "reason": null
+      },
+      {
+        "symbol_id": "1fcf1978df039257048150b5847fcb7f6279d4b6",
+        "qualified_name": "miniauth.session.AdminSession.login",
+        "file": "src/miniauth/session.py",
+        "score": 0.9023299398893706,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 0.9023299398893706,
+            "normalized": 0.010311866368040577
+          }
+        ],
+        "pinned": false,
+        "start_line": 40,
+        "end_line": 43,
+        "reason": null
+      },
+      {
+        "symbol_id": "dafba234e09be0e001fdbf4c178d08f0136bb814",
+        "qualified_name": "miniauth.app",
+        "file": "src/miniauth/app.py",
+        "score": 0.8998550442405485,
+        "kind": "module",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 0.8998550442405485,
+            "normalized": 0.009872830835833403
+          }
+        ],
+        "pinned": false,
+        "start_line": 1,
+        "end_line": 38,
+        "reason": null
+      },
+      {
+        "symbol_id": "dcd50063999735578cf6917d57396ba02aaaaf66",
+        "qualified_name": "miniauth.session.AuditedSession.login",
+        "file": "src/miniauth/session.py",
+        "score": 0.8971818276991237,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 0.8971818276991237,
+            "normalized": 0.009398614055207498
+          }
+        ],
+        "pinned": false,
+        "start_line": 53,
+        "end_line": 55,
+        "reason": null
+      },
+      {
+        "symbol_id": "3db4e04079e436c36f1f6e5225d0b73b391ef9aa",
+        "qualified_name": "miniauth.session.Session.__init__",
+        "file": "src/miniauth/session.py",
+        "score": 0.8820840215527346,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 0.8820840215527346,
+            "normalized": 0.006720330079963744
+          }
+        ],
+        "pinned": false,
+        "start_line": 16,
+        "end_line": 18,
+        "reason": null
+      },
+      {
+        "symbol_id": "268afb270b90b01df018f12a5e116cea86f10f3e",
+        "qualified_name": "miniauth.session.Session.resume",
+        "file": "src/miniauth/session.py",
+        "score": 0.8771637080355619,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 0.8771637080355619,
+            "normalized": 0.005847488243312489
+          }
+        ],
+        "pinned": false,
+        "start_line": 29,
+        "end_line": 34,
+        "reason": null
+      },
+      {
+        "symbol_id": "337b2ba116e60e18dfb188a0dc367c9849845d83",
+        "qualified_name": "miniauth.session.Session",
+        "file": "src/miniauth/session.py",
+        "score": 0.8655786927791964,
+        "kind": "class",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 0.8655786927791964,
+            "normalized": 0.0037923578214995915
+          }
+        ],
+        "pinned": false,
+        "start_line": 10,
+        "end_line": 34,
+        "reason": null
+      },
+      {
+        "symbol_id": "8baa0dcb9aca30f6a914a491e14e51efd0a2ce65",
+        "qualified_name": "miniauth.session.Session.login",
+        "file": "src/miniauth/session.py",
+        "score": 0.8533631728714322,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 0.8533631728714322,
+            "normalized": 0.0016253786656531119
+          }
+        ],
+        "pinned": false,
+        "start_line": 20,
+        "end_line": 24,
+        "reason": null
+      },
+      {
+        "symbol_id": "3dc471b4afd5cefdbbaef2db6d7bd45176cb080e",
+        "qualified_name": "miniauth.session.AuditedSession.__init__",
+        "file": "src/miniauth/session.py",
+        "score": 0.8442007195112451,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 0.8442007195112451,
+            "normalized": 0.0
+          }
+        ],
+        "pinned": false,
+        "start_line": 49,
+        "end_line": 51,
+        "reason": null
+      }
+    ]
+  },
+  "fused_symbols": [
+    {
+      "symbol_id": "c7dc59fa1faf6b5c4956d2121730e771ffe794a0",
+      "qualified_name": "miniauth.tokens.issue_token",
+      "file": "src/miniauth/tokens.py",
+      "score": 0.2,
+      "kind": "function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 6.481319966739331,
+          "normalized": 1.0
+        }
+      ],
+      "pinned": false,
+      "start_line": 17,
+      "end_line": 21,
+      "reason": "weighted fusion: bm25 raw=6.48131996674 normalized=1 rank=1 weight=0.2"
+    },
+    {
+      "symbol_id": "5509f36e4fa78ec81b3e8144969125aeef4ad4f7",
+      "qualified_name": "miniauth.tokens.verify_token",
+      "file": "src/miniauth/tokens.py",
+      "score": 0.19519415503000204,
+      "kind": "function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 6.345864360841482,
+          "normalized": 0.9759707751500101
+        }
+      ],
+      "pinned": false,
+      "start_line": 24,
+      "end_line": 33,
+      "reason": "weighted fusion: bm25 raw=6.34586436084 normalized=0.97597077515 rank=2 weight=0.2"
+    },
+    {
+      "symbol_id": "e27970d97a939517721bfe2d2a0c54e4eeddf016",
+      "qualified_name": "miniauth.tokens",
+      "file": "src/miniauth/tokens.py",
+      "score": 0.1890064561658923,
+      "kind": "module",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 6.171460379026859,
+          "normalized": 0.9450322808294613
+        }
+      ],
+      "pinned": false,
+      "start_line": 1,
+      "end_line": 33,
+      "reason": "weighted fusion: bm25 raw=6.17146037903 normalized=0.945032280829 rank=3 weight=0.2"
+    },
+    {
+      "symbol_id": "4398c6e60b004d6fbc2d2d04a3d23302c292d820",
+      "qualified_name": "tests.test_tokens.test_verify_rejects_garbage",
+      "file": "tests/test_tokens.py",
+      "score": 0.05965192008701725,
+      "kind": "test_function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 2.5255256537944284,
+          "normalized": 0.29825960043508626
+        }
+      ],
+      "pinned": false,
+      "start_line": 17,
+      "end_line": 18,
+      "reason": "weighted fusion: bm25 raw=2.52552565379 normalized=0.298259600435 rank=4 weight=0.2"
+    },
+    {
+      "symbol_id": "71aabb99e94cd3c621ef2718de6ed31f833ecfcb",
+      "qualified_name": "miniauth.tokens._sign",
+      "file": "src/miniauth/tokens.py",
+      "score": 0.05613360508838794,
+      "kind": "function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 2.4263598478115056,
+          "normalized": 0.2806680254419397
+        }
+      ],
+      "pinned": false,
+      "start_line": 12,
+      "end_line": 14,
+      "reason": "weighted fusion: bm25 raw=2.42635984781 normalized=0.280668025442 rank=5 weight=0.2"
+    },
+    {
+      "symbol_id": "a3324cdbecf9e67f8c372efd17b31c4f498332b5",
+      "qualified_name": "tests.test_tokens.test_issue_returns_three_parts",
+      "file": "tests/test_tokens.py",
+      "score": 0.05613360508838794,
+      "kind": "test_function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 2.4263598478115056,
+          "normalized": 0.2806680254419397
+        }
+      ],
+      "pinned": false,
+      "start_line": 8,
+      "end_line": 10,
+      "reason": "weighted fusion: bm25 raw=2.42635984781 normalized=0.280668025442 rank=6 weight=0.2"
+    },
+    {
+      "symbol_id": "d055c22651fd869c4a5827681049fc3b070e876d",
+      "qualified_name": "tests.test_tokens.test_verify_accepts_a_fresh_token",
+      "file": "tests/test_tokens.py",
+      "score": 0.05613360508838794,
+      "kind": "test_function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 2.4263598478115056,
+          "normalized": 0.2806680254419397
+        }
+      ],
+      "pinned": false,
+      "start_line": 13,
+      "end_line": 14,
+      "reason": "weighted fusion: bm25 raw=2.42635984781 normalized=0.280668025442 rank=7 weight=0.2"
+    },
+    {
+      "symbol_id": "7028c46362839e645cd11d65959cad804d5e0c18",
+      "qualified_name": "tests.test_tokens",
+      "file": "tests/test_tokens.py",
+      "score": 0.05474026237916921,
+      "kind": "module",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 2.387087652790896,
+          "normalized": 0.273701311895846
+        }
+      ],
+      "pinned": false,
+      "start_line": 1,
+      "end_line": 18,
+      "reason": "weighted fusion: bm25 raw=2.38708765279 normalized=0.273701311896 rank=8 weight=0.2"
+    },
+    {
+      "symbol_id": "0e0df7d8aa88d2471aee4f62644f71e590e19b00",
+      "qualified_name": "miniauth",
+      "file": "src/miniauth/__init__.py",
+      "score": 0.05177140399618824,
+      "kind": "module",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 2.303408609125914,
+          "normalized": 0.2588570199809412
+        }
+      ],
+      "pinned": false,
+      "start_line": 1,
+      "end_line": 12,
+      "reason": "weighted fusion: bm25 raw=2.30340860913 normalized=0.258857019981 rank=9 weight=0.2"
+    },
+    {
+      "symbol_id": "0542837eafd2eb13930e63ae8a8e156f3f7da752",
+      "qualified_name": "miniauth.session",
+      "file": "src/miniauth/session.py",
+      "score": 0.027579267231971606,
+      "kind": "module",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.621538810200215,
+          "normalized": 0.13789633615985802
+        }
+      ],
+      "pinned": false,
+      "start_line": 1,
+      "end_line": 55,
+      "reason": "weighted fusion: bm25 raw=1.6215388102 normalized=0.13789633616 rank=10 weight=0.2"
+    },
+    {
+      "symbol_id": "3859a3a2bbf83bcbf74fade22f58d2326481d8d1",
+      "qualified_name": "tests.test_session.TestSession",
+      "file": "tests/test_session.py",
+      "score": 0.013060246065582605,
+      "kind": "class",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.212311541860398,
+          "normalized": 0.06530123032791302
+        }
+      ],
+      "pinned": false,
+      "start_line": 9,
+      "end_line": 16,
+      "reason": "weighted fusion: bm25 raw=1.21231154186 normalized=0.0653012303279 rank=11 weight=0.2"
+    },
+    {
+      "symbol_id": "3575020ed77ea3c95583c952e78605da8a30a21f",
+      "qualified_name": "tests.test_session",
+      "file": "tests/test_session.py",
+      "score": 0.012164148383952678,
+      "kind": "module",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.1870544944178354,
+          "normalized": 0.06082074191976339
+        }
+      ],
+      "pinned": false,
+      "start_line": 1,
+      "end_line": 25,
+      "reason": "weighted fusion: bm25 raw=1.18705449442 normalized=0.0608207419198 rank=12 weight=0.2"
+    },
+    {
+      "symbol_id": "dce06c1bd46cce17143a1e664ba6b224bb8cea8a",
+      "qualified_name": "miniauth.session.AdminSession",
+      "file": "src/miniauth/session.py",
+      "score": 0.011029769939161707,
+      "kind": "class",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.1550813615939761,
+          "normalized": 0.05514884969580853
+        }
+      ],
+      "pinned": false,
+      "start_line": 37,
+      "end_line": 43,
+      "reason": "weighted fusion: bm25 raw=1.15508136159 normalized=0.0551488496958 rank=13 weight=0.2"
+    },
+    {
+      "symbol_id": "42194b2fe22dbe6f2e98eb4972cdf553271658d0",
+      "qualified_name": "tests.test_session.TestAdminSession",
+      "file": "tests/test_session.py",
+      "score": 0.010231450411454441,
+      "kind": "class",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.1325802497185928,
+          "normalized": 0.0511572520572722
+        }
+      ],
+      "pinned": false,
+      "start_line": 19,
+      "end_line": 25,
+      "reason": "weighted fusion: bm25 raw=1.13258024972 normalized=0.0511572520573 rank=14 weight=0.2"
+    },
+    {
+      "symbol_id": "dfebf6f32bb5f90b76e95c99855d273bd69f91fc",
+      "qualified_name": "tests.test_session.TestSession.test_login_with_correct_password",
+      "file": "tests/test_session.py",
+      "score": 0.009799510875569867,
+      "kind": "test_method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.1204057763617243,
+          "normalized": 0.048997554377849334
+        }
+      ],
+      "pinned": false,
+      "start_line": 10,
+      "end_line": 12,
+      "reason": "weighted fusion: bm25 raw=1.12040577636 normalized=0.0489975543778 rank=15 weight=0.2"
+    },
+    {
+      "symbol_id": "de1e7d3339458fc55465c80afbce98260179f662",
+      "qualified_name": "tests.test_session.TestSession.test_login_with_wrong_password",
+      "file": "tests/test_session.py",
+      "score": 0.009799510875569867,
+      "kind": "test_method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.1204057763617243,
+          "normalized": 0.048997554377849334
+        }
+      ],
+      "pinned": false,
+      "start_line": 14,
+      "end_line": 16,
+      "reason": "weighted fusion: bm25 raw=1.12040577636 normalized=0.0489975543778 rank=16 weight=0.2"
+    },
+    {
+      "symbol_id": "364f6807cf904443b4267c1a82a0509e0fdb307e",
+      "qualified_name": "miniauth.session.AuditedSession",
+      "file": "src/miniauth/session.py",
+      "score": 0.009116632922949936,
+      "kind": "class",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.1011584541106167,
+          "normalized": 0.045583164614749684
+        }
+      ],
+      "pinned": false,
+      "start_line": 46,
+      "end_line": 55,
+      "reason": "weighted fusion: bm25 raw=1.10115845411 normalized=0.0455831646147 rank=17 weight=0.2"
+    },
+    {
+      "symbol_id": "bf7b468765f82e1f801502d61f35ba47518d61a7",
+      "qualified_name": "tests.test_session.TestAdminSession.test_plain_user_cannot_use_admin_session",
+      "file": "tests/test_session.py",
+      "score": 0.008698018442690164,
+      "kind": "test_method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.089359555391413,
+          "normalized": 0.04349009221345082
+        }
+      ],
+      "pinned": false,
+      "start_line": 23,
+      "end_line": 25,
+      "reason": "weighted fusion: bm25 raw=1.08935955539 normalized=0.0434900922135 rank=18 weight=0.2"
+    },
+    {
+      "symbol_id": "7b2bf5d3c4dc8019c8365a6580d095966b806d3a",
+      "qualified_name": "miniauth.app.build_session",
+      "file": "src/miniauth/app.py",
+      "score": 0.007795035987653228,
+      "kind": "function",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.063908456505423,
+          "normalized": 0.03897517993826614
+        }
+      ],
+      "pinned": false,
+      "start_line": 11,
+      "end_line": 24,
+      "reason": "weighted fusion: bm25 raw=1.06390845651 normalized=0.0389751799383 rank=19 weight=0.2"
+    },
+    {
+      "symbol_id": "67cbe4420893a97b8234fc38630d749dc65b5b93",
+      "qualified_name": "tests.test_session.TestAdminSession.test_admin_can_login",
+      "file": "tests/test_session.py",
+      "score": 0.005841509475105609,
+      "kind": "test_method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 1.0088471469861604,
+          "normalized": 0.029207547375528043
+        }
+      ],
+      "pinned": false,
+      "start_line": 20,
+      "end_line": 21,
+      "reason": "weighted fusion: bm25 raw=1.00884714699 normalized=0.0292075473755 rank=20 weight=0.2"
+    },
+    {
+      "symbol_id": "48998a280c495961346cd4900790b1504822e274",
+      "qualified_name": "miniauth.session.Session.logout",
+      "file": "src/miniauth/session.py",
+      "score": 0.003805689826231335,
+      "kind": "method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 0.9514663563533889,
+          "normalized": 0.019028449131156675
+        }
+      ],
+      "pinned": false,
+      "start_line": 26,
+      "end_line": 27,
+      "reason": "weighted fusion: bm25 raw=0.951466356353 normalized=0.0190284491312 rank=21 weight=0.2"
+    },
+    {
+      "symbol_id": "1fcf1978df039257048150b5847fcb7f6279d4b6",
+      "qualified_name": "miniauth.session.AdminSession.login",
+      "file": "src/miniauth/session.py",
+      "score": 0.0020623732736081155,
+      "kind": "method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 0.9023299398893706,
+          "normalized": 0.010311866368040577
+        }
+      ],
+      "pinned": false,
+      "start_line": 40,
+      "end_line": 43,
+      "reason": "weighted fusion: bm25 raw=0.902329939889 normalized=0.010311866368 rank=22 weight=0.2"
+    },
+    {
+      "symbol_id": "dafba234e09be0e001fdbf4c178d08f0136bb814",
+      "qualified_name": "miniauth.app",
+      "file": "src/miniauth/app.py",
+      "score": 0.0019745661671666808,
+      "kind": "module",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 0.8998550442405485,
+          "normalized": 0.009872830835833403
+        }
+      ],
+      "pinned": false,
+      "start_line": 1,
+      "end_line": 38,
+      "reason": "weighted fusion: bm25 raw=0.899855044241 normalized=0.00987283083583 rank=23 weight=0.2"
+    },
+    {
+      "symbol_id": "dcd50063999735578cf6917d57396ba02aaaaf66",
+      "qualified_name": "miniauth.session.AuditedSession.login",
+      "file": "src/miniauth/session.py",
+      "score": 0.0018797228110414997,
+      "kind": "method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 0.8971818276991237,
+          "normalized": 0.009398614055207498
+        }
+      ],
+      "pinned": false,
+      "start_line": 53,
+      "end_line": 55,
+      "reason": "weighted fusion: bm25 raw=0.897181827699 normalized=0.00939861405521 rank=24 weight=0.2"
+    },
+    {
+      "symbol_id": "3db4e04079e436c36f1f6e5225d0b73b391ef9aa",
+      "qualified_name": "miniauth.session.Session.__init__",
+      "file": "src/miniauth/session.py",
+      "score": 0.0013440660159927489,
+      "kind": "method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 0.8820840215527346,
+          "normalized": 0.006720330079963744
+        }
+      ],
+      "pinned": false,
+      "start_line": 16,
+      "end_line": 18,
+      "reason": "weighted fusion: bm25 raw=0.882084021553 normalized=0.00672033007996 rank=25 weight=0.2"
+    },
+    {
+      "symbol_id": "268afb270b90b01df018f12a5e116cea86f10f3e",
+      "qualified_name": "miniauth.session.Session.resume",
+      "file": "src/miniauth/session.py",
+      "score": 0.0011694976486624979,
+      "kind": "method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 0.8771637080355619,
+          "normalized": 0.005847488243312489
+        }
+      ],
+      "pinned": false,
+      "start_line": 29,
+      "end_line": 34,
+      "reason": "weighted fusion: bm25 raw=0.877163708036 normalized=0.00584748824331 rank=26 weight=0.2"
+    },
+    {
+      "symbol_id": "337b2ba116e60e18dfb188a0dc367c9849845d83",
+      "qualified_name": "miniauth.session.Session",
+      "file": "src/miniauth/session.py",
+      "score": 0.0007584715642999184,
+      "kind": "class",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 0.8655786927791964,
+          "normalized": 0.0037923578214995915
+        }
+      ],
+      "pinned": false,
+      "start_line": 10,
+      "end_line": 34,
+      "reason": "weighted fusion: bm25 raw=0.865578692779 normalized=0.0037923578215 rank=27 weight=0.2"
+    },
+    {
+      "symbol_id": "8baa0dcb9aca30f6a914a491e14e51efd0a2ce65",
+      "qualified_name": "miniauth.session.Session.login",
+      "file": "src/miniauth/session.py",
+      "score": 0.00032507573313062237,
+      "kind": "method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 0.8533631728714322,
+          "normalized": 0.0016253786656531119
+        }
+      ],
+      "pinned": false,
+      "start_line": 20,
+      "end_line": 24,
+      "reason": "weighted fusion: bm25 raw=0.853363172871 normalized=0.00162537866565 rank=28 weight=0.2"
+    },
+    {
+      "symbol_id": "3dc471b4afd5cefdbbaef2db6d7bd45176cb080e",
+      "qualified_name": "miniauth.session.AuditedSession.__init__",
+      "file": "src/miniauth/session.py",
+      "score": 0.0,
+      "kind": "method",
+      "channel_scores": [
+        {
+          "channel": "bm25",
+          "raw": 0.8442007195112451,
+          "normalized": 0.0
+        }
+      ],
+      "pinned": false,
+      "start_line": 49,
+      "end_line": 51,
+      "reason": "weighted fusion: bm25 raw=0.844200719511 normalized=0 rank=29 weight=0.2"
+    }
+  ],
+  "rrf_k": 60,
+  "snapshot_id": "",
+  "execution": {
+    "source_kind": "directory_snapshot",
+    "base_commit": "950f8f32d59ef1f37565721c6a501a1ef3991b8c",
+    "embedding_description": "not enabled",
+    "structural_seed": null,
+    "options": {
+      "channels": {
+        "bm25": true,
+        "ripgrep": false,
+        "semantic": false,
+        "structural": false,
+        "test": false,
+        "history": false
+      },
+      "method": "weighted",
+      "weights": null,
+      "rrf_k": 60,
+      "seed_channel": "bm25",
+      "embedding": "none"
+    }
+  }
+}

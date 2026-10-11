@@ -1,0 +1,591 @@
+{
+  "schema_version": 1,
+  "dataset_kind": "synthetic-development; not a performance benchmark",
+  "total_tasks": 1,
+  "dataset_sha256": "2faa9b1d3fb1db34069967224ef3696975c9a14cf28a51f841d1ece727336711",
+  "digest_definition": "SHA-256 of sorted canonical case JSON lines with final LF",
+  "inference_sha256": "36ed7c5c070d14170537ea320cf054c2265ba1951ba348a4b5a6bda21ac17d0e",
+  "versions": {
+    "python": "3.12.7",
+    "codepilot-repair": "0.1.0",
+    "numpy": "2.5.3",
+    "rank-bm25": "0.2.2",
+    "tree-sitter": "0.25.2",
+    "tree-sitter-python": "0.25.0",
+    "networkx": "3.7"
+  },
+  "embedding_description": "offline token-hash baseline; not a learned semantic model",
+  "function_ranking": "function/method/test/module symbols in fused order; class symbols excluded",
+  "rows": [
+    {
+      "name": "bm25",
+      "status": "RUN",
+      "options": {
+        "channels": {
+          "bm25": true,
+          "ripgrep": false,
+          "semantic": false,
+          "structural": false,
+          "test": false,
+          "history": false
+        },
+        "method": "weighted",
+        "weights": null,
+        "rrf_k": 60,
+        "seed_channel": "bm25",
+        "embedding": "offline-hash"
+      },
+      "metrics": {
+        "total_tasks": 1,
+        "missing_predictions": [
+          "01-expiry-boundary"
+        ],
+        "file_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "function_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "exact_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "file_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "function_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "localization_exact": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        }
+      },
+      "results": {},
+      "execution": {},
+      "failures": {
+        "01-expiry-boundary": "IndexingError: Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py"
+      },
+      "failure_details": {
+        "01-expiry-boundary": {
+          "category": "environment",
+          "stage": "index",
+          "code": "unreadable",
+          "exception_type": "IndexingError",
+          "message": "Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py",
+          "count": 1,
+          "paths": [
+            "src/miniauth/plugins.py"
+          ],
+          "scan_counts": {
+            "binary": 0,
+            "files": 13,
+            "ignored": 0,
+            "symlinks": 0,
+            "too_large": 0,
+            "unreadable": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "ripgrep",
+      "status": "RUN",
+      "options": {
+        "channels": {
+          "bm25": false,
+          "ripgrep": true,
+          "semantic": false,
+          "structural": false,
+          "test": false,
+          "history": false
+        },
+        "method": "weighted",
+        "weights": null,
+        "rrf_k": 60,
+        "seed_channel": "bm25",
+        "embedding": "offline-hash"
+      },
+      "metrics": {
+        "total_tasks": 1,
+        "missing_predictions": [
+          "01-expiry-boundary"
+        ],
+        "file_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "function_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "exact_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "file_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "function_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "localization_exact": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        }
+      },
+      "results": {},
+      "execution": {},
+      "failures": {
+        "01-expiry-boundary": "IndexingError: Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py"
+      },
+      "failure_details": {
+        "01-expiry-boundary": {
+          "category": "environment",
+          "stage": "index",
+          "code": "unreadable",
+          "exception_type": "IndexingError",
+          "message": "Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py",
+          "count": 1,
+          "paths": [
+            "src/miniauth/plugins.py"
+          ],
+          "scan_counts": {
+            "binary": 0,
+            "files": 13,
+            "ignored": 0,
+            "symlinks": 0,
+            "too_large": 0,
+            "unreadable": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "semantic",
+      "status": "RUN",
+      "options": {
+        "channels": {
+          "bm25": false,
+          "ripgrep": false,
+          "semantic": true,
+          "structural": false,
+          "test": false,
+          "history": false
+        },
+        "method": "weighted",
+        "weights": null,
+        "rrf_k": 60,
+        "seed_channel": "bm25",
+        "embedding": "offline-hash"
+      },
+      "metrics": {
+        "total_tasks": 1,
+        "missing_predictions": [
+          "01-expiry-boundary"
+        ],
+        "file_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "function_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "exact_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "file_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "function_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "localization_exact": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        }
+      },
+      "results": {},
+      "execution": {},
+      "failures": {
+        "01-expiry-boundary": "IndexingError: Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py"
+      },
+      "failure_details": {
+        "01-expiry-boundary": {
+          "category": "environment",
+          "stage": "index",
+          "code": "unreadable",
+          "exception_type": "IndexingError",
+          "message": "Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py",
+          "count": 1,
+          "paths": [
+            "src/miniauth/plugins.py"
+          ],
+          "scan_counts": {
+            "binary": 0,
+            "files": 13,
+            "ignored": 0,
+            "symlinks": 0,
+            "too_large": 0,
+            "unreadable": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "structural",
+      "status": "RUN",
+      "options": {
+        "channels": {
+          "bm25": false,
+          "ripgrep": false,
+          "semantic": false,
+          "structural": true,
+          "test": false,
+          "history": false
+        },
+        "method": "weighted",
+        "weights": null,
+        "rrf_k": 60,
+        "seed_channel": "bm25",
+        "embedding": "offline-hash"
+      },
+      "metrics": {
+        "total_tasks": 1,
+        "missing_predictions": [
+          "01-expiry-boundary"
+        ],
+        "file_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "function_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "exact_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "file_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "function_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "localization_exact": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        }
+      },
+      "results": {},
+      "execution": {},
+      "failures": {
+        "01-expiry-boundary": "IndexingError: Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py"
+      },
+      "failure_details": {
+        "01-expiry-boundary": {
+          "category": "environment",
+          "stage": "index",
+          "code": "unreadable",
+          "exception_type": "IndexingError",
+          "message": "Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py",
+          "count": 1,
+          "paths": [
+            "src/miniauth/plugins.py"
+          ],
+          "scan_counts": {
+            "binary": 0,
+            "files": 13,
+            "ignored": 0,
+            "symlinks": 0,
+            "too_large": 0,
+            "unreadable": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "test",
+      "status": "RUN",
+      "options": {
+        "channels": {
+          "bm25": false,
+          "ripgrep": false,
+          "semantic": false,
+          "structural": false,
+          "test": true,
+          "history": false
+        },
+        "method": "weighted",
+        "weights": null,
+        "rrf_k": 60,
+        "seed_channel": "bm25",
+        "embedding": "offline-hash"
+      },
+      "metrics": {
+        "total_tasks": 1,
+        "missing_predictions": [
+          "01-expiry-boundary"
+        ],
+        "file_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "function_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "exact_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "file_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "function_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "localization_exact": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        }
+      },
+      "results": {},
+      "execution": {},
+      "failures": {
+        "01-expiry-boundary": "IndexingError: Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py"
+      },
+      "failure_details": {
+        "01-expiry-boundary": {
+          "category": "environment",
+          "stage": "index",
+          "code": "unreadable",
+          "exception_type": "IndexingError",
+          "message": "Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py",
+          "count": 1,
+          "paths": [
+            "src/miniauth/plugins.py"
+          ],
+          "scan_counts": {
+            "binary": 0,
+            "files": 13,
+            "ignored": 0,
+            "symlinks": 0,
+            "too_large": 0,
+            "unreadable": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "history",
+      "status": "RUN",
+      "options": {
+        "channels": {
+          "bm25": false,
+          "ripgrep": false,
+          "semantic": false,
+          "structural": false,
+          "test": false,
+          "history": true
+        },
+        "method": "weighted",
+        "weights": null,
+        "rrf_k": 60,
+        "seed_channel": "bm25",
+        "embedding": "offline-hash"
+      },
+      "metrics": {
+        "total_tasks": 1,
+        "missing_predictions": [
+          "01-expiry-boundary"
+        ],
+        "file_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "function_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "exact_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "file_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "function_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "localization_exact": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        }
+      },
+      "results": {},
+      "execution": {},
+      "failures": {
+        "01-expiry-boundary": "IndexingError: Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py"
+      },
+      "failure_details": {
+        "01-expiry-boundary": {
+          "category": "environment",
+          "stage": "index",
+          "code": "unreadable",
+          "exception_type": "IndexingError",
+          "message": "Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py",
+          "count": 1,
+          "paths": [
+            "src/miniauth/plugins.py"
+          ],
+          "scan_counts": {
+            "binary": 0,
+            "files": 13,
+            "ignored": 0,
+            "symlinks": 0,
+            "too_large": 0,
+            "unreadable": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "fused",
+      "status": "RUN",
+      "options": {
+        "channels": {
+          "bm25": true,
+          "ripgrep": true,
+          "semantic": true,
+          "structural": true,
+          "test": true,
+          "history": true
+        },
+        "method": "weighted",
+        "weights": null,
+        "rrf_k": 60,
+        "seed_channel": "bm25",
+        "embedding": "offline-hash"
+      },
+      "metrics": {
+        "total_tasks": 1,
+        "missing_predictions": [
+          "01-expiry-boundary"
+        ],
+        "file_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "function_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "exact_hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0
+        },
+        "file_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "function_recall": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        },
+        "localization_exact": {
+          "1": 0.0,
+          "5": 0.0,
+          "10": 0.0
+        }
+      },
+      "results": {},
+      "execution": {},
+      "failures": {
+        "01-expiry-boundary": "IndexingError: Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py"
+      },
+      "failure_details": {
+        "01-expiry-boundary": {
+          "category": "environment",
+          "stage": "index",
+          "code": "unreadable",
+          "exception_type": "IndexingError",
+          "message": "Repository index incomplete: 1 unreadable path(s): src/miniauth/plugins.py",
+          "count": 1,
+          "paths": [
+            "src/miniauth/plugins.py"
+          ],
+          "scan_counts": {
+            "binary": 0,
+            "files": 13,
+            "ignored": 0,
+            "symlinks": 0,
+            "too_large": 0,
+            "unreadable": 1
+          }
+        }
+      }
+    }
+  ],
+  "not_run": [
+    "trained semantic embedding model"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "command": [
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+    "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\docs\\evidence\\phase2-index-failure-20261011\\verify-failure-cli.py",
+    "--fault",
+    "--log-level",
+    "ERROR",
+    "retrieve",
+    "--repo",
+    "tests/fixtures/repos/mini_auth",
+    "verify_token"
+  ],
+  "exit_code": 1,
+  "pythonhashseed": "123",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "9b4d89a0a6c292f2d68fffef0755431db72628ac60056371389f34814df4f4c7"
+}

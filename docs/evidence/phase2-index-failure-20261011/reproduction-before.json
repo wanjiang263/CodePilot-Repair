@@ -1,0 +1,52 @@
+{
+  "mode": "Mock PermissionError on non-Gold source; real scanner/index/retrieval/evaluation",
+  "injected_read_failures": 1,
+  "scanner_diagnostics": [
+    {
+      "unreadable": [
+        "src/miniauth/plugins.py"
+      ]
+    }
+  ],
+  "index_diagnostics": [
+    {
+      "scan": {
+        "files": 13,
+        "ignored": 0,
+        "too_large": 0,
+        "binary": 0,
+        "symlinks": 0,
+        "unreadable": 1
+      },
+      "parse_errors": []
+    }
+  ],
+  "row_failures": {
+    "bm25": {},
+    "ripgrep": {},
+    "semantic": {},
+    "structural": {},
+    "test": {},
+    "history": {},
+    "fused": {}
+  },
+  "row_status": {
+    "bm25": "RUN",
+    "ripgrep": "RUN",
+    "semantic": "RUN",
+    "structural": "RUN",
+    "test": "RUN",
+    "history": "RUN",
+    "fused": "RUN"
+  },
+  "row_result_count": {
+    "bm25": 1,
+    "ripgrep": 1,
+    "semantic": 1,
+    "structural": 1,
+    "test": 1,
+    "history": 1,
+    "fused": 1
+  },
+  "diagnostic_in_report": false
+}

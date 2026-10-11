@@ -1,0 +1,7 @@
+{
+  "command": [
+    ".venv/Scripts/mypy.exe",
+    "src"
+  ],
+  "exit_code": 0
+}
