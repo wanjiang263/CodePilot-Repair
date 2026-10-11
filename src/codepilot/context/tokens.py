@@ -159,10 +159,6 @@ class TokenCounter:
     def encoding(self) -> str | None:
         return self._encoding
 
-    @property
-    def margin(self) -> float:
-        return self._margin
-
     def count(self, text: str) -> TokenCount:
         """计数一段文本。空串是 0，不是 ``None``。"""
         if not isinstance(text, str):

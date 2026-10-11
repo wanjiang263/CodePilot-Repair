@@ -150,6 +150,14 @@ def test_exact_and_estimate_are_the_same_order_of_magnitude() -> None:
 # ------------------------------------------------------------------ 降级与校验
 
 
+def test_loader_returning_nothing_still_explains_the_fallback() -> None:
+    counter = TokenCounter(loader=lambda model, encoding: EncoderResolution())
+
+    assert counter.exact is False
+    assert "未提供可用编码器" in (counter.note or "")
+    assert counter.count("abc").method is CountMethod.ESTIMATED
+
+
 def test_encoder_failure_degrades_to_estimate_with_a_recorded_reason() -> None:
     counter = TokenCounter(
         encoding="boom",
