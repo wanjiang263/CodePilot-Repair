@@ -412,6 +412,70 @@ def retrieve(
         raise typer.Exit(code=1) from error
 
 
+@app.command("eval-retrieval")
+def eval_retrieval(
+    dataset: Path = typer.Option(..., "--dataset", help="合成检索评估 JSONL。"),
+    output: Path | None = typer.Option(None, "--output", help="完整统计 / 配置 / 原始排名 JSON。"),
+    embedding: str = typer.Option(
+        "offline-hash", "--embedding", help="offline-hash（明确的非学习基线）或 none。"
+    ),
+    ranking: str = typer.Option("weighted", "--ranking", help="融合方法 weighted 或 rrf。"),
+    config: Path | None = typer.Option(
+        None, "--config", help="融合配置 JSON，独立消融行仍分别启用每个通道。"
+    ),
+) -> None:
+    """运行六个独立通道与融合的离线 Recall@1/5/10 消融，保存可复现证据。"""
+    from codepilot.retrieval.dataset import load_dataset
+    from codepilot.retrieval.evaluation import render_table, run_evaluation
+    from codepilot.retrieval.runner import RetrievalOptions
+    from codepilot.schemas.retrieval import FusionMethod
+
+    try:
+        cases = load_dataset(dataset)
+        if embedding not in {"none", "offline-hash"} or ranking not in {"weighted", "rrf"}:
+            raise ValueError("embedding 必须为 offline-hash/none；ranking 必须为 weighted/rrf")
+        options = (
+            RetrievalOptions.model_validate_json(config.read_text(encoding="utf-8"))
+            if config
+            else None
+        )
+        if options and (
+            options.method not in {None, FusionMethod(ranking)} or options.embedding != embedding
+        ):
+            raise ValueError("配置 method/embedding 必须与命令行一致")
+        if options and any(
+            not getattr(options.channels, name)
+            for name in ("bm25", "ripgrep", "structural", "test", "history")
+        ):
+            raise ValueError("融合配置必须启用所有消融通道（semantic 可由 none 禁用）")
+        if options and options.channels.semantic != (embedding == "offline-hash"):
+            raise ValueError("融合配置 semantic 开关必须与 embedding 模式一致")
+    except (ValueError, OSError) as error:
+        raise typer.BadParameter(str(error)) from error
+    settings = get_settings()
+    settings.ensure_dirs()
+    try:
+        report = run_evaluation(
+            cases,
+            dataset.resolve().parent,
+            settings.cache_dir,
+            embedding="offline-hash" if embedding == "offline-hash" else "none",
+            method=FusionMethod(ranking),
+            weights=options.weights if options else None,
+            rrf_k=options.rrf_k if options else 60,
+            seed_channel=options.seed_channel if options else "bm25",
+        )
+        destination = output or settings.artifacts_dir / "phase2/retrieval-evaluation.json"
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(
+            report.model_dump_json(indent=2) + "\n", encoding="utf-8", newline="\n"
+        )
+        typer.echo(render_table(report))
+        typer.echo(f"Evidence: {destination}")
+    except (ValueError, OSError) as error:
+        raise typer.BadParameter(str(error)) from error
+
+
 @app.command("run-tests")
 def run_tests(
     repo: str = typer.Argument(..., help="仓库路径。"),

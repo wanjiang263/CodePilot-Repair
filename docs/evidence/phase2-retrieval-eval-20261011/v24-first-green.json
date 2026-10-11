@@ -1,0 +1,13 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/integration/test_cli_retrieval_evaluation.py",
+    "tests/unit/retrieval/test_retrieval_eval.py",
+    "tests/unit/retrieval/test_retrieval_dataset.py",
+    "-q",
+    "--junitxml=docs/evidence/phase2-retrieval-eval-20261011/v24-green.xml"
+  ],
+  "exit_code": 0
+}
