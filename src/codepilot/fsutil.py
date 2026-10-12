@@ -15,9 +15,35 @@ from __future__ import annotations
 import os
 import shutil
 import stat
-from pathlib import Path
+from collections.abc import Callable
+from pathlib import Path, PurePosixPath
 
-__all__ = ["is_link", "pid_alive", "remove_link", "remove_tree", "strip_reparse_points"]
+__all__ = [
+    "is_link",
+    "pid_alive",
+    "remove_link",
+    "remove_tree",
+    "strip_reparse_points",
+    "workspace_source_path",
+]
+
+
+def workspace_source_path(
+    root: Path, relative: str, *, link_check: Callable[[Path], bool] | None = None
+) -> Path:
+    """Existing retrieval path policy, shared by read-only repository consumers."""
+    path = PurePosixPath(relative.replace("\\", "/"))
+    if path.is_absolute() or ".." in path.parts or ":" in relative:
+        raise ValueError(f"Unsafe indexed path: {relative}")
+    target = root
+    for part in path.parts:
+        target = target / part
+        if (link_check or is_link)(target):
+            raise ValueError(f"Linked indexed path: {relative}")
+    if not target.resolve().is_relative_to(root.resolve()):
+        raise ValueError(f"Indexed path escapes repository: {relative}")
+    return target
+
 
 #: ``GetExitCodeProcess`` 的"进程还活着"取值（Windows SDK 的 STILL_ACTIVE）。
 _STILL_ACTIVE = 259

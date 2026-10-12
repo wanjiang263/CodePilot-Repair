@@ -46,6 +46,10 @@ from pydantic import BaseModel, Field, model_validator
 
 from codepilot.agents.schemas import IssueAnalysis
 from codepilot.context.tokens import TokenCounter
+from codepilot.llm.base import LLMProvider
+from codepilot.llm.errors import ContextTooLongError
+from codepilot.llm.structured import complete_structured
+from codepilot.llm.types import LLMRequest, LLMResponse, Message
 from codepilot.schemas.common import TraceFrame
 from codepilot.schemas.retrieval import RankedFile, RankedSymbol, RetrievalResult
 
@@ -54,7 +58,9 @@ __all__ = [
     "MIN_PART_TOKENS",
     "CodeSnippet",
     "Context",
+    "ContextBudgetError",
     "ContextBuilder",
+    "ContextCallDiagnostics",
     "ContextLevel",
     "ContextPart",
     "ContextSection",
@@ -204,6 +210,20 @@ class Context(BaseModel):
     @property
     def is_empty(self) -> bool:
         return not self.text
+
+
+class ContextBudgetError(ValueError):
+    """The budget cannot admit the complete trusted output contract."""
+
+
+class ContextCallDiagnostics(BaseModel):
+    """One structured call, including failures; estimates remain labelled."""
+
+    original_budget: int = 0
+    rebuild_budget: int | None = None
+    retry_count: int = 0
+    trigger_reason: str | None = None
+    contexts: list[Context] = Field(default_factory=list)
 
 
 class ContextBuilder:
@@ -363,6 +383,10 @@ class ContextBuilder:
         return best
 
     # ------------------------------------------------------------------ 隔离
+
+    def rejection_reason(self, part: ContextPart) -> str | None:
+        """Check the existing isolation policy before a consumer reads repository data."""
+        return self._isolation_reason(part) or self._path_reason(part)
 
     @staticmethod
     def _isolation_reason(part: ContextPart) -> str | None:
@@ -541,6 +565,100 @@ class ContextBuilder:
             max_candidates=max_candidates,
         )
         return self.build(purpose, *parts, budget=budget)
+
+    def complete_structured(
+        self,
+        provider: LLMProvider,
+        purpose: str,
+        *parts: ContextPart,
+        schema: type[BaseModel],
+        budget: int | None = None,
+        diagnostics: ContextCallDiagnostics | None = None,
+        required_group: str | None = None,
+    ) -> LLMResponse:
+        """Budget every attempt; rebuild from original inputs once on explicit overflow.
+
+        Structured JSON correction messages also go through build(), so the provider
+        never receives an unbudgeted history. The frozen Provider protocol is unchanged.
+        A caller may retain diagnostics even when a provider exception propagates.
+        """
+        diag = diagnostics if diagnostics is not None else ContextCallDiagnostics()
+        diag.original_budget = self.budget_for(purpose, budget)
+        diag.rebuild_budget = None
+        diag.retry_count = 0
+        diag.trigger_reason = None
+        diag.contexts.clear()
+        original = tuple(part.model_copy(deep=True) for part in parts)
+        adapter = _ContextProvider(self, provider, purpose, original, diag, required_group)
+        return complete_structured(
+            adapter,
+            LLMRequest(messages=[], response_schema=schema, purpose=purpose),
+        )
+
+
+class _ContextProvider:
+    def __init__(
+        self,
+        builder: ContextBuilder,
+        provider: LLMProvider,
+        purpose: str,
+        parts: tuple[ContextPart, ...],
+        diagnostics: ContextCallDiagnostics,
+        required_group: str | None,
+    ) -> None:
+        self.builder = builder
+        self.provider = provider
+        self.purpose = purpose
+        self.parts = parts
+        self.diagnostics = diagnostics
+        self.required_group = required_group
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        # complete_structured starts with no messages; subsequent messages are only
+        # its schema correction history, not a second copy of repository content.
+        corrections = tuple(
+            ContextPart(
+                level=ContextLevel.ISSUE_TEXT,
+                label=f"结构化输出校验反馈 {index}",
+                text=message.content or "",
+                source="structured_validation",
+            )
+            for index, message in enumerate(request.messages)
+        )
+        diag = self.diagnostics
+        budget = diag.rebuild_budget if diag.rebuild_budget is not None else diag.original_budget
+        try:
+            return self._call(request, corrections, budget)
+        except ContextTooLongError as error:
+            if diag.retry_count:
+                raise
+            diag.trigger_reason = f"ContextTooLongError: {error.message}"
+            reduced = diag.original_budget // 2
+            if reduced >= diag.original_budget:
+                raise
+            diag.rebuild_budget = reduced
+            diag.retry_count = 1
+            return self._call(request, corrections, reduced)
+
+    def _call(
+        self, request: LLMRequest, corrections: tuple[ContextPart, ...], budget: int
+    ) -> LLMResponse:
+        context = self.builder.build(self.purpose, *self.parts, *corrections, budget=budget)
+        self.diagnostics.contexts.append(context)
+        if any(part.level == ContextLevel.SYSTEM_INSTRUCTIONS for part in self.parts) and not any(
+            section.level == 1 for section in context.included
+        ):
+            raise ContextBudgetError("Budget cannot admit the complete system/schema contract")
+        if self.required_group is not None and not any(
+            section.label.startswith(self.required_group) for section in context.included
+        ):
+            raise ContextBudgetError("Budget cannot admit any localization candidate")
+        return self.provider.complete(
+            request.model_copy(update={"messages": [Message.user(context.text)], "tools": None})
+        )
+
+    def close(self) -> None:
+        self.provider.close()
 
 
 def _snippet_part(snippet: CodeSnippet) -> ContextPart:

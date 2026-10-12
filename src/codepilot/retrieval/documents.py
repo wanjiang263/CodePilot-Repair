@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from dataclasses import dataclass
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 
-from codepilot.fsutil import is_link
+from codepilot.fsutil import is_link, workspace_source_path
 from codepilot.repo.models import Symbol
 
 
@@ -15,17 +15,10 @@ class RetrievalError(RuntimeError):
 
 
 def source_path(root: Path, relative: str) -> Path:
-    path = PurePosixPath(relative.replace("\\", "/"))
-    if path.is_absolute() or ".." in path.parts or ":" in relative:
-        raise RetrievalError(f"Unsafe indexed path: {relative}")
-    target = root
-    for part in path.parts:
-        target = target / part
-        if is_link(target):
-            raise RetrievalError(f"Linked indexed path: {relative}")
-    if not target.resolve().is_relative_to(root.resolve()):
-        raise RetrievalError(f"Indexed path escapes repository: {relative}")
-    return target
+    try:
+        return workspace_source_path(root, relative, link_check=is_link)
+    except ValueError as error:
+        raise RetrievalError(str(error)) from error
 
 
 @dataclass(frozen=True, slots=True)
