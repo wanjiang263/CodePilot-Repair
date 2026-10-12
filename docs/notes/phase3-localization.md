@@ -111,6 +111,8 @@ ContextBuilder 98.82%、LocalizationResult 100%、TokenCounter 100%、ArtifactSt
 
 ## 历史遗留问题处理
 
+以下为本批历史处理证据；当前六项风险/验收状态、后续验收条件和计划阶段统一见 [docs/05 台账（DA-001～DA-006）](../05-精细化待办清单.md#deferred-acceptance-register)。其中 DA-001 保留真实 Tokenizer 校准，DA-002 区分本地 FIXED 与 Linux CI PENDING，DA-003～DA-006 均为 NOT RUN。Phase 4～Phase 14 沿用固定 ID 更新台账，不重复登记或据 FakeLLM PASS 关闭真实模型/真实 Issue 验收。
+
 | 问题 | 状态 | 处理与边界 |
 |---|---|---|
 | 中文/Unicode/多语言估算与超限恢复 | MITIGATED | 保留字符 / 3.5；新增密集 CJK、emoji/组合字符、多语混合预算边界与一次减半恢复/抛错测试。真实 tokenizer/模型上限未验收 |

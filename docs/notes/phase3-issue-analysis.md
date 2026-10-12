@@ -103,6 +103,8 @@
 
 ## 限制与 NOT RUN
 
+当前遗留风险与未执行验收统一维护在 [docs/05 台账（DA-001～DA-006）](../05-精细化待办清单.md#deferred-acceptance-register)：DA-001 为 Token 估算与真实 Tokenizer 校准，DA-002 为本地 symlink 已验收但 Linux CI 待验收，DA-003～DA-006 分别为 Phase 3 Linux CI、L-18、C-14 与真实 Issue 定位准确率。下列内容保留首批历史状态；Phase 4～Phase 14 以台账追踪当前状态，不将离线 PASS 推广为未执行验收的 PASS。
+
 - 全部结论来自合成 Issue、`FakeLLM` 与 `mini_calc` fixture 的**离线工程正确性**，不构成模型效果或
   定位准确率提升的结论。
 - L-18 真实 API Smoke：NOT RUN（本轮授权暂缓）。C-14 真实 LLM 定位评估：NOT RUN。
