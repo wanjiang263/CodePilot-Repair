@@ -22,14 +22,18 @@ from pydantic import BaseModel, ConfigDict, Field
 from codepilot.schemas.common import TraceFrame
 from codepilot.schemas.enums import IssueType
 from codepilot.schemas.issue import IssueAnalysis
+from codepilot.schemas.localization import FileDecision, LocalizationResult, SymbolDecision
 from codepilot.schemas.retrieval import RankedSymbol, RetrievalQuery
 
 __all__ = [
+    "FileDecision",
     "IssueAnalysis",
     "IssueSemanticDraft",
     "IssueType",
+    "LocalizationResult",
     "RankedSymbol",
     "RuleEvidence",
+    "SymbolDecision",
     "TraceFrame",
 ]
 

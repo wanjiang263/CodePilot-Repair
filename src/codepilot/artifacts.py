@@ -10,13 +10,18 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
+import re
+import tempfile
 from pathlib import Path
 from typing import Any
 
 from codepilot.observability.redaction import redact
+from codepilot.schemas.retrieval import RetrievalResult
 
-__all__ = ["ArtifactStore"]
+__all__ = ["ArtifactStore", "RetrievalSnapshotStore", "SnapshotError"]
 
 #: 02 §18.3 定义的固定文件名。集中列出，让拼错成为 ImportError 而不是静默的
 #: 空文件。
@@ -131,3 +136,72 @@ class ArtifactStore:
         if not resolved.is_relative_to(self._run_dir):
             raise ValueError(f"路径不在本 run 目录内: {path}")
         return resolved.relative_to(self._run_dir).as_posix()
+
+
+class SnapshotError(ValueError):
+    """A retrieval snapshot is missing, corrupted or could not be committed."""
+
+
+class RetrievalSnapshotStore:
+    """Content-addressed complete RetrievalResult inside the existing run artifacts.
+
+    IDs hash the versioned canonical payload including the upstream snapshot_id.
+    Writes use a temporary file + fsync + atomic replace. No successful ID is
+    returned until readback validates both schema and content hash.
+    """
+
+    def __init__(self, artifacts: ArtifactStore) -> None:
+        self.artifacts = artifacts
+
+    def path_for(self, snapshot_id: str) -> Path:
+        if re.fullmatch(r"retrieval-sha256-[0-9a-f]{64}", snapshot_id) is None:
+            raise SnapshotError("Invalid retrieval snapshot ID")
+        return self.artifacts._resolve(f"retrieval_snapshots/{snapshot_id}.json")
+
+    def save(self, retrieval: RetrievalResult) -> str:
+        # Revalidate rather than trusting model_copy(update=...) bypasses.
+        result = RetrievalResult.model_validate_json(retrieval.model_dump_json())
+        payload = {"version": 1, "retrieval": result.model_dump(mode="json")}
+        canonical = _snapshot_json(payload)
+        snapshot_id = "retrieval-sha256-" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+        target = self.path_for(snapshot_id)
+        if target.exists():
+            self.load(snapshot_id)
+            return snapshot_id
+        temporary: Path | None = None
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(
+                dir=target.parent, suffix=".tmp", delete=False
+            ) as file:
+                temporary = Path(file.name)
+                file.write(canonical.encode("utf-8"))
+                file.flush()
+                os.fsync(file.fileno())
+            temporary.replace(target)
+            self.load(snapshot_id)
+        except OSError as error:
+            raise SnapshotError(f"Cannot commit retrieval snapshot: {snapshot_id}") from error
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+        return snapshot_id
+
+    def load(self, snapshot_id: str) -> RetrievalResult:
+        target = self.path_for(snapshot_id)
+        try:
+            payload = json.loads(target.read_text(encoding="utf-8"))
+            digest = hashlib.sha256(_snapshot_json(payload).encode("utf-8")).hexdigest()
+            if snapshot_id != "retrieval-sha256-" + digest or payload["version"] != 1:
+                raise ValueError("Snapshot hash/version mismatch")
+            return RetrievalResult.model_validate(payload["retrieval"])
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            raise SnapshotError(
+                f"Missing or corrupted retrieval snapshot: {snapshot_id}"
+            ) from error
+
+
+def _snapshot_json(payload: Any) -> str:
+    return json.dumps(
+        payload, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False
+    )

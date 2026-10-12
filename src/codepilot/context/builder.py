@@ -44,13 +44,13 @@ from types import MappingProxyType
 
 from pydantic import BaseModel, Field, model_validator
 
-from codepilot.agents.schemas import IssueAnalysis
 from codepilot.context.tokens import TokenCounter
 from codepilot.llm.base import LLMProvider
 from codepilot.llm.errors import ContextTooLongError
 from codepilot.llm.structured import complete_structured
 from codepilot.llm.types import LLMRequest, LLMResponse, Message
 from codepilot.schemas.common import TraceFrame
+from codepilot.schemas.issue import IssueAnalysis
 from codepilot.schemas.retrieval import RankedFile, RankedSymbol, RetrievalResult
 
 __all__ = [
