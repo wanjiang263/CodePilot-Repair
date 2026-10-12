@@ -97,6 +97,14 @@ class Settings(BaseSettings):
     # ---- 观测 ----
     log_level: str = "INFO"
 
+    # ---- Sandbox ----
+    sandbox_log_tail_bytes: int = Field(
+        default=16_384,
+        ge=0,
+        le=10_000_000,
+        description="ExecutionResult 内 stdout/stderr 尾部的 UTF-8 字节上限。",
+    )
+
     @property
     def resolved_llm_config(self) -> Path:
         """LLM 配置文件的实际路径。"""

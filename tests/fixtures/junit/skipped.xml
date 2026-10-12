@@ -1,0 +1,5 @@
+<testsuite name="pytest" tests="1" failures="0" errors="0" skipped="1">
+  <testcase classname="tests.test_platform" name="test_linux_only" time="0">
+    <skipped message="requires Linux" />
+  </testcase>
+</testsuite>

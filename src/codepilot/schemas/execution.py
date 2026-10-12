@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, Field
 
@@ -44,6 +44,8 @@ class ExecutionResult(BaseModel):
     stdout_tail: str = ""
     stderr_tail: str = ""
     artifact_dir: str = ""
+    error_reason: str | None = None
+    diagnostics: dict[str, Any] = Field(default_factory=dict)
 
     @property
     def failed_tests(self) -> list[TestCaseResult]:
@@ -73,3 +75,10 @@ class TestBaseline(BaseModel):
     outcomes: dict[str, TestOutcome] = Field(default_factory=dict)
     flaky: set[str] = Field(default_factory=set)
     """两次运行结果不一致的测试。这些测试永远不计入回归。"""
+
+    run_outcomes: list[dict[str, TestOutcome]] = Field(default_factory=list)
+    status_differences: dict[str, tuple[TestOutcome | None, TestOutcome | None]] = Field(
+        default_factory=dict
+    )
+    evidence: list[str] = Field(default_factory=list)
+    complete: bool = True

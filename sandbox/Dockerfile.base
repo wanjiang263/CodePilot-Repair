@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1
+ARG PYTHON_VERSION=3.12
+FROM python:${PYTHON_VERSION}-slim-bookworm
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       build-essential \
+       ca-certificates \
+       git \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --gid 1000 codepilot \
+    && useradd --uid 1000 --gid 1000 --create-home --shell /bin/sh codepilot \
+    && mkdir -p /workspace /out \
+    && chown -R 1000:1000 /workspace /out
+
+WORKDIR /workspace
+USER 1000:1000
+CMD ["python", "--version"]

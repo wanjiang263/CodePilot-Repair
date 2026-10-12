@@ -11,6 +11,7 @@ Phase 0 只把 ``config`` 与 ``doctor`` 做实。其余子命令**注册但不�
 from __future__ import annotations
 
 import secrets
+import shlex
 import shutil
 import subprocess
 import sys
@@ -23,6 +24,7 @@ import typer
 
 from codepilot.config import PROJECT_ROOT, get_settings
 from codepilot.observability.logging import configure_logging
+from codepilot.observability.redaction import redact_text
 
 if TYPE_CHECKING:
     from codepilot.repo.index import IndexStats
@@ -33,7 +35,6 @@ __all__ = ["app"]
 #: ``index`` 已在 R-18 落地，不再列在这里——``test_unimplemented_commands_fail_loudly``
 #: 以 ``sorted(_PLANNED)`` 参数化，删键即自动不再要求 index 退出码 2。
 _PLANNED: dict[str, str] = {
-    "run-tests": "Phase 4（Docker 沙箱）",
     "solve": "Phase 5（最小单轮闭环，M1）",
     "bench": "Phase 11（SWE-bench Lite，M3）",
     "report": "Phase 13（Run Report 与 Dashboard）",
@@ -498,11 +499,123 @@ def eval_retrieval(
 
 @app.command("run-tests")
 def run_tests(
-    repo: str = typer.Argument(..., help="仓库路径。"),
+    repo: str = typer.Option(..., "--repo", help="本地 Git 仓库路径。"),
+    tests: str | None = typer.Option(
+        None,
+        "--tests",
+        help="空格分隔的 pytest node id；省略时执行 EnvSpec 的全量选择。",
+    ),
+    base_commit: str = typer.Option("HEAD", "--base-commit", help="固定基准提交。"),
+    env_spec: Path | None = typer.Option(None, "--env-spec", help="显式 env.yaml。"),
+    allow_build_network: bool = typer.Option(
+        False,
+        "--allow-build-network",
+        help="允许首次环境构建联网安装依赖；测试执行始终断网。",
+    ),
 ) -> None:
-    """[未实现] 在 Docker 沙箱中执行测试。"""
-    del repo
-    _not_yet("run-tests")
+    """在隔离 Docker 容器中执行测试并输出 ExecutionResult JSON。"""
+    from docker.errors import DockerException
+
+    from codepilot.artifacts import ArtifactStore
+    from codepilot.repo.workspace import WorkspaceError, WorkspaceManager, normalize_source
+    from codepilot.sandbox.docker import DockerSandbox
+    from codepilot.sandbox.env_spec import EnvSpecError, resolve_env_spec
+    from codepilot.schemas.enums import ExecutionStatus
+    from codepilot.schemas.execution import ExecutionResult
+
+    if tests is not None and not tests.strip():
+        raise typer.BadParameter("--tests 不能是空字符串；省略该选项表示全量测试")
+    try:
+        selected = tuple(shlex.split(tests, posix=True)) if tests is not None else ()
+    except ValueError as exc:
+        raise typer.BadParameter(f"--tests 无法解析: {exc}") from exc
+    if tests is not None and not selected:
+        raise typer.BadParameter("--tests 必须至少包含一个 pytest node id")
+
+    settings = get_settings()
+    settings.ensure_dirs()
+    run_id = "sandbox-" + secrets.token_hex(8)
+    artifacts = ArtifactStore(settings.artifacts_dir, run_id)
+    manager = WorkspaceManager(cache_root=settings.repo_cache_dir())
+    workspace = None
+    try:
+        source = normalize_source(repo)
+        if not source.is_local:
+            raise ValueError("run-tests 当前只接受本地仓库；远端仓库请先显式检出并审阅")
+        workspace = manager.create(
+            source=source,
+            base_commit=base_commit,
+            target=artifacts.run_dir / "workspace",
+        )
+        spec = resolve_env_spec(workspace.path, explicit=env_spec)
+        sandbox = DockerSandbox(
+            artifacts=artifacts,
+            allowed_workspace_root=settings.runs_dir(),
+            log_tail_bytes=settings.sandbox_log_tail_bytes,
+        )
+        controlled_root = (PROJECT_ROOT / "tests" / "fixtures" / "repos").resolve()
+        controlled_fixture = bool(
+            source.local_path and source.local_path.resolve().is_relative_to(controlled_root)
+        )
+        environment = sandbox.build_env(
+            repository=source.normalized,
+            base_commit=workspace.base_commit,
+            workspace=workspace.path,
+            env_spec=spec,
+            allow_network=allow_build_network or controlled_fixture,
+        )
+        if environment.succeeded:
+            result = sandbox.run_tests(
+                workspace=workspace.path,
+                environment=environment,
+                env_spec=spec,
+                tests=selected,
+                artifact_iteration=1,
+            )
+            result = result.model_copy(
+                update={
+                    "diagnostics": {
+                        **result.diagnostics,
+                        "environment_cache_key": environment.cache_key,
+                        "environment_cache_hit": environment.from_cache,
+                        "base_commit": workspace.base_commit,
+                    }
+                }
+            )
+        else:
+            result = ExecutionResult(
+                status=environment.status,
+                duration_seconds=environment.duration_seconds,
+                error_reason=(
+                    "ENVIRONMENT_BUILD_FAILED"
+                    if environment.status is ExecutionStatus.ENV_ERROR
+                    else "DOCKER_UNAVAILABLE"
+                ),
+                diagnostics={
+                    "detail": environment.error or "环境构建失败",
+                    "environment_cache_key": environment.cache_key,
+                    "environment_cache_hit": False,
+                },
+            )
+    except DockerException as exc:
+        result = ExecutionResult(
+            status=ExecutionStatus.SANDBOX_ERROR,
+            error_reason="DOCKER_UNAVAILABLE",
+            diagnostics={"detail": redact_text(str(exc))},
+        )
+    except (WorkspaceError, EnvSpecError, OSError, ValueError) as exc:
+        result = ExecutionResult(
+            status=ExecutionStatus.SANDBOX_ERROR,
+            error_reason="WORKSPACE_OR_ENVSPEC_ERROR",
+            diagnostics={"detail": str(exc)},
+        )
+    finally:
+        if workspace is not None:
+            manager.remove(workspace)
+
+    typer.echo(result.model_dump_json(indent=2))
+    if result.status is not ExecutionStatus.PASS:
+        raise typer.Exit(code=1)
 
 
 @app.command("solve")

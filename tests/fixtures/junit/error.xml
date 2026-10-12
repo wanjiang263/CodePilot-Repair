@@ -1,0 +1,5 @@
+<testsuite name="pytest" tests="1" failures="0" errors="1" skipped="0">
+  <testcase classname="tests.test_import" name="test_import" time="0.01">
+    <error message="ModuleNotFoundError: No module named 'httpx'">collection traceback</error>
+  </testcase>
+</testsuite>
