@@ -375,6 +375,25 @@ def test_copy_mode_creates_an_independent_clone(
     )
 
 
+def test_relative_cache_root_still_creates_a_workspace(
+    origin: FixtureRepo, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``cache_dir`` 的默认值是相对路径，这条路径此前根本建不出 workspace。
+
+    ``_fetch_base`` 把缓存目录当 git 远端传给 ``git fetch <cache>``，而那条命令的
+    cwd 是新建的 workspace：相对路径在那里解析不到，CLI 的 run-tests 会直接失败。
+    """
+    monkeypatch.chdir(tmp_path)
+    manager = WorkspaceManager(cache_root=Path("cache/repos"))
+    assert manager.cache_root.is_absolute()
+
+    ws = manager.create(source=str(origin.path), base_commit=origin.head, target=tmp_path / "ws")
+
+    assert ws.base_commit == origin.head
+    assert (ws.path / "src" / "util.py").is_file()
+    assert (tmp_path / "cache" / "repos").is_dir()
+
+
 def test_original_is_never_modified(
     manager: WorkspaceManager, origin: FixtureRepo, tmp_path: Path
 ) -> None:

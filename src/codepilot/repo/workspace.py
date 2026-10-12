@@ -257,7 +257,12 @@ class WorkspaceManager:
         ``allow_local=False`` 时拒绝一切非远端 URL 的来源。API 层必须这样构造
         （03 §29：拒绝 ``file://`` 和本地路径），CLI 层保持默认的 True。
         """
-        self.cache_root = Path(cache_root)
+        # 缓存路径必须是绝对路径：``_fetch_base`` 把它当 git 远端传给
+        # ``git fetch <cache>``，而那条命令的 cwd 是新建的 workspace，不是调用方
+        # 目录。默认配置里 ``cache_dir`` 是相对的 ``cache``，实测（codepilot
+        # run-tests）相对路径会解析成 workspace 下的不存在目录，报
+        # "does not appear to be a git repository"，整个 workspace 建不出来。
+        self.cache_root = Path(cache_root).expanduser().absolute()
         self.allow_local = allow_local
         self.timeout = timeout
 
