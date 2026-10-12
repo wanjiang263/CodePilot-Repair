@@ -7,9 +7,12 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import urllib3.exceptions
 from docker.errors import DockerException, ImageNotFound
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from codepilot.artifacts import ArtifactStore
+from codepilot.observability.redaction import REDACTED
 from codepilot.sandbox.base import EnvironmentBuildResult
 from codepilot.sandbox.docker import (
     DockerSandbox,
@@ -93,6 +96,8 @@ class FakeContainer:
 
     def wait(self, *, timeout: int) -> dict[str, int]:
         assert timeout > 0
+        if self.owner.wait_error is not None:
+            raise self.owner.wait_error
         if self.owner.timeout:
             raise TimeoutError("deadline")
         return {"StatusCode": self.owner.exit_code}
@@ -135,6 +140,7 @@ class FakeClient:
         self.list_calls: list[dict[str, object]] = []
         self.exit_code = 0
         self.timeout = False
+        self.wait_error: BaseException | None = None
         self.oom = False
         self.remove_error = False
         self.junit_xml: str | None = None
@@ -343,6 +349,44 @@ def test_junit_artifact_is_redacted_before_entering_the_run_record(tmp_path: Pat
     assert "<testsuite" in persisted
 
 
+def test_junit_failure_text_is_redacted_inside_execution_result(tmp_path: Path) -> None:
+    """``ExecutionResult.tests`` 走的是内存解析结果，这条路此前原样带出密钥。
+
+    落盘的三份 artifact 一直有脱敏，但 Phase 5 把 ``tests`` 里的失败文本直接喂给
+    模型并写进运行记录；真实 CLI run-tests 实测到一个 FAIL 用例把 ``sk-`` token
+    原样打进了 CLI 输出的 JSON。
+    """
+    client = FakeClient()
+    client.exit_code = 1
+    client.junit_xml = (
+        '<testsuite tests="2">'
+        '<testcase classname="tests.test_x" name="ok" time="0.1"/>'
+        '<testcase classname="tests.test_x" name="leak" time="0.2">'
+        '<failure message="token sk-leakedsecret123">'
+        "password=verysecretvalue\n  assert login('demo', 'sk-leakedsecret123')\n"
+        "</failure></testcase></testsuite>"
+    )
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    result = sandbox(tmp_path, client).run_tests(
+        workspace=workspace,
+        environment=EnvironmentBuildResult(
+            status=ExecutionStatus.PASS, image_ref="env", image_id="id", cache_key="key"
+        ),
+        env_spec=EnvSpec(),
+    )
+    assert result.status is ExecutionStatus.FAIL
+    assert result.tests_passed == 1 and result.tests_failed == 1
+    leaked = result.tests[1]
+    assert "leak" in leaked.node_id
+    assert "sk-leakedsecret123" not in (leaked.message or "")
+    assert "sk-leakedsecret123" not in (leaked.traceback or "")
+    assert "verysecretvalue" not in (leaked.traceback or "")
+    assert REDACTED in (leaked.message or "")
+    assert REDACTED in (leaked.traceback or "")
+    assert "sk-leakedsecret123" not in result.model_dump_json()
+
+
 def test_timeout_kills_and_force_removes_with_diagnostics(tmp_path: Path) -> None:
     client = FakeClient()
     client.timeout = True
@@ -359,6 +403,56 @@ def test_timeout_kills_and_force_removes_with_diagnostics(tmp_path: Path) -> Non
     container = client.containers.created[0]
     assert result.status is ExecutionStatus.TIMEOUT
     assert container.killed and container.removed
+
+
+def _npipe_read_timeout() -> RequestsConnectionError:
+    """复刻 Docker Desktop npipe 传输实测到的异常链（S-18）。
+
+    该传输不把读超时报告成 ``requests.exceptions.ReadTimeout``，而是
+    ``ConnectionError``，超时本体只存在于 ``__context__`` 链里。
+    """
+    deadline = TimeoutError("Read timed out.")
+    read_timeout = urllib3.exceptions.ReadTimeoutError(None, None, "Read timed out.")
+    read_timeout.__cause__ = deadline
+    connection_error = RequestsConnectionError(
+        "NpipeHTTPConnectionPool(host='localhost'): Read timed out."
+    )
+    connection_error.__context__ = read_timeout
+    return connection_error
+
+
+def test_npipe_wrapped_read_timeout_is_still_a_timeout(tmp_path: Path) -> None:
+    client = FakeClient()
+    client.wait_error = _npipe_read_timeout()
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    result = sandbox(tmp_path, client).run_tests(
+        workspace=workspace,
+        environment=EnvironmentBuildResult(
+            status=ExecutionStatus.PASS, image_ref="env", image_id="id", cache_key="key"
+        ),
+        env_spec=EnvSpec(timeout_seconds=1),
+    )
+    container = client.containers.created[0]
+    assert result.status is ExecutionStatus.TIMEOUT
+    assert result.error_reason == "EXECUTION_TIMEOUT"
+    assert container.killed and container.removed
+
+
+def test_connection_failure_without_timeout_stays_sandbox_error(tmp_path: Path) -> None:
+    client = FakeClient()
+    client.wait_error = RequestsConnectionError("daemon closed the connection")
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    result = sandbox(tmp_path, client).run_tests(
+        workspace=workspace,
+        environment=EnvironmentBuildResult(
+            status=ExecutionStatus.PASS, image_ref="env", image_id="id", cache_key="key"
+        ),
+        env_spec=EnvSpec(timeout_seconds=1),
+    )
+    assert result.status is ExecutionStatus.SANDBOX_ERROR
+    assert not client.containers.created[0].killed
 
 
 def test_timeout_keeps_timeout_status_when_force_remove_reports_failure(tmp_path: Path) -> None:

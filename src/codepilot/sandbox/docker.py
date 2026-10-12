@@ -18,6 +18,7 @@ from typing import Any
 
 from docker.errors import DockerException, ImageNotFound
 from requests import Timeout as RequestsTimeout
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 import docker
 from codepilot.artifacts import JUNIT_XML, ArtifactStore
@@ -29,7 +30,7 @@ from codepilot.sandbox.junit import JUnitParseError, JUnitReport, parse_junit
 from codepilot.sandbox.paths import docker_bind_source, validate_workspace_path
 from codepilot.sandbox.status import classify_execution
 from codepilot.schemas.enums import ExecutionStatus, TestOutcome
-from codepilot.schemas.execution import ExecutionResult
+from codepilot.schemas.execution import ExecutionResult, TestCaseResult
 
 __all__ = ["DockerSandbox", "environment_cache_key", "execution_container_config"]
 
@@ -388,12 +389,14 @@ class DockerSandbox:
             try:
                 wait_result = container.wait(timeout=env_spec.timeout_seconds)
                 exit_code = _status_code(wait_result)
-            except (RequestsTimeout, TimeoutError):
+            except (RequestsTimeout, RequestsConnectionError, TimeoutError) as exc:
+                if not _is_wait_timeout(exc):
+                    raise
                 timed_out = True
                 try:
                     container.kill()
-                except DockerException as exc:
-                    cleanup_error = f"超时后 kill 失败: {redact_text(str(exc))}"
+                except DockerException as kill_error:
+                    cleanup_error = f"超时后 kill 失败: {redact_text(str(kill_error))}"
         except DockerException as exc:
             sandbox_error = redact_text(str(exc))
         except (OSError, ValueError, RuntimeError) as exc:
@@ -466,7 +469,7 @@ class DockerSandbox:
                 diagnostics={"detail": redact_text(str(exc))},
                 artifact_dir="",
             )
-        cases = junit.tests if junit else []
+        cases = [_redacted_case(case) for case in (junit.tests if junit else [])]
         diagnostics = dict(decision.diagnostics)
         diagnostics.update(
             {
@@ -570,11 +573,46 @@ def _decode_exec_output(output: Any) -> str:
     return str(output or "")
 
 
+def _is_wait_timeout(exc: BaseException) -> bool:
+    """判定 ``container.wait()`` 的异常是否就是超时。
+
+    Docker Desktop 的 npipe 传输不会抛出 ``requests.exceptions.ReadTimeout``：
+    urllib3 的读超时被包成 ``requests.exceptions.ConnectionError``，真正的
+    ``TimeoutError`` 只出现在 ``__context__`` 链里（S-18 实测）。只按顶层类型
+    判定的话，一次真实超时会被误报成 SANDBOX_ERROR，Phase 5 的修复循环就再也
+    拿不到 TIMEOUT 这条路由。
+    """
+    current: BaseException | None = exc
+    for _ in range(8):
+        if current is None:
+            return False
+        if isinstance(current, (RequestsTimeout, TimeoutError)):
+            return True
+        current = current.__cause__ or current.__context__
+    return False
+
+
 def _status_code(wait_result: Any) -> int | None:
     if isinstance(wait_result, Mapping):
         value = wait_result.get("StatusCode")
         return int(value) if value is not None else None
     return int(wait_result) if wait_result is not None else None
+
+
+def _redacted_case(case: TestCaseResult) -> TestCaseResult:
+    """JUnit 的失败文本由被测仓库自己产生，进 ExecutionResult 之前必须脱敏。
+
+    ``stdout``/``stderr``/JUnit 文件三份 artifact 早已在落盘前脱敏，但
+    ``ExecutionResult.tests`` 走的是内存里的解析结果：Phase 5 会把这段文本喂给
+    模型并写进运行记录，实测（真实 CLI run-tests）一个失败用例就能把
+    ``sk-`` 令牌照原样带进 CLI 输出的 JSON。
+    """
+    return case.model_copy(
+        update={
+            "message": None if case.message is None else redact_text(case.message),
+            "traceback": None if case.traceback is None else redact_text(case.traceback),
+        }
+    )
 
 
 def _read_text(path: Path) -> str:
