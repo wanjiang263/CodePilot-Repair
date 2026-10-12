@@ -1,5 +1,8 @@
 # Phase 3 首批：C-01～C-06（Issue 分析、定位种子与预算上下文）
 
+> 本文保留首批交付时的历史状态。C-07～C-13 后续实现、统一 `docs/03-AGENTS.md`
+> 规范引用、Snapshot 契约与当前门禁见 [第二批记录](phase3-localization.md)。
+
 2026-10-12。从 `main`（`1efd8a2`）创建本地分支 `codex/phase3-issue-analysis`，只做本地提交：
 不 Push、不建 PR、不合并，也不改动 `codex/l18-smoke-validation`。L-18 真实 API 验收按本轮授权
 暂缓，全部 LLM 相关执行只使用 `FakeLLM`；无真实 API Key、无网络、无 Docker、无 GPU。

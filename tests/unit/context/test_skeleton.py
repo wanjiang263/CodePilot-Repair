@@ -78,12 +78,30 @@ def test_safe_paths(stores, tmp_path, path):
         SkeletonBuilder(root, index).build(path)
 
 
-def test_stale_index_and_encoding(stores, tmp_path):
+def test_stale_index(stores, tmp_path):
     root = tmp_path / "repo"
     index = indexed(stores, root, {"a.py": "def f(): pass\n"})
     (root / "a.py").write_text("def g(): pass\n", encoding="utf-8")
     with pytest.raises(SkeletonError, match="stale"):
         SkeletonBuilder(root, index).build("a.py")
+
+
+def test_encoding_and_unreadable_file_fail_explicitly(stores, tmp_path, monkeypatch):
+    from pathlib import Path
+
+    root = tmp_path / "repo"
+    index = indexed(stores, root, {"a.py": "def f(): pass\n"})
+    builder = SkeletonBuilder(root, index)
+    monkeypatch.setattr(Path, "read_bytes", lambda self: b"\xff")
+    with pytest.raises(SkeletonError, match="read/decode"):
+        builder.build("a.py")
+
+    def unreadable(self):
+        raise PermissionError("unreadable")
+
+    monkeypatch.setattr(Path, "read_bytes", unreadable)
+    with pytest.raises(SkeletonError, match="read/decode"):
+        builder.build("a.py")
 
 
 def test_real_symlink_escape(stores, tmp_path):
@@ -96,5 +114,5 @@ def test_real_symlink_escape(stores, tmp_path):
         (root / "a.py").symlink_to(outside)
     except OSError as error:
         pytest.skip(f"Cannot create real symlink on this host: {error}; Linux CI NOT RUN")
-    with pytest.raises(SkeletonError, match="Linked|escapes"):
+    with pytest.raises(SkeletonError, match=r"Linked|escapes"):
         SkeletonBuilder(root, index).build("a.py")

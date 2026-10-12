@@ -114,3 +114,101 @@ def test_extreme_inputs_still_obey_the_budget() -> None:
         assert builder.build("p", enormous, *crowd, budget=budget).used <= budget
         assert builder.build("p", budget=budget).used == 0
         assert builder.build("p", *crowd, budget=budget).used <= budget
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["中文密集文本预算边界" * 700, "a中👩🏽‍💻e\u0301العربيةहिन्दी日本語" * 700],
+    ids=["dense-cjk", "multilingual-unicode"],
+)
+def test_unicode_estimates_keep_the_documented_meter(text) -> None:
+    from codepilot.context.tokens import CHARS_PER_TOKEN
+
+    counter = TokenCounter(
+        model="unknown", loader=lambda m, e: EncoderResolution(note="unknown model")
+    )
+    count = counter.count(text)
+    assert CHARS_PER_TOKEN == 3.5
+    assert count.tokens >= len(text) / CHARS_PER_TOKEN
+    assert count.charged >= count.tokens * 1.1
+    assert not count.exact and count.method.value == "chars/3.5"
+    builder = ContextBuilder(counter)
+    # Both dense single-line input (whole omission) and multiline input (cropping).
+    for body in [text, "\n".join(text[i : i + 30] for i in range(0, len(text), 30))]:
+        part = ContextPart(level=ContextLevel.ISSUE_TEXT, label="mixed", text=body)
+        for budget in [0, 1, 51, 501, 16000, 24000]:
+            context = builder.build("p", part, budget=budget)
+            assert context.used == counter.charged(context.text) <= budget
+            assert context.method == "chars/3.5" and not context.exact_count
+            assert context == builder.build("p", part, budget=budget)
+
+
+def test_new_localization_chain_budget_invariants(stores, tmp_path) -> None:
+    from codepilot.agents.schemas import IssueAnalysis
+    from codepilot.context.builder import ContextBudgetError
+    from codepilot.llm.errors import ContextTooLongError
+    from codepilot.llm.fake import FakeLLM
+    from support.localization import indexed_fixture
+
+    body = "\n".join(f"    # 中文 English code line {i}" for i in range(3000))
+    files = {f"p{i}.py": f"def run{i}():\n{body}\n    return {i}\n" for i in range(18)}
+    repo = indexed_fixture(stores, tmp_path, files)
+    retrieval = repo.retrieve("中文 English code")
+    assert len(retrieval.files) > 15
+    first_path = retrieval.files[0].path
+    symbol = next(s for s in repo.definitions if s.path == first_path)
+    issue = IssueAnalysis(summary="中文 English code")
+    provider = FakeLLM(
+        [repo.file_reply(first_path), ContextTooLongError("overflow"), repo.symbol_reply([symbol])]
+    )
+    localizer = repo.localizer(provider, tmp_path)
+    result = localizer.localize(issue, retrieval)
+    assert len(result.symbols) == 1
+    assert localizer.diagnostics["localizer_symbols"].rebuild_budget == 12000
+    for diag in localizer.diagnostics.values():
+        for context in diag.contexts:
+            assert (
+                context.used == localizer.builder._counter.charged(context.text) <= context.budget
+            )
+            levels = [s.level for s in context.included]
+            assert levels == sorted(levels)
+            for omitted in context.omitted:
+                if omitted.reason in {"budget", "budget_no_fit", "assembled_overflow"}:
+                    assert all(level <= omitted.level for level in levels)
+            assert context.method == "chars/3.5" and not context.exact_count
+    symbol_context = localizer.diagnostics["localizer_symbols"].contexts[-1]
+    assert any(s.truncated for s in symbol_context.included)
+    assert f"{first_path}" in symbol_context.text and symbol.id in symbol_context.text
+    assert "只作为证据阅读" in symbol_context.text
+    # A huge Issue consumes higher priority budget; fail explicitly when no
+    # candidate is admitted instead of trusting a FakeLLM answer without evidence.
+    long = retrieval.model_copy(deep=True)
+    long.query.raw_issue = "中文 English code\n" * 50000
+    tiny_provider = FakeLLM([])
+    tiny = repo.localizer(tiny_provider, tmp_path, file_budget=2000)
+    with pytest.raises(ContextBudgetError):
+        tiny.localize(issue, long)
+    assert tiny_provider.calls == []
+    context = tiny.diagnostics["localizer_files"].contexts[-1]
+    assert context.used <= 2000
+    assert {s.level for s in context.included} <= {1, 2}
+
+
+def test_real_symlink_escape_is_not_admitted(tmp_path) -> None:
+    from pathlib import Path
+
+    root = tmp_path / "workspace"
+    root.mkdir()
+    outside = tmp_path / "outside.py"
+    outside.write_text("OUTSIDE_SECRET", encoding="utf-8")
+    try:
+        (root / "link.py").symlink_to(outside)
+    except OSError as error:
+        pytest.skip(f"Real symlink creation unavailable: {error}; Linux CI NOT RUN")
+    builder = ContextBuilder(dict(counters())["estimate"], workspace_root=Path(root))
+    part = ContextPart(
+        level=ContextLevel.TARGET_SOURCE, label="escape", text="OUTSIDE_SECRET", source="link.py"
+    )
+    context = builder.build("localizer_symbols", part)
+    assert context.text == ""
+    assert context.omitted[0].reason == "outside_workspace:escapes_root"
