@@ -80,13 +80,16 @@
 
 ## 验收
 
-- 新增 508 项：`tests/unit/agents/` 77、`tests/unit/context/` 424（含 351 项预算不变量矩阵）、
+- 新增 512 项：`tests/unit/agents/` 77、`tests/unit/context/` 428（含 351 项预算不变量矩阵）、
   `tests/integration/test_phase3_issue_context_pipeline.py` 7。
 - 定向：`pytest tests/unit/agents tests/unit/context tests/integration/test_phase3_issue_context_pipeline.py`
-  → 508 passed，exit 0。
+  → 512 passed，exit 0（本地按组各跑一次，最后一组为 505 + 7）。
 - 全量离线：`pytest -m "not docker and not llm" --cov --cov-report=term-missing` →
-  1669 passed / 1 failed 0 / 1 skipped / 1 deselected，覆盖率 95.20%（门禁 80%），exit 0，耗时 617s。
+  1673 passed / 0 failed / 1 skipped / 1 deselected，覆盖率 95.39%（门禁 80%），exit 0，耗时 642s。
   唯一 skip 是既有的 `CODEPILOT_TEST_EMBEDDING_MODEL` 未设置项。
+- 新模块覆盖率：`agents/schemas.py` 100%、`agents/issue_analyzer.py` 96%、`context/tokens.py` 100%、
+  `context/builder.py` 98%。剩余未覆盖的是符号链接逃逸的 `escapes_root` 分支（需要真实 symlink，
+  Windows 上不可靠）与几处 if-false 分支（无 plan / 无 retrieval / 无候选时的旁路已被其他用例走过）。
 - `ruff check .` exit 0；`ruff format --check .` exit 0；`mypy src` exit 0（93 个源文件，strict）。
 - 集成链路逐项证明：规则证据不被 FakeLLM 覆盖（`guessed.py` / 编造异常 / 编造符号全部不出现）；
   仓库内 traceback 种子与检索结果按 `symbol_id` 关联且 `pinned` 排第一、0 分；ContextBuilder 用的是
