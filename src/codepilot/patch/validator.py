@@ -1,4 +1,10 @@
-"""Actual-workspace Git patch validation (P-15)."""
+"""Actual-workspace Git patch validation (P-15).
+
+Phase 6：交付的补丁由 :func:`generate_git_diff` 生成，而它默认剔除
+``tests/_codepilot_repro/``（D-06、D-07）。因此复现测试既不进入修改文件数与
+行数统计，也不会被误报成非法补丁；已有测试文件仍然受到完全保护。剔除掉的条目
+会作为 evidence 记录，让"补丁里为什么少了一个文件"是一个可以回答的问题。
+"""
 
 from __future__ import annotations
 
@@ -131,6 +137,11 @@ class PatchValidator:
         errors.extend(cheat_errors)
 
         risk = impact.risk if impact is not None else RiskLevel.LOW
+        if patch.excluded_files:
+            evidence.append(
+                "reproduction files excluded from the delivered patch: "
+                + ", ".join(patch.excluded_files)
+            )
         if signature_changed:
             risk = RiskLevel.HIGH
             evidence.extend(f"signature changed: {item}" for item in sorted(signature_changed))
