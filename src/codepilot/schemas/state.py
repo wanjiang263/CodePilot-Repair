@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -70,6 +71,7 @@ class RepairState(BaseModel):
     plan: RepairPlan | None = None
     reproduction: ReproductionResult | None = None
     baseline: TestBaseline | None = None
+    execution: ExecutionResult | None = None
 
     attempts: list[Attempt] = Field(default_factory=list)
     current_patch: str = ""
@@ -83,6 +85,10 @@ class RepairState(BaseModel):
     started_at: datetime
     status: RunStatus = RunStatus.RUNNING
     stop_reason: StopReason | None = None
+    events: list[dict[str, Any]] = Field(default_factory=list)
+    tool_calls: list[dict[str, Any]] = Field(default_factory=list)
+    failure_reasons: list[str] = Field(default_factory=list)
+    report_artifacts: dict[str, str] = Field(default_factory=dict)
 
     @property
     def iteration(self) -> int:

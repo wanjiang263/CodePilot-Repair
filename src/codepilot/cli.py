@@ -35,7 +35,6 @@ __all__ = ["app"]
 #: ``index`` 已在 R-18 落地，不再列在这里——``test_unimplemented_commands_fail_loudly``
 #: 以 ``sorted(_PLANNED)`` 参数化，删键即自动不再要求 index 退出码 2。
 _PLANNED: dict[str, str] = {
-    "solve": "Phase 5（最小单轮闭环，M1）",
     "bench": "Phase 11（SWE-bench Lite，M3）",
     "report": "Phase 13（Run Report 与 Dashboard）",
 }
@@ -620,13 +619,233 @@ def run_tests(
 
 @app.command("solve")
 def solve(
-    repo: str = typer.Argument(..., help="仓库路径或 URL。"),
+    repo: str = typer.Option(..., "--repo", help="仓库路径或 URL。"),
     issue: str = typer.Option(..., "--issue", help="Issue 文本或文件路径。"),
-    base_commit: str = typer.Option(..., "--base-commit", help="基准提交。"),
+    base_commit: str = typer.Option("HEAD", "--base-commit", help="固定基准提交。"),
+    fake_llm_script: Path | None = typer.Option(
+        None,
+        "--fake-llm-script",
+        help="FakeLLM JSON 脚本；离线测试模式，不访问网络。",
+    ),
+    fake_sandbox: bool = typer.Option(
+        False,
+        "--fake-sandbox",
+        help="使用明确标识的 FakeSandbox；仅用于离线集成测试。",
+    ),
+    allow_live_llm: bool = typer.Option(
+        False,
+        "--allow-live-llm",
+        help="显式授权使用 configs/llm.yaml 中的真实 Provider（可能产生费用）。",
+    ),
+    allow_build_network: bool = typer.Option(
+        False,
+        "--allow-build-network",
+        help="允许 Docker 首次构建环境时联网安装依赖；测试执行仍断网。",
+    ),
+    env_spec: Path | None = typer.Option(None, "--env-spec", help="显式 env.yaml。"),
+    keep_workspace: bool = typer.Option(
+        False, "--keep-workspace", help="保留受控 workspace 以便检查补丁。"
+    ),
 ) -> None:
-    """[未实现] 端到端修复一个 Issue。"""
-    del repo, issue, base_commit
-    _not_yet("solve")
+    """运行一次受控的定位、规划、补丁生成、校验与测试闭环。"""
+    import json
+    from datetime import UTC, datetime
+    from typing import cast
+
+    from docker.errors import DockerException
+
+    from codepilot.agents.coder import CodingAgent
+    from codepilot.agents.impact_analyzer import ImpactAnalyzer
+    from codepilot.agents.issue_analyzer import IssueAnalyzer
+    from codepilot.agents.localizer import Localizer
+    from codepilot.agents.planner import Planner
+    from codepilot.artifacts import ArtifactStore, RetrievalSnapshotStore
+    from codepilot.graph.minimal import MinimalDependencies, run_minimal_graph
+    from codepilot.llm.base import LLMProvider
+    from codepilot.llm.config import load_llm_config
+    from codepilot.llm.fake import FakeLLM, Reply
+    from codepilot.llm.registry import LLMRegistry
+    from codepilot.llm.tracking import UsageTrackingProvider
+    from codepilot.patch.validator import PatchValidator
+    from codepilot.repo.graph import RepoGraph
+    from codepilot.repo.index import Indexer, RepositoryIndex
+    from codepilot.repo.workspace import WorkspaceError, WorkspaceManager
+    from codepilot.retrieval.service import retrieve_symbols
+    from codepilot.sandbox.base import Sandbox
+    from codepilot.sandbox.docker import DockerSandbox
+    from codepilot.sandbox.env_spec import EnvSpecError, resolve_env_spec
+    from codepilot.sandbox.fake import FakeSandbox, scripted_result
+    from codepilot.schemas.enums import ExecutionStatus, RunStatus
+    from codepilot.schemas.retrieval import FusionMethod, RetrievalResult
+    from codepilot.schemas.state import RepairState
+    from codepilot.schemas.usage import Usage
+    from codepilot.storage.db import (
+        create_engine_from_url,
+        create_session_factory,
+        init_db,
+        session_scope,
+    )
+    from codepilot.storage.repository import Stores
+    from codepilot.tools.base import WorkspacePathPolicy
+    from codepilot.tools.registry import build_tool_registry
+    from codepilot.tools.write_tools import TestRunBudget
+
+    if fake_llm_script is None and not allow_live_llm:
+        raise typer.BadParameter(
+            "必须提供 --fake-llm-script，或显式传 --allow-live-llm；默认不会调用付费 API"
+        )
+    if fake_llm_script is not None and allow_live_llm:
+        raise typer.BadParameter("--fake-llm-script 与 --allow-live-llm 不能同时使用")
+    try:
+        issue_path = Path(issue)
+        issue_text = issue_path.read_text(encoding="utf-8") if issue_path.is_file() else issue
+        if not issue_text.strip():
+            raise ValueError("Issue 不能为空")
+        fake_replies: list[Reply] | None = None
+        if fake_llm_script is not None:
+            raw = json.loads(fake_llm_script.read_text(encoding="utf-8"))
+            if not isinstance(raw, list):
+                raise ValueError("FakeLLM 脚本必须是 JSON 数组")
+            fake_replies = cast("list[Reply]", raw)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+    settings = get_settings()
+    settings.ensure_dirs()
+    run_id = "solve-" + secrets.token_hex(8)
+    artifacts = ArtifactStore(settings.artifacts_dir, run_id)
+    manager = WorkspaceManager(cache_root=settings.repo_cache_dir())
+    workspace = None
+    registry_owner: LLMRegistry | None = None
+    engine = create_engine_from_url("sqlite://")
+    init_db(engine)
+    factory = create_session_factory(engine)
+    try:
+        workspace = manager.create(
+            source=repo,
+            base_commit=base_commit,
+            target=artifacts.run_dir / "workspace",
+        )
+        spec = resolve_env_spec(workspace.path, explicit=env_spec)
+        sandbox: Sandbox
+        if fake_sandbox:
+            sandbox = FakeSandbox([scripted_result(ExecutionStatus.PASS)])
+        else:
+            sandbox = DockerSandbox(
+                artifacts=artifacts,
+                allowed_workspace_root=settings.runs_dir(),
+                log_tail_bytes=settings.sandbox_log_tail_bytes,
+            )
+        environment = sandbox.build_env(
+            repository=workspace.source.normalized,
+            base_commit=workspace.base_commit,
+            workspace=workspace.path,
+            env_spec=spec,
+            allow_network=allow_build_network,
+        )
+        with session_scope(factory) as session:
+            stores = Stores(session)
+            Indexer().index(stores, workspace)
+            index_data = RepositoryIndex(stores, workspace.repository_id)
+            graph = RepoGraph(index_data)
+            symbols = index_data.symbol_objects()
+            policy = WorkspacePathPolicy(workspace.path)
+            tools = build_tool_registry(
+                policy=policy,
+                index=index_data,
+                graph=graph,
+                base_commit=workspace.base_commit,
+                sandbox=sandbox,
+                environment=environment,
+                env_spec=spec,
+                test_budget=TestRunBudget(12),
+            )
+            localizer_provider: LLMProvider
+            planner_provider: LLMProvider
+            coder_provider: LLMProvider
+            if fake_replies is not None:
+                run_usage = Usage()
+                shared_provider = UsageTrackingProvider(FakeLLM(fake_replies), usage=run_usage)
+                localizer_provider = planner_provider = coder_provider = shared_provider
+                simulated_llm = True
+            else:
+                registry_owner = LLMRegistry(load_llm_config(settings.resolved_llm_config))
+                run_usage = registry_owner.usage
+                localizer_provider = registry_owner.for_role("localizer")
+                planner_provider = registry_owner.for_role("planner")
+                coder_provider = registry_owner.for_role("coder")
+                simulated_llm = False
+            snapshots = RetrievalSnapshotStore(artifacts)
+
+            def retrieve_for_solve(text: str) -> RetrievalResult:
+                return retrieve_symbols(
+                    workspace.path,
+                    symbols,
+                    text,
+                    channel="bm25",
+                    fusion_method=FusionMethod.WEIGHTED,
+                    channel_weights={"bm25": 1.0},
+                    graph=graph,
+                )
+
+            deps = MinimalDependencies(
+                repository=workspace.source.normalized,
+                workspace=workspace.path,
+                index=index_data,
+                graph=graph,
+                issue_analyzer=IssueAnalyzer(),
+                retriever=retrieve_for_solve,
+                localizer=Localizer(localizer_provider, index_data, workspace.path, snapshots),
+                impact_analyzer=ImpactAnalyzer(index_data, graph),
+                planner=Planner(planner_provider, tools, policy, index_data),
+                coder=CodingAgent(coder_provider, tools),
+                validator=PatchValidator(policy, workspace.base_commit, index=index_data),
+                sandbox=sandbox,
+                environment=environment,
+                env_spec=spec,
+                artifacts=artifacts,
+                usage=run_usage,
+                simulated_llm=simulated_llm,
+            )
+            initial = RepairState(
+                task_id=f"cli/{run_id}",
+                run_id=run_id,
+                repository_id=workspace.repository_id,
+                base_commit=workspace.base_commit,
+                issue=issue_text,
+                started_at=datetime.now(UTC),
+            )
+            final = run_minimal_graph(initial, deps)
+        report_path = artifacts.run_dir / "report.json"
+        typer.echo(report_path.read_text(encoding="utf-8"))
+        typer.echo(f"Run artifacts: {artifacts.run_dir}", err=True)
+        if final.status is not RunStatus.PROVISIONALLY_VERIFIED:
+            raise typer.Exit(code=1)
+    except typer.Exit:
+        raise
+    except (DockerException, WorkspaceError, EnvSpecError, OSError, ValueError) as exc:
+        detail = redact_text(str(exc))
+        typer.echo(
+            json.dumps(
+                {
+                    "status": "error",
+                    "stop_reason": "configuration_or_environment",
+                    "detail": detail,
+                },
+                ensure_ascii=False,
+            ),
+            err=True,
+        )
+        raise typer.Exit(code=1) from exc
+    finally:
+        if registry_owner is not None:
+            registry_owner.close()
+        if workspace is not None:
+            if keep_workspace:
+                typer.echo(f"workspace 保留在: {workspace.path}", err=True)
+            else:
+                manager.remove(workspace)
+        engine.dispose()
 
 
 @app.command("bench")

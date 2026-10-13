@@ -21,6 +21,7 @@ __all__ = [
     "finish_tool",
     "get_git_diff_tool",
     "run_tests_tool",
+    "validate_test_target",
 ]
 
 _NODE_ID = re.compile(r"^[A-Za-z0-9_./:\-\[\],=+]+$")
@@ -74,7 +75,7 @@ def run_tests_tool(
             )
         normalized: list[str] = []
         for target in args.test_ids:
-            checked = _validate_test_target(policy, target)
+            checked = validate_test_target(policy, target)
             if authorized_tests is not None and checked not in authorized_tests:
                 return ToolResponse.failure(
                     "run_tests", "unauthorized_test", f"test is not authorized: {target}"
@@ -117,7 +118,7 @@ def finish_tool() -> Tool:
     )
 
 
-def _validate_test_target(policy: WorkspacePathPolicy, target: str) -> str:
+def validate_test_target(policy: WorkspacePathPolicy, target: str) -> str:
     if (
         not target
         or target.startswith("-")

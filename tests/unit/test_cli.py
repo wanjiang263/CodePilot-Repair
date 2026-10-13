@@ -95,17 +95,15 @@ def test_unimplemented_commands_fail_loudly(command: str) -> None:
     也不是成功（0），CI 里任何把它当成功的写法都会立刻暴露。
     """
     args = [command]
-    if command in {"index", "retrieve", "run-tests", "solve", "bench", "report"}:
+    if command in {"index", "retrieve", "run-tests", "bench", "report"}:
         args.append("dummy")
-    if command == "solve":
-        args += ["--issue", "x", "--base-commit", "abc"]
 
     result = runner.invoke(app, args)
     assert result.exit_code == 2
 
 
-def test_unimplemented_message_names_the_phase() -> None:
-    result = runner.invoke(app, ["solve", "dummy", "--issue", "x", "--base-commit", "abc"])
+def test_solve_never_uses_live_provider_without_explicit_authorization() -> None:
+    result = runner.invoke(app, ["solve", "--repo", "dummy", "--issue", "x"])
     combined = result.stdout + (result.stderr or "")
-    assert "尚未实现" in combined
-    assert "Phase 5" in combined
+    assert result.exit_code == 2
+    assert "默认不会调用付费 API" in combined

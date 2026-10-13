@@ -42,6 +42,11 @@ class StopReason(StrEnum):
     SANDBOX_FAILURE = "sandbox_failure"
     VALIDATION_LOOP = "validation_loop"
     DIAGNOSIS_GIVE_UP = "diagnosis_give_up"
+    PATCH_REJECTED = "patch_rejected"
+    TESTS_FAILED = "tests_failed"
+    TOOL_ERROR = "tool_error"
+    BUDGET_TOOL_CALLS = "budget_tool_calls"
+    WORKFLOW_ERROR = "workflow_error"
 
 
 class RunStatus(StrEnum):
@@ -52,6 +57,12 @@ class RunStatus(StrEnum):
     FAILED = "failed"
     STOPPED = "stopped"
     ERROR = "error"
+    PROVISIONALLY_VERIFIED = "provisionally_verified"
+    PATCH_REJECTED = "patch_rejected"
+    TESTS_FAILED = "tests_failed"
+    SANDBOX_ERROR = "sandbox_error"
+    TOOL_ERROR = "tool_error"
+    BUDGET_EXHAUSTED = "budget_exhausted"
 
 
 class TaskMode(StrEnum):

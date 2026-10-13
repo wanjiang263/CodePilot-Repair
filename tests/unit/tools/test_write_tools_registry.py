@@ -15,7 +15,9 @@ from codepilot.tools.graph_tools import graph_tools
 from codepilot.tools.read_tools import find_symbol_tool, read_file_tool, search_code_tool
 from codepilot.tools.registry import ToolRegistry, ToolRole, UnregisteredToolError
 from codepilot.tools.write_tools import (
-    TestRunBudget,
+    TestRunBudget as _TestRunBudget,
+)
+from codepilot.tools.write_tools import (
     finish_tool,
     get_git_diff_tool,
     run_tests_tool,
@@ -63,7 +65,7 @@ def test_registry_has_eleven_unique_tools_and_role_permissions(tmp_path: Path) -
         edit_file_tool(policy),
         create_file_tool(policy),
         get_git_diff_tool(policy, base),
-        run_tests_tool(policy, sandbox, environment, EnvSpec(), TestRunBudget(2)),
+        run_tests_tool(policy, sandbox, environment, EnvSpec(), _TestRunBudget(2)),
         finish_tool(),
     ]
     registry = ToolRegistry(tools)
@@ -86,7 +88,7 @@ def test_run_tests_accepts_only_existing_test_node_ids_and_counts_budget(tmp_pat
     environment = EnvironmentBuildResult(
         status=ExecutionStatus.PASS, image_ref="fake://env", cache_key="key"
     )
-    budget = TestRunBudget(1)
+    budget = _TestRunBudget(1)
     tool = run_tests_tool(policy, sandbox, environment, EnvSpec(), budget)
     for target in [
         "tests/test_ok.py;whoami",
