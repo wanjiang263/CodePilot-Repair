@@ -63,7 +63,8 @@ Issue + IssueAnalysis + LocalizationResult
 | D-08 离线部分 | `pytest tests/unit/test_phase6_repro_stats.py` | 37 passed |
 | D-09 指标 | `pytest tests/unit/eval` | 24 passed |
 | FakeLLM + FakeSandbox E2E | `pytest tests/graph/test_phase6_reproduction_e2e.py -m "not docker"` | **9 passed / 2 docker deselected** |
-| Phase 6 合计（离线） | 上述定向集合 | **388 passed / 2 docker deselected**，exit 0 |
+| Phase 6 新增用例合计 | 上表逐文件相加 | **201 条**，与全量套件净增量一致（2107 − 1906 = 201） |
+| 含既有相邻面的放宽子集 | `pytest tests/graph/test_phase6_reproduction_e2e.py tests/unit/eval tests/unit/test_phase6_repro_stats.py tests/unit/agents tests/unit/patch tests/unit/schemas -m "not docker"` | 388 passed / 2 docker deselected（含 Phase 3/5 既有的 patch、schema、agents 用例，不是 Phase 6 新增数） |
 
 FakeSandbox 的每个结果都带 `execution_backend=fake` 与 `container_verified=False`，`RunReport.simulated_sandbox` 据此判定，不与真实执行混淆。
 
