@@ -34,10 +34,12 @@ P-01～P-23 已实现。数据流为：Issue → 真实仓库索引/BM25 检索 
 
 最终代码与文档完成后执行：
 
-- `ruff check .`：待最终记录。
-- `ruff format --check .`：待最终记录。
-- `mypy src`：待最终记录。
-- `pytest -m "not docker and not llm" --cov --cov-report=term-missing`：待最终记录。
+- `ruff check .`：PASS，exit 0。
+- `ruff format --check .`：PASS，240 files，exit 0。
+- `mypy src`：strict PASS，124 source files，exit 0。
+- `pytest -m "not docker and not llm" --cov --cov-report=term-missing`：**1906 passed / 1 skipped / 26 deselected**，覆盖率 **93.63%**，631.11s，exit 0。
+
+Phase 5 定向测试为 **47 passed / 1 Docker deselected**，exit 0；真实 Docker E2E 单独为 **1 passed / 8 offline deselected**，exit 0。全量离线唯一 skip 是未配置的预安装 Embedding 模型；26 个 deselected 是 25 个 Docker 标记用例（Phase 4 的 24 个加本轮 1 个）与 1 个真实 LLM 标记用例，不计入 passed。
 
 ## Deferred Acceptance
 
