@@ -12,6 +12,8 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
+from codepilot.schemas.enums import RiskLevel
+
 __all__ = [
     "CheatFinding",
     "CheatPattern",
@@ -59,7 +61,9 @@ class CheatFinding(BaseModel):
     """
 
     pattern: CheatPattern
+    rule_id: str = ""
     file: str
+    line: int | None = None
     detail: str
     reject: bool = True
 
@@ -79,6 +83,8 @@ class ValidationResult(BaseModel):
     files_changed: int = 0
     lines_added: int = 0
     lines_deleted: int = 0
+    risk: RiskLevel | None = None
+    evidence: list[str] = Field(default_factory=list)
 
     @property
     def lines_changed(self) -> int:

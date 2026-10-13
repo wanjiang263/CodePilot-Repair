@@ -122,7 +122,10 @@ class WorkspacePathPolicy:
 
         # A missing leaf may still have a symlink parent; resolve(strict=False) above
         # follows it. Recheck the existing parent identity immediately before use.
-        parent = resolved.parent.resolve(strict=True)
+        parent_candidate = candidate.parent
+        while not parent_candidate.exists() and parent_candidate != self.root:
+            parent_candidate = parent_candidate.parent
+        parent = parent_candidate.resolve(strict=True)
         if not parent.is_relative_to(self.root):
             raise PathAccessError("path_escape", "resolved parent escapes the workspace")
         if must_exist and expect_file and not resolved.is_file():
