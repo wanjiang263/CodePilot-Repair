@@ -23,7 +23,7 @@ from codepilot.schemas.enums import (
     TestOutcome,
 )
 from codepilot.schemas.execution import ExecutionResult, TestBaseline, TestCaseResult
-from codepilot.schemas.impact import ImpactAnalysis, ImpactedSymbol, Relation
+from codepilot.schemas.impact import ImpactAnalysis, ImpactedSymbol, ImpactedTest, Relation
 from codepilot.schemas.issue import IssueAnalysis
 from codepilot.schemas.localization import LocalizationResult
 from codepilot.schemas.plan import PlannedChange, RepairPlan
@@ -69,6 +69,7 @@ __all__ = [
     "FusionMethod",
     "ImpactAnalysis",
     "ImpactedSymbol",
+    "ImpactedTest",
     "IssueAnalysis",
     "IssueType",
     "LocalizationResult",

@@ -23,6 +23,7 @@ from codepilot.schemas.common import TraceFrame
 from codepilot.schemas.enums import IssueType
 from codepilot.schemas.issue import IssueAnalysis
 from codepilot.schemas.localization import FileDecision, LocalizationResult, SymbolDecision
+from codepilot.schemas.plan import PlannedChange, RepairPlan
 from codepilot.schemas.retrieval import RankedSymbol, RetrievalQuery
 
 __all__ = [
@@ -32,6 +33,8 @@ __all__ = [
     "IssueType",
     "LocalizationResult",
     "RankedSymbol",
+    "PlannedChange",
+    "RepairPlan",
     "RuleEvidence",
     "SymbolDecision",
     "TraceFrame",

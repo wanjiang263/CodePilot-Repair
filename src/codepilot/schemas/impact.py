@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 
 from codepilot.schemas.enums import RiskLevel
 
-__all__ = ["ImpactAnalysis", "ImpactedSymbol", "Relation"]
+__all__ = ["ImpactAnalysis", "ImpactedSymbol", "ImpactedTest", "Relation"]
 
 
 class Relation(StrEnum):
@@ -27,11 +27,24 @@ class Relation(StrEnum):
 
 
 class ImpactedSymbol(BaseModel):
+    symbol_id: str = ""
     qualified_name: str
     file: str
     relation: Relation
     distance: int = 1
+    edge_kind: str | None = None
+    confidence: str | None = None
+    evidence: str = ""
     """图上距离。V1 只取深度 1（02 §10.3）。"""
+
+
+class ImpactedTest(BaseModel):
+    path: str
+    symbol_id: str | None = None
+    qualified_name: str | None = None
+    confidence: str | None = None
+    source: str
+    evidence: str = ""
 
 
 class ImpactAnalysis(BaseModel):
@@ -44,6 +57,9 @@ class ImpactAnalysis(BaseModel):
     callees: list[ImpactedSymbol] = Field(default_factory=list)
     subclasses: list[ImpactedSymbol] = Field(default_factory=list)
     related_tests: list[str] = Field(default_factory=list)
+    related_test_evidence: list[ImpactedTest] = Field(default_factory=list)
 
     risk: RiskLevel = RiskLevel.LOW
     risk_reasons: list[str] = Field(default_factory=list)
+    risk_estimated: bool = True
+    missing_symbols: list[str] = Field(default_factory=list)
