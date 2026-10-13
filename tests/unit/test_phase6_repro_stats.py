@@ -18,7 +18,12 @@ from types import ModuleType
 
 import pytest
 
-from codepilot.agents.reproducer import screen_reproduction_test, write_reproduction_test
+from codepilot.agents.issue_analyzer import IssueAnalyzer
+from codepilot.agents.reproducer import (
+    _localization_gap,
+    screen_reproduction_test,
+    write_reproduction_test,
+)
 from codepilot.retrieval.dataset import load_dataset
 from codepilot.schemas.localization import LocalizationResult
 from codepilot.schemas.reproduction import REPRO_TEST_DIRECTORY
@@ -144,6 +149,27 @@ def test_localization_is_built_from_retrieval_not_from_gold_labels() -> None:
     assert localization.file_decisions[0].reason.startswith("BM25")
     assert snapshot_id
     assert "gold" not in localization.model_dump_json().lower()
+
+
+def test_harness_localization_uses_the_contract_caps_not_a_shorter_slice() -> None:
+    """离线夹具取满 ``LocalizationResult`` 自己的 3 文件 / 5 symbol 上限。
+
+    截到前两个会把"真正该改的文件排在第三"的任务在复现前就判成无关，测到的其实是
+    排序深度，不是复现能力。08-role-case 就是这一类（models.py 排第 3）。
+    """
+    for case in CASES:
+        root, _base, issue_text = stats.build_inference_inputs(case, DATASET_ROOT)
+        localization, _sid = stats.build_localization(Path(root), issue_text, task_id=case.task_id)
+        assert len(localization.files) <= 3
+        assert len(localization.symbols) <= 5
+        assert (
+            _localization_gap(
+                stats.CANDIDATES[case.task_id].content,
+                analysis=IssueAnalyzer().analyze(issue_text, repo_files=[]),
+                localization=localization,
+            )
+            == ()
+        ), case.task_id
 
 
 def test_degraded_targets_are_the_existing_repo_tests(tmp_path: Path) -> None:

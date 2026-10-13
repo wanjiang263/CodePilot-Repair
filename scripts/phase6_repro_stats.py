@@ -273,9 +273,11 @@ def build_localization(
         channel_weights={"bm25": 1.0},
         snapshot_id=f"phase6-offline-{task_id}",
     )
-    files = list(retrieval.files)[:2]
+    # 3 个文件 / 5 个 symbol 是 LocalizationResult 契约自己的上限（schemas.max_length），
+    # 取满上限而不是截到前两个：离线夹具的 Top-1 排序经常把真正该改的文件排到第三。
+    files = list(retrieval.files)[:3]
     symbols_ranked = [item for item in retrieval.symbols if item.file in {f.path for f in files}][
-        :3
+        :5
     ]
     snapshot_id = retrieval.snapshot_id or f"phase6-offline-{task_id}"
     if not files:
@@ -341,7 +343,9 @@ def run_reproduction(
         path.relative_to(repo_dir).as_posix() for path in repo_dir.rglob("*.py") if path.is_file()
     ]
     analysis = IssueAnalyzer().analyze(issue, repo_files=repo_files, repo_root=repo_dir)
-    llm = FakeLLM([candidate.reply()])
+    # default 而不是只给一条脚本：候选被拒绝时 Agent 会按预算重试，脚本化生成的
+    # "重试"就是同一份候选再交一次——它不会变好，于是结局如实记为拒绝并耗尽预算。
+    llm = FakeLLM([candidate.reply()], default=candidate.reply())
     validator = BaseWorkspaceValidator(
         sandbox=sandbox,
         env_spec=ENV_SPEC,
