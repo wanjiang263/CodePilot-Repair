@@ -37,7 +37,7 @@ from codepilot.repo.index import Indexer, RepositoryIndex
 from codepilot.repo.workspace import Workspace, WorkspaceManager, normalize_source
 from codepilot.report import RunReport
 from codepilot.retrieval.service import retrieve_symbols
-from codepilot.sandbox.base import Sandbox
+from codepilot.sandbox.base import EnvironmentBuildResult, Sandbox
 from codepilot.sandbox.docker import DockerSandbox
 from codepilot.sandbox.env_spec import EnvSpec
 from codepilot.sandbox.fake import FakeSandbox, scripted_result
@@ -79,6 +79,31 @@ def _env_spec() -> EnvSpec:
         install=("python -m pip install pytest",),
         env={"PYTHONPATH": "/workspace/src"},
     )
+
+
+@pytest.fixture(scope="session")
+def docker_environment(tmp_path_factory: pytest.TempPathFactory) -> EnvironmentBuildResult:
+    """整个 session 共用一次真实镜像构建。
+
+    每个测试各建一次镜像会把一次成功的 pip 安装变成两次，而第二次的下载在代理
+    环境下会随机撞上 pip 的哈希校验失败——那是宿主机网络问题，不是复现链路的
+    判定问题。缓存键由 (repository, base_commit, env_spec) 决定，所以这里用一组
+    固定标识，两个 Docker 场景共用同一个镜像。
+    """
+    root = tmp_path_factory.mktemp("phase6-docker-env")
+    sandbox = DockerSandbox(
+        artifacts=ArtifactStore(root / "artifacts", "phase6-docker-env"),
+        allowed_workspace_root=root,
+    )
+    image = sandbox.build_env(
+        repository="phase6-docker-e2e",
+        base_commit="snapshot",
+        workspace=root,
+        env_spec=_env_spec(),
+        allow_network=True,
+    )
+    assert image.succeeded, f"环境镜像构建失败：{image.status.value} {image.error}"
+    return image
 
 
 def _fixture(tmp_path: Path) -> tuple[Path, str]:
@@ -163,6 +188,7 @@ class _Chain:
         replies: list[Any] | None = None,
         max_retries: int = 3,
         drafts: int = 1,
+        environment: EnvironmentBuildResult | None = None,
     ) -> None:
         self.original, self.base = _fixture(tmp_path)
         self.tmp_path = tmp_path
@@ -206,6 +232,7 @@ class _Chain:
                 root=work_root / "base-workspaces",
             ),
             allow_network=real_docker,
+            environment=environment,
         )
         self.policy = WorkspacePathPolicy(self.workspace.path, repro_write=True)
         self.max_retries = max_retries
@@ -582,7 +609,7 @@ def _patch_only_script(index: RepositoryIndex) -> list[Any]:
 
 @pytest.mark.docker
 def test_real_docker_reproduces_the_defect_on_the_base_commit(
-    tmp_path: Path, stores: Stores
+    tmp_path: Path, stores: Stores, docker_environment: EnvironmentBuildResult
 ) -> None:
     from codepilot.repo.gitcmd import run_git
 
@@ -590,7 +617,7 @@ def test_real_docker_reproduces_the_defect_on_the_base_commit(
         artifacts=ArtifactStore(tmp_path / "docker-artifacts", "phase6-docker"),
         allowed_workspace_root=tmp_path,
     )
-    chain = _Chain(tmp_path, stores, sandbox, real_docker=True)
+    chain = _Chain(tmp_path, stores, sandbox, real_docker=True, environment=docker_environment)
 
     outcome = chain.run()
 
@@ -621,22 +648,36 @@ def test_real_docker_reproduces_the_defect_on_the_base_commit(
 
 @pytest.mark.docker
 def test_real_docker_reports_an_unreproducible_issue_and_degrades(
-    tmp_path: Path, stores: Stores
+    tmp_path: Path, stores: Stores, docker_environment: EnvironmentBuildResult
 ) -> None:
-    """真实容器里跑一个与 Issue 无关、在 base 上就通过的测试：必须判无效并降级。"""
+    """真实容器里跑一个"在 base 上本来就通过"的测试：必须判无效并降级。"""
     from codepilot.repo.gitcmd import run_git
 
     sandbox = DockerSandbox(
         artifacts=ArtifactStore(tmp_path / "docker-artifacts", "phase6-docker-invalid"),
         allowed_workspace_root=tmp_path,
     )
-    chain = _Chain(tmp_path, stores, sandbox, real_docker=True, max_retries=0)
+    chain = _Chain(
+        tmp_path,
+        stores,
+        sandbox,
+        real_docker=True,
+        max_retries=0,
+        environment=docker_environment,
+    )
     scripted = FakeLLM(
         [
             {
-                "filename": "test_repro_environment_probe.py",
-                "content": "def test_arithmetic_never_fails() -> None:\n    assert 1 + 1 == 2\n",
-                "expected_failure": "不该出现失败：这个测试与 Issue 无关",
+                "filename": "test_repro_already_green.py",
+                # 触达了定位文件，但把缺陷行为当成正确期望：base 上就是绿的，
+                # 因此它不是复现。这与"完全无关的测试"不同——后者在筛查阶段就被拒，
+                # 轮不到沙箱。
+                "content": (
+                    "from pkg.core import normalize\n\n\n"
+                    "def test_normalize_subtracts_one() -> None:\n"
+                    "    assert normalize(3) == 2\n"
+                ),
+                "expected_failure": "不该出现失败：这个期望写的就是当前的错值",
             },
         ]
     )
@@ -652,6 +693,15 @@ def test_real_docker_reports_an_unreproducible_issue_and_degrades(
     )
     assert outcome.result.attempts == 1
     assert outcome.result.kind is ReproductionFailureKind.INVALID_PASS
+    # 这一轮确实进了真实容器（不是被静态筛查挡掉的），否则不算"真实判为无效"。
+    evidence = chain.artifacts.read_json("reproduction/attempt-01-outcome.json")
+    assert evidence["kind"] == "invalid_pass"
+    assert evidence["execution"]["status"] == "PASS"
+    assert evidence["execution"]["diagnostics"]["execution_backend"] == "docker"
+    assert evidence["execution"]["diagnostics"]["container_verified"] is True
+    assert evidence["execution"]["tests"][0]["node_id"] == (
+        "tests/_codepilot_repro/test_repro_already_green.py::test_normalize_subtracts_one"
+    )
     assert outcome.degraded is True
     assert outcome.target_tests == FALLBACK
     assert not (chain.workspace.path / REPRO_TEST_DIRECTORY).exists()
