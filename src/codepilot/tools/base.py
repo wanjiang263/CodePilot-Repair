@@ -10,6 +10,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from codepilot.llm.types import ToolSpec
+from codepilot.schemas.reproduction import REPRO_TEST_DIRECTORY
 
 __all__ = [
     "PathAccessError",
@@ -19,6 +20,28 @@ __all__ = [
     "ToolResponse",
     "WorkspacePathPolicy",
 ]
+
+_REPRODUCTION_PARTS = tuple(REPRO_TEST_DIRECTORY.split("/"))
+_REPRODUCTION_DIRECTORY_NAME = _REPRODUCTION_PARTS[-1]
+_REPRODUCTION_FORBIDDEN_NAMES = frozenset(
+    {
+        "conftest.py",
+        "pytest.ini",
+        "tox.ini",
+        "setup.cfg",
+        "pyproject.toml",
+        "__init__.py",
+    }
+)
+
+
+def _touches_reproduction_directory(path: PurePosixPath) -> bool:
+    """大小写不敏感地判断路径是否落在复现目录里（Windows 上大小写不敏感）。"""
+    directories = tuple(item.casefold() for item in path.parts[:-1])
+    return (
+        _REPRODUCTION_DIRECTORY_NAME.casefold() in directories
+        or tuple(item.casefold() for item in path.parts[:2]) == _REPRODUCTION_PARTS
+    )
 
 
 class ToolPermission(StrEnum):
@@ -63,6 +86,11 @@ class WorkspacePathPolicy:
 
     ``deny_directories`` is an explicit, auditable configuration. No fuzzy name
     matching is used, so ordinary fixtures and public tests are not blocked.
+
+    ``repro_write`` is the single, minimal exception for the reproduction test
+    directory (Phase 6 D-05). It is a **trusted construction parameter**: no
+    model-facing argument can set it, so a Coding Agent cannot widen its own
+    permissions by naming a path under ``tests/_codepilot_repro/``.
     """
 
     DEFAULT_DENY_DIRECTORIES = frozenset(
@@ -76,6 +104,7 @@ class WorkspacePathPolicy:
         *,
         deny_directories: Iterable[str] = DEFAULT_DENY_DIRECTORIES,
         deny_files: Iterable[str] = DEFAULT_DENY_FILES,
+        repro_write: bool = False,
     ) -> None:
         root = Path(workspace).resolve(strict=True)
         if not root.is_dir():
@@ -83,6 +112,7 @@ class WorkspacePathPolicy:
         self.root = root
         self.deny_directories = frozenset(self._normalize_rule(item) for item in deny_directories)
         self.deny_files = frozenset(self._normalize_rule(item) for item in deny_files)
+        self.repro_write = bool(repro_write)
 
     @staticmethod
     def _normalize_rule(value: str) -> str:
@@ -96,7 +126,6 @@ class WorkspacePathPolicy:
         expect_file: bool = True,
         for_write: bool = False,
     ) -> Path:
-        del for_write  # permission is enforced by ToolRegistry; retained for explicit call sites.
         if not isinstance(relative, str) or not relative.strip():
             raise PathAccessError("invalid_path", "path must be a non-empty string")
         windows = PureWindowsPath(relative)
@@ -111,6 +140,7 @@ class WorkspacePathPolicy:
             raise PathAccessError("path_escape", "absolute, UNC and parent paths are forbidden")
         lexical = Path(*posix.parts)
         self._check_denylist(posix)
+        self._check_reproduction_directory(posix, for_write=for_write)
 
         candidate = self.root / lexical
         try:
@@ -128,6 +158,8 @@ class WorkspacePathPolicy:
         parent = parent_candidate.resolve(strict=True)
         if not parent.is_relative_to(self.root):
             raise PathAccessError("path_escape", "resolved parent escapes the workspace")
+        if for_write:
+            self._check_reproduction_parent(posix, resolved, for_write=for_write)
         if must_exist and expect_file and not resolved.is_file():
             raise PathAccessError("not_file", f"path is not a file: {normalized}")
         if not must_exist and candidate.exists():
@@ -149,6 +181,41 @@ class WorkspacePathPolicy:
             raise PathAccessError("forbidden_path", f"path is denied by policy: {text}")
         if text in self.deny_files:
             raise PathAccessError("forbidden_path", f"file is denied by policy: {text}")
+
+    def _check_reproduction_directory(self, path: PurePosixPath, *, for_write: bool) -> None:
+        """复现目录的写入例外：无凭证一律拒绝，有凭证也只允许规范位置。
+
+        读取不受影响——ReproductionAgent 与 Sandbox 都要能读到复现测试（D-07）。
+        """
+        if not for_write or not _touches_reproduction_directory(path):
+            return
+        if not self.repro_write:
+            raise PathAccessError(
+                "forbidden_path",
+                "the reproduction test directory requires a trusted reproduction context",
+            )
+        parts = path.parts
+        if parts[:2] != _REPRODUCTION_PARTS or len(parts) != 3:
+            raise PathAccessError(
+                "forbidden_path",
+                f"reproduction files must live exactly at {REPRO_TEST_DIRECTORY}/<test_*.py>",
+            )
+        leaf = parts[-1]
+        if leaf.casefold() in _REPRODUCTION_FORBIDDEN_NAMES:
+            raise PathAccessError("forbidden_path", f"protected configuration file: {leaf}")
+        if not leaf.startswith("test_") or not leaf.endswith(".py") or "/" in leaf:
+            raise PathAccessError("forbidden_path", f"not a reproduction test file: {leaf}")
+
+    def _check_reproduction_parent(
+        self, path: PurePosixPath, resolved: Path, *, for_write: bool
+    ) -> None:
+        """目录必须是真的在那棵树里，不是被 symlink 换出来的（D-05 第 6 条）。"""
+        if not for_write or not self.repro_write or not _touches_reproduction_directory(path):
+            return
+        if resolved.parent != self.root.joinpath(*_REPRODUCTION_PARTS):
+            raise PathAccessError(
+                "path_escape", "reproduction directory is not the workspace's own directory"
+            )
 
     def verify_identity(self, path: Path) -> None:
         """Detect a path replacement between validation and the actual operation."""

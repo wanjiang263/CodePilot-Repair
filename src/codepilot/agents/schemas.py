@@ -24,6 +24,12 @@ from codepilot.schemas.enums import IssueType
 from codepilot.schemas.issue import IssueAnalysis
 from codepilot.schemas.localization import FileDecision, LocalizationResult, SymbolDecision
 from codepilot.schemas.plan import PlannedChange, RepairPlan
+from codepilot.schemas.reproduction import (
+    ReproductionAttempt,
+    ReproductionFailureKind,
+    ReproductionResult,
+    ReproductionStatus,
+)
 from codepilot.schemas.retrieval import RankedSymbol, RetrievalQuery
 
 __all__ = [
@@ -35,6 +41,10 @@ __all__ = [
     "PlannedChange",
     "RankedSymbol",
     "RepairPlan",
+    "ReproductionAttempt",
+    "ReproductionFailureKind",
+    "ReproductionResult",
+    "ReproductionStatus",
     "RuleEvidence",
     "SymbolDecision",
     "TraceFrame",

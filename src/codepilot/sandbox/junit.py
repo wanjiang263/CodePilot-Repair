@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from xml.etree import ElementTree
 
@@ -10,7 +11,19 @@ from pydantic import BaseModel, Field
 from codepilot.schemas.enums import TestOutcome
 from codepilot.schemas.execution import TestCaseResult
 
-__all__ = ["JUnitParseError", "JUnitReport", "parse_junit", "parse_junit_text"]
+__all__ = [
+    "JUnitParseError",
+    "JUnitReport",
+    "parse_junit",
+    "parse_junit_text",
+]
+
+#: traceback 末行的 ``<file>:<line>: <ExceptionName>`` 是 pytest 写在 JUnit 结构化
+#: 文本里的异常类型，比在 stdout 里搜索可靠得多（Phase 6 D-03 的有效性判定依赖它）。
+_TRACEBACK_TYPE = re.compile(r"^[^\n]*\.\w+:\d+: (?P<exc>[A-Za-z_][A-Za-z0-9_.]*)\s*$")
+_MESSAGE_TYPE = re.compile(
+    r"^(?P<exc>[A-Z][A-Za-z0-9_]*(?:Error|Exception|Failed|Exit|Interrupt|Warning)):"
+)
 
 
 class JUnitParseError(ValueError):
@@ -79,7 +92,28 @@ def _parse_case(element: ElementTree.Element) -> TestCaseResult:
         duration=max(duration, 0.0),
         message=message,
         traceback=traceback,
+        failure_type=(
+            None if detail is None else _failure_type(detail, message=message, traceback=traceback)
+        ),
     )
+
+
+def _failure_type(
+    detail: ElementTree.Element, *, message: str | None, traceback: str | None
+) -> str | None:
+    """按「``type`` 属性 → traceback 末行 → message 前缀」提取结构化失败类型。"""
+    declared = (detail.get("type") or "").strip()
+    if declared and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*", declared):
+        return declared.rsplit(".", 1)[-1]
+    if traceback:
+        for line in reversed([item.strip() for item in traceback.splitlines() if item.strip()]):
+            if (match := _TRACEBACK_TYPE.match(line)) is not None:
+                return match.group("exc").rsplit(".", 1)[-1]
+    if message:
+        match = _MESSAGE_TYPE.match(message.strip())
+        if match is not None:
+            return match.group("exc")
+    return None
 
 
 def _node_id(element: ElementTree.Element) -> str:

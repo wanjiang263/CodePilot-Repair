@@ -33,7 +33,18 @@ from codepilot.schemas.regression import (
     RegressionMode,
     RegressionResult,
 )
-from codepilot.schemas.reproduction import ReproductionResult, ReproductionStatus
+from codepilot.schemas.reproduction import (
+    ENVIRONMENT_FAILURE_KINDS,
+    MAX_REPRO_ATTEMPTS,
+    MAX_REPRO_RETRIES,
+    REPRO_TEST_DIRECTORY,
+    ReproductionAttempt,
+    ReproductionFailureKind,
+    ReproductionResult,
+    ReproductionStatus,
+    is_reproduction_test_path,
+    validate_reproduction_test_path,
+)
 from codepilot.schemas.retrieval import (
     ChannelScore,
     FusionMethod,
@@ -54,6 +65,10 @@ from codepilot.schemas.validation import (
 )
 
 __all__ = [
+    "ENVIRONMENT_FAILURE_KINDS",
+    "MAX_REPRO_ATTEMPTS",
+    "MAX_REPRO_RETRIES",
+    "REPRO_TEST_DIRECTORY",
     "Attempt",
     "ChangeAction",
     "ChannelScore",
@@ -86,6 +101,8 @@ __all__ = [
     "RepairPlan",
     "RepairState",
     "RepairStrategy",
+    "ReproductionAttempt",
+    "ReproductionFailureKind",
     "ReproductionResult",
     "ReproductionStatus",
     "RetrievalQuery",
@@ -104,5 +121,7 @@ __all__ = [
     "Usage",
     "ValidationCheck",
     "ValidationResult",
+    "is_reproduction_test_path",
     "made_progress",
+    "validate_reproduction_test_path",
 ]

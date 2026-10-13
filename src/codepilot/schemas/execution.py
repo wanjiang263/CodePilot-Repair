@@ -26,6 +26,13 @@ class TestCaseResult(BaseModel):
     duration: float
     message: str | None = None
     traceback: str | None = None
+    failure_type: str | None = None
+    """JUnit 的结构化失败类型（如 ``AssertionError``、``ModuleNotFoundError``）。
+
+    pytest 的 xunit2 格式只在少数元素上写 ``type`` 属性，因此解析器按
+    「JUnit ``type`` 属性 → traceback 末行 ``file:line: ExcName`` → message
+    前缀」三级来源提取，**不**扫描 stdout（Phase 6 D-03 的有效性判定依赖它）。
+    """
 
 
 class ExecutionResult(BaseModel):

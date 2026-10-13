@@ -24,6 +24,8 @@ from codepilot.schemas import (
     RepairBudget,
     RepairPlan,
     RepairState,
+    ReproductionAttempt,
+    ReproductionFailureKind,
     ReproductionResult,
     ReproductionStatus,
     RetrievalQuery,
@@ -83,6 +85,24 @@ def _populated_state() -> RepairState:
             test_path="tests/_codepilot_repro/test_repro.py",
             fail_reason="IndexError",
             attempts=2,
+            kind=ReproductionFailureKind.VALID_ISSUE_EXCEPTION,
+            history=[
+                ReproductionAttempt(
+                    index=1,
+                    kind=ReproductionFailureKind.INVALID_PASS,
+                    detail="复现测试在 base 上通过",
+                    test_path="tests/_codepilot_repro/test_repro.py",
+                ),
+                ReproductionAttempt(
+                    index=2,
+                    kind=ReproductionFailureKind.VALID_ISSUE_EXCEPTION,
+                    detail="IndexError: list index out of range",
+                    test_path="tests/_codepilot_repro/test_repro.py",
+                    node_id="tests/_codepilot_repro/test_repro.py::test_first",
+                    failure_type="IndexError",
+                    exit_code=1,
+                ),
+            ],
         ),
         plan=RepairPlan(
             root_cause_hypothesis="未处理空列表",
