@@ -16,7 +16,12 @@ def _git_repo(tmp_path: Path) -> tuple[Path, str]:
     run_git(["init", "-q"], cwd=root)
     run_git(["config", "user.email", "tests@example.invalid"], cwd=root)
     run_git(["config", "user.name", "Tests"], cwd=root)
-    (root / "code.py").write_text("def greet(name):\n    return f'hi {name}'\n", encoding="utf-8")
+    # newline="\n"：真实 workspace 由 WorkspaceManager 以 core.autocrlf=false 检出，
+    # 磁盘字节与仓库里的 LF 一致。缺省 write_text 会在 Windows 上写成 CRLF，那就不是
+    # 被测形态了——git apply 是逐字节比较的。
+    (root / "code.py").write_text(
+        "def greet(name):\n    return f'hi {name}'\n", encoding="utf-8", newline="\n"
+    )
     run_git(["add", "."], cwd=root)
     run_git(["commit", "-qm", "base"], cwd=root)
     return root, run_git(["rev-parse", "HEAD"], cwd=root).stdout.strip()
