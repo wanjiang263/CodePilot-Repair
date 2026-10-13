@@ -245,6 +245,16 @@ def run_git(
         ) from exc
 
     try:
+        # ``text=True`` 会把 stdin 的 "\n" 翻译成 os.linesep。Windows 上这就是
+        # 一个静默的字节差异：workspace 强制 ``core.autocrlf=false``，仓库里是
+        # LF，而 stdin 送进去的 unified diff 变成 CRLF，``git apply`` 报
+        # "patch does not apply"（Phase 6 实测）。把 stdin 钉回 "\n"，让补丁的
+        # 字节与平台无关。
+        if input is not None and process.stdin is not None:
+            reconfigure = getattr(process.stdin, "reconfigure", None)
+            if callable(reconfigure):
+                with contextlib.suppress(ValueError, OSError):
+                    reconfigure(newline="\n")
         stdout, stderr = process.communicate(input=input, timeout=timeout)
     except subprocess.TimeoutExpired as exc:
         _terminate_tree(process)
