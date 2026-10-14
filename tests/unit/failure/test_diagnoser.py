@@ -143,6 +143,43 @@ def test_patch_causation_requires_actual_changed_line(tmp_path):
         agent.diagnose([ParsedFailure(test_id="test_x", message="bad")], current_patch="fabricated")
 
 
+def test_deleted_file_diff_is_context_but_not_current_evidence(tmp_path):
+    repo = init_repo(tmp_path / "repo", {"obsolete.py": "x = 1\n"})
+    (repo.path / "obsolete.py").unlink()
+    patch = generate_git_diff(repo.path, repo.head).text
+    llm = FakeLLM(
+        [
+            draft([Evidence(kind="code", file="obsolete.py", line=1, text="x = 1")]).model_copy(
+                update={"is_patch_caused": True}
+            )
+        ]
+    )
+    agent = DiagnosisAgent(llm, WorkspacePathPolicy(repo.path))
+    result = agent.diagnose(
+        [ParsedFailure(test_id="test_x", exception_type="ModuleNotFoundError")],
+        current_patch=patch,
+        base_commit=repo.head,
+    )
+    assert len(llm.calls) == 1
+    assert result.evidence == [] and result.confidence == 0
+    assert not result.is_patch_caused
+    assert len(agent.last_record.rejected_evidence) == 1
+    assert patch.strip() in llm.prompt_texts()[0]
+
+
+def test_deleted_isolated_file_still_cannot_enter_diagnosis(tmp_path):
+    repo = init_repo(tmp_path / "repo", {"gold.py": "answer = 42\n"})
+    (repo.path / "gold.py").unlink()
+    patch = generate_git_diff(repo.path, repo.head).text
+    llm = FakeLLM([])
+    agent = DiagnosisAgent(llm, WorkspacePathPolicy(repo.path))
+    with pytest.raises(ValueError, match="gold_isolation"):
+        agent.diagnose(
+            [ParsedFailure(test_id="test_x")], current_patch=patch, base_commit=repo.head
+        )
+    assert llm.calls == []
+
+
 def test_empty_response_and_budget_contract(tmp_path):
     failure = ParsedFailure(test_id="test_x", message="bad")
     for reply in ({}, "not json", {"root_cause": "  "}):

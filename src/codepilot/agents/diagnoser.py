@@ -22,6 +22,7 @@ from codepilot.failure.signature import execution_signatures
 from codepilot.llm.base import LLMProvider
 from codepilot.observability.redaction import redact_text
 from codepilot.patch.diff import generate_git_diff
+from codepilot.repo.gitcmd import run_git
 from codepilot.repo.index import RepositoryIndex
 from codepilot.repo.models import Symbol
 from codepilot.schemas.diagnosis import Diagnosis, Evidence, EvidenceKind
@@ -255,7 +256,39 @@ class DiagnosisAgent:
             canonical = generate_git_diff(self.policy.root, base_commit, policy=self.policy)
             if canonical.text != current_patch:
                 raise ValueError("patch must be the current canonical workspace diff")
+            deleted = set(
+                run_git(
+                    [
+                        "diff",
+                        "--no-renames",
+                        "--name-only",
+                        "--diff-filter=D",
+                        "-z",
+                        canonical.base_commit,
+                        "--",
+                    ],
+                    cwd=self.policy.root,
+                )
+                .stdout.rstrip("\0")
+                .split("\0")
+            )
             for file in canonical.files:
+                if file in deleted:
+                    # Deleted content is historical diff context, never current evidence.
+                    missing = self.policy.resolve(file, must_exist=False)
+                    identity = missing.relative_to(self.policy.root).as_posix()
+                    self.policy.resolve(identity, must_exist=False)
+                    isolation = ContextBuilder(workspace_root=self.policy.root).rejection_reason(
+                        ContextPart(
+                            level=ContextLevel.TARGET_SOURCE,
+                            label=file,
+                            source=identity,
+                            text="",
+                        )
+                    )
+                    if isolation:
+                        raise ValueError(isolation)
+                    continue
                 _read_source(self.policy, file)
             changed = _added_lines(current_patch)
             parts.append(

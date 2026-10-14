@@ -10,7 +10,7 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 from codepilot.failure.parser import FailureParser
-from codepilot.observability.redaction import redact_text
+from codepilot.observability.redaction import redact, redact_text
 from codepilot.schemas.execution import ExecutionResult
 
 
@@ -58,18 +58,25 @@ def collect(input_dir: Path, output_dir: Path, *, project_root: Path) -> dict[st
                         element.attrib.pop(key, None)
                 value = ElementTree.tostring(xml, encoding="unicode")
             else:
-                result = ExecutionResult.model_validate_json(value)
+                result = ExecutionResult.model_validate(redact(json.loads(value)))
                 batch = FailureParser().parse_execution(result)
                 value = result.model_dump_json()
             if not batch.failures and batch.execution_failure is None:
                 continue
             digest = hashlib.sha256(value.encode()).hexdigest()
             target = destination / f"sample-{digest}{path.suffix}"
+            metadata_target = target.with_suffix(".metadata.json")
+            # Validate both leaves before writing either; never follow existing links,
+            # including dangling ones, or overwrite separately maintained metadata.
+            for leaf in (target, metadata_target):
+                if leaf.is_symlink() or leaf.resolve().parent != destination:
+                    raise ValueError("output leaf escapes collection destination")
             sources.append(path.relative_to(root).as_posix())
             if target.exists():
                 duplicates += 1
                 continue
-            target.write_text(value, encoding="utf-8")
+            if metadata_target.exists():
+                raise ValueError("metadata already exists without a sample")
             metadata = {
                 "source": path.relative_to(root).as_posix(),
                 "sanitized_sha256": digest,
@@ -78,9 +85,11 @@ def collect(input_dir: Path, output_dir: Path, *, project_root: Path) -> dict[st
                 if batch.execution_failure
                 else None,
             }
-            target.with_suffix(".metadata.json").write_text(
-                json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
-            )
+            # Exclusive creation also refuses a leaf inserted after validation.
+            with metadata_target.open("x", encoding="utf-8") as stream:
+                stream.write(json.dumps(redact(metadata), ensure_ascii=False, indent=2))
+            with target.open("x", encoding="utf-8") as stream:
+                stream.write(value)
             collected += 1
         except (OSError, ValueError):
             errors += 1

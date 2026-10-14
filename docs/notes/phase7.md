@@ -163,3 +163,20 @@ DA-007 保持已关闭。新增 DA-010（P2）：真实多轮中的诊断质量�
 Phase 7 只将测试源码视为引用材料，不把新增测试或复现测试当作可信成功证据。
 
 本轮仅本地分支与新提交；无 Push、PR、Merge、reset、rebase 或 amend。
+
+## 收口复查修复（2026-10-14）
+
+修复复查确认的三个 P1 问题：ExecutionResult JSON 在解析后递归按敏感键脱敏，
+样本与 metadata 都不保留嵌套凭据；采集输出同时校验 sample/metadata 叶节点，
+拒绝符号链接并用独占创建防止覆盖；诊断允许规范 Git diff 中的已删除文件，
+保留其历史 diff 上下文，但删除文件不能成为当前源码 Evidence，评测隔离仍生效。
+
+新增 5 条回归用例覆盖嵌套敏感键、两类输出 symlink、删除文件诊断与删除 Gold
+文件隔离。最终定向命令 `pytest tests/unit/failure
+tests/graph/test_phase7_diagnosis_e2e.py -m "not docker" -q`：37 passed，
+1 deselected，14.87s，exit 0。Ruff、format --check、mypy src 均 exit 0。
+首次受限运行无法访问 pytest 临时目录；获准运行后发现新测试误用了小写状态枚举，
+改为正式 ENV_ERROR 后通过。未弱化原有断言。
+
+本次仅复跑 Phase 7 定向链路与静态检查，未重跑全仓覆盖率及真实 Docker；上文的
+2139 passed / 94.04% 和 Docker 结果属于修复前验收，不能视为本次提交的全量门禁。
