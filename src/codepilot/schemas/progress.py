@@ -23,6 +23,18 @@ class ProgressSnapshot(BaseModel):
     signatures: frozenset[str] = Field(default_factory=frozenset)
     """本轮全部失败签名。用于判断"错误是否推进到了别处"。"""
 
+    regression_measured: bool = True
+    """``regression_new_failures`` 是否来自一次真实的回归执行。
+
+    三级回归属于 Phase 9（G-26～G-29）。在它落地之前，把未测量的回归写成 0 会让
+    "上一轮回归有 2 个失败 → 本轮未测量写成 0"被 ``made_progress`` 判成**有进展**，
+    于是 no_progress 停止规则永远不触发，系统会一路烧到预算耗尽。所以未测量必须
+    显式说出来，不能借用 0 这个值。
+
+    默认 ``True`` 以保持既有 run 记录与 round-trip 行为不变（新增可选字段，
+    不改已有字段的名字或语义）。
+    """
+
 
 def made_progress(prev: ProgressSnapshot, cur: ProgressSnapshot) -> bool:
     """当前轮相对上一轮是否取得进展。
@@ -33,6 +45,11 @@ def made_progress(prev: ProgressSnapshot, cur: ProgressSnapshot) -> bool:
     """
     if cur.target_failed < prev.target_failed:
         return True
-    if cur.regression_new_failures < prev.regression_new_failures:
+    # 未测量的一侧不参与比较：拿"没测"当"变好了"会凭空制造进展。
+    if (
+        prev.regression_measured
+        and cur.regression_measured
+        and cur.regression_new_failures < prev.regression_new_failures
+    ):
         return True
     return cur.target_failed == prev.target_failed and cur.signatures != prev.signatures
