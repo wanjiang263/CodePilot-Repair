@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 __all__ = ["TraceFrame"]
 
@@ -17,7 +17,7 @@ class TraceFrame(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     file: str
-    line: int
+    line: int = Field(ge=1)
     function: str
     in_repo: bool
     # 文档写作 `code: str | None`。多数情况下 traceback 里拿不到源码行

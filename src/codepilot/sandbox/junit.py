@@ -14,6 +14,7 @@ from codepilot.schemas.execution import TestCaseResult
 __all__ = [
     "JUnitParseError",
     "JUnitReport",
+    "failure_type_from_traceback",
     "parse_junit",
     "parse_junit_text",
 ]
@@ -22,7 +23,7 @@ __all__ = [
 #: 文本里的异常类型，比在 stdout 里搜索可靠得多（Phase 6 D-03 的有效性判定依赖它）。
 _TRACEBACK_TYPE = re.compile(r"^[^\n]*\.\w+:\d+: (?P<exc>[A-Za-z_][A-Za-z0-9_.]*)\s*$")
 _MESSAGE_TYPE = re.compile(
-    r"^(?P<exc>[A-Z][A-Za-z0-9_]*(?:Error|Exception|Failed|Exit|Interrupt|Warning)):"
+    r"^(?P<exc>(?:[A-Z][A-Za-z0-9_]*(?:Error|Exception|Exit|Interrupt|Warning)|Failed|Exception|Warning)):"
 )
 
 
@@ -105,13 +106,22 @@ def _failure_type(
     declared = (detail.get("type") or "").strip()
     if declared and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*", declared):
         return declared.rsplit(".", 1)[-1]
-    if traceback:
-        for line in reversed([item.strip() for item in traceback.splitlines() if item.strip()]):
-            if (match := _TRACEBACK_TYPE.match(line)) is not None:
-                return match.group("exc").rsplit(".", 1)[-1]
+    if traceback and (extracted := failure_type_from_traceback(traceback)):
+        return extracted
     if message:
         match = _MESSAGE_TYPE.match(message.strip())
         if match is not None:
+            return match.group("exc")
+    return None
+
+
+def failure_type_from_traceback(traceback: str) -> str | None:
+    """Last exception in standard Python or pytest traceback, including collection syntax."""
+    for line in reversed([item.strip() for item in traceback.splitlines() if item.strip()]):
+        if (match := _TRACEBACK_TYPE.match(line)) is not None:
+            return match.group("exc").rsplit(".", 1)[-1]
+        python_line = re.sub(r"^E\s+", "", line)
+        if (match := _MESSAGE_TYPE.match(python_line)) is not None:
             return match.group("exc")
     return None
 
