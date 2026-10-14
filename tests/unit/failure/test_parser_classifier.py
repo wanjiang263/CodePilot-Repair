@@ -166,3 +166,32 @@ def test_authoritative_enum_exact_and_terminal_failed_type():
     assert failure.type_source == "message"
     timeout = failure.model_copy(update={"message": "Failed: Timeout >1.0s"})
     assert FailureClassifier().classify(timeout).category == FailureCategory.TIMEOUT
+
+
+def test_module_origin_requires_an_explicit_inventory():
+    f = ParsedFailure(
+        test_id="test_x", exception_type="ModuleNotFoundError", message="No module named 'pkg'"
+    )
+    assert FailureClassifier().classify(f).category == FailureCategory.UNKNOWN
+    assert FailureClassifier(repo_modules=[]).classify(f).category == FailureCategory.ENVIRONMENT
+    assert FailureClassifier(repo_modules=["pkg"]).classify(f).category == FailureCategory.IMPORT
+
+
+def test_call_failure_and_teardown_error_are_both_retained():
+    batch = FailureParser().parse_xml(
+        """<testsuite><testcase classname="test_a" name="test_x"><failure type="AssertionError" message="assert failed">test_a.py:1: AssertionError</failure><error type="ValueError" message="failed on teardown with ValueError">test_a.py:2: ValueError</error></testcase></testsuite>"""
+    )
+    assert len(batch.failures) == 2
+    assert [f.test_id for f in batch.failures] == ["test_a.py::test_x"] * 2
+    assert [FailureClassifier().classify(f).category.value for f in batch.failures] == [
+        "assertion",
+        "fixture",
+    ]
+    f = (
+        FailureParser()
+        .parse_xml(
+            '<testsuite><testcase name="x"><failure type="invalid type" message="bad">a.py:1: TypeError</failure></testcase></testsuite>'
+        )
+        .failures[0]
+    )
+    assert f.type_source == "traceback"

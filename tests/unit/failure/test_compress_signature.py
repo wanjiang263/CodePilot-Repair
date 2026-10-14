@@ -16,6 +16,7 @@ def test_signature_stability_negative_controls():
     )
     assert normalize(normalize(a.message)) == normalize(a.message)
     assert normalize("missing 'user'") != normalize("missing 'session'")
+    assert normalize("C:\\repo\\file.py") == normalize("/repo/file.py")
 
 
 def test_dedup_budget_identity_and_purity():

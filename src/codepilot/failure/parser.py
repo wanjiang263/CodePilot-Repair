@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Collection, Sequence
 from xml.etree import ElementTree
 
@@ -56,24 +57,28 @@ class FailureParser:
             raise JUnitParseError("JUnit declares failures without usable failure records")
         elements = list(ElementTree.fromstring(text).iter("testcase"))
         failures = []
-        for case, element in zip(report.tests, elements, strict=True):
-            if case.outcome not in (TestOutcome.FAILED, TestOutcome.ERROR):
-                continue
-            failure = self.parse_case(case, artifact_ref=artifact_ref)
-            detail = element.find("failure")
-            if detail is None:
-                detail = element.find("error")
-            if detail is not None and detail.get("type") and case.failure_type:
-                failure = failure.model_copy(update={"type_source": "junit_type"})
-            elif case.failure_type:
-                failure = failure.model_copy(
-                    update={
-                        "type_source": "traceback"
-                        if failure_type_from_traceback(case.traceback or "")
-                        else "message"
-                    }
-                )
-            failures.append(failure)
+        for element in elements:
+            # One pytest testcase may report both a call failure and teardown error.
+            # Feed each actual detail through the same authoritative JUnit adapter.
+            for detail in element:
+                if detail.tag not in {"failure", "error"}:
+                    continue
+                suite = ElementTree.Element("testsuite")
+                case_element = ElementTree.SubElement(suite, "testcase", element.attrib)
+                case_element.append(detail)
+                case = parse_junit_text(ElementTree.tostring(suite, encoding="unicode")).tests[0]
+                failure = self.parse_case(case, artifact_ref=artifact_ref)
+                if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*", (detail.get("type") or "").strip()):
+                    failure = failure.model_copy(update={"type_source": "junit_type"})
+                elif case.failure_type:
+                    failure = failure.model_copy(
+                        update={
+                            "type_source": "traceback"
+                            if failure_type_from_traceback(case.traceback or "")
+                            else "message"
+                        }
+                    )
+                failures.append(failure)
         return FailureBatch(failures=failures, artifact_ref=artifact_ref)
 
     def parse_execution(self, result: ExecutionResult) -> FailureBatch:

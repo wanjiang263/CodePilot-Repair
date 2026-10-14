@@ -50,11 +50,11 @@ class FailureClassifier:
         self,
         provider: LLMProvider | None = None,
         *,
-        repo_modules: Collection[str] = (),
+        repo_modules: Collection[str] | None = None,
         context_builder: ContextBuilder | None = None,
     ) -> None:
         self.provider = provider
-        self.repo_modules = frozenset(repo_modules)
+        self.repo_modules = None if repo_modules is None else frozenset(repo_modules)
         self.builder = context_builder or ContextBuilder()
         self.total = 0
         self.rule_hits = 0
@@ -92,9 +92,11 @@ class FailureClassifier:
             missing = re.search(
                 r"No module named ['\"]([^'\"]+)", failure.message + "\n" + failure.traceback
             )
-            if missing and self.repo_modules:
+            if missing:
                 name = missing[1].split(".")[0]
-                if name not in self.repo_modules:
+                if self.repo_modules is None:
+                    category, rule = FailureCategory.UNKNOWN, "unknown_module_origin"
+                elif name not in self.repo_modules:
                     category, rule = FailureCategory.ENVIRONMENT, "missing_external_module"
         return Classification(category=category, rule=rule, basis=exc or failure.phase)
 

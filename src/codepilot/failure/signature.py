@@ -10,6 +10,7 @@ from codepilot.failure.schemas import ParsedFailure
 
 def normalize(message: str) -> str:
     value = message.replace("\\", "/")
+    value = re.sub(r"(?i)\b[a-z]:(?=/)", "", value)
     value = re.sub(r"0x[0-9a-fA-F]+\b", "<address>", value)
     value = re.sub(
         r"(?i)(?:[a-z]:)?/(?:[^\s'\"<>:]+/)*(?:tmp|temp|pytest-of-[^/\s]+)/(?:[^\s'\"<>:]+)",
