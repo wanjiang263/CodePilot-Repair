@@ -20,6 +20,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 from codepilot.schemas.common import TraceFrame
+from codepilot.schemas.diagnosis import Diagnosis, Evidence, EvidenceKind
 from codepilot.schemas.enums import IssueType
 from codepilot.schemas.issue import IssueAnalysis
 from codepilot.schemas.localization import FileDecision, LocalizationResult, SymbolDecision
@@ -33,6 +34,9 @@ from codepilot.schemas.reproduction import (
 from codepilot.schemas.retrieval import RankedSymbol, RetrievalQuery
 
 __all__ = [
+    "Diagnosis",
+    "Evidence",
+    "EvidenceKind",
     "FileDecision",
     "IssueAnalysis",
     "IssueSemanticDraft",

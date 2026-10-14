@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from codepilot.schemas.enums import FailureCategory, RepairStrategy
 
@@ -24,15 +24,33 @@ class Evidence(BaseModel):
     降低 confidence（02 §14.6）。LLM 编造行号是很常见的失败模式。
     """
 
+    model_config = ConfigDict(extra="forbid")
     kind: EvidenceKind
-    file: str
-    line: int | None = None
-    text: str = ""
+    file: str = Field(min_length=1)
+    line: int = Field(ge=1, strict=True)
+    text: str = Field(min_length=1)
+    symbol_id: str | None = None
+
+    @field_validator("file", "text")
+    @classmethod
+    def nonempty(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("evidence cannot be whitespace")
+        return value
 
 
 class Diagnosis(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     failure_category: FailureCategory = FailureCategory.UNKNOWN
-    root_cause: str = ""
+    root_cause: str = Field(min_length=1)
+
+    @field_validator("root_cause")
+    @classmethod
+    def nonempty_hypothesis(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("root_cause must state a hypothesis")
+        return value
+
     evidence: list[Evidence] = Field(default_factory=list)
     suspected_symbols: list[str] = Field(default_factory=list)
 
@@ -45,7 +63,7 @@ class Diagnosis(BaseModel):
 
     repair_strategy: RepairStrategy = RepairStrategy.REFINE
 
-    confidence: float = 0.0
+    confidence: float = Field(default=0.0, ge=0, le=1, allow_inf_nan=False)
     """**只用于日志和分析，不参与控制流程**（02 §14.6 末句）。
 
     LLM 自报的置信度没有校准，用它做决策会引入无法调试的行为。
