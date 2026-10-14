@@ -1,0 +1,6 @@
+<testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1"><testcase classname="test_case" name="test_resource"><error message="failed on setup with &quot;ValueError: controlled setup failure&quot;">@pytest.fixture
+    def resource():
+&gt;       raise ValueError('controlled setup failure')
+E       ValueError: controlled setup failure
+
+test_case.py:5: ValueError</error></testcase></testsuite></testsuites>

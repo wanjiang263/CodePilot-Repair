@@ -1,0 +1,5 @@
+<testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1"><testcase classname="test_case" name="test_attribute"><failure message="AttributeError: 'object' object has no attribute 'absent'">def test_attribute():
+&gt;       object().absent
+E       AttributeError: 'object' object has no attribute 'absent'
+
+test_case.py:2: AttributeError</failure></testcase></testsuite></testsuites>

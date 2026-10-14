@@ -1,0 +1,15 @@
+<testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2"><testcase classname="test_case" name="test_many[1]"><failure message="assert 1 == 0">value = 1
+
+    @pytest.mark.parametrize('value', [1, 2])
+    def test_many(value):
+&gt;       assert value == 0
+E       assert 1 == 0
+
+test_case.py:5: AssertionError</failure></testcase><testcase classname="test_case" name="test_many[2]"><failure message="assert 2 == 0">value = 2
+
+    @pytest.mark.parametrize('value', [1, 2])
+    def test_many(value):
+&gt;       assert value == 0
+E       assert 2 == 0
+
+test_case.py:5: AssertionError</failure></testcase></testsuite></testsuites>

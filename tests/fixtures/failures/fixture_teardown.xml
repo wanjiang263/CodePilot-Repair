@@ -1,0 +1,7 @@
+<testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1"><testcase classname="test_case" name="test_resource"><error message="failed on teardown with &quot;ValueError: controlled teardown failure&quot;">@pytest.fixture
+    def resource():
+        yield 1
+&gt;       raise ValueError('controlled teardown failure')
+E       ValueError: controlled teardown failure
+
+test_case.py:6: ValueError</error></testcase></testsuite></testsuites>

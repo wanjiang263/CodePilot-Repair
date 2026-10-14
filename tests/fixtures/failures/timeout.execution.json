@@ -1,0 +1,17 @@
+{
+  "status": "TIMEOUT",
+  "exit_code": 1,
+  "duration_seconds": 0.0,
+  "tests": [],
+  "tests_passed": 0,
+  "tests_failed": 0,
+  "stdout_tail": "",
+  "stderr_tail": "",
+  "artifact_dir": "tests/fixtures/failures/timeout.execution.json",
+  "error_reason": "PYTEST_TIMEOUT_THREAD_EXIT",
+  "diagnostics": {
+    "execution_backend": "controlled_local_pytest",
+    "junit_written": false,
+    "timeout_seconds": 1
+  }
+}

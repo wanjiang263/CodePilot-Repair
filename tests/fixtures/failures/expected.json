@@ -1,0 +1,18 @@
+{
+  "assertion": {"category":"assertion","exception_type":"AssertionError","messages":["assert 1 == 2"],"line":2},
+  "attribute": {"category":"name_attribute","exception_type":"AttributeError","messages":["AttributeError: 'object' object has no attribute 'absent'"],"line":2},
+  "chain": {"category":"value_key_index","exception_type":"ValueError","messages":["ValueError: outer"],"line":5},
+  "collection": {"category":"collection","exception_type":"RuntimeError","messages":["collection failure"],"line":1},
+  "dependency": {"category":"environment","exception_type":"ModuleNotFoundError","messages":["ModuleNotFoundError: No module named 'codepilot_absent_dependency_7f98'"],"line":2},
+  "did_not_raise": {"category":"expected_exception_missing","exception_type":"Failed","messages":["Failed: DID NOT RAISE ValueError"],"line":4},
+  "fixture_setup": {"category":"fixture","exception_type":"ValueError","messages":["failed on setup with \"ValueError: controlled setup failure\""],"line":5},
+  "fixture_teardown": {"category":"fixture","exception_type":"ValueError","messages":["failed on teardown with \"ValueError: controlled teardown failure\""],"line":6},
+  "import": {"category":"import","exception_type":"ImportError","messages":["ImportError: cannot import name 'absent' from 'pkg' (/fixture\\pkg.py)"],"line":2},
+  "key": {"category":"value_key_index","exception_type":"KeyError","messages":["KeyError: 'missing'"],"line":2},
+  "multiple": {"category":"assertion","exception_type":"AssertionError","messages":["assert 1 == 0","assert 2 == 0"],"line":5},
+  "syntax": {"category":"syntax","exception_type":"SyntaxError","messages":["collection failure"],"line":1},
+  "type": {"category":"type","exception_type":"TypeError","messages":["TypeError: object of type 'int' has no len()"],"line":2},
+  "unknown": {"category":"unknown","exception_type":"RuntimeError","messages":["RuntimeError: opaque controlled failure"],"line":2},
+  "volatile_a": {"category":"value_key_index","exception_type":"ValueError","messages":["ValueError: object 0xabcdef at /tmp/tmpABC/item: 123"],"line":2},
+  "volatile_b": {"category":"value_key_index","exception_type":"ValueError","messages":["ValueError: object 0xfedcba at /tmp/tmpXYZ/item: 456"],"line":2}
+}

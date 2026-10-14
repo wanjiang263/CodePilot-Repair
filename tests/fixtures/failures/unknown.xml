@@ -1,0 +1,5 @@
+<testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1"><testcase classname="test_case" name="test_unknown"><failure message="RuntimeError: opaque controlled failure">def test_unknown():
+&gt;       raise RuntimeError('opaque controlled failure')
+E       RuntimeError: opaque controlled failure
+
+test_case.py:2: RuntimeError</failure></testcase></testsuite></testsuites>

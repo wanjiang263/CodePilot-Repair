@@ -1,0 +1,17 @@
+<testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1"><testcase classname="test_case" name="test_chain"><failure message="ValueError: outer">def test_chain():
+        try:
+&gt;           raise KeyError('origin')
+E           KeyError: 'origin'
+
+test_case.py:3: KeyError
+
+The above exception was the direct cause of the following exception:
+
+    def test_chain():
+        try:
+            raise KeyError('origin')
+        except KeyError as exc:
+&gt;           raise ValueError('outer') from exc
+E           ValueError: outer
+
+test_case.py:5: ValueError</failure></testcase></testsuite></testsuites>

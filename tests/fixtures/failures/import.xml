@@ -1,0 +1,5 @@
+<testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1"><testcase classname="test_case" name="test_import"><failure message="ImportError: cannot import name 'absent' from 'pkg' (/fixture\pkg.py)">def test_import():
+&gt;       from pkg import absent
+E       ImportError: cannot import name 'absent' from 'pkg' (/fixture\pkg.py)
+
+test_case.py:2: ImportError</failure></testcase></testsuite></testsuites>

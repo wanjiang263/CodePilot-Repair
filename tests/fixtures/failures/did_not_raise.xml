@@ -1,0 +1,6 @@
+<testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1"><testcase classname="test_case" name="test_raises"><failure message="Failed: DID NOT RAISE ValueError">def test_raises():
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+test_case.py:4: Failed</failure></testcase></testsuite></testsuites>

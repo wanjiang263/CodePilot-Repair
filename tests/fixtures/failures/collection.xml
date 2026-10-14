@@ -1,0 +1,4 @@
+<testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1"><testcase classname="" name="test_case"><error message="collection failure">&gt;   raise RuntimeError('controlled collection failure')
+E   RuntimeError: controlled collection failure
+
+test_case.py:1: RuntimeError</error></testcase></testsuite></testsuites>

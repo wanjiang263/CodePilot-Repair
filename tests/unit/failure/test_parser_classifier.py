@@ -78,6 +78,18 @@ def test_frame_invariants_and_roundtrip():
         is False
     )
     assert parse_traceback('File "x.py", line 0, in f') == []
+    absolute = parse_traceback('File "/pkg/a.py", line 1, in f', repo_files={"/pkg/a.py"})
+    assert absolute[0].in_repo is True
+    with pytest.raises(ValidationError):
+        ParsedFailure(test_id="x", frames=absolute, deepest_repo_frame=absolute[0])
+
+
+def test_only_failed_or_error_cases_are_failure_evidence():
+    for outcome in (TestOutcome.PASSED, TestOutcome.SKIPPED):
+        with pytest.raises(ValueError, match="failure evidence"):
+            FailureParser().parse_case(
+                TestCaseResult(node_id="t.py::test_x", outcome=outcome, duration=0.0)
+            )
 
 
 def test_pytest_specific_and_module_inventory():
