@@ -124,7 +124,7 @@ def _repeated_failure(tmp_path: Path) -> Harness:
         tmp_path,
         results=[
             assertion_failure(NODE, message="assert 1 == 3"),
-            assertion_failure(NODE, message="assert 0 == 3"),
+            assertion_failure(NODE, message="assert 1 == 3"),
         ],
         coder_rounds=[[EDIT, FINISH], [EDIT_AFTER_REVERT, FINISH]],
         diagnoses=[
@@ -141,14 +141,14 @@ def _oscillation(tmp_path: Path) -> Harness:
 
     第 3 轮如果交出与第 1 轮逐字相同的补丁，先命中的会是 ``repeated_patch``
     （优先级更高），测不到振荡判据。这里让第 3 轮改成 ``+ 5``：结果仍是正数，
-    消息归一化后与第 1 轮同为 ``assert <number> == <number>``，签名相同而补丁不同。
+    原始失败消息与第 1 轮一致，签名和失败身份相同而补丁不同。
     """
     return build_harness(
         tmp_path,
         results=[
             assertion_failure(NODE, message="assert 1 == 3"),
             scripted_type_failure(),
-            assertion_failure(NODE, message="assert 8 == 3"),
+            assertion_failure(NODE, message="assert 1 == 3"),
         ],
         coder_rounds=[
             [EDIT, FINISH],
