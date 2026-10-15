@@ -30,10 +30,7 @@ from codepilot.failure.compressor import compress_failures
 from codepilot.failure.signature import execution_signatures
 from codepilot.graph.budget import Activity
 from codepilot.graph.deps import Deps, DepsConfigurationError
-from codepilot.graph.progress import (
-    ProgressTracker,
-    build_progress_snapshot,
-)
+from codepilot.graph.progress import build_progress_snapshot
 from codepilot.graph.repair_policy import RepairPolicy
 from codepilot.graph.routing import (
     Node,
@@ -82,7 +79,6 @@ __all__ = [
 
 _DEFERRED = "DEFERRED:phase9-not-implemented"
 
-_tracker = ProgressTracker()
 _policy = RepairPolicy()
 
 

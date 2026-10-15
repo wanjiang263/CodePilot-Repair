@@ -36,7 +36,6 @@ __all__ = [
     "RoundEvidence",
     "build_progress_snapshot",
     "round_evidence",
-    "signature_sets",
 ]
 
 

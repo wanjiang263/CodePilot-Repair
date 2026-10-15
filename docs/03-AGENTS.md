@@ -563,7 +563,7 @@ Stop when any of these holds, and record the matching `stop_reason` (exact defin
 | stop_reason | condition |
 |---|---|
 | `budget_*` | iterations / test runs / tokens / cost / wall time exhausted |
-| `repeated_patch` | whitespace-normalized patch hash seen before |
+| `repeated_patch` | patch hash seen before (hash normalises content-free git metadata only; leading indentation and trailing whitespace inside string literals are Python semantics, so "strip all whitespace" is wrong — see 02 §15.5) |
 | `repeated_failure` | identical failure-signature set two rounds in a row |
 | `no_progress` | `made_progress` false two rounds in a row, or the current signature set already appeared in an earlier round (oscillation) |
 | `sandbox_failure` | `SANDBOX_ERROR` or `ENV_ERROR` |
