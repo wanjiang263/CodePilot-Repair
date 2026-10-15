@@ -161,11 +161,20 @@ Workspace 缺失或 base commit 对不上时**拒绝继续**（`status=error` +
 | Lint | `ruff check .` | exit 0 |
 | Format | `ruff format --check .` | exit 0 |
 | 类型 | `mypy src`（strict） | exit 0，144 files |
-| 离线全量 | `pytest -m "not docker and not llm" --cov` | 见下表 |
-| Phase 8 定向 | `pytest tests/graph tests/unit/graph` | **301 passed**（含 1 项 docker） |
-| 真实 Docker 两轮 E2E | `pytest tests/graph/test_phase8_docker_e2e.py -m docker` | **1 passed / 25.74s** |
+| 离线全量 | `pytest -m "not docker and not llm" --cov` | exit 0：**2419 passed / 0 failed / 1 skipped / 30 deselected**，覆盖率 **93.81%**（阈值 80.0%），1524.03s |
+| Phase 8 定向 | `pytest tests/graph tests/unit/graph` | exit 0：**301 passed / 0 failed**，560.42s（含 1 项 docker 标记用例） |
+| 真实 Docker 两轮 E2E | `pytest tests/graph/test_phase8_docker_e2e.py -m docker` | exit 0：**1 passed / 28.61s** |
 
 环境：Docker Desktop，Engine 29.8.2 / `OSType=linux`。
+
+**离线全量第一次运行是红的，且不是本轮引入的**：`tests/unit/repo/test_gitcmd.py::
+test_timeout_kills_the_grandchild_not_just_the_child` 失败（Phase 1 的孙进程树清理
+用例，超时预算 1.0s、轮询上限 6.0s、`elapsed < 3.5s`，三个数字在满负载下都会踩线）。
+本轮没有改动 `repo/gitcmd.py`，也没有改动该测试文件。隔离重跑三次均通过：77.59s、
+8.90s、137.99s——同一个用例的墙钟差 15 倍，说明它是负载敏感的计时断言，不是逻辑
+回归。第二次全量运行 2419 passed / 0 failed。处理方式：**没有 skip、没有放宽断言、
+没有降低阈值**；把它作为已知不稳定用例登记在这里，收紧计时预算属于 Phase 1 的
+测试维护，不在本轮范围内。
 
 FakeLLM + FakeSandbox 多轮通过率**不是**真实模型的自主修复成功率；真实模型链路
 （P-24）本轮仍然 NOT RUN。
