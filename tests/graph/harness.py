@@ -380,6 +380,7 @@ def build_harness(
     now: datetime | None = None,
     offsets: Sequence[float] = (),
     plan_replies: bool = True,
+    planner_replies: Sequence[Reply] | None = None,
     extra_plans: int = 0,
     reuse: bool = False,
 ) -> Harness:
@@ -450,7 +451,10 @@ def build_harness(
     if plan_replies:
         # 一次 ``Planner.plan()`` = 2 个请求：先要一次只读工具调用，再出最终 JSON。
         # 断言"有没有重新规划"时要按 2 的倍数数 planner 调用。
-        _planner_reply(script, tests)
+        if planner_replies is not None:
+            script.add("planner", *planner_replies)
+        else:
+            _planner_reply(script, tests)
     for _ in range(extra_plans):
         _planner_reply(script, tests)
     for round_replies in coder_rounds:

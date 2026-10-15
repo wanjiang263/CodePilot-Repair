@@ -181,32 +181,18 @@ class ProgressTracker:
             streak += 1
         return streak
 
-    def oscillation(
-        self, sets: Sequence[frozenset[str]]
-    ) -> tuple[int | None, frozenset[str] | None]:
-        """当前签名集合是否在更早的任意一轮出现过（含 A→B→C→A 这类长周期）。"""
-        if len(sets) < 2:
-            return None, None
-        current = sets[-1]
-        if not current:
-            # 没有失败（全通过）时不存在振荡可言。
-            return None, None
-        for index, candidate in enumerate(sets[:-1]):
-            if candidate == current:
-                return index + 1, candidate
-        return None, None
-
     def evaluate(self, state: RepairState) -> ProgressResult:
         snapshots = self.snapshots(state)
         evidence = self.evidence(state)
-        sets = signature_sets(state.attempts)
         reasons: list[str] = []
 
         streak = self.streak(snapshots)
         if streak:
             reasons.append(f"no_progress_streak={streak}")
 
-        # 重复失败：最近两轮的签名集合与失败身份都一致。
+        # 重复失败与振荡共用**同一套**身份核验。只给 repeated_failure 加核验没有
+        # 意义：no_progress 会因为"签名集合回到过更早一轮"把同一个 run 停在完全
+        # 相同的地方，DA-010 的误聚合照样生效。
         repeated_failure = False
         collision = False
         if len(evidence) >= 2:
@@ -224,10 +210,23 @@ class ProgressTracker:
                         "（DA-010：签名相同但失败身份不同，不作为停止依据）"
                     )
 
-        round_number, _ = self.oscillation(sets)
-        oscillated = round_number is not None
-        if oscillated and round_number is not None:
-            reasons.append(f"oscillation back to round {round_number}")
+        oscillation_round: int | None = None
+        if len(evidence) >= 2 and evidence[-1].signatures:
+            current = evidence[-1]
+            for position, earlier in enumerate(evidence[:-1], start=1):
+                if earlier.signatures != current.signatures:
+                    continue
+                if earlier.same_failures_as(current):
+                    oscillation_round = position
+                    break
+                collision = True
+                reasons.append(
+                    f"signature_collision round {position} vs {current.iteration}"
+                    "（DA-010：签名相同但失败身份不同，不判振荡）"
+                )
+        oscillated = oscillation_round is not None
+        if oscillated and oscillation_round is not None:
+            reasons.append(f"oscillation back to round {oscillation_round}")
 
         # 最近一轮相对上一轮是否推进。02 §15.4 末段：签名集合回到过更早的一轮，
         # 即使数字上"看起来变了"也判为无进展——那是振荡不是推进。
@@ -245,7 +244,7 @@ class ProgressTracker:
             no_progress_streak=streak,
             repeated_failure=repeated_failure,
             oscillated=oscillated,
-            oscillation_round=round_number,
+            oscillation_round=oscillation_round,
             signature_collision_suspected=collision,
             reasons=tuple(reasons),
         )

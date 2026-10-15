@@ -175,7 +175,7 @@ def _budget_guard(
     return {
         "status": status,
         "stop_reason": reason,
-        "failure_reasons": [*[state.failure_reasons, message]],
+        "failure_reasons": [*state.failure_reasons, message],
         "usage": deps.usage,
         "test_runs": deps.test_runs,
         "events": _emit(state, deps, node.value, f"blocked:{reason.value}"),
