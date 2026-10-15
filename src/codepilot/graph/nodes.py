@@ -40,7 +40,7 @@ from codepilot.graph.routing import (
     reproduction_target_tests,
     selected_target_tests,
 )
-from codepilot.graph.stop_rules import StopRules, patch_hash
+from codepilot.graph.stop_rules import patch_hash
 from codepilot.observability.events import EventType
 from codepilot.observability.redaction import redact_text
 from codepilot.patch.diff import generate_git_diff
@@ -83,7 +83,6 @@ __all__ = [
 _DEFERRED = "DEFERRED:phase9-not-implemented"
 
 _tracker = ProgressTracker()
-_stop_rules = StopRules()
 _policy = RepairPolicy()
 
 
@@ -881,7 +880,7 @@ async def check_budget(state: RepairState, deps: Deps) -> dict[str, Any]:
     ``validation_loop`` 与 ``repeated_patch`` 这类需要"跨过一轮"才能数出来的
     规则都在这里有唯一的判定点。
     """
-    decision = _stop_rules.evaluate(state)
+    decision = deps.rules.evaluate(state)
     deps.events.emit(
         node=Node.CHECK_BUDGET.value,
         type=EventType.BUDGET_CHECK,
@@ -893,7 +892,7 @@ async def check_budget(state: RepairState, deps: Deps) -> dict[str, Any]:
             "events": _emit(state, deps, Node.CHECK_BUDGET.value, "continue"),
         }
     primary = decision.primary
-    status = _stop_rules.status_for(decision)
+    status = deps.rules.status_for(decision)
     if primary is None or status is None:  # should_stop 已保证两者都在
         return {"events": _emit(state, deps, Node.CHECK_BUDGET.value, "continue")}
     reasons = [f"{Node.CHECK_BUDGET.value}: {item}" for item in decision.explanations]

@@ -30,11 +30,19 @@ def test_first_pass_patch_lands_and_graph_runs(tmp_path: Path) -> None:
     harness = build_harness(
         tmp_path,
         results=[passed_result()],
-        coder_rounds=[[{"tool": "edit_file", "arguments": {
-            "path": "src/pkg/core.py",
-            "search": "    return value - 1",
-            "replace": "    return value",
-        }}, {"tool": "finish", "arguments": {"summary": "fixed normalize"}}]],
+        coder_rounds=[
+            [
+                {
+                    "tool": "edit_file",
+                    "arguments": {
+                        "path": "src/pkg/core.py",
+                        "search": "    return value - 1",
+                        "replace": "    return value",
+                    },
+                },
+                {"tool": "finish", "arguments": {"summary": "fixed normalize"}},
+            ]
+        ],
     )
     state = harness.run()
 
@@ -81,14 +89,19 @@ def test_first_pass_does_not_fake_phase9_results(tmp_path: Path) -> None:
     harness = build_harness(
         tmp_path,
         results=[passed_result()],
-        coder_rounds=[[
-            {"tool": "edit_file", "arguments": {
-                "path": "src/pkg/core.py",
-                "search": "    return value - 1",
-                "replace": "    return value",
-            }},
-            {"tool": "finish", "arguments": {"summary": "fixed normalize"}},
-        ]],
+        coder_rounds=[
+            [
+                {
+                    "tool": "edit_file",
+                    "arguments": {
+                        "path": "src/pkg/core.py",
+                        "search": "    return value - 1",
+                        "replace": "    return value",
+                    },
+                },
+                {"tool": "finish", "arguments": {"summary": "fixed normalize"}},
+            ]
+        ],
     )
     state = harness.run()
 
@@ -118,14 +131,19 @@ def test_first_pass_budget_accounted_once_per_execution(tmp_path: Path) -> None:
     harness = build_harness(
         tmp_path,
         results=[passed_result(), passed_result(), passed_result()],
-        coder_rounds=[[
-            {"tool": "edit_file", "arguments": {
-                "path": "src/pkg/core.py",
-                "search": "    return value - 1",
-                "replace": "    return value",
-            }},
-            {"tool": "finish", "arguments": {"summary": "fixed"}},
-        ]],
+        coder_rounds=[
+            [
+                {
+                    "tool": "edit_file",
+                    "arguments": {
+                        "path": "src/pkg/core.py",
+                        "search": "    return value - 1",
+                        "replace": "    return value",
+                    },
+                },
+                {"tool": "finish", "arguments": {"summary": "fixed"}},
+            ]
+        ],
     )
     state = harness.run()
     assert state.test_runs == 3, state.model_dump_json(indent=2)
@@ -138,14 +156,19 @@ def test_first_pass_writes_artifacts_and_leaves_target_repo_untouched(tmp_path: 
     harness = build_harness(
         tmp_path,
         results=[passed_result()],
-        coder_rounds=[[
-            {"tool": "edit_file", "arguments": {
-                "path": "src/pkg/core.py",
-                "search": "    return value - 1",
-                "replace": "    return value",
-            }},
-            {"tool": "finish", "arguments": {"summary": "fixed"}},
-        ]],
+        coder_rounds=[
+            [
+                {
+                    "tool": "edit_file",
+                    "arguments": {
+                        "path": "src/pkg/core.py",
+                        "search": "    return value - 1",
+                        "replace": "    return value",
+                    },
+                },
+                {"tool": "finish", "arguments": {"summary": "fixed"}},
+            ]
+        ],
     )
     state = harness.run()
     run_dir = harness.artifacts_root / "runs" / state.run_id

@@ -18,7 +18,6 @@ LLM 脚本按 **purpose 分队列**而不是一个全局列表：一轮修复会
 
 from __future__ import annotations
 
-import shutil
 from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass, field
@@ -36,6 +35,7 @@ from codepilot.artifacts import ArtifactStore
 from codepilot.context.builder import ContextBuilder
 from codepilot.failure.parser import FailureParser
 from codepilot.graph.deps import Deps
+from codepilot.graph.stop_rules import patch_hash
 from codepilot.llm.fake import FakeLLM, Reply
 from codepilot.llm.tracking import UsageTrackingProvider
 from codepilot.observability.events import EventSink
@@ -43,35 +43,41 @@ from codepilot.patch.validator import PatchValidator
 from codepilot.repo.gitcmd import run_git
 from codepilot.repo.graph import RepoGraph
 from codepilot.repo.index import Indexer, RepositoryIndex
-from codepilot.repo.workspace import WorkspaceManager, normalize_source
+from codepilot.repo.workspace import WorkspaceManager
 from codepilot.retrieval.service import retrieve_symbols
-from codepilot.sandbox.base import EnvironmentBuildResult
 from codepilot.sandbox.env_spec import EnvSpec
 from codepilot.sandbox.fake import FakeSandbox, scripted_result
 from codepilot.schemas.budget import RepairBudget
-from codepilot.schemas.enums import ExecutionStatus, TestOutcome
+from codepilot.schemas.diagnosis import Diagnosis
+from codepilot.schemas.enums import ExecutionStatus, RunStatus, TestOutcome
 from codepilot.schemas.execution import ExecutionResult, TestCaseResult
 from codepilot.schemas.retrieval import FusionMethod
-from codepilot.schemas.state import RepairState
+from codepilot.schemas.state import Attempt, RepairState
 from codepilot.schemas.usage import Usage
+from codepilot.schemas.validation import ValidationResult
 from codepilot.tools.base import WorkspacePathPolicy
 from codepilot.tools.registry import build_tool_registry
 from codepilot.tools.write_tools import TestRunBudget
 
 DEFECTIVE = "def normalize(value: int) -> int:\n    return value - 1\n"
 CORRECT = "def normalize(value: int) -> int:\n    return value\n"
-EXISTING_TEST = (
-    "from pkg.core import normalize\n\n\ndef test_normalize() -> None:\n    assert normalize(3) == 3\n"
-)
+# expand_scope 需要"诊断点了一个还没被定位到的真实 symbol"。多一个独立模块比在
+# core.py 里加函数更干净：它同时验证新增文件与新增 symbol 两条路径，而且不会
+# 改动 core.py 的行号，第一轮的所有断言保持不变。
+HELPER = "def coerce(value: int) -> int:\n    return int(value)\n"
+EXISTING_TEST = "from pkg.core import normalize\n\n\ndef test_normalize() -> None:\n    assert normalize(3) == 3\n"
 ISSUE = "normalize(3) returns 2; the contract is that it returns the value unchanged."
 TARGET = "tests/test_core.py"
 
 __all__ = [
+    "CORRECT",
     "DEFECTIVE",
-    "Harness",
+    "HELPER",
     "ISSUE",
-    "PurposeScript",
+    "ROUND1_FIXTURE",
     "TARGET",
+    "Harness",
+    "PurposeScript",
     "assert_original_clean",
     "assertion_failure",
     "build_harness",
@@ -84,6 +90,7 @@ def _base_repo(root: Path) -> tuple[Path, str]:
     (original / "src/pkg").mkdir(parents=True)
     (original / "tests").mkdir(parents=True)
     (original / "src/pkg/core.py").write_text(DEFECTIVE, encoding="utf-8")
+    (original / "src/pkg/helper.py").write_text(HELPER, encoding="utf-8")
     (original / "tests/test_core.py").write_text(EXISTING_TEST, encoding="utf-8")
     (original / "pyproject.toml").write_text(
         "[project]\nname='fixture'\nversion='0.0.1'\n", encoding="utf-8"
@@ -132,7 +139,8 @@ def multiple_failures(count: int, *, prefix: str) -> ExecutionResult:
 
 def passed_result(node_id: str = TARGET) -> ExecutionResult:
     return scripted_result(
-        ExecutionStatus.PASS, tests=[TestCaseResult(node_id=node_id, outcome=TestOutcome.PASSED, duration=0.1)]
+        ExecutionStatus.PASS,
+        tests=[TestCaseResult(node_id=node_id, outcome=TestOutcome.PASSED, duration=0.1)],
     )
 
 
@@ -172,6 +180,15 @@ def edit(path: str, search: str, replace: str) -> dict[str, Any]:
 
 
 FINISH: dict[str, Any] = {"tool": "finish", "arguments": {"summary": "done"}}
+#: 第 1 轮的"改坏了"编辑：把 -1 改成 -2，补丁真实落盘但目标测试仍然失败。
+ROUND1_FIXTURE: dict[str, Any] = {
+    "tool": "edit_file",
+    "arguments": {
+        "path": "src/pkg/core.py",
+        "search": "    return value - 1",
+        "replace": "    return value - 2",
+    },
+}
 
 
 def _localizer_replies(script: PurposeScript, target_symbol: Any, target_file: Any) -> None:
@@ -276,6 +293,68 @@ class Harness:
     def close(self) -> None:
         self.deps.close()
 
+    def prime(
+        self,
+        *,
+        patch_diff: str,
+        execution: ExecutionResult,
+        diagnosis_payload: Diagnosis,
+        extra_attempts: int = 0,
+    ) -> RepairState:
+        """真的把分析链跑到"第 1 轮补丁已校验、测试已失败、诊断已给出"。
+
+        节点级测试需要一份**合法的** ``localization`` / ``plan`` / ``issue_analysis``
+        才能喂给 Coding Agent。手工捏这些对象会绕过 ``LocalizationResult`` 的
+        成员校验，测出来的"通过"没有意义，所以这里跑的是真实节点。
+
+        ``extra_attempts`` 用来把历史垫到指定的迭代数（预算类测试用）。
+        """
+        import asyncio
+
+        from codepilot.graph import nodes
+
+        state = self.initial
+        for name in (
+            "understand_issue",
+            "retrieve",
+            "localize",
+            "analyze_impact",
+            "plan",
+        ):
+            update = asyncio.run(getattr(nodes, name)(state, self.deps))
+            state = state.model_copy(update=update)
+        attempt = Attempt(
+            iteration=1,
+            patch_diff=patch_diff,
+            patch_hash=patch_hash(patch_diff),
+            validation=ValidationResult(passed=True),
+            execution=execution,
+            failure_signatures=sorted({case.node_id for case in execution.failed_tests}),
+            diagnosis=diagnosis_payload,
+        )
+        attempts = [attempt]
+        for index in range(2, extra_attempts + 2):
+            attempts.append(
+                Attempt(
+                    iteration=index,
+                    patch_diff=patch_diff,
+                    patch_hash=f"history-{index}",
+                    validation=ValidationResult(passed=True),
+                    execution=execution,
+                    failure_signatures=[f"sig-{index}"],
+                    diagnosis=diagnosis_payload,
+                )
+            )
+        return state.model_copy(
+            update={
+                "attempts": attempts,
+                "execution": execution,
+                "current_patch": patch_diff,
+                "status": RunStatus.RUNNING,
+                "test_runs": 1,
+            }
+        )
+
 
 def assert_original_clean(harness: Harness) -> None:
     """原始仓库必须分毫不差（03 §28：never modify the user's working tree）。"""
@@ -297,7 +376,8 @@ def build_harness(
     cost_per_call: float = 0.0,
     now: datetime | None = None,
     offsets: Sequence[float] = (),
-    plan_tests: bool = True,
+    plan_replies: bool = True,
+    extra_plans: int = 0,
 ) -> Harness:
     """装配一次可运行的图。
 
@@ -306,7 +386,9 @@ def build_harness(
     """
     original, base = _base_repo(tmp_path)
     manager = WorkspaceManager(cache_root=tmp_path / "cache")
-    workspace = manager.create(source=str(original), base_commit=base, target=tmp_path / "workspace")
+    workspace = manager.create(
+        source=str(original), base_commit=base, target=tmp_path / "workspace"
+    )
     ws_path = workspace.path
 
     from codepilot.storage.repository import Stores
@@ -324,7 +406,11 @@ def build_harness(
     target_symbol = next(item for item in symbols if item.qualified_name == "pkg.core.normalize")
     target_file = next(item for item in files if item.path == "src/pkg/core.py")
     _localizer_replies(script, target_symbol, target_file)
-    if plan_tests:
+    if plan_replies:
+        # 一次 ``Planner.plan()`` = 2 个请求：先要一次只读工具调用，再出最终 JSON。
+        # 断言"有没有重新规划"时要按 2 的倍数数 planner 调用。
+        _planner_reply(script, tests)
+    for _ in range(extra_plans):
         _planner_reply(script, tests)
     for round_replies in coder_rounds:
         script.add("coder", *round_replies)
@@ -349,10 +435,14 @@ def build_harness(
     # build_env 一定先在 base commit 上跑**两次**全量测试建基线（03 §14），所以
     # 基线结果由夹具显式提供并排在前面，测试脚本里的 ``results`` 只写目标测试。
     # 不自动补的话，FakeSandbox 会在基线那一步就拒绝伪造结果——这正是它应有的行为。
-    scripted = list(baseline_results if baseline_results is not None else [passed_result(), passed_result()])
+    scripted = list(
+        baseline_results if baseline_results is not None else [passed_result(), passed_result()]
+    )
     scripted.extend(results)
     sandbox = FakeSandbox(scripted, build_status=build_status)
-    env_spec = EnvSpec(install=("python -m pip install pytest",), env={"PYTHONPATH": "/workspace/src"})
+    env_spec = EnvSpec(
+        install=("python -m pip install pytest",), env={"PYTHONPATH": "/workspace/src"}
+    )
     environment = sandbox.build_env(
         repository=str(original), base_commit=base, workspace=ws_path, env_spec=env_spec
     )

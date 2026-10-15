@@ -38,6 +38,7 @@ from codepilot.context.builder import ContextBuilder
 from codepilot.failure.classifier import FailureClassifier
 from codepilot.failure.parser import FailureParser
 from codepilot.graph.budget import BudgetManager
+from codepilot.graph.stop_rules import StopRules
 from codepilot.llm.registry import LLMRegistry
 from codepilot.observability.events import EventSink
 from codepilot.patch.validator import PatchValidator
@@ -189,6 +190,7 @@ class Deps:
     clock: Clock = utcnow
     #: 允许注入自定义判定器；缺省时在 ``__post_init__`` 里绑定 ``clock``。
     budget_manager: BudgetManager | None = None
+    stop_rules: StopRules | None = None
 
     #: Phase 9 接缝：本轮刻意留空，节点必须记录 DEFERRED 而不是伪造 PASS。
     regression_runner: RegressionRunner | None = None
@@ -202,6 +204,7 @@ class Deps:
     #: ``__post_init__`` 归一化后的计数视图。
     accounting: AccountingSandbox = field(init=False)
     _budget: BudgetManager | None = field(init=False, default=None, repr=False)
+    _stop_rules: StopRules | None = field(init=False, default=None, repr=False)
     closed: bool = field(init=False, default=False)
 
     def __post_init__(self) -> None:
@@ -216,6 +219,8 @@ class Deps:
             self.sandbox = self.accounting
         if self.budget_manager is not None:
             self._budget = self.budget_manager
+        if self.stop_rules is not None:
+            self._stop_rules = self.stop_rules
 
     @property
     def budget(self) -> BudgetManager:
@@ -227,6 +232,19 @@ class Deps:
         if self._budget is None:
             self._budget = BudgetManager(clock=self.clock)
         return self._budget
+
+    @property
+    def rules(self) -> StopRules:
+        """停止规则判定器，必须复用 :attr:`budget`。
+
+        它不能是模块级单例：单例里的 ``BudgetManager`` 会在构造时绑定真实
+        ``utcnow``，于是 ``check_budget`` 用宿主机时间判预算，而节点入口检查用
+        注入时钟判预算——同一个 run 里两套时间口径，实测会让 ``budget_time``
+        在第一次修复轮就误报耗尽。单例还会让并行 run 共享判定状态。
+        """
+        if self._stop_rules is None:
+            self._stop_rules = StopRules(budget=self.budget)
+        return self._stop_rules
 
     # ------------------------------------------------------------------ 身份
 
