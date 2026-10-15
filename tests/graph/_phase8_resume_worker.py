@@ -76,9 +76,7 @@ def inspect(tmp_path: Path) -> None:
     """只读 checkpoint，不跑图：崩溃后"到底存下了什么"。"""
     # pending_nodes 需要一张已编译的图来算"下一步该跑哪个节点"；接回的是崩溃进程
     # 留下的 Workspace 与索引，不是重新搭一份现场。
-    probe = build_harness(
-        tmp_path, results=[], baseline_results=[], coder_rounds=[], reuse=True
-    )
+    probe = build_harness(tmp_path, results=[], baseline_results=[], coder_rounds=[], reuse=True)
 
     async def look() -> dict[str, object]:
         async with await open_checkpointer(_checkpoint_path(tmp_path), "phase8-run") as handle:

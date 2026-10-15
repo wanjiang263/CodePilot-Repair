@@ -268,7 +268,9 @@ async def run_graph_async(
     try:
         result = await _ainvoke(graph, payload, config, durability=mode)
     except GraphRecursionError as exc:
-        return _report_recursion_overflow(initial, deps, config, exc)
+        return await _report_recursion_overflow(
+            initial, deps, config, exc, graph=graph if checkpointer is not None else None
+        )
     return RepairState.model_validate(result)
 
 
@@ -305,33 +307,47 @@ def run_graph(
     )
 
 
-def _report_recursion_overflow(
+async def _report_recursion_overflow(
     initial: RepairState,
     deps: Deps,
     config: dict[str, Any],
     exc: Exception,
+    *,
+    graph: Any | None = None,
 ) -> RepairState:
     """recursion_limit 命中时的安全终止。
 
     不假装成功：状态写成 ``error`` + ``workflow_error``，并把命中的上限与原因
     写进 ``failure_reasons``，报告里能直接看出这是"最后一道防线被触发"，
     而不是某条正常的停止规则。
+
+    有 checkpointer 时**先回读最后一个 checkpoint**：里面可能有已经真实完成的
+    节点与已计费的用量，直接拿 ``initial`` 会让一次已经烧了钱的运行在报告里
+    变成"什么都没发生"。回读必须是 ``await aget_state``：``AsyncSqliteSaver``
+    禁止在主线程里同步调用。
     """
     limit = config["recursion_limit"]
+    recovered = initial
+    if graph is not None:
+        snapshot = await graph.aget_state(config)
+        if snapshot.values:
+            recovered = RepairState.model_validate(dict(snapshot.values))
     message = (
         f"recursion_limit={limit} reached; the graph stopped as a last resort "
         f"(StopRules should have stopped earlier). {type(exc).__name__}"
     )
     deps.events.emit(node="recursion_limit", type=EventType.STOP, status=message)
-    return initial.model_copy(
+    return recovered.model_copy(
         update={
             "status": RunStatus.ERROR,
             "stop_reason": StopReason.WORKFLOW_ERROR,
-            "failure_reasons": [*initial.failure_reasons, message],
+            "failure_reasons": [*recovered.failure_reasons, message],
+            "usage": deps.usage,
+            "test_runs": deps.test_runs,
             "events": [
-                *initial.events,
+                *recovered.events,
                 {
-                    "seq": len(initial.events) + 1,
+                    "seq": len(recovered.events) + 1,
                     "node": "recursion_limit",
                     "status": "error",
                     "error": message,

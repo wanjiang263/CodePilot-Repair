@@ -46,10 +46,15 @@ from typing import Any
 import aiosqlite
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+from langgraph.errors import GraphRecursionError
 from pydantic import BaseModel
 
 from codepilot import __version__
-from codepilot.graph.builder import build_graph, graph_config
+from codepilot.graph.builder import (
+    _report_recursion_overflow,
+    build_graph,
+    graph_config,
+)
 from codepilot.graph.deps import Deps
 from codepilot.graph.stop_rules import patch_hash
 from codepilot.observability.events import EventType
@@ -374,11 +379,18 @@ async def _ainvoke_checkpointed(
     payload: dict[str, Any] | None,
     recursion_limit: int | None,
 ) -> RepairState:
-    """异步执行。节点是 ``async def``，用同步 ``invoke`` 会直接 TypeError。"""
+    """异步执行。节点是 ``async def``，用同步 ``invoke`` 会直接 TypeError。
+
+    recursion_limit 命中时与 :func:`codepilot.graph.builder.run_graph` 走同一个
+    安全终止路径：回读最后一次落盘的状态，把已经发生的用量如实带出来。
+    """
     graph = build_graph(deps, checkpointer=handle.saver)
     anchor = RepairState.model_validate(payload) if payload else _anchor(deps)
     config = graph_config(deps, anchor, recursion_limit=recursion_limit)
-    result = await graph.ainvoke(payload, config, durability="sync")
+    try:
+        result = await graph.ainvoke(payload, config, durability="sync")
+    except GraphRecursionError as exc:
+        return await _report_recursion_overflow(anchor, deps, config, exc, graph=graph)
     return RepairState.model_validate(result)
 
 
