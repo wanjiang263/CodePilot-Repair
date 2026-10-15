@@ -18,6 +18,7 @@ LLM 脚本按 **purpose 分队列**而不是一个全局列表：一轮修复会
 
 from __future__ import annotations
 
+import json
 from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass, field
@@ -67,6 +68,8 @@ CORRECT = "def normalize(value: int) -> int:\n    return value\n"
 HELPER = "def coerce(value: int) -> int:\n    return int(value)\n"
 EXISTING_TEST = "from pkg.core import normalize\n\n\ndef test_normalize() -> None:\n    assert normalize(3) == 3\n"
 ISSUE = "normalize(3) returns 2; the contract is that it returns the value unchanged."
+#: 恢复测试用它把"旧现场"的身份传给新进程（真实运行里这份信息在数据库的 run 记录里）。
+_SPEC = "run_spec.json"
 TARGET = "tests/test_core.py"
 
 __all__ = [
@@ -378,26 +381,64 @@ def build_harness(
     offsets: Sequence[float] = (),
     plan_replies: bool = True,
     extra_plans: int = 0,
+    reuse: bool = False,
 ) -> Harness:
     """装配一次可运行的图。
 
     ``offsets`` 注入**假时钟**：``clock()`` 依次返回 ``now + offsets``，用于触发
     ``budget_time`` 而不必真等 30 分钟。队列耗尽后一直返回最后一个值。
+
+    ``reuse=True`` 用于**中断恢复**：不重建 git 夹具、不重新 create Workspace、
+    不重新索引，而是接回上一次运行留下的 Workspace 与文件型索引库。恢复测试的
+    价值恰恰在于"新进程面对的是旧的现场"，重新搭一遍就等于把要验的东西绕开了。
     """
-    original, base = _base_repo(tmp_path)
-    manager = WorkspaceManager(cache_root=tmp_path / "cache")
-    workspace = manager.create(
-        source=str(original), base_commit=base, target=tmp_path / "workspace"
-    )
-    ws_path = workspace.path
+    spec_path = tmp_path / _SPEC
+    if reuse:
+        spec = json.loads(spec_path.read_text(encoding="utf-8"))
+        original = Path(spec["original"])
+        base = spec["base_commit"]
+        manager = WorkspaceManager(cache_root=tmp_path / "cache")
+        ws_path = Path(spec["workspace"])
+        from codepilot.repo.workspace import Workspace, normalize_source
+        from codepilot.storage.repository import Stores
 
-    from codepilot.storage.repository import Stores
+        stores = Stores(_session_factory(tmp_path)())
+        workspace = Workspace(
+            path=ws_path,
+            source=normalize_source(str(original)),
+            base_commit=base,
+            repository_id=spec["repository_id"],
+        )
+        index = RepositoryIndex(stores, workspace.repository_id)
+    else:
+        original, base = _base_repo(tmp_path)
+        manager = WorkspaceManager(cache_root=tmp_path / "cache")
+        workspace = manager.create(
+            source=str(original), base_commit=base, target=tmp_path / "workspace"
+        )
+        ws_path = workspace.path
 
-    factory = _session_factory(tmp_path)
-    session = factory()
-    stores = Stores(session)
-    Indexer().index(stores, workspace)
-    index = RepositoryIndex(stores, workspace.repository_id)
+        from codepilot.storage.repository import Stores
+
+        factory = _session_factory(tmp_path)
+        session = factory()
+        stores = Stores(session)
+        Indexer().index(stores, workspace)
+        # 必须 commit：恢复测试要在**新进程**里重建同一个 RepositoryIndex，
+        # 没提交的 SQLAlchemy session 换进程就是空库，reuse 分支会拿到零符号。
+        session.commit()
+        index = RepositoryIndex(stores, workspace.repository_id)
+        spec_path.write_text(
+            json.dumps(
+                {
+                    "original": str(original),
+                    "base_commit": base,
+                    "workspace": str(ws_path),
+                    "repository_id": workspace.repository_id,
+                }
+            ),
+            encoding="utf-8",
+        )
     graph = RepoGraph(index)
     symbols = list(index.symbol_objects())
     files = list(index.files())

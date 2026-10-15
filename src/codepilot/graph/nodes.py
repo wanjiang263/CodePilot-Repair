@@ -679,6 +679,17 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
         tests=targets,
         artifact_iteration=attempt.iteration,
     )
+    # 立刻把执行结果落成 Artifact，而不是等 finalize。
+    #
+    # 崩溃恢复要核对的是"这轮 PASS 到底有没有外部证据"，而证据必须在该轮结束时
+    # 就存在。只在 finalize 写的话，一次崩溃的 run 一个执行 Artifact 都没有，
+    # verify_recovery 只能判"证据缺失"，把已经做成的事重跑一遍。
+    # Sandbox 自己没给 artifact_dir 时（脚本化后端）用这里写下的路径补上，
+    # 让 fake 与真实后端遵守同一条证据契约。
+    execution_path = deps.artifacts.attempt_relpath(attempt.iteration, EXECUTION_JSON)
+    deps.artifacts.write_json(execution_path, execution.model_dump(mode="json"))
+    if not execution.artifact_dir:
+        execution = execution.model_copy(update={"artifact_dir": execution_path})
     deps.events.emit(
         node=Node.RUN_TARGET_TESTS.value,
         type=EventType.SANDBOX_RUN,

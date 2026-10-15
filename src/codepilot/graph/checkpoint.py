@@ -9,7 +9,7 @@ LangGraph 的 checkpoint 只保证 **state** 持久化。Workspace 里的补丁�
 
 所以恢复流程是三段，缺一不可：
 
-1. :func:`load_checkpoint` —— 按 ``thread_id = run_id`` 读回 State。
+1. :func:`checkpoint_state` —— 按 ``thread_id = run_id`` 读回 State。
 2. :func:`verify_recovery` —— 核对 Workspace 是否存在、base commit 是否一致、
    当前补丁哈希是否与 checkpoint 相符、已记录的执行证据是否仍可读。
 3. :func:`resume_run` —— 只对**证据仍然成立**的部分做复用；证据失效就关掉复用
@@ -38,14 +38,14 @@ import enum
 import importlib
 import json
 import re
-import sqlite3
 import typing
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+import aiosqlite
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
-from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from pydantic import BaseModel
 
 from codepilot import __version__
@@ -61,7 +61,6 @@ __all__ = [
     "CHECKPOINT_SCHEMA_VERSION",
     "CheckpointManifest",
     "RecoveryReport",
-    "load_checkpoint",
     "open_checkpointer",
     "read_manifest",
     "resume_run",
@@ -134,33 +133,41 @@ def _serde() -> JsonPlusSerializer:
 class CheckpointHandle:
     """一次运行的 checkpointer 与其文件；必须由持有者关闭。"""
 
-    saver: SqliteSaver
-    connection: sqlite3.Connection
+    saver: AsyncSqliteSaver
+    connection: aiosqlite.Connection
     path: Path
     run_id: str
 
-    def close(self) -> None:
-        self.connection.commit()
-        self.connection.close()
+    async def close(self) -> None:
+        await self.connection.commit()
+        await self.connection.close()
 
-    def __enter__(self) -> CheckpointHandle:
+    async def __aenter__(self) -> CheckpointHandle:
         return self
 
-    def __exit__(self, *exc_info: object) -> None:
-        self.close()
+    async def __aexit__(self, *exc_info: object) -> None:
+        await self.close()
 
 
-def open_checkpointer(path: Path, run_id: str) -> CheckpointHandle:
+async def open_checkpointer(path: Path, run_id: str) -> CheckpointHandle:
     """打开（或创建）某个 run 的 SQLite checkpoint 文件。
 
     路径稳定：``artifacts/runs/<run_id>/checkpoints.sqlite``。放在 run 目录里而不是
     进程临时目录，是"换进程还能找到它"的前提；也与既有 Artifact 布局一致，
     不会和 ``attempts/`` 抢位置。
+
+    用的是 ``AsyncSqliteSaver``。节点是 ``async def``（03 §5 的硬约束），而
+    LangGraph 只有 ``ainvoke`` 能跑异步节点；同步的 ``SqliteSaver`` 在 ``ainvoke``
+    下会直接 ``NotImplementedError``。``aiosqlite`` 是 ``langgraph-checkpoint-sqlite``
+    自带的依赖，不需要新增包。
+
+    必须是协程：``AsyncSqliteSaver.__init__`` 会抓住当前 running loop，在没有 loop
+    的上下文里构造会得到 ``RuntimeError: no running event loop``。
     """
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
-    connection = sqlite3.connect(str(target), check_same_thread=False)
-    saver = SqliteSaver(connection, serde=_serde())
+    connection = aiosqlite.connect(str(target))
+    saver = AsyncSqliteSaver(connection, serde=_serde())
     return CheckpointHandle(saver=saver, connection=connection, path=target, run_id=run_id)
 
 
@@ -180,7 +187,7 @@ class CheckpointManifest:
     allowed_types: int
 
     def to_json(self) -> str:
-        return json.dumps(self.__dict__, ensure_ascii=False, indent=2, sort_keys=True)
+        return json.dumps(asdict(self), ensure_ascii=False, indent=2, sort_keys=True)
 
 
 def read_manifest(path: Path) -> dict[str, Any] | None:
@@ -314,14 +321,9 @@ def _diff_at(deps: Deps, state: RepairState) -> str:
     ).text
 
 
-def load_checkpoint(saver: SqliteSaver, run_id: str) -> RepairState | None:
+async def checkpoint_state(saver: AsyncSqliteSaver, run_id: str) -> RepairState | None:
     """按 ``thread_id = run_id`` 读回最新 checkpoint 里的 ``RepairState``。"""
-    return checkpoint_state(saver, run_id)
-
-
-def checkpoint_state(saver: SqliteSaver, run_id: str) -> RepairState | None:
-    """读回并校验 ``RepairState``；没有记录时返回 ``None``。"""
-    tuple_ = saver.get_tuple({"configurable": {"thread_id": run_id}})
+    tuple_ = await saver.aget_tuple({"configurable": {"thread_id": run_id}})
     if tuple_ is None:
         return None
     values = tuple_.checkpoint.get("channel_values", {})
@@ -330,32 +332,69 @@ def checkpoint_state(saver: SqliteSaver, run_id: str) -> RepairState | None:
     return RepairState.model_validate(dict(values))
 
 
-def pending_nodes(saver: SqliteSaver, run_id: str) -> tuple[str, ...]:
-    """checkpoint 里"接下来要执行的节点"。空元组意味着这一轮已经跑完。"""
-    tuple_ = saver.get_tuple({"configurable": {"thread_id": run_id}})
-    if tuple_ is None:
-        return ()
-    nxt = tuple_.checkpoint.get("next", ())
-    return tuple(str(name) for name in nxt) if isinstance(nxt, (list, tuple)) else ()
+async def pending_nodes(deps: Deps, handle: CheckpointHandle, run_id: str) -> tuple[str, ...]:
+    """checkpoint 里"接下来要执行的节点"。空元组意味着这一轮已经跑完。
+
+    读的是 ``graph.aget_state().next``，不是原始 ``checkpoint["next"]`` 字段：
+    后者在 LangGraph 里并不可靠（实测崩溃后为 ``()``，而 ``get_state`` 能算出
+    真正待执行的节点）。编译一次图不执行任何节点，因此这个读操作没有副作用。
+    """
+    graph = build_graph(deps, checkpointer=handle.saver)
+    snapshot = await graph.aget_state({"configurable": {"thread_id": run_id}})
+    return tuple(snapshot.next or ())
 
 
-def run_with_checkpoint(
+async def run_with_checkpoint(
     initial: RepairState,
     deps: Deps,
     handle: CheckpointHandle,
     *,
     recursion_limit: int | None = None,
 ) -> RepairState:
-    """带 checkpoint 的完整执行入口。"""
+    """带 checkpoint 的完整执行入口。
+
+    刻意是协程而不是"同步外壳 + :func:`asyncio.run`"：调用方通常已经在一个
+    ``async with await open_checkpointer(...)`` 的循环里，再套一层 ``asyncio.run``
+    会直接 ``RuntimeError: This event loop is already running``。
+    """
     assert_checkpoint_safe(initial)
-    graph = build_graph(deps, checkpointer=handle.saver)
-    config = graph_config(deps, initial, recursion_limit=recursion_limit)
-    result = graph.invoke(initial.model_dump(mode="python"), config, durability="sync")
     write_manifest(handle, initial, code_version=_code_version())
+    return await _ainvoke_checkpointed(
+        deps,
+        handle,
+        payload=initial.model_dump(mode="python"),
+        recursion_limit=recursion_limit,
+    )
+
+
+async def _ainvoke_checkpointed(
+    deps: Deps,
+    handle: CheckpointHandle,
+    *,
+    payload: dict[str, Any] | None,
+    recursion_limit: int | None,
+) -> RepairState:
+    """异步执行。节点是 ``async def``，用同步 ``invoke`` 会直接 TypeError。"""
+    graph = build_graph(deps, checkpointer=handle.saver)
+    anchor = RepairState.model_validate(payload) if payload else _anchor(deps)
+    config = graph_config(deps, anchor, recursion_limit=recursion_limit)
+    result = await graph.ainvoke(payload, config, durability="sync")
     return RepairState.model_validate(result)
 
 
-def resume_run(
+def _anchor(deps: Deps) -> RepairState:
+    """恢复路径只需要 run/task/base 来生成 config，不消费其它字段。"""
+    return RepairState(
+        task_id=deps.task_id,
+        run_id=deps.run_id,
+        repository_id="",
+        base_commit=deps.base_commit,
+        issue="",
+        started_at=deps.clock(),
+    )
+
+
+async def resume_run(
     deps: Deps,
     handle: CheckpointHandle,
     run_id: str,
@@ -367,7 +406,7 @@ def resume_run(
     调用方必须是**新进程**（或至少是重新构造的 Deps）：恢复的意义就在于验证
     "内存里的计数器归零之后还能不能正确接续"，同进程内模拟函数重复调用证明不了它。
     """
-    stored = checkpoint_state(handle.saver, run_id)
+    stored = await checkpoint_state(handle.saver, run_id)
     if stored is None:
         raise ValueError(f"run_id={run_id!r} 没有可用的 checkpoint")
     if stored.status is not RunStatus.RUNNING:
@@ -402,10 +441,25 @@ def resume_run(
     # 但绝不会把拿不出证据的 PASS 继续当成结论。
     deps.evidence_trusted = report.can_reuse_evidence
 
-    graph = build_graph(deps, checkpointer=handle.saver)
-    config = graph_config(deps, stored, recursion_limit=recursion_limit)
-    result = graph.invoke(None, config, durability="sync")
-    return RepairState.model_validate(result)
+    waiting = await pending_nodes(deps, handle, run_id)
+    if not waiting:
+        # 状态还是 running，但图认为没有待执行节点：这是 checkpoint 与代码
+        # 分支不一致（路由被改过、或写入被截断）。LangGraph 这时会抛
+        # EmptyInputError，信息量为零，所以提前给出可行动的原因。
+        message = (
+            f"run_id={run_id!r} is marked running but the graph has no pending node; "
+            "refusing to replay a partially-persisted run"
+        )
+        deps.events.emit(node="resume", type=EventType.STOP, status="refused", error=message)
+        return stored.model_copy(
+            update={
+                "status": RunStatus.ERROR,
+                "stop_reason": StopReason.WORKFLOW_ERROR,
+                "failure_reasons": [*stored.failure_reasons, message],
+            }
+        )
+
+    return await _ainvoke_checkpointed(deps, handle, payload=None, recursion_limit=recursion_limit)
 
 
 def _code_version() -> str:
