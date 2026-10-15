@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from codepilot.sandbox.base import EnvironmentBuildResult, Sandbox
@@ -20,24 +21,25 @@ def build_test_baseline(
     environment: EnvironmentBuildResult,
     env_spec: EnvSpec,
     first_artifact_iteration: int = 1,
+    before_run: Callable[[], EnvSpec | ExecutionResult] | None = None,
 ) -> TestBaseline:
     """正常情况下固定运行两次；环境/沙箱错误按路由约定立即终止。"""
-    first = sandbox.run_tests(
-        workspace=workspace,
-        environment=environment,
-        env_spec=env_spec,
-        artifact_iteration=first_artifact_iteration,
-    )
+
+    def execute(iteration: int) -> ExecutionResult:
+        specification = before_run() if before_run is not None else env_spec
+        if isinstance(specification, ExecutionResult):
+            return specification
+        return sandbox.run_tests(
+            workspace=workspace,
+            environment=environment,
+            env_spec=specification,
+            artifact_iteration=iteration,
+        )
+
+    first = execute(first_artifact_iteration)
     runs = [first]
     if first.status not in {ExecutionStatus.ENV_ERROR, ExecutionStatus.SANDBOX_ERROR}:
-        runs.append(
-            sandbox.run_tests(
-                workspace=workspace,
-                environment=environment,
-                env_spec=env_spec,
-                artifact_iteration=first_artifact_iteration + 1,
-            )
-        )
+        runs.append(execute(first_artifact_iteration + 1))
     mappings = [_outcomes(run) for run in runs]
     all_nodes = sorted(set().union(*(mapping.keys() for mapping in mappings)))
     differences: dict[str, tuple[TestOutcome | None, TestOutcome | None]] = {}
@@ -68,6 +70,7 @@ def build_test_baseline(
         status_differences=differences,
         evidence=evidence,
         complete=complete,
+        duration_seconds=max(run.duration_seconds for run in runs),
     )
 
 

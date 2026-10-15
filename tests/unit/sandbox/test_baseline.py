@@ -79,3 +79,25 @@ def test_baseline_records_terminal_environment_failure(tmp_path: Path) -> None:
     assert baseline.complete is False
     assert "status=ENV_ERROR" in baseline.evidence[0]
     assert len(sandbox.run_calls) == 1
+
+
+def test_budget_preflight_blocks_second_external_run(tmp_path: Path) -> None:
+    sandbox = FakeSandbox([execution(("stable", TestOutcome.PASSED), status=ExecutionStatus.PASS)])
+    spec = EnvSpec()
+    environment = sandbox.build_env(
+        repository="repo", base_commit="base", workspace=tmp_path, env_spec=spec
+    )
+    decisions = iter(
+        [spec, ExecutionResult(status=ExecutionStatus.TIMEOUT, error_reason="budget_time")]
+    )
+    baseline = build_test_baseline(
+        sandbox,
+        base_commit="base",
+        workspace=tmp_path,
+        environment=environment,
+        env_spec=spec,
+        before_run=lambda: next(decisions),
+    )
+    assert len(sandbox.run_calls) == 1
+    assert not baseline.complete
+    assert "status=TIMEOUT" in baseline.evidence[1]

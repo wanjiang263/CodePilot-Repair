@@ -48,6 +48,7 @@ class RoundEvidence:
     test_ids: frozenset[str]
     categories: frozenset[str]
     artifact_refs: frozenset[str] = field(default_factory=frozenset)
+    failure_details: frozenset[tuple[str, str, str]] = field(default_factory=frozenset)
 
     def same_failures_as(self, other: RoundEvidence) -> bool:
         """签名相等**且**身份相等，才认为是同一批失败。"""
@@ -55,6 +56,7 @@ class RoundEvidence:
             self.signatures == other.signatures
             and self.test_ids == other.test_ids
             and self.categories == other.categories
+            and self.failure_details == other.failure_details
         )
 
     def signature_collision_with(self, other: RoundEvidence) -> bool:
@@ -109,9 +111,19 @@ def round_evidence(attempt: Attempt) -> RoundEvidence | None:
     node_id / failure_type / 类别都在，恢复时也不需要额外 Artifact。
     """
     execution = attempt.execution
+    if attempt.regression is not None and attempt.regression.has_regression:
+        cases = [
+            case
+            for result in attempt.regression.executions.values()
+            for case in result.tests
+            if case.node_id in attempt.regression.new_failures
+        ]
+        execution = ExecutionResult(
+            status=ExecutionStatus.FAIL, tests=cases, tests_failed=len(cases)
+        )
     if execution is None:
         return None
-    failures: list[str] = []
+    failures: list[tuple[str, str, str]] = []
     ids: set[str] = set()
     categories: set[str] = set()
     for case in execution.tests:
@@ -119,12 +131,13 @@ def round_evidence(attempt: Attempt) -> RoundEvidence | None:
             continue
         ids.add(case.node_id)
         categories.add(case.failure_type or "unknown")
-        failures.append(case.message or "")
+        failures.append((case.node_id, case.failure_type or "unknown", case.message or ""))
     if not ids and execution.status is not ExecutionStatus.PASS:
         # 执行整体失败但没有逐用例记录（COLLECTION_ERROR / TIMEOUT / OOM）。
         ids.add(f"<execution:{execution.status.value}>")
         categories.add(execution.status.value)
     return RoundEvidence(
+        failure_details=frozenset(failures),
         iteration=attempt.iteration,
         signatures=frozenset(attempt.failure_signatures),
         test_ids=frozenset(ids),

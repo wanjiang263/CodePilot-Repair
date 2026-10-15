@@ -334,6 +334,15 @@ async def build_env(state: RepairState, deps: Deps) -> dict[str, Any]:
             "test_runs": deps.test_runs,
             "events": _emit(state, deps, Node.BUILD_ENV.value, "environment_error"),
         }
+    if state.budget.max_test_runs - deps.test_runs < 2:
+        return _terminal(
+            state,
+            deps,
+            Node.BUILD_ENV.value,
+            RunStatus.BUDGET_EXHAUSTED,
+            StopReason.BUDGET_TEST_RUNS,
+            ["baseline requires two test runs"],
+        )
     baseline: TestBaseline = _build_baseline(deps, state)
     return {
         "baseline": baseline,
@@ -352,6 +361,19 @@ async def build_env(state: RepairState, deps: Deps) -> dict[str, Any]:
 
 def _build_baseline(deps: Deps, state: RepairState) -> TestBaseline:
     from codepilot.sandbox.baseline import build_test_baseline
+    from codepilot.sandbox.env_spec import EnvSpec
+
+    def before_run() -> EnvSpec | ExecutionResult:
+        live = state.model_copy(update={"test_runs": deps.test_runs, "usage": deps.usage})
+        stop = deps.budget.check(live, Activity.TEST)
+        remaining = state.budget.max_runtime_seconds - deps.budget.elapsed_seconds(state)
+        if stop is not None or remaining < 1:
+            return ExecutionResult(
+                status=ExecutionStatus.TIMEOUT, error_reason=str(stop or StopReason.BUDGET_TIME)
+            )
+        return deps.env_spec.model_copy(
+            update={"timeout_seconds": min(deps.env_spec.timeout_seconds, max(1, int(remaining)))}
+        )
 
     return build_test_baseline(
         deps.sandbox,
@@ -359,6 +381,7 @@ def _build_baseline(deps: Deps, state: RepairState) -> TestBaseline:
         workspace=deps.require_workspace(),
         environment=deps.environment,
         env_spec=deps.env_spec,
+        before_run=before_run,
     )
 
 
@@ -468,6 +491,12 @@ def _authorized_targets(deps: Deps, state: RepairState) -> list[str]:
     targets: list[str] = []
     for raw in selected_target_tests(state):
         try:
+            if (
+                state.baseline is not None
+                and not reproduction_target_tests(state)
+                and not any(n == raw or n.startswith(raw + "::") for n in state.baseline.outcomes)
+            ):
+                continue
             targets.append(validate_test_target(deps.validator.policy, raw))
         except ValueError:
             continue
@@ -742,15 +771,10 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
 
 
 async def run_regression(state: RepairState, deps: Deps) -> dict[str, Any]:
-    """三级回归（G-26～G-29）。本轮**没有实现**，如实记录 DEFERRED。
-
-    ``regression`` 保持 ``None`` 而不是造一个 ``new_failures=[]`` 的
-    ``RegressionResult``：后者在路由与进度判定里都会被读成"零新增失败"，
-    等于把未验证环节写成通过。
-    """
+    """Execute baseline-relative regression; legacy dependencies remain explicitly deferred."""
     _identity(state, deps)
     blocked = _budget_guard(state, deps, Activity.TEST, Node.RUN_REGRESSION)
-    if blocked is not None:
+    if blocked is not None and deps.regression_runner is None:
         return blocked
     if deps.regression_runner is None:
         return {
@@ -758,7 +782,52 @@ async def run_regression(state: RepairState, deps: Deps) -> dict[str, Any]:
             "report_artifacts": {**state.report_artifacts, "regression": _DEFERRED},
         }
     regression = deps.regression_runner.run(state, deps)
+    regression_attempt = state.current_attempt
+    if regression.has_regression and regression_attempt is not None:
+        failures = [
+            t
+            for e in regression.executions.values()
+            for t in e.tests
+            if t.node_id in regression.new_failures
+        ]
+        evidence = ExecutionResult(
+            status=ExecutionStatus.FAIL, tests=failures, tests_failed=len(failures)
+        )
+        parsed = deps.failure_parser.parse_execution(evidence).failures
+        classified = [
+            f.model_copy(update={"category": deps.failure_classifier.classify(f).category})
+            for f in parsed
+        ]
+        signatures = execution_signatures(classified)
+        regression_attempt = regression_attempt.model_copy(
+            update={
+                "failure_signatures": sorted(signatures),
+                "progress": build_progress_snapshot(
+                    evidence, signatures=signatures, regression=regression
+                ),
+            }
+        )
+    fields: dict[str, Any] = {}
+    if regression_attempt is not None:
+        fields["attempts"] = _update_last(
+            state, regression_attempt.model_copy(update={"regression": regression})
+        )
+    if any(e.is_environment_problem for e in regression.executions.values()) or any(
+        e.is_environment_problem for retries in regression.retries.values() for e in retries
+    ):
+        fields.update(status=RunStatus.SANDBOX_ERROR, stop_reason=StopReason.SANDBOX_FAILURE)
+    budget_errors = [
+        e.error_reason
+        for e in [
+            *regression.executions.values(),
+            *(e for retries in regression.retries.values() for e in retries),
+        ]
+        if e.error_reason and e.error_reason.startswith("budget_")
+    ]
+    if budget_errors:
+        fields.update(status=RunStatus.BUDGET_EXHAUSTED, stop_reason=StopReason(budget_errors[0]))
     return {
+        **fields,
         "regression": regression,
         "test_runs": deps.test_runs,
         "events": _emit(
@@ -768,18 +837,41 @@ async def run_regression(state: RepairState, deps: Deps) -> dict[str, Any]:
 
 
 async def review(state: RepairState, deps: Deps) -> dict[str, Any]:
-    """Patch Review（G-31）。本轮**没有实现**，如实记录 DEFERRED。"""
+    """Run independent review after completed regression with bounded high-risk repair."""
     _identity(state, deps)
     blocked = _budget_guard(state, deps, Activity.LLM, Node.REVIEW)
-    if blocked is not None:
+    if blocked is not None and deps.reviewer is None:
         return blocked
     if deps.reviewer is None:
         return {
             "events": _emit(state, deps, Node.REVIEW.value, _DEFERRED),
             "report_artifacts": {**state.report_artifacts, "review": _DEFERRED},
         }
-    result = deps.reviewer.review(state, deps)
+    if state.regression is not None and (
+        not state.regression.complete or state.regression.has_regression
+    ):
+        return {}
+    from codepilot.agents.reviewer import ReviewBudgetError
+
+    try:
+        result = deps.reviewer.review(state, deps)
+    except ReviewBudgetError as exc:
+        return _terminal(
+            state,
+            deps,
+            Node.REVIEW.value,
+            RunStatus.BUDGET_EXHAUSTED,
+            exc.reason,
+            ["review budget exhausted before model call"],
+        )
+    fields: dict[str, Any] = {}
+    if state.current_attempt is not None:
+        fields["attempts"] = _update_last(
+            state, state.current_attempt.model_copy(update={"review": result})
+        )
     return {
+        **fields,
+        "usage_uncertain": state.usage_uncertain or not result.usage_known,
         "review": result,
         "usage": deps.usage,
         "events": _emit(
@@ -811,6 +903,16 @@ async def diagnose(state: RepairState, deps: Deps) -> dict[str, Any]:
             RunStatus.ERROR,
             StopReason.WORKFLOW_ERROR,
             ["diagnose requires a current attempt with an execution result"],
+        )
+    if state.regression is not None and state.regression.has_regression:
+        failed = [
+            t
+            for e in state.regression.executions.values()
+            for t in e.tests
+            if t.node_id in state.regression.new_failures
+        ]
+        execution = ExecutionResult(
+            status=ExecutionStatus.FAIL, tests=failed, tests_failed=len(failed)
         )
     failures = deps.failure_parser.parse_execution(execution).failures
     if not failures:
@@ -981,6 +1083,26 @@ async def repair_patch(state: RepairState, deps: Deps) -> dict[str, Any]:
         # refine：不动 Workspace，但把失败反馈写进下一轮计划的可信上下文。
         round_plan = _with_feedback(round_plan, diagnosis)
 
+    if state.review is not None and state.review.has_high_issues:
+        if state.review_repairs >= 1:
+            return _terminal(
+                state,
+                deps,
+                Node.REPAIR_PATCH.value,
+                RunStatus.STOPPED,
+                StopReason.TESTS_FAILED,
+                ["unresolved high review issues"],
+            )
+        fields["review_repairs"] = 1
+        if round_plan is not None:
+            round_plan = round_plan.model_copy(
+                update={
+                    "root_cause_hypothesis": round_plan.root_cause_hypothesis
+                    + " Review: "
+                    + state.review.model_dump_json()
+                }
+            )
+    fields.update(regression=None, review=None)
     base_state = state.model_copy(update={"events": events, **fields})
     produced = _run_coder(base_state, deps, round_plan, Node.REPAIR_PATCH.value)
     merged: dict[str, Any] = {**produced, **fields}
@@ -1203,6 +1325,24 @@ async def finalize(state: RepairState, deps: Deps) -> dict[str, Any]:
             status = RunStatus.FAILED
             stop_reason = StopReason.TESTS_FAILED
             reasons.append("finalize: target tests were never executed")
+        elif state.regression is not None and (
+            not state.regression.complete or state.regression.has_regression
+        ):
+            status = RunStatus.FAILED
+            stop_reason = StopReason.TESTS_FAILED
+            reasons.append("regression incomplete or confirmed new failures")
+        elif state.review is not None and state.review.has_high_issues:
+            status = RunStatus.STOPPED
+            stop_reason = StopReason.TESTS_FAILED
+            reasons.append("unresolved high review issues")
+        elif (
+            execution.status is ExecutionStatus.PASS
+            and state.regression is not None
+            and state.regression.complete
+            and state.review is not None
+        ):
+            status = RunStatus.SUCCEEDED
+            stop_reason = None
         elif execution.status is ExecutionStatus.PASS:
             status = RunStatus.PROVISIONALLY_VERIFIED
             stop_reason = None
@@ -1215,9 +1355,15 @@ async def finalize(state: RepairState, deps: Deps) -> dict[str, Any]:
             stop_reason = StopReason.TESTS_FAILED
             reasons.append(f"finalize: target tests ended as {execution.status.value}")
 
-    interim = state.model_copy(update={"status": status, "stop_reason": stop_reason})
+    interim = state.model_copy(
+        update={"status": status, "stop_reason": stop_reason, "failure_reasons": reasons}
+    )
     patch = generate_git_diff(
-        deps.require_workspace(), state.base_commit, policy=deps.validator.policy
+        deps.require_workspace(),
+        state.base_commit,
+        policy=deps.validator.policy,
+        delivery=True,
+        new_tests_reviewed=state.review is not None and not state.review.has_high_issues,
     )
     paths["final_patch"] = "patch_final.diff"
     deps.artifacts.write_text(paths["final_patch"], patch.text)
@@ -1231,6 +1377,14 @@ async def finalize(state: RepairState, deps: Deps) -> dict[str, Any]:
         simulated_llm=deps.simulated_llm,
         artifacts=paths,
     )
+    from codepilot.tools.base import is_test_path
+
+    report.added_tests = {
+        name: "trusted task authorization; reviewed; not used as independent success evidence"
+        for name in patch.files
+        if is_test_path(name) and not deps.validator._base_exists(name)
+    }
+    report.excluded_tests = [name for name in patch.excluded_files if is_test_path(name)]
     report_paths = write_run_report(report, deps.artifacts, report_state)
     merged = {**paths, **report_paths}
     # 最后再写一次 state：report_artifacts 要包含报告自身的路径，否则报告里的

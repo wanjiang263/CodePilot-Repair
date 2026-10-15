@@ -52,9 +52,9 @@ def test_identical_failure_signature_set_stops_the_loop(tmp_path: Path) -> None:
     harness = build_harness(
         tmp_path,
         results=[
-            # 两轮都是 "assert <数字> == <数字>"：归一化之后签名一致。
+            # 两轮原始失败消息一致；不同消息的碰撞由 Phase 9 负控制覆盖。
             _failure(NODE, "assert 1 == 3"),
-            _failure(NODE, "assert 0 == 3"),
+            _failure(NODE, "assert 1 == 3"),
         ],
         coder_rounds=[
             [_edit("    return value - 1", "    return value - 2"), FINISH],
@@ -90,7 +90,7 @@ def test_repeated_failure_explanation_names_both_rounds(tmp_path: Path) -> None:
     """停止原因不只一个命中时，报告要能看出真实缺口，而不是只留一个标签。"""
     harness = build_harness(
         tmp_path,
-        results=[_failure(NODE, "assert 1 == 3"), _failure(NODE, "assert 0 == 3")],
+        results=[_failure(NODE, "assert 1 == 3"), _failure(NODE, "assert 1 == 3")],
         coder_rounds=[
             [_edit("    return value - 1", "    return value - 2"), FINISH],
             [_edit("    return value - 1", "    return value - 3"), FINISH],

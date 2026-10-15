@@ -90,7 +90,7 @@ def test_oscillation_back_to_an_earlier_signature_set_stops(tmp_path: Path) -> N
     """A → B → A：第 3 轮的失败集合在第 1 轮就出现过，判为无进展。
 
     第 3 轮的补丁必须与第 1 轮**不同**，否则 ``repeated_patch``（优先级更高）会
-    先命中，测到的就不是振荡判据。这里用 ``- 7`` 换回同一批断言失败：两条消息
+    先命中，测到的就不是振荡判据。这里用 ``- 7`` 换回同一批断言失败：两条原始消息一致，
     归一化后都是 ``assert <number> == <number>``，签名一致而补丁不同。
     """
     harness = build_harness(
@@ -98,7 +98,7 @@ def test_oscillation_back_to_an_earlier_signature_set_stops(tmp_path: Path) -> N
         results=[
             _named_failure(NODE, exception="AssertionError", message="assert 1 == 3"),
             _named_failure(NODE, exception="TypeError", message="cannot add int and str"),
-            _named_failure(NODE, exception="AssertionError", message="assert 2 == 3"),
+            _named_failure(NODE, exception="AssertionError", message="assert 1 == 3"),
         ],
         coder_rounds=[
             [_edit("    return value - 1", "    return value - 2"), FINISH],

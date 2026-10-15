@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 
 from codepilot.repo.gitcmd import GitError, run_git
 from codepilot.schemas.reproduction import REPRO_TEST_DIRECTORY
-from codepilot.tools.base import WorkspacePathPolicy
+from codepilot.tools.base import WorkspacePathPolicy, is_test_path
 
 __all__ = ["CanonicalDiff", "generate_git_diff", "is_excluded_path"]
 
@@ -49,6 +49,8 @@ def generate_git_diff(
     *,
     policy: WorkspacePathPolicy | None = None,
     excluded_directories: Sequence[str] = (REPRO_TEST_DIRECTORY,),
+    delivery: bool = False,
+    new_tests_reviewed: bool = False,
 ) -> CanonicalDiff:
     root = Path(workspace).resolve(strict=True)
     path_policy = policy or WorkspacePathPolicy(root)
@@ -110,6 +112,17 @@ def generate_git_diff(
     text = "\n".join(chunk for chunk in chunks if chunk).replace("\r\n", "\n")
     if text:
         text += "\n"
+    if delivery and (not path_policy.allow_new_tests or not new_tests_reviewed):
+        base_files = set(
+            run_git(["ls-tree", "-r", "--name-only", resolved_base], cwd=root).stdout.splitlines()
+        )
+        unauthorized = [
+            name for name in _changed_files(text) if name not in base_files and is_test_path(name)
+        ]
+        text, omitted = _filter_diff_blocks(text, unauthorized)
+        dropped.extend(omitted)
+        if text and not text.endswith("\n"):
+            text += "\n"
     files = sorted(set(_changed_files(text)))
     added, deleted = _line_counts(text)
     return CanonicalDiff(

@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 
 class ToolRole(StrEnum):
     PLANNER = "planner"
+    REVIEWER = "reviewer"
     CODER = "coder"
 
 
@@ -90,7 +91,7 @@ class ToolRegistry:
 
     @classmethod
     def _allowed(cls, role: ToolRole | None) -> frozenset[str] | None:
-        if role is ToolRole.PLANNER:
+        if role in {ToolRole.PLANNER, ToolRole.REVIEWER}:
             return cls.PLANNER_NAMES
         if role is ToolRole.CODER:
             return cls.CODER_NAMES

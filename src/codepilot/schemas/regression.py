@@ -7,7 +7,9 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
+from codepilot.schemas.execution import ExecutionResult
 
 __all__ = ["RegressionLevel", "RegressionMode", "RegressionResult"]
 
@@ -33,15 +35,34 @@ class RegressionResult(BaseModel):
     测试不算（否则任何仓库都会永远报回归），flaky 测试也不算。
     """
 
+    model_config = ConfigDict(extra="forbid")
+
+    complete: bool = Field(default=False, strict=True)
+    status_changes: dict[str, tuple[str, str]] = Field(default_factory=dict)
+    baseline_commit: str | None = None
+    baseline_hash: str | None = None
+    status: str = "NOT RUN"
+    executed_tests: list[str] = Field(default_factory=list)
+    unexecuted_tests: list[str] = Field(default_factory=list)
+    existing_failures: list[str] = Field(default_factory=list)
+    executions: dict[str, ExecutionResult] = Field(default_factory=dict)
+    retries: dict[str, list[ExecutionResult]] = Field(default_factory=dict)
+    seed: int | None = None
+    failure_reason: str | None = None
+
     new_failures: list[str] = Field(default_factory=list)
     fixed_tests: list[str] = Field(default_factory=list)
     """base 上失败、patch 后通过的测试。只在报告里展示，不参与成功判定。"""
 
     flaky: set[str] = Field(default_factory=set)
     mode: RegressionMode = RegressionMode.FULL
-    sampled_ratio: float | None = None
+    sampled_ratio: float | None = Field(default=None, ge=0, le=1, allow_inf_nan=False)
     levels_run: list[RegressionLevel] = Field(default_factory=list)
 
     @property
     def has_regression(self) -> bool:
         return bool(self.new_failures)
+
+    @property
+    def regression_mode(self) -> str:
+        return self.mode.value

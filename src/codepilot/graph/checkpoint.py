@@ -38,6 +38,7 @@ import enum
 import importlib
 import json
 import re
+import sqlite3
 import typing
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -246,11 +247,12 @@ class RecoveryReport:
     artifacts_present: bool
     reusable_execution_evidence: bool
     problems: tuple[str, ...]
+    phase9_consistent: bool = True
 
     @property
     def can_continue(self) -> bool:
         """Workspace 与 base commit 是继续执行的硬前提。"""
-        return self.workspace_present and self.base_commit_matches
+        return self.workspace_present and self.base_commit_matches and self.phase9_consistent
 
     @property
     def can_reuse_evidence(self) -> bool:
@@ -308,7 +310,22 @@ def verify_recovery(state: RepairState, deps: Deps) -> RecoveryReport:
                 "its PASS cannot be reused"
             )
 
+    phase9_ok = True
+    if (
+        (deps.artifacts.run_dir / "operations.sqlite").exists()
+        or state.regression is not None
+        or state.review is not None
+    ):
+        from codepilot.graph.operations import verify_journal
+
+        try:
+            verify_journal(state, deps)
+        except (ValueError, RuntimeError, OSError, sqlite3.DatabaseError) as exc:
+            phase9_ok = False
+            problems.append(f"Phase 9 evidence invalid: {exc}")
+
     return RecoveryReport(
+        phase9_consistent=phase9_ok,
         workspace_present=present,
         base_commit_matches=base_ok,
         patch_identity_matches=patch_ok,
@@ -432,8 +449,9 @@ async def resume_run(
         # 不属于同一个世界的补丁，安全终止而不是"将就着跑完"。
         message = "; ".join(report.problems) or "recovery verification failed"
         deps.events.emit(node="resume", type=EventType.STOP, status="refused", error=message)
-        return stored.model_copy(
+        refused = stored.model_copy(
             update={
+                "usage_uncertain": stored.usage_uncertain or not report.phase9_consistent,
                 "status": RunStatus.ERROR,
                 "stop_reason": StopReason.WORKFLOW_ERROR,
                 "failure_reasons": [*stored.failure_reasons, f"resume refused: {message}"],
@@ -448,6 +466,22 @@ async def resume_run(
                 ],
             }
         )
+
+        if not report.phase9_consistent:
+            from codepilot.report import RunReport, write_run_report
+
+            failure_report = RunReport.from_state(
+                refused,
+                repository=deps.repository,
+                git_diff=refused.current_patch,
+                modified_files=[],
+                simulated_llm=deps.simulated_llm,
+            )
+            paths = write_run_report(failure_report, deps.artifacts, refused)
+            refused = refused.model_copy(
+                update={"report_artifacts": {**refused.report_artifacts, **paths}}
+            )
+        return refused
 
     # 证据不成立时关掉复用开关：这一轮会被重新执行并重新计费，
     # 但绝不会把拿不出证据的 PASS 继续当成结论。

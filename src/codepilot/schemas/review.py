@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pathlib import PurePosixPath, PureWindowsPath
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from codepilot.schemas.enums import ReviewSeverity, RiskLevel
 
@@ -16,14 +18,39 @@ class ReviewIssue(BaseModel):
     （02 §10.6），其他等级只记录在报告里。
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     severity: ReviewSeverity
-    file: str
-    line: int | None = None
+    file: str = Field(min_length=1)
+    line: int | None = Field(default=None, ge=1, strict=True)
     description: str = ""
+
+    @field_validator("description")
+    @classmethod
+    def nonempty_description(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("review evidence description must be nonempty")
+        return value
+
+    @field_validator("file")
+    @classmethod
+    def valid_path(cls, value: str) -> str:
+        path = PurePosixPath(value.replace("\\", "/"))
+        if (
+            path.is_absolute()
+            or PureWindowsPath(value).anchor
+            or ".." in path.parts
+            or not value.strip()
+        ):
+            raise ValueError("review file must be repository relative")
+        return path.as_posix()
 
 
 class ReviewResult(BaseModel):
-    approved: bool
+    model_config = ConfigDict(extra="forbid")
+
+    usage_known: bool = True
+    approved: bool = Field(strict=True)
     risk: RiskLevel = RiskLevel.LOW
     issues: list[ReviewIssue] = Field(default_factory=list)
     summary: str = ""

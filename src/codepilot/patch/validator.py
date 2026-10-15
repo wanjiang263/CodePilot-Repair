@@ -177,13 +177,16 @@ class PatchValidator:
         return errors
 
     def _test_protection_errors(self, files: list[str]) -> list[str]:
-        if self.config.allow_test_edits:
-            return []
-        return [
-            f"existing test file modification is not allowed: {relative}"
-            for relative in files
-            if _is_test_path(relative, self._indexed_tests) and self._base_exists(relative)
-        ]
+        errors = []
+        for relative in files:
+            if not _is_test_path(relative, self._indexed_tests):
+                continue
+            if self._base_exists(relative):
+                if not self.config.allow_test_edits:
+                    errors.append(f"existing test file modification is not allowed: {relative}")
+            elif not self.policy.allow_new_tests:
+                errors.append(f"new test file requires trusted authorization: {relative}")
+        return errors
 
     def _base_text(self, relative: str) -> str:
         result = run_git(
@@ -235,7 +238,7 @@ def _nonempty_errors(diff: str) -> list[str]:
 
 
 def _is_test_path(relative: str, indexed_tests: set[str]) -> bool:
-    path = PurePosixPath(relative)
+    path = PurePosixPath(relative.casefold())
     return (
         relative in indexed_tests
         or "tests" in path.parts

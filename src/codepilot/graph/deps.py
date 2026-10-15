@@ -73,7 +73,7 @@ Clock = Callable[[], datetime]
 
 @runtime_checkable
 class RegressionRunner(Protocol):
-    """Phase 9（G-26～G-29）的接缝。本轮没有实现，节点据此记录 DEFERRED。"""
+    """Phase 9（G-26～G-29）回归实现的注入契约。"""
 
     def run(self, state: RepairState, deps: Deps) -> RegressionResult: ...
 
@@ -192,9 +192,10 @@ class Deps:
     budget_manager: BudgetManager | None = None
     stop_rules: StopRules | None = None
 
-    #: Phase 9 接缝：本轮刻意留空，节点必须记录 DEFERRED 而不是伪造 PASS。
+    #: Phase 9 可注入实现；旧调用方未配置时仍记录 DEFERRED，不伪造 PASS。
     regression_runner: RegressionRunner | None = None
     reviewer: PatchReviewer | None = None
+    patch_reviewer: PatchReviewer | None = None
 
     simulated_llm: bool = False
     llm_registry: LLMRegistry | None = None
@@ -208,6 +209,8 @@ class Deps:
     closed: bool = field(init=False, default=False)
 
     def __post_init__(self) -> None:
+        if self.patch_reviewer is not None:
+            self.reviewer = self.patch_reviewer
         if not self.run_id:
             raise DepsConfigurationError("Deps 必须绑定 run_id")
         if not self.task_id:

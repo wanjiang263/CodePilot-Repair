@@ -15,11 +15,8 @@
 3. ``Diagnosis.confidence`` 不参与任何路由决策（02 §14.6 末句）。模型的自报
    置信度没有校准，用它分支会得到一个无法调试的系统。
 
-Phase 9 边界：``run_regression`` 与 ``review`` 的边 here 就接好了，但本轮没有
-``RegressionRunner`` / ``PatchReviewer`` 实现，所以 ``regression`` / ``review``
-保持 ``None``。路由把 ``None`` 当作**未测量**处理，绝不把它当成"0 个新增失败"
-或"复审通过"——真正的判定见 ``nodes.finalize``，它只在有真实证据时才给
-``provisionally_verified``。
+Phase 9 使用注入的 RegressionRunner / PatchReviewer。兼容旧调用方的 None 仍表示
+未测量；完整性和高危问题由确定性路由及 finalize 强制核验。
 """
 
 from __future__ import annotations
@@ -152,21 +149,22 @@ def route_after_regression(state: RepairState) -> Node:
     regression = state.regression
     if regression is not None and regression.has_regression:
         return Node.DIAGNOSE
+    if regression is not None and not regression.complete:
+        return Node.FINALIZE
     return Node.REVIEW
 
 
 def route_after_review(state: RepairState) -> Node:
     """review → finalize | check_budget。
 
-    只有未复审过的高危问题才回到修复（02 §10.6）；"只触发一次"的上限由 Phase 9
-    的 G-32 负责，本轮由 ``check_budget`` 的迭代预算与 ``recursion_limit`` 兜底。
+    仅有效高危问题允许一次额外修复；review_repairs 与既有预算共同约束。
     """
     if terminated(state):
         return Node.FINALIZE
     review = state.review
     if review is None:
         return Node.FINALIZE
-    if review.approved or not review.has_high_issues:
+    if not review.has_high_issues or state.review_repairs >= 1:
         return Node.FINALIZE
     return Node.CHECK_BUDGET
 

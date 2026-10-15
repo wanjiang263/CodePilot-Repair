@@ -107,6 +107,7 @@ def _guard(
                 node=node.value, type=EventType.NODE_END, status="error", error=message
             )
             return {
+                "usage_uncertain": state.usage_uncertain or node is Node.REVIEW,
                 "status": RunStatus.ERROR,
                 "stop_reason": StopReason.WORKFLOW_ERROR,
                 "failure_reasons": [*state.failure_reasons, message],

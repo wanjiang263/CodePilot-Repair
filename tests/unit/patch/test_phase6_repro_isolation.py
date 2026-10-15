@@ -154,7 +154,7 @@ def test_forging_the_reproduction_directory_name_hides_nothing(tmp_path: Path) -
     """伪装目录名不会让改动躲过交付补丁与校验——例外只认精确目录。"""
     _, workspace, base = _fixture(tmp_path)
     forged = "tests/_codepilot_repro_extra/test_repro.py"
-    result = create_file_tool(WorkspacePathPolicy(workspace)).execute(
+    result = create_file_tool(WorkspacePathPolicy(workspace, allow_new_tests=True)).execute(
         {"path": forged, "content": "def test_x() -> None:\n    assert 1 == 2\n"}
     )
     assert result.ok is True

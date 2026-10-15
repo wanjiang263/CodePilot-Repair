@@ -212,7 +212,10 @@ def test_regression_with_new_failures_goes_to_diagnose() -> None:
 def test_clean_regression_goes_to_review() -> None:
     from codepilot.schemas.regression import RegressionResult
 
-    state = _state(attempts=[_attempt()], regression=RegressionResult(new_failures=[]))
+    state = _state(
+        attempts=[_attempt()],
+        regression=RegressionResult(new_failures=[], complete=True, status="completed"),
+    )
     assert route_after_regression(state) is Node.REVIEW
 
 

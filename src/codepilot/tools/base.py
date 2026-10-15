@@ -105,6 +105,7 @@ class WorkspacePathPolicy:
         deny_directories: Iterable[str] = DEFAULT_DENY_DIRECTORIES,
         deny_files: Iterable[str] = DEFAULT_DENY_FILES,
         repro_write: bool = False,
+        allow_new_tests: bool = False,
     ) -> None:
         root = Path(workspace).resolve(strict=True)
         if not root.is_dir():
@@ -113,6 +114,7 @@ class WorkspacePathPolicy:
         self.deny_directories = frozenset(self._normalize_rule(item) for item in deny_directories)
         self.deny_files = frozenset(self._normalize_rule(item) for item in deny_files)
         self.repro_write = bool(repro_write)
+        self.allow_new_tests = bool(allow_new_tests)
 
     @staticmethod
     def _normalize_rule(value: str) -> str:
@@ -142,6 +144,15 @@ class WorkspacePathPolicy:
         self._check_denylist(posix)
         self._check_reproduction_directory(posix, for_write=for_write)
 
+        if (
+            for_write
+            and not must_exist
+            and not self.allow_new_tests
+            and not (self.repro_write and _touches_reproduction_directory(posix))
+            and is_test_path(posix.as_posix())
+        ):
+            raise PathAccessError("forbidden_path", "new tests require trusted task authorization")
+
         candidate = self.root / lexical
         try:
             resolved = candidate.resolve(strict=must_exist)
@@ -158,6 +169,16 @@ class WorkspacePathPolicy:
         parent = parent_candidate.resolve(strict=True)
         if not parent.is_relative_to(self.root):
             raise PathAccessError("path_escape", "resolved parent escapes the workspace")
+        if (
+            for_write
+            and not must_exist
+            and not self.allow_new_tests
+            and is_test_path(resolved.relative_to(self.root).as_posix())
+            and not (self.repro_write and _touches_reproduction_directory(posix))
+        ):
+            raise PathAccessError(
+                "forbidden_path", "resolved new test requires trusted task authorization"
+            )
         if for_write:
             self._check_reproduction_parent(posix, resolved, for_write=for_write)
         if must_exist and expect_file and not resolved.is_file():
@@ -272,3 +293,8 @@ class Tool:
 
 class EmptyInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+def is_test_path(relative: str) -> bool:
+    path = PurePosixPath(relative.replace("\\", "/").casefold())
+    return "tests" in path.parts or path.name.startswith("test_") or path.name.endswith("_test.py")

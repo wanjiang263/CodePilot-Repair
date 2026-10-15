@@ -37,6 +37,21 @@ def detect_ast_cheats(before: str, after: str, path: str) -> list[CheatFinding]:
                 )
             )
 
+    for name in sorted(new_tests.keys() - old_tests.keys()):
+        node = new_tests[name]
+        assertions = _assert_nodes(node)
+        has_call = any(isinstance(item, ast.Call) for item in ast.walk(node))
+        if (not assertions and not has_call) or any(_always_true(item.test) for item in assertions):
+            findings.append(
+                _finding(
+                    CheatPattern.WEAKENED_ASSERTION,
+                    "CP-CHEAT-NEW",
+                    path,
+                    node.lineno,
+                    "new test has empty or always-true assertions",
+                )
+            )
+
     old_skip = _skip_nodes(old_tree)
     for signature, skip_node in (_skip_nodes(new_tree) - old_skip).items():
         findings.append(

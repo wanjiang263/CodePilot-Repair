@@ -47,6 +47,8 @@ class Attempt(BaseModel):
     failure_signatures: list[str] = Field(default_factory=list)
     """本轮失败签名排序后的集合，用于重复失败检测。"""
 
+    regression: RegressionResult | None = None
+    review: ReviewResult | None = None
     diagnosis: Diagnosis | None = None
     progress: ProgressSnapshot | None = None
 
@@ -74,12 +76,14 @@ class RepairState(BaseModel):
     execution: ExecutionResult | None = None
 
     attempts: list[Attempt] = Field(default_factory=list)
+    review_repairs: int = Field(default=0, ge=0, le=1)
     current_patch: str = ""
     regression: RegressionResult | None = None
     review: ReviewResult | None = None
 
     budget: RepairBudget = Field(default_factory=RepairBudget)
     usage: Usage = Field(default_factory=Usage)
+    usage_uncertain: bool = False
     test_runs: int = 0
 
     started_at: datetime

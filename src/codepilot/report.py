@@ -2,19 +2,24 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 from codepilot.artifacts import REPORT_JSON, REPORT_MD, STATE_FINAL, ArtifactStore
+from codepilot.clock import utcnow
 from codepilot.observability.redaction import redact, redact_text
-from codepilot.schemas.execution import ExecutionResult
+from codepilot.schemas.execution import ExecutionResult, TestBaseline
 from codepilot.schemas.impact import ImpactAnalysis
 from codepilot.schemas.issue import IssueAnalysis
 from codepilot.schemas.localization import LocalizationResult
 from codepilot.schemas.plan import RepairPlan
-from codepilot.schemas.state import RepairState
+from codepilot.schemas.regression import RegressionResult
+from codepilot.schemas.reproduction import ReproductionResult
+from codepilot.schemas.review import ReviewResult
+from codepilot.schemas.state import Attempt, RepairState
 from codepilot.schemas.usage import Usage
 from codepilot.schemas.validation import ValidationResult
 
@@ -22,11 +27,25 @@ __all__ = ["RunReport", "write_run_report"]
 
 _BOUNDARY = (
     "provisionally_verified means only that one validator-approved patch passed the selected "
-    "authorized tests. It does not establish full regression safety or final issue resolution."
+    "authorized tests. It does not establish full regression safety or final issue resolution. "
+    "m2_verified covers the authorized baseline suite with review and no confirmed new failures; "
+    "existing failures and flaky tests remain disclosed. sampled_verified covers only the listed "
+    "sample and impact tests. Neither level establishes external issue resolution or real-model quality."
 )
 
 
 class RunReport(BaseModel):
+    baseline: TestBaseline | None = None
+    reproduction: ReproductionResult | None = None
+    attempts: list[Attempt] = Field(default_factory=list)
+    regression: RegressionResult | None = None
+    review: ReviewResult | None = None
+    verification_level: str = "provisionally_verified"
+    runtime_seconds: float = 0
+    usage_uncertain: bool = False
+    regression_mode: str | None = None
+    added_tests: dict[str, str] = Field(default_factory=dict)
+    excluded_tests: list[str] = Field(default_factory=list)
     run_id: str
     task_id: str
     repository: str
@@ -39,6 +58,7 @@ class RunReport(BaseModel):
     repair_plan: RepairPlan | None = None
     modified_files: list[str] = Field(default_factory=list)
     git_diff: str = ""
+    patch_hash: str = ""
     patch_validation: ValidationResult | None = None
     test_execution: ExecutionResult | None = None
     usage: Usage = Field(default_factory=Usage)
@@ -67,6 +87,25 @@ class RunReport(BaseModel):
         execution = state.execution or (
             state.current_attempt.execution if state.current_attempt else None
         )
+        level = state.status.value
+        if level == "succeeded":
+            target_verified = bool(
+                validation and validation.passed and execution and execution.status.value == "PASS"
+            )
+            regression_verified = bool(
+                state.regression
+                and state.regression.complete
+                and not state.regression.has_regression
+            )
+            review_verified = bool(state.review and not state.review.has_high_issues)
+            if target_verified and regression_verified and review_verified:
+                level = (
+                    "sampled_verified"
+                    if state.regression and state.regression.mode.value == "sampled"
+                    else "m2_verified"
+                )
+            else:
+                level = "provisionally_verified" if target_verified else "unverified"
         artifact_map = artifacts or state.report_artifacts
         if execution is not None and execution.artifact_dir:
             execution = execution.model_copy(
@@ -79,6 +118,15 @@ class RunReport(BaseModel):
             {"type": "event", **item} for item in state.events
         ]
         return cls(
+            usage_uncertain=state.usage_uncertain,
+            regression_mode=state.regression.mode.value if state.regression else None,
+            baseline=state.baseline,
+            reproduction=state.reproduction,
+            attempts=state.attempts,
+            regression=state.regression,
+            review=state.review,
+            verification_level=level,
+            runtime_seconds=max(0, (utcnow() - state.started_at).total_seconds()),
             run_id=state.run_id,
             task_id=state.task_id,
             repository=repository,
@@ -93,6 +141,7 @@ class RunReport(BaseModel):
             repair_plan=state.plan,
             modified_files=modified_files,
             git_diff=git_diff,
+            patch_hash=hashlib.sha256(git_diff.encode()).hexdigest(),
             patch_validation=validation,
             test_execution=execution,
             usage=state.usage,
@@ -131,6 +180,9 @@ class RunReport(BaseModel):
             f"## Modified files\n\n{files}\n\n"
             f"## Failures\n\n{failures}\n\n"
             f"## Evidence boundary\n\n{simulation}\n\n{self.verification_boundary}\n\n"
+            f"## Regression and Review\n\nVerification: {self.verification_level}\n\n"
+            f"```json\n{self.regression.model_dump_json(indent=2) if self.regression else 'NOT RUN'}\n```\n\n"
+            f"```json\n{self.review.model_dump_json(indent=2) if self.review else 'NOT RUN'}\n```\n\n"
             f"## Git diff\n\n```diff\n{self.git_diff}```\n"
         )
 

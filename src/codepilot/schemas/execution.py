@@ -89,3 +89,4 @@ class TestBaseline(BaseModel):
     )
     evidence: list[str] = Field(default_factory=list)
     complete: bool = True
+    duration_seconds: float | None = Field(default=None, ge=0, allow_inf_nan=False)

@@ -1,0 +1,201 @@
+"""Baseline-relative L2/L3 regression with bounded flaky retries."""
+
+from __future__ import annotations
+
+import math
+import random
+from pathlib import PurePosixPath
+
+from codepilot.graph.budget import Activity
+from codepilot.graph.deps import Deps
+from codepilot.graph.operations import digest, execute_once
+from codepilot.patch.diff import generate_git_diff
+from codepilot.schemas.enums import ExecutionStatus, TestOutcome
+from codepilot.schemas.execution import ExecutionResult, TestBaseline
+from codepilot.schemas.regression import RegressionLevel, RegressionMode, RegressionResult
+from codepilot.schemas.state import RepairState
+from codepilot.tools.write_tools import validate_test_target
+
+
+def new_failures(baseline: TestBaseline, after: ExecutionResult) -> list[str]:
+    """Exact parametrized NodeIDs only; missing baseline is never assumed PASS."""
+    if not baseline.complete or after.is_environment_problem:
+        return []
+    return sorted(
+        {
+            t.node_id
+            for t in after.failed_tests
+            if baseline.outcomes.get(t.node_id) is TestOutcome.PASSED
+            and t.node_id not in baseline.flaky
+        }
+    )
+
+
+class RegressionRunner:
+    def __init__(self, *, seed: int = 42) -> None:
+        self.seed = seed
+
+    def run(self, state: RepairState, deps: Deps) -> RegressionResult:
+        baseline = state.baseline
+        result = RegressionResult()
+        if (
+            baseline is None
+            or not baseline.complete
+            or baseline.base_commit != state.base_commit
+            or not baseline.outcomes
+        ):
+            result.failure_reason = "missing, incomplete or mismatched baseline"
+            return result
+        result.baseline_commit = baseline.base_commit
+        result.baseline_hash = digest(baseline.model_dump(mode="json"))
+        result.flaky = set(baseline.flaky)
+        authorized = sorted(baseline.outcomes)
+        result.unexecuted_tests = list(authorized)
+        if state.execution is None or state.execution.status is not ExecutionStatus.PASS:
+            result.failure_reason = "L1 has not passed"
+            return result
+        for node in authorized:
+            validate_test_target(deps.validator.policy, node)
+        result.executions["L1"] = state.execution
+        result.levels_run.append(RegressionLevel.TARGET)
+        related = state.impact.related_tests if state.impact else []
+        patch = generate_git_diff(deps.workspace, state.base_commit, policy=deps.validator.policy)
+        parents = {PurePosixPath(name).parent for name in patch.files}
+        affected = [
+            n
+            for n in authorized
+            if n in related
+            or n.split("::")[0] in related
+            or PurePosixPath(n.split("::")[0]).parent in parents
+        ]
+
+        def run_scope(key: str, scope: list[str]) -> ExecutionResult:
+            def action() -> ExecutionResult:
+                live = state.model_copy(update={"test_runs": deps.test_runs, "usage": deps.usage})
+                stop = deps.budget.check(live, Activity.TEST)
+                remaining = state.budget.max_runtime_seconds - deps.budget.elapsed_seconds(state)
+                if stop or remaining < 1:
+                    return ExecutionResult(
+                        status=ExecutionStatus.TIMEOUT, error_reason=str(stop or "budget_time")
+                    )
+                spec = deps.env_spec.model_copy(
+                    update={
+                        "timeout_seconds": min(
+                            deps.env_spec.timeout_seconds, max(1, int(remaining))
+                        )
+                    }
+                )
+                return deps.sandbox.run_tests(
+                    workspace=deps.workspace,
+                    environment=deps.environment,
+                    env_spec=spec,
+                    tests=scope,
+                    artifact_iteration=1000 + deps.test_runs,
+                )
+
+            execution = execute_once(state, deps, key, ExecutionResult, action)
+            deps.artifacts.write_json(
+                f"regression/{state.iteration}/{key}.json",
+                execution.model_dump(mode="json"),
+                redact_values=True,
+            )
+            return execution
+
+        def inspect(key: str, scope: list[str]) -> bool:
+            execution = run_scope(key, scope)
+            result.executions[key] = execution
+            observed = {t.node_id: t.outcome for t in execution.tests}
+            result.executed_tests = sorted(
+                set(result.executed_tests) | (set(observed) & set(authorized))
+            )
+            result.unexecuted_tests = sorted(set(authorized) - set(result.executed_tests))
+            if (execution.status is ExecutionStatus.PASS and execution.failed_tests) or (
+                execution.status is ExecutionStatus.FAIL and not execution.failed_tests
+            ):
+                result.failure_reason = "execution status contradicts per-test outcomes"
+                return False
+            if execution.status not in {ExecutionStatus.PASS, ExecutionStatus.FAIL} or set(
+                observed
+            ) != set(scope):
+                result.status = execution.status.value
+                result.failure_reason = "execution failed or test scope mismatch"
+                return False
+            result.status_changes.update(
+                {
+                    node: (baseline.outcomes[node].value, outcome.value)
+                    for node, outcome in observed.items()
+                    if node in baseline.outcomes and baseline.outcomes[node] != outcome
+                }
+            )
+            result.existing_failures = sorted(
+                set(result.existing_failures)
+                | {
+                    t.node_id
+                    for t in execution.failed_tests
+                    if baseline.outcomes.get(t.node_id) in {TestOutcome.FAILED, TestOutcome.ERROR}
+                }
+            )
+            for node in new_failures(baseline, execution):
+                if node in result.flaky:
+                    continue
+                retries = []
+                for attempt in range(2):
+                    retry = run_scope(f"{key}-retry-{digest(node)[:16]}-{attempt}", [node])
+                    retries.append(retry)
+                    result.retries[node] = retries
+                    if retry.status not in {ExecutionStatus.PASS, ExecutionStatus.FAIL} or [
+                        t.node_id for t in retry.tests
+                    ] != [node]:
+                        result.status = retry.status.value
+                        result.failure_reason = "flaky retry incomplete"
+                        return False
+                if any(r.tests[0].outcome is TestOutcome.PASSED for r in retries):
+                    result.flaky.add(node)
+                elif all(
+                    r.tests[0].outcome in {TestOutcome.FAILED, TestOutcome.ERROR} for r in retries
+                ):
+                    result.new_failures.append(node)
+                else:
+                    result.failure_reason = "flaky retry skipped"
+                    return False
+            return not result.has_regression
+
+        if affected:
+            result.levels_run.append(RegressionLevel.IMPACT)
+            if not inspect("L2", affected):
+                return result
+        remaining = state.budget.max_runtime_seconds - deps.budget.elapsed_seconds(state)
+        estimate = (
+            baseline.duration_seconds
+            if baseline.duration_seconds is not None
+            else deps.env_spec.timeout_seconds
+        )
+        full_runs = sum(
+            RegressionLevel.FULL in a.regression.levels_run
+            for a in state.attempts[:-1]
+            if a.regression
+        )
+        if full_runs >= 2:
+            result.failure_reason = "L3 full-run limit reached"
+            return result
+        scope = authorized
+        key = "L3"
+        if estimate > remaining:
+            candidates = sorted(set(authorized) - set(affected))
+            scope = sorted(
+                random.Random(self.seed).sample(candidates, math.ceil(len(candidates) * 0.2))
+            )
+            result.mode = RegressionMode.SAMPLED
+            result.sampled_ratio = len(scope) / len(candidates) if candidates else 0
+            result.seed = self.seed
+            key = "L3-sampled"
+        if not scope:
+            result.failure_reason = "no regression scope executed"
+            return result
+        if key == "L3":
+            result.levels_run.append(RegressionLevel.FULL)
+        if not inspect(key, scope):
+            return result
+        result.complete = True
+        result.status = "completed"
+        return result
