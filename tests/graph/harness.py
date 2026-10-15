@@ -32,10 +32,11 @@ from codepilot.agents.impact_analyzer import ImpactAnalyzer
 from codepilot.agents.issue_analyzer import IssueAnalyzer
 from codepilot.agents.localizer import Localizer
 from codepilot.agents.planner import Planner
+from codepilot.agents.reproducer import ReproductionAgent
 from codepilot.artifacts import ArtifactStore
 from codepilot.context.builder import ContextBuilder
 from codepilot.failure.parser import FailureParser
-from codepilot.graph.deps import Deps
+from codepilot.graph.deps import AccountingSandbox, Deps
 from codepilot.graph.stop_rules import patch_hash
 from codepilot.llm.fake import FakeLLM, Reply
 from codepilot.llm.tracking import UsageTrackingProvider
@@ -379,6 +380,9 @@ def build_harness(
     cost_per_call: float = 0.0,
     now: datetime | None = None,
     offsets: Sequence[float] = (),
+    sandbox_override: Any | None = None,
+    with_reproducer: bool = False,
+    repro_drafts: Sequence[Reply] = (),
     plan_replies: bool = True,
     planner_replies: Sequence[Reply] | None = None,
     extra_plans: int = 0,
@@ -461,6 +465,8 @@ def build_harness(
         script.add("coder", *round_replies)
     for item in diagnoses:
         script.add("diagnoser", item)
+    for item in repro_drafts:
+        script.add("reproducer", item)
 
     llm = FakeLLM(
         default=script.reply,
@@ -484,14 +490,47 @@ def build_harness(
         baseline_results if baseline_results is not None else [passed_result(), passed_result()]
     )
     scripted.extend(results)
-    sandbox = FakeSandbox(scripted, build_status=build_status)
+    # 显式构造计数包装器：复现校验器必须共用它，否则 ReproductionAgent 在 base
+    # Workspace 上跑的那些测试不会计入 max_test_runs。
+    inner_sandbox: Any = (
+        sandbox_override
+        if sandbox_override is not None
+        else FakeSandbox(scripted, build_status=build_status)
+    )
+    sandbox = AccountingSandbox(inner_sandbox)
     env_spec = EnvSpec(
         install=("python -m pip install pytest",), env={"PYTHONPATH": "/workspace/src"}
     )
     environment = sandbox.build_env(
-        repository=str(original), base_commit=base, workspace=ws_path, env_spec=env_spec
+        repository=str(original),
+        base_commit=base,
+        workspace=ws_path,
+        env_spec=env_spec,
+        allow_network=sandbox_override is not None,
     )
-    policy = WorkspacePathPolicy(ws_path)
+    policy = WorkspacePathPolicy(ws_path, repro_write=with_reproducer)
+    reproducer: ReproductionAgent | None = None
+    if with_reproducer:
+        from codepilot.agents.reproducer import (
+            BaseWorkspaceValidator,
+            ReproductionAgent,
+            WorkspaceManagerBaseProvider,
+        )
+
+        validator = BaseWorkspaceValidator(
+            sandbox=sandbox,
+            env_spec=env_spec,
+            provider=WorkspaceManagerBaseProvider(
+                WorkspaceManager(cache_root=tmp_path / "base-cache"),
+                source=str(original),
+                base_commit=base,
+                root=tmp_path / "base-workspaces",
+            ),
+            environment=environment,
+        )
+        reproducer = ReproductionAgent(
+            provider, policy=policy, validator=validator, artifacts=artifacts, usage=usage
+        )
     test_budget = TestRunBudget(budget.max_test_runs if budget else 12)
     registry = build_tool_registry(
         policy=policy,
@@ -557,6 +596,7 @@ def build_harness(
         sandbox=sandbox,
         environment=environment,
         env_spec=env_spec,
+        reproducer=reproducer,
         validator=PatchValidator(policy, base, index=index),
         tools=registry,
         context_builder=ContextBuilder(workspace_root=ws_path),
@@ -583,7 +623,7 @@ def build_harness(
         workspace=ws_path,
         base_commit=base,
         llm=llm,
-        sandbox=sandbox,
+        sandbox=inner_sandbox,
         events_path=events_path,
         artifacts_root=artifacts_root,
         clock=[started],
