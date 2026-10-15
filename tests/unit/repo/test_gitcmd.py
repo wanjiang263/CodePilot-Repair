@@ -9,6 +9,8 @@
 
 from __future__ import annotations
 
+import os
+import signal
 import subprocess
 import sys
 import time
@@ -46,32 +48,59 @@ def spawn_instead_of_git(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     yield
 
 
+def _pid_alive(pid: int) -> bool:
+    if sys.platform == "win32":
+        import ctypes
+        from ctypes import wintypes
+
+        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        kernel.OpenProcess.restype = wintypes.HANDLE
+        kernel.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+        kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+        handle = kernel.OpenProcess(0x1000, False, pid)
+        if not handle:
+            return False
+        try:
+            code = wintypes.DWORD()
+            assert kernel.GetExitCodeProcess(handle, ctypes.byref(code))
+            return code.value == 259
+        finally:
+            kernel.CloseHandle(handle)
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    return True
+
+
 @pytest.fixture
-def spawn_tree_that_writes_a_marker(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
-    """子进程派生一个孙进程；孙进程醒过来就写一个文件，作为"还活着"的证据。
-
-    孙进程只睡 2 秒就写——它必须**早于**查询时刻，否则用例分辨不出
-    "被杀掉了"和"还没醒"。第一版让孙进程睡 20 秒、返回后 4 秒去查，
-    结果连"只杀直接子进程"的变异都能通过。
-    """
-    marker = tmp_path / "grandchild-still-alive.txt"
-    grandchild = (
-        f"import pathlib, time\ntime.sleep(2)\npathlib.Path({str(marker)!r}).write_text('alive')\n"
-    )
-    script = (
-        "import subprocess, sys, time\n"
-        f"subprocess.Popen([sys.executable, '-c', {grandchild!r}])\n"
-        "time.sleep(60)\n"
-    )
+def started_process_tree(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    """Handshake ensures both processes exist before the timeout clock starts."""
+    handshake = tmp_path / "grandchild.pid"
+    grandchild = f"import os,pathlib,time; pathlib.Path({str(handshake)!r}).write_text(str(os.getpid())); time.sleep(60)"
+    script = f"import subprocess,sys,time; subprocess.Popen([sys.executable,'-c',{grandchild!r}]); time.sleep(60)"
     real_popen = subprocess.Popen
+    pids = []
 
-    def fake_popen(command: list[str], **kwargs: object) -> object:
-        if command[:1] == ["git"]:
-            return real_popen([sys.executable, "-c", script], **kwargs)  # type: ignore[arg-type]
-        return real_popen(command, **kwargs)  # type: ignore[arg-type]
+    def fake_popen(command, **kwargs):
+        if command[:1] != ["git"]:
+            return real_popen(command, **kwargs)
+        process = real_popen([sys.executable, "-c", script], **kwargs)
+        pids.append(process.pid)
+        deadline = time.monotonic() + 20
+        while not handshake.exists() and time.monotonic() < deadline:
+            time.sleep(0.02)
+        assert handshake.exists(), "process startup handshake timed out"
+        pids.append(int(handshake.read_text()))
+        assert all(_pid_alive(pid) for pid in pids)
+        return process
 
     monkeypatch.setattr(subprocess, "Popen", fake_popen)
-    return marker
+    yield pids
+    for pid in reversed(pids):
+        if _pid_alive(pid):
+            os.kill(pid, signal.SIGTERM)
 
 
 # --------------------------------------------------------------- 基本
@@ -192,26 +221,47 @@ def test_timeout_returns_within_the_timeout_plus_a_small_grace(
     )
 
 
+@pytest.mark.parametrize("load", [0, 2])
 def test_timeout_kills_the_grandchild_not_just_the_child(
-    tmp_path: Path, spawn_tree_that_writes_a_marker: Path
+    tmp_path: Path, started_process_tree, load
 ) -> None:
-    """光看"返回得快"还不够：必须证明孙进程**真的死了**。
+    workers = [
+        subprocess.Popen(
+            [
+                sys.executable,
+                "-c",
+                "import time; end=time.monotonic()+30; exec('while time.monotonic()<end: pass')",
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        for _ in range(load)
+    ]
+    try:
+        with pytest.raises(GitError):
+            run_git(["x"], cwd=tmp_path, timeout=1.0)
+        deadline = time.monotonic() + 10
+        while any(_pid_alive(pid) for pid in started_process_tree) and time.monotonic() < deadline:
+            time.sleep(0.02)
+        assert len(started_process_tree) == 2
+        assert not any(_pid_alive(pid) for pid in started_process_tree), (
+            "child/grandchild remains alive"
+        )
+    finally:
+        for worker in workers:
+            worker.kill()
+            worker.wait(timeout=10)
 
-    它补的是上一条测不到的失败模式：一个"立刻返回但没杀干净"的实现——
-    第二次 ``communicate`` 可以靠超时立刻放弃，耗时看起来完全正常，而
-    孙进程继续跑完。这里让孙进程在 2 秒后写一个文件作为活着的证据。
-    """
+
+def test_process_tree_probe_detects_surviving_grandchild(
+    tmp_path, started_process_tree, monkeypatch
+):
+    """Negative control: deliberately kill only the direct child."""
+    monkeypatch.setattr("codepilot.repo.gitcmd._terminate_tree", lambda process: process.kill())
     with pytest.raises(GitError):
         run_git(["x"], cwd=tmp_path, timeout=1.0)
-
-    # 一直查到孙进程本该写完的时刻之后。查询必须**晚于**它的写入时刻，
-    # 否则"文件不存在"分不清是"被杀掉了"还是"还没醒"。
-    deadline = time.monotonic() + 6.0
-    while time.monotonic() < deadline:
-        assert not spawn_tree_that_writes_a_marker.exists(), (
-            "孙进程活过了超时处理：它会继续占着管道跑完，而 run_git 已经返回了。"
-        )
-        time.sleep(0.25)
+    assert len(started_process_tree) == 2
+    assert _pid_alive(started_process_tree[1]), "negative control did not leave a grandchild"
 
 
 def test_timeout_message_names_the_command(tmp_path: Path, spawn_instead_of_git: None) -> None:
