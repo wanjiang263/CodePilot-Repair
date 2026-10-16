@@ -44,7 +44,7 @@ from codepilot import __version__ as CODEPILOT_VERSION  # noqa: N812
 from codepilot.artifacts import ArtifactStore
 from codepilot.eval.assembly import InferenceAssembly, InferenceOutcome, ProviderBundle
 from codepilot.eval.evaluation import EvaluationVerdict, GoldEvaluator, PatchEvaluation
-from codepilot.eval.metrics import TaskOutcome, VerificationMode
+from codepilot.eval.metrics import LocalizationSample, TaskOutcome, VerificationMode
 from codepilot.eval.synthetic import SyntheticFixture
 from codepilot.repo.workspace import WorkspaceManager
 from codepilot.schemas.budget import RepairBudget
@@ -333,6 +333,11 @@ class TaskRecord:
     artifact_refs: dict[str, str] = field(default_factory=dict)
     error_details: tuple[str, ...] = ()
     finished_at: str = ""
+    localization_files: tuple[str, ...] = ()
+    localization_symbols: tuple[str, ...] = ()
+    # 推理侧自己给出的定位候选（有序、按模型排名）。只存预测，不存 gold：gold 一旦落进
+    # journal 或 ``results.jsonl``，续跑与复盘就会把"该改哪个文件"重新喂进任何读这些
+    # 产物的环节。gold 在报告时由评测侧现算。
 
     def as_dict(self) -> dict[str, Any]:
         payload = asdict(self)
@@ -342,7 +347,8 @@ class TaskRecord:
     @staticmethod
     def from_dict(payload: Mapping[str, Any]) -> TaskRecord:
         data = dict(payload)
-        data["error_details"] = tuple(data.get("error_details", ()))
+        for key in ("error_details", "localization_files", "localization_symbols"):
+            data[key] = tuple(data.get(key, ()))
         return TaskRecord(**data)
 
     @property
@@ -350,7 +356,7 @@ class TaskRecord:
         """这次观测是否产生了可用于成功率判断的结论。"""
         return self.execution_state == ExecutionState.COMPLETED.value
 
-    def metric_view(self, localization: TaskOutcome | None = None) -> TaskOutcome:
+    def metric_view(self, localization: LocalizationSample | None = None) -> TaskOutcome:
         """转成指标层输入。定位结论由评测侧算好后传入，这里不碰 gold。"""
         return TaskOutcome(
             task_id=self.task_id,
@@ -374,7 +380,7 @@ class TaskRecord:
             cost=self.cost,
             runtime_seconds=self.runtime_seconds,
             cost_currency=self.cost_currency,
-            localization=localization.localization if localization else None,
+            localization=localization,
         )
 
 
@@ -461,6 +467,13 @@ class BenchmarkRun:
     started_at: str
     finished_at: str
     integrity: str
+    gold_files_by_task: Mapping[str, frozenset[str]] = field(default_factory=dict)
+    """``task_id -> gold 修改的文件集合``。只在报告阶段使用，不写进任何产物。
+
+    只有文件级 gold 是从 fixture 直接得到的；符号级 gold 需要把补丁行映射回索引，
+    评测侧目前不提供，因此 Function Recall@K 的分母如实为 0（``value=None``），
+    而不是 0%。
+    """
 
     def counts(self) -> dict[str, int]:
         out: dict[str, int] = {}
@@ -469,7 +482,21 @@ class BenchmarkRun:
         return dict(sorted(out.items()))
 
     def metric_inputs(self) -> list[TaskOutcome]:
-        return [record.metric_view() for record in self.records]
+        outcomes: list[TaskOutcome] = []
+        for record in self.records:
+            gold = self.gold_files_by_task.get(record.task_id)
+            sample = (
+                LocalizationSample(
+                    task_id=record.task_id,
+                    predicted_files=record.localization_files,
+                    predicted_symbols=record.localization_symbols,
+                    gold_files=gold,
+                )
+                if gold
+                else None
+            )
+            outcomes.append(record.metric_view(sample))
+        return outcomes
 
 
 AssemblyFactory = Callable[[SyntheticFixture, int], InferenceAssembly]
@@ -563,6 +590,9 @@ class BenchmarkRunner:
             started_at=self._started_at,
             finished_at=finished,
             integrity=self._integrity(len(records)),
+            gold_files_by_task={
+                item.task_id: frozenset(item.evaluation.gold_files) for item in self._fixtures
+            },
         )
 
     # ------------------------------------------------------------------ 内部
@@ -603,7 +633,11 @@ class BenchmarkRunner:
         identity = self._identity(fixture, seed)
         if not self._ledger.reserve():
             return self._record(fixture, identity, state=ExecutionState.BUDGET_BLOCKED, run_id="")
-        run_id = f"{identity.task_id}-s{seed}-{identity.key[:8]}"
+        # run_id 里必须带本次 benchmark 的标识：推理现场（workspace 目录）在运行结束后
+        # 刻意保留供事后核查，而 WorkspaceManager 拒绝写入非空目录。只用 task+seed+identity
+        # 命名的话，第二次全新运行会一头撞进上一次留下的现场，每一个任务都变成
+        # inference_error——而复跑正是评测基础设施最基本的能力要求。
+        run_id = f"{self._run_id}-{identity.task_id}-s{seed}-{identity.key[:8]}"
         try:
             outcome = self._assembly_factory(fixture, seed).run(run_id=run_id, seed=seed)
         except Exception as exc:  # 单任务失败不能带走整批
@@ -716,6 +750,8 @@ class BenchmarkRunner:
                 evaluation is not None and evaluation.sandbox_backend.startswith("docker")
             ),
             usage_uncertain=bool(outcome.usage_uncertain) if outcome else True,
+            localization_files=tuple(outcome.localization_files) if outcome else (),
+            localization_symbols=tuple(outcome.localization_symbols) if outcome else (),
             artifact_refs={
                 **({"inference_run_dir": Path(outcome.artifact_dir).name} if outcome else {}),
                 **(evaluation.artifact_refs if evaluation else {}),

@@ -82,6 +82,7 @@ def _outcome(
     llm_calls: int = 4,
     empty: bool = False,
     iterations: int = 2,
+    localization: tuple[str, ...] = (),
 ) -> InferenceOutcome:
     usage = Usage(input_tokens=100, output_tokens=50, cost=cost or 0.0, llm_calls=llm_calls)
     if cost is None:
@@ -104,7 +105,7 @@ def _outcome(
         usage_uncertain=cost is None,
         test_runs=1,
         runtime_seconds=1.5,
-        localization_files=(),
+        localization_files=localization,
         localization_symbols=(),
         agent_claims_success=not empty,
         empty_patch=empty,
@@ -187,6 +188,7 @@ def _runner(
     seeds: tuple[int, ...] = (0, 1, 2),
     sandbox: FakeSandbox | None = None,
     outcome_factory: Any = None,
+    assembly_factory: Any = None,
     max_total_cost: float | None = None,
     reservation: float = 0.0,
     journal_dir: Path | None = None,
@@ -200,7 +202,9 @@ def _runner(
     )
     built: dict[str, _StubAssembly] = {}
 
-    def factory(fixture: Any, seed: int) -> _StubAssembly:
+    def factory(fixture: Any, seed: int) -> Any:
+        if assembly_factory is not None:
+            return assembly_factory(fixture, seed)
         key = f"{fixture.task_id}-{seed}"
         if key not in built:
             patch = "" if getattr(fixture, "_no_patch", False) else fixture.evaluation.gold_patch
@@ -444,9 +448,52 @@ def test_resume_after_new_seed_only_runs_the_new_one(tmp_path: Path) -> None:
     assert states[1] == ExecutionState.COMPLETED.value
 
 
+def test_two_fresh_runs_get_disjoint_inference_run_dirs(tmp_path: Path) -> None:
+    """第二次全新运行不得复用上一次的推理 run 目录名。
+
+    真实症状：推理 workspace 在运行结束后刻意保留（中断现场要能核查），而
+    WorkspaceManager 拒绝写入非空目录。run_id 只由 task+seed+identity 决定时，
+    第二次跑同一批 fixture 会一头撞进上一次的残留，9/9 任务全部变成
+    inference_error——复跑是评测基础设施的底线，不是锦上添花。
+    """
+    import dataclasses
+
+    fixtures = _fixtures(tmp_path, 2)
+    claimed: set[str] = set()
+
+    class _ClaimingAssembly:
+        def __init__(self, outcome: InferenceOutcome) -> None:
+            self._outcome = outcome
+
+        def run(self, *, run_id: str, seed: int) -> InferenceOutcome:
+            if run_id in claimed:
+                raise RuntimeError(f"workspace 目标目录已存在且非空: {run_id}")
+            claimed.add(run_id)
+            return dataclasses.replace(self._outcome, run_id=run_id, seed=seed)
+
+    def factory(fixture: Any, seed: int) -> _ClaimingAssembly:
+        return _ClaimingAssembly(
+            _outcome(
+                run_id="stub",
+                task_id=fixture.task_id,
+                seed=seed,
+                patch=fixture.evaluation.gold_patch,
+            )
+        )
+
+    for attempt in range(2):
+        result = _runner(
+            tmp_path / f"run{attempt}",
+            fixtures=fixtures,
+            seeds=(0, 1, 2),
+            assembly_factory=factory,
+        ).run()
+        states = [item.execution_state for item in result.records]
+        assert states == [ExecutionState.COMPLETED.value] * 6, result.records
+    assert len(claimed) == 12
+
+
 # ------------------------------------------------------------------ 编排与产物
-
-
 def test_full_pipeline_writes_four_artifacts(tmp_path: Path) -> None:
     fixtures = _fixtures(tmp_path, 3)
     runner = _runner(tmp_path, fixtures=fixtures, seeds=(0, 1, 2), journal_dir=tmp_path / "run")
@@ -460,6 +507,57 @@ def test_full_pipeline_writes_four_artifacts(tmp_path: Path) -> None:
     assert len(lines) == 9 == len(result.records)
     for line in lines:
         json.loads(line)
+
+
+def test_localization_predictions_reach_recall_metrics(tmp_path: Path) -> None:
+    """推理侧的定位预测要进到 Recall@K 的分母里。
+
+    分母 0（``value=None``）与"算出来是 0%"是两件事：前者说明评测压根没看到候选，
+    后者说明模型没找准。少了这条链路，File/Function Recall@K 会永远停在 None，
+    而报告看上去"只是没算好"。
+    """
+    import dataclasses
+
+    fixtures = _fixtures(tmp_path, 1)
+    gold = tuple(sorted(fixtures[0].evaluation.gold_files))
+    assert gold, "demo fixture 应当有 gold 修改的文件"
+
+    class _Recording:
+        def __init__(self, outcome: InferenceOutcome) -> None:
+            self._outcome = outcome
+
+        def run(self, *, run_id: str, seed: int) -> InferenceOutcome:
+            return dataclasses.replace(
+                self._outcome,
+                run_id=run_id,
+                seed=seed,
+                localization_files=gold,
+            )
+
+    def factory(fixture: Any, seed: int) -> _Recording:
+        return _Recording(
+            _outcome(
+                run_id="stub",
+                task_id=fixture.task_id,
+                seed=seed,
+                patch=fixture.evaluation.gold_patch,
+            )
+        )
+
+    result = _runner(tmp_path, fixtures=fixtures, seeds=(0,), assembly_factory=factory).run()
+    record = result.records[0]
+    assert record.localization_files == gold, "定位预测没落到逐任务记录里"
+    sample = result.metric_inputs()[0].localization
+    assert sample is not None and sample.gold_files == frozenset(gold), "评测侧的 gold 没接上"
+
+    metrics = build_metrics(result)
+    recall = metrics["overall"]["localization"]["k1"]["file_recall"]
+    assert recall["denominator"] == 1, recall
+    assert recall["value"] == 1.0, recall
+    function_recall = metrics["overall"]["localization"]["k1"]["function_recall"]
+    assert function_recall["denominator"] == 0 and function_recall["value"] is None, (
+        "符号级 gold 评测侧不提供，必须如实显示为无证据，而不是 0%"
+    )
 
 
 def test_record_count_matches_denominator(tmp_path: Path) -> None:
