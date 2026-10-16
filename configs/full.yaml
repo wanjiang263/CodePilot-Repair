@@ -1,0 +1,45 @@
+# Phase 10 synthetic benchmark 运行配置（04 Phase 10 / docs/02 §17.4）。
+#
+# 这份文件描述"怎么跑"，不描述"用哪个模型"——模型与单价在 configs/llm.yaml，
+# 换模型不该动运行配置（03 §24）。密钥也不在这里，只写环境变量名。
+#
+# 预算分两层，二者含义不同，不要混：
+#   budget.max_cost        单任务上限（03 §16）。没有固定默认值：不同模型单价差别
+#                          很大，同一个数字换个模型含义就完全变了。
+#   limits.max_total_cost  整批上限。派发新任务**之前**检查，达到后停止派发，已完成
+#                          的结果保留。这是为了不让一次无人值守的批量跑变成一张意外
+#                          的账单，不是为了保证不可预测的外部账单不超过某个数——
+#                          已经在途的任务只能等它结束。
+
+suite: synthetic
+
+# 02 §17.5：synthetic 每组配置 3 个 seed，报告均值 ± 标准差。
+seeds: [0, 1, 2]
+
+# 每个任务的修复预算（03 §16 的默认值，逐项可覆盖）。
+budget:
+  max_iterations: 5
+  max_test_runs: 12
+  max_files_changed: 5
+  max_lines_changed: 150
+  max_tool_calls_per_iteration: 30
+  max_runtime_seconds: 1800
+  max_total_tokens: 1000000
+  max_cost: null
+  budget_currency: CNY
+
+limits:
+  # 整批费用上限，单位与 budget_currency 一致。null = 不设上限。
+  max_total_cost: null
+
+  # 每个任务在派发前先按这个数额占额度。设置了 max_total_cost 时必须给正值，
+  # 否则并发派发会超发：两个 worker 同时看到"还剩一份预算"，钱就花出去了。
+  # 取值应当接近单任务实际平均费用；缺省时用 max_cost，再缺省取上限的 1/8。
+  max_cost_per_task: null
+
+  # 同时在途的任务数。真实模型跑批量时 >1 才有意义，且必须配合 max_cost_per_task。
+  max_in_flight: 1
+
+output:
+  dir: artifacts/phase10
+  label: bench

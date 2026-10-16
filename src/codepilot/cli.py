@@ -10,6 +10,7 @@ Phase 0 只把 ``config`` 与 ``doctor`` 做实。其余子命令**注册但不�
 
 from __future__ import annotations
 
+import json
 import secrets
 import shlex
 import shutil
@@ -18,13 +19,16 @@ import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import typer
 
+from codepilot.artifacts import ArtifactStore
 from codepilot.config import PROJECT_ROOT, get_settings
+from codepilot.eval.runner import BenchmarkRunner
 from codepilot.observability.logging import configure_logging
 from codepilot.observability.redaction import redact_text
+from codepilot.repo.workspace import WorkspaceManager
 
 if TYPE_CHECKING:
     from codepilot.repo.index import IndexStats
@@ -35,7 +39,6 @@ __all__ = ["app"]
 #: ``index`` 已在 R-18 落地，不再列在这里——``test_unimplemented_commands_fail_loudly``
 #: 以 ``sorted(_PLANNED)`` 参数化，删键即自动不再要求 index 退出码 2。
 _PLANNED: dict[str, str] = {
-    "bench": "Phase 11（SWE-bench Lite，M3）",
     "report": "Phase 13（Run Report 与 Dashboard）",
 }
 
@@ -850,11 +853,292 @@ def solve(
 
 @app.command("bench")
 def bench(
-    subset: Path = typer.Option(Path("configs/subsets/swe_lite.json"), "--subset"),
+    suite: str = typer.Option("synthetic", "--suite", help="评测套件名。"),
+    config: Path = typer.Option(
+        Path("configs/full.yaml"), "--config", help="运行配置（预算、seed、整批上限）。"
+    ),
+    seeds: str = typer.Option(
+        ...,
+        "--seeds",
+        help="seed 数量（如 3 → 0,1,2）或逗号分隔的显式列表（如 7,8,9）。",
+    ),
+    suite_root: Path = typer.Option(
+        Path("benchmarks/synthetic"), "--suite-root", help="合成 fixture 目录。"
+    ),
+    max_total_cost: float | None = typer.Option(
+        None, "--max-total-cost", help="整批费用上限，达到后停止派发新任务。"
+    ),
+    max_in_flight: int | None = typer.Option(
+        None, "--max-in-flight", help="同时在途任务数（>1 需要配合每任务预留额）。"
+    ),
+    fake_llm_script_dir: Path | None = typer.Option(
+        None,
+        "--fake-llm-script-dir",
+        help="按 <task_id>.json 提供 FakeLLM 脚本；离线工程 smoke，不访问网络。",
+    ),
+    fake_sandbox: bool = typer.Option(
+        False, "--fake-sandbox", help="使用明确标识的 FakeSandbox；仅工程测试。"
+    ),
+    allow_live_llm: bool = typer.Option(
+        False, "--allow-live-llm", help="显式授权使用真实 Provider（会产生费用）。"
+    ),
+    resume: Path | None = typer.Option(
+        None, "--resume", help="从既有 run 目录续跑，已完成任务不重跑。"
+    ),
+    require_validated: bool = typer.Option(
+        True,
+        "--require-validated",
+        help="只跑已经通过 E-02 校验的 fixture；缺记录就拒绝开跑。",
+    ),
 ) -> None:
-    """[未实现] 在 SWE-bench Lite 子集上评测。"""
-    del subset
-    _not_yet("bench")
+    """运行合成 benchmark：多 seed、全局预算、可续跑，输出四份产物。
+
+    默认不碰付费模型：必须显式 ``--allow-live-llm``。FakeLLM 跑出来的结果会带上
+    ``simulated_llm=True``，报告标题写成"工程 smoke"，不会被当成模型效果。
+    """
+    import json as _json
+
+    from codepilot.eval.evaluation import GoldEvaluator
+    from codepilot.eval.report import write_benchmark_report
+    from codepilot.eval.runner import assembly_factory, load_bench_config, provider_config_hash
+    from codepilot.eval.synthetic import validate_suite
+
+    parsed_seeds = _parse_seeds(seeds)
+    if fake_llm_script_dir is not None and allow_live_llm:
+        raise typer.BadParameter("--fake-llm-script-dir 与 --allow-live-llm 不能同时使用")
+    if fake_llm_script_dir is None and not allow_live_llm:
+        raise typer.BadParameter(
+            "必须提供 --fake-llm-script-dir，或显式传 --allow-live-llm；默认不会调用付费 API"
+        )
+
+    settings = get_settings()
+    settings.ensure_dirs()
+    try:
+        llm_payload = (
+            {}
+            if fake_llm_script_dir is not None
+            else _json.loads(
+                settings.resolved_llm_config.read_text(encoding="utf-8").replace("\t", " ")
+            )
+            if settings.resolved_llm_config.is_file()
+            else {}
+        )
+    except (OSError, ValueError) as exc:
+        raise typer.BadParameter(f"LLM 配置读取失败：{exc}") from exc
+
+    bench_config = load_bench_config(
+        config,
+        seeds_override=parsed_seeds,
+        max_total_cost_override=max_total_cost,
+        max_in_flight_override=max_in_flight,
+        model_identity="FakeLLM" if fake_llm_script_dir is not None else "configs/llm.yaml",
+        provider_config=provider_config_hash(llm_payload),
+    )
+    if bench_config.suite != suite:
+        raise typer.BadParameter(
+            f"配置里的 suite={bench_config.suite!r} 与 --suite={suite!r} 不一致"
+        )
+
+    loaded = validate_suite(suite_root)
+    for task_id, reasons in sorted(loaded.invalid.items()):
+        typer.echo(f"[INVALID_FIXTURE] {task_id}: {reasons[0]}", err=True)
+    if not loaded.fixtures:
+        typer.echo("没有可用 fixture。", err=True)
+        raise typer.Exit(code=2)
+    if loaded.invalid:
+        typer.echo(
+            f"警告：{len(loaded.invalid)} 个 fixture schema 不合格，已从本次分母中排除并记录。",
+            err=True,
+        )
+
+    work_root = settings.artifacts_dir / "bench-work"
+    validation_dir = settings.artifacts_dir / "phase10" / "fixture-validation"
+    validated = _validated_fixture_versions(validation_dir) if require_validated else {}
+    if require_validated:
+        missing = [item.task_id for item in loaded.fixtures if item.task_id not in validated]
+        if missing:
+            typer.echo(
+                "以下 fixture 没有真实 Docker 校验记录，拒绝进入 benchmark 分母：\n  "
+                + "\n  ".join(missing[:10])
+                + "\n先运行：uv run python scripts/validate_fixtures.py",
+                err=True,
+            )
+            raise typer.Exit(code=2)
+        loaded_fixtures = [item for item in loaded.fixtures if item.task_id in validated]
+    else:
+        loaded_fixtures = list(loaded.fixtures)
+
+    sandbox_factory = _bench_sandbox_factory(fake_sandbox=fake_sandbox)
+    eval_work_root = work_root / "evaluation"
+    evaluator = GoldEvaluator(
+        manager=WorkspaceManager(cache_root=work_root / "repo-cache"),
+        sandbox_factory=sandbox_factory,
+        work_root=eval_work_root,
+    )
+    providers = _bench_provider_factory(
+        fake_llm_script_dir=fake_llm_script_dir, allow_live_llm=allow_live_llm
+    )
+    runner = BenchmarkRunner(
+        config=bench_config,
+        fixtures=loaded_fixtures,
+        assembly_factory=assembly_factory(
+            work_root=work_root,
+            cache_root=settings.repo_cache_dir(),
+            sandbox_factory=sandbox_factory,
+            providers=providers,
+            evaluator=evaluator,
+            budget=bench_config.per_task_budget,
+        ),
+        evaluator=evaluator,
+        journal_directory=resume,
+    )
+    if allow_live_llm:
+        _confirm_live_cost(bench_config, len(loaded_fixtures))
+    typer.echo(f"run dir: {runner.run_dir}", err=True)
+    result = runner.run()
+    paths = write_benchmark_report(result, runner.run_dir)
+    typer.echo(
+        _json.dumps(
+            {
+                "run_id": result.run_id,
+                "integrity": result.integrity,
+                "counts": result.counts(),
+                "budget": result.ledger,
+                "artifacts": {
+                    "results": str(paths.results),
+                    "metrics": str(paths.metrics),
+                    "summary": str(paths.summary),
+                    "manifest": str(paths.manifest),
+                },
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    completed = sum(1 for item in result.records if item.counted)
+    if not completed:
+        raise typer.Exit(code=1)
+
+
+def _parse_seeds(text: str) -> tuple[int, ...]:
+    """``--seeds 3`` 是数量，``--seeds 7,8,9`` 是显式列表。
+
+    两种写法都要支持：04 的命令示例用的是数量，而续跑与消融要能指定具体 seed。
+    """
+    raw = text.strip()
+    if not raw:
+        raise typer.BadParameter("--seeds 不能为空")
+    try:
+        if "," in raw:
+            values = tuple(int(item) for item in raw.split(",") if item.strip())
+        elif raw.isdigit() and int(raw) > 0:
+            values = tuple(range(int(raw)))
+        else:
+            values = (int(raw),)
+    except ValueError as exc:
+        raise typer.BadParameter(f"--seeds 解析失败: {exc}") from exc
+    if not values:
+        raise typer.BadParameter("--seeds 至少要有一个")
+    if min(values) < 0:
+        raise typer.BadParameter("--seeds 不能为负")
+    if len(set(values)) != len(values):
+        raise typer.BadParameter("--seeds 不能有重复值")
+    return values
+
+
+def _validated_fixture_versions(directory: Path) -> dict[str, str]:
+    """读取 E-02 的校验记录：``task_id -> fixture_version``。
+
+    只认 ``status=VALID`` 且带真实执行证据的记录。``ENV_ERROR`` 不是"任务无效"，
+    但也不能当作"已验证有效"——那会把一批从没测出结论的 fixture 放进分母。
+    """
+    summary = Path(directory) / "summary.json"
+    if not summary.is_file():
+        return {}
+    try:
+        payload = json.loads(summary.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    if not payload.get("real_execution_evidence"):
+        return {}
+    out: dict[str, str] = {}
+    for record in payload.get("records", []):
+        if record.get("status") == "VALID" and record.get("task_id"):
+            out[str(record["task_id"])] = str(record.get("fixture_version", ""))
+    return out
+
+
+def _bench_sandbox_factory(*, fake_sandbox: bool) -> Any:
+    from codepilot.sandbox.base import Sandbox
+    from codepilot.sandbox.docker import DockerSandbox
+    from codepilot.sandbox.fake import FakeSandbox, scripted_result
+    from codepilot.schemas.enums import ExecutionStatus
+
+    def factory(artifacts: ArtifactStore) -> Sandbox:
+        if fake_sandbox:
+            return FakeSandbox([scripted_result(ExecutionStatus.PASS)])
+        return DockerSandbox(
+            artifacts=artifacts,
+            allowed_workspace_root=get_settings().artifacts_dir,
+            log_tail_bytes=get_settings().sandbox_log_tail_bytes,
+        )
+
+    return factory
+
+
+def _bench_provider_factory(*, fake_llm_script_dir: Path | None, allow_live_llm: bool) -> Any:
+    from codepilot.eval.assembly import ProviderBundle
+    from codepilot.llm.config import load_llm_config
+
+    if fake_llm_script_dir is None:
+        assert allow_live_llm
+        live_config = load_llm_config(get_settings().resolved_llm_config)
+
+        def live_providers(_fixture: Any, _seed: int) -> ProviderBundle:
+            # 每个 (task, seed) 一份新的 ProviderBundle：共用一份会让两个任务写同一个
+            # Usage 对象，于是 A 的费用记到 B 头上——顺序跑看不出来，只在并发下出现。
+            return ProviderBundle.live(live_config)
+
+        return live_providers
+
+    def providers(fixture: Any, seed: int) -> ProviderBundle:
+        path = Path(fake_llm_script_dir) / f"{fixture.task_id}.json"
+        if not path.is_file():
+            raise FileNotFoundError(f"缺少 FakeLLM 脚本 {path}；没有脚本时拒绝伪造模型应答。")
+        queues = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(queues, dict):
+            raise ValueError(f"{path.name} 必须是 purpose -> 回复列表 的映射")
+        return ProviderBundle.scripted(
+            {key: list(value) for key, value in queues.items()},
+            model_identity=f"FakeLLM/{path.name}@s{seed}",
+        )
+
+    return providers
+
+
+def _confirm_live_cost(config: Any, fixture_count: int) -> None:
+    """跑真实模型前把费用上界说出来（02 §17.4：运行前写进实验计划）。
+
+    说"上界"而不是"预计"：预算按预留额判定，而不可预测的外部账单只能靠单任务上限
+    约束，这里没法保证总额一定不超过某个数。
+    """
+    observations = fixture_count * len(config.seeds)
+    ceiling = (
+        "不设上限"
+        if config.max_total_cost is None
+        else f"{config.max_total_cost} {config.budget_currency}"
+    )
+    per_task = (
+        "未设"
+        if config.per_task_budget.max_cost is None
+        else f"{config.per_task_budget.max_cost} {config.budget_currency}"
+    )
+    typer.echo(
+        f"[live] 将派发 {observations} 次运行（{fixture_count} fixture × {len(config.seeds)} seed）；"
+        f"整批上限 {ceiling}，单任务上限 {per_task}。"
+        "上界依赖服务商实际计价，不保证账单一定不超过该值。",
+        err=True,
+    )
 
 
 @app.command("report")
