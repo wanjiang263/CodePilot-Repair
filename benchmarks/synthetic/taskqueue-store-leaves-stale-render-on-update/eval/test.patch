@@ -1,0 +1,28 @@
+diff --git a/tests/test_cache_invalidation.py b/tests/test_cache_invalidation.py
+new file mode 100644
+index 0000000..26439d7
+--- /dev/null
++++ b/tests/test_cache_invalidation.py
+@@ -0,0 +1,22 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from taskqueue.store import Store
++
++
++def test_overwrite_invalidates_the_render() -> None:
++    store = Store()
++    store.set("a", "one")
++    assert store.get("a") == "ONE"
++    store.set("a", "two")
++    assert store.get("a") == "TWO"
++
++
++def test_render_cache_is_not_shared_between_keys() -> None:
++    store = Store()
++    store.set("a", "x")
++    store.get("a")
++    store.set("b", "y")
++    assert store.get("b") == "Y"
++    assert store.get("a") == "X"

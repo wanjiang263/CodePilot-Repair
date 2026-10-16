@@ -1,0 +1,25 @@
+diff --git a/tests/test_refund_sign.py b/tests/test_refund_sign.py
+new file mode 100644
+index 0000000..a5edc15
+--- /dev/null
++++ b/tests/test_refund_sign.py
+@@ -0,0 +1,19 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from budget.ledger import Ledger
++
++
++def test_refund_reduces_total() -> None:
++    ledger = Ledger()
++    ledger.add(50.0, "Lunch")
++    ledger.refund(0, 10.0)
++    assert ledger.total() == 40.0
++
++
++def test_refund_entry_is_negative() -> None:
++    ledger = Ledger()
++    ledger.add(50.0, "Lunch")
++    entry = ledger.refund(0, 10.0)
++    assert entry.amount == -10.0

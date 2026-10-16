@@ -1,0 +1,26 @@
+diff --git a/tests/test_recorder_copy.py b/tests/test_recorder_copy.py
+new file mode 100644
+index 0000000..b4cb244
+--- /dev/null
++++ b/tests/test_recorder_copy.py
+@@ -0,0 +1,20 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from httpclient.transport import Recorder, build_sender
++
++
++def test_recorder_does_not_drain_the_callers_list() -> None:
++    responses = ["a", "b"]
++    recorder = Recorder(responses)
++    recorder("u1", 1.0, 0)
++    assert responses == ["a", "b"]
++
++
++def test_two_recorders_from_one_script() -> None:
++    responses = ["a", "b"]
++    first = build_sender(responses=responses)
++    second = build_sender(responses=responses)
++    assert first("u", 1.0, 0) == "a"
++    assert second("u", 1.0, 0) == "a"

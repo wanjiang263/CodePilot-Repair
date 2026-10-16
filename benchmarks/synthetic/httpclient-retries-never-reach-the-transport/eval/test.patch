@@ -1,0 +1,32 @@
+diff --git a/tests/test_retries_reach_transport.py b/tests/test_retries_reach_transport.py
+new file mode 100644
+index 0000000..925f7f6
+--- /dev/null
++++ b/tests/test_retries_reach_transport.py
+@@ -0,0 +1,26 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from httpclient.client import Client, new_client
++from httpclient.config import Config
++from httpclient.transport import build_sender
++
++
++def test_sender_receives_three_arguments() -> None:
++    sender = build_sender(responses=["ok"])
++    client = Client(Config(base_url="https://example.invalid/", retries=4), sender=sender)
++    client.request("users")
++    assert len(sender.calls[0]) == 3
++
++
++def test_configured_retries_are_passed_through() -> None:
++    sender = build_sender(responses=["ok"])
++    client = Client(Config(base_url="https://example.invalid/", retries=4), sender=sender)
++    client.request("users")
++    assert sender.calls[0][2] == 4
++
++
++def test_helper_constructor_also_works() -> None:
++    client = new_client(base_url="https://example.invalid/", responses=["ok"], retries=2)
++    assert client.request("users") == "ok"

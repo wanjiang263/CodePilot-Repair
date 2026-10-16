@@ -1,0 +1,13 @@
+diff --git a/src/inventory/shipping.py b/src/inventory/shipping.py
+index ca8c43c..ef15c0a 100644
+--- a/src/inventory/shipping.py
++++ b/src/inventory/shipping.py
+@@ -11,7 +11,7 @@ def box_count(weight_kg: float, capacity_kg: float) -> int:
+     """需要几个箱子。必须向上取整——半箱的货发不出去。"""
+     if capacity_kg <= 0:
+         raise ValueError(f"capacity_kg must be positive, got {capacity_kg}")
+-    return int(weight_kg / capacity_kg)
++    return math.ceil(weight_kg / capacity_kg)
+ 
+ 
+ def fits(order: list[Line], limits: dict[str, int]) -> bool:

@@ -1,0 +1,27 @@
+diff --git a/tests/test_category_rounding.py b/tests/test_category_rounding.py
+new file mode 100644
+index 0000000..a631775
+--- /dev/null
++++ b/tests/test_category_rounding.py
+@@ -0,0 +1,21 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from budget.ledger import Ledger
++
++
++def _tenth_ledger() -> Ledger:
++    ledger = Ledger()
++    for _ in range(3):
++        ledger.add(0.1, "Coffee")
++    return ledger
++
++
++def test_three_tenths_is_exactly_three_tenths() -> None:
++    assert _tenth_ledger().by_category() == {"food": 0.3}
++
++
++def test_category_and_total_agree() -> None:
++    ledger = _tenth_ledger()
++    assert sum(ledger.by_category().values()) == ledger.total()

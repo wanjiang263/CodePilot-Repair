@@ -1,0 +1,13 @@
+diff --git a/src/httpclient/config.py b/src/httpclient/config.py
+index ee0aa51..b85b9a7 100644
+--- a/src/httpclient/config.py
++++ b/src/httpclient/config.py
+@@ -26,7 +26,7 @@ class Config:
+ 
+     def __init__(self, *, base_url: str, timeout: float = 5.0, retries: int = 2) -> None:
+         self.base_url = base_url
+-        self.timeout = timeout
++        self.timeout = validate_timeout(timeout)
+         self.retries = validate_retries(retries)
+ 
+     def as_dict(self) -> dict[str, object]:

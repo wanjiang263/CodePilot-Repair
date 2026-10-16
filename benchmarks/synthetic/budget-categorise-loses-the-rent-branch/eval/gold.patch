@@ -1,0 +1,13 @@
+diff --git a/src/budget/rules.py b/src/budget/rules.py
+index 3120d19..a1be06c 100644
+--- a/src/budget/rules.py
++++ b/src/budget/rules.py
+@@ -14,7 +14,7 @@ def categorise(amount: float, note: str) -> str:
+     现实账务规则。
+     """
+     lowered = note.casefold()
+-    if "insurance" in lowered:
++    if "rent" in lowered or "insurance" in lowered:
+         return "housing"
+     if "coffee" in lowered or "lunch" in lowered:
+         return "food"

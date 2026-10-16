@@ -1,0 +1,37 @@
+diff --git a/src/httpclient/client.py b/src/httpclient/client.py
+index b7a6b0f..15185a0 100644
+--- a/src/httpclient/client.py
++++ b/src/httpclient/client.py
+@@ -20,7 +20,7 @@ class Client:
+     def request(self, path: str) -> str:
+         """发一次请求。超时与重试次数都取自配置，不在这里重写。"""
+         url = urljoin(self.config.base_url, path)
+-        return self.sender(url, self.config.timeout)
++        return self.sender(url, self.config.timeout, self.config.retries)
+ 
+     def request_with_retries(self, path: str) -> str:
+         """按配置的重试次数重发，直到成功。"""
+diff --git a/src/httpclient/transport.py b/src/httpclient/transport.py
+index a25032c..fdf19d5 100644
+--- a/src/httpclient/transport.py
++++ b/src/httpclient/transport.py
+@@ -17,15 +17,15 @@ class Recorder:
+ 
+     def __init__(self, responses: list[str]) -> None:
+         self.responses = list(responses)
+-        self.calls: list[tuple[str, float]] = []
++        self.calls: list[tuple[str, float, int]] = []
+ 
+-    def __call__(self, url: str, timeout: float) -> str:
+-        self.calls.append((url, timeout))
++    def __call__(self, url: str, timeout: float, retries: int) -> str:
++        self.calls.append((url, timeout, retries))
+         if not self.responses:
+             raise AssertionError("Recorder 的预设响应已用尽")
+         return self.responses.pop(0)
+ 
+ 
+-def build_sender(*, responses: list[str]) -> Callable[[str, float], str]:
++def build_sender(*, responses: list[str]) -> Callable[[str, float, int], str]:
+     """构造一个可注入的发送函数。"""
+     return Recorder(responses=responses)

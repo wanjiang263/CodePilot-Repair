@@ -1,0 +1,13 @@
+diff --git a/src/taskqueue/queue.py b/src/taskqueue/queue.py
+index 50a2e39..68b4114 100644
+--- a/src/taskqueue/queue.py
++++ b/src/taskqueue/queue.py
+@@ -30,7 +30,7 @@ class TaskQueue:
+         """出队；空队列返回 ``None`` 而不是抛异常。"""
+         if not self._items:
+             return None
+-        task = self._items.pop()
++        task = self._items.popleft()
+         self.history.append(f"pop:{task.name}")
+         return task
+ 

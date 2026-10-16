@@ -1,0 +1,19 @@
+diff --git a/tests/test_title_empty.py b/tests/test_title_empty.py
+new file mode 100644
+index 0000000..8f122f9
+--- /dev/null
++++ b/tests/test_title_empty.py
+@@ -0,0 +1,13 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from textkit.normalise import title
++
++
++def test_empty_string_is_left_alone() -> None:
++    assert title("") == ""
++
++
++def test_single_character() -> None:
++    assert title("a") == "A"

@@ -1,0 +1,25 @@
+{
+  "fail_to_pass": [
+    "tests/test_reserve_error_type.py::test_message_names_the_sku",
+    "tests/test_reserve_error_type.py::test_short_stock_raises_out_of_stock"
+  ],
+  "pass_to_pass": [
+    "tests/test_catalog.py::test_describe_known_sku",
+    "tests/test_catalog.py::test_describe_with_custom_catalog",
+    "tests/test_catalog.py::test_skus_are_sorted",
+    "tests/test_catalog.py::test_skus_of_custom_catalog",
+    "tests/test_pricing.py::test_price_for_combines_both",
+    "tests/test_pricing.py::test_subtotal_at_threshold_gets_discount",
+    "tests/test_pricing.py::test_subtotal_below_threshold",
+    "tests/test_pricing.py::test_tax_rounds_to_cents",
+    "tests/test_shipping.py::test_box_count_exact_division",
+    "tests/test_shipping.py::test_box_count_rejects_zero_capacity",
+    "tests/test_shipping.py::test_fits_rejects_over_limit",
+    "tests/test_shipping.py::test_fits_within_limits",
+    "tests/test_shipping.py::test_total_weight",
+    "tests/test_stock.py::test_reserve_reduces_available",
+    "tests/test_stock.py::test_restock_accumulates",
+    "tests/test_stock.py::test_unknown_sku_is_zero",
+    "tests/test_stock.py::test_value_at_uses_price_table"
+  ]
+}

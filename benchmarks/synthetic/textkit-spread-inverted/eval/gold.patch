@@ -1,0 +1,10 @@
+diff --git a/src/textkit/stats.py b/src/textkit/stats.py
+index d0fff6c..87fee6c 100644
+--- a/src/textkit/stats.py
++++ b/src/textkit/stats.py
+@@ -25,4 +25,4 @@ def running_unique(items: list[str]) -> list[str]:
+ 
+ def spread(values: list[float]) -> float:
+     """极差（最大减负）。"""
+-    return min(values) - max(values)
++    return max(values) - min(values)

@@ -1,0 +1,21 @@
+diff --git a/tests/test_column_order.py b/tests/test_column_order.py
+new file mode 100644
+index 0000000..6dbbb2a
+--- /dev/null
++++ b/tests/test_column_order.py
+@@ -0,0 +1,15 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from budget.csv_writer import COLUMNS, render_row
++
++
++def test_row_follows_column_order_not_dict_order() -> None:
++    record = {"amount": 12, "category": "food", "currency": "CNY", "note": "Coffee"}
++    assert render_row(record) == ",".join(str(record[name]) for name in COLUMNS)
++
++
++def test_row_has_one_field_per_column() -> None:
++    record = {"amount": 1, "category": "c", "currency": "X", "note": "n"}
++    assert len(render_row(record).split(",")) == len(COLUMNS)

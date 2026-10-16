@@ -1,0 +1,10 @@
+diff --git a/src/budget/csv_writer.py b/src/budget/csv_writer.py
+index 46303c5..4a36a69 100644
+--- a/src/budget/csv_writer.py
++++ b/src/budget/csv_writer.py
+@@ -17,4 +17,4 @@ def headers() -> tuple[str, ...]:
+ 
+ def render_row(values: dict[str, object]) -> str:
+     """按列顺序把一条记录拼成一行 CSV。"""
+-    return ",".join(str(value) for value in values.values())
++    return ",".join(str(values[column]) for column in COLUMNS)

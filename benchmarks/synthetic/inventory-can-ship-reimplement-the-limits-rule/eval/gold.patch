@@ -1,0 +1,22 @@
+diff --git a/src/inventory/shipping.py b/src/inventory/shipping.py
+index c180d55..ef15c0a 100644
+--- a/src/inventory/shipping.py
++++ b/src/inventory/shipping.py
+@@ -17,7 +17,7 @@ def box_count(weight_kg: float, capacity_kg: float) -> int:
+ def fits(order: list[Line], limits: dict[str, int]) -> bool:
+     """订单里每一行的数量都不超过该 SKU 的单次上限。"""
+     for line in order:
+-        if line.sku in limits and line.quantity > limits[line.sku]:
++        if line.quantity > limits.get(line.sku, 0):
+             return False
+     return True
+ 
+@@ -35,7 +35,7 @@ def can_ship(
+     行上限的判定**只能**来自 :func:`fits`。在这里另写一遍比较逻辑，就等于给
+     同一个规则留了第二个副本，而两个副本不会同时被修好。
+     """
+-    if any(line.quantity > limits.get(line.sku, 10**9) for line in order):
++    if not fits(order, limits):
+         return False
+     return box_count(weight_kg, capacity_kg) <= max_boxes
+ 

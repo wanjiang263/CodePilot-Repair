@@ -1,0 +1,21 @@
+{
+  "base_commit": "a25fc002bdaa8a817f3232645edd442015ba6750",
+  "category": "api_misuse",
+  "difficulty": "easy",
+  "has_traceback": true,
+  "multi_file": false,
+  "repo_files": {
+    "pyproject.toml": "a92b84a7c1884ad89a06f156b332bb9df6caac73cdfda28d7c411c0b8a95b733",
+    "src/inventory/__init__.py": "8bc6d694d149b3199d09771e0c554d4a86b985c08c0661293fc92bcf832fb98d",
+    "src/inventory/catalog.py": "2fdba71806a2d0c657624aed5dfc864fd9d2795a93ac96b772794010f0300495",
+    "src/inventory/pricing.py": "c10a9bb114a9f10d275411794ed519d3a4d62cfdf8063313d665a4059a5115a4",
+    "src/inventory/shipping.py": "276ccbcf9a28927a10d89af1b7d81cbb0daf12de21d60278d80bc4f663650432",
+    "src/inventory/stock.py": "c51018a14b201adaba98098d46b8d76445fa3d5bbfa9ab2b26698dc812c8cd74",
+    "tests/test_catalog.py": "2e94f06963137e8ed9765f1aca5191514ce33e17ae4420bbbf1b5670ce986d6f",
+    "tests/test_pricing.py": "d303f4bb5f34bc4ca79350aa4a8e02f4e43ecba5f0787e46a3088acb5ec18f82",
+    "tests/test_shipping.py": "9e98e99f502f749170ae020b4aeb5499eaa6632d69a1b8991ec3d46a3d1b65aa",
+    "tests/test_stock.py": "7d8f7107f81c99aa54895d75d010986a0be4d16942b57fafc80cb27a1e4c2328"
+  },
+  "schema_version": 1,
+  "task_id": "inventory-describe-crashes-on-unknown-sku"
+}

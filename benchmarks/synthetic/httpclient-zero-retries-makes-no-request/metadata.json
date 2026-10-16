@@ -1,0 +1,20 @@
+{
+  "base_commit": "b183116f7e25549fe970655167aab091bff35aac",
+  "category": "edge_case",
+  "difficulty": "medium",
+  "has_traceback": true,
+  "multi_file": false,
+  "repo_files": {
+    "pyproject.toml": "484273f52a9f1130d3ceff1c0945fb95ac1aac312bff7c845078e799475870fa",
+    "src/httpclient/__init__.py": "c790fdc9ea9b2e082712d549a4687f4f4156ca296ac5b105d43ba50d922dd2f4",
+    "src/httpclient/client.py": "0fb18793d4466f731812a410b2714dfdf7dfad1c2b4042272b25eaecca5df8e5",
+    "src/httpclient/config.py": "2244d9e90c1af53970748b2d5043adadf1d225405a6658c9b02e0afe2feb141e",
+    "src/httpclient/errors.py": "ec94d04fd68ee0148d590158f053fa8cf87f017ae252dd0f78369bbd7e05b3d3",
+    "src/httpclient/transport.py": "245744567b572c95acf15b55b63fbb0076ca3e31a37bf244f9b72bdc75643012",
+    "tests/test_client.py": "0ade69c068d9a1879b01468fc0035a14882fecab45f62875ed612b4b345d2821",
+    "tests/test_config.py": "2918644978ceed5a3af22ac2dd5da07f0d4efceda6f27beb50071c22eb14c146",
+    "tests/test_errors.py": "bd60e10e1868145256876486f4652778d359f2ee6539c29726d89d57a3a91c19"
+  },
+  "schema_version": 1,
+  "task_id": "httpclient-zero-retries-makes-no-request"
+}

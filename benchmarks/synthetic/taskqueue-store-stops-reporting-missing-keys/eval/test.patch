@@ -1,0 +1,32 @@
+diff --git a/tests/test_store_missing_key.py b/tests/test_store_missing_key.py
+new file mode 100644
+index 0000000..71e26e7
+--- /dev/null
++++ b/tests/test_store_missing_key.py
+@@ -0,0 +1,26 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++import pytest
++
++from taskqueue.store import MissingKey, Store
++
++
++def test_get_unknown_key_raises() -> None:
++    with pytest.raises(MissingKey):
++        Store().get("nope")
++
++
++def test_deleted_key_raises_again() -> None:
++    store = Store()
++    store.set("a", "x")
++    store.delete("a")
++    with pytest.raises(MissingKey):
++        store.get("a")
++
++
++def test_existing_key_still_readable() -> None:
++    store = Store()
++    store.set("a", "x")
++    assert store.get("a") == "X"

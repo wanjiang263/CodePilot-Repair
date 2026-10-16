@@ -1,0 +1,20 @@
+{
+  "base_commit": "43f71612d1d2879dfda77fcf4cab809763406b21",
+  "category": "api_misuse",
+  "difficulty": "medium",
+  "has_traceback": true,
+  "multi_file": false,
+  "repo_files": {
+    "pyproject.toml": "41ea779db07b6f57f2fdced959f75c8626d071dba1519caf689097bd5c7ed2c9",
+    "src/budget/__init__.py": "855defd27792ab7c8fd0f08fd1eab55563a4c153ebac5a964fa2c26d0a727f11",
+    "src/budget/csv_writer.py": "d47fb06c960a7e6c919f583380b0aa3ad0618e503e6f749b1dd2c7a0a1b95ccc",
+    "src/budget/ledger.py": "0f682c5e238b0c0776d1a8ea4ab60fa0ec4e93f0e189daa4a65a759d85a0bcef",
+    "src/budget/report.py": "8ff235cba22016ec72c36f77f80d1c76b1f35e50430fb5784dc1246befb243e8",
+    "src/budget/rules.py": "c0db1020d10c18d515d65548d7967fa181e01083b7603d1eb0cc4ea1e33826df",
+    "tests/test_ledger.py": "4c68f656fcdb83db1dd9b851b77c106ea84c46e41fd48935c66a331109e0b3df",
+    "tests/test_report.py": "d59a6fdab2a9165c5728e0203a3d89848215c52d5efb5b6b1a0d02a32feae169",
+    "tests/test_rules.py": "9e97c37abc6c54bfc362230f383182ad21cd54a24af4e56c95d5ce62197bf502"
+  },
+  "schema_version": 1,
+  "task_id": "budget-render-row-ignores-column-order"
+}

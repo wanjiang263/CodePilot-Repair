@@ -1,0 +1,21 @@
+diff --git a/tests/test_weight_missing_entry.py b/tests/test_weight_missing_entry.py
+new file mode 100644
+index 0000000..5c8938a
+--- /dev/null
++++ b/tests/test_weight_missing_entry.py
+@@ -0,0 +1,15 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from inventory.shipping import total_weight
++from inventory.stock import Line
++
++
++def test_unlisted_sku_counts_as_zero() -> None:
++    assert total_weight([Line("Z-9", 3)], {"A-1": 1.0}) == 0.0
++
++
++def test_mixed_known_and_unknown() -> None:
++    lines = [Line("A-1", 2), Line("Z-9", 5)]
++    assert total_weight(lines, {"A-1": 1.5}) == 3.0

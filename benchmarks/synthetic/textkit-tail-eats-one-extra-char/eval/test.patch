@@ -1,0 +1,23 @@
+diff --git a/tests/test_tail_length.py b/tests/test_tail_length.py
+new file mode 100644
+index 0000000..f3925d1
+--- /dev/null
++++ b/tests/test_tail_length.py
+@@ -0,0 +1,17 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from textkit.slices import tail
++
++
++def test_tail_returns_exactly_requested() -> None:
++    assert tail("abcdef", 2) == "ef"
++
++
++def test_tail_of_whole_string() -> None:
++    assert tail("abcdef", 6) == "abcdef"
++
++
++def test_tail_one() -> None:
++    assert tail("abcdef", 1) == "f"

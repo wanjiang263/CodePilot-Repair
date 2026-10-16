@@ -1,0 +1,10 @@
+diff --git a/src/budget/ledger.py b/src/budget/ledger.py
+index d1a1225..c2ec5bc 100644
+--- a/src/budget/ledger.py
++++ b/src/budget/ledger.py
+@@ -60,4 +60,4 @@ class Ledger:
+ 
+     def snapshot(self) -> list[Entry]:
+         """当前分录的**副本**列表，供调用方安全持有。"""
+-        return self.entries
++        return list(self.entries)

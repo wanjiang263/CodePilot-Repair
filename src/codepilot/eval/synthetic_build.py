@@ -112,7 +112,16 @@ class TaskSpec:
 
     @property
     def has_traceback(self) -> bool:
-        return "Traceback (most recent call last)" in self.issue
+        """Issue 里是否贴了失败现场。
+
+        判据不能只认 ``"Traceback (most recent call last)"`` 这一种写法：pytest 的
+        失败摘录（``E   KeyError: ...`` 加 ``file:line: ExcName``）同样是 reporter
+        会粘进 Issue 的 traceback 形态。E-06 关心的是"有没有给出现场"，不是"现场
+        长的是哪一种句式"。
+        """
+        if "Traceback (most recent call last)" in self.issue:
+            return True
+        return any(line.startswith("E   ") for line in self.issue.splitlines())
 
 
 def _looks_like_test(path: str) -> bool:

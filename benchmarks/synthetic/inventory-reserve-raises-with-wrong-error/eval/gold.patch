@@ -1,0 +1,13 @@
+diff --git a/src/inventory/stock.py b/src/inventory/stock.py
+index b4ed7b9..018e6c9 100644
+--- a/src/inventory/stock.py
++++ b/src/inventory/stock.py
+@@ -37,7 +37,7 @@ class Stock:
+         """预留：扣减可用数量。不足时抛 :class:`OutOfStock`。"""
+         available = self.quantities.get(line.sku, 0)
+         if line.quantity > available:
+-            raise ValueError(f"{line.sku}: need {line.quantity}, have {available}")
++            raise OutOfStock(f"{line.sku}: need {line.quantity}, have {available}")
+         self.quantities[line.sku] = available - line.quantity
+ 
+     def available(self, sku: str) -> int:

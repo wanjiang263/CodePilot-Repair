@@ -1,0 +1,26 @@
+diff --git a/src/textkit/normalise.py b/src/textkit/normalise.py
+index 788dc6d..5c0ebd9 100644
+--- a/src/textkit/normalise.py
++++ b/src/textkit/normalise.py
+@@ -7,7 +7,7 @@ def split_fields(line: str, separator: str = ",", *, max_split: int = -1) -> lis
+     """按分隔符切列并去掉每列两端空白。空行返回空列表。"""
+     if not line.strip():
+         return []
+-    return line.split(separator, max_split)
++    return [part.strip() for part in line.split(separator, max_split)]
+ 
+ 
+ def collapse_whitespace(text: str) -> str:
+diff --git a/src/textkit/table.py b/src/textkit/table.py
+index ef4af65..3f422ec 100644
+--- a/src/textkit/table.py
++++ b/src/textkit/table.py
+@@ -11,7 +11,7 @@ from textkit.normalise import split_fields
+ 
+ def parse_row(line: str) -> list[str]:
+     """一行 -> 去掉两端空白的单元格列表。"""
+-    return line.split(",")
++    return split_fields(line)
+ 
+ 
+ def parse_table(text: str) -> list[list[str]]:

@@ -1,0 +1,13 @@
+diff --git a/src/inventory/stock.py b/src/inventory/stock.py
+index 0e5e464..018e6c9 100644
+--- a/src/inventory/stock.py
++++ b/src/inventory/stock.py
+@@ -29,6 +29,8 @@ class Stock:
+ 
+     def restock(self, sku: str, amount: int) -> None:
+         """入库。数量必须为正。"""
++        if amount <= 0:
++            raise InvalidQuantity(f"restock amount must be positive, got {amount}")
+         self.quantities[sku] = self.quantities.get(sku, 0) + amount
+ 
+     def reserve(self, line: Line) -> None:

@@ -1,0 +1,19 @@
+diff --git a/tests/test_recurring_quantifier.py b/tests/test_recurring_quantifier.py
+new file mode 100644
+index 0000000..60d01be
+--- /dev/null
++++ b/tests/test_recurring_quantifier.py
+@@ -0,0 +1,13 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from budget.rules import is_recurring
++
++
++def test_one_keyword_is_enough() -> None:
++    assert is_recurring("Rent April") is True
++
++
++def test_another_single_keyword_is_enough() -> None:
++    assert is_recurring("Insurance renewal") is True

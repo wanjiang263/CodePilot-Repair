@@ -1,0 +1,21 @@
+{
+  "base_commit": "209562f39922c5b76cd15e6d8ab5fde81bde475e",
+  "category": "state_mutation_bug",
+  "difficulty": "medium",
+  "has_traceback": false,
+  "multi_file": false,
+  "repo_files": {
+    "pyproject.toml": "c87b54658a4b733f15bcafeec1a4b6aeea40276b011473a61141c8d6f59de33f",
+    "src/taskqueue/__init__.py": "134128d6e1a38d1b14fc48d35622f54cb54381854efbe17dea47a89d6758c8e0",
+    "src/taskqueue/priority.py": "973a489af743df27b7b96bd6656b54d5937d9a99bbdf88051917c9c32f0ab0a5",
+    "src/taskqueue/queue.py": "6890a775663de5a453c1e2ea75500deed0b0ef61bd2a04b16c6b78c35aeb78c3",
+    "src/taskqueue/retry.py": "74b17e5883023c82b84dd7bdcac61efdfb6dedae23130dcef1b4576f3b14f7b4",
+    "src/taskqueue/store.py": "30e1925446ddf27da18b424ea2ab4a41b3029f1e2b5b3b39366ac53328ba6a18",
+    "tests/test_priority.py": "424e55d460a87572e99cef72f3c955dd53b708556a9cfa1779dbc554f4bb5a54",
+    "tests/test_queue.py": "be05d41d66e72ad0e70c88d1dde9fda66d30cc7d55953e5a821b1088cc960c8e",
+    "tests/test_retry.py": "cab30fcd97a9053ffeb7f60c3b37f37c0deb08d15ab2075eb5a4752f39cef161",
+    "tests/test_store.py": "94f0b51040c4db77b953a2af24a4d63a45525b9710416b1597aa97588ae48b3d"
+  },
+  "schema_version": 1,
+  "task_id": "taskqueue-drain-leaves-tasks-queued"
+}

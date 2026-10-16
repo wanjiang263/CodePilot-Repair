@@ -1,0 +1,19 @@
+diff --git a/tests/test_discount_branch.py b/tests/test_discount_branch.py
+new file mode 100644
+index 0000000..e3249dd
+--- /dev/null
++++ b/tests/test_discount_branch.py
+@@ -0,0 +1,13 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from budget.rules import apply_discount
++
++
++def test_member_pays_less() -> None:
++    assert apply_discount(200.0, member=True) == 180.0
++
++
++def test_guest_pays_full() -> None:
++    assert apply_discount(200.0, member=False) == 200.0

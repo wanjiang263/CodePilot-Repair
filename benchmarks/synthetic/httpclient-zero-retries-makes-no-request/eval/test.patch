@@ -1,0 +1,29 @@
+diff --git a/tests/test_zero_retry_attempt.py b/tests/test_zero_retry_attempt.py
+new file mode 100644
+index 0000000..c5c3ce1
+--- /dev/null
++++ b/tests/test_zero_retry_attempt.py
+@@ -0,0 +1,23 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from httpclient.client import Client
++from httpclient.config import Config
++from httpclient.transport import build_sender
++
++
++def test_zero_retries_still_asks_once() -> None:
++    sender = build_sender(responses=["ok"])
++    client = Client(Config(base_url="https://example.invalid/", retries=0), sender=sender)
++    assert client.request_with_retries("users") == "ok"
++    assert len(sender.calls) == 1
++
++
++def test_two_retries_means_three_attempts() -> None:
++    sender = build_sender(responses=["a", "b", "c"])
++    client = Client(Config(base_url="https://example.invalid/", retries=2), sender=sender)
++    client.request_with_retries("x")
++    client.request_with_retries("y")
++    client.request_with_retries("z")
++    assert len(sender.calls) == 3

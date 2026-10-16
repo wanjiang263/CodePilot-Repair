@@ -1,0 +1,24 @@
+diff --git a/tests/test_retries_error_type.py b/tests/test_retries_error_type.py
+new file mode 100644
+index 0000000..aeef215
+--- /dev/null
++++ b/tests/test_retries_error_type.py
+@@ -0,0 +1,18 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++import pytest
++
++from httpclient.config import validate_retries
++from httpclient.errors import ConfigError, HttpError
++
++
++def test_negative_retries_raises_config_error() -> None:
++    with pytest.raises(ConfigError):
++        validate_retries(-1)
++
++
++def test_error_is_an_http_error() -> None:
++    with pytest.raises(HttpError):
++        validate_retries(-2)

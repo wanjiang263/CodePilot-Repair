@@ -1,0 +1,32 @@
+diff --git a/tests/test_snapshot_isolation.py b/tests/test_snapshot_isolation.py
+new file mode 100644
+index 0000000..04886bc
+--- /dev/null
++++ b/tests/test_snapshot_isolation.py
+@@ -0,0 +1,26 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from budget.ledger import Ledger
++
++
++def _ledger() -> Ledger:
++    ledger = Ledger()
++    ledger.add(1.0, "Coffee")
++    return ledger
++
++
++def test_snapshot_is_not_the_internal_list() -> None:
++    ledger = _ledger()
++    snapshot = ledger.snapshot()
++    snapshot.clear()
++    assert len(ledger.entries) == 1
++
++
++def test_later_entries_are_not_visible_in_an_older_snapshot() -> None:
++    ledger = _ledger()
++    snapshot = ledger.snapshot()
++    ledger.add(2.0, "Lunch")
++    assert len(snapshot) == 1
++    assert len(ledger.entries) == 2

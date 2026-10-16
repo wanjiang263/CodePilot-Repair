@@ -1,0 +1,10 @@
+diff --git a/src/textkit/normalise.py b/src/textkit/normalise.py
+index 8e49af7..5c0ebd9 100644
+--- a/src/textkit/normalise.py
++++ b/src/textkit/normalise.py
+@@ -17,4 +17,4 @@ def collapse_whitespace(text: str) -> str:
+ 
+ def title(value: str) -> str:
+     """首字母大写，其余原样。"""
+-    return value[0].upper() + value[1:]
++    return value[:1].upper() + value[1:] if value else value

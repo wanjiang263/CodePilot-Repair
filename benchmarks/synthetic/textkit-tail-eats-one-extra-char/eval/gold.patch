@@ -1,0 +1,10 @@
+diff --git a/src/textkit/slices.py b/src/textkit/slices.py
+index 1c84a61..649cb3e 100644
+--- a/src/textkit/slices.py
++++ b/src/textkit/slices.py
+@@ -15,4 +15,4 @@ def window_start(page: int, size: int) -> int:
+ 
+ def tail(text: str, count: int) -> str:
+     """结尾 ``count`` 个字符；``count`` 为 0 时返回空串。"""
+-    return text[len(text) - count - 1 :] if count else ""
++    return text[len(text) - count :] if count else ""

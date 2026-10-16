@@ -1,0 +1,20 @@
+{
+  "base_commit": "797cb3904f6b1d3cfb38a7bd47afc2f4ca4fc58e",
+  "category": "cross_module_dependency",
+  "difficulty": "hard",
+  "has_traceback": false,
+  "multi_file": true,
+  "repo_files": {
+    "pyproject.toml": "484273f52a9f1130d3ceff1c0945fb95ac1aac312bff7c845078e799475870fa",
+    "src/httpclient/__init__.py": "c790fdc9ea9b2e082712d549a4687f4f4156ca296ac5b105d43ba50d922dd2f4",
+    "src/httpclient/client.py": "39df6d0437625a1f4de11561e693456affa6910176c28ea2ddf667716fb297c0",
+    "src/httpclient/config.py": "202182e34b1ed067c68f3d277b23617f5921b246922d9e46f078a102328e0c8f",
+    "src/httpclient/errors.py": "ec94d04fd68ee0148d590158f053fa8cf87f017ae252dd0f78369bbd7e05b3d3",
+    "src/httpclient/transport.py": "245744567b572c95acf15b55b63fbb0076ca3e31a37bf244f9b72bdc75643012",
+    "tests/test_client.py": "0ade69c068d9a1879b01468fc0035a14882fecab45f62875ed612b4b345d2821",
+    "tests/test_config.py": "2918644978ceed5a3af22ac2dd5da07f0d4efceda6f27beb50071c22eb14c146",
+    "tests/test_errors.py": "bd60e10e1868145256876486f4652778d359f2ee6539c29726d89d57a3a91c19"
+  },
+  "schema_version": 1,
+  "task_id": "httpclient-config-snapshot-loses-retries"
+}

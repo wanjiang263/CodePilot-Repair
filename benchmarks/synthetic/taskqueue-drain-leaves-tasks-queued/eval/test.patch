@@ -1,0 +1,30 @@
+diff --git a/tests/test_drain_empties.py b/tests/test_drain_empties.py
+new file mode 100644
+index 0000000..b393448
+--- /dev/null
++++ b/tests/test_drain_empties.py
+@@ -0,0 +1,24 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from taskqueue.queue import Task, TaskQueue
++
++
++def test_drain_empties_the_queue() -> None:
++    queue = TaskQueue([Task("a"), Task("b")])
++    assert len(queue.drain()) == 2
++    assert len(queue) == 0
++
++
++def test_second_drain_is_empty() -> None:
++    queue = TaskQueue([Task("a")])
++    queue.drain()
++    assert queue.drain() == []
++
++
++def test_drained_batch_is_detached() -> None:
++    queue = TaskQueue([Task("a")])
++    batch = queue.drain()
++    queue.push(Task("b"))
++    assert [task.name for task in batch] == ["a"]

@@ -1,0 +1,13 @@
+diff --git a/src/httpclient/config.py b/src/httpclient/config.py
+index 0d758e7..b85b9a7 100644
+--- a/src/httpclient/config.py
++++ b/src/httpclient/config.py
+@@ -17,7 +17,7 @@ def validate_timeout(value: float) -> float:
+ def validate_retries(value: int) -> int:
+     """重试次数必须是非负整数。"""
+     if value < 0:
+-        raise ValueError(f"retries must be >= 0, got {value}")
++        raise ConfigError(f"retries must be >= 0, got {value}")
+     return value
+ 
+ 

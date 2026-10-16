@@ -1,0 +1,32 @@
+diff --git a/tests/test_page_consistency.py b/tests/test_page_consistency.py
+new file mode 100644
+index 0000000..600ee46
+--- /dev/null
++++ b/tests/test_page_consistency.py
+@@ -0,0 +1,26 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from textkit.paging import page
++from textkit.slices import window_start
++
++VALUES = list(range(10))
++
++
++def test_second_page_follows_window_start() -> None:
++    assert page(VALUES, 1, 3) == VALUES[window_start(1, 3) : window_start(1, 3) + 3]
++
++
++def test_each_page_boundary() -> None:
++    assert page(VALUES, 0, 3) == [0, 1, 2]
++    assert page(VALUES, 1, 3) == [3, 4, 5]
++
++
++def test_last_partial_page() -> None:
++    assert page(VALUES, 3, 3) == [9]
++
++
++def test_page_and_window_never_disagree() -> None:
++    for number in range(4):
++        assert page(VALUES, number, 3)[:1] == VALUES[window_start(number, 3) :][:1]

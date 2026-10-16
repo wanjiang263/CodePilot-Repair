@@ -1,0 +1,13 @@
+diff --git a/src/budget/rules.py b/src/budget/rules.py
+index 6cf37c6..a1be06c 100644
+--- a/src/budget/rules.py
++++ b/src/budget/rules.py
+@@ -26,7 +26,7 @@ def categorise(amount: float, note: str) -> str:
+ def is_recurring(note: str) -> bool:
+     """备注是否指向一项周期性支出。"""
+     lowered = note.casefold()
+-    return all(keyword in lowered for keyword in RECURRING_KEYWORDS)
++    return any(keyword in lowered for keyword in RECURRING_KEYWORDS)
+ 
+ 
+ def apply_discount(total: float, *, member: bool) -> float:

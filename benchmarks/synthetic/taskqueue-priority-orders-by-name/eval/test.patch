@@ -1,0 +1,27 @@
+diff --git a/tests/test_priority_key.py b/tests/test_priority_key.py
+new file mode 100644
+index 0000000..232d269
+--- /dev/null
++++ b/tests/test_priority_key.py
+@@ -0,0 +1,21 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from taskqueue.priority import order
++from taskqueue.queue import Task
++
++
++def test_urgent_wins_over_alphabetical_order() -> None:
++    tasks = [Task("a"), Task("z", payload={"level": "urgent"})]
++    assert [task.name for task in order(tasks)] == ["z", "a"]
++
++
++def test_low_goes_last() -> None:
++    tasks = [Task("b", payload={"level": "low"}), Task("a", payload={"level": "normal"})]
++    assert [task.name for task in order(tasks)] == ["a", "b"]
++
++
++def test_equal_weights_keep_input_order() -> None:
++    tasks = [Task("m"), Task("c"), Task("k")]
++    assert [task.name for task in order(tasks)] == ["m", "c", "k"]

@@ -1,0 +1,20 @@
+{
+  "base_commit": "43654ac7b0e6a909b1e9659d64fa34b80462b860",
+  "category": "wrong_exception",
+  "difficulty": "medium",
+  "has_traceback": true,
+  "multi_file": false,
+  "repo_files": {
+    "pyproject.toml": "484273f52a9f1130d3ceff1c0945fb95ac1aac312bff7c845078e799475870fa",
+    "src/httpclient/__init__.py": "c790fdc9ea9b2e082712d549a4687f4f4156ca296ac5b105d43ba50d922dd2f4",
+    "src/httpclient/client.py": "c0d8b2855c2aa472aa24d074c6580ffb5b9bf3b9cbd7d6b29fd5fdcf59f07a02",
+    "src/httpclient/config.py": "1e144e6f0897ce4c2e23018702bd2273cf2d647df111eee47e5a7514f747f0c9",
+    "src/httpclient/errors.py": "ec94d04fd68ee0148d590158f053fa8cf87f017ae252dd0f78369bbd7e05b3d3",
+    "src/httpclient/transport.py": "245744567b572c95acf15b55b63fbb0076ca3e31a37bf244f9b72bdc75643012",
+    "tests/test_client.py": "0ade69c068d9a1879b01468fc0035a14882fecab45f62875ed612b4b345d2821",
+    "tests/test_config.py": "2918644978ceed5a3af22ac2dd5da07f0d4efceda6f27beb50071c22eb14c146",
+    "tests/test_errors.py": "bd60e10e1868145256876486f4652778d359f2ee6539c29726d89d57a3a91c19"
+  },
+  "schema_version": 1,
+  "task_id": "httpclient-retries-rejects-with-wrong-error"
+}

@@ -1,0 +1,13 @@
+diff --git a/src/httpclient/client.py b/src/httpclient/client.py
+index 45bd478..15185a0 100644
+--- a/src/httpclient/client.py
++++ b/src/httpclient/client.py
+@@ -24,7 +24,7 @@ class Client:
+ 
+     def request_with_retries(self, path: str) -> str:
+         """按配置的重试次数重发，直到成功。"""
+-        attempts = self.config.retries
++        attempts = self.config.retries + 1
+         last: Exception | None = None
+         for _ in range(attempts):
+             try:

@@ -1,0 +1,28 @@
+diff --git a/tests/test_timeout_wiring.py b/tests/test_timeout_wiring.py
+new file mode 100644
+index 0000000..fbde9d9
+--- /dev/null
++++ b/tests/test_timeout_wiring.py
+@@ -0,0 +1,22 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++import pytest
++
++from httpclient.config import Config
++from httpclient.errors import ConfigError
++
++
++def test_zero_timeout_rejected_by_constructor() -> None:
++    with pytest.raises(ConfigError):
++        Config(base_url="https://example.invalid/", timeout=0.0)
++
++
++def test_negative_timeout_rejected() -> None:
++    with pytest.raises(ConfigError):
++        Config(base_url="https://example.invalid/", timeout=-1.0)
++
++
++def test_valid_timeout_still_accepted() -> None:
++    assert Config(base_url="https://example.invalid/", timeout=0.5).timeout == 0.5

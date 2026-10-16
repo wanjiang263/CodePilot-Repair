@@ -1,0 +1,13 @@
+diff --git a/src/budget/ledger.py b/src/budget/ledger.py
+index b693fe7..c2ec5bc 100644
+--- a/src/budget/ledger.py
++++ b/src/budget/ledger.py
+@@ -36,6 +36,8 @@ class Ledger:
+ 
+     def refund(self, index: int, amount: float) -> Entry:
+         """对第 ``index`` 笔做部分退款，记一条负分录。"""
++        if amount <= 0:
++            raise InvalidAmount(f"refund amount must be positive, got {amount}")
+         original = self.entries[index]
+         entry = Entry(amount=-amount, note=f"refund of {original.note}", category=original.category)
+         self.entries.append(entry)

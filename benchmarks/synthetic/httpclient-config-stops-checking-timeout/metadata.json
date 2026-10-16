@@ -1,0 +1,20 @@
+{
+  "base_commit": "c66e79d202a37268e0e5eb7bcbf33057f8a89fbc",
+  "category": "regression_bug",
+  "difficulty": "medium",
+  "has_traceback": false,
+  "multi_file": false,
+  "repo_files": {
+    "pyproject.toml": "484273f52a9f1130d3ceff1c0945fb95ac1aac312bff7c845078e799475870fa",
+    "src/httpclient/__init__.py": "c790fdc9ea9b2e082712d549a4687f4f4156ca296ac5b105d43ba50d922dd2f4",
+    "src/httpclient/client.py": "c0d8b2855c2aa472aa24d074c6580ffb5b9bf3b9cbd7d6b29fd5fdcf59f07a02",
+    "src/httpclient/config.py": "3d1485f87378568245f6696de14ca2a5e474fbf74634474b602173c6853f979c",
+    "src/httpclient/errors.py": "ec94d04fd68ee0148d590158f053fa8cf87f017ae252dd0f78369bbd7e05b3d3",
+    "src/httpclient/transport.py": "245744567b572c95acf15b55b63fbb0076ca3e31a37bf244f9b72bdc75643012",
+    "tests/test_client.py": "0ade69c068d9a1879b01468fc0035a14882fecab45f62875ed612b4b345d2821",
+    "tests/test_config.py": "2918644978ceed5a3af22ac2dd5da07f0d4efceda6f27beb50071c22eb14c146",
+    "tests/test_errors.py": "bd60e10e1868145256876486f4652778d359f2ee6539c29726d89d57a3a91c19"
+  },
+  "schema_version": 1,
+  "task_id": "httpclient-config-stops-checking-timeout"
+}

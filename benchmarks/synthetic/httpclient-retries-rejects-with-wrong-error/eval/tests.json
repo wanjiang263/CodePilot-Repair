@@ -1,0 +1,18 @@
+{
+  "fail_to_pass": [
+    "tests/test_retries_error_type.py::test_error_is_an_http_error",
+    "tests/test_retries_error_type.py::test_negative_retries_raises_config_error"
+  ],
+  "pass_to_pass": [
+    "tests/test_client.py::test_build_sender_returns_a_callable",
+    "tests/test_client.py::test_request_returns_response",
+    "tests/test_client.py::test_request_uses_the_configured_timeout",
+    "tests/test_client.py::test_retries_exhaust_and_raise",
+    "tests/test_config.py::test_as_dict_carries_base_url",
+    "tests/test_config.py::test_defaults",
+    "tests/test_config.py::test_positive_retries_pass_through",
+    "tests/test_config.py::test_zero_retries_is_allowed",
+    "tests/test_errors.py::test_hierarchy",
+    "tests/test_errors.py::test_messages_survive"
+  ]
+}

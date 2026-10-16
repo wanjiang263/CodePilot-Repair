@@ -1,0 +1,21 @@
+{
+  "fail_to_pass": [
+    "tests/test_refund_sign.py::test_refund_entry_is_negative",
+    "tests/test_refund_sign.py::test_refund_reduces_total"
+  ],
+  "pass_to_pass": [
+    "tests/test_ledger.py::test_add_records_an_entry",
+    "tests/test_ledger.py::test_by_category_groups",
+    "tests/test_ledger.py::test_refund_adds_an_entry",
+    "tests/test_ledger.py::test_remove_pops_the_entry",
+    "tests/test_ledger.py::test_total_sums_entries",
+    "tests/test_report.py::test_build_rows_matches_headers",
+    "tests/test_report.py::test_headers_is_a_tuple_of_names",
+    "tests/test_report.py::test_render_starts_with_header_line",
+    "tests/test_rules.py::test_categorise_detects_insurance",
+    "tests/test_rules.py::test_categorise_large_fallback",
+    "tests/test_rules.py::test_categorise_uses_coffee_keyword",
+    "tests/test_rules.py::test_discount_is_only_about_membership",
+    "tests/test_rules.py::test_is_recurring_rejects_unrelated_note"
+  ]
+}

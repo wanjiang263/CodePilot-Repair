@@ -1,0 +1,13 @@
+diff --git a/src/budget/ledger.py b/src/budget/ledger.py
+index 2281dce..c2ec5bc 100644
+--- a/src/budget/ledger.py
++++ b/src/budget/ledger.py
+@@ -28,6 +28,8 @@ class Ledger:
+ 
+     def add(self, amount: float, note: str) -> Entry:
+         """记一笔。金额必须为正——退款走 :meth:`refund`，不混在这里。"""
++        if amount <= 0:
++            raise InvalidAmount(f"amount must be positive, got {amount}")
+         entry = Entry(amount=amount, note=note, category=categorise(amount, note))
+         self.entries.append(entry)
+         return entry

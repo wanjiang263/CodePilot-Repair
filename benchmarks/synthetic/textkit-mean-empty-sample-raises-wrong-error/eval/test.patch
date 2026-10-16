@@ -1,0 +1,23 @@
+diff --git a/tests/test_mean_empty.py b/tests/test_mean_empty.py
+new file mode 100644
+index 0000000..4f90b61
+--- /dev/null
++++ b/tests/test_mean_empty.py
+@@ -0,0 +1,17 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++import pytest
++
++from textkit.stats import EmptySample, mean
++
++
++def test_empty_sample_raises_typed_error() -> None:
++    with pytest.raises(EmptySample):
++        mean([])
++
++
++def test_no_division_error_leaks() -> None:
++    with pytest.raises(EmptySample):
++        mean([])  # 不是 ZeroDivisionError

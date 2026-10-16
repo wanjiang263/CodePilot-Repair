@@ -1,0 +1,24 @@
+diff --git a/src/textkit/paging.py b/src/textkit/paging.py
+index 735a096..107136b 100644
+--- a/src/textkit/paging.py
++++ b/src/textkit/paging.py
+@@ -11,5 +11,5 @@ from textkit.slices import window_start
+ 
+ def page(values: list[int], number: int, size: int) -> list[int]:
+     """第 ``number`` 页（从 0 开始）的元素。"""
+-    start = number * size + 1
++    start = window_start(number, size)
+     return values[start : start + size]
+diff --git a/src/textkit/slices.py b/src/textkit/slices.py
+index 716a643..649cb3e 100644
+--- a/src/textkit/slices.py
++++ b/src/textkit/slices.py
+@@ -10,7 +10,7 @@ def first_n(values: list[int], count: int) -> list[int]:
+ 
+ def window_start(page: int, size: int) -> int:
+     """第 ``page`` 页（从 0 开始）的起始下标。"""
+-    return page * size + 1
++    return page * size
+ 
+ 
+ def tail(text: str, count: int) -> str:

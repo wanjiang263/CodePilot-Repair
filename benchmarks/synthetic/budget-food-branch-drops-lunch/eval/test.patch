@@ -1,0 +1,19 @@
+diff --git a/tests/test_lunch_branch.py b/tests/test_lunch_branch.py
+new file mode 100644
+index 0000000..34dafa7
+--- /dev/null
++++ b/tests/test_lunch_branch.py
+@@ -0,0 +1,13 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from budget.rules import categorise
++
++
++def test_lunch_is_food() -> None:
++    assert categorise(12.0, "Lunch") == "food"
++
++
++def test_uppercase_lunch_is_food() -> None:
++    assert categorise(30.0, "LUNCH deal") == "food"

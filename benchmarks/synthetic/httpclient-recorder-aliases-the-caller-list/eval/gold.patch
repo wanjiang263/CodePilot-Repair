@@ -1,0 +1,13 @@
+diff --git a/src/httpclient/transport.py b/src/httpclient/transport.py
+index d3274f3..fdf19d5 100644
+--- a/src/httpclient/transport.py
++++ b/src/httpclient/transport.py
+@@ -16,7 +16,7 @@ class Recorder:
+     """记录每次调用并返回预设响应。"""
+ 
+     def __init__(self, responses: list[str]) -> None:
+-        self.responses = responses
++        self.responses = list(responses)
+         self.calls: list[tuple[str, float, int]] = []
+ 
+     def __call__(self, url: str, timeout: float, retries: int) -> str:

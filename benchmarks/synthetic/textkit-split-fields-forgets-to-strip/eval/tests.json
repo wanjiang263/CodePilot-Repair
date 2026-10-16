@@ -1,0 +1,16 @@
+{
+  "fail_to_pass": [
+    "tests/test_split_strip.py::test_cells_are_stripped",
+    "tests/test_split_strip.py::test_tab_padding_is_stripped"
+  ],
+  "pass_to_pass": [
+    "tests/test_normalise.py::test_collapse_whitespace",
+    "tests/test_normalise.py::test_split_fields_blank_line",
+    "tests/test_normalise.py::test_split_fields_honours_max_split",
+    "tests/test_normalise.py::test_title_of_word",
+    "tests/test_slices.py::test_first_n_with_short_input",
+    "tests/test_slices.py::test_first_n_with_two_of_four",
+    "tests/test_stats.py::test_mean_of_sample",
+    "tests/test_stats.py::test_running_unique_keeps_first_occurrence_order"
+  ]
+}

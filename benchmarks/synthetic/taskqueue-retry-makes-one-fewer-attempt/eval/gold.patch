@@ -1,0 +1,13 @@
+diff --git a/src/taskqueue/retry.py b/src/taskqueue/retry.py
+index bab7bc8..0d431cc 100644
+--- a/src/taskqueue/retry.py
++++ b/src/taskqueue/retry.py
+@@ -24,7 +24,7 @@ class RetryPolicy:
+ def run(function: Callable[[], str], policy: RetryPolicy) -> str:
+     """执行 ``function``，失败时按策略重试。"""
+     last: Exception | None = None
+-    for _ in range(policy.attempts - 1):
++    for _ in range(policy.attempts):
+         try:
+             return function()
+         except Exception as exc:

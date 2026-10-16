@@ -1,0 +1,13 @@
+diff --git a/src/taskqueue/store.py b/src/taskqueue/store.py
+index 0e5e82e..46f7a50 100644
+--- a/src/taskqueue/store.py
++++ b/src/taskqueue/store.py
+@@ -28,6 +28,8 @@ class Store:
+         cached = self._rendered.get(key)
+         if cached is not None:
+             return cached
++        if key not in self._data:
++            raise MissingKey(key)
+         rendered = self._data[key].upper()
+         self._rendered[key] = rendered
+         return rendered

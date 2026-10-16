@@ -1,0 +1,21 @@
+{
+  "base_commit": "4bb6b7da43d09c4a19b6bc003bb014e81438e856",
+  "category": "off_by_one",
+  "difficulty": "easy",
+  "has_traceback": false,
+  "multi_file": false,
+  "repo_files": {
+    "pyproject.toml": "e79f83c826f56d60daaa8b5fa0e77c902679da8f4dafe501d5f24811a6ec265b",
+    "src/textkit/__init__.py": "55061075eb452a0b959e6df5693c2262c51f28e5f5a58ac80cbc026031e3a7c2",
+    "src/textkit/normalise.py": "1ce4410674bd0e9f4e7640c61b4241b2bc05a89ecc24be8a02219de265dfbd0d",
+    "src/textkit/paging.py": "a50eb7a3fcf9eb582fe837d1b10c09d067a1b247f206b886b145cd42341b8098",
+    "src/textkit/slices.py": "c619d18c13ebaeb9dd30e799a04fd691443569f637f942a45dbde7391448ee45",
+    "src/textkit/stats.py": "6a716a65ebd59198b0d2e9d08aa937d061f6af27f1b4e716dfa1b413dd914de0",
+    "src/textkit/table.py": "1e2a60dae329a2d180c1680c2419cd71036dfad256e642b6e08a15191aaa7740",
+    "tests/test_normalise.py": "662872845ffbf92ff5b59bcad36061f2c6b3e5643ae0a2c2b7e7097c2e379b1a",
+    "tests/test_slices.py": "03e1dcf2413ece831df97a8160279091c6abcb0d5f5da8765d0c8204d4ed9192",
+    "tests/test_stats.py": "98940e4397f34b035bb73b7803205f37d2e5c7488c60983b4e228a14373f79d6"
+  },
+  "schema_version": 1,
+  "task_id": "textkit-window-start-one-past-page"
+}

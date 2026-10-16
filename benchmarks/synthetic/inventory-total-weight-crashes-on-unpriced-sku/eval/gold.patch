@@ -1,0 +1,10 @@
+diff --git a/src/inventory/shipping.py b/src/inventory/shipping.py
+index 1e8722b..ef15c0a 100644
+--- a/src/inventory/shipping.py
++++ b/src/inventory/shipping.py
+@@ -42,4 +42,4 @@ def can_ship(
+ 
+ def total_weight(lines: list[Line], per_unit: dict[str, float]) -> float:
+     """订单总重。"""
+-    return round(sum(line.quantity * per_unit[line.sku] for line in lines), 3)
++    return round(sum(line.quantity * per_unit.get(line.sku, 0.0) for line in lines), 3)

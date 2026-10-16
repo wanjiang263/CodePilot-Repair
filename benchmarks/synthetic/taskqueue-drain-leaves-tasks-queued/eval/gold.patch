@@ -1,0 +1,15 @@
+diff --git a/src/taskqueue/queue.py b/src/taskqueue/queue.py
+index 99155f1..68b4114 100644
+--- a/src/taskqueue/queue.py
++++ b/src/taskqueue/queue.py
+@@ -40,7 +40,9 @@ class TaskQueue:
+ 
+     def drain(self) -> list[Task]:
+         """取出全部任务，并且把队列清空。"""
+-        return list(self._items)
++        items = list(self._items)
++        self._items.clear()
++        return items
+ 
+     def __len__(self) -> int:
+         return len(self._items)

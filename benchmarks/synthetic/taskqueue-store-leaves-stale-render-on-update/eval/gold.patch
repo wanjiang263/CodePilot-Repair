@@ -1,0 +1,12 @@
+diff --git a/src/taskqueue/store.py b/src/taskqueue/store.py
+index 4ca791b..46f7a50 100644
+--- a/src/taskqueue/store.py
++++ b/src/taskqueue/store.py
+@@ -21,6 +21,7 @@ class Store:
+     def set(self, key: str, value: str) -> None:
+         """写入。缓存里这一条必须一起清掉。"""
+         self._data[key] = value
++        self._rendered.pop(key, None)
+ 
+     def get(self, key: str) -> str:
+         """读取渲染结果并缓存它。"""

@@ -1,0 +1,28 @@
+diff --git a/tests/test_fifo_order.py b/tests/test_fifo_order.py
+new file mode 100644
+index 0000000..8a3d0ae
+--- /dev/null
++++ b/tests/test_fifo_order.py
+@@ -0,0 +1,22 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from taskqueue.queue import Task, TaskQueue
++
++
++def test_first_pushed_is_first_popped() -> None:
++    queue = TaskQueue()
++    queue.push(Task("old"))
++    queue.push(Task("new"))
++    popped = queue.pop()
++    assert popped is not None
++    assert popped.name == "old"
++
++
++def test_full_order() -> None:
++    queue = TaskQueue([Task("a"), Task("b"), Task("c")])
++    names = []
++    while (task := queue.pop()) is not None:
++        names.append(task.name)
++    assert names == ["a", "b", "c"]

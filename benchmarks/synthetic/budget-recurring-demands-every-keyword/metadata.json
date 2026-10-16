@@ -1,0 +1,20 @@
+{
+  "base_commit": "a6f4aa0c0d9296f8fa36e0fe28051e89396f13ab",
+  "category": "wrong_condition",
+  "difficulty": "easy",
+  "has_traceback": false,
+  "multi_file": false,
+  "repo_files": {
+    "pyproject.toml": "41ea779db07b6f57f2fdced959f75c8626d071dba1519caf689097bd5c7ed2c9",
+    "src/budget/__init__.py": "855defd27792ab7c8fd0f08fd1eab55563a4c153ebac5a964fa2c26d0a727f11",
+    "src/budget/csv_writer.py": "bbbbc232e73a98d224a1257929c64c512384872db682d48d45d64830229b1b4e",
+    "src/budget/ledger.py": "0f682c5e238b0c0776d1a8ea4ab60fa0ec4e93f0e189daa4a65a759d85a0bcef",
+    "src/budget/report.py": "8ff235cba22016ec72c36f77f80d1c76b1f35e50430fb5784dc1246befb243e8",
+    "src/budget/rules.py": "0da033705750143c8cbfbf551921c2b817f0f27b4843438b75983d949e4907cc",
+    "tests/test_ledger.py": "4c68f656fcdb83db1dd9b851b77c106ea84c46e41fd48935c66a331109e0b3df",
+    "tests/test_report.py": "d59a6fdab2a9165c5728e0203a3d89848215c52d5efb5b6b1a0d02a32feae169",
+    "tests/test_rules.py": "9e97c37abc6c54bfc362230f383182ad21cd54a24af4e56c95d5ce62197bf502"
+  },
+  "schema_version": 1,
+  "task_id": "budget-recurring-demands-every-keyword"
+}

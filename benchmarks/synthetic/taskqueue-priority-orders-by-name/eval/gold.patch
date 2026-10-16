@@ -1,0 +1,13 @@
+diff --git a/src/taskqueue/priority.py b/src/taskqueue/priority.py
+index 4b8dcfa..45cdf21 100644
+--- a/src/taskqueue/priority.py
++++ b/src/taskqueue/priority.py
+@@ -26,7 +26,7 @@ def rank(task: Task) -> int:
+ 
+ def order(tasks: Sequence[Task]) -> list[Task]:
+     """按权重升序；权重相同的保持原顺序。"""
+-    return sorted(tasks, key=lambda task: task.name)
++    return sorted(tasks, key=rank)
+ 
+ 
+ def top(tasks: Sequence[Task]) -> Task | None:

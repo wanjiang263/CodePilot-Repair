@@ -1,0 +1,12 @@
+diff --git a/src/budget/rules.py b/src/budget/rules.py
+index 1bb08e0..a1be06c 100644
+--- a/src/budget/rules.py
++++ b/src/budget/rules.py
+@@ -31,6 +31,6 @@ def is_recurring(note: str) -> bool:
+ 
+ def apply_discount(total: float, *, member: bool) -> float:
+     """会员打折，非会员原价。"""
+-    if not member:
++    if member:
+         return round(total * (1 - MEMBER_DISCOUNT), 2)
+     return total

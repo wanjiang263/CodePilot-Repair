@@ -1,0 +1,13 @@
+diff --git a/src/budget/ledger.py b/src/budget/ledger.py
+index 3a4d260..c2ec5bc 100644
+--- a/src/budget/ledger.py
++++ b/src/budget/ledger.py
+@@ -55,7 +55,7 @@ class Ledger:
+         """按类别汇总。"""
+         totals: dict[str, float] = {}
+         for entry in self.entries:
+-            totals[entry.category] = totals.get(entry.category, 0.0) + entry.amount
++            totals[entry.category] = round(totals.get(entry.category, 0.0) + entry.amount, 2)
+         return dict(sorted(totals.items()))
+ 
+     def snapshot(self) -> list[Entry]:

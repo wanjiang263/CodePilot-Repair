@@ -1,0 +1,29 @@
+diff --git a/tests/test_refund_validation.py b/tests/test_refund_validation.py
+new file mode 100644
+index 0000000..5c1b592
+--- /dev/null
++++ b/tests/test_refund_validation.py
+@@ -0,0 +1,23 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++import pytest
++
++from budget.ledger import InvalidAmount, Ledger
++
++
++def _ledger() -> Ledger:
++    ledger = Ledger()
++    ledger.add(50.0, "Lunch")
++    return ledger
++
++
++def test_refund_rejects_zero() -> None:
++    with pytest.raises(InvalidAmount):
++        _ledger().refund(0, 0.0)
++
++
++def test_refund_rejects_negative() -> None:
++    with pytest.raises(InvalidAmount):
++        _ledger().refund(0, -10.0)

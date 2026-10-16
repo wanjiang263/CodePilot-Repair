@@ -1,0 +1,23 @@
+diff --git a/tests/test_rent_branch.py b/tests/test_rent_branch.py
+new file mode 100644
+index 0000000..abf269c
+--- /dev/null
++++ b/tests/test_rent_branch.py
+@@ -0,0 +1,17 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from budget.rules import categorise
++
++
++def test_rent_is_housing() -> None:
++    assert categorise(900.0, "Rent April") == "housing"
++
++
++def test_both_keywords_still_housing() -> None:
++    assert categorise(10.0, "rent and insurance") == "housing"
++
++
++def test_large_rent_does_not_fall_through() -> None:
++    assert categorise(1500.0, "Rent") == "housing"

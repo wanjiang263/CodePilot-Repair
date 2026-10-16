@@ -1,0 +1,19 @@
+diff --git a/tests/test_describe_unknown.py b/tests/test_describe_unknown.py
+new file mode 100644
+index 0000000..22b6f49
+--- /dev/null
++++ b/tests/test_describe_unknown.py
+@@ -0,0 +1,13 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from inventory.catalog import UNKNOWN_NAME, describe
++
++
++def test_unknown_sku_gets_placeholder() -> None:
++    assert describe("NOPE") == f"NOPE - {UNKNOWN_NAME}"
++
++
++def test_custom_catalog_missing_key() -> None:
++    assert describe("Q", catalog={"A": "x"}) == "Q - unknown"

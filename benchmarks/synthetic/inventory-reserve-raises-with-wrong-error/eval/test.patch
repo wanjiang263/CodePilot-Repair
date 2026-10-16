@@ -1,0 +1,26 @@
+diff --git a/tests/test_reserve_error_type.py b/tests/test_reserve_error_type.py
+new file mode 100644
+index 0000000..5baf10e
+--- /dev/null
++++ b/tests/test_reserve_error_type.py
+@@ -0,0 +1,20 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++import pytest
++
++from inventory.stock import Line, OutOfStock, Stock
++
++
++def test_short_stock_raises_out_of_stock() -> None:
++    stock = Stock()
++    stock.restock("A-1", 1)
++    with pytest.raises(OutOfStock):
++        stock.reserve(Line("A-1", 4))
++
++
++def test_message_names_the_sku() -> None:
++    stock = Stock()
++    with pytest.raises(OutOfStock, match="B-2"):
++        stock.reserve(Line("B-2", 1))

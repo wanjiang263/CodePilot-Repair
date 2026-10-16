@@ -1,0 +1,23 @@
+diff --git a/tests/test_policy_validation.py b/tests/test_policy_validation.py
+new file mode 100644
+index 0000000..920cf2a
+--- /dev/null
++++ b/tests/test_policy_validation.py
+@@ -0,0 +1,17 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++import pytest
++
++from taskqueue.retry import RetryPolicy
++
++
++def test_zero_attempts_rejected() -> None:
++    with pytest.raises(ValueError):
++        RetryPolicy(attempts=0)
++
++
++def test_negative_attempts_rejected() -> None:
++    with pytest.raises(ValueError):
++        RetryPolicy(attempts=-3)

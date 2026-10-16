@@ -1,0 +1,23 @@
+{
+  "fail_to_pass": [
+    "tests/test_fifo_order.py::test_first_pushed_is_first_popped",
+    "tests/test_fifo_order.py::test_full_order"
+  ],
+  "pass_to_pass": [
+    "tests/test_priority.py::test_rank_defaults_to_normal",
+    "tests/test_priority.py::test_rank_reads_payload",
+    "tests/test_priority.py::test_top_of_empty_is_none",
+    "tests/test_priority.py::test_top_picks_urgent",
+    "tests/test_queue.py::test_drain_returns_every_task",
+    "tests/test_queue.py::test_history_records_operations",
+    "tests/test_queue.py::test_peek_does_not_remove",
+    "tests/test_queue.py::test_pop_on_empty_returns_none",
+    "tests/test_queue.py::test_push_then_pop_is_fifo",
+    "tests/test_retry.py::test_policy_accepts_positive_attempts",
+    "tests/test_retry.py::test_run_exhausts_and_wraps_cause",
+    "tests/test_retry.py::test_run_succeeds_eventually",
+    "tests/test_store.py::test_delete_removes_the_key",
+    "tests/test_store.py::test_keys_are_sorted",
+    "tests/test_store.py::test_set_then_get"
+  ]
+}

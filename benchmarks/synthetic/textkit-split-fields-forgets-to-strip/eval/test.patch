@@ -1,0 +1,19 @@
+diff --git a/tests/test_split_strip.py b/tests/test_split_strip.py
+new file mode 100644
+index 0000000..9729c51
+--- /dev/null
++++ b/tests/test_split_strip.py
+@@ -0,0 +1,13 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from textkit.normalise import split_fields
++
++
++def test_cells_are_stripped() -> None:
++    assert split_fields(" a , b , c ") == ["a", "b", "c"]
++
++
++def test_tab_padding_is_stripped() -> None:
++    assert split_fields("a\t,b", ",") == ["a", "b"]

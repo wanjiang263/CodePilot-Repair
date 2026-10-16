@@ -1,0 +1,20 @@
+diff --git a/tests/test_fits_unlisted.py b/tests/test_fits_unlisted.py
+new file mode 100644
+index 0000000..6744054
+--- /dev/null
++++ b/tests/test_fits_unlisted.py
+@@ -0,0 +1,14 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from inventory.shipping import fits
++from inventory.stock import Line
++
++
++def test_unlisted_sku_does_not_fit() -> None:
++    assert fits([Line("Z-9", 1)], {"A-1": 5}) is False
++
++
++def test_listed_sku_still_checked() -> None:
++    assert fits([Line("A-1", 6)], {"A-1": 5}) is False

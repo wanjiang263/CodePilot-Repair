@@ -1,0 +1,33 @@
+diff --git a/tests/test_can_ship_follows_fits.py b/tests/test_can_ship_follows_fits.py
+new file mode 100644
+index 0000000..71e6e77
+--- /dev/null
++++ b/tests/test_can_ship_follows_fits.py
+@@ -0,0 +1,27 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from inventory.shipping import can_ship, fits
++from inventory.stock import Line
++
++
++def _order() -> list[Line]:
++    return [Line("Z-9", 1)]
++
++
++def test_unlisted_sku_rejected_by_both() -> None:
++    assert fits(_order(), {"A-1": 5}) is False
++    assert can_ship(_order(), limits={"A-1": 5}, weight_kg=1.0, capacity_kg=5.0, max_boxes=1) is False
++
++
++def test_can_ship_agrees_with_fits_for_listed_orders() -> None:
++    order = [Line("A-1", 2)]
++    limits = {"A-1": 5}
++    assert fits(order, limits) is True
++    assert can_ship(order, limits=limits, weight_kg=1.0, capacity_kg=5.0, max_boxes=1) is True
++
++
++def test_box_limit_still_applies() -> None:
++    order = [Line("A-1", 1)]
++    assert can_ship(order, limits={"A-1": 5}, weight_kg=9.0, capacity_kg=4.0, max_boxes=1) is False

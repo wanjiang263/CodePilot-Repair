@@ -1,0 +1,40 @@
+diff --git a/tests/test_currency_column.py b/tests/test_currency_column.py
+new file mode 100644
+index 0000000..124dcc5
+--- /dev/null
++++ b/tests/test_currency_column.py
+@@ -0,0 +1,34 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from budget.csv_writer import COLUMNS, render_row
++from budget.ledger import Ledger
++from budget.report import build_rows, render
++
++
++def _ledger() -> Ledger:
++    ledger = Ledger()
++    ledger.add(20.0, "Coffee")
++    return ledger
++
++
++def test_currency_is_one_of_the_columns() -> None:
++    assert "currency" in COLUMNS
++
++
++def test_rows_carry_every_column() -> None:
++    rows = build_rows(_ledger())
++    assert set(COLUMNS) <= set(rows[0])
++
++
++def test_rendering_does_not_raise_key_error() -> None:
++    text = render(_ledger())
++    header = text.splitlines()[0].split(",")
++    body = text.splitlines()[1].split(",")
++    assert len(header) == len(body) == len(COLUMNS)
++
++
++def test_currency_value_is_written() -> None:
++    rows = build_rows(_ledger())
++    assert rows[0]["currency"]

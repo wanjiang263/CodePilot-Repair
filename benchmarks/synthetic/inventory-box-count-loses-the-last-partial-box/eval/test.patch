@@ -1,0 +1,34 @@
+diff --git a/tests/test_box_ceil.py b/tests/test_box_ceil.py
+new file mode 100644
+index 0000000..5d1f706
+--- /dev/null
++++ b/tests/test_box_ceil.py
+@@ -0,0 +1,28 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++import pytest
++
++from inventory.shipping import box_count
++
++
++def test_partial_box_is_counted() -> None:
++    assert box_count(10.0, 4.0) == 3
++
++
++def test_smallest_nonzero_load_needs_one_box() -> None:
++    assert box_count(0.5, 5.0) == 1
++
++
++def test_exact_fill_unchanged() -> None:
++    assert box_count(10.0, 5.0) == 2
++
++
++def test_zero_load_needs_no_box() -> None:
++    assert box_count(0.0, 5.0) == 0
++
++
++def test_capacity_still_validated() -> None:
++    with pytest.raises(ValueError):
++        box_count(1.0, -1.0)

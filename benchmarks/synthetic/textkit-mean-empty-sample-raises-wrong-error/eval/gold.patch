@@ -1,0 +1,13 @@
+diff --git a/src/textkit/stats.py b/src/textkit/stats.py
+index 81cbb41..87fee6c 100644
+--- a/src/textkit/stats.py
++++ b/src/textkit/stats.py
+@@ -9,6 +9,8 @@ class EmptySample(Exception):
+ 
+ def mean(values: list[float]) -> float:
+     """算术平均。空输入没有定义，必须报错而不是除零。"""
++    if not values:
++        raise EmptySample("mean of an empty sample")
+     return sum(values) / len(values)
+ 
+ 

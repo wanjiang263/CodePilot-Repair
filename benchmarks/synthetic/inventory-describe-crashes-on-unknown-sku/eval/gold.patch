@@ -1,0 +1,13 @@
+diff --git a/src/inventory/catalog.py b/src/inventory/catalog.py
+index b758c66..35b43f6 100644
+--- a/src/inventory/catalog.py
++++ b/src/inventory/catalog.py
+@@ -11,7 +11,7 @@ UNKNOWN_NAME = "unknown"
+ def describe(sku: str, *, catalog: Mapping[str, str] | None = None) -> str:
+     """返回 ``"SKU - 名称"``。未知 SKU 用占位名，调用方不必自己挡 KeyError。"""
+     table = catalog or CATALOG
+-    name = table[sku]
++    name = table.get(sku, UNKNOWN_NAME)
+     return f"{sku} - {name}"
+ 
+ 

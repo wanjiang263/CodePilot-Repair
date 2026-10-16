@@ -1,0 +1,14 @@
+diff --git a/src/taskqueue/retry.py b/src/taskqueue/retry.py
+index 3e0666a..0d431cc 100644
+--- a/src/taskqueue/retry.py
++++ b/src/taskqueue/retry.py
+@@ -17,7 +17,8 @@ class RetryPolicy:
+     attempts: int = 3
+ 
+     def __post_init__(self) -> None:
+-        return None
++        if self.attempts < 1:
++            raise ValueError("attempts 至少为 1")
+ 
+ 
+ def run(function: Callable[[], str], policy: RetryPolicy) -> str:

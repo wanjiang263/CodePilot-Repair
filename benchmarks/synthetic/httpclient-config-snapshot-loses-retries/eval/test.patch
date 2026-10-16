@@ -1,0 +1,31 @@
+diff --git a/tests/test_config_snapshot.py b/tests/test_config_snapshot.py
+new file mode 100644
+index 0000000..69b5ecd
+--- /dev/null
++++ b/tests/test_config_snapshot.py
+@@ -0,0 +1,25 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from httpclient.client import new_client
++from httpclient.config import Config
++
++
++def test_as_dict_reports_every_field() -> None:
++    snapshot = Config(base_url="https://example.invalid/", timeout=1.0, retries=5).as_dict()
++    assert snapshot == {
++        "base_url": "https://example.invalid/",
++        "timeout": 1.0,
++        "retries": 5,
++    }
++
++
++def test_helper_forwards_keyword_arguments() -> None:
++    client = new_client(base_url="https://example.invalid/", responses=["ok"], retries=5)
++    assert client.config.retries == 5
++
++
++def test_helper_and_snapshot_agree() -> None:
++    client = new_client(base_url="https://example.invalid/", responses=["ok"], retries=3)
++    assert client.config.as_dict()["retries"] == 3

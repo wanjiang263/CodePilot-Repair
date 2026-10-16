@@ -1,0 +1,20 @@
+{
+  "base_commit": "dd0bbd4a5050dbda50beb506890e74e4399e9dd7",
+  "category": "cross_module_dependency",
+  "difficulty": "hard",
+  "has_traceback": false,
+  "multi_file": true,
+  "repo_files": {
+    "pyproject.toml": "484273f52a9f1130d3ceff1c0945fb95ac1aac312bff7c845078e799475870fa",
+    "src/httpclient/__init__.py": "c790fdc9ea9b2e082712d549a4687f4f4156ca296ac5b105d43ba50d922dd2f4",
+    "src/httpclient/client.py": "758936a23027a82d1db7b6131b029eda3af9014650171cca702cc5bb50c8d6db",
+    "src/httpclient/config.py": "2244d9e90c1af53970748b2d5043adadf1d225405a6658c9b02e0afe2feb141e",
+    "src/httpclient/errors.py": "ec94d04fd68ee0148d590158f053fa8cf87f017ae252dd0f78369bbd7e05b3d3",
+    "src/httpclient/transport.py": "d50c5deb34de5c329f54a50c050656f0799ce573998da9f90e9c4f219597d942",
+    "tests/test_client.py": "0ade69c068d9a1879b01468fc0035a14882fecab45f62875ed612b4b345d2821",
+    "tests/test_config.py": "2918644978ceed5a3af22ac2dd5da07f0d4efceda6f27beb50071c22eb14c146",
+    "tests/test_errors.py": "bd60e10e1868145256876486f4652778d359f2ee6539c29726d89d57a3a91c19"
+  },
+  "schema_version": 1,
+  "task_id": "httpclient-retries-never-reach-the-transport"
+}

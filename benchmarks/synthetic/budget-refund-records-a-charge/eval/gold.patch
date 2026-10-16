@@ -1,0 +1,13 @@
+diff --git a/src/budget/ledger.py b/src/budget/ledger.py
+index e82404f..c2ec5bc 100644
+--- a/src/budget/ledger.py
++++ b/src/budget/ledger.py
+@@ -39,7 +39,7 @@ class Ledger:
+         if amount <= 0:
+             raise InvalidAmount(f"refund amount must be positive, got {amount}")
+         original = self.entries[index]
+-        entry = Entry(amount=amount, note=f"refund of {original.note}", category=original.category)
++        entry = Entry(amount=-amount, note=f"refund of {original.note}", category=original.category)
+         self.entries.append(entry)
+         return entry
+ 

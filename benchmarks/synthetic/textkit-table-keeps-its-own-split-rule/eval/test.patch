@@ -1,0 +1,27 @@
+diff --git a/tests/test_table_delegates.py b/tests/test_table_delegates.py
+new file mode 100644
+index 0000000..377a24d
+--- /dev/null
++++ b/tests/test_table_delegates.py
+@@ -0,0 +1,21 @@
++"""Hidden evaluation tests (test.patch)."""
++
++from __future__ import annotations
++
++from textkit.normalise import split_fields
++from textkit.table import parse_row, parse_table
++
++TEXT = " a , b \n\n  c,d  \n"
++
++
++def test_row_cells_are_stripped() -> None:
++    assert parse_row(" a , b ") == ["a", "b"]
++
++
++def test_row_agrees_with_split_fields() -> None:
++    for line in (" a,b ", "x ,y,z", "  p , q"):
++        assert parse_row(line) == split_fields(line)
++
++
++def test_table_skips_blank_lines_and_strips() -> None:
++    assert parse_table(TEXT) == [["a", "b"], ["c", "d"]]
