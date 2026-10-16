@@ -5,10 +5,7 @@ Everything this library rejects about *configuration* is a `ConfigError`, and ca
 Actual behaviour on the current revision:
 
 ```
-    def validate_retries(value: int) -> int:
-        """重试次数必须是非负整数。"""
-        if value < 0:
->           raise ValueError(f"retries must be >= 0, got {value}")
+Traceback (most recent call last):
 E           ValueError: retries must be >= 0, got -2
 src/httpclient/config.py:20: ValueError
 ```

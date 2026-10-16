@@ -2,7 +2,7 @@
   "base_commit": "550f46391dcb5b5c66de62965f42a4ca621ff00b",
   "category": "api_misuse",
   "difficulty": "medium",
-  "has_traceback": true,
+  "has_traceback": false,
   "multi_file": false,
   "repo_files": {
     "pyproject.toml": "c87b54658a4b733f15bcafeec1a4b6aeea40276b011473a61141c8d6f59de33f",

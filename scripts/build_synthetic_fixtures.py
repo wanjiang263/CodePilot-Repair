@@ -25,6 +25,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from collections.abc import Sequence
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -35,7 +36,12 @@ for entry in (REPO_ROOT / "src", REPO_ROOT):
 from synthetic_hosts import COMMON_ENV, HOSTS  # noqa: E402
 from synthetic_tasks import TASKS, Bug, TaskDef  # noqa: E402
 
-from codepilot.eval.synthetic import BenchmarkCategory, load_fixture, validate_suite  # noqa: E402
+from codepilot.eval.synthetic import (  # noqa: E402
+    BenchmarkCategory,
+    SyntheticFixture,
+    load_fixture,
+    validate_suite,
+)
 from codepilot.eval.synthetic_build import TaskSpec, build_fixture  # noqa: E402
 from codepilot.sandbox.junit import parse_junit  # noqa: E402
 from codepilot.schemas.enums import TestOutcome  # noqa: E402
@@ -117,8 +123,10 @@ def _write_tree(root: Path, files: dict[str, str]) -> Path:
     return tree
 
 
-def _run_suite(tree: Path, work: Path) -> tuple[dict[str, str], dict[str, str]]:
-    """在给定文件树上跑 pytest，返回 ``node_id -> outcome`` 与 ``node_id -> 失败文本``。
+def _run_suite(tree: Path, work: Path) -> tuple[dict[str, str], dict[str, tuple[str, str]]]:
+    """在给定文件树上跑 pytest。
+
+    返回 ``node_id -> outcome`` 与 ``node_id -> (失败类型, 失败文本)``。
 
     结果只从 junit XML 读（03 §13）：终端文本会随 pytest 版本与 -q/-v 而变化，
     而"哪些测试红了"是这个脚本唯一的判据来源。
@@ -149,15 +157,12 @@ def _run_suite(tree: Path, work: Path) -> tuple[dict[str, str], dict[str, str]]:
     if not junit.is_file():
         raise CheckError(
             tree.name,
-            [
-                f"pytest 没有产出 junit（exit={completed.returncode}）",
-                completed.stdout[-400:],
-            ],
+            [f"pytest 没有产出 junit（exit={completed.returncode}）", completed.stdout[-400:]],
         )
     report = parse_junit(junit)
     outcomes = {case.node_id: case.outcome.value for case in report.tests}
-    messages = {
-        case.node_id: case.traceback or case.message or ""
+    failures = {
+        case.node_id: (case.failure_type or "", case.traceback or case.message or "")
         for case in report.tests
         if case.outcome.value in (TestOutcome.FAILED.value, TestOutcome.ERROR.value)
     }
@@ -166,7 +171,7 @@ def _run_suite(tree: Path, work: Path) -> tuple[dict[str, str], dict[str, str]]:
             tree.name,
             [f"junit 里没有任何测试（exit={completed.returncode}）: {completed.stdout[-500:]}"],
         )
-    return outcomes, messages
+    return outcomes, failures
 
 
 def _assert_compilable(files: dict[str, str], label: str) -> None:
@@ -199,23 +204,42 @@ TRACEBACK_CATEGORIES = frozenset(
 )
 
 
-def _traceback_block(messages: dict[str, str], node: str) -> str:
-    """从**真实执行**里取一段失败文本。
+#: 这些"失败"是断言不等，不是库自己崩了；它们的输出里必然带着期望值。
+_ASSERTION_FAILURES = frozenset({"", "AssertionError", "Failed"})
 
-    刻意不手写 traceback：手写的栈会指向作者想象中的行号，而 Issue 里出现的行号是
-    推理可见信息。用 base 上真实跑出来的那一段，既有诊断价值，又不会意外把 gold 的
-    内容写进 Issue。
 
-    路径分隔符统一成 ``/``：junit 里带的是**构建机**的形态（Windows 上是
-    ``src\\inventory\\catalog.py``），把反斜杠固化进一个要提交的 fixture，就等于
-    把构建机的操作系统写进了数据集。
+def _traceback_block(failures: dict[str, tuple[str, str]], node: str) -> str:
+    """从**真实执行**里取一段失败现场。
+
+    刻意不手写 traceback：手写的栈会指向作者想象中的行号，而 Issue 里的行号是推理
+    可见信息，写错了就把模型引到别处去。
+
+    三条过滤都对应第一版的真实泄漏点，均由 ``scripts/check_leakage.py`` 抓到：
+
+    * 丢掉引用 ``tests/`` 的行 —— pytest 会把隐藏测试的断言原文连同路径一起打出来，
+      而隐藏测试是评测内容；
+    * **断言不等整段都不要** —— ``assert 'a' == 'b'`` 的差异输出把判分标准直接写进
+      了推理可见的 Issue，那不是"描述现象"，那就是答案；
+    * 路径分隔符归一成 ``/`` —— junit 里带的是构建机的形态，把反斜杠固化进要提交的
+      fixture 等于把构建机操作系统写进数据集。
+
+    于是只有库自己抛出的异常（KeyError / IndexError / ZeroDivisionError…）才会带
+    traceback，而那些内容只涉及 base 源码——base 本来就对模型可读。
     """
-    text = (messages.get(node) or "").strip().replace("\\", "/")
-    if not text:
+    failure_type, text = failures.get(node, ("", ""))
+    text = text.strip().replace("\\", "/")
+    if not text or failure_type in _ASSERTION_FAILURES:
         return ""
-    lines = [line for line in text.splitlines() if line.strip()]
-    tail = lines[-6:] if len(lines) > 6 else lines
-    return "```\n" + "\n".join(tail) + "\n```\n"
+    kept: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or "tests/" in stripped:
+            continue
+        if stripped.startswith("E ") or "src/" in stripped:
+            kept.append(stripped)
+    if not kept:
+        return ""
+    return "```\nTraceback (most recent call last):\n" + "\n".join(kept[-6:]) + "\n```\n"
 
 
 def check_task(task: TaskDef, work: Path) -> tuple[tuple[str, ...], tuple[str, ...], str]:
@@ -228,7 +252,7 @@ def check_task(task: TaskDef, work: Path) -> tuple[tuple[str, ...], tuple[str, .
     _assert_compilable({**gold, **task.hidden}, task.task_id)
 
     base_tree = _write_tree(work / "base", {**base, **task.hidden})
-    base_outcomes, base_messages = _run_suite(base_tree, work / "base")
+    base_outcomes, base_failures = _run_suite(base_tree, work / "base")
 
     gold_tree = _write_tree(work / "gold", {**gold, **task.hidden})
     gold_outcomes, _ = _run_suite(gold_tree, work / "gold")
@@ -288,11 +312,12 @@ def check_task(task: TaskDef, work: Path) -> tuple[tuple[str, ...], tuple[str, .
     if reasons:
         raise CheckError(task.task_id, reasons)
     traceback_text = ""
-    if task.category in TRACEBACK_CATEGORIES and discriminating:
-        traceback_text = _traceback_block(base_messages, discriminating[0])
-        if not traceback_text:
-            reasons.append(f"{task.category.value} 类任务应当带 traceback，但 base 上没有失败文本")
-            raise CheckError(task.task_id, reasons)
+    if task.category in TRACEBACK_CATEGORIES:
+        # 取第一个"库自己抛异常"的失败节点。断言不等的节点跳过：它们的输出就是答案。
+        for node in discriminating:
+            traceback_text = _traceback_block(base_failures, node)
+            if traceback_text:
+                break
     return tuple(visible), tuple(discriminating), traceback_text
 
 
@@ -316,15 +341,26 @@ def suite_requirements(tasks: list[TaskDef]) -> list[str]:
     multi = sum(1 for task in tasks if len({bug.file for bug in task.bugs}) > 1)
     if multi < 5:
         reasons.append(f"多文件修复任务 {multi} < 5")
-    no_trace = sum(1 for task in tasks if task.category not in TRACEBACK_CATEGORIES)
-    if no_trace < 5:
-        reasons.append(f"不含 traceback 的 Issue {no_trace} < 5")
-    with_trace = sum(1 for task in tasks if task.category in TRACEBACK_CATEGORIES)
-    if with_trace < 5:
-        reasons.append(f"含 traceback 的 Issue {with_trace} < 5（traceback 多样性不足）")
     ids = [task.task_id for task in tasks]
     if len(set(ids)) != len(ids):
         reasons.append("存在重复 task_id")
+    return reasons
+
+
+def suite_content_requirements(fixtures: Sequence[SyntheticFixture]) -> list[str]:
+    """traceback 多样性只能**建完之后**核对。
+
+    一个缺陷到底会不会让库自己抛异常，是执行出来的事实，不是类别的标签：同属
+    edge_case 的两个任务，一个抛 IndexError、另一个只是断言不等，而后者不能带
+    traceback（带上去就是漏答案）。所以这里读 metadata 里测得的 has_traceback。
+    """
+    with_trace = sum(1 for item in fixtures if item.metadata.has_traceback)
+    without = sum(1 for item in fixtures if not item.metadata.has_traceback)
+    reasons: list[str] = []
+    if without < 5:
+        reasons.append(f"不含 traceback 的 Issue {without} < 5")
+    if with_trace < 5:
+        reasons.append(f"含 traceback 的 Issue {with_trace} < 5（现场多样性不足）")
     return reasons
 
 
@@ -394,6 +430,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"\nsuite: {len(suite)} 个 fixture，schema 无效 {len(suite.invalid)}")
     for task_id, reasons in sorted(suite.invalid.items()):
         print(f"  INVALID {task_id}: {reasons[0]}")
+    if args.only is None:
+        content_problems = suite_content_requirements(suite.fixtures)
+        for problem in content_problems:
+            print(f"REQ FAIL: {problem}", file=sys.stderr)
+        if content_problems:
+            return 2
     return 0 if not suite.invalid else 1
 
 

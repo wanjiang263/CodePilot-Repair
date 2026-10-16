@@ -5,10 +5,8 @@ The function already treats a missing price table entry as zero weight in intent
 Actual behaviour on the current revision:
 
 ```
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-.0 = <list_iterator object at 0x00000211FA9D0EB0>
->   return round(sum(line.quantity * per_unit[line.sku] for line in lines), 3)
-                                     ^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+src/inventory/shipping.py:45:
 E   KeyError: 'Z-9'
 src/inventory/shipping.py:45: KeyError
 ```

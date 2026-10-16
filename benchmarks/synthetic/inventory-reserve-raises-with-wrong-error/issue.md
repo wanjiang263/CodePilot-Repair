@@ -5,10 +5,7 @@ The checkout flow catches `OutOfStock` to show a restock prompt, and lets anythi
 Actual behaviour on the current revision:
 
 ```
-        """预留：扣减可用数量。不足时抛 :class:`OutOfStock`。"""
-        available = self.quantities.get(line.sku, 0)
-        if line.quantity > available:
->           raise ValueError(f"{line.sku}: need {line.quantity}, have {available}")
+Traceback (most recent call last):
 E           ValueError: B-2: need 1, have 0
 src/inventory/stock.py:40: ValueError
 ```

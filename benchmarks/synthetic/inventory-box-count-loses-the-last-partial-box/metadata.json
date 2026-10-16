@@ -2,7 +2,7 @@
   "base_commit": "710a4f6343af01bf58045eceffa7263b03f068be",
   "category": "edge_case",
   "difficulty": "medium",
-  "has_traceback": true,
+  "has_traceback": false,
   "multi_file": false,
   "repo_files": {
     "pyproject.toml": "a92b84a7c1884ad89a06f156b332bb9df6caac73cdfda28d7c411c0b8a95b733",

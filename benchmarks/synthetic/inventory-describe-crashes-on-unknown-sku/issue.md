@@ -5,10 +5,7 @@ Describing an unlisted SKU raises `KeyError`.
 Actual behaviour on the current revision:
 
 ```
-        """返回 ``"SKU - 名称"``。未知 SKU 用占位名，调用方不必自己挡 KeyError。"""
-        table = catalog or CATALOG
->       name = table[sku]
-               ^^^^^^^^^^
+Traceback (most recent call last):
 E       KeyError: 'Q'
 src/inventory/catalog.py:14: KeyError
 ```
