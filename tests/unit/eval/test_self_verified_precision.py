@@ -162,7 +162,19 @@ def test_metric_is_a_pure_function_without_runtime_dependencies() -> None:
             imported.update(alias.name.split(".", 1)[0] for alias in node.names)
         elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
             imported.add(node.module.split(".", 1)[0])
-    assert imported <= {"collections", "dataclasses", "codepilot", "__future__"}
+    assert imported <= {
+        "collections",
+        "dataclasses",
+        "codepilot",
+        "__future__",
+        # E-03 起指标全集需要的三个模块，都是纯计算、无 I/O：
+        # math 只算分位数，enum 定义 VerificationMode，typing 只有注解。
+        # 加进来之前先确认：这里绝不能出现 os / pathlib / subprocess / docker /
+        # httpx——那正是本测试要拦的东西。
+        "math",
+        "enum",
+        "typing",
+    }
 
     samples = [_sample("a", True, True)]
     assert self_verified_precision(samples) == self_verified_precision(samples)
