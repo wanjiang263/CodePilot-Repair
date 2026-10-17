@@ -71,7 +71,7 @@ from codepilot.tools.base import WorkspacePathPolicy
 from codepilot.tools.registry import build_tool_registry
 from codepilot.tools.write_tools import TestRunBudget
 
-__all__ = ["InferenceAssembly", "InferenceOutcome", "ProviderBundle"]
+__all__ = ["InferenceAssembly", "InferenceOutcome", "ProviderBundle", "role_model_identity"]
 
 #: 图里会向模型要东西的角色。装配时一次备齐，缺一个就在构造期炸，而不是等某个
 #: 节点跑到一半才报 KeyError。
@@ -135,7 +135,7 @@ class ProviderBundle:
         )
 
     @classmethod
-    def live(cls, config: LLMConfig, *, budget_currency: str = "CNY") -> ProviderBundle:
+    def live(cls, config: LLMConfig, *, budget_currency: str | None = None) -> ProviderBundle:
         """真实 provider。可能产生费用，因此必须由调用方显式授权后才构造。
 
         ``model_identity`` 取"角色 -> 模型 ID"的完整映射而不是配置文件名：换模型会
@@ -143,19 +143,27 @@ class ProviderBundle:
         属于哪个模型。
         """
         registry = LLMRegistry(config, budget_currency=budget_currency)
-        mapping = {role: config.resolve_role(role).model for role in ROLES}
-        identity = "/".join(f"{role}={mapping[role]}" for role in ROLES)
         return cls(
             roles={role: registry.for_role(role) for role in ROLES},
             usage=registry.usage,
             simulated=False,
-            model_identity=identity,
+            model_identity=role_model_identity(config),
             registry=registry,
         )
 
     def close(self) -> None:
         if self.registry is not None:
             self.registry.close()
+
+
+def role_model_identity(config: LLMConfig) -> str:
+    """角色 → 官方模型 ID 的完整映射，作为一批运行的身份。
+
+    单独成函数是因为 CLI 在**开跑之前**就要把这个字符串写进 manifest 与确认提示，
+    而那时还没有 provider 对象；两处各自拼一遍会出现"报表里的身份和实际跑的不一样"。
+    """
+    mapping = {role: config.resolve_role(role).model for role in ROLES}
+    return "/".join(f"{role}={mapping[role]}" for role in ROLES)
 
 
 @dataclass(frozen=True, slots=True)

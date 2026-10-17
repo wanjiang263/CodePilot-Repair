@@ -19,18 +19,21 @@ import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import typer
 
 from codepilot.artifacts import ArtifactStore
 from codepilot.config import PROJECT_ROOT, get_settings
+from codepilot.eval.assembly import role_model_identity
 from codepilot.eval.runner import BenchmarkRunner
 from codepilot.observability.logging import configure_logging
-from codepilot.observability.redaction import redact_text
+from codepilot.observability.redaction import redact, redact_text
 from codepilot.repo.workspace import WorkspaceManager
 
 if TYPE_CHECKING:
+    from codepilot.llm.config import LLMConfig
+    from codepilot.llm.smoke import SmokeReport
     from codepilot.repo.index import IndexStats
 
 __all__ = ["app"]
@@ -51,6 +54,25 @@ app = typer.Typer(
 
 config_app = typer.Typer(name="config", help="查看与校验配置。", no_args_is_help=True)
 app.add_typer(config_app, name="config")
+
+llm_app = typer.Typer(name="llm", help="LLM Provider 的体检与冒烟。", no_args_is_help=True)
+app.add_typer(llm_app, name="llm")
+
+
+def _effective_llm_config(*, alias: str | None = None, platform: str | None = None) -> LLMConfig:
+    """``configs/llm.yaml`` → 应用 GLM 运行期覆盖 → 可选地把所有角色绑到同一别名。
+
+    所有需要真实 provider 的入口都走这里，而不是各自 ``load_llm_config``：否则
+    ``GLM_PLATFORM`` / ``GLM_MODEL`` 只对某一条命令生效，而报表里的
+    ``provider_config_hash`` 算的是另一份配置——那正是"跑的和记的不是一份东西"。
+    """
+    from codepilot.llm.config import load_llm_config
+    from codepilot.llm.glm import apply_glm_env
+
+    config = apply_glm_env(load_llm_config(get_settings().resolved_llm_config), platform=platform)
+    if alias is not None:
+        config = config.bind_all_roles(alias)
+    return config
 
 
 def _version() -> str:
@@ -143,6 +165,152 @@ def config_show() -> None:
     typer.echo(f"API key 已配置  : {'是' if settings.api_key else '否'}")
     typer.echo(f"录制 LLM 调用   : {settings.record_llm}")
     typer.echo(f"回放文件        : {settings.replay_llm_path or '（未设置）'}")
+
+
+# ---------------------------------------------------------------- llm
+
+
+@llm_app.command("smoke")
+def llm_smoke(
+    alias: str = typer.Option(
+        ..., "--alias", help="configs/llm.yaml 里的模型别名，例如 glm-main 或 glm-5-zai。"
+    ),
+    provider: str | None = typer.Option(
+        None, "--provider", help="等价写法：给定 provider 名时用它下面唯一的别名。"
+    ),
+    platform: str | None = typer.Option(
+        None, "--glm-platform", help="GLM 平台：zai 或 bigmodel（覆盖 GLM_PLATFORM）。"
+    ),
+    model: str | None = typer.Option(
+        None, "--model", help="覆盖该 provider 下所有别名的官方模型 ID。"
+    ),
+    stage: list[str] = typer.Option(
+        [], "--stage", help="只跑指定阶段：text / structured / tools。可重复；默认全跑。"
+    ),
+    live: bool = typer.Option(
+        False, "--live", help="发起**真实**请求并产生费用。不传则只做 dry-run，一个字节都不发。"
+    ),
+    max_output_tokens: int = typer.Option(
+        512, "--max-output-tokens", min=1, help="每次请求的输出上限（真实调用必须有限）。"
+    ),
+    max_cost: float | None = typer.Option(
+        None, "--max-cost", help="费用上限（预算币种）。live 必须给出，否则拒绝执行。"
+    ),
+    timeout_seconds: float | None = typer.Option(
+        None, "--timeout-seconds", help="覆盖 provider 超时（等价 GLM_TIMEOUT_SECONDS）。"
+    ),
+    max_retries: int | None = typer.Option(
+        None, "--max-retries", help="覆盖 provider 重试次数（等价 GLM_MAX_RETRIES）。"
+    ),
+    budget_currency: str | None = typer.Option(
+        None, "--budget-currency", help="本次冒烟的费用币种；默认取配置的 budget_currency。"
+    ),
+    as_json: bool = typer.Option(False, "--json", help="输出机器可读的 JSON 结果。"),
+) -> None:
+    """对单个 provider/模型跑三阶段冒烟：普通对话、结构化输出、函数调用。
+
+    默认 **dry-run**：不发任何请求，只报告将要执行什么。三条前置条件
+    （显式 ``--live``、有限输出上限、显式费用上限）里任何一条不满足，真实调用就不会发生，
+    报告里如实写成 NOT RUN —— 而不是"试试看会不会失败"。
+
+    \b
+    例子：
+      uv run codepilot llm smoke --alias glm-main                       # dry-run
+      uv run codepilot llm smoke --alias glm-main --live --max-cost 0.05
+    """
+    from codepilot.llm.config import load_llm_config
+    from codepilot.llm.glm import apply_glm_env
+    from codepilot.llm.smoke import DEFAULT_STAGES, SmokeStage, run_smoke
+
+    try:
+        stages = tuple(SmokeStage(item.strip().lower()) for item in stage) or DEFAULT_STAGES
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+    config = apply_glm_env(
+        load_llm_config(get_settings().resolved_llm_config),
+        platform=platform,
+        model=model,
+        timeout_seconds=timeout_seconds,
+        max_retries=max_retries,
+    )
+
+    selected_alias = alias
+    if provider is not None:
+        # 只给 provider 时替调用方挑别名，但多于一个就拒绝猜：猜错的那个
+        # 会在报表里留下一个与实际操作者意图不同的模型 ID。
+        candidates = sorted(a for a, s in config.models.items() if s.provider == provider)
+        if not candidates:
+            raise typer.BadParameter(f"provider {provider!r} 下没有模型别名")
+        if len(candidates) > 1:
+            raise typer.BadParameter(
+                f"provider {provider!r} 有多个别名：{', '.join(candidates)}；请用 --alias 指定一个"
+            )
+        selected_alias = candidates[0]
+
+    report = run_smoke(
+        config,
+        alias=selected_alias,
+        live=live,
+        stages=stages,
+        max_output_tokens=max_output_tokens,
+        max_cost=max_cost,
+        budget_currency=budget_currency,
+    )
+
+    if as_json:
+        typer.echo(json.dumps(report.as_dict(), ensure_ascii=False, indent=2))
+    else:
+        _render_smoke_report(report)
+
+    # dry-run 不是失败：它的全部意义就是"在没有授权的情况下把要做什么说清楚"。
+    # 只有真实冒烟没通过才用非零退出码，让 CI 与脚本能据此判断。
+    if report.live and not report.passed:
+        raise typer.Exit(code=1)
+
+
+def _render_smoke_report(report: SmokeReport) -> None:
+    from codepilot.llm.smoke import SmokeStatus
+
+    marks = {SmokeStatus.PASS: "✓", SmokeStatus.FAIL: "✗", SmokeStatus.NOT_RUN: "-"}
+    # "live" 只代表**已授权**，不代表真的花了钱：前置条件不满足时一个请求都不会发，
+    # 把它写成"已产生费用"会让报表谎报支出。
+    if not report.live:
+        mode = "dry-run（未发出任何请求）"
+    elif report.total_requests:
+        mode = f"live（已产生 {report.total_requests} 次真实调用）"
+    else:
+        mode = "live（已授权，但前置条件未满足，未发出请求）"
+    typer.echo(
+        f"provider={report.provider} alias={report.model_alias} model={report.model_id}\n"
+        f"base_url={report.base_url} 币种={report.currency} 模式={mode}"
+    )
+    for item in report.stages:
+        typer.echo(f"  {marks[item.status]} {item.stage:<10} {item.status.value:<7} {item.detail}")
+        for note in item.notes:
+            typer.echo(f"      · {note}")
+        if item.requests:
+            cost = (
+                f"费用 {item.cost:.6f} {item.currency}"
+                if item.cost_known
+                else "费用 UNKNOWN（未确认单价，或请求结果未知）"
+            )
+            typer.echo(
+                f"      HTTP {item.requests} 次，"
+                f"token {item.input_tokens} in / {item.output_tokens} out，{cost}"
+            )
+    if report.cost_known:
+        typer.echo(
+            f"合计：{report.total_requests} 次 HTTP，费用 {report.total_cost:.6f} {report.currency}"
+        )
+    else:
+        typer.echo(f"合计：{report.total_requests} 次 HTTP，费用 UNKNOWN")
+    if report.usage_uncertain:
+        typer.echo(
+            "  ⚠️ 有已发出但结果未知的请求：服务端可能已按生成量计费，因此上面的费用是下界而非账单。"
+        )
+    if report.refusal:
+        typer.echo(f"  未执行原因：{report.refusal}", err=True)
 
 
 # ---------------------------------------------------------------- doctor
@@ -640,6 +808,17 @@ def solve(
         "--allow-live-llm",
         help="显式授权使用 configs/llm.yaml 中的真实 Provider（可能产生费用）。",
     ),
+    llm_model: str | None = typer.Option(
+        None,
+        "--llm-model",
+        help="本次运行把**所有**角色都绑定到这个模型别名（configs/llm.yaml 的 models 键）。"
+        "不传则按配置里的 roles 逐角色取值。",
+    ),
+    glm_platform: str | None = typer.Option(
+        None,
+        "--glm-platform",
+        help="GLM 平台：zai 或 bigmodel（等价于设置 GLM_PLATFORM 环境变量）。",
+    ),
     allow_build_network: bool = typer.Option(
         False,
         "--allow-build-network",
@@ -665,7 +844,6 @@ def solve(
     from codepilot.artifacts import ArtifactStore, RetrievalSnapshotStore
     from codepilot.graph.minimal import MinimalDependencies, run_minimal_graph
     from codepilot.llm.base import LLMProvider
-    from codepilot.llm.config import load_llm_config
     from codepilot.llm.fake import FakeLLM, Reply
     from codepilot.llm.registry import LLMRegistry
     from codepilot.llm.tracking import UsageTrackingProvider
@@ -772,7 +950,9 @@ def solve(
                 localizer_provider = planner_provider = coder_provider = shared_provider
                 simulated_llm = True
             else:
-                registry_owner = LLMRegistry(load_llm_config(settings.resolved_llm_config))
+                registry_owner = LLMRegistry(
+                    _effective_llm_config(alias=llm_model, platform=glm_platform)
+                )
                 run_usage = registry_owner.usage
                 localizer_provider = registry_owner.for_role("localizer")
                 planner_provider = registry_owner.for_role("planner")
@@ -865,6 +1045,12 @@ def bench(
     suite_root: Path = typer.Option(
         Path("benchmarks/synthetic"), "--suite-root", help="合成 fixture 目录。"
     ),
+    task: list[str] = typer.Option(
+        [],
+        "--task",
+        help="只派发这些 task_id（可重复）。用于单任务真实 Agent 验证；"
+        "分母随之缩小，评测口径与预算不变。",
+    ),
     max_total_cost: float | None = typer.Option(
         None, "--max-total-cost", help="整批费用上限，达到后停止派发新任务。"
     ),
@@ -881,6 +1067,14 @@ def bench(
     ),
     allow_live_llm: bool = typer.Option(
         False, "--allow-live-llm", help="显式授权使用真实 Provider（会产生费用）。"
+    ),
+    llm_model: str | None = typer.Option(
+        None,
+        "--llm-model",
+        help="整批把**所有**角色绑定到这个模型别名；不传则按 configs/llm.yaml 的 roles 取值。",
+    ),
+    glm_platform: str | None = typer.Option(
+        None, "--glm-platform", help="GLM 平台：zai 或 bigmodel。"
     ),
     resume: Path | None = typer.Option(
         None, "--resume", help="从既有 run 目录续跑，已完成任务不重跑。"
@@ -913,25 +1107,34 @@ def bench(
 
     settings = get_settings()
     settings.ensure_dirs()
-    try:
-        llm_payload = (
-            {}
-            if fake_llm_script_dir is not None
-            else _json.loads(
-                settings.resolved_llm_config.read_text(encoding="utf-8").replace("\t", " ")
+    # 生效配置只在这里读**一次**：它同时用于费用哈希、身份字符串和真正跑起来的
+    # provider。分开读的话，GLM_* 覆盖只要在其中一处没生效，报表就会给出一份
+    # "记录了但没跑过"的配置指纹——而这两种配置长得几乎一样。
+    live_config = None
+    model_identity = "FakeLLM"
+    llm_payload: dict[str, Any] = {}
+    if fake_llm_script_dir is None:
+        try:
+            live_config = _effective_llm_config(alias=llm_model, platform=glm_platform)
+            llm_payload = cast("dict[str, Any]", redact(live_config.model_dump(mode="json")))
+            model_identity = role_model_identity(live_config)
+        except (FileNotFoundError, ValueError, KeyError) as exc:
+            raise typer.BadParameter(f"LLM 配置读取失败：{exc}") from exc
+        currency_gaps = live_config.check().currency_unmatched
+        if currency_gaps:
+            detail = ", ".join(f"{alias}({currency})" for alias, currency in currency_gaps.items())
+            raise typer.BadParameter(
+                f"角色所用模型的单价币种与预算币种 {live_config.budget_currency} 不一致且缺汇率："
+                f"{detail}。请在 configs/llm.yaml 的 exchange_rates 里声明该币种汇率，"
+                "或把 budget_currency 改成同一币种——按 1.0 混算出来的总额是错的，不接受。"
             )
-            if settings.resolved_llm_config.is_file()
-            else {}
-        )
-    except (OSError, ValueError) as exc:
-        raise typer.BadParameter(f"LLM 配置读取失败：{exc}") from exc
 
     bench_config = load_bench_config(
         config,
         seeds_override=parsed_seeds,
         max_total_cost_override=max_total_cost,
         max_in_flight_override=max_in_flight,
-        model_identity="FakeLLM" if fake_llm_script_dir is not None else "configs/llm.yaml",
+        model_identity=model_identity,
         provider_config=provider_config_hash(llm_payload),
     )
     if bench_config.suite != suite:
@@ -968,6 +1171,27 @@ def bench(
     else:
         loaded_fixtures = list(loaded.fixtures)
 
+    if task:
+        # ``--task`` 只是把同一套完整流程缩小到几个 fixture，不是第二条评测通路：
+        # 分母变小了，但 fixture 校验、预算、Docker 后端与报告口径全都照旧。
+        wanted = {item.strip() for item in task if item.strip()}
+        known = {item.task_id for item in loaded_fixtures}
+        unknown = sorted(wanted - known)
+        if unknown:
+            typer.echo(
+                f"[UNKNOWN_TASK] {', '.join(unknown)}；当前套件可用 fixture："
+                + ", ".join(sorted(known)[:10])
+                + (f" …（共 {len(known)} 个）" if len(known) > 10 else ""),
+                err=True,
+            )
+            raise typer.Exit(code=2)
+        loaded_fixtures = [item for item in loaded_fixtures if item.task_id in wanted]
+        typer.echo(
+            f"[task filter] 只派发 {len(loaded_fixtures)} 个 fixture × "
+            f"{len(parsed_seeds)} seed；报告分母随之缩小。",
+            err=True,
+        )
+
     sandbox_factory = _bench_sandbox_factory(fake_sandbox=fake_sandbox)
     eval_work_root = work_root / "evaluation"
     evaluator = GoldEvaluator(
@@ -976,7 +1200,10 @@ def bench(
         work_root=eval_work_root,
     )
     providers = _bench_provider_factory(
-        fake_llm_script_dir=fake_llm_script_dir, allow_live_llm=allow_live_llm
+        fake_llm_script_dir=fake_llm_script_dir,
+        allow_live_llm=allow_live_llm,
+        live_config=live_config,
+        budget_currency=bench_config.budget_currency,
     )
     runner = BenchmarkRunner(
         config=bench_config,
@@ -1086,18 +1313,25 @@ def _bench_sandbox_factory(*, fake_sandbox: bool) -> Any:
     return factory
 
 
-def _bench_provider_factory(*, fake_llm_script_dir: Path | None, allow_live_llm: bool) -> Any:
+def _bench_provider_factory(
+    *,
+    fake_llm_script_dir: Path | None,
+    allow_live_llm: bool,
+    live_config: LLMConfig | None,
+    budget_currency: str,
+) -> Any:
     from codepilot.eval.assembly import ProviderBundle
-    from codepilot.llm.config import load_llm_config
 
     if fake_llm_script_dir is None:
         assert allow_live_llm
-        live_config = load_llm_config(get_settings().resolved_llm_config)
+        assert live_config is not None  # bench 里两者同时成立；缺一份就是装配错误
 
         def live_providers(_fixture: Any, _seed: int) -> ProviderBundle:
             # 每个 (task, seed) 一份新的 ProviderBundle：共用一份会让两个任务写同一个
             # Usage 对象，于是 A 的费用记到 B 头上——顺序跑看不出来，只在并发下出现。
-            return ProviderBundle.live(live_config)
+            # budget_currency 用运行配置的值而不是默认 CNY：Z.AI 以 USD 计价时，
+            # 按 CNY 归集会把每个数都变成口径不明的数。
+            return ProviderBundle.live(live_config, budget_currency=budget_currency)
 
         return live_providers
 
