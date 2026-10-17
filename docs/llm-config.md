@@ -133,3 +133,42 @@ E-10（39 题真实跑批）、P-24、G-37 仍为 **NOT RUN**，
 密钥只写入被忽略的 `.env`（`git check-ignore .env` 返回 0，`git ls-files` 不含 `.env`）；
 提交物、冒烟报告与异常文本中均无密钥值——本轮还修掉了一条真实存在的泄漏路径：
 服务商 401 错误体会把密钥回显在 message 字符串里，而按键名脱敏的 `redact()` 拦不住它。
+
+## 2026-10-17 逐请求可观测性与录制接线（追加，不修改上面的历史记录）
+
+第一次真实 GLM 单任务实验暴露出"账目问不出答案"：`events.jsonl` 里 16 条事件的
+`usage` 全是 `null`，`Usage.by_model` 只有一个聚合项，`llm_calls.jsonl` 根本不存在。
+三条原因都是接线，不是能力：
+
+1. `LLMRegistry` 从来没拿到 `EventSink`。真实 provider 在**派发前**就装配好了，那时
+   还没有 `run_id` 与 artifact 目录。现在由 `LLMRegistry.bind_run(...)` /
+   `ProviderBundle.bind_run(...)` 在 `InferenceAssembly.run()` 里晚绑定。
+2. `settings.record_llm` 只被 CLI 打印过一次，从没接到 `LLMRegistry` 的真实路径。
+   现在 `ProviderBundle.live(..., record_llm=True)` → `LLMMode.RECORD`，落点是每个 run
+   自己的 `llm_calls.jsonl`。**未绑定落点时 `RecordingLLM` 拒绝发请求**，不产生
+   "花了钱但没录下来"的调用。
+3. 逐请求元数据此前完全没有这一层。新增 `codepilot/llm/calls.py`：默认就写的
+   `llm_requests.jsonl`（每个 run 一份），每条含 `call_id` / `run_id` / `task_id` /
+   `seq` / `role` / `node` / `iteration` / `purpose` / `provider` / `model` /
+   `attempt` / `correction` / `status` / `finish_reason` / token 四项 / `cost` /
+   `cost_known` / `currency` / `error_type` / `http_status` / `tool_calls` / `duration_ms`。
+
+口径上有四条不可含糊：
+
+- **模型别名与角色是两个维度**。`Usage` 同时维护 `by_model` 与 `by_role`，
+  `role_totals_reconcile()` 自检两者与总账一致；一个 run 里 planner 与 coder 常常是
+  同一个模型，只有 `by_model` 就答不出"贵在哪个环节"。
+- **语义纠正重试与服务商 HTTP 重试分开计**。前者写进 `LLMRequest.attempt` /
+  `correction` 与 `RepairState.plan_corrections`，后者只存在于 provider 的
+  `attempts` / `unacknowledged`。
+- **未知费用不记为 0**。`cost_known=False` 的请求单独计数
+  (`Usage.cost_unknown_calls`)，`cost_is_lower_bound` 为真时总费用只能报成下界。
+- **不同币种不相加**。往一个 `Usage` 里写另一种币种的费用直接抛错。
+
+默认**不**保存：API key、Authorization 头、原始 prompt、未脱敏工具参数、
+`reasoning_content`、隐藏测试内容、gold patch。逐请求日志只有元数据；完整请求体只在
+显式 `record_llm` 时写，并照旧过 `redact()`。恢复进程会按已有行数续接 `seq`，
+`Deps.restore_usage` 改为逐字段覆盖（含 `by_role` 与未知费用计数），避免恢复后
+分角色账目与总账脱节。
+
+细节与验证见 [notes/glm-live-hardening.md](notes/glm-live-hardening.md) §4。
