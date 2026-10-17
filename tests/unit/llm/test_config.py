@@ -281,3 +281,47 @@ def test_editing_yaml_changes_model_price_and_request_options(tmp_path: Path) ->
     assert first.price is not None and first.price.input_per_mtok == 1.0
     assert second.price is not None and second.price.input_per_mtok == 3.0
     assert second.price.output_per_mtok == 4.0
+
+
+def test_duplicate_alias_in_yaml_is_rejected(tmp_path: Path) -> None:
+    """同一个别名写两遍时，PyYAML 会静默让后一份覆盖前一份。
+
+    在这个文件里那意味着"跑的模型与单价"由文件里谁排在后面决定。本轮开发中真的
+    写出过一份重复的 GLM 别名，所以这里设了加载期闸门，而不是靠人记得检查。
+    """
+    path = tmp_path / "llm.yaml"
+    path.write_text(
+        """
+providers:
+  p: {base_url: "https://p.test/v1", api_key_env: P_KEY}
+models:
+  m: {provider: p, model: first-model}
+  m: {provider: p, model: second-model}
+roles: {coder: m}
+""",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="重复的键"):
+        load_llm_config(path)
+
+
+def test_duplicate_provider_key_is_rejected(tmp_path: Path) -> None:
+    path = tmp_path / "llm.yaml"
+    path.write_text(
+        """
+providers:
+  p: {base_url: "https://a.test/v1", api_key_env: P_KEY}
+  p: {base_url: "https://b.test/v1", api_key_env: P_KEY}
+models:
+  m: {provider: p, model: real}
+roles: {coder: m}
+""",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="重复的键"):
+        load_llm_config(path)
+
+
+def test_repository_config_has_no_duplicate_keys() -> None:
+    """仓库里这份必须自己过这道闸。"""
+    load_llm_config(REPO_ROOT / "configs" / "llm.yaml")
