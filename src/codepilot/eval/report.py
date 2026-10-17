@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from codepilot.eval.attribution import Attribution
 from codepilot.eval.metrics import (
     SuiteMetrics,
     aggregate_metric_values,
@@ -34,8 +35,12 @@ __all__ = [
     "MANIFEST_JSON",
     "METRICS_JSON",
     "RESULTS_JSONL",
+    "SCHEMA_VERSION",
     "SUMMARY_MD",
     "ReportPaths",
+    "build_metrics",
+    "evidence_classification",
+    "render_summary",
     "write_benchmark_report",
 ]
 
@@ -43,6 +48,10 @@ RESULTS_JSONL = "results.jsonl"
 METRICS_JSON = "metrics.json"
 SUMMARY_MD = "summary.md"
 MANIFEST_JSON = "manifest.json"
+
+#: v2 = Harness Hardening：每行带归因，并区分"runner 跑完了"与"独立评测真的判定过"。
+#: v1（Phase 10 的产物）不回写、不重算；读入时由 ``TaskRecord.from_dict`` 显式映射。
+SCHEMA_VERSION = 2
 
 _Evidence = tuple[str, ...]
 
@@ -61,11 +70,16 @@ def evidence_classification(run: BenchmarkRun) -> dict[str, Any]:
 
     刻意把"不是"写在前面：FakeLLM 的脚本恰好解出全部合成任务，也只证明图与评测
     链路能跑通，不证明真实模型有同等能力。这一条不写清楚，报告越详细越有害。
+
+    ``evaluation_coverage`` 只看**独立评测真的判定过**的任务。外层 runner 的
+    ``completed`` 说明不了模型有没有被评到——首次真实 GLM 运行就是
+    ``completed`` + 空补丁 + 一次 Harness 崩溃，却被报告成一次普通的"模型未解决"。
     """
     records = run.records
     simulated = {record.simulated_llm for record in records}
     docker = {record.real_docker_evaluation for record in records}
-    completed = [item for item in records if item.counted]
+    evaluated = [item for item in records if item.effectively_evaluated]
+    harness = [item for item in records if item.attribution == Attribution.HARNESS_ERROR.value]
     return {
         "engine": "FakeLLM 工程 smoke"
         if simulated == {True}
@@ -78,15 +92,30 @@ def evidence_classification(run: BenchmarkRun) -> dict[str, Any]:
         "real_docker_evaluation": all(docker) if docker else False,
         "evaluation_coverage": (
             "full"
-            if len(completed) == run.declared_observations and run.declared_observations
+            if len(evaluated) == run.declared_observations and run.declared_observations
             else "partial"
         ),
+        "dispatched_observations": len(records),
+        "runner_completed": sum(1 for item in records if item.counted),
+        "effectively_evaluated": len(evaluated),
+        "harness_errors": len(harness),
+        "unevaluated": len(records) - len(evaluated),
         "verification_modes": sorted({item.verification_mode for item in records}),
         "unknown_cost_tasks": run.ledger["unknown_cost_tasks"],
-        "claims_model_capability": False,
+        # 只有"真实模型 + 每一条都拿到独立评测判定"才允许声称这是模型能力读数。
+        # FakeLLM 的脚本按 gold 生成，全对也只证明链路通；把它算成能力结论是
+        # 本轮最容易造成、也最难事后纠正的误读。
+        "claims_model_capability": bool(records)
+        and simulated == {False}
+        and len(evaluated) == len(records),
         "claim_note": (
             "本报告不构成模型修复能力结论。FakeLLM 按脚本应答，其成功率衡量的是评测"
             "基础设施；真实模型效果验收（E-10）本轮 NOT RUN。"
+            if simulated != {False}
+            else (
+                "真实模型批次：只有拿到独立评测判定的任务才是模型能力读数；"
+                "Harness / 沙箱 / 预算截停的任务仍留在端到端分母里，但不算作模型修复失败。"
+            )
         ),
     }
 
@@ -115,10 +144,12 @@ def build_metrics(run: BenchmarkRun) -> dict[str, Any]:
         if record.execution_state == ExecutionState.EVALUATION_ERROR.value:
             bucket["env_errors"] += 1
     return {
+        "schema_version": SCHEMA_VERSION,
         "integrity": run.integrity,
         "declared_observations": run.declared_observations,
         "recorded_observations": len(run.records),
         "execution_state_counts": counts,
+        "attribution_counts": run.attribution_counts(),
         "budget": run.ledger,
         "overall": overall.as_dict(),
         "per_seed": {str(seed): value.as_dict() for seed, value in by_seed.items()},
@@ -131,7 +162,11 @@ def build_metrics(run: BenchmarkRun) -> dict[str, Any]:
             "note": "配对 bootstrap（Phase 12）用的任务级二元结果；这里只给原始数据，不算区间。",
             "per_seed_task_outcomes": {
                 str(seed): [
-                    {"task_id": item.task_id, "resolved": item.resolved}
+                    {
+                        "task_id": item.task_id,
+                        "resolved": item.resolved,
+                        "attribution": item.attribution.value,
+                    }
                     for item in outcomes
                     if item.seed == seed
                 ]
@@ -143,13 +178,15 @@ def build_metrics(run: BenchmarkRun) -> dict[str, Any]:
             "denominators_visible": True,
             "undefined_ratios_rendered_as_none": True,
             "environment_failures_in_denominator": True,
+            "historical_runs_not_rewritten": True,
+            "harness_errors_kept_in_end_to_end_denominator": True,
         },
     }
 
 
 def build_manifest(run: BenchmarkRun) -> dict[str, Any]:
     return {
-        "schema_version": 1,
+        "schema_version": SCHEMA_VERSION,
         "run": run.identity,
         "suite": {
             "name": run.config.suite,
@@ -179,6 +216,7 @@ def render_summary(run: BenchmarkRun, metrics: dict[str, Any]) -> str:
     repair = metrics["overall"]["repair"]
     cost = metrics["overall"]["cost"]
     iterations = metrics["overall"]["iterations"]
+    attribution = metrics["overall"]["attribution"]
     lines: list[str] = [
         f"# Phase 10 Synthetic Benchmark —— {evidence['engine']}",
         "",
@@ -195,14 +233,46 @@ def render_summary(run: BenchmarkRun, metrics: dict[str, Any]) -> str:
         f"- 开始 / 结束: {run.started_at} / {run.finished_at}",
         f"- 数据完整性: **{metrics['integrity']}**"
         f"（记录 {metrics['recorded_observations']}/{metrics['declared_observations']}）",
+        f"- 产物格式: results.jsonl v{metrics['schema_version']}",
         "",
         "## 证据边界",
         "",
         f"- 推理引擎: {evidence['engine']}（simulated={evidence['engine_is_simulated']}）",
         f"- 评测是否真实 Docker: {evidence['real_docker_evaluation']}",
         f"- 评测覆盖: {evidence['evaluation_coverage']}",
+        f"- 派发 / runner 跑完 / **真的拿到独立评测**："
+        f"{evidence['dispatched_observations']} / {evidence['runner_completed']} / "
+        f"{evidence['effectively_evaluated']}（未评测 {evidence['unevaluated']}）",
+        f"- Harness 自身错误: **{evidence['harness_errors']}**"
+        "（它们仍计入端到端分母，但不算模型修复失败）",
         f"- 验证模式分布: {', '.join(f'`{item}`' for item in evidence['verification_modes'])}",
         f"- 费用未知的任务数: {evidence['unknown_cost_tasks']}",
+        "",
+        "## 失败归因（谁错了）",
+        "",
+        "| 归因 | 数量 | 占全部派发 |",
+        "| --- | --- | --- |",
+    ]
+    total = attribution["total_tasks"]
+    for name, count in attribution["counts"].items():
+        share = f"{count / total * 100:.2f}%" if total else "n/a"
+        lines.append(f"| `{name}` | {count} | {share} |")
+    lines += [
+        "",
+        f"- 端到端解决率（分母 = 全部派发）: {_pct(attribution['end_to_end_resolved'])} | "
+        f"{_frac(attribution['end_to_end_resolved'])}",
+        f"- 条件解决率（分母 = 拿到独立评测判定的任务）: "
+        f"{_pct(attribution['conditional_resolved'])} | {_frac(attribution['conditional_resolved'])}",
+        f"- 有效评测覆盖率: {_pct(attribution['evaluation_coverage'])} | "
+        f"{_frac(attribution['evaluation_coverage'])}",
+        f"- Harness 错误率: {_pct(attribution['harness_error_rate'])}；"
+        f"环境错误率: {_pct(attribution['environment_error_rate'])}；"
+        f"沙箱错误率: {_pct(attribution['sandbox_error_rate'])}",
+        f"- 模型计划拒绝率: {_pct(attribution['plan_rejection_rate'])}；"
+        f"模型输出错误率: {_pct(attribution['model_output_error_rate'])}",
+        "",
+        "> 条件解决率只有在覆盖率与它自己的分母一起出现时才是模型读数；"
+        "端到端解决率回答的是「这批任务里有多少真的被修好了」，包含没跑成的。",
         "",
         "## 修复指标（分母含环境失败任务）",
         "",
@@ -287,8 +357,15 @@ def _limitations(run: BenchmarkRun, evidence: dict[str, Any]) -> list[str]:
         items.append("本批评测未使用真实 Docker 执行，因此不构成交付意义上的评测结论。")
     if evidence["evaluation_coverage"] != "full":
         items.append(
-            f"评测只覆盖了部分派发（{run.integrity}）；被截停或未执行的任务已计入总体分母但无结论。"
+            f"评测只覆盖了部分派发（{run.integrity}）；未评测的任务已计入总体分母但没有模型能力结论。"
         )
+    if evidence["harness_errors"]:
+        items.append(
+            f"其中 {evidence['harness_errors']} 个任务是 Harness 自身出错（不是模型修复失败）；"
+            "这批观测没有测量到模型的修复能力，修复这些缺陷后必须重跑才能得出能力结论。"
+        )
+    if not evidence["claims_model_capability"]:
+        items.append("并非每个派发都拿到了独立评测判定，因此本批不构成完整口径的模型能力结论。")
     return items
 
 

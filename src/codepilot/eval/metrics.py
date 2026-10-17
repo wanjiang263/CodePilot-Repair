@@ -28,6 +28,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any, ClassVar
 
+from codepilot.eval.attribution import Attribution, EvaluationState
 from codepilot.schemas.enums import RunStatus
 
 __all__ = [
@@ -44,6 +45,7 @@ __all__ = [
     "VerificationMode",
     "agent_claims_success",
     "aggregate_metric_values",
+    "attribution_metrics",
     "cost_metrics",
     "file_recall_at_k",
     "function_recall_at_k",
@@ -362,7 +364,16 @@ class TaskOutcome:
     iterations: int | None = None
     stop_reason: str | None = None
     environment_failure: bool = False
+    harness_failure: bool = False
+    """Harness 自己出错导致这次观测根本没有评到模型。**不**等于环境失败。"""
+
     verification_mode: VerificationMode = VerificationMode.NONE
+
+    # ---- 归因（Harness Hardening）----
+    attribution: Attribution = Attribution.EVALUATION_NOT_RUN
+    evaluation_state: EvaluationState = EvaluationState.NOT_RUN
+    error_class: str | None = None
+    error_origin: str | None = None
 
     # ---- 成本 ----
     input_tokens: int | None = None
@@ -569,6 +580,82 @@ def reliability_metrics(outcomes: Sequence[TaskOutcome]) -> dict[str, Any]:
 
 
 @dataclass(frozen=True, slots=True)
+class AttributionMetrics:
+    """归因分布 + 两套解决率 + 有效评测覆盖率。
+
+    两个比例**必须同时**看，只看一个就会得出错的结论：
+
+    * **端到端解决率**分母 = 全部派发（含 Harness 崩溃、超预算、没评成的）。
+      这是"这批任务里有多少真的被修好了"。
+    * **条件解决率**分母 = 实际拿到独立评测判定的任务。
+      这是"在评测真的发生过的那些任务里，模型修好了多少"——它是唯一可以直接
+      当作模型能力读数的一项，且必须带着覆盖率一起报（覆盖率 30% 时的 80%
+      条件解决率完全可能是幸存者偏差）。
+
+    ``environment_failures`` 与 ``harness_failures`` 分开：一次 Docker 镜像坏了
+    与一次我们自己的代码抛了异常，是两类不同的责任，也不该混进同一个错误率。
+    """
+
+    total_tasks: int
+    counts: dict[str, int]
+    end_to_end_resolved: Ratio
+    conditional_resolved: Ratio
+    evaluation_coverage: Ratio
+    harness_error_rate: Ratio
+    environment_error_rate: Ratio
+    sandbox_error_rate: Ratio
+    plan_rejection_rate: Ratio
+    model_output_error_rate: Ratio
+    unevaluated_tasks: int
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "total_tasks": self.total_tasks,
+            "counts": dict(sorted(self.counts.items())),
+            "end_to_end_resolved": self.end_to_end_resolved.as_dict(),
+            "conditional_resolved": self.conditional_resolved.as_dict(),
+            "evaluation_coverage": self.evaluation_coverage.as_dict(),
+            "harness_error_rate": self.harness_error_rate.as_dict(),
+            "environment_error_rate": self.environment_error_rate.as_dict(),
+            "sandbox_error_rate": self.sandbox_error_rate.as_dict(),
+            "plan_rejection_rate": self.plan_rejection_rate.as_dict(),
+            "model_output_error_rate": self.model_output_error_rate.as_dict(),
+            "unevaluated_tasks": self.unevaluated_tasks,
+        }
+
+
+def attribution_metrics(outcomes: Sequence[TaskOutcome]) -> AttributionMetrics:
+    """按归因把一次批次切开。纯计数，不做任何"排除后更好看"的处理。"""
+    _check_unique_identity(outcomes)
+    total = len(outcomes)
+    counts: dict[str, int] = {}
+    for item in outcomes:
+        counts[item.attribution.value] = counts.get(item.attribution.value, 0) + 1
+
+    def _share(*attributions: Attribution) -> Ratio:
+        wanted = {item.value for item in attributions}
+        return _ratio([item.attribution.value in wanted for item in outcomes])
+
+    evaluated_flags = [item.evaluation_state is EvaluationState.EVALUATED for item in outcomes]
+    conditional = [
+        item.resolved is True for item, flag in zip(outcomes, evaluated_flags, strict=True) if flag
+    ]
+    return AttributionMetrics(
+        total_tasks=total,
+        counts=counts,
+        end_to_end_resolved=_ratio([item.resolved is True for item in outcomes]),
+        conditional_resolved=_ratio(conditional),
+        evaluation_coverage=_ratio(evaluated_flags),
+        harness_error_rate=_share(Attribution.HARNESS_ERROR),
+        environment_error_rate=_share(Attribution.ENV_ERROR),
+        sandbox_error_rate=_share(Attribution.SANDBOX_ERROR),
+        plan_rejection_rate=_share(Attribution.MODEL_INVALID_PLAN),
+        model_output_error_rate=_share(Attribution.MODEL_OUTPUT_ERROR),
+        unevaluated_tasks=sum(1 for flag in evaluated_flags if not flag),
+    )
+
+
+@dataclass(frozen=True, slots=True)
 class SummaryStatistics:
     """一组数值分布的三个位置统计量。"""
 
@@ -729,6 +816,7 @@ class SuiteMetrics:
     iterations: SummaryStatistics
     cost: CostMetrics
     reliability: dict[str, Any]
+    attribution: AttributionMetrics
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -740,6 +828,7 @@ class SuiteMetrics:
             "iterations": self.iterations.as_dict(),
             "cost": self.cost.as_dict(),
             "reliability": self.reliability,
+            "attribution": self.attribution.as_dict(),
         }
 
 
@@ -768,6 +857,7 @@ def summarize(
         iterations=iterations_metrics(outcomes),
         cost=cost_metrics(outcomes),
         reliability=reliability_metrics(outcomes),
+        attribution=attribution_metrics(outcomes),
     )
 
 

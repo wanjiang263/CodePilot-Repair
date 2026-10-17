@@ -42,7 +42,9 @@ from typing import Any, ClassVar
 
 from codepilot import __version__ as CODEPILOT_VERSION  # noqa: N812
 from codepilot.artifacts import ArtifactStore
+from codepilot.errors import classify_exception
 from codepilot.eval.assembly import InferenceAssembly, InferenceOutcome, ProviderBundle
+from codepilot.eval.attribution import Attribution, EvaluationState, attribute_run
 from codepilot.eval.evaluation import EvaluationVerdict, GoldEvaluator, PatchEvaluation
 from codepilot.eval.metrics import LocalizationSample, TaskOutcome, VerificationMode
 from codepilot.eval.synthetic import SyntheticFixture
@@ -71,6 +73,58 @@ def _canonical(value: Any) -> str:
 
 def _sha(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+#: ``results.jsonl`` 的当前行格式版本。Phase 10 的原始记录没有这个字段，读回来时
+#: 由 :func:`_legacy_attribution` 显式映射成归因 v2 —— 不做映射就等于假设
+#: "老记录里的 NOT_RESOLVED 都是模型真的没修好"，而那批数据里恰好混着 Harness 崩溃。
+RECORD_VERSION = 2
+
+#: 旧格式里"评测确实给出了可判定结论"的那些 ``evaluation_status`` 取值。
+_LEGACY_DECIDABLE = frozenset(
+    {
+        EvaluationVerdict.RESOLVED.value,
+        EvaluationVerdict.NOT_RESOLVED.value,
+        EvaluationVerdict.PATCH_APPLY_FAILED.value,
+        EvaluationVerdict.COLLECTION_ERROR.value,
+    }
+)
+
+
+def _legacy_attribution(data: dict[str, Any]) -> dict[str, Any]:
+    """把 Phase 10 的 v1 记录映射到 v2 的归因字段（只补字段，不改动原值）。
+
+    历史产物一律**不回写**：这是读的时候做的翻译，为的是同一份 journal 能被新旧两套
+    口径解释，而不是让旧数字看起来像被追溯修正过。
+
+    v1 里有两类行在新口径下其实"没有有效评测"，必须映射出来而不是照抄：
+    补丁为空时评测器仍然跑了整套 gold 套件，测的是坏掉的基线而不是模型的补丁；
+    而那次真实 GLM 崩溃正是这种行（``completed`` + 空补丁 + ``workflow_error``）。
+    """
+    verdict = str(data.get("evaluation_status") or "")
+    empty_patch = bool(data.get("empty_patch"))
+    if empty_patch:
+        state = EvaluationState.NOT_RUN
+    elif verdict in _LEGACY_DECIDABLE:
+        state = EvaluationState.EVALUATED
+    elif verdict in {EvaluationVerdict.ENV_ERROR.value, EvaluationVerdict.SANDBOX_ERROR.value}:
+        state = EvaluationState.ERROR
+    else:
+        state = EvaluationState.NOT_RUN
+    attribution = attribute_run(
+        execution_state=str(data.get("execution_state") or ""),
+        evaluation_state=state,
+        resolved=None if empty_patch else data.get("resolved"),
+        stop_reason=data.get("stop_reason"),
+        status=data.get("agent_status"),
+        patch_produced=not empty_patch and verdict != "NOT_EVALUATED",
+        claims_success=bool(data.get("agent_claims_success")),
+    )
+    return {
+        "record_version": 1,
+        "attribution": attribution.value,
+        "evaluation_state": state.value,
+    }
 
 
 def code_identity(root: Path | None = None) -> dict[str, Any]:
@@ -335,6 +389,18 @@ class TaskRecord:
     finished_at: str = ""
     localization_files: tuple[str, ...] = ()
     localization_symbols: tuple[str, ...] = ()
+    # ---- Harness Hardening 追加字段：全部带默认值，旧 journal 行照常可读 ----
+    record_version: int = RECORD_VERSION
+    attribution: str = Attribution.EVALUATION_NOT_RUN.value
+    error_class: str | None = None
+    error_origin: str | None = None
+    evaluation_state: str = EvaluationState.NOT_RUN.value
+    agent_status: str | None = None
+    plan_corrections: int = 0
+    plan_tool_audit: dict[str, Any] = field(default_factory=dict)
+    llm_requests: dict[str, Any] = field(default_factory=dict)
+    checkpointed: bool = False
+    resumed_from_checkpoint: bool = False
     # 推理侧自己给出的定位候选（有序、按模型排名）。只存预测，不存 gold：gold 一旦落进
     # journal 或 ``results.jsonl``，续跑与复盘就会把"该改哪个文件"重新喂进任何读这些
     # 产物的环节。gold 在报告时由评测侧现算。
@@ -349,12 +415,33 @@ class TaskRecord:
         data = dict(payload)
         for key in ("error_details", "localization_files", "localization_symbols"):
             data[key] = tuple(data.get(key, ()))
+        if "record_version" not in data:
+            data.update(_legacy_attribution(dict(data)))
         return TaskRecord(**data)
 
     @property
     def counted(self) -> bool:
         """这次观测是否产生了可用于成功率判断的结论。"""
         return self.execution_state == ExecutionState.COMPLETED.value
+
+    @property
+    def effectively_evaluated(self) -> bool:
+        """补丁是否真的被独立评测判定过。
+
+        与 :attr:`counted` 的差别就是本轮修复的核心：``completed`` 只说明 runner
+        跑完了这一格；一次被 Harness 崩溃掐断、连补丁都没有的运行**没有**给出任何
+        关于模型修复能力的结论。把 ``counted`` 当成"评过了"会凭空造出分母。
+        """
+        return self.evaluation_state == EvaluationState.EVALUATED.value
+
+    @property
+    def infra_failure(self) -> bool:
+        return self.attribution in {
+            Attribution.HARNESS_ERROR.value,
+            Attribution.SANDBOX_ERROR.value,
+            Attribution.ENV_ERROR.value,
+            Attribution.EVALUATION_ERROR.value,
+        }
 
     def metric_view(self, localization: LocalizationSample | None = None) -> TaskOutcome:
         """转成指标层输入。定位结论由评测侧算好后传入，这里不碰 gold。"""
@@ -369,10 +456,13 @@ class TaskRecord:
             invalid_patch=self.invalid_patch,
             iterations=self.iterations,
             stop_reason=self.stop_reason,
-            environment_failure=(
-                self.execution_state == ExecutionState.EVALUATION_ERROR.value
-                or self.execution_state == ExecutionState.INFERENCE_ERROR.value
-            ),
+            attribution=Attribution(self.attribution),
+            evaluation_state=EvaluationState(self.evaluation_state),
+            error_class=self.error_class,
+            error_origin=self.error_origin,
+            environment_failure=self.attribution
+            in {Attribution.SANDBOX_ERROR.value, Attribution.ENV_ERROR.value},
+            harness_failure=self.attribution == Attribution.HARNESS_ERROR.value,
             verification_mode=VerificationMode(self.verification_mode),
             input_tokens=self.input_tokens,
             output_tokens=self.output_tokens,
@@ -481,6 +571,13 @@ class BenchmarkRun:
             out[record.execution_state] = out.get(record.execution_state, 0) + 1
         return dict(sorted(out.items()))
 
+    def attribution_counts(self) -> dict[str, int]:
+        """按归因计数。分母永远是全部记录，包括没跑成与没评成的。"""
+        out: dict[str, int] = {}
+        for record in self.records:
+            out[record.attribution] = out.get(record.attribution, 0) + 1
+        return dict(sorted(out.items()))
+
     def metric_inputs(self) -> list[TaskOutcome]:
         outcomes: list[TaskOutcome] = []
         for record in self.records:
@@ -532,10 +629,34 @@ class BenchmarkRunner:
         self._code = code_identity()
         self._started_at = datetime.now(UTC).isoformat()
         self._run_id = f"{config.run_label}-{uuid.uuid4().hex[:12]}"
-        self._journal = (
-            ResultJournal(Path(journal_directory) / "journal.sqlite") if journal_directory else None
-        )
         self._journal_directory = Path(journal_directory) if journal_directory else None
+        if self._journal_directory is not None:
+            self._run_id = self._inherited_run_id(self._journal_directory) or self._run_id
+        self._journal = (
+            ResultJournal(self._journal_directory / "journal.sqlite")
+            if self._journal_directory
+            else None
+        )
+
+    def _inherited_run_id(self, directory: Path) -> str | None:
+        """续跑时沿用原来那批 run 的 run_id —— 节点级恢复靠它找到旧现场。
+
+        推理目录名里带着 run_id，checkpoint 路径也在同一个 run 目录下；换一个新
+        run_id 就等于每次都从头开一块新现场，"续跑"只会停留在任务级。配置指纹
+        不一致时拒绝继承：那批现场属于另一份配置，接上去跑出来的是混合结果。
+        """
+        manifest = directory / "manifest.json"
+        if not manifest.is_file():
+            return None
+        try:
+            payload = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+        run = payload.get("run") or {}
+        if payload.get("config", {}).get("hash") != self._config.config_hash:
+            return None
+        inherited = run.get("run_id")
+        return str(inherited) if inherited else None
 
     # ------------------------------------------------------------------ 入口
 
@@ -641,36 +762,46 @@ class BenchmarkRunner:
         try:
             outcome = self._assembly_factory(fixture, seed).run(run_id=run_id, seed=seed)
         except Exception as exc:  # 单任务失败不能带走整批
+            failure = classify_exception(exc)
             self._ledger.settle(None)
             return self._record(
                 fixture,
                 identity,
                 state=ExecutionState.INFERENCE_ERROR,
                 run_id=run_id,
-                errors=(f"{type(exc).__name__}: {exc}",),
+                errors=(failure.reason(),),
+                error_class=failure.failure_class.value,
+                error_origin=failure.origin.value,
             )
-        try:
-            final = self._evaluator.evaluate(
-                fixture, outcome.final_patch, patch_source="model_final", run_id=run_id
-            )
-            first = None
-            if outcome.first_attempt_patch is not None:
-                first = self._evaluator.evaluate(
-                    fixture,
-                    outcome.first_attempt_patch,
-                    patch_source="model_first_attempt",
-                    run_id=run_id,
+        # **空补丁不做独立评测。** 空补丁不是"一份没修好的补丁"，而是"没有补丁"：
+        # 拿它去跑一遍 gold 套件，测的是坏掉的基线，花的却是真实 Docker 的时间与钱，
+        # 而且产出一个看起来像结论的 NOT_RESOLVED。首次真实 GLM 运行就是这样把一次
+        # Harness 崩溃记成"模型未解决"的。
+        evaluation: PatchEvaluation | None = None
+        first: PatchEvaluation | None = None
+        if outcome.final_patch.strip():
+            try:
+                evaluation = self._evaluator.evaluate(
+                    fixture, outcome.final_patch, patch_source="model_final", run_id=run_id
                 )
-        except Exception as exc:  # 评测失败要记录，而不是整批退出
-            self._ledger.settle(outcome.usage.cost)
-            return self._record(
-                fixture,
-                identity,
-                state=ExecutionState.EVALUATION_ERROR,
-                run_id=run_id,
-                outcome=outcome,
-                errors=(f"{type(exc).__name__}: {exc}",),
-            )
+                if outcome.first_attempt_patch is not None:
+                    first = self._evaluator.evaluate(
+                        fixture,
+                        outcome.first_attempt_patch,
+                        patch_source="model_first_attempt",
+                        run_id=run_id,
+                    )
+            except Exception as exc:  # 评测失败要记录，而不是整批退出
+                failure = classify_exception(exc)
+                self._ledger.settle(outcome.usage.cost)
+                return self._record(
+                    fixture,
+                    identity,
+                    state=ExecutionState.EVALUATION_ERROR,
+                    run_id=run_id,
+                    outcome=outcome,
+                    errors=(failure.reason(),),
+                )
         self._ledger.settle(outcome.usage.cost if outcome.usage.llm_calls else None)
         record = self._record(
             fixture,
@@ -678,7 +809,7 @@ class BenchmarkRunner:
             state=ExecutionState.COMPLETED,
             run_id=run_id,
             outcome=outcome,
-            evaluation=final,
+            evaluation=evaluation,
             first_attempt=first,
         )
         assert self._journal is not None
@@ -696,10 +827,36 @@ class BenchmarkRunner:
         evaluation: PatchEvaluation | None = None,
         first_attempt: PatchEvaluation | None = None,
         errors: tuple[str, ...] = (),
+        error_class: str | None = None,
+        error_origin: str | None = None,
     ) -> TaskRecord:
         usage = outcome.usage if outcome else None
         metadata = fixture.metadata
         blocked = state in (ExecutionState.BUDGET_BLOCKED, ExecutionState.NOT_EXECUTED)
+        evaluation_state = (
+            EvaluationState.ERROR
+            if state is ExecutionState.EVALUATION_ERROR
+            else EvaluationState.EVALUATED
+            if evaluation is not None and evaluation.verdict.value in _LEGACY_DECIDABLE
+            else EvaluationState.NOT_RUN
+        )
+        effective_error_class = error_class or (outcome.error_class if outcome else None)
+        effective_error_origin = error_origin or (outcome.error_origin if outcome else None)
+        attribution = attribute_run(
+            execution_state=state.value,
+            evaluation_state=evaluation_state,
+            resolved=evaluation.resolved if evaluation is not None else None,
+            error_class=effective_error_class,
+            error_origin=effective_error_origin,
+            stop_reason=outcome.stop_reason if outcome else None,
+            status=outcome.status if outcome else None,
+            patch_produced=bool(outcome and outcome.final_patch.strip()),
+            claims_success=bool(outcome and outcome.agent_claims_success),
+        )
+        # 没做有效评测就没有"模型行不行"的结论：``resolved`` 必须是 None（未判定），
+        # 而不是 False。False 会被总体分母当成一次确定的失败，那正是把基础设施问题
+        # 记到模型头上的方式。
+        decided = evaluation_state is EvaluationState.EVALUATED
         return TaskRecord(
             task_id=metadata.task_id,
             seed=identity.seed,
@@ -719,11 +876,13 @@ class BenchmarkRunner:
                 evaluation.verdict.value
                 if evaluation is not None
                 else "NOT_EVALUATED"
-                if blocked or outcome is None
+                if blocked or outcome is None or evaluation_state is EvaluationState.NOT_RUN
                 else EvaluationVerdict.ENV_ERROR.value
             ),
-            resolved=None if blocked else (evaluation.resolved if evaluation else None),
-            first_attempt_resolved=(None if first_attempt is None else first_attempt.resolved),
+            resolved=evaluation.resolved if decided and evaluation is not None else None,
+            first_attempt_resolved=(
+                None if first_attempt is None or not decided else first_attempt.resolved
+            ),
             agent_claims_success=bool(outcome and outcome.agent_claims_success),
             empty_patch=bool(outcome and outcome.empty_patch),
             invalid_patch=bool(outcome and outcome.invalid_patch),
@@ -752,6 +911,17 @@ class BenchmarkRunner:
             usage_uncertain=bool(outcome.usage_uncertain) if outcome else True,
             localization_files=tuple(outcome.localization_files) if outcome else (),
             localization_symbols=tuple(outcome.localization_symbols) if outcome else (),
+            record_version=RECORD_VERSION,
+            attribution=attribution.value,
+            error_class=effective_error_class,
+            error_origin=effective_error_origin,
+            evaluation_state=evaluation_state.value,
+            agent_status=outcome.status if outcome else None,
+            plan_corrections=outcome.plan_corrections if outcome else 0,
+            plan_tool_audit=dict(outcome.plan_tool_audit) if outcome else {},
+            llm_requests=dict(outcome.llm_requests) if outcome else {},
+            checkpointed=bool(outcome.checkpointed) if outcome else False,
+            resumed_from_checkpoint=bool(outcome.resumed_from_checkpoint) if outcome else False,
             artifact_refs={
                 **({"inference_run_dir": Path(outcome.artifact_dir).name} if outcome else {}),
                 **(evaluation.artifact_refs if evaluation else {}),
@@ -859,6 +1029,8 @@ def assembly_factory(
     providers: Callable[[SyntheticFixture, int], ProviderBundle],
     evaluator: GoldEvaluator,
     budget: RepairBudget | None = None,
+    record_llm: bool = False,
+    checkpoint: bool = True,
 ) -> AssemblyFactory:
     """生产装配工厂。
 
@@ -866,6 +1038,10 @@ def assembly_factory(
     材料化一次：``materialize`` 拒绝写入非空目录，两边各建一份会在第二次跑同一个
     fixture 时直接抛错，而那份错误看起来像"磁盘上有个坏缓存"，其实只是两处各自
     为政。
+
+    ``checkpoint`` 默认开启：单任务真实实验最容易死在中途，而死了不能接上就意味着
+    每一次崩溃都要重新花一遍钱。任务级续跑（:class:`ResultJournal`）与节点级恢复是
+    两层不同的能力，journal 只记得"哪些任务已经有结论"，接不上图跑到一半的状态。
     """
     manager = WorkspaceManager(cache_root=cache_root)
 
@@ -880,6 +1056,8 @@ def assembly_factory(
             sandbox_factory=sandbox_factory,
             provider_bundle=providers(fixture, seed),
             budget=budget or RepairBudget(),
+            record_llm=record_llm,
+            checkpoint=checkpoint,
         )
 
     return factory
