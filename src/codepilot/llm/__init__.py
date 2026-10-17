@@ -10,6 +10,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 from codepilot.llm.base import LLMProvider
 from codepilot.llm.config import (
     KNOWN_ROLES,
@@ -35,8 +37,21 @@ from codepilot.llm.record import RecordingLLM
 from codepilot.llm.registry import LLMMode, LLMRegistry
 from codepilot.llm.replay import ReplayLLM
 from codepilot.llm.retry import RetryPolicy
-from codepilot.llm.structured import complete_structured
 from codepilot.llm.types import LLMRequest, LLMResponse, Message, ToolCall, ToolSpec
+
+if TYPE_CHECKING:
+    from codepilot.llm.structured import complete_structured
+
+
+def __getattr__(name: str) -> Any:
+    # errors imports llm.errors while its own exception types are still being
+    # defined. Loading structured eagerly would import those types back.
+    if name == "complete_structured":
+        from codepilot.llm.structured import complete_structured
+
+        return complete_structured
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = [
     "KNOWN_ROLES",
