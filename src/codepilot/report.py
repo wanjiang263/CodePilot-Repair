@@ -66,6 +66,21 @@ class RunReport(BaseModel):
     status: str
     stop_reason: str | None = None
     failure_reasons: list[str] = Field(default_factory=list)
+    error_class: str | None = None
+    """终态归因大类；``None`` = 没有失败（或这次运行早于归因机制）。"""
+
+    error_origin: str | None = None
+    """责任侧：model / provider / tool / workspace / harness。"""
+
+    plan_corrections: int = 0
+    """Planner 被重新问的次数。与服务商 HTTP 重试分开计。"""
+
+    plan_tool_audit: dict[str, Any] = Field(default_factory=dict)
+    """Planner 工具审计摘要。空 dict = **没采集到**，不等于"模型没调用工具"。"""
+
+    llm_requests: dict[str, Any] = Field(default_factory=dict)
+    """逐请求记录的按角色聚合（由装配层注入；纯图运行可以为空）。"""
+
     artifacts: dict[str, str] = Field(default_factory=dict)
     evidence: list[dict[str, Any]] = Field(default_factory=list)
     simulated_llm: bool = False
@@ -114,9 +129,12 @@ class RunReport(BaseModel):
         simulated_sandbox = bool(
             execution and execution.diagnostics.get("execution_backend") == "fake"
         )
-        evidence = [{"type": "tool_call", **item} for item in state.tool_calls] + [
-            {"type": "event", **item} for item in state.events
-        ]
+        # 工具审计必须是"记录"而不是"计数"：把 state.tool_calls 的长度当成
+        # "模型调用了几次工具"，等于把采集缺失读成零调用。
+        evidence = [{"type": "tool_call", **item} for item in state.tool_calls]
+        if state.plan_tools is not None:
+            evidence.append({"type": "planner_tool_audit", **state.plan_tools.summary()})
+        evidence += [{"type": "event", **item} for item in state.events]
         return cls(
             usage_uncertain=state.usage_uncertain,
             regression_mode=state.regression.mode.value if state.regression else None,
@@ -149,6 +167,10 @@ class RunReport(BaseModel):
             status=state.status.value,
             stop_reason=state.stop_reason.value if state.stop_reason else None,
             failure_reasons=state.failure_reasons,
+            error_class=state.error_class,
+            error_origin=state.error_origin,
+            plan_corrections=state.plan_corrections,
+            plan_tool_audit=(state.plan_tools.summary() if state.plan_tools is not None else {}),
             artifacts=artifact_map,
             evidence=evidence,
             simulated_llm=simulated_llm,
@@ -166,11 +188,19 @@ class RunReport(BaseModel):
             f"FakeLLM={self.simulated_llm}; FakeSandbox={self.simulated_sandbox}. "
             "Simulation evidence is not real-model repair evidence."
         )
+        attribution = (
+            f"- Failure attribution: `{self.error_class or 'none'}` / "
+            f"`{self.error_origin or 'none'}`\n"
+            f"- Planner corrections: `{self.plan_corrections}`; "
+            f"planner tool audit: "
+            f"`{self.plan_tool_audit or 'NOT COLLECTED (not the same as zero calls)'}`\n"
+        )
         return (
             f"# CodePilot Repair Run `{self.run_id}`\n\n"
             f"- Status: `{self.status}`\n"
             f"- Stop reason: `{self.stop_reason or 'none'}`\n"
-            f"- Repository: `{self.repository}`\n"
+            + attribution
+            + f"- Repository: `{self.repository}`\n"
             f"- Base commit: `{self.base_commit}`\n"
             f"- Patch validation: `{validation}`\n"
             f"- Test execution: `{execution}`\n"

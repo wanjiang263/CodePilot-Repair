@@ -34,6 +34,7 @@ class LLMError(Exception):
         status: int | None = None,
         body: Any = None,
         retry_after: float | None = None,
+        uncertain: bool = False,
     ) -> None:
         super().__init__(message)
         self.message = message
@@ -44,6 +45,10 @@ class LLMError(Exception):
         # 服务端在 429 里给的等待秒数。重试策略会优先采纳它
         # （见 retry.delay_for），因为它反映的是真实的配额窗口。
         self.retry_after = retry_after
+        # 请求已经离开本机、但响应没拿回来（超时、连接被重置）。服务端可能已经
+        # 生成并计费。没有这个标记，一次"结果未知"的调用会在归因里被当成
+        # 确定的服务商错误，费用也无法交代。
+        self.uncertain = uncertain
 
     def __str__(self) -> str:
         parts = [self.message]
@@ -53,6 +58,8 @@ class LLMError(Exception):
             parts.append(f"model={self.model_alias}")
         if self.status is not None:
             parts.append(f"status={self.status}")
+        if self.uncertain:
+            parts.append("结果未知（请求已发出，未收到响应）")
         return " | ".join(parts)
 
 
@@ -77,6 +84,10 @@ class StructuredOutputError(LLMError):
 
     携带 ``last_error`` 与 ``last_content``，因为"模型返回了什么"是排查
     这类失败的唯一线索。
+
+    ``last_stage`` 区分最后一步失败在哪一层：``schema`` 是 JSON/Pydantic 不合法，
+    ``semantic`` 是形状对但业务语义不合法（例如把还没写出来的测试填进了
+    ``tests_to_run``）。归因层需要这个差别——两者都是模型的错，但不是同一种错。
     """
 
     def __init__(
@@ -86,12 +97,14 @@ class StructuredOutputError(LLMError):
         attempts: int = 0,
         last_error: str | None = None,
         last_content: str | None = None,
+        last_stage: str | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message, **kwargs)
         self.attempts = attempts
         self.last_error = last_error
         self.last_content = last_content
+        self.last_stage = last_stage
 
 
 class ReplayMissError(LLMError):

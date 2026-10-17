@@ -181,6 +181,7 @@ class OpenAICompatibleProvider:
                 f"请求超时: {self._scrub(str(exc))}",
                 provider=self.provider.name,
                 model_alias=self.spec.alias,
+                uncertain=True,
             ) from exc
         except httpx.TransportError as exc:
             # 连接被重置、DNS 失败等等，都属于可重试。
@@ -191,6 +192,7 @@ class OpenAICompatibleProvider:
                 f"传输失败: {self._scrub(str(exc))}",
                 provider=self.provider.name,
                 model_alias=self.spec.alias,
+                uncertain=True,
             ) from exc
 
         if response.is_success:

@@ -127,6 +127,16 @@ class LLMRequest(BaseModel):
     它的存在使得"钱花在哪一步"这个问题可以回答，而不是只知道总花费。
     """
 
+    attempt: int = 1
+    """同一次逻辑请求里的第几轮（结构化输出的 Schema/语义纠正计数）。
+
+    与服务商的 HTTP 重试**分别计数**：前者是"模型答错了再问一次"，后者是"网络
+    抖了再发一次"，两件事叠在一个数字上就没法判断纠正机制到底有没有在工作。
+    """
+
+    correction: bool = False
+    """``True`` 表示这一轮是带着上一轮错误反馈的纠正请求，不是首次提问。"""
+
     def has_schema(self) -> bool:
         return self.response_schema is not None
 
@@ -154,6 +164,13 @@ class LLMResponse(BaseModel):
     model_alias: str = ""
     latency_ms: int = 0
 
+    call_id: str | None = None
+    """由用量统计层分配的逐请求 id，与 ``llm_requests.jsonl`` 里的同一条对齐。
+
+    Agent 拿得到响应但拿不到统计层的内部序号；有了它，Planner 才能把"这次工具调用
+    是哪一次模型请求发出来的"写进审计。
+    """
+
     finish_reason: str | None = None
     """服务端给出的结束原因（``stop`` / ``length`` / ``tool_calls`` / GLM 的
     ``sensitive`` 等）。
@@ -179,6 +196,10 @@ def request_fingerprint(request: LLMRequest) -> str:
 
     ``temperature`` 与 ``max_output_tokens`` 参与指纹：它们会改变模型输出，
     回放时必须匹配，否则录制的响应可能对应一次完全不同的调用。
+
+    ``attempt`` 与 ``correction`` **不**参与指纹：纠正重试是同一个逻辑请求的下一轮，
+    真正区分它们的是新追加的那条错误反馈消息，而消息已经在指纹里。把它们算进去
+    会让一次录制回放因为"第几轮"不同而错配。
     """
     schema: dict[str, Any] | None = None
     if request.response_schema is not None:

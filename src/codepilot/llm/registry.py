@@ -23,6 +23,7 @@ from typing import Any
 import httpx
 
 from codepilot.llm.base import LLMProvider
+from codepilot.llm.calls import CallRecorder, LLMRunContext
 from codepilot.llm.config import LLMConfig, ModelSpec, ProviderSpec
 from codepilot.llm.errors import ProviderNotConfiguredError
 from codepilot.llm.openai_compatible import OpenAICompatibleProvider
@@ -76,12 +77,18 @@ class LLMRegistry:
         budget_currency: str | None = None,
         policy: RetryPolicy | None = None,
         client_factory: Any = None,
+        recorder: CallRecorder | None = None,
     ) -> None:
         """
         Args:
             calls_path: ``record`` 模式的写入路径，或 ``replay`` 模式的读取路径。
+                ``record`` 模式允许先不传：真实 benchmark 里 provider 在派发前就装好了，
+                而 ``llm_calls.jsonl`` 要落在每个 run 自己的 artifact 目录里，那时才有路径。
+                未绑定就发请求会显式报错，而不是静默丢掉一份录制。
             client_factory: 测试注入点，签名 ``(ProviderSpec, api_key) -> httpx.Client``。
                 生产环境不传，用默认实现。
+            recorder: 逐请求元数据记录器（``llm_requests.jsonl``）。同一 run 内所有角色
+                共用一个，序号才是全局单调的。
         """
         self.config = config
         self.mode = mode
@@ -93,6 +100,7 @@ class LLMRegistry:
         self.budget_currency = budget_currency or config.budget_currency
         self.policy = policy or RetryPolicy()
         self._client_factory = client_factory
+        self.recorder = recorder
 
         self._cache: dict[str, LLMProvider] = {}
         self._limiters: dict[str, ConcurrencyLimiter] = {}
@@ -111,6 +119,46 @@ class LLMRegistry:
         provider = self._build(spec, role)
         self._cache[role] = provider
         return provider
+
+    def bind_run(
+        self,
+        *,
+        run_id: str,
+        task_id: str,
+        sink: EventSink | None = None,
+        recorder: CallRecorder | None = None,
+        calls_path: Path | None = None,
+        requests_path: Path | None = None,
+        context: LLMRunContext | None = None,
+    ) -> LLMRunContext:
+        """把 run 身份、事件流与落盘路径绑到已构造的 provider 链上。
+
+        两个路径是两件事，绝不能合成一个：``calls_path`` 是
+        :class:`~codepilot.llm.record.RecordingLLM` 的**完整请求体**录制（只在显式
+        record 模式写），``requests_path`` 是默认就写的**逐请求元数据**。把它们写到
+        同一个文件里，会让一份元数据日志看起来像一次带密钥风险的完整录制。
+
+        返回这次运行的 :class:`LLMRunContext`（节点进入时更新 node/iteration）。
+        """
+        run_context = context or LLMRunContext(run_id=run_id, task_id=task_id)
+        run_context.run_id = run_id
+        run_context.task_id = task_id
+        active_recorder = recorder or self.recorder
+        if active_recorder is None:
+            active_recorder = CallRecorder(path=requests_path, context=run_context)
+        else:
+            active_recorder.bind(
+                run_context, requests_path if requests_path is not None else active_recorder.path
+            )
+        self.sink = sink if sink is not None else self.sink
+        self.recorder = active_recorder
+        if calls_path is not None:
+            self.calls_path = calls_path
+        for provider in self._cache.values():
+            _bind_provider_chain(
+                provider, sink=self.sink, recorder=active_recorder, calls_path=calls_path
+            )
+        return run_context
 
     def complete(self, role: str, request: Any) -> Any:
         """快捷方式：``registry.complete("coder", request)``。"""
@@ -173,7 +221,7 @@ class LLMRegistry:
             )
 
             if self.mode == LLMMode.RECORD:
-                inner = RecordingLLM(inner, self._require_calls_path())
+                inner = RecordingLLM(inner, self._calls_path_or_pending())
 
         # 统计层放在最外面：录制与回放本身不产生 token，
         # 但无论哪条路径，用量的归属都必须一致。
@@ -182,6 +230,9 @@ class LLMRegistry:
             usage=self.usage,
             sink=self.sink,
             node=role,
+            role=role,
+            provider=provider_spec.name,
+            recorder=self.recorder,
         )
 
     def _replay_provider(self) -> ReplayLLM:
@@ -204,6 +255,10 @@ class LLMRegistry:
             raise ValueError(f"{self.mode} 模式必须提供 calls_path")
         return self.calls_path
 
+    def _calls_path_or_pending(self) -> Path | None:
+        """``record`` 模式允许晚绑定；``replay`` 模式必须当场有文件可读。"""
+        return self.calls_path
+
     def _limiter_for(self, provider_name: str, limit: int) -> ConcurrencyLimiter:
         """同一 provider 的多个模型共用限流器。
 
@@ -214,6 +269,25 @@ class LLMRegistry:
             limiter = ConcurrencyLimiter(limit)
             self._limiters[provider_name] = limiter
         return limiter
+
+
+def _bind_provider_chain(
+    provider: Any,
+    *,
+    sink: EventSink | None,
+    recorder: CallRecorder,
+    calls_path: Path | None,
+) -> None:
+    """沿 ``inner`` 链晚绑定：外层记事件与逐请求用量，内层决定录制落点。"""
+    if hasattr(provider, "bind_sink"):
+        provider.bind_sink(sink, recorder=recorder)
+    current = getattr(provider, "inner", None)
+    seen: set[int] = set()
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        if isinstance(current, RecordingLLM) and calls_path is not None:
+            current.set_path(calls_path)
+        current = getattr(current, "inner", None)
 
 
 def _api_key_for(provider_spec: ProviderSpec) -> str:

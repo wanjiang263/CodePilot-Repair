@@ -140,30 +140,45 @@ class CallRecord:
 
 
 class RecordingLLM:
-    """把每次调用追加写入 JSONL 的装饰器。"""
+    """把每次调用追加写入 JSONL 的装饰器。
+
+    ``path`` 允许先为空再晚绑定（:meth:`set_path`）：真实 benchmark 的 provider 在
+    派发前就装配好了，而录制文件必须落在每个 run 自己的 artifact 目录里。
+    未绑定就发请求会显式报错——静默丢掉一份录制，等于事后没有任何证据可回放。
+    """
 
     def __init__(
         self,
         inner: LLMProvider,
-        path: Path,
+        path: Path | None = None,
         *,
         clock: Any = utcnow,
         redact_payloads: bool = True,
     ) -> None:
         self._inner = inner
-        self._path = path
+        self._path = Path(path) if path is not None else None
         self._clock = clock
         self._redact = redact_payloads
-        self._seq = _count_lines(path) if path.exists() else 0
+        self._seq = (
+            _count_lines(self._path) if self._path is not None and self._path.exists() else 0
+        )
         self._closed = False
 
     def complete(self, request: LLMRequest) -> LLMResponse:
+        target = self._path
+        if target is None:
+            # 还没绑定落点就**不发**这次请求：一次录不到、但要付钱的调用
+            # 比一次直接失败的调用难排查得多。
+            raise RuntimeError(
+                "record 模式还没有绑定 llm_calls.jsonl 路径；"
+                "调用 LLMRegistry.bind_run(calls_path=...) 后才能发请求。"
+            )
         try:
             response = self._inner.complete(request)
         except Exception as exc:
-            self._append(request, response=None, error=exc, timestamp=self._clock())
+            self._append(request, response=None, error=exc, timestamp=self._clock(), path=target)
             raise
-        self._append(request, response=response, error=None, timestamp=self._clock())
+        self._append(request, response=response, error=None, timestamp=self._clock(), path=target)
         return response
 
     def close(self) -> None:
@@ -176,8 +191,14 @@ class RecordingLLM:
         return self._inner
 
     @property
-    def path(self) -> Path:
+    def path(self) -> Path | None:
         return self._path
+
+    def set_path(self, path: Path) -> None:
+        """晚绑定落盘位置；已有计数按新文件重建。"""
+        target = Path(path)
+        self._path = target
+        self._seq = _count_lines(target) if target.exists() else 0
 
     @property
     def recorded(self) -> int:
@@ -190,7 +211,14 @@ class RecordingLLM:
         response: LLMResponse | None,
         error: Exception | None,
         timestamp: datetime,
+        path: Path | None = None,
     ) -> None:
+        target = path if path is not None else self._path
+        if target is None:
+            raise RuntimeError(
+                "record 模式还没有绑定 llm_calls.jsonl 路径；"
+                "调用 LLMRegistry.bind_run(calls_path=...) 后才能写记录。"
+            )
         self._seq += 1
         record = CallRecord(
             seq=self._seq,
@@ -209,8 +237,8 @@ class RecordingLLM:
             # 02 §25：落盘前一律过脱敏。错误体里常有回显的请求头。
             payload = redact(payload)
 
-        self._path.parent.mkdir(parents=True, exist_ok=True)
-        with self._path.open("a", encoding="utf-8") as handle:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with target.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
 
 

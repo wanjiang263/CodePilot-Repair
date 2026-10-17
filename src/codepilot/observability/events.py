@@ -49,12 +49,18 @@ class EventUsage(BaseModel):
 
     不同 provider 的币种可能不同，事后回溯时若不知道当时的币种，
     费用数字就没有意义。
+
+    ``cost_known`` 必须显式存在：``cost=0`` 既可能是"真的免费"，也可能是
+    "这个模型没配单价"。前者是事实，后者是没测到——把它们写成同一个数，
+    总账就会被当成确定值。
     """
 
     model: str
     input_tokens: int = 0
     output_tokens: int = 0
+    cached_input_tokens: int = 0
     cost: float = 0.0
+    cost_known: bool = True
     currency: str = "CNY"
 
 

@@ -1079,6 +1079,18 @@ def bench(
     resume: Path | None = typer.Option(
         None, "--resume", help="从既有 run 目录续跑，已完成任务不重跑。"
     ),
+    checkpoint: bool = typer.Option(
+        True,
+        "--checkpoint/--no-checkpoint",
+        help="每个 (task, seed) 用独立 thread 的节点级 checkpoint；进程中断后可从未完成的节点接上。"
+        "--no-checkpoint 只保留任务级续跑。",
+    ),
+    record_llm: bool | None = typer.Option(
+        None,
+        "--record-llm/--no-record-llm",
+        help="把完整 LLM 请求体录制到每个 run 目录的 llm_calls.jsonl（落盘前脱敏）。"
+        "缺省取 settings.record_llm。",
+    ),
     require_validated: bool = typer.Option(
         True,
         "--require-validated",
@@ -1204,6 +1216,7 @@ def bench(
         allow_live_llm=allow_live_llm,
         live_config=live_config,
         budget_currency=bench_config.budget_currency,
+        record_llm=settings.record_llm if record_llm is None else record_llm,
     )
     runner = BenchmarkRunner(
         config=bench_config,
@@ -1215,6 +1228,8 @@ def bench(
             providers=providers,
             evaluator=evaluator,
             budget=bench_config.per_task_budget,
+            record_llm=settings.record_llm if record_llm is None else record_llm,
+            checkpoint=checkpoint,
         ),
         evaluator=evaluator,
         journal_directory=resume,
@@ -1319,6 +1334,7 @@ def _bench_provider_factory(
     allow_live_llm: bool,
     live_config: LLMConfig | None,
     budget_currency: str,
+    record_llm: bool = False,
 ) -> Any:
     from codepilot.eval.assembly import ProviderBundle
 
@@ -1331,7 +1347,11 @@ def _bench_provider_factory(
             # Usage 对象，于是 A 的费用记到 B 头上——顺序跑看不出来，只在并发下出现。
             # budget_currency 用运行配置的值而不是默认 CNY：Z.AI 以 USD 计价时，
             # 按 CNY 归集会把每个数都变成口径不明的数。
-            return ProviderBundle.live(live_config, budget_currency=budget_currency)
+            # record_llm 以前只是被 CLI 打印出来，从没接到真实执行路径上：那次真实
+            # GLM 实验开了录制也不会有 llm_calls.jsonl。
+            return ProviderBundle.live(
+                live_config, budget_currency=budget_currency, record_llm=record_llm
+            )
 
         return live_providers
 
