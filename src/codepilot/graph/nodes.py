@@ -448,7 +448,12 @@ async def reproduce(state: RepairState, deps: Deps) -> dict[str, Any]:
 
 
 async def plan(state: RepairState, deps: Deps) -> dict[str, Any]:
-    """规划（Planner 只读，不改文件 —— 03 §10）。"""
+    """规划（Planner 只读，不改文件 —— 03 §10）。
+
+    语义校验在 Planner 内部与 Schema 共用同一个有界纠正环；这里只负责把
+    **审计**写进 state/artifact：工具调用轨迹与纠正轮数。二者缺失时报告只能
+    显示"0 次"，而事实是"没采集"。
+    """
     _identity(state, deps)
     blocked = _budget_guard(state, deps, Activity.LLM, Node.PLAN)
     if blocked is not None:
@@ -462,15 +467,23 @@ async def plan(state: RepairState, deps: Deps) -> dict[str, Any]:
             StopReason.WORKFLOW_ERROR,
             ["plan requires issue analysis, localization and impact"],
         )
-    repair_plan = deps.planner.plan(
-        issue_text=state.issue,
-        issue_analysis=state.issue_analysis,
-        localization=state.localization,
-        impact=state.impact,
-        retrieval=state.retrieval,
-    )
+    try:
+        repair_plan = deps.planner.plan(
+            issue_text=state.issue,
+            issue_analysis=state.issue_analysis,
+            localization=state.localization,
+            impact=state.impact,
+            retrieval=state.retrieval,
+        )
+    finally:
+        # 失败的那次运行更需要工具证据：计划被拒时如果只留下 ``plan_rejections.jsonl``
+        # 而没有 ``plan_tools.json``，事后就看不出模型到底查过什么才写出这个计划。
+        audit = deps.planner.write_audit()
+    corrections = int(getattr(deps.planner, "last_plan_corrections", 0))
     return {
         "plan": repair_plan,
+        "plan_tools": audit,
+        "plan_corrections": state.plan_corrections + corrections,
         "usage": deps.usage,
         "events": _emit(
             state,
@@ -479,6 +492,9 @@ async def plan(state: RepairState, deps: Deps) -> dict[str, Any]:
             "ok",
             changes=len(repair_plan.changes),
             tests=len(repair_plan.tests_to_run),
+            planned_new_tests=len(repair_plan.planned_new_tests),
+            plan_corrections=corrections,
+            tool_audit=audit.summary(),
         ),
     }
 

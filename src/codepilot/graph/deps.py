@@ -39,6 +39,7 @@ from codepilot.failure.classifier import FailureClassifier
 from codepilot.failure.parser import FailureParser
 from codepilot.graph.budget import BudgetManager
 from codepilot.graph.stop_rules import StopRules
+from codepilot.llm.calls import LLMRunContext
 from codepilot.llm.registry import LLMRegistry
 from codepilot.observability.events import EventSink
 from codepilot.patch.validator import PatchValidator
@@ -208,6 +209,10 @@ class Deps:
     _stop_rules: StopRules | None = field(init=False, default=None, repr=False)
     closed: bool = field(init=False, default=False)
 
+    #: 逐请求 LLM 记录里的"当前在哪个节点、第几轮"。装配时绑定 run/task 身份，
+    #: 节点进入时由 :func:`codepilot.graph.builder._guard` 更新。
+    llm_context: LLMRunContext = field(default_factory=LLMRunContext, init=False, repr=False)
+
     def __post_init__(self) -> None:
         if self.patch_reviewer is not None:
             self.reviewer = self.patch_reviewer
@@ -215,6 +220,8 @@ class Deps:
             raise DepsConfigurationError("Deps 必须绑定 run_id")
         if not self.task_id:
             raise DepsConfigurationError("Deps 必须绑定 task_id")
+        self.llm_context.run_id = self.run_id
+        self.llm_context.task_id = self.task_id
         if isinstance(self.sandbox, AccountingSandbox):
             self.accounting = self.sandbox
         else:
@@ -278,13 +285,10 @@ class Deps:
 
         Coding Agent / Planner 持有同一个 ``Usage`` 引用；换成新对象会让后续
         LLM 调用记到 state 已经不再持有的对象上，恢复之后费用就悄悄丢了。
+        逐字段覆盖而不是只覆盖四个总数：``by_role`` / ``by_model`` / 未知费用计数
+        漏掉一项，恢复后的分角色账目就会与总账对不上（G-13 的记账自检）。
         """
-        target = self.usage
-        target.input_tokens = usage.input_tokens
-        target.output_tokens = usage.output_tokens
-        target.cost = usage.cost
-        target.llm_calls = usage.llm_calls
-        target.by_model = dict(usage.by_model)
+        self.usage.reset_to(usage)
 
     @property
     def test_runs(self) -> int:
@@ -295,6 +299,15 @@ class Deps:
         if not path.is_dir():
             raise DepsConfigurationError(f"Workspace 不存在：{path}")
         return path
+
+    def bind_llm_context(self, node: str, iteration: int) -> None:
+        """记录"接下来这些 LLM 请求属于哪个节点、第几轮修复"。
+
+        放在节点入口而不是让每个 Agent 自己上报：Agent 拿不到 state，而漏报的
+        表现是记录里 role 对了、轮次全 0，事后完全看不出漏在哪。
+        """
+        self.llm_context.node = node
+        self.llm_context.iteration = iteration
 
     # ------------------------------------------------------------------ 生命周期
 

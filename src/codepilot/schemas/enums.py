@@ -29,7 +29,11 @@ __all__ = [
 
 
 class StopReason(StrEnum):
-    """02「停止规则」表中的全部取值。"""
+    """02「停止规则」表中的取值，外加 Phase 5 之后各轮实际引入的终态
+    （``patch_rejected`` / ``tests_failed`` / ``tool_error`` / ``budget_tool_calls`` /
+    ``workflow_error`` / ``plan_rejected``）。新增它们没有改 02 的语义，只是把
+    「谁错了」拆开写：``workflow_error`` 是 Harness 的问题，``plan_rejected`` 是模型
+    给出的计划不合法，两者混在一起就没法算干净的评测分母。"""
 
     BUDGET_ITERATIONS = "budget_iterations"
     BUDGET_TEST_RUNS = "budget_test_runs"
@@ -47,6 +51,10 @@ class StopReason(StrEnum):
     TOOL_ERROR = "tool_error"
     BUDGET_TOOL_CALLS = "budget_tool_calls"
     WORKFLOW_ERROR = "workflow_error"
+    #: 计划被语义/Schema 校验拒绝（纠正预算耗尽）。刻意与 ``workflow_error`` 分开：
+    #: 前者是"模型没给出可执行的计划"，后者是"Harness 自己出了问题"，
+    #: 混在一起会让一次基础设施崩溃被计入模型修复失败的分母。
+    PLAN_REJECTED = "plan_rejected"
 
 
 class RunStatus(StrEnum):
@@ -59,6 +67,7 @@ class RunStatus(StrEnum):
     ERROR = "error"
     PROVISIONALLY_VERIFIED = "provisionally_verified"
     PATCH_REJECTED = "patch_rejected"
+    PLAN_REJECTED = "plan_rejected"
     TESTS_FAILED = "tests_failed"
     SANDBOX_ERROR = "sandbox_error"
     TOOL_ERROR = "tool_error"

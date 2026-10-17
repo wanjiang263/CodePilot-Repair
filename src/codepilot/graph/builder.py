@@ -32,6 +32,7 @@ from langgraph.errors import GraphRecursionError
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Durability
 
+from codepilot.errors import attribution_fields, classify_exception, terminal_status_for
 from codepilot.graph import nodes
 from codepilot.graph.deps import Deps
 from codepilot.graph.routing import (
@@ -92,24 +93,36 @@ def _guard(
     fn: Callable[[RepairState, Deps], Awaitable[dict[str, Any]]],
     deps: Deps,
 ) -> Callable[[RepairState], Awaitable[dict[str, Any]]]:
-    """把异常转成**可审计的终态**，而不是假成功（03 §26）。
+    """把异常转成**带归因的可审计终态**，而不是假成功（03 §26）。
 
-    捕获后必须把状态写成 ``error``：如果只记日志然后返回 ``{}``，图会带着一个
-    仍然 ``running`` 的状态继续往下走，最后的报告看起来像一次通过。
+    捕获后必须把状态写成终态：如果只记日志然后返回 ``{}``，图会带着一个仍然
+    ``running`` 的状态继续往下走，最后的报告看起来像一次通过。
+
+    归因先于状态：``classify_exception`` 决定这次是"Harness 崩了"还是"模型给的
+    东西不合法"。默认（未识别）才落在 ``workflow_error`` 上 —— 一次可纠正的计划
+    字段错误被写成基础设施崩溃，是首次真实 GLM 运行里最贵的一类误判。
     """
 
     async def runner(state: RepairState) -> dict[str, Any]:
+        deps.bind_llm_context(node.value, state.iteration)
         try:
             update = await fn(state, deps)
         except Exception as exc:
-            message = f"{node.value}: {type(exc).__name__}: {exc}"
+            failure = classify_exception(exc, node=node.value)
+            message = failure.reason()
             deps.events.emit(
-                node=node.value, type=EventType.NODE_END, status="error", error=message
+                node=node.value,
+                type=EventType.NODE_END,
+                status="error",
+                error=message,
+                error_class=failure.failure_class.value,
+                error_origin=failure.origin.value,
+                corrections_used=failure.corrections_used,
             )
             return {
+                **attribution_fields(failure),
+                **terminal_status_for(failure),
                 "usage_uncertain": state.usage_uncertain or node is Node.REVIEW,
-                "status": RunStatus.ERROR,
-                "stop_reason": StopReason.WORKFLOW_ERROR,
                 "failure_reasons": [*state.failure_reasons, message],
                 "usage": deps.usage,
                 "test_runs": deps.test_runs,

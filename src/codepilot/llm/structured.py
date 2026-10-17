@@ -10,6 +10,12 @@
 
 失败时抛异常而不是返回 ``None``：``None`` 会被调用方误当成"模型没意见"，
 从而在没有任何诊断信息的情况下静默降级。
+
+``semantic_validator`` 是 Harness Hardening 加的第二阶段：JSON 与 Pydantic 只保证
+"形状对"，而"字段 ``tests_to_run`` 里写了一个还不存在的测试"形状完全合法、语义上
+不可执行。以前这类校验在 ``complete_structured`` **之后**才跑，于是模型哪怕只错一个
+前缀，也已经花掉了纠正预算之外的所有机会，并且被节点边界归因成 Harness 崩溃。
+把语义校验放进同一个有界纠正环里，才能"再问一次"而不是"直接崩"。
 """
 
 from __future__ import annotations
@@ -20,15 +26,20 @@ from typing import Any, TypeVar
 
 from pydantic import BaseModel, ValidationError
 
+from codepilot.errors import AgentFailureError
 from codepilot.llm.base import LLMProvider
 from codepilot.llm.errors import StructuredOutputError
 from codepilot.llm.types import LLMRequest, LLMResponse, Message
+from codepilot.observability.redaction import redact_text
 
 __all__ = ["STRUCTURED_MAX_ATTEMPTS", "complete_structured", "extract_json"]
 
 STRUCTURED_MAX_ATTEMPTS = 3
 
 TModel = TypeVar("TModel", bound=BaseModel)
+
+#: 回灌给模型的上一轮输出上限。原文里可能含源码片段，超长既不必要也不该反复计费。
+_PREVIOUS_LIMIT = 2000
 
 _CORRECTION_PROMPT = """\
 你上一次的输出不符合要求的 JSON Schema。
@@ -86,10 +97,16 @@ def complete_structured(
     *,
     max_attempts: int = STRUCTURED_MAX_ATTEMPTS,
     on_attempt: Callable[[int, str | None], None] | None = None,
+    semantic_validator: Callable[[Any], Any] | None = None,
 ) -> LLMResponse:
     """调用并把 ``content`` 解析成 ``request.response_schema``。
 
     返回的 ``LLMResponse.parsed`` 是校验过的实例。
+
+    Args:
+        semantic_validator: 可选的第二阶段（业务语义）校验。它对**已通过 Pydantic
+            校验**的模型调用，抛 :class:`~codepilot.errors.AgentFailureError` 即转入
+            同一轮的纠正重试；返回 ``None`` 视为通过。它**不得**修改对象，只做校验。
 
     Raises:
         ValueError: 请求没有指定 ``response_schema``。
@@ -102,9 +119,12 @@ def complete_structured(
     messages: list[Message] = list(request.messages)
     last_error: str | None = None
     last_content: str | None = None
+    last_stage = "schema"
 
     for attempt in range(1, max_attempts + 1):
-        current = request.model_copy(update={"messages": messages})
+        current = request.model_copy(
+            update={"messages": messages, "attempt": attempt, "correction": attempt > 1}
+        )
         response = provider.complete(current)
         last_content = response.content
 
@@ -117,27 +137,57 @@ def complete_structured(
             data = extract_json(response.content)
             parsed = schema_cls.model_validate(data)
         except (ValueError, ValidationError) as exc:
+            last_stage = "schema"
             last_error = _format_error(exc)
-            messages = [
-                *messages,
-                Message.assistant(response.content or ""),
-                Message.user(
-                    _CORRECTION_PROMPT.format(
-                        error=last_error, previous=(response.content or "")[:2000]
-                    )
-                ),
-            ]
-            continue
+        else:
+            if semantic_validator is None:
+                return response.model_copy(update={"parsed": parsed})
+            try:
+                semantic_validator(parsed)
+            except AgentFailureError as exc:
+                if not exc.retryable:
+                    # 权限拒绝、服务商故障、程序 bug 都不是"再问一次模型"能解决的。
+                    # 让它们原样冒到节点边界去归因，而不是被伪装成一次纠正机会。
+                    raise
+                last_stage = "semantic"
+                last_error = _format_semantic_error(exc)
+            else:
+                return response.model_copy(update={"parsed": parsed})
 
-        return response.model_copy(update={"parsed": parsed})
+        messages = [
+            *messages,
+            Message.assistant(response.content or ""),
+            Message.user(_correction(last_error or "", last_stage, last_content)),
+        ]
 
     raise StructuredOutputError(
-        f"结构化输出连续 {max_attempts} 次失败",
+        f"结构化输出连续 {max_attempts} 次失败（最后一次是{last_stage}校验）",
         attempts=max_attempts,
         last_error=last_error,
         last_content=last_content,
         model_alias=request.purpose,
+        last_stage=last_stage,
     )
+
+
+def _correction(error: str, stage: str, previous: str | None) -> str:
+    """纠正提示：语义错误用错误自己带的可执行说明，Schema 错误沿用模板。"""
+    if stage == "semantic" and "\n" in error:
+        # 语义错误对象已经把"该改哪个字段、改成什么"写好了；再套一层模板只会稀释它。
+        return redact_text(error)[: _PREVIOUS_LIMIT * 2]
+    return redact_text(
+        _CORRECTION_PROMPT.format(
+            error=error, previous=redact_text(previous or "")[:_PREVIOUS_LIMIT]
+        )
+    )
+
+
+def _format_semantic_error(exc: Exception) -> str:
+    """语义校验异常的文本形态。"""
+    prompt = getattr(exc, "correction_prompt", None)
+    if callable(prompt):
+        return str(prompt())
+    return _format_error(exc)
 
 
 def _format_error(exc: Exception) -> str:

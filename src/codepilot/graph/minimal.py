@@ -16,6 +16,7 @@ from codepilot.agents.issue_analyzer import IssueAnalyzer
 from codepilot.agents.localizer import Localizer
 from codepilot.agents.planner import Planner
 from codepilot.artifacts import EXECUTION_JSON, PATCH_DIFF, VALIDATION_JSON, ArtifactStore
+from codepilot.errors import attribution_fields, classify_exception, terminal_status_for
 from codepilot.patch.diff import generate_git_diff
 from codepilot.patch.validator import PatchValidator
 from codepilot.repo.graph import RepoGraph
@@ -135,6 +136,9 @@ def _plan(deps: MinimalDependencies) -> Callable[[RepairState], dict[str, Any]]:
         return {
             "impact": impact,
             "plan": plan,
+            "plan_tools": deps.planner.write_audit(),
+            "plan_corrections": state.plan_corrections
+            + int(getattr(deps.planner, "last_plan_corrections", 0)),
             "usage": deps.usage,
             "events": _event(state, "plan", "ok"),
         }
@@ -293,11 +297,13 @@ def _guard(
         try:
             return node(state)
         except Exception as exc:  # explicit workflow boundary: error becomes auditable state
+            failure = classify_exception(exc, node=name)
+            message = failure.reason()
             return {
-                "status": RunStatus.ERROR,
-                "stop_reason": StopReason.WORKFLOW_ERROR,
+                **attribution_fields(failure),
+                **terminal_status_for(failure),
                 "failure_reasons": [f"{name}: {type(exc).__name__}: {exc}"],
-                "events": _event(state, name, "error", str(exc)),
+                "events": _event(state, name, "error", message),
             }
 
     return guarded

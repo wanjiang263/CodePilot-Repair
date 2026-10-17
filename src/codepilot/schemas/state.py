@@ -12,6 +12,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from codepilot.schemas.audit import PlannerToolAudit
 from codepilot.schemas.budget import RepairBudget
 from codepilot.schemas.diagnosis import Diagnosis
 from codepilot.schemas.enums import RunStatus, StopReason, TaskMode
@@ -93,6 +94,22 @@ class RepairState(BaseModel):
     tool_calls: list[dict[str, Any]] = Field(default_factory=list)
     failure_reasons: list[str] = Field(default_factory=list)
     report_artifacts: dict[str, str] = Field(default_factory=dict)
+
+    plan_tools: PlannerToolAudit | None = None
+    """Planner 的只读工具调用审计。``None`` = 没采集到，**不等于**"模型没调用工具"。"""
+
+    error_class: str | None = None
+    """终态归因大类，取值见 :class:`codepilot.errors.FailureClass`。"""
+
+    error_origin: str | None = None
+    """终态责任侧，取值见 :class:`codepilot.errors.ErrorOrigin`。
+
+    带默认值的可选字段，历史 checkpoint 照旧可读（``CHECKPOINT_SCHEMA_VERSION``
+    不用 +1，因为没有改任何已有字段的语义）。
+    """
+
+    plan_corrections: int = Field(default=0, ge=0)
+    """Planner 语义/Schema 纠正重试的**已使用**次数，与服务商 HTTP 重试分开计。"""
 
     @property
     def iteration(self) -> int:

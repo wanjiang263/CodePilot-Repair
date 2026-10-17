@@ -38,6 +38,7 @@ from codepilot.context.builder import ContextBuilder
 from codepilot.failure.parser import FailureParser
 from codepilot.graph.deps import AccountingSandbox, Deps
 from codepilot.graph.stop_rules import patch_hash
+from codepilot.llm.calls import LLMRunContext
 from codepilot.llm.fake import FakeLLM, Reply
 from codepilot.llm.tracking import UsageTrackingProvider
 from codepilot.observability.events import EventSink
@@ -543,7 +544,19 @@ def build_harness(
         test_budget=test_budget,
     )
     effective_budget = budget or RepairBudget()
-    planner = Planner(provider, registry, policy, index)
+    # 与生产装配一致：Planner 拿得到事件流与 artifact 目录，才能把工具审计与
+    # 被拒计划落盘。缺了这一步，图测试就永远测不到审计链路，而报告里的空列表
+    # 会被读成"模型没调用工具"。
+    llm_context = LLMRunContext(run_id=run_id, task_id="fixture/normalize", node="plan")
+    planner = Planner(
+        provider,
+        registry,
+        policy,
+        index,
+        events=events,
+        artifacts=artifacts,
+        llm_context=llm_context,
+    )
     coder = CodingAgent(
         provider,
         registry,
