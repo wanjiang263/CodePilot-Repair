@@ -122,8 +122,15 @@ def build_request_body(
     request: LLMRequest, spec: ModelSpec, messages: list[Message]
 ) -> dict[str, Any]:
     """构造 OpenAI 兼容的请求体。"""
+    extra_body = deepcopy(spec.extra_body)
+    if spec.supports_thinking is False:
+        # 思考开关是逐模型的能力，不是逐厂商的。收到 false 就把两个相关参数摘掉，
+        # 而不是让一次"这个模型不支持该参数"的 400 变成整批任务的失败。
+        for key in ("thinking", "reasoning_effort"):
+            extra_body.pop(key, None)
+
     body: dict[str, Any] = {
-        **deepcopy(spec.extra_body),
+        **extra_body,
         "model": spec.model,
         "messages": [_encode_message(m) for m in messages],
         "max_tokens": request.max_output_tokens,

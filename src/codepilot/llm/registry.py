@@ -15,6 +15,7 @@ Agent 拿到 provider 的唯一入口。它负责把"角色"翻译成"配好密�
 
 from __future__ import annotations
 
+from dataclasses import replace
 from enum import StrEnum
 from pathlib import Path
 from typing import Any
@@ -22,7 +23,7 @@ from typing import Any
 import httpx
 
 from codepilot.llm.base import LLMProvider
-from codepilot.llm.config import LLMConfig, ModelSpec
+from codepilot.llm.config import LLMConfig, ModelSpec, ProviderSpec
 from codepilot.llm.errors import ProviderNotConfiguredError
 from codepilot.llm.openai_compatible import OpenAICompatibleProvider
 from codepilot.llm.record import RecordingLLM
@@ -32,7 +33,27 @@ from codepilot.llm.tracking import UsageTrackingProvider
 from codepilot.observability.events import EventSink
 from codepilot.schemas.usage import Usage
 
-__all__ = ["LLMMode", "LLMRegistry"]
+__all__ = ["LLMMode", "LLMRegistry", "transport_provider"]
+
+
+def transport_provider(chain: LLMProvider) -> Any:
+    """剥开装饰器，拿到真正发 HTTP 的那一层。
+
+    装饰器链（用量统计 → 录制 → provider）是刻意对上层透明的，但有两件事只有
+    最内层知道：**一共发了几次请求**、以及**有没有请求已发出但结果未知**。
+    冒烟脚本要靠这两个数字如实报告费用确定性，所以这里显式地把它取出来，
+    而不是给 Protocol 加一个所有装饰器都要转发的属性。
+    """
+    current: Any = chain
+    seen: set[int] = set()
+    while True:
+        if isinstance(current, OpenAICompatibleProvider):
+            return current
+        inner = getattr(current, "inner", None)
+        if inner is None or id(current) in seen:
+            raise TypeError(f"provider 链里没有 OpenAICompatibleProvider: {type(current).__name__}")
+        seen.add(id(current))
+        current = inner
 
 
 class LLMMode(StrEnum):
@@ -52,7 +73,7 @@ class LLMRegistry:
         usage: Usage | None = None,
         sink: EventSink | None = None,
         calls_path: Path | None = None,
-        budget_currency: str = "CNY",
+        budget_currency: str | None = None,
         policy: RetryPolicy | None = None,
         client_factory: Any = None,
     ) -> None:
@@ -67,7 +88,9 @@ class LLMRegistry:
         self.usage = usage if usage is not None else Usage()
         self.sink = sink
         self.calls_path = calls_path
-        self.budget_currency = budget_currency
+        # 币种以运行参数为准，其次是配置里的 budget_currency。两处都能声明是为了
+        # "同一个 provider 配置跑在不同币种预算下"；都不给时才落到 CNY 默认值。
+        self.budget_currency = budget_currency or config.budget_currency
         self.policy = policy or RetryPolicy()
         self._client_factory = client_factory
 
@@ -130,7 +153,7 @@ class LLMRegistry:
                     "（uv run codepilot config check 可查看待填项）。"
                 )
 
-            api_key = _api_key_for(provider_spec.name, provider_spec.api_key_env)
+            api_key = _api_key_for(provider_spec)
             client = (
                 self._client_factory(provider_spec, api_key)
                 if self._client_factory is not None
@@ -142,7 +165,7 @@ class LLMRegistry:
                 provider=provider_spec,
                 api_key=api_key,
                 client=client,
-                policy=self.policy,
+                policy=self._policy_for(provider_spec),
                 limiter=self._limiter_for(provider_spec.name, provider_spec.max_concurrency),
                 exchange_rates=self.config.exchange_rates,
                 budget_currency=self.budget_currency,
@@ -166,6 +189,16 @@ class LLMRegistry:
             self._replay = ReplayLLM(self._require_calls_path())
         return self._replay
 
+    def _policy_for(self, provider_spec: ProviderSpec) -> RetryPolicy:
+        """provider 配了 ``max_retries`` 就覆盖全局策略的尝试次数。
+
+        只改次数，退避基数与抖动仍来自调用方传入的策略——它们是本地调参，
+        而重试次数是服务商配额决定的。
+        """
+        if provider_spec.max_retries is None:
+            return self.policy
+        return replace(self.policy, max_attempts=provider_spec.max_retries + 1)
+
     def _require_calls_path(self) -> Path:
         if self.calls_path is None:
             raise ValueError(f"{self.mode} 模式必须提供 calls_path")
@@ -183,15 +216,16 @@ class LLMRegistry:
         return limiter
 
 
-def _api_key_for(provider_name: str, env_name: str) -> str:
-    from codepilot.config import read_secret_env
-
-    key = read_secret_env(env_name)
+def _api_key_for(provider_spec: ProviderSpec) -> str:
+    key = provider_spec.api_key()
     if key is None:
+        names = [provider_spec.api_key_env]
+        if provider_spec.api_key_env_fallback:
+            names.append(provider_spec.api_key_env_fallback)
         raise ProviderNotConfiguredError(
-            f"环境变量 {env_name} 未设置（provider={provider_name}）。"
+            f"环境变量 {' 或 '.join(names)} 均未设置（provider={provider_spec.name}）。"
             "请写入 .env 文件——.env 不会被提交，也绝不要把密钥写进 configs/。",
-            provider=provider_name,
+            provider=provider_spec.name,
         )
     return key
 
