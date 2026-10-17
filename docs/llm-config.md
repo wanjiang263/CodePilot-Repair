@@ -5,25 +5,42 @@
 
 ## 官方资料与估算口径
 
-以下配置在 2026-10-09 核实。单价单位均为人民币 / 百万 token，列顺序为
-普通输入、输出、缓存命中输入。
+DeepSeek / Kimi 于 2026-10-09 核实；GLM 于 2026-10-17 核实，能力差异与真实 API 冒烟结论见
+[notes/glm-integration.md](notes/glm-integration.md)。单价单位均为**每百万 token**，
+列顺序为普通输入、输出、缓存命中输入。币种是每个模型自己的 `price.currency`：
+BigModel 站以 CNY 计价、Z.AI 站以 USD 计价，**两种币种不能混记进同一张预算表**。
 
-| 项目别名 | 官方模型 ID | 配置单价 | 官方来源 |
-|---|---|---|---|
-| `deepseek-chat` | `deepseek-flash` | 2 / 8 / 0.04 | [模型与价格](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/) |
-| `kimi-main` | `kimi-k2.6` | 6.5 / 27 / 1.1 | [平台价格](https://platform.kimi.com/)、[模型参数](https://platform.kimi.com/docs/guide/kimi-k2-6-quickstart) |
-| `glm-main` | `glm-4.7` | 4 / 16 / 0.8 | [模型说明](https://docs.bigmodel.cn/cn/guide/models/text/glm-4.7)、[计价表](https://docs.bigmodel.cn/cn/guide/start/pricing) |
+| 项目别名 | provider | 官方模型 ID | 币种 | 配置单价 | 官方来源 |
+|---|---|---|---|---|---|
+| `deepseek-chat` | deepseek | `deepseek-flash` | CNY | 2 / 8 / 0.04 | [模型与价格](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/) |
+| `kimi-main` | kimi | `kimi-k2.6` | CNY | 6.5 / 27 / 1.1 | [平台价格](https://platform.kimi.com/)、[模型参数](https://platform.kimi.com/docs/guide/kimi-k2-6-quickstart) |
+| `glm-main` | bigmodel | `glm-4.7` | CNY | 4 / 16 / 0.8 | [计价表](https://docs.bigmodel.cn/cn/guide/start/pricing) |
+| `glm-5-main` | bigmodel | `glm-5` | CNY | 6 / 22 / 1.5 | 同上 |
+| `glm-5.1-main` | bigmodel | `glm-5.1` | CNY | 8 / 28 / 2 | 同上 |
+| `glm-5.3-main` | bigmodel | `glm-5.3` | CNY | 8 / 28 / 2 | 同上 |
+| `glm-4.7-zai` | zai | `glm-4.7` | USD | 0.6 / 2.2 / 0.11 | [Z.AI 定价](https://docs.z.ai/guides/overview/pricing) |
+| `glm-5-zai` | zai | `glm-5` | USD | 1.0 / 3.2 / 0.2 | 同上 |
+| `glm-5.1-zai` | zai | `glm-5.1` | USD | 1.4 / 4.4 / 0.26 | 同上 |
+| `glm-5.3-zai` | zai | `glm-5.3` | USD | 1.4 / 4.4 / 0.26 | 同上 |
 
-DeepSeek 使用高峰价格；GLM 使用长输入最高档价格。这是按核实当日公开价格作出的
-保守预算估算，未实现分时、分档自动选择，也不代表厂商实际扣费。账单以厂商控制台为准，
-价格变化后需更新 YAML。上下文窗口按文档的 M/K 数值保守配置，输出预算仍为 4096。
+DeepSeek 使用高峰价格；BigModel 的 GLM 按**输入长度分档**（`glm-4.7` 还按输出长度分档），
+一律取公开最高档；Z.AI 不分档。这些都是按核实当日公开价格作出的保守预算估算，
+未实现分时/分档自动选择，也不代表厂商实际扣费；缓存存储费与 Batch API 折扣未建模。
+账单以厂商控制台为准，价格变化后需更新 YAML。上下文窗口按文档的 M/K 数值保守配置，
+请求侧输出预算仍为 4096。
 
-三个模型默认关闭思考模式。开关来自模型的 `extra_body`，由同一个兼容客户端发送，
-无需添加厂商分支。依据：[DeepSeek 思考模式](https://api-docs.deepseek.com/zh-cn/guides/thinking_mode/)、
+思考模式：**不是所有模型都能关**。`glm-4.7`、`deepseek-chat`、`kimi-main` 通过
+`extra_body: {thinking: {type: disabled}}` 关闭，由同一个兼容客户端发送，无需厂商分支；
+`glm-5` / `glm-5.1` 思考无法关闭，因此别名里根本不下发该参数，并用
+`supports_thinking: false` 声明（此时再往 `extra_body` 里写 `thinking` 会在加载期报错）。
+当前 Agent 消息协议不回传思考内容；2026-10-17 的真实冒烟证实这一点在 `glm-5` 上可用——
+思考开着、`reasoning_content` 不进历史，两轮工具闭环仍然成功。但同一批冒烟也证明：
+**思考模型的输出预算必须容得下推理 token**，预算过小时 `content` 会被挤成空。
+依据：[DeepSeek 思考模式](https://api-docs.deepseek.com/zh-cn/guides/thinking_mode/)、
 [Kimi 参数](https://platform.kimi.com/docs/guide/kimi-k2-6-quickstart)、
-[GLM 思考模式](https://docs.bigmodel.cn/cn/guide/capabilities/thinking-mode)。当前 Agent 消息协议
-不回传思考内容；如需开启思考并使用工具，应先核对厂商对历史思考内容回传的要求。
-Kimi 温度为模式固定值，因此配置 `supports_temperature: false`，省略请求温度参数。
+[GLM 思考模式](https://docs.bigmodel.cn/cn/guide/capabilities/thinking-mode)。
+Kimi 温度为模式固定值，GLM-5 系温度取值范围不含本项目请求默认的 `0.0`，
+两者都配 `supports_temperature: false`，省略该参数交给服务端默认值。
 
 `extra_body` 不能覆盖 `model`、`messages`、`max_tokens`、`temperature`、`tools`、
 `tool_choice`、`response_format`、`stream`。这些字段由请求与能力标志管理，加载时会拒绝冲突。
@@ -33,15 +50,28 @@ Kimi 温度为模式固定值，因此配置 `supports_temperature: false`，省
 ```bash
 uv sync --extra dev --locked
 uv run codepilot config check
-uv run python scripts/llm_smoke.py deepseek
+uv run codepilot llm smoke --alias glm-4.7-zai                       # dry-run，零请求
+uv run codepilot llm smoke --alias glm-4.7-zai --live --max-cost 0.05 --budget-currency USD
+uv run python scripts/llm_smoke.py deepseek                          # 逐 provider 文本连通性
 ```
 
-冒烟脚本会确认费用后发起真实请求；`--yes` 可跳过交互确认。它只验证普通文本对话，
-不会发送仓库源码。空回复或截断回复判定为失败，打印费用明确标为“按配置估算”。
-结构化输出与工具调用的真实验收需另外执行，不能由普通对话成功推断。
+`codepilot llm smoke` 是三阶段冒烟：普通对话、结构化输出（解析成 Pydantic 对象）、
+函数调用（真实 `ToolRegistry` 闭环，模型只有真的执行了工具才拿得到答案里的暗号）。
+**默认 dry-run，连 HTTP 客户端都不构造**；真实调用必须同时给 `--live` 和 `--max-cost`，
+缺任何一条都报成 NOT RUN 而不是"试试看"。费用按 YAML 单价计算并标币种，价格未知或
+请求结果未知时报 UNKNOWN，不写成已确认 0。`--json` 输出机器可读结果，其中不含密钥。
+空回复与截断回复都判失败。
 
-未配置 Kimi、GLM 或 OpenAI 密钥时，完整性检查仍会列出这些服务；这不影响选择已有
-DeepSeek 密钥的普通对话冒烟。`--strict` 要求所有声明的服务与角色配置完整。
+`scripts/llm_smoke.py` 仍是逐 provider 的文本连通性检查，会先确认费用；`--yes` 跳过交互。
+
+普通对话成功**不能**推断结构化与工具调用也通过——这句话现在有了对应的可执行检查，
+不再是只能靠人记得。
+
+未配置 Kimi、GLM 或 OpenAI 密钥时，完整性检查仍会列出这些服务；`--strict` 要求所有
+声明的服务与角色配置完整。**币种**也在检查范围内：角色所用模型的单价币种与
+`budget_currency` 不一致且 `exchange_rates` 未声明该币种时，检查判为不完整，
+live 冒烟与 `bench --allow-live-llm` 都会拒绝开跑（缺汇率时按 1.0 换算会把 USD 费用
+低估约七倍，且 `cost_known` 仍为 True，这种数不能放行）。
 
 ## 本机 Git 与 HTTP 代理
 
@@ -84,3 +114,22 @@ JUnit 结果确认此前因 WinError 1314 跳过的三项均已执行通过；�
 本次测试在 Codex 文件系统沙箱外以普通用户身份运行；沙箱自身的文件写入限制另行生效。
 上表的全量结果保留为修复前历史证据，本次未重跑全量测试。
 原设置备份、真实链接探测和测试结果位于 `artifacts/symlink-permissions/20261009-172246/`。
+## 2026-10-17 GLM 接入验证（追加，不修改上面的历史记录）
+
+真实冒烟的逐条结果、请求次数与费用只写在
+[notes/glm-integration.md](notes/glm-integration.md) §9 一处——两份文档各抄一份数字，
+迟早会变成"哪份是真的"这个问题。摘要：5 次 `codepilot llm smoke` 命令、合计 17 个
+HTTP 请求、约 $0.0066 USD + ¥0.0040 CNY，`glm-4.7`（两个平台）、`glm-5`、`glm-5.3`
+的对话 / 结构化 / 函数调用三条路径全部通过；另有一次故意把输出上限压到 64 的请求
+如实报成 FAIL，用来记录"思考模型必须先容得下推理 token"这条约束。
+
+离线侧新增 4 个测试文件与 3 项配置层用例，合计 **141 项**（全量套件从 2665 passed 增至
+2806 passed，差值与之一一对应）：配置与币种闸门 / MockTransport 全路径 /
+三阶段冒烟引擎 / CLI 装配。最终门禁 2806 passed、1 skipped（原有 embedding 用例）、
+44 deselected（docker 与 llm 标记）、覆盖率 92.72%，退出码 0。
+E-10（39 题真实跑批）、P-24、G-37 仍为 **NOT RUN**，
+这两条结论不能由上面的任何一项互相替代。
+
+密钥只写入被忽略的 `.env`（`git check-ignore .env` 返回 0，`git ls-files` 不含 `.env`）；
+提交物、冒烟报告与异常文本中均无密钥值——本轮还修掉了一条真实存在的泄漏路径：
+服务商 401 错误体会把密钥回显在 message 字符串里，而按键名脱敏的 `redact()` 拦不住它。
