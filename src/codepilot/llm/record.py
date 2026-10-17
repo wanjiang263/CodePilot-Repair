@@ -171,6 +171,11 @@ class RecordingLLM:
         self._inner.close()
 
     @property
+    def inner(self) -> LLMProvider:
+        """被包装者；见 ``UsageTrackingProvider.inner`` 的说明。"""
+        return self._inner
+
+    @property
     def path(self) -> Path:
         return self._path
 

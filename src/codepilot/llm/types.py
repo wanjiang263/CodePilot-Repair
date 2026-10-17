@@ -154,6 +154,15 @@ class LLMResponse(BaseModel):
     model_alias: str = ""
     latency_ms: int = 0
 
+    finish_reason: str | None = None
+    """服务端给出的结束原因（``stop`` / ``length`` / ``tool_calls`` / GLM 的
+    ``sensitive`` 等）。
+
+    单独提出来是因为"被截断"与"模型没意见"必须区分开：只看 ``content`` 是否为空
+    无法判断一次输出是不是在 ``max_tokens`` 处被砍断，而砍断的 JSON 会伪装成一次
+    合法的解析失败。各家取值集合不同，因此这里只透传，不在代码里按取值分支。
+    """
+
     reasoning_content: str | None = None
     """思考内容。单独保存，不回流到后续消息。"""
 

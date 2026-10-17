@@ -29,6 +29,7 @@ from codepilot.llm.errors import (
 )
 from codepilot.llm.retry import ConcurrencyLimiter, RetryPolicy, call_with_retry
 from codepilot.llm.types import LLMRequest, LLMResponse, ToolCall
+from codepilot.observability.redaction import REDACTED
 
 __all__ = ["CONTEXT_OVERFLOW_MARKERS", "OpenAICompatibleProvider", "looks_like_context_overflow"]
 
@@ -109,12 +110,21 @@ class OpenAICompatibleProvider:
             "Authorization": f"Bearer {api_key}",
             **provider.extra_headers,
         }
+        # 只为了在错误文本里把它的值抹掉，见 :meth:`_scrub`。
+        self._api_key = api_key
 
         self._owns_client = client is None
         self._client = client or httpx.Client(
             base_url=provider.base_url,
             timeout=provider.timeout_seconds,
         )
+
+        #: 真正发出去的 HTTP 请求次数（含每一次重试）。``Usage`` 只能记录"成功的
+        #: 调用消耗了多少 token"，而"一共打了多少次服务端"是限流与账单核对的唯一依据。
+        self.attempts = 0
+        #: 已经发出但**结果未知**的请求：超时与连接中断时，服务端可能已经生成并计费，
+        #: 也可能没有。这个数字必须留着，否则费用会被当成确定的。
+        self.unacknowledged = 0
 
     # ---------------------------------------------------------------- 调用
 
@@ -144,22 +154,41 @@ class OpenAICompatibleProvider:
 
     # ---------------------------------------------------------------- 内部
 
+    def _scrub(self, text: str) -> str:
+        """把本次请求用的密钥从任何将要不落盘/落盘的文本里抹掉。
+
+        :func:`codepilot.observability.redaction.redact` 按**键名**脱敏，管不住
+        "密钥作为某个 message 字符串的一部分被回显"这种情况 —— 而服务商的 401
+        错误体恰恰会这么回显。到这一步只剩值本身可认，所以由持有密钥的 provider
+        负责。不做这件事的后果是：一次排错截图就把密钥带进了 artifacts、Issue 或
+        聊天记录。
+        """
+        if self._api_key and self._api_key in text:
+            return text.replace(self._api_key, REDACTED)
+        return text
+
     def _post(self, body: dict[str, Any]) -> httpx.Response:
         """发一次请求，把 HTTP 层的失败翻译成本层的异常类型。"""
+        self.attempts += 1
         try:
             response = self._client.post(
                 CHAT_COMPLETIONS_PATH, json=body, headers=self._request_headers
             )
         except httpx.TimeoutException as exc:
+            # 请求已经离开本机：服务端可能已经生成并计费，也可能没有。
+            self.unacknowledged += 1
             raise ProviderError(
-                f"请求超时: {exc}",
+                f"请求超时: {self._scrub(str(exc))}",
                 provider=self.provider.name,
                 model_alias=self.spec.alias,
             ) from exc
         except httpx.TransportError as exc:
             # 连接被重置、DNS 失败等等，都属于可重试。
+            # DNS 失败与"连上之后断开"是两类：只有后者可能已经发出过请求体。
+            # 这里一律记为结果未知 —— 少报一次比假装确定一次安全。
+            self.unacknowledged += 1
             raise ProviderError(
-                f"传输失败: {exc}",
+                f"传输失败: {self._scrub(str(exc))}",
                 provider=self.provider.name,
                 model_alias=self.spec.alias,
             ) from exc
@@ -175,7 +204,7 @@ class OpenAICompatibleProvider:
         )
 
     def _raise_for_status(self, response: httpx.Response) -> None:
-        text = response.text
+        text = self._scrub(response.text)
         # 显式声明类型，而不是让它推成 dict[str, object]：
         # 后者用 ** 展开时与 LLMError 的具名关键字参数对不上。
         common: _ErrorContext = {
@@ -213,9 +242,28 @@ class OpenAICompatibleProvider:
         )
 
     def _parse(self, response: httpx.Response, request: LLMRequest) -> LLMResponse:
-        raw = response.json()
+        try:
+            raw = response.json()
+        except ValueError as exc:
+            # 200 但正文不是 JSON：网关截断、HTML 错误页都是这个症状。它必须报成
+            # 一次 provider 失败，而不是让 JSONDecodeError 穿透到 agent 层变成
+            # "无法归因的内部错误"。
+            raise ProviderError(
+                f"响应体不是合法 JSON: {exc}",
+                provider=self.provider.name,
+                model_alias=self.spec.alias,
+                body=self._scrub(response.text)[:2000],
+            ) from exc
+        if not isinstance(raw, dict):
+            raise ProviderError(
+                f"响应顶层不是对象，收到 {type(raw).__name__}",
+                provider=self.provider.name,
+                model_alias=self.spec.alias,
+                body=raw,
+            )
         choices = raw.get("choices") or []
-        if not choices:
+        first = choices[0] if choices and isinstance(choices[0], dict) else None
+        if first is None:
             raise ProviderError(
                 "响应中没有 choices",
                 provider=self.provider.name,
@@ -223,9 +271,26 @@ class OpenAICompatibleProvider:
                 body=raw,
             )
 
-        message = choices[0].get("message") or {}
+        message = first.get("message") or {}
+        if not isinstance(message, dict):
+            raise ProviderError(
+                "choices[0].message 不是对象",
+                provider=self.provider.name,
+                model_alias=self.spec.alias,
+                body=raw,
+            )
         content = message.get("content")
+        if content is not None and not isinstance(content, str):
+            # 把非字符串 content 当成"读不出来的最终答案"，而不是 repr() 一个 dict
+            # 冒充模型说的话。reasoning_content / tool_calls 仍然照常解析。
+            raise ProviderError(
+                f"content 不是字符串，收到 {type(content).__name__}",
+                provider=self.provider.name,
+                model_alias=self.spec.alias,
+                body=raw,
+            )
         tool_calls = self._extract_tool_calls(message, content, request)
+        finish_reason = first.get("finish_reason")
 
         usage = raw.get("usage") or {}
         input_tokens = int(usage.get("prompt_tokens") or 0)
@@ -250,6 +315,7 @@ class OpenAICompatibleProvider:
             cost=breakdown.amount,
             cost_known=breakdown.known,
             model_alias=self.spec.alias,
+            finish_reason=finish_reason,
             # 思考内容只记录、不回流：多数服务商拒绝接受带思考内容的历史消息。
             reasoning_content=message.get("reasoning_content") or message.get("reasoning"),
             raw=raw,
@@ -260,6 +326,14 @@ class OpenAICompatibleProvider:
     ) -> list[ToolCall]:
         native = message.get("tool_calls") or []
         if native:
+            if not isinstance(native, list) or any(not isinstance(item, dict) for item in native):
+                # 结构不对就报错，绝不当作"模型没有调用工具"：静默丢弃一次工具调用
+                # 会让 Agent 以为模型直接给出了答案。
+                raise ProviderError(
+                    "tool_calls 结构非法（不是对象数组）",
+                    provider=self.provider.name,
+                    model_alias=self.spec.alias,
+                )
             return [_parse_native_tool_call(tc) for tc in native]
 
         # 没有原生 tool calling 时，模型按 prompt 里的协议把调用写在 content 里。

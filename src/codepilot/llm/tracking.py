@@ -81,6 +81,13 @@ class UsageTrackingProvider:
         self._inner.close()
 
     @property
+    def inner(self) -> LLMProvider:
+        """被包装者。装饰器链需要一层层剥开才能拿到真实 provider ——
+        例如冒烟脚本要知道"一共发了几次 HTTP"，而这个数字只存在于最内层。
+        """
+        return self._inner
+
+    @property
     def usage(self) -> Usage:
         return self._usage
 
