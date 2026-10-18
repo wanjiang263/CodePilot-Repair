@@ -28,6 +28,7 @@ base 侧结论来自 :meth:`GoldEvaluator.baseline` 的**全量**运行（``base
 from __future__ import annotations
 
 import hashlib
+import json
 import shutil
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
@@ -61,6 +62,19 @@ __all__ = [
 #: ``allow_new_tests=True`` 是**可信构造参数**——test.patch 的本意就是往仓库里
 #: 添加隐藏测试，而这个 policy 对象从不交给 Coding Agent。
 _EVAL_DENY_DIRECTORIES = (".git",)
+
+#: 评测证据摘要保留的诊断字段（不含隐藏测试 NodeID / 源码 / 输出正文）。
+_EVIDENCE_DIAGNOSTIC_KEYS = (
+    "execution_backend",
+    "container_verified",
+    "network_mode",
+    "oom_killed",
+    "junit_error",
+    "cleanup_error",
+    "environment_cache_key",
+    "environment_image_id",
+    "environment_image_ref",
+)
 
 
 class EvaluationVerdict(StrEnum):
@@ -369,6 +383,7 @@ class GoldEvaluator:
         run_dir = self._work_root / "runs" / run_id
         artifacts = ArtifactStore(self._work_root, run_id)
         workspace = None
+        retained: ExecutionResult | None = None
         try:
             workspace = self._manager.create(
                 source=str(repository),
@@ -381,15 +396,12 @@ class GoldEvaluator:
             for patch in patches:
                 applied = apply_unified_diff(patch, policy)
                 if not applied.applied:
-                    return _RunOutcome(
-                        ExecutionResult(
-                            status=ExecutionStatus.COLLECTION_ERROR,
-                            error_reason=f"PATCH_APPLY_FAILED: {applied.error}",
-                            diagnostics={"execution_backend": "patch_apply"},
-                        ),
-                        "patch_apply",
-                        "patch_apply:none:none",
+                    retained = ExecutionResult(
+                        status=ExecutionStatus.COLLECTION_ERROR,
+                        error_reason=f"PATCH_APPLY_FAILED: {applied.error}",
+                        diagnostics={"execution_backend": "patch_apply"},
                     )
+                    return _RunOutcome(retained, "patch_apply", "patch_apply:none:none")
             sandbox = self._sandbox_factory(artifacts)
             environment = sandbox.build_env(
                 repository=str(repository),
@@ -400,17 +412,18 @@ class GoldEvaluator:
             )
             backend = str(getattr(sandbox, "backend", _guess_backend(sandbox)))
             if not environment.succeeded:
+                retained = ExecutionResult(
+                    status=environment.status,
+                    error_reason=environment.error,
+                    diagnostics={
+                        "execution_backend": backend,
+                        "environment_cache_key": environment.cache_key,
+                        "environment_image_ref": environment.image_ref or "",
+                        "environment_image_id": environment.image_id or "",
+                    },
+                )
                 return _RunOutcome(
-                    ExecutionResult(
-                        status=environment.status,
-                        error_reason=environment.error,
-                        diagnostics={
-                            "execution_backend": backend,
-                            "environment_cache_key": environment.cache_key,
-                            "environment_image_ref": environment.image_ref or "",
-                            "environment_image_id": environment.image_id or "",
-                        },
-                    ),
+                    retained,
                     backend,
                     _environment_identity(backend, environment.cache_key, environment.image_id),
                 )
@@ -430,11 +443,48 @@ class GoldEvaluator:
                 environment.cache_key,
                 environment.image_id or merged.get("environment_image_id"),
             )
-            return _RunOutcome(result.model_copy(update={"diagnostics": merged}), backend, identity)
+            retained = result.model_copy(update={"diagnostics": merged})
+            return _RunOutcome(retained, backend, identity)
         finally:
             if workspace is not None:
                 self._manager.remove(workspace)
+            if retained is not None:
+                # 评测 run 目录必须清掉（不能把隐藏测试的 workspace / junit 留在
+                # 磁盘上），但 ``artifact_refs`` 不能指向已删除的目录：把脱敏摘要
+                # 写到 runs/ 之外的 evidence/ 下，并让 artifact_dir 指向它。
+                retained.artifact_dir = str(self._retain_evidence(run_id, retained))
             shutil.rmtree(run_dir, ignore_errors=True)
+
+    def _retain_evidence(self, run_id: str, result: ExecutionResult) -> Path:
+        """把一次评测执行的脱敏摘要写到 ``runs/`` 之外，供 ``artifact_refs`` 使用。
+
+        摘要只保留状态、计数与后端标记；不写测试 NodeID、源码或失败正文，
+        因此不会把隐藏测试内容留在 artifact 里。
+        """
+        target = self._work_root / "evidence" / f"{run_id}.json"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        diagnostics = {
+            key: result.diagnostics[key]
+            for key in _EVIDENCE_DIAGNOSTIC_KEYS
+            if key in result.diagnostics
+        }
+        payload = {
+            "run_id": run_id,
+            "status": result.status.value,
+            "exit_code": result.exit_code,
+            "duration_seconds": result.duration_seconds,
+            "tests_observed": len(result.tests),
+            "tests_passed": result.tests_passed,
+            "tests_failed": result.tests_failed,
+            "diagnostics": diagnostics,
+            "error_reason": (result.error_reason or "")[:1000] or None,
+            "retention": "sanitized summary; raw junit/stdout removed after evaluation",
+        }
+        target.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        return target
 
     # ------------------------------------------------------------------ 判定
 
