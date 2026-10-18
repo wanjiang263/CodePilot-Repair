@@ -45,7 +45,9 @@ providers:
     max_concurrency: 4
     timeout_seconds: 120
     # 官方限流文档没有 Retry-After，也没有承诺幂等；重试只针对 429/5xx。
-    max_retries: 2
+    # 2026-10-18 E-10 全量批跑实测：并发 2 时持续触发 429，2 次重试不够；
+    # 并发降到 1 并把重试提到 4 次，给短时限流窗口留出退避余量。
+    max_retries: 4
 
   zai:
     base_url: https://api.z.ai/api/paas/v4
