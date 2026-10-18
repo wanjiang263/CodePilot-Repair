@@ -190,6 +190,29 @@ models:
       output_per_mtok: 28.0
       cached_input_per_mtok: 2.0
 
+  # GLM-5.3-Flash：当前 BigModel 账号的资源包只覆盖 flash/flashx（2026-10-18 实测
+  # glm-4.7 返回 1113「余额不足或无可用资源包」）。flash 强制思考、不能用
+  # thinking.type=disabled；必须用 reasoning_effort（low/high/max）。工具调用与
+  # JSON 模式已实测可用（200）。单价来源：https://docs.bigmodel.cn/cn/guide/start/pricing
+  # 2026-10-18：输入 0.8 / 输出 2.8 / 缓存命中 0.23（元/百万 tokens），1M 上下文。
+  glm-5.3-flash-main:
+    provider: bigmodel
+    model: glm-5.3-flash
+    context_window: 1000000
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: false
+    supports_thinking: true
+    max_output_tokens: 4096
+    # 强制思考：low 用来压低思考 token；supports_thinking=false 会把该参数摘掉。
+    extra_body:
+      reasoning_effort: low
+    price:
+      currency: CNY
+      input_per_mtok: 0.8
+      output_per_mtok: 2.8
+      cached_input_per_mtok: 0.23
+
 
   # ---- Z.AI 国际站：同一批模型，公开计价以 **USD** 结算 ----
   # 币种不能混：把 USD 单价直接当成 CNY 记进预算会低估约七倍。要么在
