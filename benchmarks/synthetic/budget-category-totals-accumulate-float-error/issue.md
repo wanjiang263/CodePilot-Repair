@@ -1,3 +1,3 @@
-Category totals drift after many small entries.
+Category totals contain numerical noise and must follow the reporting precision contract.
 
-`Ledger.total` rounds its result, and the account view compares the two against each other. After a handful of 0.1 entries `by_category` reports something like `0.30000000000000004` while `total` reports `0.3`, so the two views of the same ledger disagree.
+Three food expenses of 0.1 currently produce 0.30000000000000004 instead of 0.3. For finite amounts, the decimal representation of each input is the accounting value. Sub-cent amounts and refunds are allowed. Each category reports its exact aggregate rounded once to two decimal places, with half-cent ties rounded to the nearest even cent. Results must be independent of entry order and returned as floats, with category keys sorted. Categories are rounded independently: their rounded totals need not sum to the separately rounded whole-ledger total. An empty ledger returns an empty mapping.

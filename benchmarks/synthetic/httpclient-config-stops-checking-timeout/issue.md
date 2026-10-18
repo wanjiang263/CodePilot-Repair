@@ -1,3 +1,3 @@
-A zero or negative timeout is accepted again.
+Zero and negative timeouts are accepted again.
 
-`validate_timeout` exists and the constructor used to call it, but the check no longer runs, so `Config(timeout=0)` builds successfully and then hangs or fails in whatever transport receives it. The helper itself still works when called directly - it is the wiring that went missing.
+Constructing a configuration with timeout=0 or timeout=-1 succeeds. A timeout must be strictly positive, and invalid values should raise the library configuration error at construction time so callers can report a bad setting before making a request. Positive timeouts should remain usable.

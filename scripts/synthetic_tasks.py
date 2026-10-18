@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from synthetic_hosts import HOSTS  # noqa: F401  (被 build_synthetic_fixtures 使用)
+from synthetic_hosts import PRECISION_BASE, PRECISION_GOLD
 
 from codepilot.eval.synthetic import BenchmarkCategory
 
@@ -492,11 +492,13 @@ def test_tail_one() -> None:
         category=BenchmarkCategory.OFF_BY_ONE,
         difficulty="medium",
         issue=(
-            "A `RetryPolicy(attempts=n)` only calls the function `n - 1` times.\n\n"
-            "Callers size their timeouts around the number of attempts they "
-            "configured. The last attempt is the one that usually succeeds for a "
-            "flaky dependency, so dropping it turns 'eventually succeeds' into "
-            "'always gives up'.\n"
+            "Work is abandoned before the configured attempts are used.\n"
+            "\n"
+            "With an allowance of three attempts, a callback that fails twice and would then "
+            "succeed never reaches that success. A one-attempt policy also fails without calling "
+            "a healthy callback. The allowance includes the initial call; success should stop "
+            "further attempts, and exhaustion should be reported only after the allowance is "
+            "used.\n"
         ),
         bugs=(
             Bug(
@@ -536,11 +538,11 @@ def test_single_attempt_is_enough_for_a_good_function() -> None:
         category=BenchmarkCategory.INCORRECT_RETURN,
         difficulty="medium",
         issue=(
-            "Recording a refund increases the ledger total.\n\n"
-            "`refund` is documented as writing a negative entry for the given "
-            "amount, but the entry it appends carries the amount unchanged, so "
-            "money appears from nowhere. `test_refund_adds_an_entry` only checks "
-            "that an entry appears, not what it contains.\n"
+            "Recording a refund increases spending instead of reducing it.\n"
+            "\n"
+            "After a lunch expense of 50 and a refund of 10 against that expense, the ledger "
+            "reports 60 spent; it should report 40. The original expense must remain in the "
+            "history, and the refund must remain associated with the same category.\n"
         ),
         bugs=(
             Bug(
@@ -652,11 +654,12 @@ def test_spread_of_equal_values_is_zero() -> None:
         category=BenchmarkCategory.API_MISUSE,
         difficulty="medium",
         issue=(
-            "Exported CSV rows sometimes have their columns swapped.\n\n"
-            "`COLUMNS` is the single definition of the export order, but the row "
-            "renderer walks the record's own values instead of looking each column "
-            "up. A record built in a different order therefore writes a different "
-            "column order than the header line promises.\n"
+            "Exported CSV values appear under the wrong headings.\n"
+            "\n"
+            "A record containing amount 12, category food, currency CNY and note Coffee produces "
+            "a different row when its fields are supplied in a different order. The exported "
+            "values must stay aligned with their headings regardless of the order in which the "
+            "caller assembled the record.\n"
         ),
         bugs=(
             Bug(
@@ -688,11 +691,12 @@ def test_row_has_one_field_per_column() -> None:
         category=BenchmarkCategory.API_MISUSE,
         difficulty="easy",
         issue=(
-            "Describing an unlisted SKU raises `KeyError`.\n\n"
-            "`UNKNOWN_NAME` exists so that a catalog lookup can always produce a "
-            "label, and callers are supposed to get that label instead of an "
-            "exception - the report generator walks every SKU seen on the floor, "
-            "most of which are not in the catalog at all.\n"
+            "Describing an unlisted SKU raises KeyError.\n"
+            "\n"
+            "The stock report includes products that have not yet been added to the catalog. For "
+            'example, an unlisted Q should be displayed as "Q - unknown" rather than aborting the '
+            "report. This also applies when a caller supplies its own catalog; listed products "
+            "should retain their names.\n"
         ),
         bugs=(
             Bug(
@@ -755,43 +759,86 @@ def test_mixed_known_and_unknown() -> None:
     # =============================================================== edge case (4)
     TaskDef(
         task_id="budget-category-totals-accumulate-float-error",
-        host="budget",
+        host="budget_precision",
         category=BenchmarkCategory.EDGE_CASE,
         difficulty="medium",
         issue=(
-            "Category totals drift after many small entries.\n\n"
-            "`Ledger.total` rounds its result, and the account view compares the two "
-            "against each other. After a handful of 0.1 entries `by_category` "
-            "reports something like `0.30000000000000004` while `total` reports "
-            "`0.3`, so the two views of the same ledger disagree.\n"
+            "Category totals contain numerical noise and must follow the reporting precision "
+            "contract.\n"
+            "\n"
+            "Three food expenses of 0.1 currently produce 0.30000000000000004 instead of 0.3. For "
+            "finite amounts, the decimal representation of each input is the accounting value. "
+            "Sub-cent amounts and refunds are allowed. Each category reports its exact aggregate "
+            "rounded once to two decimal places, with half-cent ties rounded to the nearest even "
+            "cent. Results must be independent of entry order and returned as floats, with "
+            "category keys sorted. Categories are rounded independently: their rounded totals "
+            "need not sum to the separately rounded whole-ledger total. An empty ledger returns "
+            "an empty mapping.\n"
         ),
-        bugs=(
-            Bug(
-                file="src/budget/ledger.py",
-                fixed="            totals[entry.category] = round(totals.get(entry.category, 0.0) + entry.amount, 2)",
-                buggy="            totals[entry.category] = totals.get(entry.category, 0.0) + entry.amount",
-            ),
-        ),
+        bugs=(Bug(file="src/budget/ledger.py", fixed=PRECISION_GOLD, buggy=PRECISION_BASE),),
         hidden=hidden(
             "category_rounding",
             """
-from budget.ledger import Ledger
+from itertools import permutations
+
+import pytest
+
+from budget.ledger import Entry, Ledger
 
 
-def _tenth_ledger() -> Ledger:
+@pytest.mark.parametrize("amounts, expected", [
+    ([0.1, 0.1, 0.1], 0.3),
+    ([0.004, 0.004, 0.004], 0.01),
+    ([0.005, 0.005], 0.01),
+    ([0.005], 0.0),
+    ([0.015], 0.02),
+    ([0.025], 0.02),
+    ([-0.005], 0.0),
+    ([-0.015], -0.02),
+    ([-0.025], -0.02),
+    ([0.0049], 0.0),
+    ([0.0051], 0.01),
+    ([2.675], 2.68),
+])
+def test_decimal_reporting(amounts, expected) -> None:
+    ledger = Ledger([Entry(amount, "item", "food") for amount in amounts])
+    result = ledger.by_category()
+    assert result == {"food": expected}
+    assert isinstance(result["food"], float)
+
+
+@pytest.mark.parametrize("amounts, expected", [
+    ([0.015, 0.015, -0.01], 0.02),
+    ([1e16, 0.01, -1e16], 0.01),
+])
+def test_order_does_not_change_totals(amounts, expected) -> None:
+    for ordered in permutations(amounts):
+        ledger = Ledger([Entry(value, "item", "food") for value in ordered])
+        assert ledger.by_category() == {"food": expected}
+
+
+def test_categories_are_independent_and_sorted() -> None:
+    ledger = Ledger([
+        Entry(0.005, "item", "z"), Entry(0.005, "item", "a"),
+        Entry(0.015, "item", "m"),
+    ])
+    before = list(ledger.entries)
+    assert ledger.by_category() == {"a": 0.0, "m": 0.02, "z": 0.0}
+    assert list(ledger.by_category()) == ["a", "m", "z"]
+    assert ledger.entries == before
+
+
+def test_refund_participates_before_rounding() -> None:
     ledger = Ledger()
-    for _ in range(3):
-        ledger.add(0.1, "Coffee")
-    return ledger
+    ledger.add(0.025, "Coffee")
+    ledger.refund(0, 0.01)
+    assert ledger.by_category() == {"food": 0.02}
 
 
-def test_three_tenths_is_exactly_three_tenths() -> None:
-    assert _tenth_ledger().by_category() == {"food": 0.3}
-
-
-def test_category_and_total_agree() -> None:
-    ledger = _tenth_ledger()
-    assert sum(ledger.by_category().values()) == ledger.total()
+def test_empty_and_cancelling_categories() -> None:
+    assert Ledger().by_category() == {}
+    ledger = Ledger([Entry(0.015, "item", "food"), Entry(-0.015, "refund", "food")])
+    assert ledger.by_category() == {"food": 0.0}
 """,
         ),
     ),
@@ -923,16 +970,18 @@ def test_two_retries_means_three_attempts() -> None:
     # ================================================= cross-module dependency (5)
     TaskDef(
         task_id="budget-export-adds-currency-column",
-        host="budget",
+        host="budget_currency",
         category=BenchmarkCategory.CROSS_MODULE,
         difficulty="hard",
         issue=(
-            "The CSV export cannot be imported by the accounting tool any more.\n\n"
-            "Every exported row now has to say which currency the amounts are in - "
-            "the finance team merges exports from several deployments and the same "
-            "number means different things depending on where it came from. A row "
-            "that is missing the currency is rejected on import as a header/data "
-            "mismatch.\n"
+            "CSV exports are rejected because the currency column is missing.\n"
+            "\n"
+            "The import format requires category, note, currency, amount in that order, including "
+            "the header for an empty ledger. Each ledger has a currency attribute: omitted "
+            "currency defaults to CNY for compatibility, while a caller can supply another "
+            "currency such as USD or EUR. Every exported row must use that ledger currency "
+            "without converting its amount. Exports from different ledgers must retain their own "
+            "currencies, including when produced consecutively.\n"
         ),
         bugs=(
             Bug(
@@ -942,72 +991,56 @@ def test_two_retries_means_three_attempts() -> None:
             ),
             Bug(
                 file="src/budget/report.py",
-                fixed=(
-                    'EXPORT_CURRENCY = "CNY"\n'
-                    "\n\n"
-                    "def build_rows(ledger: Ledger) -> list[dict[str, object]]:\n"
-                    '    """把账本转成"列名 -> 值"的记录列表，键集合与 :func:`headers` 一致。"""\n'
-                    "    rows: list[dict[str, object]] = []\n"
-                    "    for entry in ledger.entries:\n"
-                    "        rows.append(\n"
-                    "            {\n"
-                    '                "category": entry.category,\n'
-                    '                "note": entry.note,\n'
-                    '                "currency": EXPORT_CURRENCY,\n'
-                    '                "amount": entry.amount,\n'
-                    "            }\n"
-                    "        )\n"
-                    "    return rows"
-                ),
-                buggy=(
-                    "def build_rows(ledger: Ledger) -> list[dict[str, object]]:\n"
-                    '    """把账本转成"列名 -> 值"的记录列表，键集合与 :func:`headers` 一致。"""\n'
-                    "    rows: list[dict[str, object]] = []\n"
-                    "    for entry in ledger.entries:\n"
-                    "        rows.append(\n"
-                    "            {\n"
-                    '                "category": entry.category,\n'
-                    '                "note": entry.note,\n'
-                    '                "amount": entry.amount,\n'
-                    "            }\n"
-                    "        )\n"
-                    "    return rows"
-                ),
+                fixed='                "currency": ledger.currency,\n',
+                buggy="",
             ),
         ),
         hidden=hidden(
             "currency_column",
             """
-from budget.csv_writer import COLUMNS, render_row
+import csv
+import io
+
+import pytest
+
 from budget.ledger import Ledger
 from budget.report import build_rows, render
 
 
-def _ledger() -> Ledger:
-    ledger = Ledger()
+@pytest.mark.parametrize("currency", ["CNY", "USD", "EUR"])
+def test_export_uses_ledger_currency(currency) -> None:
+    ledger = Ledger(currency=currency)
     ledger.add(20.0, "Coffee")
-    return ledger
+    ledger.add(7.5, "Lunch")
+    rows = build_rows(ledger)
+    assert [row["currency"] for row in rows] == [currency, currency]
+    assert [row["amount"] for row in rows] == [20.0, 7.5]
+    reader = csv.DictReader(io.StringIO(render(ledger)))
+    assert reader.fieldnames == ["category", "note", "currency", "amount"]
+    assert list(reader) == [
+        {"category": "food", "note": "Coffee", "currency": currency, "amount": "20.0"},
+        {"category": "food", "note": "Lunch", "currency": currency, "amount": "7.5"},
+    ]
 
 
-def test_currency_is_one_of_the_columns() -> None:
-    assert "currency" in COLUMNS
+def test_default_currency_is_cny() -> None:
+    ledger = Ledger()
+    ledger.add(2.0, "Coffee")
+    assert build_rows(ledger)[0]["currency"] == "CNY"
 
 
-def test_rows_carry_every_column() -> None:
-    rows = build_rows(_ledger())
-    assert set(COLUMNS) <= set(rows[0])
+def test_sequential_exports_do_not_share_currency() -> None:
+    usd, eur = Ledger(currency="USD"), Ledger(currency="EUR")
+    usd.add(1.0, "Coffee")
+    eur.add(1.0, "Coffee")
+    for ledger, currency in [(usd, "USD"), (eur, "EUR"), (usd, "USD")]:
+        assert list(csv.DictReader(io.StringIO(render(ledger))))[0]["currency"] == currency
+        assert ledger.currency == currency
+        assert ledger.entries[0].amount == 1.0
 
 
-def test_rendering_does_not_raise_key_error() -> None:
-    text = render(_ledger())
-    header = text.splitlines()[0].split(",")
-    body = text.splitlines()[1].split(",")
-    assert len(header) == len(body) == len(COLUMNS)
-
-
-def test_currency_value_is_written() -> None:
-    rows = build_rows(_ledger())
-    assert rows[0]["currency"]
+def test_empty_export_keeps_schema() -> None:
+    assert render(Ledger(currency="EUR")) == "category,note,currency,amount\\n"
 """,
         ),
     ),
@@ -1198,12 +1231,13 @@ def test_box_limit_still_applies() -> None:
         category=BenchmarkCategory.CROSS_MODULE,
         difficulty="hard",
         issue=(
-            "A client built through the helper ignores the configuration it is given.\n\n"
-            "`new_client` accepts the same keyword arguments as `Config`, and "
-            "`Config.as_dict` is what the diagnostics endpoint prints. Right now a "
-            "caller can pass `retries=5`, see `retries: 2` in the diagnostic "
-            "snapshot, and have no way to tell which of the two is lying - so both "
-            "the helper and the snapshot need to be fixed.\n"
+            "Client settings are lost and the diagnostic snapshot is incomplete.\n"
+            "\n"
+            "Creating a client through the convenience API with retries=5 leaves its retry budget "
+            "at the default 2. Diagnostic snapshots omit the retry count, including for a "
+            "configuration created directly. Callers expect the supplied timeout and retry "
+            "settings to take effect and snapshots to report base URL, timeout and retries "
+            "accurately.\n"
         ),
         bugs=(
             Bug(
@@ -1251,12 +1285,12 @@ def test_helper_and_snapshot_agree() -> None:
         category=BenchmarkCategory.REGRESSION,
         difficulty="medium",
         issue=(
-            "A zero or negative timeout is accepted again.\n\n"
-            "`validate_timeout` exists and the constructor used to call it, but the "
-            "check no longer runs, so `Config(timeout=0)` builds successfully and "
-            "then hangs or fails in whatever transport receives it. The helper "
-            "itself still works when called directly - it is the wiring that went "
-            "missing.\n"
+            "Zero and negative timeouts are accepted again.\n"
+            "\n"
+            "Constructing a configuration with timeout=0 or timeout=-1 succeeds. A timeout must "
+            "be strictly positive, and invalid values should raise the library configuration "
+            "error at construction time so callers can report a bad setting before making a "
+            "request. Positive timeouts should remain usable.\n"
         ),
         bugs=(
             Bug(
@@ -1295,10 +1329,12 @@ def test_valid_timeout_still_accepted() -> None:
         category=BenchmarkCategory.REGRESSION,
         difficulty="medium",
         issue=(
-            "Rent payments are no longer classified as housing.\n\n"
-            "This used to work and only insurance is matched now. The keyword list "
-            "still mentions both, and the category name is unchanged, so the "
-            "classification step is the only place the rule could have gone.\n"
+            "Rent payments are no longer classified as housing.\n"
+            "\n"
+            'An expense of 900 with note "Rent April" appears as large, although rent belongs to '
+            "housing regardless of its amount. Insurance expenses still appear as housing. Notes "
+            "are matched without regard to letter case, and unrelated expenses should retain "
+            "their existing categories.\n"
         ),
         bugs=(
             Bug(
@@ -1569,10 +1605,11 @@ def test_drained_batch_is_detached() -> None:
         category=BenchmarkCategory.WRONG_CONDITION,
         difficulty="easy",
         issue=(
-            "Members pay full price and guests get the discount.\n\n"
-            "`apply_discount` is supposed to reduce the total by `MEMBER_DISCOUNT` "
-            "when `member` is true and leave it alone otherwise. The two branches "
-            "have swapped places.\n"
+            "Membership prices are incorrect.\n"
+            "\n"
+            "For a purchase total of 200, a member is charged 200 while a guest is charged 180. "
+            "The membership offer is a ten percent reduction; guests pay the original total. "
+            "Discounted prices are rounded to two decimal places.\n"
         ),
         bugs=(
             Bug(

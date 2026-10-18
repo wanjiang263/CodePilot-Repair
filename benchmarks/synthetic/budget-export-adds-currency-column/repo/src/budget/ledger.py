@@ -25,6 +25,7 @@ class Ledger:
     """一个可变的账本。"""
 
     entries: list[Entry] = field(default_factory=list)
+    currency: str = "CNY"
 
     def add(self, amount: float, note: str) -> Entry:
         """记一笔。金额必须为正——退款走 :meth:`refund`，不混在这里。"""

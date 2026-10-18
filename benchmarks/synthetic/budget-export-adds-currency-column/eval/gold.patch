@@ -12,24 +12,14 @@ index 59d3bdb..4a36a69 100644
  
  def headers() -> tuple[str, ...]:
 diff --git a/src/budget/report.py b/src/budget/report.py
-index ece1a6d..ad76d5c 100644
+index ece1a6d..ab058db 100644
 --- a/src/budget/report.py
 +++ b/src/budget/report.py
-@@ -5,6 +5,9 @@ from __future__ import annotations
- from budget.csv_writer import headers, render_row
- from budget.ledger import Ledger
- 
-+EXPORT_CURRENCY = "CNY"
-+
-+
- def build_rows(ledger: Ledger) -> list[dict[str, object]]:
-     """把账本转成"列名 -> 值"的记录列表，键集合与 :func:`headers` 一致。"""
-     rows: list[dict[str, object]] = []
-@@ -13,6 +16,7 @@ def build_rows(ledger: Ledger) -> list[dict[str, object]]:
+@@ -13,6 +13,7 @@ def build_rows(ledger: Ledger) -> list[dict[str, object]]:
              {
                  "category": entry.category,
                  "note": entry.note,
-+                "currency": EXPORT_CURRENCY,
++                "currency": ledger.currency,
                  "amount": entry.amount,
              }
          )

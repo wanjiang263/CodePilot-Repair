@@ -1,3 +1,3 @@
-Recording a refund increases the ledger total.
+Recording a refund increases spending instead of reducing it.
 
-`refund` is documented as writing a negative entry for the given amount, but the entry it appends carries the amount unchanged, so money appears from nowhere. `test_refund_adds_an_entry` only checks that an entry appears, not what it contains.
+After a lunch expense of 50 and a refund of 10 against that expense, the ledger reports 60 spent; it should report 40. The original expense must remain in the history, and the refund must remain associated with the same category.

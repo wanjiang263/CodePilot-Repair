@@ -1,3 +1,3 @@
-A `RetryPolicy(attempts=n)` only calls the function `n - 1` times.
+Work is abandoned before the configured attempts are used.
 
-Callers size their timeouts around the number of attempts they configured. The last attempt is the one that usually succeeds for a flaky dependency, so dropping it turns 'eventually succeeds' into 'always gives up'.
+With an allowance of three attempts, a callback that fails twice and would then succeed never reaches that success. A one-attempt policy also fails without calling a healthy callback. The allowance includes the initial call; success should stop further attempts, and exhaustion should be reported only after the allowance is used.

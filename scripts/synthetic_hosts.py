@@ -1292,6 +1292,48 @@ HOSTS: dict[str, dict[str, str]] = {
     },
 }
 
+# Task-local contracts: do not change the historical hosts used by other fixtures.
+PRECISION_BASE = '''    def by_category(self) -> dict[str, float]:
+        """按类别汇总；十进制金额最终取两位，半分取偶，类别独立。"""
+        totals: dict[str, float] = {}
+        for entry in self.entries:
+            totals[entry.category] = totals.get(entry.category, 0.0) + entry.amount
+        return dict(sorted(totals.items()))
+'''
+
+PRECISION_GOLD = '''    def by_category(self) -> dict[str, float]:
+        """按类别汇总；十进制金额最终取两位，半分取偶，类别独立。"""
+        from fractions import Fraction
+
+        totals: dict[str, Fraction] = {}
+        for entry in self.entries:
+            amount = Fraction(str(entry.amount))
+            totals[entry.category] = totals.get(entry.category, Fraction(0)) + amount
+        return {category: float(round(total, 2)) for category, total in sorted(totals.items())}
+'''
+
+_category_start = BUDGET_LEDGER.index("    def by_category(")
+_category_end = BUDGET_LEDGER.index("    def snapshot(")
+HOSTS["budget_precision"] = {
+    **HOSTS["budget"],
+    "src/budget/ledger.py": (
+        BUDGET_LEDGER[:_category_start] + PRECISION_GOLD + "\n" + BUDGET_LEDGER[_category_end:]
+    ),
+}
+
+# 2026-10-18 user-confirmed synthetic API; CNY is a compatibility default,
+# not an inferred universal business currency. The field exists in base and gold.
+HOSTS["budget_currency"] = {
+    **HOSTS["budget"],
+    "src/budget/ledger.py": BUDGET_LEDGER.replace(
+        "    entries: list[Entry] = field(default_factory=list)",
+        '    entries: list[Entry] = field(default_factory=list)\n    currency: str = "CNY"',
+    ),
+    "src/budget/report.py": BUDGET_REPORT.replace('EXPORT_CURRENCY = "CNY"\n\n\n', "").replace(
+        '"currency": EXPORT_CURRENCY', '"currency": ledger.currency'
+    ),
+}
+
 #: 所有 fixture 共用同一类运行环境：只有标准库加 pytest。
 COMMON_ENV: dict[str, object] = {
     "python_version": "3.12",

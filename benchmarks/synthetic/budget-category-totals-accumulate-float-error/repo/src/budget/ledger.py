@@ -52,7 +52,7 @@ class Ledger:
         return round(sum(entry.amount for entry in self.entries), 2)
 
     def by_category(self) -> dict[str, float]:
-        """按类别汇总。"""
+        """按类别汇总；十进制金额最终取两位，半分取偶，类别独立。"""
         totals: dict[str, float] = {}
         for entry in self.entries:
             totals[entry.category] = totals.get(entry.category, 0.0) + entry.amount

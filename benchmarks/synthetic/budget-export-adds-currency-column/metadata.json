@@ -1,5 +1,5 @@
 {
-  "base_commit": "714e3e80ffacd9153e4aebca0f60a6bd6ce1cf46",
+  "base_commit": "1f174a105e5e6218a51602f10e080b1f282b8a21",
   "category": "cross_module_dependency",
   "difficulty": "hard",
   "has_traceback": false,
@@ -8,7 +8,7 @@
     "pyproject.toml": "41ea779db07b6f57f2fdced959f75c8626d071dba1519caf689097bd5c7ed2c9",
     "src/budget/__init__.py": "855defd27792ab7c8fd0f08fd1eab55563a4c153ebac5a964fa2c26d0a727f11",
     "src/budget/csv_writer.py": "440cb7d092cdb4aee32f462a5e12c29d9e475e259e2967044d2a1e4da052dc51",
-    "src/budget/ledger.py": "0f682c5e238b0c0776d1a8ea4ab60fa0ec4e93f0e189daa4a65a759d85a0bcef",
+    "src/budget/ledger.py": "5f54542fc13b4b2355b665fd0c53c4b63179e700bf089fe2d81913c02881a06c",
     "src/budget/report.py": "6491ac752dfd8f903da8e9c02204d54d6281e0f85b2bd3efac3dff046ed12d4d",
     "src/budget/rules.py": "c0db1020d10c18d515d65548d7967fa181e01083b7603d1eb0cc4ea1e33826df",
     "tests/test_ledger.py": "4c68f656fcdb83db1dd9b851b77c106ea84c46e41fd48935c66a331109e0b3df",

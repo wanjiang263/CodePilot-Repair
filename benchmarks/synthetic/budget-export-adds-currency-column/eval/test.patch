@@ -1,40 +1,53 @@
 diff --git a/tests/test_currency_column.py b/tests/test_currency_column.py
 new file mode 100644
-index 0000000..124dcc5
+index 0000000..7ee5db7
 --- /dev/null
 +++ b/tests/test_currency_column.py
-@@ -0,0 +1,34 @@
+@@ -0,0 +1,47 @@
 +"""Hidden evaluation tests (test.patch)."""
 +
 +from __future__ import annotations
 +
-+from budget.csv_writer import COLUMNS, render_row
++import csv
++import io
++
++import pytest
++
 +from budget.ledger import Ledger
 +from budget.report import build_rows, render
 +
 +
-+def _ledger() -> Ledger:
-+    ledger = Ledger()
++@pytest.mark.parametrize("currency", ["CNY", "USD", "EUR"])
++def test_export_uses_ledger_currency(currency) -> None:
++    ledger = Ledger(currency=currency)
 +    ledger.add(20.0, "Coffee")
-+    return ledger
++    ledger.add(7.5, "Lunch")
++    rows = build_rows(ledger)
++    assert [row["currency"] for row in rows] == [currency, currency]
++    assert [row["amount"] for row in rows] == [20.0, 7.5]
++    reader = csv.DictReader(io.StringIO(render(ledger)))
++    assert reader.fieldnames == ["category", "note", "currency", "amount"]
++    assert list(reader) == [
++        {"category": "food", "note": "Coffee", "currency": currency, "amount": "20.0"},
++        {"category": "food", "note": "Lunch", "currency": currency, "amount": "7.5"},
++    ]
 +
 +
-+def test_currency_is_one_of_the_columns() -> None:
-+    assert "currency" in COLUMNS
++def test_default_currency_is_cny() -> None:
++    ledger = Ledger()
++    ledger.add(2.0, "Coffee")
++    assert build_rows(ledger)[0]["currency"] == "CNY"
 +
 +
-+def test_rows_carry_every_column() -> None:
-+    rows = build_rows(_ledger())
-+    assert set(COLUMNS) <= set(rows[0])
++def test_sequential_exports_do_not_share_currency() -> None:
++    usd, eur = Ledger(currency="USD"), Ledger(currency="EUR")
++    usd.add(1.0, "Coffee")
++    eur.add(1.0, "Coffee")
++    for ledger, currency in [(usd, "USD"), (eur, "EUR"), (usd, "USD")]:
++        assert list(csv.DictReader(io.StringIO(render(ledger))))[0]["currency"] == currency
++        assert ledger.currency == currency
++        assert ledger.entries[0].amount == 1.0
 +
 +
-+def test_rendering_does_not_raise_key_error() -> None:
-+    text = render(_ledger())
-+    header = text.splitlines()[0].split(",")
-+    body = text.splitlines()[1].split(",")
-+    assert len(header) == len(body) == len(COLUMNS)
-+
-+
-+def test_currency_value_is_written() -> None:
-+    rows = build_rows(_ledger())
-+    assert rows[0]["currency"]
++def test_empty_export_keeps_schema() -> None:
++    assert render(Ledger(currency="EUR")) == "category,note,currency,amount\n"

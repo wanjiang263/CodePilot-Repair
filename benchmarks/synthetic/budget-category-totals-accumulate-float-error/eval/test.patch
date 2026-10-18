@@ -1,27 +1,70 @@
 diff --git a/tests/test_category_rounding.py b/tests/test_category_rounding.py
 new file mode 100644
-index 0000000..a631775
+index 0000000..daee23e
 --- /dev/null
 +++ b/tests/test_category_rounding.py
-@@ -0,0 +1,21 @@
+@@ -0,0 +1,64 @@
 +"""Hidden evaluation tests (test.patch)."""
 +
 +from __future__ import annotations
 +
-+from budget.ledger import Ledger
++from itertools import permutations
++
++import pytest
++
++from budget.ledger import Entry, Ledger
 +
 +
-+def _tenth_ledger() -> Ledger:
++@pytest.mark.parametrize("amounts, expected", [
++    ([0.1, 0.1, 0.1], 0.3),
++    ([0.004, 0.004, 0.004], 0.01),
++    ([0.005, 0.005], 0.01),
++    ([0.005], 0.0),
++    ([0.015], 0.02),
++    ([0.025], 0.02),
++    ([-0.005], 0.0),
++    ([-0.015], -0.02),
++    ([-0.025], -0.02),
++    ([0.0049], 0.0),
++    ([0.0051], 0.01),
++    ([2.675], 2.68),
++])
++def test_decimal_reporting(amounts, expected) -> None:
++    ledger = Ledger([Entry(amount, "item", "food") for amount in amounts])
++    result = ledger.by_category()
++    assert result == {"food": expected}
++    assert isinstance(result["food"], float)
++
++
++@pytest.mark.parametrize("amounts, expected", [
++    ([0.015, 0.015, -0.01], 0.02),
++    ([1e16, 0.01, -1e16], 0.01),
++])
++def test_order_does_not_change_totals(amounts, expected) -> None:
++    for ordered in permutations(amounts):
++        ledger = Ledger([Entry(value, "item", "food") for value in ordered])
++        assert ledger.by_category() == {"food": expected}
++
++
++def test_categories_are_independent_and_sorted() -> None:
++    ledger = Ledger([
++        Entry(0.005, "item", "z"), Entry(0.005, "item", "a"),
++        Entry(0.015, "item", "m"),
++    ])
++    before = list(ledger.entries)
++    assert ledger.by_category() == {"a": 0.0, "m": 0.02, "z": 0.0}
++    assert list(ledger.by_category()) == ["a", "m", "z"]
++    assert ledger.entries == before
++
++
++def test_refund_participates_before_rounding() -> None:
 +    ledger = Ledger()
-+    for _ in range(3):
-+        ledger.add(0.1, "Coffee")
-+    return ledger
++    ledger.add(0.025, "Coffee")
++    ledger.refund(0, 0.01)
++    assert ledger.by_category() == {"food": 0.02}
 +
 +
-+def test_three_tenths_is_exactly_three_tenths() -> None:
-+    assert _tenth_ledger().by_category() == {"food": 0.3}
-+
-+
-+def test_category_and_total_agree() -> None:
-+    ledger = _tenth_ledger()
-+    assert sum(ledger.by_category().values()) == ledger.total()
++def test_empty_and_cancelling_categories() -> None:
++    assert Ledger().by_category() == {}
++    ledger = Ledger([Entry(0.015, "item", "food"), Entry(-0.015, "refund", "food")])
++    assert ledger.by_category() == {"food": 0.0}

@@ -1,7 +1,11 @@
 {
   "fail_to_pass": [
-    "tests/test_currency_column.py::test_currency_is_one_of_the_columns",
-    "tests/test_currency_column.py::test_currency_value_is_written"
+    "tests/test_currency_column.py::test_default_currency_is_cny",
+    "tests/test_currency_column.py::test_empty_export_keeps_schema",
+    "tests/test_currency_column.py::test_export_uses_ledger_currency[CNY]",
+    "tests/test_currency_column.py::test_export_uses_ledger_currency[EUR]",
+    "tests/test_currency_column.py::test_export_uses_ledger_currency[USD]",
+    "tests/test_currency_column.py::test_sequential_exports_do_not_share_currency"
   ],
   "pass_to_pass": [
     "tests/test_ledger.py::test_add_records_an_entry",

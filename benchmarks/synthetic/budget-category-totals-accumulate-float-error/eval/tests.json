@@ -1,7 +1,20 @@
 {
   "fail_to_pass": [
-    "tests/test_category_rounding.py::test_category_and_total_agree",
-    "tests/test_category_rounding.py::test_three_tenths_is_exactly_three_tenths"
+    "tests/test_category_rounding.py::test_categories_are_independent_and_sorted",
+    "tests/test_category_rounding.py::test_decimal_reporting[amounts0-0.3]",
+    "tests/test_category_rounding.py::test_decimal_reporting[amounts1-0.01]",
+    "tests/test_category_rounding.py::test_decimal_reporting[amounts10-0.01]",
+    "tests/test_category_rounding.py::test_decimal_reporting[amounts11-2.68]",
+    "tests/test_category_rounding.py::test_decimal_reporting[amounts3-0.0]",
+    "tests/test_category_rounding.py::test_decimal_reporting[amounts4-0.02]",
+    "tests/test_category_rounding.py::test_decimal_reporting[amounts5-0.02]",
+    "tests/test_category_rounding.py::test_decimal_reporting[amounts6-0.0]",
+    "tests/test_category_rounding.py::test_decimal_reporting[amounts7--0.02]",
+    "tests/test_category_rounding.py::test_decimal_reporting[amounts8--0.02]",
+    "tests/test_category_rounding.py::test_decimal_reporting[amounts9-0.0]",
+    "tests/test_category_rounding.py::test_order_does_not_change_totals[amounts0-0.02]",
+    "tests/test_category_rounding.py::test_order_does_not_change_totals[amounts1-0.01]",
+    "tests/test_category_rounding.py::test_refund_participates_before_rounding"
   ],
   "pass_to_pass": [
     "tests/test_ledger.py::test_add_records_an_entry",

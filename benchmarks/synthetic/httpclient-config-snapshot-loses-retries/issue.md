@@ -1,3 +1,3 @@
-A client built through the helper ignores the configuration it is given.
+Client settings are lost and the diagnostic snapshot is incomplete.
 
-`new_client` accepts the same keyword arguments as `Config`, and `Config.as_dict` is what the diagnostics endpoint prints. Right now a caller can pass `retries=5`, see `retries: 2` in the diagnostic snapshot, and have no way to tell which of the two is lying - so both the helper and the snapshot need to be fixed.
+Creating a client through the convenience API with retries=5 leaves its retry budget at the default 2. Diagnostic snapshots omit the retry count, including for a configuration created directly. Callers expect the supplied timeout and retry settings to take effect and snapshots to report base URL, timeout and retries accurately.

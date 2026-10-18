@@ -1,6 +1,6 @@
-Describing an unlisted SKU raises `KeyError`.
+Describing an unlisted SKU raises KeyError.
 
-`UNKNOWN_NAME` exists so that a catalog lookup can always produce a label, and callers are supposed to get that label instead of an exception - the report generator walks every SKU seen on the floor, most of which are not in the catalog at all.
+The stock report includes products that have not yet been added to the catalog. For example, an unlisted Q should be displayed as "Q - unknown" rather than aborting the report. This also applies when a caller supplies its own catalog; listed products should retain their names.
 
 Actual behaviour on the current revision:
 

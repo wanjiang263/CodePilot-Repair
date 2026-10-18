@@ -1,13 +1,21 @@
 diff --git a/src/budget/ledger.py b/src/budget/ledger.py
-index 3a4d260..c2ec5bc 100644
+index 95b0fae..de38b2f 100644
 --- a/src/budget/ledger.py
 +++ b/src/budget/ledger.py
-@@ -55,7 +55,7 @@ class Ledger:
-         """按类别汇总。"""
-         totals: dict[str, float] = {}
+@@ -53,10 +53,13 @@ class Ledger:
+ 
+     def by_category(self) -> dict[str, float]:
+         """按类别汇总；十进制金额最终取两位，半分取偶，类别独立。"""
+-        totals: dict[str, float] = {}
++        from fractions import Fraction
++
++        totals: dict[str, Fraction] = {}
          for entry in self.entries:
 -            totals[entry.category] = totals.get(entry.category, 0.0) + entry.amount
-+            totals[entry.category] = round(totals.get(entry.category, 0.0) + entry.amount, 2)
-         return dict(sorted(totals.items()))
+-        return dict(sorted(totals.items()))
++            amount = Fraction(str(entry.amount))
++            totals[entry.category] = totals.get(entry.category, Fraction(0)) + amount
++        return {category: float(round(total, 2)) for category, total in sorted(totals.items())}
  
      def snapshot(self) -> list[Entry]:
+         """当前分录的**副本**列表，供调用方安全持有。"""

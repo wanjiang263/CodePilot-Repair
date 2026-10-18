@@ -1,3 +1,3 @@
-Members pay full price and guests get the discount.
+Membership prices are incorrect.
 
-`apply_discount` is supposed to reduce the total by `MEMBER_DISCOUNT` when `member` is true and leave it alone otherwise. The two branches have swapped places.
+For a purchase total of 200, a member is charged 200 while a guest is charged 180. The membership offer is a ten percent reduction; guests pay the original total. Discounted prices are rounded to two decimal places.

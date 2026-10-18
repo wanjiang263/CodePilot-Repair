@@ -1,3 +1,3 @@
-The CSV export cannot be imported by the accounting tool any more.
+CSV exports are rejected because the currency column is missing.
 
-Every exported row now has to say which currency the amounts are in - the finance team merges exports from several deployments and the same number means different things depending on where it came from. A row that is missing the currency is rejected on import as a header/data mismatch.
+The import format requires category, note, currency, amount in that order, including the header for an empty ledger. Each ledger has a currency attribute: omitted currency defaults to CNY for compatibility, while a caller can supply another currency such as USD or EUR. Every exported row must use that ledger currency without converting its amount. Exports from different ledgers must retain their own currencies, including when produced consecutively.

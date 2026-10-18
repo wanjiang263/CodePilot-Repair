@@ -1,5 +1,5 @@
 {
-  "base_commit": "08602807419b25c2d7392be8aca8efe2e774d6b4",
+  "base_commit": "cedbcac2cc1f5e386877a050433d0a79fd6553f3",
   "category": "edge_case",
   "difficulty": "medium",
   "has_traceback": false,
@@ -8,7 +8,7 @@
     "pyproject.toml": "41ea779db07b6f57f2fdced959f75c8626d071dba1519caf689097bd5c7ed2c9",
     "src/budget/__init__.py": "855defd27792ab7c8fd0f08fd1eab55563a4c153ebac5a964fa2c26d0a727f11",
     "src/budget/csv_writer.py": "bbbbc232e73a98d224a1257929c64c512384872db682d48d45d64830229b1b4e",
-    "src/budget/ledger.py": "95110fff0fc88457aa6ddd1e11ae38e6fbbe1c7309ed2ccefebe05541aac8c56",
+    "src/budget/ledger.py": "d6cbab270c202186ff9f30ac95f8590b10f734d75ac1d97c4d2b99f604eb5139",
     "src/budget/report.py": "8ff235cba22016ec72c36f77f80d1c76b1f35e50430fb5784dc1246befb243e8",
     "src/budget/rules.py": "c0db1020d10c18d515d65548d7967fa181e01083b7603d1eb0cc4ea1e33826df",
     "tests/test_ledger.py": "4c68f656fcdb83db1dd9b851b77c106ea84c46e41fd48935c66a331109e0b3df",
