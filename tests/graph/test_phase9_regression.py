@@ -190,6 +190,48 @@ def test_invalid_review_evidence_fails_closed(tmp_path):
     assert state.review_repairs == 0
 
 
+def test_review_issue_on_existing_unmodified_file_is_allowed(tmp_path):
+    """未改动但真实存在的仓库文件可以作为 issue 证据；line=None 也合法。
+
+    真实 GLM-5.3-Flash 的 reviewer 对测试文件提了一条建议性 issue
+    （``tests/test_ledger.py``、line=null），旧校验只认 diff 文件，直接把整次
+    运行判成 ``review evidence references an unverified file``。
+    """
+    harness = build_harness(
+        tmp_path,
+        results=[passed_result(), passed_result(), passed_result()],
+        coder_rounds=[[edit("src/pkg/core.py", "return value - 1", "return value"), FINISH]],
+    )
+    harness.deps.regression_runner = RegressionRunner()
+    harness.deps.reviewer = PatchReviewer(
+        FakeLLM(
+            [
+                {
+                    "approved": True,
+                    "issues": [
+                        {
+                            "severity": "low",
+                            "file": "tests/test_core.py",
+                            "line": 2,
+                            "description": "consider adding a regression assertion here",
+                        },
+                        {
+                            "severity": "low",
+                            "file": "src/pkg/helper.py",
+                            "line": None,
+                            "description": "file-level note",
+                        },
+                    ],
+                }
+            ]
+        )
+    )
+    state = harness.run()
+    assert state.status is RunStatus.SUCCEEDED, state.failure_reasons
+    assert state.review is not None
+    assert len(state.review.issues) == 2
+
+
 @pytest.mark.parametrize("second_high", [True, False])
 def test_high_review_has_one_extra_repair(tmp_path, second_high):
     high = {

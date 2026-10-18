@@ -114,13 +114,22 @@ class PatchReviewer:
                 raise ValueError("invalid reviewer output")
             for issue in result.issues:
                 pure = PurePosixPath(issue.file)
-                if pure.is_absolute() or ".." in pure.parts or issue.file not in sources:
+                if pure.is_absolute() or ".." in pure.parts:
                     raise ValueError("review evidence references an unverified file")
-                if (
-                    not issue.description.strip()
-                    or issue.line is None
-                    or not 1 <= issue.line <= len(sources[issue.file].splitlines())
-                ):
+                text = sources.get(issue.file)
+                if text is None:
+                    # 未改动的仓库文件也可以是合法 issue 的证据（例如"这里缺测试"）。
+                    # 只要文件真实存在、且行号（若给出）在范围内，就不是伪造；
+                    # 不存在/越界才 fail-closed。
+                    try:
+                        text = deps.validator.policy.resolve(issue.file, must_exist=True).read_text(
+                            encoding="utf-8"
+                        )
+                    except (OSError, ValueError) as exc:
+                        raise ValueError("review evidence references an unverified file") from exc
+                if not issue.description.strip():
+                    raise ValueError("review evidence has invalid line or description")
+                if issue.line is not None and not 1 <= issue.line <= len(text.splitlines()):
                     raise ValueError("review evidence has invalid line or description")
             return result.model_copy(update={"usage_known": response.cost_known})
 
