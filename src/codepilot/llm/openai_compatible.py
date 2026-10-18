@@ -29,6 +29,7 @@ from codepilot.llm.errors import (
 )
 from codepilot.llm.retry import ConcurrencyLimiter, RetryPolicy, call_with_retry
 from codepilot.llm.types import LLMRequest, LLMResponse, ToolCall
+from codepilot.net import build_http_client
 from codepilot.observability.redaction import REDACTED
 
 __all__ = ["CONTEXT_OVERFLOW_MARKERS", "OpenAICompatibleProvider", "looks_like_context_overflow"]
@@ -114,7 +115,7 @@ class OpenAICompatibleProvider:
         self._api_key = api_key
 
         self._owns_client = client is None
-        self._client = client or httpx.Client(
+        self._client = client or build_http_client(
             base_url=provider.base_url,
             timeout=provider.timeout_seconds,
         )

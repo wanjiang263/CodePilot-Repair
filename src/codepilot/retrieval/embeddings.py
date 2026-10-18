@@ -20,6 +20,7 @@ from numpy.typing import NDArray
 from codepilot.llm.config import ProviderSpec
 from codepilot.llm.errors import ProviderError, ProviderNotAllowedError, RateLimitError
 from codepilot.llm.retry import ConcurrencyLimiter, RetryPolicy, call_with_retry
+from codepilot.net import build_http_client
 from codepilot.retrieval.documents import RetrievalError
 
 type Vectors = NDArray[np.float64]
@@ -154,7 +155,7 @@ class OpenAICompatibleEmbeddingProvider:
         self.sleep = sleep
         self._headers = {"Authorization": f"Bearer {api_key}", **provider.extra_headers}
         self._owns_client = client is None
-        self._client = client or httpx.Client(timeout=provider.timeout_seconds)
+        self._client = client or build_http_client(timeout=provider.timeout_seconds)
 
     def embed(self, texts: Sequence[str]) -> Vectors:
         if not texts:

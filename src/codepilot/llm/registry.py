@@ -31,6 +31,7 @@ from codepilot.llm.record import RecordingLLM
 from codepilot.llm.replay import ReplayLLM
 from codepilot.llm.retry import ConcurrencyLimiter, RetryPolicy
 from codepilot.llm.tracking import UsageTrackingProvider
+from codepilot.net import build_http_client
 from codepilot.observability.events import EventSink
 from codepilot.schemas.usage import Usage
 
@@ -311,7 +312,7 @@ def _default_client(provider_spec: Any, api_key: str) -> httpx.Client:
     写在这里会让人以为"注入 client 就等于配好了鉴权"。
     """
     del api_key
-    return httpx.Client(
+    return build_http_client(
         base_url=provider_spec.base_url,
         timeout=provider_spec.timeout_seconds,
     )
