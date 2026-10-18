@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import os
 import re
 import shutil
 import subprocess
-from pathlib import PurePosixPath, PureWindowsPath
+from collections.abc import Iterator
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -97,6 +99,148 @@ def read_file_tool(policy: WorkspacePathPolicy) -> Tool:
     )
 
 
+_MAX_SEARCH_MATCHES = 50
+_MAX_SEARCH_FILE_BYTES = 5 * 1024 * 1024
+_BINARY_PROBE_BYTES = 8192
+
+
+def _is_denied_directory(relative: str, policy: WorkspacePathPolicy) -> bool:
+    parts = relative.split("/")
+    candidates = {"/".join(parts[:index]) for index in range(1, len(parts) + 1)}
+    return any(rule in candidates for rule in policy.deny_directories)
+
+
+def _iter_search_files(
+    policy: WorkspacePathPolicy, path_glob: str | None
+) -> Iterator[tuple[str, Path]]:
+    """按确定顺序遍历 workspace 内可搜索文件（不跟随符号链接）。"""
+    for dirpath, dirnames, filenames in os.walk(policy.root, followlinks=False):
+        base = Path(dirpath)
+        relative_dir = base.relative_to(policy.root).as_posix()
+        kept: list[str] = []
+        for name in sorted(dirnames):
+            if (base / name).is_symlink():
+                continue
+            relative = name if relative_dir == "." else f"{relative_dir}/{name}"
+            if _is_denied_directory(relative, policy):
+                continue
+            kept.append(name)
+        dirnames[:] = kept
+        for name in sorted(filenames):
+            relative = name if relative_dir == "." else f"{relative_dir}/{name}"
+            if path_glob is not None and not PurePosixPath(relative).match(path_glob):
+                continue
+            yield relative, base / name
+
+
+def _search_with_python(policy: WorkspacePathPolicy, args: SearchCodeInput) -> ToolResponse:
+    """ripgrep 缺失时的纯 Python 回退；输出形状与 rg 路径保持一致。
+
+    真实 GLM 实验里 Planner 的 ``search_code`` 因为宿主机没有 ``rg`` 直接失败
+    （``dependency_missing``）。工具不该把"可选二进制缺失"变成"搜索能力为零"：
+    这里提供确定性、受 workspace 策略约束的回退实现。
+    """
+    pattern: re.Pattern[str] | None = re.compile(args.pattern) if args.regex else None
+    matches: list[dict[str, str | int]] = []
+    truncated = False
+    for relative, path in _iter_search_files(policy, args.path_glob):
+        if path.is_symlink():
+            continue
+        try:
+            policy.resolve(relative, must_exist=True)
+            data = path.read_bytes()
+        except (OSError, ValueError):
+            continue
+        if len(data) > _MAX_SEARCH_FILE_BYTES:
+            continue
+        if b"\x00" in data[:_BINARY_PROBE_BYTES]:
+            continue
+        text = data.decode("utf-8", errors="replace")
+        for line_no, line in enumerate(text.splitlines(), start=1):
+            if pattern is not None:
+                found = pattern.search(line)
+                column = found.start() + 1 if found is not None else 0
+            else:
+                index = line.find(args.pattern)
+                column = index + 1 if index >= 0 else 0
+            if column == 0:
+                continue
+            matches.append(
+                {"path": relative, "line": line_no, "column": column, "text": line[:1000]}
+            )
+            if len(matches) > _MAX_SEARCH_MATCHES:
+                truncated = True
+                break
+        if truncated:
+            break
+    matches.sort(key=lambda item: (str(item["path"]), int(item["line"]), int(item["column"])))
+    return ToolResponse.success(
+        "search_code", matches=matches[:_MAX_SEARCH_MATCHES], truncated=truncated
+    )
+
+
+def _search_with_ripgrep(
+    policy: WorkspacePathPolicy, args: SearchCodeInput, executable: str
+) -> ToolResponse:
+    command = [
+        executable,
+        "--line-number",
+        "--column",
+        "--no-heading",
+        "--color=never",
+    ]
+    if not args.regex:
+        command.append("--fixed-strings")
+    if args.path_glob:
+        command.extend(["--glob", args.path_glob])
+    for denied in sorted(policy.deny_directories):
+        command.extend(["--glob", f"!{denied}/**"])
+    command.extend(["--", args.pattern, "."])
+    completed = subprocess.run(
+        command,
+        cwd=policy.root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=15,
+        check=False,
+    )
+    if completed.returncode not in (0, 1):
+        return ToolResponse.failure(
+            "search_code",
+            "search_failed",
+            completed.stderr.strip()[:1000] or "ripgrep failed",
+        )
+    matches: list[dict[str, str | int]] = []
+    for line in completed.stdout.splitlines():
+        if len(matches) == _MAX_SEARCH_MATCHES:
+            break
+        match = re.match(r"^(.+?):(\d+):(\d+):(.*)$", line)
+        if match is None:
+            continue
+        relative, line_no, column, text = match.groups()
+        relative = relative.removeprefix(".\\").removeprefix("./").replace("\\", "/")
+        try:
+            policy.resolve(relative, must_exist=True)
+        except ValueError:
+            continue
+        matches.append(
+            {
+                "path": relative,
+                "line": int(line_no),
+                "column": int(column),
+                "text": text[:1000],
+            }
+        )
+    matches.sort(key=lambda item: (str(item["path"]), int(item["line"]), int(item["column"])))
+    return ToolResponse.success(
+        "search_code",
+        matches=matches,
+        truncated=len(completed.stdout.splitlines()) > _MAX_SEARCH_MATCHES,
+    )
+
+
 def search_code_tool(policy: WorkspacePathPolicy) -> Tool:
     def handle(raw: BaseModel) -> ToolResponse:
         args = SearchCodeInput.model_validate(raw)
@@ -107,68 +251,15 @@ def search_code_tool(policy: WorkspacePathPolicy) -> Tool:
                 return ToolResponse.failure("search_code", "invalid_regex", str(exc))
         executable = shutil.which("rg")
         if executable is None:
-            return ToolResponse.failure(
-                "search_code", "dependency_missing", "ripgrep is unavailable"
-            )
-        command = [
-            executable,
-            "--line-number",
-            "--column",
-            "--no-heading",
-            "--color=never",
-        ]
-        if not args.regex:
-            command.append("--fixed-strings")
-        if args.path_glob:
-            command.extend(["--glob", args.path_glob])
-        for denied in sorted(policy.deny_directories):
-            command.extend(["--glob", f"!{denied}/**"])
-        command.extend(["--", args.pattern, "."])
-        completed = subprocess.run(
-            command,
-            cwd=policy.root,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=15,
-            check=False,
-        )
-        if completed.returncode not in (0, 1):
-            return ToolResponse.failure(
-                "search_code",
-                "search_failed",
-                completed.stderr.strip()[:1000] or "ripgrep failed",
-            )
-        matches: list[dict[str, str | int]] = []
-        for line in completed.stdout.splitlines():
-            if len(matches) == 50:
-                break
-            match = re.match(r"^(.+?):(\d+):(\d+):(.*)$", line)
-            if match is None:
-                continue
-            relative, line_no, column, text = match.groups()
-            relative = relative.removeprefix(".\\").removeprefix("./").replace("\\", "/")
-            try:
-                policy.resolve(relative, must_exist=True)
-            except ValueError:
-                continue
-            matches.append(
-                {
-                    "path": relative,
-                    "line": int(line_no),
-                    "column": int(column),
-                    "text": text[:1000],
-                }
-            )
-        matches.sort(key=lambda item: (str(item["path"]), int(item["line"]), int(item["column"])))
-        return ToolResponse.success(
-            "search_code", matches=matches, truncated=len(completed.stdout.splitlines()) > 50
-        )
+            return _search_with_python(policy, args)
+        return _search_with_ripgrep(policy, args, executable)
 
     return Tool(
         name="search_code",
-        description="Search repository text with ripgrep and return at most 50 matches.",
+        description=(
+            "Search repository text (ripgrep when available, built-in fallback) "
+            "and return at most 50 matches."
+        ),
         permission=ToolPermission.READ,
         input_model=SearchCodeInput,
         handler=handle,
