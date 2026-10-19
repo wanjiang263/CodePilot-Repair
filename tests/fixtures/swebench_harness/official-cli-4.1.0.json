@@ -1,0 +1,385 @@
+{
+  "argparse": [
+    {
+      "choices": null,
+      "default": "==SUPPRESS==",
+      "dest": "help",
+      "flags": [
+        "-h",
+        "--help"
+      ],
+      "help": "show this help message and exit",
+      "nargs": null,
+      "required": false,
+      "type": null
+    },
+    {
+      "choices": null,
+      "default": "SWE-bench/SWE-bench_Lite",
+      "dest": "dataset_name",
+      "flags": [
+        "-d",
+        "--dataset_name"
+      ],
+      "help": "Name of dataset or path to JSON file.",
+      "nargs": null,
+      "required": false,
+      "type": "str"
+    },
+    {
+      "choices": null,
+      "default": "test",
+      "dest": "split",
+      "flags": [
+        "-s",
+        "--split"
+      ],
+      "help": "Split of the dataset",
+      "nargs": null,
+      "required": false,
+      "type": "str"
+    },
+    {
+      "choices": null,
+      "default": null,
+      "dest": "instance_ids",
+      "flags": [
+        "-i",
+        "--instance_ids"
+      ],
+      "help": "Instance IDs to run (space separated)",
+      "nargs": "+",
+      "required": false,
+      "type": "str"
+    },
+    {
+      "choices": null,
+      "default": null,
+      "dest": "predictions_path",
+      "flags": [
+        "-p",
+        "--predictions_path"
+      ],
+      "help": "Path to predictions file - if 'gold', uses gold predictions",
+      "nargs": null,
+      "required": true,
+      "type": "str"
+    },
+    {
+      "choices": null,
+      "default": 4,
+      "dest": "max_workers",
+      "flags": [
+        "--max_workers"
+      ],
+      "help": "Maximum number of workers (should be <= 75%% of CPU cores)",
+      "nargs": null,
+      "required": false,
+      "type": "int"
+    },
+    {
+      "choices": null,
+      "default": 4096,
+      "dest": "open_file_limit",
+      "flags": [
+        "--open_file_limit"
+      ],
+      "help": "Open file limit",
+      "nargs": null,
+      "required": false,
+      "type": "int"
+    },
+    {
+      "choices": null,
+      "default": 1800,
+      "dest": "timeout",
+      "flags": [
+        "-t",
+        "--timeout"
+      ],
+      "help": "Timeout (in seconds) for running tests for each instance",
+      "nargs": null,
+      "required": false,
+      "type": "int"
+    },
+    {
+      "choices": null,
+      "default": false,
+      "dest": "force_rebuild",
+      "flags": [
+        "--force_rebuild"
+      ],
+      "help": "Force rebuild of all images",
+      "nargs": null,
+      "required": false,
+      "type": "str2bool"
+    },
+    {
+      "choices": [
+        "none",
+        "base",
+        "env",
+        "instance"
+      ],
+      "default": "env",
+      "dest": "cache_level",
+      "flags": [
+        "--cache_level"
+      ],
+      "help": "Cache level - remove images above this level",
+      "nargs": null,
+      "required": false,
+      "type": "str"
+    },
+    {
+      "choices": null,
+      "default": false,
+      "dest": "clean",
+      "flags": [
+        "--clean"
+      ],
+      "help": "Clean images above cache level",
+      "nargs": null,
+      "required": false,
+      "type": "str2bool"
+    },
+    {
+      "choices": null,
+      "default": null,
+      "dest": "run_id",
+      "flags": [
+        "-id",
+        "--run_id"
+      ],
+      "help": "Run ID - identifies the run",
+      "nargs": null,
+      "required": true,
+      "type": "str"
+    },
+    {
+      "choices": null,
+      "default": "swebench",
+      "dest": "namespace",
+      "flags": [
+        "-n",
+        "--namespace"
+      ],
+      "help": "Namespace for images. (use \"none\" to use no namespace)",
+      "nargs": null,
+      "required": false,
+      "type": "optional_str"
+    },
+    {
+      "choices": null,
+      "default": "latest",
+      "dest": "instance_image_tag",
+      "flags": [
+        "--instance_image_tag"
+      ],
+      "help": "Instance image tag",
+      "nargs": null,
+      "required": false,
+      "type": "str"
+    },
+    {
+      "choices": null,
+      "default": "latest",
+      "dest": "env_image_tag",
+      "flags": [
+        "--env_image_tag"
+      ],
+      "help": "Environment image tag",
+      "nargs": null,
+      "required": false,
+      "type": "str"
+    },
+    {
+      "choices": null,
+      "default": false,
+      "dest": "rewrite_reports",
+      "flags": [
+        "--rewrite_reports"
+      ],
+      "help": "Doesn't run new instances, only writes reports for instances with existing test outputs",
+      "nargs": null,
+      "required": false,
+      "type": "str2bool"
+    },
+    {
+      "choices": null,
+      "default": ".",
+      "dest": "report_dir",
+      "flags": [
+        "--report_dir"
+      ],
+      "help": "Directory to write reports to",
+      "nargs": null,
+      "required": false,
+      "type": "str"
+    },
+    {
+      "choices": null,
+      "default": false,
+      "dest": "modal",
+      "flags": [
+        "--modal"
+      ],
+      "help": "Run on Modal",
+      "nargs": null,
+      "required": false,
+      "type": "str2bool"
+    }
+  ],
+  "main_parameters": [
+    {
+      "annotation": "str",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "dataset_name"
+    },
+    {
+      "annotation": "str",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "split"
+    },
+    {
+      "annotation": "list",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "instance_ids"
+    },
+    {
+      "annotation": "str",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "predictions_path"
+    },
+    {
+      "annotation": "int",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "max_workers"
+    },
+    {
+      "annotation": "bool",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "force_rebuild"
+    },
+    {
+      "annotation": "str",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "cache_level"
+    },
+    {
+      "annotation": "bool",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "clean"
+    },
+    {
+      "annotation": "int",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "open_file_limit"
+    },
+    {
+      "annotation": "str",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "run_id"
+    },
+    {
+      "annotation": "int",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "timeout"
+    },
+    {
+      "annotation": "str | None",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "namespace"
+    },
+    {
+      "annotation": "bool",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "rewrite_reports"
+    },
+    {
+      "annotation": "bool",
+      "default": null,
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "modal"
+    },
+    {
+      "annotation": "str",
+      "default": "latest",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "instance_image_tag"
+    },
+    {
+      "annotation": "str",
+      "default": "latest",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "env_image_tag"
+    },
+    {
+      "annotation": "str",
+      "default": ".",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "name": "report_dir"
+    }
+  ],
+  "per_instance_report_fields": [
+    "patch_is_None",
+    "patch_exists",
+    "patch_successfully_applied",
+    "resolved",
+    "tests_status"
+  ],
+  "per_instance_report_note": "Per-instance report.json under logs/run_evaluation/<run_id>/<model_slug>/<instance_id>/ is written by grading.get_eval_report(include_tests_status=True) and is the only place that distinguishes patch apply failure from an unresolved test run.",
+  "prediction_keys": [
+    "instance_id",
+    "model_name_or_path",
+    "model_patch"
+  ],
+  "predictions_validation_note": "swebench.harness.utils.get_predictions_from_file only requires 'instance_id' and only accepts .json/.jsonl; CodePilot validates the full three-field contract itself before invoking the official CLI (fail closed).",
+  "provenance": {
+    "generated_for": "CodePilot-Repair Phase 11 E-16",
+    "harness_package": "swebench",
+    "harness_version": "4.1.0",
+    "python_venv": ".venv-swebench",
+    "tool": "python -m swebench.harness.run_evaluation --help",
+    "windows_note": "Native Windows cannot import swebench; the child interpreter injected sys.modules['resource'] stub (RLIMIT_NOFILE/RLIM_INFINITY/getrlimit/setrlimit) before import, matching cache/verify/gen_assets.py."
+  },
+  "report_fields": [
+    "total_instances",
+    "submitted_instances",
+    "completed_instances",
+    "resolved_instances",
+    "unresolved_instances",
+    "empty_patch_instances",
+    "error_instances",
+    "completed_ids",
+    "incomplete_ids",
+    "empty_patch_ids",
+    "submitted_ids",
+    "resolved_ids",
+    "unresolved_ids",
+    "error_ids",
+    "schema_version",
+    "unstopped_instances",
+    "unstopped_containers",
+    "unremoved_images"
+  ],
+  "report_filename_rule": "<model_name_or_path with '/' replaced by '__'>.<run_id>.json",
+  "report_filename_template": "{model_slug}.{run_id}.json where model_slug = model_name_or_path.replace('/', '__')",
+  "report_optional_fields_note": "make_run_report only writes unstopped_* when client is None; a real local run always passes a docker client, so unstopped_instances/unstopped_containers/unremoved_images are present only in client-less report generation and must be treated as optional.",
+  "report_schema_version": 2,
+  "report_write_directory": "process cwd (swebench 4.1.0 computes a relative Path; --report_dir is accepted and created but not used as the write directory)",
+  "run_evaluation_log_dir": "logs/run_evaluation (relative; resolved against process cwd)"
+}

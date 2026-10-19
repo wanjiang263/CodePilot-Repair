@@ -1,0 +1,39 @@
+{
+  "completed_ids": [
+    "astropy__astropy-12907",
+    "astropy__astropy-14182",
+    "astropy__astropy-14995"
+  ],
+  "completed_instances": 3,
+  "empty_patch_ids": [
+    "astropy__astropy-14365"
+  ],
+  "empty_patch_instances": 1,
+  "error_ids": [
+    "astropy__astropy-14995"
+  ],
+  "error_instances": 1,
+  "incomplete_ids": [
+    "astropy__astropy-6938"
+  ],
+  "resolved_ids": [
+    "astropy__astropy-12907"
+  ],
+  "resolved_instances": 1,
+  "schema_version": 2,
+  "submitted_ids": [
+    "astropy__astropy-12907",
+    "astropy__astropy-14182",
+    "astropy__astropy-14365",
+    "astropy__astropy-14995"
+  ],
+  "submitted_instances": 4,
+  "total_instances": 5,
+  "unremoved_images": [],
+  "unresolved_ids": [
+    "astropy__astropy-14182"
+  ],
+  "unresolved_instances": 1,
+  "unstopped_containers": [],
+  "unstopped_instances": 0
+}

@@ -1,0 +1,22 @@
+{
+  "astropy__astropy-12907": {
+    "patch_exists": true,
+    "patch_is_None": false,
+    "patch_successfully_applied": true,
+    "resolved": true,
+    "tests_status": {
+      "FAIL_TO_PASS": {
+        "failure": [],
+        "success": [
+          "test_a"
+        ]
+      },
+      "PASS_TO_PASS": {
+        "failure": [],
+        "success": [
+          "test_b"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "provenance": {
+    "generator": "swebench.harness.reporting.make_run_report(predictions, dataset, run_id, client=None)",
+    "harness_version": "4.1.0",
+    "instance_ids": [
+      "astropy__astropy-12907",
+      "astropy__astropy-14182",
+      "astropy__astropy-14365",
+      "astropy__astropy-14995",
+      "astropy__astropy-6938"
+    ],
+    "model_name_or_path": "codepilot/glm-4.5",
+    "note": "Real 4.1.0 output captured with client=None (so unstopped_* keys are present). A real local run passes docker client and therefore omits them.",
+    "report_filename": "codepilot__glm-4.5.cp-0123456789ab-seed20261019.json",
+    "report_sha256": "02ac64e85fd5858261481ee7c73927a74646b3a282ef8dc783fe49b0873ed3c6",
+    "run_id": "cp-0123456789ab-seed20261019",
+    "sandbox_venv": ".venv-swebench",
+    "total_instances": 5
+  }
+}
