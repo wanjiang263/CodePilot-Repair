@@ -1,6 +1,12 @@
 # Phase 11：SWE-bench Lite 集成（E-11～E-20）开发记录
 
-> 本文件记录真实执行过的东西。凡是没跑过的，正文里直接写 **NOT RUN**，不写“应该可以”。
+> **后续（Phase 11R，2026-10-19）**：本轮的"真实镜像构建 NOT RUN / 真实 Harness NOT RUN"
+> 已在 [`phase11-runtime-acceptance.md`](phase11-runtime-acceptance.md) 里补齐：Linux/WSL2
+> 全量离线门禁 exit 0、`swebench==4.1.0` 官方 CLI 真实执行、一个官方 dev 实例的
+> Gold + 三种负向控制真实判分。该文件同时更正本文两处口径（镜像名的 namespace 前缀、
+> "补丁打不上"的官方归类）。下文保留 Phase 11 当时的事实，不作追溯修改。
+>
+> 本文件记录真实执行过的东西。凡是没跑过的，正文里直接写 **NOT RUN**，不写"应该可以"。
 > 状态口径（与任务书 §21 一致）：`IMPLEMENTED / TESTED` 指代码与离线测试完成，
 > 不等于官方 M3 验收通过。**M3 仍未达成**：固定 50/300 题的真实模型 + 官方 Harness
 > 评测没有执行。
@@ -125,14 +131,19 @@ Checkpoint、恢复路径读取，全部失败才算通过；同时正向断言 
 - 官方环境规格冻结快照：`configs/swebench/env-specs-4.1.0.json`（来自
   `swebench.harness.constants.MAP_REPO_VERSION_TO_SPECS`，66 个 repo），运行时只读快照。
 - 镜像身份（由 4.1.0 的 `TestSpec` 实测命名规则）：
-  - instance：`sweb.eval.x86_64.<instance_id>:latest`
-  - env：`sweb.env.py.x86_64.<env hash>:latest`
-  - base：`sweb.base.py.x86_64:latest`
+  - instance：**默认是远端预构建镜像** `swebench/sweb.eval.x86_64.<instance_id 小写、`__`→`_1776_》:latest`
+    （官方 CLI `-n/--namespace` 默认值 `swebench`）；`-n none` 才是本地构建形态
+    `sweb.eval.x86_64.<instance_id>:latest`
+  - env：`sweb.env.py.x86_64.<22 位 hash>:latest`（hash 来自 `str(env_script_list)`，离线不可复算）
+  - base：`sweb.base.py.x86_64:latest`（规格带 `docker_specs` 时追加 10 位 hash）
   - 环境身份还把 `repo/base_commit/environment_setup_commit/dataset_revision/harness_version/
     spec_sha256` 一起哈希成 `environment_hash`，不能只靠 repo 名判断复用。
-- 预检查：Docker daemon、Linux 容器模式、镜像存在性、磁盘余量（本机 C: 约 29GB 空闲）、
-  harness 版本、平台可执行性；不足返回 `ENV_ERROR` / `RESOURCE_BLOCKED`，不把环境失败
-  记成模型失败。
+  - ⚠ Phase 11 当初只写了无 namespace 的本地构建名，与官方默认查的镜像不是同一个；
+    已在 Phase 11R 修复（见 [`phase11-runtime-acceptance.md`](phase11-runtime-acceptance.md) §9 P1-1）。
+- 预检查：Docker daemon、Linux 容器模式、镜像存在性、磁盘余量、harness 版本、平台可执行性；
+  不足返回 `ENV_ERROR` / `RESOURCE_BLOCKED`，不把环境失败记成模型失败。
+  （Phase 11 当时按"C: 空闲约 29 GB"评估为紧张；Phase 11R 实测 Docker 数据落在
+  `D:\Docker\wsl\disk\docker_data.vhdx`，D 盘空闲 236 GB，评估结论作废。）
 - 清理：只清理带 `codepilot.*` 标签的自家临时容器；不执行 `docker system prune`、
   不删除/修改其他项目镜像。
 - **真实镜像构建/官方镜像拉取：NOT RUN**。本机 258 个镜像占 43.79GB，其中没有
@@ -164,6 +175,9 @@ Checkpoint、恢复路径读取，全部失败才算通过；同时正向断言 
 - 判分语义映射：`resolved` / `unresolved` / `patch apply failed` / `error` / 空补丁 /
   缺失预测 / 未评测，分别映射到 `OfficialVerdict`。**CodePilot 内部 `m2_verified`
   永远不等于 `official_resolved=True`**，两者不一致本身就是报告里的一个指标。
+  真实执行更正：官方 4.1.0 对"补丁打不上"抛 `EvaluationError`，**不写** 单实例
+  `report.json`，只在汇总里进 `error_ids`（不算 unresolved）；该形态只能由
+  `run_instance.log` 里的 `>>>>> Patch Apply Failed` 识别，Phase 11R 已据此修复归因。
 - 评测缓存负控制：缓存身份 = patch hash + dataset revision + harness version + 镜像身份 +
   run_id；同一 instance 的 Patch A 与 Patch B 不共享未经验证的结论；报告缺失/损坏/身份
   不符一律不复用。有专门测试构造“旧报告被新 patch 误复用”的负控制。
@@ -317,8 +331,10 @@ exit code: 1（失败全部为下述环境阻塞，见分类证据；覆盖率�
 
 ## 11. 未执行 / 阻断项
 
-1. **真实官方 Harness 评测（50/300 题）：NOT RUN**。需要 Linux/WSL2 环境 + 官方实例
-   镜像（每个 1GB+，本机 C: 余量约 29GB，未获授权批量下载）。
+1. **真实官方 Harness 评测（50/300 题）：NOT RUN**。Phase 11R 已把"能不能跑"这一步打通
+   （一个官方 dev 实例的 Gold + 三种负向控制真实判分，见
+   [`phase11-runtime-acceptance.md`](phase11-runtime-acceptance.md) §6），批量仍未执行；
+   题量与费用需要单独授权。
 2. **真实 GLM 推理：NOT RUN**。本轮禁止付费 API；E-17 保持 `LIVE NOT RUN`。
 3. **官方镜像作为推理环境复用：DEFERRED**。当前推理沙箱使用官方规格派生的 `EnvSpec`，
    与官方镜像环境可能有依赖差异；真实跑批前需要先验证两者一致性。

@@ -8,6 +8,9 @@
 > 唯一有真实数字的是 Phase 10 Synthetic 39 题的 GLM-5.3-Flash 用量，它只作
 > **工程参考**，不得当成 SWE-bench 均值（见 §8）。
 >
+> **后续更新（2026-10-19 Phase 11R）**：官方 Harness 的评测侧已用真实 Docker 跑通并给出
+> 实测墙钟/磁盘基线（本文 §4.1），LLM 侧仍为 0 次真实调用、`c̄` 等校准数字仍是 PENDING。
+>
 > 相关实现：`src/codepilot/eval/swebench_runner.py`（费用/预算/恢复与报告指标）、
 > `docs/notes/phase11.md`（本轮开发记录）、`docs/notes/phase10.md`（历史数据来源）。
 
@@ -204,6 +207,36 @@ mean_cost_per_attempt     = (Σ c_i) / N_tasks_with_llm_calls
 | 磁盘占用 | 峰值 GB、`disk_free_gb` 预检值 | 镜像按 repo 累积；不足时 fail closed |
 | 计算资源费率 | 本地 / 云 VM 每小时或每秒单价 | 本地可记 0 现金成本但必须记墙钟；云按真实单价 |
 | 失败重试 | 环境错误重试次数 | 重试成本单列，不摊进成功任务 |
+
+### 4.1 真实评测侧实测基线（2026-10-19，Phase 11R）
+
+不是估算：以下数字来自 WSL2 Ubuntu-24.04 + Docker Desktop 29.8.2（20 vCPU / 8.2 GB）上
+**真实官方 Harness** 对官方 dev 实例 `marshmallow-code__marshmallow-1343`
+（revision `6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2`）的判分，`max_workers=1`，
+`--cache_level instance`，`-n swebench`（远端预构建镜像，不做本地构建）。
+
+| 场景 | 墙钟 | 说明 |
+|---|---|---|
+| 冷启动（含镜像拉取）→ gold 判 `resolved` | **239.9 s** | 下载 939.0 MB 压缩 / 16 层，本地展开 3.57 GB |
+| 镜像已在本地 → 同补丁重新判分 | **50.5 s** | 纯容器执行 + 测试 + 判分（FAIL_TO_PASS 1 + PASS_TO_PASS 24） |
+| 补丁能打上但没修好 → `unresolved` | 53.8 s | 官方 `unresolved_instances=1` |
+| 补丁打不上 → `PATCH_APPLY_FAILED` | 46.0 s | 官方只进 `error_ids`，无 `report.json` |
+| 空补丁 → `EMPTY_PATCH` | 24.4 s | 官方不启动评测容器 |
+| 同身份第二次调用 | **0.0 s** | 适配器命中已验证官方报告（`decision=REUSED`） |
+
+镜像体积（`docker manifest inspect` 元数据，未下载）：dev split 各实例压缩体积
+933.8 MB（astroid-1978）～1625.5 MB（pvlib-1072），`marshmallow-1343` 为 939.0 MB；
+同一 base/env 层在实例间共享，所以边际磁盘增量远小于首个实例。
+
+**必须提前定的策略**：官方 `--cache_level` 默认 `env`，跑完会删除本次拉取/构建的实例
+镜像；CodePilot 记录的是镜像身份，删掉后 preflight 必然报"镜像不存在"、下一题重新下载。
+- 保留（`instance`）：单实例 ≈3.6 GB 磁盘，test50 峰值可达 ≈180 GB（本机 D 盘空闲 236 GB 可容纳），
+  每题省掉一次 ~1 GB 下载；
+- 不保留（`env`）：磁盘残留最小，但每题都要重下 ≈939 MB～1.6 GB。
+适配器现在把该参数显式写进命令与证据里，不再有"隐式跟随官方默认"的歧义。
+
+**评测侧现金成本**：本地执行为 0 CNY/USD（不消耗 token），但墙钟与磁盘必须记账；
+若迁到云 VM，`compute_rate` 按真实小时单价填入下方公式。
 
 公式（概念式，费率待实测填写）：
 
@@ -427,9 +460,15 @@ mean_runtime_per_task  = 3,835.998 / 39 = 98.36 s
 
 - [ ] 10 题真实 LLM 成本校准：`c̄`、`s`、95% 区间、`max(c_i)`、未知占比 → 填入 §6/§9。
 - [ ] 实际账单 vs 公开单价估算的对账（含资源包/缓存价差异）。
-- [ ] Docker 构建/执行成本的实测费率与缓存命中率。
+- [x] 评测侧（官方 Harness + 真实 Docker）墙钟与磁盘基线：见 §4.1（1 个官方 dev 实例：
+      冷启动含拉取 239.9 s、热镜像复判 50.5 s、身份一致复用 0.0 s；镜像 939 MB 压缩 /
+      本地 3.57 GB）。**仍缺**：跨 repo 样本量、`compute_rate` 费率（本地记 0 现金但记墙钟）、
+      缓存命中率分母（要批量才有）。
 - [ ] 若使用 USD provider：声明可信汇率来源与日期并重算预算。
-- [ ] 冻结集 50 题与完整 300 题的官方 Harness 评测（依赖 Linux/WSL2 + 镜像授权）。
+- [ ] 冻结集 50 题与完整 300 题的官方 Harness 评测：评测链路本身已于 2026-10-19 真实跑通
+      （Gold 判 resolved + unresolved / patch-apply-failed / empty-patch 三种负向控制），
+      批量仍未执行；当前阻断项是真实模型调用授权与 DA-021 的 Linux 侧 GitHub 出口，
+      **不再包括"官方 Harness 能不能跑"**。
 
 **E-20 状态：`ENGINEERING_IMPLEMENTED / REAL_COST_CALIBRATION_PENDING`。**
 在上述 PENDING 项完成前，本文不提供任何 SWE-bench 费用承诺，也不把 Synthetic 39 题

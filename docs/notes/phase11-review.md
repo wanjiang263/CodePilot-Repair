@@ -400,3 +400,44 @@ prediction probe（%TEMP）：mode-only OK、hunk 内容行 OK、rename 仍 REJE
 
 **最终判定：可以按当前状态进入 E-17/E-19 的 Linux/WSL 真实运行；无 STILL_OPEN 的 P0/P1。**
 
+
+---
+
+## Phase 11R 运行时复核（2026-10-19，真实 WSL2 + Docker + 官方 Harness 4.1.0）
+
+> Reviewer：Owner D（harness）/ Lead 授权的运行时验收轮  
+> 方式：在 WSL2 Ubuntu-24.04 里安装真实 `swebench==4.1.0`，用真实 Docker 跑官方
+> Harness 对**一个官方 dev 实例**做 Gold + 负向控制；其余为只读源码核对。  
+> 完整证据：[`phase11-runtime-acceptance.md`](phase11-runtime-acceptance.md)。
+
+### 结论
+
+| 编号 | 级别 | 状态 | 证据 |
+|---|---|---|---|
+| R-1 镜像身份与官方 `-n` 默认值不符 | **P1** | **FIXED**（`cb01bcd`） | 官方 `test_spec.py:104-112` + 真实 `--help`（默认 `swebench`）；`official-probe-dev.json` 修复前 `matches_official_default_namespace=false`，修复后 `official-probe-dev-fixed.json` 为 `true`。`namespace` 进入 argv 与 `HarnessCacheIdentity`，缺字段的旧 sidecar 解析失败即拒绝复用 |
+| R-2 "补丁打不上"被泛化成环境错误 | **P1** | **FIXED**（`848a07d`） | 真实 garbage 控制：官方汇总 `error_instances=1`、无 `report.json`，仅 `run_instance.log` 含 `>>>>> Patch Apply Failed`。同一报告字节（sha `63c727d7…`）修复前 verdict=`ERROR`，修复后 `PATCH_APPLY_FAILED`；`cache_level=instance` 下第二次运行 `decision=REUSED` 仍保持该归因 |
+| R-3 Linux/CI 上 mypy 门禁失败 | P2 | **FIXED**（`ed4b224`） | Windows-only `st_file_attributes` 无条件类型引用；改用 `getattr(..., 0)`，两平台 mypy 均 0 |
+| R-4 官方 env 镜像名仍为"候选键" | P2 | **OPEN（已记录，非缺陷）** | 官方 22 位摘要来自 `str(env_script_list)`，需读仓库内 `requirements.txt`/`environment.yml`；实测官方值 `sweb.env.py.x86_64.2f217c8b4490bfa0e2ba14:latest` 与 CodePilot 候选键不同。保留在 `DEFERRED_CAPABILITIES` |
+| R-5 `--force_rebuild/--clean/--open_file_limit/--rewrite_reports` 未暴露 | P2 | **NOT FIXED（有意）** | 保持官方默认（`clean=False`）才不会删别人的镜像；若要批量重建成镜像再单独评审 |
+| R-6 `--cache_level` 官方默认会删除本次实例镜像 | P2 | **已在报告口径中固定** | 适配器现在显式传该参数；本轮按授权用 `instance` 保留（单实例 3.57 GB）。300 题跑批前必须选策略：保留≈TB 级磁盘 vs 每题重下≈1 GB 流量 |
+
+### 通过项（真实执行确认，不再只是 mock）
+
+- 适配器拼出的 argv 被真实 argparse 接受：失败点停在 `utils.py:65 get_predictions_from_file`，
+  在 `docker.from_env()` 之前 → 参数集合与 4.1.0 一致，且该探针不碰 Docker。
+- 汇总报告位置：`<model 的 / → __>.<run_id>.json` 相对子进程 cwd，`--report_dir` 只 `mkdir`
+  ——适配器的"cwd=report_dir"做法与真实产物路径逐字节吻合（`report_path == expected_report`）。
+- `configs/swebench/env-specs-4.1.0.json` 与已安装 4.1.0 的 `MAP_REPO_VERSION_TO_SPECS`
+  **完全一致**（66 repo，无多/缺/内容差异；`scripts/check_env_specs_against_official.py`）。
+- Gold 正向控制真实判分 `resolved_instances=1`，且 `control_kind=ORACLE_CONTROL`、
+  `included_in_resolved_rate=false`，没有伪装成 Agent 成功。
+- 负向：`unresolved` / `PATCH_APPLY_FAILED` / `EMPTY_PATCH` 三种形态互不混淆；
+  同一 run_id 换补丁被 `CACHE_IDENTITY_MISMATCH` 拒绝（用真实 gold 报告做 substrate）。
+- Docker 侧无副作用：`docker system df` 前后仅 +1 个 swebench 镜像，Build Cache 19.73 GB 未变，
+  无残留 `sweb.*` 容器，未执行 prune。
+
+### 对既有 review 结论的影响
+
+上一节"可以按当前状态进入 E-17/E-19 的 Linux/WSL 真实运行"成立，但当时未覆盖
+`-n` 与 `cache_level` 的默认值语义；R-1/R-2 是真实执行才暴露的两条，均已修复并有测试。
+M3（固定 50 题真实模型 + 官方评测）**仍未达成**：评测链路已验证可用，缺的是模型侧授权与预算。
