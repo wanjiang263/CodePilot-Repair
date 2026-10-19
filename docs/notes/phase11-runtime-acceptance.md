@@ -228,6 +228,29 @@ FAIL_TO_PASS 只有 1 条的实例；`marshmallow-code__marshmallow-1343` 满足
 授权记录：2026-10-19 15:4x 用户批准"真实拉取 + 两次容器评测，用 `--cache_level instance`
 保留镜像"，并要求门禁与 Docker 评测**串行**执行（不并发）。
 
+### 5.1 真实 daemon 上的预检查（修复前后对照）
+
+`SWEBenchEnvironmentAdapter.preflight()` 直接连真实 daemon（WSL 内需显式给
+`DOCKER_HOST`，因为没有开 Docker Desktop 的 WSL integration）：
+
+```json
+{"ok": true, "daemon_ok": true, "container_os": "linux", "linux_containers": true,
+ "disk_free_gb": 952.955,
+ "image_key": "swebench/sweb.eval.x86_64.marshmallow-code_1776_marshmallow-1343:latest",
+ "image_present": true, "problems": [], "warnings": []}
+```
+
+修复前查的是无 namespace 的本地构建名，即使官方镜像就在本地也会报
+`image_present=false` → `RESOURCE_BLOCKED`。`tests/sandbox/test_swebench_env.py::
+test_real_docker_daemon_preflight_is_observable`（`@pytest.mark.docker`，离线门禁里被
+deselect）在真实 daemon 下 **1 passed**。
+
+### 5.2 未使用的资源手段
+
+没有执行 `docker system prune`、没有删除/停止任何既有容器、没有改 Docker Desktop 设置、
+没有开启 WSL integration、没有暴露 2375 端口、没有给容器额外权限
+（镜像、容器名与挂载全部由官方 harness 自身的既有策略决定）。
+
 ## 6. 真实官方 Harness 控制（任务 C）
 
 工具：`scripts/swebench_official_control.py`（+ `scripts/wsl-run-official-control.sh`）。
