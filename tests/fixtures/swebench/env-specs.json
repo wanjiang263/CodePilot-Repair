@@ -1,0 +1,121 @@
+{
+  "harness_package": "swebench",
+  "harness_version": "4.1.0",
+  "note": "Fixture subset of the frozen 4.1.0 environment specs; only repos/versions used by tests/fixtures/swebench rows.",
+  "python_requires": ">=3.9",
+  "source": "swebench.harness.constants.MAP_REPO_VERSION_TO_SPECS (subset fixture)",
+  "specs": {
+    "astropy/astropy": {
+      "5.1": {
+        "install": "python -m pip install -e .[test] --verbose",
+        "pip_packages": [
+          "attrs==23.1.0",
+          "exceptiongroup==1.1.3",
+          "execnet==2.0.2",
+          "hypothesis==6.82.6",
+          "iniconfig==2.0.0",
+          "numpy==1.25.2",
+          "packaging==23.1",
+          "pluggy==1.3.0",
+          "psutil==5.9.5",
+          "pyerfa==2.0.0.3",
+          "pytest-arraydiff==0.5.0",
+          "pytest-astropy-header==0.2.2",
+          "pytest-astropy==0.10.0",
+          "pytest-cov==4.1.0",
+          "pytest-doctestplus==1.0.0",
+          "pytest-filter-subpackage==0.1.2",
+          "pytest-mock==3.11.1",
+          "pytest-openfiles==0.5.0",
+          "pytest-remotedata==0.4.0",
+          "pytest-xdist==3.3.1",
+          "pytest==7.4.0",
+          "PyYAML==6.0.1",
+          "setuptools==68.0.0",
+          "sortedcontainers==2.4.0",
+          "tomli==2.0.1"
+        ],
+        "pre_install": [
+          "sed -i 's/requires = \\[\"setuptools\",/requires = \\[\"setuptools==68.0.0\",/' pyproject.toml"
+        ],
+        "python": "3.9",
+        "test_cmd": "pytest -rA"
+      }
+    },
+    "django/django": {
+      "3.0": {
+        "eval_commands": [
+          "sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen",
+          "export LANG=en_US.UTF-8",
+          "export LANGUAGE=en_US:en",
+          "export LC_ALL=en_US.UTF-8"
+        ],
+        "install": "python -m pip install -e .",
+        "packages": "requirements.txt",
+        "python": "3.6",
+        "test_cmd": "./tests/runtests.py --verbosity 2 --settings=test_sqlite --parallel 1"
+      }
+    },
+    "marshmallow-code/marshmallow": {
+      "3.0": {
+        "install": "python -m pip install -e '.[dev]'",
+        "python": "3.9",
+        "test_cmd": "pytest -rA"
+      }
+    },
+    "matplotlib/matplotlib": {
+      "3.5": {
+        "install": "python -m pip install -e .",
+        "packages": "environment.yml",
+        "pip_packages": [
+          "contourpy==1.1.0",
+          "cycler==0.11.0",
+          "fonttools==4.42.1",
+          "ghostscript",
+          "kiwisolver==1.4.5",
+          "numpy==1.25.2",
+          "packaging==23.1",
+          "pillow==10.0.0",
+          "pikepdf",
+          "pyparsing==3.0.9",
+          "python-dateutil==2.8.2",
+          "six==1.16.0",
+          "setuptools==68.1.2",
+          "setuptools-scm==7.1.0",
+          "typing-extensions==4.7.1"
+        ],
+        "pre_install": [
+          "apt-get -y update && apt-get -y upgrade && DEBIAN_FRONTEND=noninteractive apt-get install -y imagemagick ffmpeg texlive texlive-latex-extra texlive-fonts-recommended texlive-xetex texlive-luatex cm-super dvipng",
+          "QHULL_URL=\"http://www.qhull.org/download/qhull-2020-src-8.0.2.tgz\"",
+          "QHULL_TAR=\"/tmp/qhull-2020-src-8.0.2.tgz\"",
+          "QHULL_BUILD_DIR=\"/testbed/build\"",
+          "wget -O \"$QHULL_TAR\" \"$QHULL_URL\"",
+          "mkdir -p \"$QHULL_BUILD_DIR\"",
+          "tar -xvzf \"$QHULL_TAR\" -C \"$QHULL_BUILD_DIR\""
+        ],
+        "python": "3.11",
+        "test_cmd": "pytest -rA"
+      }
+    },
+    "sqlfluff/sqlfluff": {
+      "0.6": {
+        "install": "python -m pip install -e .",
+        "packages": "requirements.txt",
+        "python": "3.9",
+        "test_cmd": "pytest -rA"
+      }
+    },
+    "sympy/sympy": {
+      "1.6": {
+        "install": "python -m pip install -e .",
+        "packages": "mpmath flake8",
+        "pip_packages": [
+          "mpmath==1.3.0",
+          "flake8-comprehensions"
+        ],
+        "python": "3.9",
+        "test_cmd": "PYTHONWARNINGS='ignore::UserWarning,ignore::SyntaxWarning' bin/test -C --verbose"
+      }
+    }
+  }
+}
