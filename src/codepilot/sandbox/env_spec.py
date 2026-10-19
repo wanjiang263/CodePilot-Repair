@@ -166,6 +166,20 @@ def from_swebench_spec(spec: Mapping[str, Any]) -> EnvSpec:
         raise EnvSpecError("SWE-bench packages 必须是字符串或字符串数组")
 
     raw_install = spec.get("install", "")
+    # swebench 4.1.0 的官方规格用 ``pip_packages`` 表示在仓库安装前必须固定的依赖
+    # （如 astropy 的 numpy==1.25.2 / pytest==7.4.0）。它和 ``packages`` 是两种来源：
+    # 前者是 pip 包清单，后者可能是 requirements 文件或 conda environment.yml。
+    # 顺序与官方环境镜像一致：先推导 packages，再装 pip_packages，最后装仓库本身。
+    pip_packages = spec.get("pip_packages", ())
+    if pip_packages:
+        if isinstance(pip_packages, str) or not isinstance(pip_packages, Sequence):
+            raise EnvSpecError("SWE-bench pip_packages 必须是字符串数组")
+        if not all(isinstance(item, str) for item in pip_packages):
+            raise EnvSpecError("SWE-bench pip_packages 数组只能包含字符串")
+        pip_list = [item.strip() for item in pip_packages if item.strip()]
+        if pip_list:
+            install.append("python -m pip install " + " ".join(pip_list))
+
     if isinstance(raw_install, str) and raw_install.strip():
         install.append(raw_install)
     elif isinstance(raw_install, Sequence) and not isinstance(raw_install, str):
