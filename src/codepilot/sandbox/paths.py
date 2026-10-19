@@ -32,7 +32,9 @@ def validate_workspace_path(path: Path, *, allowed_root: Path) -> Path:
         raise PathBoundaryError(f"workspace 不在允许根目录内: {candidate}")
     for entry in candidate.rglob("*"):
         try:
-            attributes = entry.lstat().st_file_attributes if os.name == "nt" else 0
+            # ``st_file_attributes`` 只存在于 Windows 的 stat_result；POSIX 上按
+            # "没有 reparse point" 处理（getattr 让同一份代码在 Linux mypy 也成立）。
+            attributes = getattr(entry.lstat(), "st_file_attributes", 0)
         except OSError as exc:
             raise PathBoundaryError(f"无法检查 workspace 路径: {entry}") from exc
         is_reparse = (
