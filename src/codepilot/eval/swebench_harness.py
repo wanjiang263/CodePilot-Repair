@@ -198,6 +198,9 @@ _DOCKER_UNAVAILABLE_MARKERS: tuple[str, ...] = (
 #: 官方 `make_run_report` 用第一条 prediction 的 model 字段做文件名；模型名必须能
 #: 安全转成文件名（只允许 `/` 作为分隔符，映射成 `__`）。
 _MODEL_NAME_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._@+-]*(?:/[A-Za-z0-9._@+-]+)*")
+#: 官方 4.1.0 常量 `APPLY_PATCH_FAIL`（`harness/constants/__init__.py`）。补丁应用失败时
+#: 官方抛 `EvaluationError`、不写单实例 report.json，这条标记只出现在 `run_instance.log`。
+OFFICIAL_PATCH_APPLY_FAIL_MARKER = ">>>>> Patch Apply Failed"
 #: 本模块默认在仓库根下的官方 venv 里找解释器（与契约 §0 一致）。
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_HARNESS_VENV = _REPO_ROOT / ".venv-swebench"
@@ -278,9 +281,11 @@ class OfficialVerdict(StrEnum):
         * ``ERROR/MISSING/NOT_EVALUATED``：没测到，写成 ``False`` 会把"没测到"冒充
           "模型没修好"。
 
-        官方聚合口径仍以 :class:`HarnessReport` 为准：``unresolved_instances`` 包含
-        patch-apply-failure（官方把它们算作 unresolved），``empty_patch_instances``
-        单列；统计层用 report 的数字，单实例归因用 verdict。
+        官方聚合口径仍以 :class:`HarnessReport` 为准。真实 4.1.0 跑出来的口径是：
+        补丁打不上**不**进 ``unresolved_instances``，而是抛 ``EvaluationError`` 后只进
+        ``error_instances``（2026-10-19 官方实例 marshmallow-code__marshmallow-1343 实测，
+        见 ``docs/notes/phase11-runtime-acceptance.md``）；空补丁单列
+        ``empty_patch_instances``。单实例归因用 verdict，聚合数字用 report。
         """
         if self is OfficialVerdict.RESOLVED:
             return True
@@ -688,6 +693,10 @@ class HarnessCommand(BaseModel):
 
     def per_instance_report(self, instance_id: str, model_slug: str, run_id: str) -> Path:
         return self.per_instance_log_root / run_id / model_slug / instance_id / "report.json"
+
+    def per_instance_log(self, instance_id: str, model_slug: str, run_id: str) -> Path:
+        """官方 ``LOG_INSTANCE``（``run_instance.log``）路径；补丁打不上时只有它。"""
+        return self.per_instance_log_root / run_id / model_slug / instance_id / "run_instance.log"
 
 
 class HarnessCacheIdentity(BaseModel):
@@ -2135,8 +2144,18 @@ class OfficialHarnessRunner:
                     verdict = OfficialVerdict.PATCH_APPLY_FAILED
                     error_detail = "官方单实例报告 patch_successfully_applied=false"
             if verdict is OfficialVerdict.ERROR:
-                error_kind = HarnessErrorKind.INSTANCE_ERROR
-                error_detail = "官方报告把该实例列入 error_ids（见 logs/run_evaluation 证据）"
+                if self._per_instance_patch_apply_failed(command, instance_id):
+                    # 真实 4.1.0：补丁打不上时官方直接抛 EvaluationError（marker=APPLY_PATCH_FAIL），
+                    # 既不写 report.json，也不计入 unresolved，只在汇总里记 error_ids。
+                    # 不读这份日志就只能把它当成环境错误，模型的坏补丁会被记成"没测到"。
+                    verdict = OfficialVerdict.PATCH_APPLY_FAILED
+                    error_detail = (
+                        f"官方单实例日志含 {OFFICIAL_PATCH_APPLY_FAIL_MARKER!r}"
+                        "（4.1.0 打不上补丁时不写 report.json，只进 error_ids）"
+                    )
+                else:
+                    error_kind = HarnessErrorKind.INSTANCE_ERROR
+                    error_detail = "官方报告把该实例列入 error_ids（见 logs/run_evaluation 证据）"
             if verdict is OfficialVerdict.EMPTY_PATCH:
                 error_detail = "model_patch 为空，官方 harness 跳过评测"
             if verdict is OfficialVerdict.MISSING:
@@ -2158,6 +2177,15 @@ class OfficialHarnessRunner:
                 )
             )
         return tuple(results)
+
+    def _per_instance_patch_apply_failed(self, command: HarnessCommand, instance_id: str) -> bool:
+        """官方日志里是否有"补丁打不上"的标记（真实 4.1.0 唯一的证据来源）。"""
+        path = command.per_instance_log(instance_id, self._config.model_slug, self._config.run_id)
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            return False
+        return OFFICIAL_PATCH_APPLY_FAIL_MARKER in text
 
     def _per_instance_patch_applied(self, command: HarnessCommand, instance_id: str) -> bool | None:
         path = command.per_instance_report(

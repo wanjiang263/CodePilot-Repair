@@ -840,6 +840,72 @@ def test_run_detects_patch_apply_failure_from_per_instance_report(tmp_path: Path
     assert "patch_successfully_applied" in (unresolved.error_detail or "")
 
 
+#: 真实 4.1.0 在实例 `run_instance.log` 里的原文（2026-10-19 官方实例实测摘录）。
+_REAL_PATCH_APPLY_FAIL_LOG = (
+    "2026-10-19 15:50:26,446 - INFO - Running evaluation on instance "
+    "marshmallow-code__marshmallow-1343\n"
+    "swebench.harness.utils.EvaluationError: marshmallow-code__marshmallow-1343: "
+    ">>>>> Patch Apply Failed:\n"
+    "patching file src/marshmallow/schema.py\n"
+    "patch: **** malformed patch at line 7\n"
+)
+
+
+def test_run_recovers_patch_apply_failure_from_official_instance_log(tmp_path: Path) -> None:
+    """官方把"补丁打不上"记进 error_ids 且不写 report.json，归因必须仍能区分模型与环。
+
+    真实执行证据：坏补丁 → ``error_instances=1``、``unresolved_instances=0``、
+    只有 ``run_instance.log`` 含 ``>>>>> Patch Apply Failed``。若只看汇总，模型的
+    坏补丁会被当成环境错误（``resolved=None`` 且归到 INSTANCE_ERROR），跑批的
+    失败归因与 resolved rate 口径都会失真。
+    """
+    patches = {ID_UNRESOLVED: PATCH}
+    predictions = _make_predictions(tmp_path, patches)
+    config = _make_config(tmp_path, predictions, patches=patches, instance_ids=(ID_UNRESOLVED,))
+    payload = _report_payload(total=1, error=(ID_UNRESOLVED,))
+
+    def _on_run(cwd: Path, _env: dict[str, str]) -> None:
+        _write_json(cwd / config.expected_report_name, payload)
+        log_dir = cwd / "logs" / "run_evaluation" / config.run_id / config.model_slug
+        # 官方在这种情况下**不写** report.json，只留日志。
+        (log_dir / ID_UNRESOLVED).mkdir(parents=True, exist_ok=True)
+        (log_dir / ID_UNRESOLVED / "run_instance.log").write_text(
+            _REAL_PATCH_APPLY_FAIL_LOG, encoding="utf-8"
+        )
+
+    result = OfficialHarnessRunner(
+        config, runner=FakeSubprocessRunner(on_run=_on_run), platform=_linux()
+    ).run()
+    item = next(entry for entry in result.verdicts if entry.instance_id == ID_UNRESOLVED)
+    assert item.verdict is OfficialVerdict.PATCH_APPLY_FAILED
+    assert item.resolved is None
+    assert item.error_kind is None
+    assert "Patch Apply Failed" in (item.error_detail or "")
+
+
+def test_run_keeps_genuine_instance_error(tmp_path: Path) -> None:
+    """error_ids 里没有打补丁失败标记时，仍然归成实例错误，不能一律算坏补丁。"""
+    patches = {ID_ERROR: PATCH}
+    predictions = _make_predictions(tmp_path, patches)
+    config = _make_config(tmp_path, predictions, patches=patches, instance_ids=(ID_ERROR,))
+    payload = _report_payload(total=1, error=(ID_ERROR,))
+
+    def _on_run(cwd: Path, _env: dict[str, str]) -> None:
+        _write_json(cwd / config.expected_report_name, payload)
+        log_dir = cwd / "logs" / "run_evaluation" / config.run_id / config.model_slug
+        _write_json(log_dir / ID_ERROR / "report.json", {ID_ERROR: {"resolved": False}})
+        (log_dir / ID_ERROR / "run_instance.log").write_text(
+            "TimeoutError: tests exceeded 1800 seconds", encoding="utf-8"
+        )
+
+    result = OfficialHarnessRunner(
+        config, runner=FakeSubprocessRunner(on_run=_on_run), platform=_linux()
+    ).run()
+    item = next(entry for entry in result.verdicts if entry.instance_id == ID_ERROR)
+    assert item.verdict is OfficialVerdict.ERROR
+    assert item.error_kind is HarnessErrorKind.INSTANCE_ERROR
+
+
 def test_run_returns_not_evaluated_for_unsubmitted_requested_instance(tmp_path: Path) -> None:
     payload = _report_payload(total=2, resolved=(ID_RESOLVED,), incomplete=(ID_UNRESOLVED,))
     # 只提交一条 prediction，但请求两条：另一条必须 NOT_EVALUATED 而不是 resolved/unresolved。
