@@ -381,7 +381,8 @@ Adapter 解析与缓存（全部有真实证据）。未满足：Linux 侧 works
 | `848a07d` | fix(eval)：读官方实例日志区分坏补丁与环境错误（P1-2） |
 | `74ced3a` | test(eval)：真实官方产物入夹具 + 控制脚本 + `.gitignore` |
 | `68e57b4` | chore(scripts)：冻结规格与已装 harness 的一致性核对 |
-| 本提交 | 文档收口（本文件 + `phase11.md` / `phase11-review.md` / `05` / `experiment-plan`） |
+| `c9080b5` | docs：本文件 + `phase11.md` / `phase11-review.md` / `05` / `experiment-plan` 收口 |
+| `446a324` | docs：补记真实 daemon 预检查结果（§5.1）与"未使用的资源手段"（§5.2） |
 
 远端：**未 push**；无 PR / merge / reset / rebase / amend / force push。
 最终 `git status --short` 只剩既有未跟踪目录 `.playwright-mcp/`。
