@@ -45,6 +45,7 @@ if str(ROOT / "tests") not in sys.path:
 from codepilot.eval.assembly import InferenceOutcome  # noqa: E402
 from codepilot.eval.runner import JournalCorruptionError  # noqa: E402
 from codepilot.eval.swebench_harness import (  # noqa: E402
+    OFFICIAL_NAMESPACE,
     HarnessCacheError,
     HarnessCacheIdentity,
     HarnessConfig,
@@ -625,7 +626,9 @@ def test_evaluator_receives_a_run_id_the_official_harness_accepts(tmp_path: Path
         dataset_revision=DATASET_REVISION,
         split="test",
         harness_version=HARNESS_VERSION,
+        namespace=config.namespace,
     )
+    assert config.namespace == OFFICIAL_NAMESPACE
     # 不抛异常即被接受；旧算法（补丁哈希前 12 位）会被它拒绝。
     OfficialHarnessRunner(config)._enforce_run_id_digest(identity)
 
