@@ -1,0 +1,24 @@
+{
+  "generated_at": "2026-10-19",
+  "source": "scripts/swebench_official_control.py 的真实官方执行产物",
+  "harness_version": "4.1.0",
+  "dataset_name": "princeton-nlp/SWE-bench_Lite",
+  "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+  "split": "dev",
+  "instance_id": "marshmallow-code__marshmallow-1343",
+  "gold_run_id": "cp-oracle-b6712c8b1352-oracle",
+  "gold_official_report_name": "codepilot-oracle-control.cp-oracle-b6712c8b1352-oracle.json",
+  "patch_apply_fail_run_id": "cp-56a6f0f92b13-negative",
+  "instance_image": "swebench/sweb.eval.x86_64.marshmallow-code_1776_marshmallow-1343:latest",
+  "instance_image_id": "sha256:a61197e0b29461e34010cd83570424eb91a7f265574a81c82ff79e55c6c10f29",
+  "runtime": "WSL2 Ubuntu-24.04 + Docker Desktop 29.8.2 (linux/amd64)",
+  "files": {
+    "real-gold-report-4.1.0.json": {
+      "official_report_sha256_at_run": "06b5964bc1b3e47c977258c8cc47b3a485b288a339abf6a8933c368c34b8ae9f",
+      "note": "官方汇总报告原文，schema_version=2，client 非空故无 unstopped_* 三键"
+    },
+    "real-patch-apply-fail-4.1.0.log": {
+      "note": "官方 run_instance.log 尾部摘录；绝对路径行已剔除，标记与 patch 报错原文保留"
+    }
+  }
+}

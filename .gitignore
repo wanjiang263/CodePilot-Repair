@@ -18,6 +18,9 @@ build/
 .ruff_cache/
 # 早前 Codex 会话用 --basetemp 写进仓库根的 pytest 临时目录（内容为测试 git 夹具，可弃）
 .codex-pytest-tmp/
+# 本机会话的 TMP 就落在仓库里，pytest 默认 basetemp 会写成 `pytest-of-<user>/`；
+# 不挡住它的话 ruff 会去 lint 夹具副本。
+pytest-of-*/
 .coverage
 .coverage.*
 htmlcov/

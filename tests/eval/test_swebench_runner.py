@@ -1835,3 +1835,62 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         raise SystemExit("usage: test_swebench_runner.py <mode> <root>")
     raise SystemExit(_worker_main(sys.argv[1], Path(sys.argv[2])))
+
+
+def test_real_official_control_verdicts_map_to_the_expected_attribution() -> None:
+    """四个真实官方控制的结论必须落到各自的归因桶，不能互相冒充。
+
+    来源：2026-10-19 WSL2 + Docker 真实官方 Harness 运行（官方实例
+    ``marshmallow-code__marshmallow-1343``，dev split，revision
+    ``6ec7bb89…37cc2``），见 ``docs/notes/phase11-runtime-acceptance.md``。
+    观测到的官方 verdict 依次是 RESOLVED / UNRESOLVED / PATCH_APPLY_FAILED /
+    EMPTY_PATCH；这里把它们喂给归因纯函数，钉住"模型坏补丁 ≠ 环境错误"与
+    "官方结论优先于内部判断"两条口径。
+    """
+    common = {"patch_valid": True, "execution_state": "COMPLETED"}
+    assert (
+        classify_outcome(
+            official_verdict=OfficialVerdict.RESOLVED.value,
+            official_resolved=True,
+            empty_patch=False,
+            invalid_patch=False,
+            **common,
+        )
+        is SWEBenchAttribution.OFFICIAL_RESOLVED
+    )
+    assert (
+        classify_outcome(
+            official_verdict=OfficialVerdict.UNRESOLVED.value,
+            official_resolved=False,
+            empty_patch=False,
+            invalid_patch=False,
+            **common,
+        )
+        is SWEBenchAttribution.OFFICIAL_NOT_RESOLVED
+    )
+    for verdict, empty in (
+        (OfficialVerdict.PATCH_APPLY_FAILED, False),
+        (OfficialVerdict.EMPTY_PATCH, True),
+    ):
+        assert (
+            classify_outcome(
+                official_verdict=verdict.value,
+                official_resolved=None,
+                empty_patch=empty,
+                invalid_patch=False,
+                **common,
+            )
+            is SWEBenchAttribution.PATCH_INVALID
+        ), verdict
+    # 官方 error_ids（非补丁原因）仍然是评测错误，不算模型未解决。
+    assert (
+        classify_outcome(
+            official_verdict=OfficialVerdict.ERROR.value,
+            official_resolved=None,
+            official_error_kind="INSTANCE_ERROR",
+            empty_patch=False,
+            invalid_patch=False,
+            **common,
+        )
+        is SWEBenchAttribution.OFFICIAL_EVALUATION_ERROR
+    )

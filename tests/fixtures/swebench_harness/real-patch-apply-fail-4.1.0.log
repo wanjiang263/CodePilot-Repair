@@ -1,0 +1,11 @@
+2026-10-19 15:50:26,446 - INFO - Traceback (most recent call last):
+    raise EvaluationError(
+swebench.harness.utils.EvaluationError: marshmallow-code__marshmallow-1343: >>>>> Patch Apply Failed:
+patching file src/marshmallow/schema.py
+patch: **** malformed patch at line 7:  context line that does not exist in the repository C
+
+
+
+2026-10-19 15:50:26,446 - INFO - Attempting to stop container sweb.eval.marshmallow-code__marshmallow-1343.cp-56a6f0f92b13-negative...
+2026-10-19 15:50:41,649 - INFO - Attempting to remove container sweb.eval.marshmallow-code__marshmallow-1343.cp-56a6f0f92b13-negative...
+2026-10-19 15:50:41,683 - INFO - Container sweb.eval.marshmallow-code__marshmallow-1343.cp-56a6f0f92b13-negative removed.

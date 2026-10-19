@@ -63,6 +63,8 @@ from codepilot.eval.swebench_harness import (
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "swebench_harness"
 MODEL = "codepilot/glm-4.5"
+#: 负向控制用的模型标识（与 scripts/swebench_official_control.py 保持一致）。
+NEGATIVE_MODEL = "codepilot/negative-control"
 
 ID_RESOLVED = "astropy__astropy-12907"
 ID_UNRESOLVED = "astropy__astropy-14182"
@@ -1746,3 +1748,151 @@ def test_default_harness_python_pointer() -> None:
     if found is not None:
         assert found.is_file()
         assert ".venv-swebench" in str(found)
+
+
+# ---------------------------------------------------------------------------
+# 14. 真实官方产物（2026-10-19，WSL2 + Docker Desktop 官方 Harness 实测）
+# ---------------------------------------------------------------------------
+REAL_GOLD_REPORT = FIXTURES / "real-gold-report-4.1.0.json"
+REAL_PATCH_FAIL_LOG = FIXTURES / "real-patch-apply-fail-4.1.0.log"
+REAL_PROVENANCE = FIXTURES / "real-run-provenance.json"
+
+REAL_INSTANCE = "marshmallow-code__marshmallow-1343"
+
+
+def _real_provenance() -> dict[str, Any]:
+    return json.loads(REAL_PROVENANCE.read_text(encoding="utf-8"))
+
+
+def test_real_official_gold_report_parses_as_resolved() -> None:
+    """真跑出来的官方汇总必须能被适配器解析成 RESOLVED。
+
+    这份夹具不是手写样例，而是官方 harness 4.1.0 在真实实例镜像上判分后写的文件，
+    用来钉住"解析口径"与官方真实字节之间的一致性。
+    """
+    prov = _real_provenance()
+    assert prov["harness_version"] == HARNESS_VERSION
+    assert prov["dataset_revision"] == DATASET_REVISION
+    raw = json.loads(REAL_GOLD_REPORT.read_text(encoding="utf-8"))
+    # 本地执行一定带 docker client，所以这三键在真实产物里根本不存在。
+    assert not {"unstopped_instances", "unstopped_containers", "unremoved_images"} & set(raw)
+
+    report = OfficialHarnessRunner.parse_report_file(REAL_GOLD_REPORT)
+    assert report.schema_version == 2
+    assert report.total_instances == report.submitted_instances == 1
+    assert report.resolved_instances == 1
+    assert report.unresolved_instances == report.error_instances == 0
+    assert report.resolved_ids == (REAL_INSTANCE,)
+    assert report.verdict_for(REAL_INSTANCE) is OfficialVerdict.RESOLVED
+    assert report.verdict_for(REAL_INSTANCE).resolved_value is True
+    assert report.evaluation_coverage == 1.0
+
+    # 官方文件名规则：<model 的 / → __>.<run_id>.json，相对子进程 cwd。
+    # 夹具落盘时改过名，所以规则对照 provenance 里记录的官方原始文件名。
+    expected_name = f"codepilot-oracle-control.{prov['gold_run_id']}.json"
+    assert prov["gold_official_report_name"] == expected_name
+    assert (
+        HarnessConfig(
+            predictions_path=REAL_GOLD_REPORT.parent / "oracle.jsonl",
+            run_id=prov["gold_run_id"],
+            report_dir=REAL_GOLD_REPORT.parent,
+            model_name_or_path="codepilot-oracle-control",
+            split="dev",
+        ).expected_report_name
+        == expected_name
+    )
+
+
+def test_real_official_report_is_not_reused_for_a_different_patch(tmp_path: Path) -> None:
+    """同一 run_id 换补丁，真实官方报告也不允许复用（负控制的身份隔离）。"""
+    prov = _real_provenance()
+    run_id = prov["gold_run_id"]
+    patches = {REAL_INSTANCE: PATCH}
+    predictions = _make_predictions(tmp_path, patches, name="real-a.jsonl")
+    config = _make_config(
+        tmp_path,
+        predictions,
+        patches=patches,
+        run_id=run_id,
+        instance_ids=(REAL_INSTANCE,),
+    )
+    report_bytes = REAL_GOLD_REPORT.read_bytes()
+    first = FakeSubprocessRunner(
+        on_run=lambda cwd, _env: (cwd / config.expected_report_name).write_bytes(report_bytes)
+    )
+    first_result = OfficialHarnessRunner(
+        config, runner=first, platform=_linux(), image_ids={REAL_INSTANCE: prov["instance_image"]}
+    ).run()
+    assert first_result.decision is HarnessRunDecision.EXECUTED
+    assert first_result.verdict_for(REAL_INSTANCE) is OfficialVerdict.RESOLVED
+
+    other_patches = {REAL_INSTANCE: PATCH + "\n+# codepilot: a different model answer\n"}
+    other_predictions = _make_predictions(tmp_path, other_patches, name="real-b.jsonl")
+    other = _make_config(
+        tmp_path,
+        other_predictions,
+        patches=other_patches,
+        run_id=run_id,
+        instance_ids=(REAL_INSTANCE,),
+        report_dir=config.report_dir,
+    )
+    second_fake = FakeSubprocessRunner()
+    with pytest.raises(HarnessCacheError) as excinfo:
+        OfficialHarnessRunner(
+            other,
+            runner=second_fake,
+            platform=_linux(),
+            image_ids={REAL_INSTANCE: prov["instance_image"]},
+        ).run()
+    assert excinfo.value.kind is HarnessErrorKind.CACHE_IDENTITY_MISMATCH
+    assert second_fake.calls == []
+
+
+def test_real_patch_apply_failure_log_is_attributed_to_the_patch(tmp_path: Path) -> None:
+    """官方对"补丁打不上"只留 run_instance.log，归因必须来自这份真实日志。"""
+    patches = {REAL_INSTANCE: PATCH}
+    predictions = _make_predictions(tmp_path, patches, model=NEGATIVE_MODEL)
+    # 官方摘要口径：run_id 第二段必须是当前补丁集合摘要的前 12 位（真实产物用的
+    # 是当时那份坏补丁的摘要，这里换成夹具补丁，所以按同一规则重新派生）。
+    fail_run_id = derive_run_id({REAL_INSTANCE: _sha(PATCH)}, seed="negative")
+    config = _make_config(
+        tmp_path,
+        predictions,
+        patches=patches,
+        run_id=fail_run_id,
+        instance_ids=(REAL_INSTANCE,),
+        model_name_or_path=NEGATIVE_MODEL,
+    )
+    summary = {
+        "total_instances": 1,
+        "submitted_instances": 1,
+        "completed_instances": 1,
+        "resolved_instances": 0,
+        "unresolved_instances": 0,
+        "empty_patch_instances": 0,
+        "error_instances": 1,
+        "completed_ids": [REAL_INSTANCE],
+        "incomplete_ids": [],
+        "empty_patch_ids": [],
+        "submitted_ids": [REAL_INSTANCE],
+        "resolved_ids": [],
+        "unresolved_ids": [],
+        "error_ids": [REAL_INSTANCE],
+        "schema_version": 2,
+    }
+
+    def _on_run(cwd: Path, _env: dict[str, str]) -> None:
+        _write_json(cwd / config.expected_report_name, summary)
+        log_dir = cwd / "logs" / "run_evaluation" / config.run_id / config.model_slug
+        _write_json(log_dir / f"{REAL_INSTANCE}.log", {})  # 干扰项：只有日志目录才算数
+        (log_dir / REAL_INSTANCE).mkdir(parents=True, exist_ok=True)
+        (log_dir / REAL_INSTANCE / "run_instance.log").write_bytes(REAL_PATCH_FAIL_LOG.read_bytes())
+
+    result = OfficialHarnessRunner(
+        config, runner=FakeSubprocessRunner(on_run=_on_run), platform=_linux()
+    ).run()
+    item = next(entry for entry in result.verdicts if entry.instance_id == REAL_INSTANCE)
+    assert item.verdict is OfficialVerdict.PATCH_APPLY_FAILED
+    assert item.resolved is None
+    assert item.error_kind is None
+    assert "Patch Apply Failed" in (item.error_detail or "")
