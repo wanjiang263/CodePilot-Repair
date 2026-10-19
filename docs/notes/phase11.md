@@ -309,7 +309,8 @@ exit code: 1（失败全部为下述环境阻塞，见分类证据；覆盖率�
 | `d685828` | E-17/E-18 bench-swebench CLI、单题 Smoke、30/50 冻结子集 |
 | 本提交 | 文档收口（04/05/notes/experiment-plan/contract/review） |
 
-- 工作树：本提交后应为干净；`.playwright-mcp/` 是此前既有的未跟踪目录，
+- 文档收口提交：ee8cc6；其后仅追加本条 Git 状态记录，故最终 HEAD 为该记录提交（git log -1）。
+- 工作树：最终 git status --short 仅剩既有未跟踪目录 .playwright-mcp/，其余干净；`.playwright-mcp/` 是此前既有的未跟踪目录，
   `.venv-swebench/`、`cache/`、`artifacts/`、`.env` 均由 `.gitignore` 忽略。
 - 未跟踪/忽略材料不含 API Key、`.env`、原始 Gold 审查材料或大型 Artifact。
 
