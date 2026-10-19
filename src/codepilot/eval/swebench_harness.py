@@ -205,6 +205,18 @@ DEFAULT_HARNESS_VENV = _REPO_ROOT / ".venv-swebench"
 #: ``<snapshot>/<split>.jsonl`` 传给 ``HarnessConfig.dataset_snapshot`` 来固定
 #: revision；本模块不做自动发现（否则"跑的是哪个 revision"会隐式取决于本机缓存）。
 DEFAULT_SNAPSHOT_ROOT = _REPO_ROOT / "cache" / "swebench"
+#: 官方 4.1.0 CLI 的 `-n/--namespace` 默认值。非空 → 实例镜像是**远端预构建镜像**
+#: （`<namespace>/sweb.eval...`，实例 id 里的 `__` 替换成 `_1776_`）；`none` → 本地构建。
+#: 必须显式传给官方，同时与 ``codepilot.sandbox.swebench_env.instance_image_key`` 的
+#: 默认值一致，否则 preflight 查的镜像名和官方实际用的镜像名不是同一个。
+OFFICIAL_NAMESPACE = "swebench"
+#: 官方 `--cache_level` 取值与默认值（默认 `env`：跑完会删掉本次拉取/构建的实例镜像）。
+CACHE_LEVELS: tuple[str, ...] = ("none", "base", "env", "instance")
+OFFICIAL_CACHE_LEVEL = "env"
+#: 官方给远端镜像名做的前缀替换标记（`swebench/sweb.eval.x86_64.astropy_1776_astropy-1`）。
+_NAMESPACE_MARKER = "_1776_"
+#: Docker 仓库名组件规则（小写），用于校验 namespace 不会破坏镜像名。
+_DOCKER_NAME_COMPONENT = re.compile(r"[a-z0-9][a-z0-9._-]*")
 #: 超时被杀的子进程没有退出码，用哨兵值把"超时"和"正常非零退出"分开。
 TIMEOUT_EXIT_CODE = -1
 #: 保存到 artifact 的 stdout/stderr 尾部长度；完整日志落盘，模型只看尾部。
@@ -512,6 +524,8 @@ class HarnessConfig(BaseModel):
     # --- 必要扩展 ---
     dataset_revision: str = DATASET_REVISION
     dataset_snapshot: Path | None = None
+    namespace: str | None = OFFICIAL_NAMESPACE
+    cache_level: str = OFFICIAL_CACHE_LEVEL
 
     @field_validator("max_workers", "timeout_seconds", mode="before")
     @classmethod
@@ -594,6 +608,32 @@ class HarnessConfig(BaseModel):
                 raise ValueError(f"非法 instance_id: {instance_id!r}")
         return value
 
+    @field_validator("namespace")
+    @classmethod
+    def _check_namespace(cls, value: str | None) -> str | None:
+        """官方把字符串 `"none"` 解析成 None，所以我们只接受 None 或合法命名空间。"""
+        if value is None:
+            return None
+        if value.strip() != value or not value:
+            raise ValueError("namespace 不能为空或有首尾空白；本地构建请传 namespace=None")
+        if value.lower() == "none":
+            raise ValueError('官方把 "none" 解析成 None；请直接传 namespace=None，避免两种写法')
+        if _DOCKER_NAME_COMPONENT.fullmatch(value) is None:
+            raise ValueError(f"namespace 必须是合法的小写镜像名组件: {value!r}")
+        if "__" in value:
+            raise ValueError(
+                f"namespace 不能含 '__'（官方会把它替换成 '{_NAMESPACE_MARKER}'，"
+                "会让镜像身份与 instance_image_key 不一致）"
+            )
+        return value
+
+    @field_validator("cache_level")
+    @classmethod
+    def _check_cache_level(cls, value: str) -> str:
+        if value not in CACHE_LEVELS:
+            raise ValueError(f"cache_level 必须是 {CACHE_LEVELS}，收到 {value!r}")
+        return value
+
     @model_validator(mode="after")
     def _check_predictions_path(self) -> Self:
         suffix = self.predictions_path.suffix.lower()
@@ -668,6 +708,10 @@ class HarnessCacheIdentity(BaseModel):
     dataset_revision: str
     split: str
     harness_version: str
+    #: 远端/本地构建决定了报告是在哪套镜像上判分的；没有 `image_ids` 注入时，它是
+    #: 唯一能区分两种环境的字段。**必填**：Phase 11 之前写的 sidecar 没有这个字段，
+    #: 解析即失败 → 拒绝复用（当时也没有任何真实官方报告，代价为零）。
+    namespace: str | None
     image_ids: tuple[tuple[str, str], ...] = ()
 
     @field_validator("patch_hashes", "image_ids")
@@ -716,6 +760,8 @@ class HarnessCacheIdentity(BaseModel):
                 reasons.append(f"{field} {theirs!r} != {mine!r}")
         if self.harness_version != other.harness_version:
             reasons.append(f"harness_version {other.harness_version!r} != {self.harness_version!r}")
+        if self.namespace != other.namespace:
+            reasons.append(f"namespace {other.namespace!r} != {self.namespace!r}")
         if self.image_ids != other.image_ids:
             reasons.append(f"image_ids {dict(other.image_ids)!r} != {dict(self.image_ids)!r}")
         return tuple(reasons)
@@ -1318,6 +1364,13 @@ class OfficialHarnessRunner:
                 str(self._config.timeout_seconds),
                 "--report_dir",
                 str(report_dir),
+                # 显式传官方默认值，而不是"什么都不传、依赖官方默认"：这两个参数决定
+                # 用的是远端预构建镜像还是本地构建镜像、以及跑完是否删除实例镜像，
+                # 都必须出现在记录下来的命令里，镜像身份才经得起复核。
+                "-n",
+                self._config.namespace or "none",
+                "--cache_level",
+                self._config.cache_level,
             ]
         )
         if self._platform.use_wsl and self._platform.is_windows:
@@ -1806,6 +1859,7 @@ class OfficialHarnessRunner:
             dataset_revision=self._config.dataset_revision,
             split=self._config.split,
             harness_version=self._config.harness_version,
+            namespace=self._config.namespace,
             image_ids=self._image_ids,
         )
 

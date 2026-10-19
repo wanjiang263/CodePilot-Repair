@@ -29,9 +29,12 @@ from pydantic import ValidationError
 
 from codepilot.artifacts import ArtifactStore
 from codepilot.eval.swebench_harness import (
+    CACHE_LEVELS,
     DATASET_NAME,
     DATASET_REVISION,
     HARNESS_VERSION,
+    OFFICIAL_CACHE_LEVEL,
+    OFFICIAL_NAMESPACE,
     ORACLE_CONTROL_MODEL_NAME,
     HarnessCacheError,
     HarnessCacheIdentity,
@@ -316,6 +319,8 @@ def test_build_command_matches_real_swebench_4_1_0_cli(tmp_path: Path) -> None:
     assert argv[13:15] == ("--max_workers", "3")
     assert argv[15:17] == ("-t", "600")
     assert argv[17:19] == ("--report_dir", str((tmp_path / "official-eval").resolve()))
+    assert argv[19:21] == ("-n", OFFICIAL_NAMESPACE)
+    assert argv[21:23] == ("--cache_level", OFFICIAL_CACHE_LEVEL)
 
     # 每个选项都必须是 4.1.0 argparse 里真实存在的 flag（-m 是 Python 的）。
     real_flags = {flag for entry in cli["argparse"] for flag in entry["flags"]}
@@ -335,6 +340,120 @@ def test_build_command_matches_real_swebench_4_1_0_cli(tmp_path: Path) -> None:
     assert command.env["PYTHONIOENCODING"] == "utf-8"
     # env 只含显式注入变量，不能把父进程 PATH/API key 写进 artifact。
     assert "PATH" not in command.env and "OPENAI_API_KEY" not in command.env
+
+
+def test_namespace_and_cache_level_defaults_are_the_official_ones() -> None:
+    """镜像模式相关默认值必须来自真实 4.1.0，不能凭印象写死。
+
+    踩过的坑：官方 `-n` 默认是 `swebench`（远端预构建镜像，镜像名带前缀且 `__` 变成
+    `_1776_`），适配器早期完全不传 `-n`，导致 preflight 查的镜像名与官方真正使用的
+    不是同一个，"镜像存在/缺失"的结论对整个评测都不成立。
+    """
+    cli = _load_cli_fixture()
+    by_dest = {entry["dest"]: entry for entry in cli["argparse"]}
+    assert by_dest["namespace"]["default"] == OFFICIAL_NAMESPACE == "swebench"
+    assert by_dest["cache_level"]["default"] == OFFICIAL_CACHE_LEVEL == "env"
+    assert by_dest["cache_level"]["choices"] == list(CACHE_LEVELS)
+    assert "-n" in by_dest["namespace"]["flags"]
+
+
+def test_image_identity_follows_the_namespace_mode(tmp_path: Path) -> None:
+    """适配器传给官方的 namespace 必须与镜像身份算出来的名字同源。"""
+    from codepilot.sandbox.swebench_env import instance_image_key
+
+    remote = instance_image_key(ID_RESOLVED)
+    local = instance_image_key(ID_RESOLVED, namespace=None)
+    assert (
+        remote
+        == f"{OFFICIAL_NAMESPACE}/sweb.eval.x86_64.{ID_RESOLVED.replace('__', '_1776_')}:latest"
+    )
+    assert local == f"sweb.eval.x86_64.{ID_RESOLVED.lower()}:latest"
+    assert remote != local
+
+    patches = {ID_RESOLVED: PATCH}
+    predictions = _make_predictions(tmp_path, patches)
+    default_config = _make_config(
+        tmp_path,
+        predictions,
+        patches=patches,
+        instance_ids=(ID_RESOLVED,),
+        harness_python=tmp_path / "swebench-python.exe",
+    )
+    remote_argv = (
+        OfficialHarnessRunner(default_config, runner=FakeSubprocessRunner(), platform=_linux())
+        .build_command(patch_hashes=_patch_hashes(patches))
+        .argv
+    )
+    assert remote_argv[remote_argv.index("-n") + 1] == OFFICIAL_NAMESPACE
+
+    local_config = default_config.model_copy(update={"namespace": None})
+    local_argv = (
+        OfficialHarnessRunner(local_config, runner=FakeSubprocessRunner(), platform=_linux())
+        .build_command(patch_hashes=_patch_hashes(patches))
+        .argv
+    )
+    # 官方 `optional_str` 把字符串 "none" 解析成 None → 本地构建镜像。
+    assert local_argv[local_argv.index("-n") + 1] == "none"
+
+
+def test_namespace_input_is_rejected_before_launch(tmp_path: Path) -> None:
+    """非法 namespace 不能让官方子进程去猜（拼错会得到另一套镜像环境）。"""
+    predictions = _make_predictions(tmp_path, {ID_RESOLVED: PATCH})
+
+    def make(**updates: Any) -> HarnessConfig:
+        return _make_config(
+            tmp_path,
+            predictions,
+            patches={ID_RESOLVED: PATCH},
+            instance_ids=(ID_RESOLVED,),
+            harness_python=tmp_path / "swebench-python.exe",
+            **updates,
+        )
+
+    make()  # 默认值必须可用
+    for bad in ("none", "NONE", "Swebench", "a__b", " bad", ""):
+        with pytest.raises(ValidationError, match="namespace"):
+            make(namespace=bad)
+    with pytest.raises(ValidationError, match="cache_level"):
+        make(cache_level="everything")
+
+
+def test_cache_identity_requires_namespace(tmp_path: Path) -> None:
+    """远端镜像与本地构建镜像得出的报告不能互相复用。"""
+    patches = {ID_RESOLVED: PATCH}
+    identity = HarnessCacheIdentity(
+        run_id="cp-aaaaaaaaaaaa-seed1",
+        patch_hashes=((ID_RESOLVED, _sha(PATCH)),),
+        model_name_or_path="codepilot/glm-4.5",
+        dataset_name="princeton-nlp/SWE-bench_Lite",
+        dataset_revision=DATASET_REVISION,
+        split="test",
+        harness_version=HARNESS_VERSION,
+        namespace=None,
+    )
+    other = identity.model_copy(update={"namespace": OFFICIAL_NAMESPACE})
+    assert "namespace" in " ".join(identity.mismatches(other))
+    assert identity.fingerprint != other.fingerprint
+
+    # 旧格式 sidecar（没有 namespace 字段）无法解析 → 拒绝复用，而不是当成默认值。
+    sidecar = tmp_path / "legacy.identity.json"
+    legacy = identity.model_dump(mode="json")
+    legacy.pop("namespace")
+    sidecar.write_text(json.dumps(legacy, ensure_ascii=False), encoding="utf-8")
+    runner = OfficialHarnessRunner(
+        _make_config(
+            tmp_path,
+            _make_predictions(tmp_path, patches),
+            patches=patches,
+            instance_ids=(ID_RESOLVED,),
+            harness_python=tmp_path / "swebench-python.exe",
+        ),
+        runner=FakeSubprocessRunner(),
+        platform=_linux(),
+    )
+    with pytest.raises(HarnessCacheError) as excinfo:
+        runner._read_identity(sidecar)
+    assert excinfo.value.kind is HarnessErrorKind.CACHE_UNVERIFIED
 
 
 def test_preview_command_works_before_predictions_exist(tmp_path: Path) -> None:
@@ -1495,6 +1614,7 @@ def test_identity_fingerprint_is_canonical_and_reports_mismatch() -> None:
         dataset_revision=DATASET_REVISION,
         split="test",
         harness_version=HARNESS_VERSION,
+        namespace=OFFICIAL_NAMESPACE,
         image_ids=((ID_RESOLVED, "sweb.eval.x86_64.x"),),
     )
     reordered = HarnessCacheIdentity(
@@ -1505,12 +1625,14 @@ def test_identity_fingerprint_is_canonical_and_reports_mismatch() -> None:
         dataset_revision=DATASET_REVISION,
         split="test",
         harness_version=HARNESS_VERSION,
+        namespace=OFFICIAL_NAMESPACE,
         image_ids=((ID_RESOLVED, "sweb.eval.x86_64.x"),),
     )
     assert first.fingerprint == reordered.fingerprint
     assert first.mismatches(reordered) == ()
     assert first.patch_hash_for(ID_RESOLVED) == "a" * 64
     assert first.image_identity_for(ID_RESOLVED) == "sweb.eval.x86_64.x"
+    assert first.mismatches(first.model_copy(update={"namespace": None}))[0].startswith("namespace")
 
     changed = first.model_copy(update={"dataset_revision": "b" * 40, "run_id": "run-2"})
     reasons = first.mismatches(changed)

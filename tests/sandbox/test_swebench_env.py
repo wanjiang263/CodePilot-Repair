@@ -463,7 +463,9 @@ def test_crlf_snapshot_bytes_produce_identical_spec_digest_and_identity(
 def test_identity_generates_official_image_keys_and_hashes(tmp_path: Path) -> None:
     identity = make_identity(tmp_path, FakeDockerBackend())
     assert identity.instance_id == "astropy__astropy-12907"
-    assert identity.instance_image_key == "sweb.eval.x86_64.astropy__astropy-12907:latest"
+    assert (
+        identity.instance_image_key == "swebench/sweb.eval.x86_64.astropy_1776_astropy-12907:latest"
+    )
     assert identity.base_image_key == "sweb.base.py.x86_64:latest"
     assert identity.env_image_key.startswith(f"sweb.env.py.{ARCH}.")
     assert identity.env_image_key.endswith(":latest")
@@ -1033,16 +1035,23 @@ def test_preflight_linux_platform_is_harness_runnable(tmp_path: Path) -> None:
 
 def test_preflight_required_instance_missing_image_is_reported(tmp_path: Path) -> None:
     backend = FakeDockerBackend()
-    backend.add_image("sweb.eval.x86_64.astropy__astropy-12907:latest", image_id="sha256:bad")
+    backend.add_image(
+        "swebench/sweb.eval.x86_64.astropy_1776_astropy-12907:latest", image_id="sha256:bad"
+    )
     report = make_adapter(tmp_path, backend).preflight(required_instance="astropy__astropy-9999")
     assert report.image_present is False
-    assert report.image_key == "sweb.eval.x86_64.astropy__astropy-9999:latest"
+    assert report.image_key == "swebench/sweb.eval.x86_64.astropy_1776_astropy-9999:latest"
     assert any("镜像不存在" in problem for problem in report.problems)
     assert report.ok is False
 
 
 def test_instance_image_key_lowercases_and_rejects_bad_ids() -> None:
+    # 官方默认 namespace=swebench（远端预构建镜像）；`__` 会被替换成 `_1776_`。
     assert instance_image_key("Astropy__Astropy-12907") == (
+        "swebench/sweb.eval.x86_64.astropy_1776_astropy-12907:latest"
+    )
+    # `-n none` 的本地构建名（官方 TestSpec 同一规则的无 namespace 形态）。
+    assert instance_image_key("Astropy__Astropy-12907", namespace=None) == (
         "sweb.eval.x86_64.astropy__astropy-12907:latest"
     )
     with pytest.raises(SWEBenchEnvironmentError) as caught:

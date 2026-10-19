@@ -60,6 +60,7 @@ __all__ = [
     "DEFERRED_CAPABILITIES",
     "HARNESS_PACKAGE",
     "HARNESS_VERSION",
+    "OFFICIAL_NAMESPACE",
     "ContainerInfo",
     "DockerBackend",
     "DockerBackendError",
@@ -86,6 +87,14 @@ HARNESS_PACKAGE = "swebench"
 HARNESS_VERSION = "4.1.0"
 ARCH = "x86_64"
 IMAGE_TAG = "latest"
+#: 官方 4.1.0 CLI 的 `-n/--namespace` 默认值（`harness/run_evaluation.py`）。非空
+#: namespace 意味着实例镜像是**远端镜像**（官方在 Docker Hub 上预构建），镜像名会带
+#: `<namespace>/` 前缀、且实例 id 里的 `__` 被替换成 `_1776_`；`-n none` 才是本地构建
+#: 名。preflight 查的必须是官方真正会用的那个名字，否则"镜像存在/缺失"的结论与官方
+#: 执行不一致。
+OFFICIAL_NAMESPACE = "swebench"
+#: 官方 `instance_image_key` 对 `__` 的替换标记（`test_spec.py::instance_image_key`）。
+_NAMESPACE_SEPARATOR = "_1776_"
 
 DEFAULT_SPEC_SNAPSHOT = (
     Path(__file__).resolve().parents[3] / "configs" / "swebench" / "env-specs-4.1.0.json"
@@ -1304,14 +1313,28 @@ class SWEBenchSandboxFactory:
         )
 
 
-def instance_image_key(instance_id: str, *, arch: str = ARCH, tag: str = IMAGE_TAG) -> str:
-    """官方实例镜像名（离线可精确计算，无 namespace 前缀）。"""
+def instance_image_key(
+    instance_id: str,
+    *,
+    arch: str = ARCH,
+    tag: str = IMAGE_TAG,
+    namespace: str | None = OFFICIAL_NAMESPACE,
+) -> str:
+    """官方 4.1.0 实例镜像名，逐规则对齐 ``TestSpec.instance_image_key``。
+
+    ``namespace`` 默认取官方 CLI 默认值 ``swebench``（远端预构建镜像）；传 ``None``
+    得到本地构建名。官方在加前缀后会把整个名字里的 ``__`` 换成 ``_1776_``，所以
+    ``swebench/sweb.eval.x86_64.astropy_1776_astropy-12907:latest`` 才是默认形态。
+    """
     if not isinstance(instance_id, str) or _INSTANCE_ID.fullmatch(instance_id.strip()) is None:
         raise SWEBenchEnvironmentError(
             f"非法 SWE-bench instance_id: {instance_id!r}",
             kind=SWEBenchEnvironmentKind.ENV_ERROR,
         )
-    return f"sweb.eval.{arch}.{instance_id.strip().lower()}:{tag}"
+    key = f"sweb.eval.{arch}.{instance_id.strip().lower()}:{tag}"
+    if namespace:
+        key = f"{namespace}/{key}".replace("__", _NAMESPACE_SEPARATOR)
+    return key
 
 
 def _base_image_key(raw: Mapping[str, Any]) -> str:
