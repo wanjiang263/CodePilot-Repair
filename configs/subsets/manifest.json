@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-18T17:38:45Z",
+  "dataset": {
+    "name": "princeton-nlp/SWE-bench_Lite",
+    "revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+    "official_split_sizes": {
+      "dev": 23,
+      "test": 300
+    },
+    "snapshot_root": "cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+    "snapshot_jsonl_sha256": {
+      "dev": "bff2c0441656b2aed0c6d7d9788955d31116920c6fb135059ac373521e8b1836",
+      "test": "5c7a40b4812a0d3daaffbbd63664fbf1cd8291ed520c80e304aa5c1b7e21ff7a"
+    }
+  },
+  "seed": 20261019,
+  "source_split": "test",
+  "algorithm": {
+    "id": "repo-stratified-round-robin-v1",
+    "summary": "仓库间轮转 + 仓库内 version 组轮转；实例顺序由 sha256 决定，全局轮转序列前 30 条为 dev30、随后 50 条为 test50",
+    "steps": [
+      "读取官方 test split 300 条，instance_id 升序作为稳定输入",
+      "按 repo 分组；repo 轮转顺序 = 实例数降序、repo 名升序",
+      "每个 repo 内按 version 分组，version 组顺序与组内实例顺序均由 sha256(seed|x) 决定",
+      "同一 repo 内先在 version 组之间轮转，避免同 version 连续编号任务成串",
+      "全局按 repo 轮转取实例，前 30 条为 dev30，随后 50 条为 test50",
+      "两组各自按 instance_id 升序写盘，并断言交集为空"
+    ],
+    "determinism": "仅依赖快照内容与固定 seed；不使用 random 模块与系统时间（时间只写 manifest）",
+    "model_results_used": false
+  },
+  "files": {
+    "swebench-lite-dev30.json": {
+      "count": 30,
+      "sha256": "18a0ccc75edd93a2859160f3256e797daf22f9be0035033ad4abd83981538d48",
+      "instance_list_sha256": "897832deecd7504d659cd7071c7aed6325d2ad0dc10ba51ac8005b5f1d309c18",
+      "source_split": "test",
+      "repo_distribution": {
+        "astropy/astropy": 2,
+        "django/django": 3,
+        "matplotlib/matplotlib": 3,
+        "mwaskom/seaborn": 2,
+        "pallets/flask": 2,
+        "psf/requests": 2,
+        "pydata/xarray": 2,
+        "pylint-dev/pylint": 2,
+        "pytest-dev/pytest": 3,
+        "scikit-learn/scikit-learn": 3,
+        "sphinx-doc/sphinx": 3,
+        "sympy/sympy": 3
+      }
+    },
+    "swebench-lite-test50.json": {
+      "count": 50,
+      "sha256": "775db5cf9c38ea20006a1e5fab529b0df744dc70236b164de9d5f107be48b338",
+      "instance_list_sha256": "d5cd5c7534741d40634639722e3a1c3d37b02b62a8ef1efb19fce900d427287c",
+      "source_split": "test",
+      "repo_distribution": {
+        "astropy/astropy": 4,
+        "django/django": 6,
+        "matplotlib/matplotlib": 5,
+        "mwaskom/seaborn": 2,
+        "pallets/flask": 1,
+        "psf/requests": 4,
+        "pydata/xarray": 3,
+        "pylint-dev/pylint": 4,
+        "pytest-dev/pytest": 5,
+        "scikit-learn/scikit-learn": 5,
+        "sphinx-doc/sphinx": 5,
+        "sympy/sympy": 6
+      }
+    },
+    "swebench-lite-official-dev23.json": {
+      "count": 23,
+      "sha256": "81552151b5460d9f80f0a7de2d2a74ac3902a0be781b3c65bba2737772ad3c99",
+      "instance_list_sha256": "a67fe3677fc9d533bfd9e972bc2a421f443b8df1f2e47dfc2b01bb96ef7fd2bd",
+      "source_split": "dev",
+      "repo_distribution": {
+        "marshmallow-code/marshmallow": 2,
+        "pvlib/pvlib-python": 5,
+        "pydicom/pydicom": 5,
+        "pylint-dev/astroid": 5,
+        "pyvista/pyvista": 1,
+        "sqlfluff/sqlfluff": 5
+      }
+    }
+  },
+  "overlap": {
+    "swebench-lite-dev30.json∩swebench-lite-test50.json": {
+      "count": 0,
+      "instance_ids": []
+    }
+  },
+  "official_split_vs_custom": {
+    "official_test": "官方 test split 300 条，是完整榜单/全量实验口径",
+    "official_dev": "官方 dev split 23 条，仅保留为参考清单，不参与任何抽样",
+    "custom_dev30": "从官方 test split 抽 30 条作为开发子集（调参/冒烟），不是官方 dev",
+    "custom_test50": "从官方 test split 另抽 50 条作为测试子集（E-18 固定口径）",
+    "difference": "自定义 dev30/test50 是官方 test 300 条的固定子集：口径更小、可重复、仓库均衡，但不等于官方 split，任何指标必须标明实际分母与抽取清单，不能写成官方的 dev/test 结果",
+    "not_selected_by_model_success": "抽样只依赖 instance_id/repo/version 与固定 seed；未使用任何模型运行结果，因此不存在按 GLM 成功率挑题"
+  },
+  "reproduce": "python scripts/make_swebench_subsets.py --generated-at 2026-10-18T17:38:45Z"
+}

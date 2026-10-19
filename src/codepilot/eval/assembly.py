@@ -29,7 +29,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 from codepilot.agents.coder import CodingAgent
 from codepilot.agents.diagnoser import DiagnosisAgent
@@ -40,7 +40,7 @@ from codepilot.agents.planner import Planner
 from codepilot.agents.reviewer import PatchReviewer
 from codepilot.artifacts import LLM_REQUESTS_JSONL, ArtifactStore, RetrievalSnapshotStore
 from codepilot.context.builder import ContextBuilder
-from codepilot.eval.synthetic import INFERENCE_DENIED_DIRECTORIES, InferenceTask
+from codepilot.eval.synthetic import INFERENCE_DENIED_DIRECTORIES
 from codepilot.failure.parser import FailureParser
 from codepilot.graph.builder import run_graph
 from codepilot.graph.checkpoint import open_checkpointer, resume_run, run_with_checkpoint
@@ -59,6 +59,7 @@ from codepilot.repo.index import Indexer, RepositoryIndex
 from codepilot.repo.workspace import Workspace, WorkspaceManager, normalize_source
 from codepilot.retrieval.service import retrieve_symbols
 from codepilot.sandbox.base import Sandbox
+from codepilot.sandbox.env_spec import EnvSpec
 from codepilot.schemas.budget import RepairBudget
 from codepilot.schemas.enums import RunStatus, TaskMode
 from codepilot.schemas.retrieval import FusionMethod
@@ -85,6 +86,45 @@ __all__ = [
 
 #: 现场身份记录。恢复进程靠它认回 workspace 与索引的 ``repository_id``。
 WORKSPACE_IDENTITY = "workspace_identity.json"
+
+
+class InferenceTaskLike(Protocol):
+    """推理图需要的最小任务视图（Phase 11 起同时服务 Synthetic 与 SWE-bench）。
+
+    这里刻意用结构化 Protocol 而不是 import 具体任务类型：SWE-bench 的任务模块
+    (:mod:`codepilot.eval.swebench_task`) 必须可以独立于本模块存在，而本模块也
+    绝不能反向依赖评测侧的 ``codepilot.eval.swebench``（那里有 gold patch 与
+    隐藏测试清单）。两者只在这个五字段视图上相遇：
+
+    * ``task_id`` / ``issue`` / ``base_commit`` 是任务身份与问题描述；
+    * ``repository`` 既可以是本地路径（synthetic fixture 的 ``repo/``），也可以是
+      远端 URL（SWE-bench 的 ``https://github.com/<owner>/<name>.git``）——
+      :class:`~codepilot.repo.workspace.WorkspaceManager` 两种都支持；
+    * ``env_spec`` 是环境规格；
+    * ``mode`` 决定 ``RepairState.mode``（synthetic / swebench）。
+
+    评测字段（gold patch、test patch、FAIL_TO_PASS…）**不在**这个视图里，因此
+    装配层即使想泄漏也无从取值。
+    """
+
+    @property
+    def task_id(self) -> str: ...
+
+    @property
+    def issue(self) -> str: ...
+
+    @property
+    def base_commit(self) -> str: ...
+
+    @property
+    def repository(self) -> Path | str: ...
+
+    @property
+    def env_spec(self) -> EnvSpec: ...
+
+    @property
+    def mode(self) -> str: ...
+
 
 #: 图里会向模型要东西的角色。装配时一次备齐，缺一个就在构造期炸，而不是等某个
 #: 节点跑到一半才报 KeyError。
@@ -301,7 +341,7 @@ class InferenceAssembly:
     def __init__(
         self,
         *,
-        task: InferenceTask,
+        task: InferenceTaskLike,
         workspace_manager: WorkspaceManager,
         work_root: Path,
         sandbox_factory: Callable[[ArtifactStore], Sandbox],
@@ -586,7 +626,7 @@ class InferenceAssembly:
             repository_id=workspace.repository_id,
             base_commit=workspace.base_commit,
             issue=task.issue,
-            mode=TaskMode.SYNTHETIC,
+            mode=TaskMode(task.mode),
             started_at=datetime.now(UTC),
             budget=self._budget,
         )

@@ -1395,6 +1395,130 @@ def _confirm_live_cost(config: Any, fixture_count: int) -> None:
     )
 
 
+@app.command("bench-swebench")
+def bench_swebench(
+    instance_id: str = typer.Option(..., "--instance-id", help="官方 SWE-bench Lite instance_id。"),
+    split: str = typer.Option("test", "--split", help="官方 split：dev 或 test。"),
+    revision: str | None = typer.Option(
+        None, "--revision", help="数据集 revision；缺省取代码里钉死的官方 revision。"
+    ),
+    provider: str = typer.Option(
+        "bigmodel", "--provider", help="LLM provider 名（configs/llm.yaml）。"
+    ),
+    model: str | None = typer.Option(None, "--model", help="模型别名；缺省按角色配置。"),
+    budget: float | None = typer.Option(None, "--budget", help="单题预算上限（预算币种）。"),
+    seed: int = typer.Option(0, "--seed", help="随机种子。"),
+    temperature: float = typer.Option(0.0, "--temperature", help="采样温度。"),
+    max_output_tokens: int = typer.Option(4096, "--max-output-tokens", help="单次输出上限。"),
+    timeout: int = typer.Option(1800, "--timeout", help="官方 Harness 单实例超时（秒）。"),
+    docker_cpus: float = typer.Option(2.0, "--docker-cpus", help="Docker 资源上限：CPU。"),
+    docker_memory: str = typer.Option("4g", "--docker-memory", help="Docker 资源上限：内存。"),
+    artifact_root: Path = typer.Option(
+        Path("artifacts/swebench"), "--artifact-root", help="Artifact 根目录。"
+    ),
+    snapshot_root: Path = typer.Option(
+        Path("cache/swebench"), "--snapshot-root", help="数据集快照根目录（离线缓存）。"
+    ),
+    spec_snapshot: Path = typer.Option(
+        Path("configs/swebench/env-specs-4.1.0.json"),
+        "--spec-snapshot",
+        help="官方环境规格冻结快照。",
+    ),
+    harness_python: Path | None = typer.Option(
+        None, "--harness-python", help="安装了锁定版 swebench 的 Python（默认 .venv-swebench）。"
+    ),
+    run_label: str | None = typer.Option(
+        None, "--run-label", help="运行标签（A/B 双次运行时用于区分现场）。"
+    ),
+    repeats: int = typer.Option(1, "--repeats", help="重复次数；2 = Run A / Run B 独立运行。"),
+    resume: bool = typer.Option(False, "--resume", help="从既有现场按三层恢复续跑。"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="只验证 Loader/环境/装配/命令/产物，不调用任何 LLM。"
+    ),
+    live_llm: bool = typer.Option(
+        False, "--live-llm", help="显式授权真实付费 LLM（默认关闭，未授权不发起任何请求）。"
+    ),
+    record_llm: bool = typer.Option(False, "--record-llm", help="录制 LLM 请求到 artifact。"),
+) -> None:
+    """SWE-bench Lite 单题完整链路入口（E-17）。
+
+    这是 ``codepilot bench`` 家族里的 SWE-bench 分支：真正执行的是
+    ``scripts/swebench_smoke.py``（同一套 Loader → 环境 → 完整 M2 图 → Patch →
+    Prediction → 官方 Harness → Report 链路），CLI 只做参数收口与退出码转换，
+    避免在 Typer 里再复制一份执行逻辑。
+
+    默认 ``--dry-run`` 之外也要显式 ``--live-llm`` 才会调用真实模型；两者都没有时
+    会以明确错误退出，而不是悄悄跑一次 FakeLLM 并把它当成真实结果。
+    """
+    import importlib.util
+
+    script = PROJECT_ROOT / "scripts" / "swebench_smoke.py"
+    if not script.is_file():
+        typer.echo(f"[bench-swebench] 找不到入口脚本: {script}", err=True)
+        raise typer.Exit(code=2)
+    module_name = "codepilot_swebench_smoke_entry"
+    spec = importlib.util.spec_from_file_location(module_name, script)
+    if spec is None or spec.loader is None:  # pragma: no cover - 文件系统异常
+        typer.echo(f"[bench-swebench] 无法加载入口脚本: {script}", err=True)
+        raise typer.Exit(code=2)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    try:
+        spec.loader.exec_module(module)
+    except Exception as exc:
+        typer.echo(f"[bench-swebench] 加载失败: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+
+    argv: list[str] = [
+        "--instance-id",
+        instance_id,
+        "--split",
+        split,
+        "--provider",
+        provider,
+        "--seed",
+        str(seed),
+        "--temperature",
+        str(temperature),
+        "--max-output-tokens",
+        str(max_output_tokens),
+        "--timeout",
+        str(timeout),
+        "--docker-cpus",
+        str(docker_cpus),
+        "--docker-memory",
+        docker_memory,
+        "--artifact-root",
+        str(artifact_root),
+        "--snapshot-root",
+        str(snapshot_root),
+        "--spec-snapshot",
+        str(spec_snapshot),
+        "--repeats",
+        str(repeats),
+    ]
+    for flag, value in (
+        ("--revision", revision),
+        ("--model", model),
+        ("--budget", None if budget is None else str(budget)),
+        ("--harness-python", None if harness_python is None else str(harness_python)),
+        ("--run-label", run_label),
+    ):
+        if value is not None:
+            argv += [flag, value]
+    if resume:
+        argv.append("--resume")
+    if dry_run:
+        argv.append("--dry-run")
+    if live_llm:
+        argv.append("--live-llm")
+    if record_llm:
+        argv.append("--record-llm")
+
+    code = int(module.main(argv))
+    raise typer.Exit(code=code)
+
+
 @app.command("report")
 def report(
     run_id: str = typer.Argument(..., help="运行 ID。"),

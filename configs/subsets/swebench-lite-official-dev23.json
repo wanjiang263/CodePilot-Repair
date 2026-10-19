@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "name": "swebench-lite-official-dev23",
+  "description": "官方 dev split 全量 23 题的参考清单，仅作兼容/对照；不参与自定义抽样，也不与 dev30/test50 混用。",
+  "dataset": {
+    "name": "princeton-nlp/SWE-bench_Lite",
+    "revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2"
+  },
+  "source_split": "dev",
+  "seed": null,
+  "count": 23,
+  "instance_ids": [
+    "marshmallow-code__marshmallow-1343",
+    "marshmallow-code__marshmallow-1359",
+    "pvlib__pvlib-python-1072",
+    "pvlib__pvlib-python-1154",
+    "pvlib__pvlib-python-1606",
+    "pvlib__pvlib-python-1707",
+    "pvlib__pvlib-python-1854",
+    "pydicom__pydicom-1139",
+    "pydicom__pydicom-1256",
+    "pydicom__pydicom-1413",
+    "pydicom__pydicom-1694",
+    "pydicom__pydicom-901",
+    "pylint-dev__astroid-1196",
+    "pylint-dev__astroid-1268",
+    "pylint-dev__astroid-1333",
+    "pylint-dev__astroid-1866",
+    "pylint-dev__astroid-1978",
+    "pyvista__pyvista-4315",
+    "sqlfluff__sqlfluff-1517",
+    "sqlfluff__sqlfluff-1625",
+    "sqlfluff__sqlfluff-1733",
+    "sqlfluff__sqlfluff-1763",
+    "sqlfluff__sqlfluff-2419"
+  ],
+  "instance_list_sha256": "a67fe3677fc9d533bfd9e972bc2a421f443b8df1f2e47dfc2b01bb96ef7fd2bd",
+  "repo_distribution": {
+    "marshmallow-code/marshmallow": 2,
+    "pvlib/pvlib-python": 5,
+    "pydicom/pydicom": 5,
+    "pylint-dev/astroid": 5,
+    "pyvista/pyvista": 1,
+    "sqlfluff/sqlfluff": 5
+  }
+}
