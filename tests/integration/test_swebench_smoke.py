@@ -962,3 +962,28 @@ def test_repeats_two_produce_independent_runs(tmp_path: Path) -> None:
     comparison = json.loads(comparison_path.read_text(encoding="utf-8"))
     assert comparison["checks"]["distinct_run_ids"] is True
     assert comparison["checks"]["independent_artifacts"] is True
+
+
+def test_cost_note_follows_the_engine_and_never_calls_real_money_a_demo(
+    tmp_path: Path,
+) -> None:
+    """真实运行的 cost.json 不许写"这只是记账链路接通"。
+
+    这句免责对 FakeLLM 是对的，对着真实 provider 写就会把一份真实费用读成演示数据；
+    反过来也一样，模拟运行不能写成真实花费。两种场合各说各的事实。
+    """
+    paths = SimpleNamespace(usage=tmp_path / "usage.json", cost=tmp_path / "cost.json")
+    config = SimpleNamespace(budget_currency="CNY", budget=10.0)
+    usage = Usage(input_tokens=100, output_tokens=10, cost=0.5, llm_calls=1)
+
+    smoke._write_usage_and_cost(config, paths, SimpleNamespace(usage=usage, simulated_llm=False))
+    live = json.loads(paths.cost.read_text(encoding="utf-8"))
+    assert live["simulated_llm"] is False
+    assert "真实 provider 记账" in live["note"]
+    assert "不构成真实费用证据" not in live["note"]
+
+    smoke._write_usage_and_cost(config, paths, SimpleNamespace(usage=usage, simulated_llm=True))
+    fake = json.loads(paths.cost.read_text(encoding="utf-8"))
+    assert fake["simulated_llm"] is True
+    assert fake["note"].startswith("simulated_llm=true")
+    assert fake["budget_max_cost"] == 10.0

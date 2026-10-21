@@ -401,6 +401,18 @@ class TaskRecord:
     llm_requests: dict[str, Any] = field(default_factory=dict)
     checkpointed: bool = False
     resumed_from_checkpoint: bool = False
+    # ---- Phase 11 闭环字段：内部自验证的逐阶段真相 ----
+    # ``resolved`` 是**官方**判分（外部 Harness 决定），``verification_level`` 是 Agent
+    # **自己**的闭环级别（``m2_verified`` / ``provisionally_verified`` / ``unverified`` …）。
+    # 两者必须各写各的：官方 RESOLVED 不等于自验证闭环完整，反之亦然——首次真实运行
+    # 就是"官方 RESOLVED + 审查从未执行"同时成立的那一种。
+    verification_level: str = ""
+    review_executed: bool = False
+    review_bound_to_candidate: bool = False
+    review_high_issues: int = 0
+    post_review_repair: bool = False
+    unexecuted_stages: tuple[str, ...] = ()
+    coding_stop_reason: str = ""
     # 推理侧自己给出的定位候选（有序、按模型排名）。只存预测，不存 gold：gold 一旦落进
     # journal 或 ``results.jsonl``，续跑与复盘就会把"该改哪个文件"重新喂进任何读这些
     # 产物的环节。gold 在报告时由评测侧现算。
@@ -413,7 +425,12 @@ class TaskRecord:
     @staticmethod
     def from_dict(payload: Mapping[str, Any]) -> TaskRecord:
         data = dict(payload)
-        for key in ("error_details", "localization_files", "localization_symbols"):
+        for key in (
+            "error_details",
+            "localization_files",
+            "localization_symbols",
+            "unexecuted_stages",
+        ):
             data[key] = tuple(data.get(key, ()))
         if "record_version" not in data:
             data.update(_legacy_attribution(dict(data)))
@@ -922,6 +939,15 @@ class BenchmarkRunner:
             llm_requests=dict(outcome.llm_requests) if outcome else {},
             checkpointed=bool(outcome.checkpointed) if outcome else False,
             resumed_from_checkpoint=bool(outcome.resumed_from_checkpoint) if outcome else False,
+            verification_level=outcome.verification_level if outcome else "",
+            review_executed=bool(outcome.review_executed) if outcome else False,
+            review_bound_to_candidate=(
+                bool(outcome.review_bound_to_candidate) if outcome else False
+            ),
+            review_high_issues=outcome.review_high_issues if outcome else 0,
+            post_review_repair=bool(outcome.post_review_repair) if outcome else False,
+            unexecuted_stages=tuple(outcome.unexecuted_stages) if outcome else (),
+            coding_stop_reason=outcome.coding_stop_reason if outcome else "",
             artifact_refs={
                 **({"inference_run_dir": Path(outcome.artifact_dir).name} if outcome else {}),
                 **(evaluation.artifact_refs if evaluation else {}),

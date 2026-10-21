@@ -37,6 +37,11 @@ from codepilot.agents.impact_analyzer import ImpactAnalyzer
 from codepilot.agents.issue_analyzer import IssueAnalyzer
 from codepilot.agents.localizer import Localizer
 from codepilot.agents.planner import Planner
+from codepilot.agents.reproducer import (
+    BaseWorkspaceValidator,
+    ReproductionAgent,
+    WorkspaceManagerBaseProvider,
+)
 from codepilot.agents.reviewer import PatchReviewer
 from codepilot.artifacts import LLM_REQUESTS_JSONL, ArtifactStore, RetrievalSnapshotStore
 from codepilot.context.builder import ContextBuilder
@@ -49,6 +54,7 @@ from codepilot.graph.regression import RegressionRunner
 from codepilot.llm.base import LLMProvider
 from codepilot.llm.calls import CallRecorder, LLMRunContext
 from codepilot.llm.config import LLMConfig
+from codepilot.llm.dispatch_budget import current_outstanding
 from codepilot.llm.fake import FakeLLM, Reply
 from codepilot.llm.registry import LLMMode, LLMRegistry
 from codepilot.llm.tracking import UsageTrackingProvider
@@ -57,6 +63,7 @@ from codepilot.patch.validator import PatchValidator
 from codepilot.repo.graph import RepoGraph
 from codepilot.repo.index import Indexer, RepositoryIndex
 from codepilot.repo.workspace import Workspace, WorkspaceManager, normalize_source
+from codepilot.report import VerificationClosure, verification_level
 from codepilot.retrieval.service import retrieve_symbols
 from codepilot.sandbox.base import Sandbox
 from codepilot.sandbox.env_spec import EnvSpec
@@ -128,7 +135,14 @@ class InferenceTaskLike(Protocol):
 
 #: 图里会向模型要东西的角色。装配时一次备齐，缺一个就在构造期炸，而不是等某个
 #: 节点跑到一半才报 KeyError。
-ROLES: tuple[str, ...] = ("localizer", "planner", "coder", "diagnoser", "reviewer")
+ROLES: tuple[str, ...] = (
+    "localizer",
+    "planner",
+    "coder",
+    "reproducer",
+    "diagnoser",
+    "reviewer",
+)
 
 #: Agent 会对外宣称"这一步成功了"的终态，与 ``metrics.agent_claims_success`` 同源。
 _CLAIM_STATUSES: frozenset[RunStatus] = frozenset(
@@ -311,6 +325,30 @@ class InferenceOutcome:
 
     plan_tool_audit: dict[str, Any] = field(default_factory=dict)
     """Planner 工具审计摘要。``{}`` = **没有采集到**，不等于"模型没调用工具"。"""
+
+    verification_level: str = ""
+    """内部自验证级别（``m2_verified`` / ``sampled_verified`` / ``provisionally_verified``
+    / ``unverified`` …；``""`` = 这条运行没有产出级别）。与官方判分各记各的。"""
+
+    review_executed: bool = False
+    """PatchReviewer 是否真的审过候选补丁。``False`` 只能读成"未执行"，
+    **永远不等于通过**（Phase 11 §六）。"""
+
+    coding_stop_reason: str = ""
+    """编码阶段的局部停止原因。非空只说明"这一轮不能再改代码了"，不说明任务终止：
+    补丁照样要过校验、过测试、过审查，报告里两套口径分开写。"""
+
+    review_high_issues: int = 0
+    """审查留下的 high 问题数。``review_executed=False`` 时这个 0 只能读成"没审"。"""
+
+    post_review_repair: bool = False
+    """是否发生过 Phase 9 政策允许的那一次"审查后修复"（复审因此必须重新挣）。"""
+
+    unexecuted_stages: tuple[str, ...] = ()
+    """闭环里**未执行**的阶段（含未执行原因）。空元组 = 全部执行过，不是"没采集"。"""
+
+    review_bound_to_candidate: bool = False
+    """审查结论是否绑定当前候选补丁的 SHA-256。审过 v1 不给 v2 背书。"""
 
     llm_requests: dict[str, Any] = field(default_factory=dict)
     """逐请求记录的聚合（按 role/model）。"""
@@ -616,8 +654,36 @@ class InferenceAssembly:
             workspace_manager=self._manager,
             usage=self._providers.usage,
             simulated_llm=self._providers.simulated,
+            # 闭环预留要按 Reviewer 实际绑定模型的单价估算；这份配置就是那条链
+            # （角色 → 别名 → 单价/汇率/币种）。脚本化与 Fake 批次没有注册表，
+            # 传 None 让预留退回账本单价口径，零成本运行照旧放行。
+            llm_config=self._providers.registry.config if self._providers.registry else None,
+            # 逐请求预留的"已承诺未落账"部分必须进预算准入：state.usage 只在响应回来
+            # 之后累加，飞行中的那笔钱否则是隐形的，预留就会在一个并不存在的余额上
+            # 再扣一次。未启用进程级账本（离线批次）时这个读数恒为 None，行为不变。
+            outstanding_cost=current_outstanding,
             regression_runner=RegressionRunner(),
             reviewer=PatchReviewer(provider["reviewer"]),
+            reproducer=(
+                ReproductionAgent(
+                    provider["reproducer"],
+                    policy=policy,
+                    validator=BaseWorkspaceValidator(
+                        sandbox=sandbox,
+                        env_spec=task.env_spec,
+                        environment=environment,
+                        provider=WorkspaceManagerBaseProvider(
+                            self._manager,
+                            source=str(task.repository),
+                            base_commit=workspace.base_commit,
+                            root=artifacts.run_dir / "reproduction-base",
+                        ),
+                    ),
+                    artifacts=artifacts,
+                )
+                if self._with_reproducer
+                else None
+            ),
         )
         deps.llm_context = context
         initial = RepairState(
@@ -675,6 +741,9 @@ class InferenceAssembly:
                 break
         if state.execution is not None:
             backend = str(state.execution.diagnostics.get("execution_backend") or backend)
+        # 闭环逐阶段事实只算一次：``review_executed`` 与报告里的 closure 必须同源，
+        # 两处各判一遍迟早会出现"报告说没审、结果行说审过了"。
+        closure = VerificationClosure.from_state(state)
         return InferenceOutcome(
             run_id=run_id,
             task_id=state.task_id,
@@ -709,6 +778,13 @@ class InferenceAssembly:
             simulated_llm=self._providers.simulated,
             sandbox_backend=backend,
             verification_mode=_verification_mode(state),
+            verification_level=verification_level(state),
+            review_executed=closure.review_executed,
+            coding_stop_reason=closure.coding_stop_reason or "",
+            review_high_issues=closure.review_high_issues,
+            post_review_repair=closure.post_review_repair,
+            unexecuted_stages=tuple(closure.unexecuted_stages),
+            review_bound_to_candidate=closure.review_bound_to_candidate,
             artifact_dir=str(artifacts.run_dir),
             failure_reasons=tuple(state.failure_reasons),
             error_class=state.error_class,

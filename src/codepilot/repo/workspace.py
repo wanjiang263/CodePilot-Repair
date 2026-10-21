@@ -695,7 +695,16 @@ class WorkspaceManager:
         refspecs = [f"+{ref}:{ref}" for ref in tags.lines]
         for batch in _batched([commit, *refspecs], limit=_CMDLINE_BUDGET):
             fetched = run_git(
-                ["-c", "gc.auto=0", "fetch", "--quiet", "--no-tags", str(cache), *batch],
+                [
+                    "-c",
+                    "gc.auto=0",
+                    "fetch",
+                    "--quiet",
+                    "--no-tags",
+                    *(["--depth=1"] if (cache / "shallow").is_file() else []),
+                    str(cache),
+                    *batch,
+                ],
                 cwd=target,
                 check=False,
                 timeout=self.timeout,

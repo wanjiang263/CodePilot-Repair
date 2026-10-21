@@ -1381,6 +1381,15 @@ class _InferenceFacts:
     plan_corrections: int = 0
     plan_tool_audit: Mapping[str, Any] = field(default_factory=dict)
     llm_requests: Mapping[str, Any] = field(default_factory=dict)
+    # Phase 11 闭环：内部自验证的逐阶段真相，与官方判分各记各的。恢复时这些数字要
+    # 从现场 manifest 原样读回——读不回来就会把"已经审过"的现场写成"从未执行"。
+    verification_level: str = ""
+    review_executed: bool = False
+    review_bound_to_candidate: bool = False
+    review_high_issues: int = 0
+    post_review_repair: bool = False
+    unexecuted_stages: tuple[str, ...] = ()
+    coding_stop_reason: str = ""
 
 
 def _facts_from_outcome(outcome: InferenceOutcome) -> _InferenceFacts:
@@ -1406,6 +1415,13 @@ def _facts_from_outcome(outcome: InferenceOutcome) -> _InferenceFacts:
         plan_corrections=int(outcome.plan_corrections),
         plan_tool_audit=dict(outcome.plan_tool_audit),
         llm_requests=dict(outcome.llm_requests),
+        verification_level=str(outcome.verification_level),
+        review_executed=bool(outcome.review_executed),
+        review_bound_to_candidate=bool(outcome.review_bound_to_candidate),
+        review_high_issues=int(outcome.review_high_issues),
+        post_review_repair=bool(outcome.post_review_repair),
+        unexecuted_stages=tuple(outcome.unexecuted_stages),
+        coding_stop_reason=str(outcome.coding_stop_reason),
     )
 
 
@@ -1464,6 +1480,13 @@ def _facts_to_payload(facts: _InferenceFacts) -> dict[str, Any]:
         "plan_corrections": facts.plan_corrections,
         "plan_tool_audit": dict(facts.plan_tool_audit),
         "llm_requests": dict(facts.llm_requests),
+        "verification_level": facts.verification_level,
+        "review_executed": facts.review_executed,
+        "review_bound_to_candidate": facts.review_bound_to_candidate,
+        "review_high_issues": facts.review_high_issues,
+        "post_review_repair": facts.post_review_repair,
+        "unexecuted_stages": list(facts.unexecuted_stages),
+        "coding_stop_reason": facts.coding_stop_reason,
     }
 
 
@@ -1473,6 +1496,7 @@ def _facts_from_payload(payload: Mapping[str, Any]) -> _InferenceFacts:
     reasons = payload.get("failure_reasons")
     plan_audit = payload.get("plan_tool_audit")
     llm_requests = payload.get("llm_requests")
+    stages = payload.get("unexecuted_stages")
     return _InferenceFacts(
         status=str(payload.get("status") or "unknown"),
         stop_reason=payload.get("stop_reason"),
@@ -1499,6 +1523,13 @@ def _facts_from_payload(payload: Mapping[str, Any]) -> _InferenceFacts:
         plan_corrections=int(payload.get("plan_corrections") or 0),
         plan_tool_audit=dict(plan_audit) if isinstance(plan_audit, dict) else {},
         llm_requests=dict(llm_requests) if isinstance(llm_requests, dict) else {},
+        verification_level=str(payload.get("verification_level") or ""),
+        review_executed=bool(payload.get("review_executed", False)),
+        review_bound_to_candidate=bool(payload.get("review_bound_to_candidate", False)),
+        review_high_issues=int(payload.get("review_high_issues") or 0),
+        post_review_repair=bool(payload.get("post_review_repair", False)),
+        unexecuted_stages=(tuple(str(item) for item in stages) if isinstance(stages, list) else ()),
+        coding_stop_reason=str(payload.get("coding_stop_reason") or ""),
     )
 
 
@@ -2861,6 +2892,13 @@ class SWEBenchRunner:
             llm_requests=dict(facts.llm_requests),
             checkpointed=facts.checkpointed,
             resumed_from_checkpoint=facts.resumed_from_checkpoint,
+            verification_level=facts.verification_level,
+            review_executed=facts.review_executed,
+            review_bound_to_candidate=facts.review_bound_to_candidate,
+            review_high_issues=facts.review_high_issues,
+            post_review_repair=facts.post_review_repair,
+            unexecuted_stages=facts.unexecuted_stages,
+            coding_stop_reason=facts.coding_stop_reason,
         )
 
     def _refusal_record(self, *, base: RunIdentity, seed: int, audit: WorkspaceAudit) -> TaskRecord:

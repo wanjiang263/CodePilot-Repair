@@ -1485,6 +1485,27 @@ def test_classify_outcome_matrix(kwargs: dict[str, Any], expected: SWEBenchAttri
     assert classify_outcome(**kwargs) is expected
 
 
+def test_a_closure_admission_stop_is_bucketed_as_a_budget_stop() -> None:
+    """闭环准入（DA-024）落在预算桶里，而不是"补丁无效"或"模型没修好"。
+
+    ``classify_outcome`` 按 ``budget_`` 前缀分桶，所以 ``budget_closure_test_runs`` 这个
+    名字不是风格问题：家族外的名字会让一次"额度算下来不够"被算进模型能力失败的分母，
+    而那一轮的补丁其实有效、只是没额度验完。
+    """
+    assert (
+        classify_outcome(
+            execution_state="completed",
+            official_verdict=None,
+            official_resolved=None,
+            patch_valid=True,
+            empty_patch=False,
+            invalid_patch=False,
+            stop_reason="budget_closure_test_runs",
+        )
+        is SWEBenchAttribution.BUDGET_STOPPED
+    )
+
+
 def test_every_swebench_attribution_maps_to_a_legacy_attribution() -> None:
     assert set(LEGACY_ATTRIBUTION) == set(SWEBenchAttribution)
     for value in LEGACY_ATTRIBUTION.values():

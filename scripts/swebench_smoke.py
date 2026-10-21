@@ -328,12 +328,51 @@ def _default_environment_adapter(config: SmokeConfig, *, allow_build: bool = Fal
 
 
 def _default_sandbox_factory(config: SmokeConfig) -> Callable[[Any], Any]:
+    from codepilot.sandbox.base import EnvironmentBuildResult
     from codepilot.sandbox.docker import DockerSandbox
+    from codepilot.sandbox.swebench_env import instance_image_key
+    from codepilot.schemas.enums import ExecutionStatus
+
+    class CachedOfficialSandbox(DockerSandbox):
+        def build_env(self, **kwargs: Any) -> Any:
+            from codepilot.repo.gitcmd import run_git
+
+            head = run_git(["rev-parse", "HEAD"], cwd=kwargs["workspace"]).stdout.strip()
+            if head != kwargs["base_commit"]:
+                raise SmokeError("official sandbox workspace base commit mismatch")
+            # No builds or pulls: use the same cached official instance environment.
+            image_ref = instance_image_key(config.instance_id)
+            image = self.client.images.get(image_ref)
+            return EnvironmentBuildResult(
+                status=ExecutionStatus.PASS,
+                image_ref=image_ref,
+                image_id=image.id,
+                cache_key=f"official:{image.id}",
+                from_cache=True,
+            )
+
+        def run_tests(self, **kwargs: Any) -> Any:
+            spec = kwargs["env_spec"]
+            command = re.sub(
+                r"^(?:python(?:3)? -m )?pytest\b",
+                "/opt/miniconda3/envs/testbed/bin/python -m pytest",
+                spec.test_command,
+            )
+            kwargs["env_spec"] = spec.model_copy(
+                update={
+                    "test_command": command,
+                    # 工作区以卷的形式出现在 /testbed，与被测镜像原本的布局一致。
+                    "env": {**spec.env, "PYTHONPATH": "/testbed/src:/testbed"},
+                }
+            )
+            return super().run_tests(**kwargs)
 
     def factory(artifacts: Any) -> Any:
-        return DockerSandbox(
+        return CachedOfficialSandbox(
             artifacts=artifacts,
             allowed_workspace_root=Path(config.artifact_root),
+            # 覆盖镜像自带的 checkout（含它的 Git 历史），只留推理工作区的内容。
+            workspace_target="/testbed",
         )
 
     return factory
@@ -431,6 +470,7 @@ def _default_harness_runner(
         model_name_or_path=config.model_identity,
         dataset_revision=config.revision,
         dataset_snapshot=snapshot_dir,
+        cache_level="instance",
     )
     return module.OfficialHarnessRunner(
         harness_config,
@@ -680,7 +720,7 @@ def _run_inference(
         sandbox_factory=sandbox_factory,
         provider_bundle=bundle,
         budget=budget,
-        with_reproducer=False,
+        with_reproducer=config.live_llm,
         allow_new_tests=False,
         record_llm=config.record_llm,
         # 图级恢复由 runner 决定；本脚本的普通链路一律开 checkpoint，便于人工
@@ -988,7 +1028,14 @@ def _write_usage_and_cost(
         "unknown_cost_calls": getattr(usage, "cost_unknown_calls", None),
         "budget_max_cost": config.budget,
         "simulated_llm": bool(getattr(outcome, "simulated_llm", True)),
-        "note": "FakeLLM 的 cost 只证明记账链路接通，不构成真实费用证据",
+        # 这句话在真实运行里是错的：把"记账链路已接通"的免责写成"这不是真钱"，会让一份
+        # 真实费用的报告被读成演示数据。按引擎分叉，两种场合各自说自己的事实。
+        "note": (
+            "simulated_llm=true：这里的 cost 只证明记账链路接通，不构成真实费用证据"
+            if bool(getattr(outcome, "simulated_llm", True))
+            else "真实 provider 记账：金额由服务商回传的用量与配置单价算出；"
+            "unknown_cost_calls>0 时它是下界而不是总额"
+        ),
     }
     _atomic_write_json(paths.usage, usage_payload)
     _atomic_write_json(paths.cost, cost)

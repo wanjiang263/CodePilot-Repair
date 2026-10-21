@@ -787,6 +787,7 @@ def test_providers_bundle_rejects_missing_roles() -> None:
         "localizer",
         "planner",
         "coder",
+        "reproducer",
         "diagnoser",
         "reviewer",
     }
@@ -833,3 +834,45 @@ def test_artifact_store_writes_are_contained(tmp_path: Path) -> None:
         store.write_json("../escape.json", {})
     with pytest.raises(ValueError):
         ArtifactStore(tmp_path / "art", "../run")
+
+
+def test_closure_fields_stay_apart_from_the_official_verdict(tmp_path: Path) -> None:
+    """§六.9：内部闭环级别与官方判分写在同一行里，但谁也覆盖不了谁。
+
+    这一行同时是"官方 RESOLVED"与"审查从未执行"——首次真实运行就是这个形状。
+    只有两个字段并列存在，事后才看得出 Agent 并没有自证，而外部判分也没有替它自证。
+    """
+    import dataclasses
+
+    fixtures = _fixtures(tmp_path, 1)
+
+    def outcome_factory(*, run_id: str, task_id: str, seed: int, patch: str) -> InferenceOutcome:
+        base = _outcome(run_id=run_id, task_id=task_id, seed=seed, patch=patch)
+        return dataclasses.replace(
+            base,
+            verification_level="provisionally_verified",
+            review_executed=False,
+            review_bound_to_candidate=False,
+            review_high_issues=0,
+            post_review_repair=False,
+            unexecuted_stages=("review:not executed (no reviewer wired)",),
+            coding_stop_reason="budget_tool_calls",
+        )
+
+    run = _runner(tmp_path, fixtures=fixtures, seeds=(0,), outcome_factory=outcome_factory).run()
+    record = run.records[0]
+
+    assert record.resolved is True  # 评测侧（gold patch 判分）
+    assert record.agent_claims_success is True
+    assert record.verification_level == "provisionally_verified"
+    assert record.review_executed is False
+    assert record.review_bound_to_candidate is False
+    assert record.coding_stop_reason == "budget_tool_calls"
+    assert record.unexecuted_stages == ("review:not executed (no reviewer wired)",)
+    # 落盘格式（journal 与 results.jsonl 走同一条 from_dict 路径）必须原样读回：
+    # 元组过一遍 JSON 会变成列表，读回来还按列表比较就会把"往返一致"判成"往返不等"。
+    payload = json.loads(json.dumps(record.as_dict()))
+    assert TaskRecord.from_dict(payload) == record
+    path = tmp_path / RESULTS_JSONL
+    path.write_text(json.dumps(record.as_dict()) + "\n", encoding="utf-8")
+    assert read_results(path)[0] == record
