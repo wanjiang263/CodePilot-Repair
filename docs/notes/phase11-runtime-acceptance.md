@@ -386,3 +386,123 @@ Adapter 解析与缓存（全部有真实证据）。未满足：Linux 侧 works
 
 远端：**未 push**；无 PR / merge / reset / rebase / amend / force push。
 最终 `git status --short` 只剩既有未跟踪目录 `.playwright-mcp/`。
+
+## 10. 后续轮次（2026-10-19/20，本文件之外的记录）
+
+- 首次真实单题实验（GLM-5.3-Flash，6 次调用，记账 ¥0.0588488）在 `reproduce` 节点因
+  `DockerSandbox` 的宿主 bind 挂载在这台机器上不可用而停止，官方判定 `NOT_EVALUATED`。
+  现场与结论：`artifacts/phase11-glm10-20261019/REPORT.md`。
+  本文件 §5/§6 的"真实 Docker 验证"只覆盖官方 Harness 自身的挂载策略（§5.2 原话），
+  推理沙箱的 bind 依赖当时确实没有被真实验证过——这是本轮发现的根因。
+- 传输层修复与零模型成本验证：`docs/notes/phase11-sandbox-transfer.md`
+  （证据目录 `artifacts/phase11-sandbox-hardening/`）。
+
+## 12. 真实单题验收（2026-10-20 收口轮，两次运行，官方各判一次）
+
+同一实例 `marshmallow-code__marshmallow-1343`（dev/seed 0），模型
+`glm-5.3-flash-main`，官方 `swebench==4.1.0`。两次都是新站点、新 run_id、
+新派发账本，未覆盖 §5–§10 与更早实验的任何产物。
+
+| | attempt-1 `…glm12-20261020…` | attempt-2 `…glm13-20261020…` |
+| --- | --- | --- |
+| 官方 verdict | **RESOLVED**（`resolved_instances:1`、`error_instances:0`） | **UNRESOLVED**（`resolved_instances:0`、`error_instances:0`，decision `EXECUTED`） |
+| 补丁 | 550 B，`a99f52042800c095…` | 576 B，`5c41d93b087c0446…` |
+| 调用 / 费用 | 13 次，¥0.1232776，`frozen=false` | 19 次，¥0.1708477，`frozen=false` |
+| 内部终态 | `error` / `workflow_error`，`harness_internal_error`+`harness` | `stopped` / `repeated_patch` |
+| 闭环 | 校验✓、目标测试 PASS、**回归与审查未执行** | 校验✓、目标测试 FAIL → 回归/审查按前置条件不成立而不执行（如实记录） |
+| 证据 | `artifacts/phase11-glm12-20261020/REPORT.md` | `artifacts/phase11-glm13-20261020/REPORT.md` |
+
+### 12.1 DA-021 已经解决（有实测）
+
+WSL 侧不需要 GitHub 出口也能建立**推理工作区**，路径链已跑通两次：
+
+1. base commit 取自冻结的官方数据集快照（`SWEBenchLoader.load_dataset("dev")` →
+   `get_inference_task(...).base_commit` = `2be2d83a1a9a6d3d9b85804f3ab545cecc409bb0`），
+   **不是**手抄；
+2. 该 commit 用 `docker run --pull=never --network none` 从**已缓存的官方实例镜像**里
+   `git pack-objects` 取出 → `git init --bare` + `index-pack` → 立即
+   `git clone --bare --depth=1` 落成 base-only 浅镜像（`stored_commits=1`、
+   `shallow=true`、无 `objects/info/alternates`、`fsck --full` 通过）；
+3. `WorkspaceManager(cache_root=<artifact-root>/repo-cache)` 从该缓存 `file://` 克隆，
+   `InferenceAssembly._assert_isolated` 通过（这正是 attempt-1 曾因 1663 个可达提交而失败、
+   必须浅镜像化的那条判据）；
+4. 推理容器、predictions、官方 Harness 与产物目录全在 WSL 同一侧，官方判分真实执行。
+
+因此 DA-021 的"WSL 内无法建立推理 workspace"阻断**已由这条本地通道解决**，
+未伪造克隆、未把本地错误仓库冒充官方任务（base commit 与镜像内 commit 双向核对）。
+
+### 12.2 真实运行暴露的新缺陷（attempt-1，已修）
+
+`run_regression` 对基线每条 NodeID 跑 `validate_test_target()`，而真实 marshmallow 基线
+779 条里有 **9 条**是含空格/引号的 pytest 参数化 ID
+（如 `tests/test_validate.py::test_url_absolute_invalid[ ]`）。旧判据"含空格就不是 ID"
+把它们当命令行 → `ValueError: test target must be a path or pytest NodeID, never a command`
+→ 回归整段中止、审查从未执行，终态 `error/workflow_error`
+（归因 `harness_internal_error` / `origin=harness`，**不是**模型没修好：那一题官方判 RESOLVED）。
+
+修法与边界见 [闭环与预算记录](phase11-closure-budget.md)；零模型成本的真实容器验证：
+在实例镜像内直接跑这两条带空格 ID → `2 passed`，且 JUnit 回读经
+`sandbox/junit._node_id()` 还原后与输入 ID 逐字相等（否则 `RegressionRunner` 的
+`set(observed) == set(scope)` 会误判 scope mismatch）。
+
+### 12.3 仍未执行 / 不在本轮
+
+- DA-022 的形状（`coding_stop_reason` 非空 → 闭环继续走完验证与审查）在真实模型上
+  **仍未出现**：两次运行编码阶段都在 5 次工具调用后 `finish`（每轮上限 30），没触顶。
+  该条保持 NOT RUN。
+- 3～5 题小规模、冻结 test50/test300、10 题费用校准（DA-019）：**未运行**。
+- 本轮 Docker 侧的 `--progress` 阻断已用 Ubuntu 官方源的 `docker-buildx` 包解决，
+  真实 Docker 门禁 46/46 通过；`python:3.12.7-slim-bookworm` 与
+  `ghcr.io/astral-sh/uv:0.12.9` 两个基础镜像因此被拉取到本机（供该用例使用，未 prune）。
+
+---
+
+# 13. 最终收口轮（2026-10-20 第二次实跑）：779 条基线全覆盖 + 第三次真实单题
+
+预算与闭环的工程改动、真实实验细节与门禁数字记在
+[闭环与预算记录](phase11-closure-budget.md) §9–§13。这里只补两份运行证据。
+
+## 13.1 真实基线 779 条授权回归 NodeID 的生产链路验证（零模型成本）
+
+驱动：[`scripts/verify_baseline_nodeids.py`](../../scripts/verify_baseline_nodeids.py)，
+证据：`artifacts/phase11-nodeids-20261020/`（含 `SUMMARY.json`、逐条判读
+`per-nodeid-results.json`、原始 JUnit 与容器 stdout/stderr）。
+
+跑的是生产组件：`build_test_baseline` → `RegressionRunner` → `DockerSandbox`（已缓存的
+官方实例镜像，`workspace_target=/testbed`，**不 build 不 pull**）→ `sandbox.junit` 解析。
+模型调用 0 次，未触碰 fixture / Gold / 隐藏测试。
+
+| 判据 | 结果 |
+| --- | --- |
+| 重新生成基线 | 779 条、`complete=true`，两次全量执行各 779 条；授权集合与逐条判读都与归档 `state_final.json` **逐字相等**，清单 `sha256=4a3af703779bed51…` |
+| L1 目标测试 | PASS（退出码 0，回读 12 条，`declared=cases=unique=12`） |
+| L2 受影响 | 219 条，PASS，回读 219 条 |
+| L3 全量 | 请求 779 → 回读 **779**；缺失 0、多余 0、重复 0；`set(observed)==set(scope)` 成立；回读列表哈希与授权清单**同一个哈希** |
+| L3 判读 | `status=PASS`、退出码 0、779 条全 passed、`new_failures=0`、`status_changes={}`、`flaky=[]`；`execution_backend=docker` |
+| 判据覆盖 | 779/779 通过 `validate_test_target` 与沙箱 `_validate_test_selection`；含空格/引号的参数化 ID **13 条**全部放行（旧判据在这里炸过） |
+| 转义 | 779 条逐项 `shlex.quote` 的命令长 **59,134** 字符，`shlex.split` 还原后与输入逐条相等 |
+| 注入负控制 | 14 条（flag、`; rm -rf /`、`$(id)`、反引号、换行、NUL、绝对路径、`..` 越界、超长、空串）全部被拒，两层判据各留原因 |
+| 超时与清理 | 完整 779 条 + `timeout_seconds=1` → `TIMEOUT`（不误判为通过）；前后 `codepilot` 容器/卷新增均为 0 |
+| 用时 | 16.36 s，exit 0，25 条判据全 PASS |
+
+一处必须记录的真实差异：官方 `FAIL_TO_PASS` 那个节点在 **base commit 工作区里不存在**
+（由评测期隐藏 test patch 创建），实测 pytest `ERROR: not found … no match in any of
+[<Class TestUnmarshaller>]`、退出码 4、`classify_execution` 如实给
+`COLLECTION_ERROR`。本验证不得改动隐藏测试，L1 因此改用授权清单内真实存在的节点
+（与生产图一致）。第一次实跑的失败现场保留在 `phase11-nodeids-20261020b`。
+
+结论：回归覆盖缺口（"只验证少数参数化用例"）关闭。该实例基线本身没有失败项，所以
+"预期基线失败 vs Harness 错误"这组区分在本实例上是空集，不得写成"779 条都被验证为失败"。
+
+## 13.2 第三次真实单题（最多一次，已执行）
+
+`marshmallow-code__marshmallow-1343`（dev/seed 0）、`glm-5.3-flash-main`、官方
+`swebench==4.1.0`、¥10 单题硬上限、全新站点与派发账本。官方 **RESOLVED**；内部
+`budget_exhausted`（`budget_test_runs` 12/12），Coder **没有**触及每轮 30 次工具上限
+（10/30）→ DA-022 的真实同形状仍 `NOT OBSERVED`。真实运行还抓出 Reviewer 被重复记账
+的缺陷（`llm/tracking.py:tracks_usage` 修复，负控制见
+`test_a_reviewer_behind_a_decorator_is_booked_exactly_once`）。完整数字与口径分列见
+[闭环与预算记录](phase11-closure-budget.md) §11。
+
+三次真实单题合计花费 ¥0.49（三次账本数字相加，含 glm14 多算的那一次），远低于单题
+¥10 上限；没有跑任何批量评测，也没有覆盖或改写历史产物。
