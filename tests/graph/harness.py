@@ -388,6 +388,7 @@ def build_harness(
     planner_replies: Sequence[Reply] | None = None,
     extra_plans: int = 0,
     reuse: bool = False,
+    llm_config: Any | None = None,
 ) -> Harness:
     """装配一次可运行的图。
 
@@ -619,6 +620,9 @@ def build_harness(
         usage=usage,
         clock=clock,
         simulated_llm=True,
+        # 真实装配里这份配置来自 ProviderBundle 的注册表（见 eval/assembly.py）；
+        # 测试注入它才能验"闭环预留按 Reviewer 绑定模型的单价估算"这条口径。
+        llm_config=llm_config,
     )
     initial = RepairState(
         task_id="fixture/normalize",

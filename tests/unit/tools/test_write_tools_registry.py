@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from codepilot.patch.diff import generate_git_diff
 from codepilot.repo.gitcmd import run_git
 from codepilot.sandbox.base import EnvironmentBuildResult
@@ -112,3 +114,55 @@ def test_create_file_cannot_overwrite_or_escape_and_enters_diff(tmp_path: Path) 
     assert not tool.execute({"path": "../outside.py", "content": "bad"}).ok
     assert tool.execute({"path": "src/new.py", "content": "VALUE = 2\n"}).ok
     assert "src/new.py" in generate_git_diff(root, base).files
+
+
+def test_parametrized_node_ids_with_spaces_are_targets_not_commands(
+    tmp_path: Path,
+) -> None:
+    """真实仓库的参数化 ID 里就有空格与引号，拒掉它们等于把回归阶段炸了。
+
+    2026-10-20 首次真实单题运行的实测形状：marshmallow 基线 779 条里 9 条是
+    ``test_email_invalid[" "@example.org]`` 这一类，旧判据"看见空格就不是 ID"把它们
+    全部当成命令，``run_regression`` 直接抛 ValueError，闭环停在审查之前。
+    放行的是 ``::`` 之后的 ID 本体；命令形态仍然一律拒。
+    """
+    from codepilot.tools.write_tools import validate_test_target
+
+    root, _ = _repo(tmp_path)
+    policy = WorkspacePathPolicy(root)
+    real_ids = [
+        "tests/test_ok.py::test_ok[my message]",
+        'tests/test_ok.py::test_email_invalid[" "@example.org]',
+        "tests/test_ok.py::test_url_absolute_invalid[ ]",
+        'tests/test_ok.py::test_x[a("very.(),:;<>[]".VERY)]',
+    ]
+    for target in real_ids:
+        assert validate_test_target(policy, target).startswith("tests/test_ok.py::")
+    sandbox = FakeSandbox([scripted_result(ExecutionStatus.PASS)])
+    environment = EnvironmentBuildResult(
+        status=ExecutionStatus.PASS, image_ref="fake://env", cache_key="key"
+    )
+    tool = run_tests_tool(policy, sandbox, environment, EnvSpec(), _TestRunBudget(1))
+    response = tool.execute({"test_ids": ["tests/test_ok.py::test_ok[my message]"]})
+    assert response.ok, response.error
+    assert sandbox.run_calls[0][1] == ("tests/test_ok.py::test_ok[my message]",)
+
+
+def test_command_shaped_targets_are_still_rejected(tmp_path: Path) -> None:
+    """负控制：放宽的只是 ID 本体的字符集，命令形态一项没放过。"""
+    from codepilot.tools.write_tools import validate_test_target
+
+    root, _ = _repo(tmp_path)
+    policy = WorkspacePathPolicy(root)
+    for target in [
+        "",
+        "-x",
+        "pytest tests/ -x",
+        "tests/test_ok.py;rm -rf /",
+        "tests/test_ok.py $(id)",
+        "tests/test_ok.py::test_ok\nrm -rf /",
+        "tests/test_ok.py::test_ok\t",
+        "tests/" + "a" * 1200,
+    ]:
+        with pytest.raises(ValueError, match="never a command"):
+            validate_test_target(policy, target)

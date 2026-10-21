@@ -50,6 +50,17 @@ class StopReason(StrEnum):
     TESTS_FAILED = "tests_failed"
     TOOL_ERROR = "tool_error"
     BUDGET_TOOL_CALLS = "budget_tool_calls"
+    #: 审查专属额度（``max_review_calls``）耗尽。刻意与 ``budget_tool_calls`` 分开：
+    #: 前者说明"审查阶段被自己的次数上限拦下"，后者说明"编码阶段没工具调用了"。
+    #: 混成一个原因就看不出是 Coder 把 Reviewer 饿死了，还是审查真的轮次用完了。
+    BUDGET_REVIEW_CALLS = "budget_review_calls"
+    #: 剩余测试额度撑不起**下一版候选补丁的验证闭环**，于是在启动修复之前就被拦下。
+    #: 闭环测试额度准入：**还没花完，但已经算出来剩余额度撑不起下一版候选的闭环**。
+    #: 留在 ``budget_*`` 家族里，既有的归因分桶（``TaskOutcome.over_budget``、
+    #: SWE-bench 的 ``BUDGET_STOPPED``）才会把它算成预算停止而不是"补丁无效/模型没修好"；
+    #: 值本身与 ``budget_test_runs`` 区分：后者是"12 次已经花完"（运行结果），这一条是
+    #: "还剩 2 次而闭环要 3 次"（派发前的算术），修法完全不同。
+    BUDGET_CLOSURE_TEST_RUNS = "budget_closure_test_runs"
     WORKFLOW_ERROR = "workflow_error"
     #: 计划被语义/Schema 校验拒绝（纠正预算耗尽）。刻意与 ``workflow_error`` 分开：
     #: 前者是"模型没给出可执行的计划"，后者是"Harness 自己出了问题"，

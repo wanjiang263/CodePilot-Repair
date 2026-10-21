@@ -159,17 +159,31 @@ def test_wall_clock_budget_stops_before_any_llm_call(tmp_path: Path) -> None:
 def test_tool_call_budget_maps_to_a_stop_reason_not_silently_ignored(
     tmp_path: Path,
 ) -> None:
-    """Coding Agent 内部撞到工具上限时，必须映射成权威的 ``budget_tool_calls``。"""
+    """Coding Agent 内部撞到工具上限时，必须映射成权威的 ``budget_tool_calls``。
+
+    Phase 11 修正了这条原因的**作用域**：它是这一轮编码的局部停止原因，不是整个
+    run 的终点。已经落盘的补丁仍然要过 PatchValidator、目标测试与诊断，最后由
+    ``check_budget`` 判定"不能再修一轮了"才终止——所以工具上限既不会被静默忽略，
+    也不会再顺手把验证与审查一起跳过（那正是首次真实 GLM 运行的缺陷）。
+    """
     harness = _one_round(tmp_path, budget=RepairBudget(max_tool_calls_per_iteration=1))
     state = harness.run()
 
+    assert state.coding_stop_reason is StopReason.BUDGET_TOOL_CALLS
     assert state.stop_reason is StopReason.BUDGET_TOOL_CALLS, state.status.value
     assert state.status is RunStatus.BUDGET_EXHAUSTED
     assert len(state.tool_calls) == 1
-    # 工具上限是在 generate_patch 里触发的，所以补丁从未送去执行测试。
-    # （只剩基线那两次执行。）
-    assert state.execution is None
-    assert len(harness.sandbox.run_calls) == 2
+    # 补丁确实被交出去验证过了，而不是停在"没工具了"这一步。
+    visited = [item["node"] for item in state.events]
+    assert Node.VALIDATE_PATCH.value in visited
+    assert Node.RUN_TARGET_TESTS.value in visited
+    assert Node.DIAGNOSE.value in visited
+    assert Node.REPAIR_PATCH.value not in visited
+    attempt = state.current_attempt
+    assert attempt is not None and attempt.patch_hash and attempt.execution is not None
+    # 工具上限是在编码阶段内部触发的，所以测试只跑到那一版补丁一次（外加基线两次）。
+    assert harness.deps.test_runs == 3
+    assert len(state.attempts) == 1
 
 
 # ------------------------------------------------------------------ 停止后无副作用

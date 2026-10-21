@@ -13,7 +13,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from codepilot.schemas.audit import PlannerToolAudit
-from codepilot.schemas.budget import RepairBudget
+from codepilot.schemas.budget import ClosureAdmission, RepairBudget
 from codepilot.schemas.diagnosis import Diagnosis
 from codepilot.schemas.enums import RunStatus, StopReason, TaskMode
 from codepilot.schemas.execution import ExecutionResult, TestBaseline
@@ -81,6 +81,37 @@ class RepairState(BaseModel):
     current_patch: str = ""
     regression: RegressionResult | None = None
     review: ReviewResult | None = None
+
+    coding_stop_reason: StopReason | None = None
+    """编码阶段自己的停止原因（工具调用/token/费用局部额度耗尽）。
+
+    刻意与 :attr:`stop_reason` 分开：前者只说明"这一轮编码不能再做了"，**不**等于
+    整个任务结束。首次真实 GLM 运行把两者写成了一层，于是 Coder 撞到每轮 30 次工具
+    上限后整张图直奔 finalize，PatchReviewer 从未执行。补丁仍然要送去校验、测试、
+    审查，而这条局部原因必须留在报告里。
+    """
+
+    frozen_patch_hash: str = ""
+    """编码阶段停止时**冻结**的补丁 SHA-256（:func:`codepilot.graph.stop_rules.patch_hash`）。
+
+    后续验证与审查必须绑定这一身份；一旦 Workspace 产出不同的补丁，冻结立即失效，
+    旧轮次的测试/审查结论不得复用。
+    """
+
+    review_calls: int = Field(default=0, ge=0)
+    """真正执行过的独立审查次数（专属额度，与编码工具额度互不相干）。"""
+
+    review_skip_reason: str | None = None
+    """审查**未执行**的原因。``None`` 且 :attr:`review` 为 ``None`` 只出现在审查前
+    置条件未到达的运行里；写入后报告必须把审查标为 NOT EXECUTED，而不是通过。"""
+
+    closure_admission: ClosureAdmission | None = None
+    """最近一次编码派发前的**闭环测试额度准入**读数（DA-024）。
+
+    ``None`` = 这次运行还没有做过闭环判定（例如 Phase 5 单次图），**不等于**"额度充足"。
+    带默认值的可选字段：历史 checkpoint 照旧可读，语义只增不改。它是读数不是记账，
+    重放同一条边不会因此多消耗一次测试执行。
+    """
 
     budget: RepairBudget = Field(default_factory=RepairBudget)
     usage: Usage = Field(default_factory=Usage)

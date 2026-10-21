@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from codepilot.artifacts import REPORT_JSON, REPORT_MD, STATE_FINAL, ArtifactStore
 from codepilot.clock import utcnow
 from codepilot.observability.redaction import redact, redact_text
+from codepilot.schemas.budget import ClosureAdmission
 from codepilot.schemas.execution import ExecutionResult, TestBaseline
 from codepilot.schemas.impact import ImpactAnalysis
 from codepilot.schemas.issue import IssueAnalysis
@@ -23,7 +24,7 @@ from codepilot.schemas.state import Attempt, RepairState
 from codepilot.schemas.usage import Usage
 from codepilot.schemas.validation import ValidationResult
 
-__all__ = ["RunReport", "write_run_report"]
+__all__ = ["RunReport", "VerificationClosure", "verification_level", "write_run_report"]
 
 _BOUNDARY = (
     "provisionally_verified means only that one validator-approved patch passed the selected "
@@ -34,6 +35,179 @@ _BOUNDARY = (
 )
 
 
+def _stage(executed: bool, outcome: object) -> str:
+    """把"执行了吗 + 结果"写成一句不断档的话。
+
+    ``NOT EXECUTED`` 必须与 ``executed, result=False`` 长得就不一样：报告是给人读的，
+    把没跑过的阶段写成 ``False`` 会被读成"跑了，失败了"，而那正是需要被区分出来的事。
+    """
+    if not executed:
+        return "NOT EXECUTED"
+    return f"executed, result={outcome}"
+
+
+class VerificationClosure(BaseModel):
+    """Agent 内部自验证闭环的逐阶段真相（Phase 11 §六）。
+
+    存在的理由是一句话覆盖不了四种不同的事实：**有补丁**、**补丁被验证过**、
+    **验证过的是这一版补丁**、**审查过的是这一版补丁**。把未执行的阶段留空等于
+    让读者自己补"大概是过了"，而首次真实运行暴露的正是这种误读。
+
+    ``official_verdict`` 刻意**不**由本模型推断：官方 SWE-bench 判分由外部 Harness
+    决定，内部闭环级别由本模型决定，两者各自记录、互不覆盖。
+    """
+
+    patch_present: bool
+    candidate_patch_sha256: str
+    frozen_by_coding_stage: bool
+    coding_stop_reason: str | None
+    """编码阶段自己的局部停止原因。非 ``None`` 只说明"这一轮不能再改代码了"。"""
+
+    validator_executed: bool
+    validator_passed: bool | None
+    target_tests_executed: bool
+    target_tests_status: str | None
+    target_test_sha256: str
+    """目标测试执行时所在补丁版本（Attempt 上记录的 SHA-256）。"""
+
+    regression_executed: bool
+    regression_complete: bool
+    regression_levels: list[str]
+    regression_new_failures: int
+    review_executed: bool
+    review_approved: bool | None
+    review_high_issues: int
+    review_bound_to_candidate: bool
+    post_review_repair: bool
+    review_calls: int
+    unexecuted_stages: list[str]
+    closure_admission: ClosureAdmission | None = None
+    """最近一次编码派发前的闭环测试额度准入读数（DA-024）。
+
+    ``None`` = 这条运行里没有做过该判定（例如 Phase 5 单次图），**不等于**"额度充足"。
+    ``feasible=False`` 那一行必须同时出现在 :attr:`unexecuted_stages` 里：被拒的修复轮
+    同样是"没有执行的阶段"，只是它是**故意**不执行的。
+    """
+
+    budget_usage: dict[str, str]
+    cost_hard_cap: float | None
+    cost_hard_cap_hit: bool
+
+    @classmethod
+    def from_state(cls, state: RepairState) -> VerificationClosure:
+        # 延迟导入：``codepilot.graph`` 的包初始化会反过来 import 本模块
+        # （graph/minimal.py:from codepilot.report import ...），模块级导入会成环。
+        from codepilot.graph.budget import BudgetManager, Category
+        from codepilot.graph.stop_rules import patch_hash
+
+        attempt = state.current_attempt
+        candidate = patch_hash(state.current_patch)
+        execution = attempt.execution if attempt is not None else None
+        regression = state.regression
+        review = state.review
+        unexecuted: list[str] = []
+        if attempt is None or not attempt.validation.passed:
+            unexecuted.append("patch_validation")
+        if execution is None:
+            unexecuted.append("target_tests")
+        if regression is None:
+            unexecuted.append("regression")
+        elif not regression.complete:
+            unexecuted.append("regression_incomplete")
+        if review is None:
+            unexecuted.append(
+                f"review:{state.review_skip_reason or 'the reviewer produced no result'}"
+            )
+        admission = state.closure_admission
+        if admission is not None and not admission.feasible:
+            unexecuted.append(
+                f"repair_round:{admission.trigger}:the verification closure needs "
+                f"{admission.required} test runs but {admission.remaining} remained"
+            )
+        readings = BudgetManager().readings(state.budget, state)
+        usage = {
+            category.value: (
+                f"{used:g}/unlimited" if limit == float("inf") else f"{used:g}/{limit:g}"
+            )
+            for category, (used, limit) in readings.items()
+        }
+        cost_used, cost_limit = readings[Category.COST]
+        return cls(
+            patch_present=bool(state.current_patch.strip()),
+            candidate_patch_sha256=candidate,
+            frozen_by_coding_stage=bool(state.frozen_patch_hash),
+            coding_stop_reason=state.coding_stop_reason.value if state.coding_stop_reason else None,
+            validator_executed=attempt is not None,
+            validator_passed=attempt.validation.passed if attempt is not None else None,
+            target_tests_executed=execution is not None,
+            target_tests_status=execution.status.value if execution is not None else None,
+            target_test_sha256=attempt.patch_hash if attempt is not None else "",
+            regression_executed=regression is not None,
+            regression_complete=bool(regression and regression.complete),
+            regression_levels=[
+                level.value for level in (regression.levels_run if regression else ())
+            ],
+            regression_new_failures=len(regression.new_failures) if regression else 0,
+            review_executed=review is not None,
+            review_approved=review.approved if review is not None else None,
+            review_high_issues=(
+                sum(1 for issue in review.issues if issue.severity.value == "high")
+                if review is not None
+                else 0
+            ),
+            review_bound_to_candidate=bool(review and review.reviewed_patch_hash == candidate),
+            post_review_repair=state.review_repairs > 0,
+            review_calls=state.review_calls,
+            unexecuted_stages=unexecuted,
+            closure_admission=admission,
+            budget_usage=usage,
+            cost_hard_cap=None if cost_limit == float("inf") else cost_limit,
+            cost_hard_cap_hit=bool(state.budget.max_cost is not None and cost_used >= cost_limit),
+        )
+
+
+def verification_level(state: RepairState) -> str:
+    """内部验证级别（``m2_verified`` / ``sampled_verified`` / …）的唯一口径。
+
+    刻意抽成函数而不是埋在 :meth:`RunReport.from_state` 里：评测装配层也要回答同一个
+    问题，两处各算一遍迟早会算出两个答案，而"成功率"的定义容不下两套口径。
+
+    相对状态标签更严：``status == succeeded`` 只是必要条件。审查结论还必须绑定
+    **当前候选补丁**——审过 v1 不给 v2 背书（``reviewed_patch_hash`` 为空是
+    Phase 9 之前的历史记录，按"未盖章"处理，不当作已核对）。
+    """
+    from codepilot.graph.stop_rules import patch_hash
+
+    level = state.status.value
+    if level != "succeeded":
+        return level
+    attempt = state.current_attempt
+    validation = attempt.validation if attempt is not None else None
+    execution = state.execution or (attempt.execution if attempt is not None else None)
+    target_verified = bool(
+        validation and validation.passed and execution and execution.status.value == "PASS"
+    )
+    regression_verified = bool(
+        state.regression and state.regression.complete and not state.regression.has_regression
+    )
+    review = state.review
+    review_verified = bool(
+        review
+        and not review.has_high_issues
+        and (
+            not review.reviewed_patch_hash
+            or review.reviewed_patch_hash == patch_hash(state.current_patch)
+        )
+    )
+    if target_verified and regression_verified and review_verified:
+        return (
+            "sampled_verified"
+            if state.regression and state.regression.mode.value == "sampled"
+            else "m2_verified"
+        )
+    return "provisionally_verified" if target_verified else "unverified"
+
+
 class RunReport(BaseModel):
     baseline: TestBaseline | None = None
     reproduction: ReproductionResult | None = None
@@ -41,6 +215,12 @@ class RunReport(BaseModel):
     regression: RegressionResult | None = None
     review: ReviewResult | None = None
     verification_level: str = "provisionally_verified"
+    closure: VerificationClosure | None = None
+    """逐阶段的自验证真相。``verification_level`` 是结论，这里是**依据**。
+
+    ``None`` = 这条运行没有走完整闭环图（Phase 5 单次图）；不等于"闭环全部执行"。
+    """
+
     runtime_seconds: float = 0
     usage_uncertain: bool = False
     regression_mode: str | None = None
@@ -102,25 +282,7 @@ class RunReport(BaseModel):
         execution = state.execution or (
             state.current_attempt.execution if state.current_attempt else None
         )
-        level = state.status.value
-        if level == "succeeded":
-            target_verified = bool(
-                validation and validation.passed and execution and execution.status.value == "PASS"
-            )
-            regression_verified = bool(
-                state.regression
-                and state.regression.complete
-                and not state.regression.has_regression
-            )
-            review_verified = bool(state.review and not state.review.has_high_issues)
-            if target_verified and regression_verified and review_verified:
-                level = (
-                    "sampled_verified"
-                    if state.regression and state.regression.mode.value == "sampled"
-                    else "m2_verified"
-                )
-            else:
-                level = "provisionally_verified" if target_verified else "unverified"
+        level = verification_level(state)
         artifact_map = artifacts or state.report_artifacts
         if execution is not None and execution.artifact_dir:
             execution = execution.model_copy(
@@ -144,6 +306,7 @@ class RunReport(BaseModel):
             regression=state.regression,
             review=state.review,
             verification_level=level,
+            closure=VerificationClosure.from_state(state),
             runtime_seconds=max(0, (utcnow() - state.started_at).total_seconds()),
             run_id=state.run_id,
             task_id=state.task_id,
@@ -175,6 +338,92 @@ class RunReport(BaseModel):
             evidence=evidence,
             simulated_llm=simulated_llm,
             simulated_sandbox=simulated_sandbox,
+        )
+
+    def _closure_markdown(self) -> str:
+        if self.closure is None:
+            return (
+                "## Self-verification closure\n\n"
+                "NOT APPLICABLE: this run did not go through the full iterative graph, so no "
+                "per-stage closure evidence was recorded. Absent evidence is not passed evidence.\n"
+            )
+        closure = self.closure
+        admission = closure.closure_admission
+        admission_text = (
+            "NOT EVALUATED (no coding dispatch recorded a test-run plan)"
+            if admission is None
+            else (
+                f"trigger={admission.trigger}, closure requires {admission.required} run(s), "
+                f"{admission.remaining} of {admission.allowance} remained, "
+                f"coding-stage share={admission.coder_share}, "
+                f"flaky re-run reserve={admission.retry_reserve} → "
+                + ("allowed" if admission.feasible else "REFUSED before dispatch")
+            )
+        )
+        rows = [
+            ("Valid patch", f"{closure.patch_present} (`{closure.candidate_patch_sha256[:16]}`)"),
+            (
+                "Patch frozen by the coding stage",
+                str(closure.frozen_by_coding_stage)
+                + (
+                    f" — coding stage stopped on `{closure.coding_stop_reason}`"
+                    if closure.coding_stop_reason
+                    else ""
+                ),
+            ),
+            ("PatchValidator", _stage(closure.validator_executed, closure.validator_passed)),
+            (
+                "Target tests (L1)",
+                _stage(closure.target_tests_executed, closure.target_tests_status)
+                + f" on `{closure.target_test_sha256[:16]}`",
+            ),
+            (
+                "Regression (L2/L3)",
+                (
+                    f"executed, complete={closure.regression_complete}, "
+                    f"levels={closure.regression_levels or 'none'}, "
+                    f"new failures={closure.regression_new_failures}"
+                    if closure.regression_executed
+                    else "NOT EXECUTED"
+                ),
+            ),
+            (
+                "PatchReviewer",
+                (
+                    f"executed, approved={closure.review_approved}, "
+                    f"high issues={closure.review_high_issues}, "
+                    f"bound to candidate={closure.review_bound_to_candidate}"
+                    if closure.review_executed
+                    else f"NOT EXECUTED ({'; '.join(closure.unexecuted_stages) or 'no result'})"
+                ),
+            ),
+            (
+                "Post-review repair",
+                f"{closure.post_review_repair}; review calls="
+                f"{closure.review_calls}/{self.closure.budget_usage.get('review_calls', '?')}",
+            ),
+            ("Budget usage", ", ".join(f"{k}={v}" for k, v in closure.budget_usage.items())),
+            (
+                "Closure admission (test runs)",
+                admission_text,
+            ),
+            (
+                "Cost hard cap",
+                (
+                    "not set"
+                    if closure.cost_hard_cap is None
+                    else f"{closure.cost_hard_cap:g}"
+                    + (" (REACHED)" if closure.cost_hard_cap_hit else "")
+                ),
+            ),
+            ("Internal verification level", f"`{self.verification_level}`"),
+        ]
+        body = "\n".join(f"- {name}: {value}" for name, value in rows)
+        return (
+            "## Self-verification closure\n\n"
+            f"{body}\n\n"
+            "Official SWE-bench resolution is decided by the external harness and recorded "
+            "separately; it neither raises nor lowers the internal level above.\n"
         )
 
     def render_markdown(self) -> str:
@@ -209,7 +458,8 @@ class RunReport(BaseModel):
             f"## Issue\n\n{self.issue_summary}\n\n"
             f"## Modified files\n\n{files}\n\n"
             f"## Failures\n\n{failures}\n\n"
-            f"## Evidence boundary\n\n{simulation}\n\n{self.verification_boundary}\n\n"
+            + self._closure_markdown()
+            + f"## Evidence boundary\n\n{simulation}\n\n{self.verification_boundary}\n\n"
             f"## Regression and Review\n\nVerification: {self.verification_level}\n\n"
             f"```json\n{self.regression.model_dump_json(indent=2) if self.regression else 'NOT RUN'}\n```\n\n"
             f"```json\n{self.review.model_dump_json(indent=2) if self.review else 'NOT RUN'}\n```\n\n"

@@ -29,7 +29,9 @@ from codepilot.schemas.state import RepairState
 
 __all__ = [
     "Node",
+    "pending_review_calls",
     "reproduction_target_tests",
+    "review_preconditions",
     "route_after_check_budget",
     "route_after_diagnose",
     "route_after_regression",
@@ -152,6 +154,77 @@ def route_after_regression(state: RepairState) -> Node:
     if regression is not None and not regression.complete:
         return Node.FINALIZE
     return Node.REVIEW
+
+
+def review_preconditions(state: RepairState) -> str | None:
+    """独立审查的前置条件；不满足时返回**未执行原因**，满足时返回 ``None``。
+
+    这条判据同时被 ``review`` 节点与 :class:`~codepilot.agents.reviewer.PatchReviewer`
+    使用，所以它是"不满足前置条件时不得强行调用 Reviewer"的唯一口径（Phase 11 场景 B）：
+    没有真实候选补丁、目标测试没跑过或跑成失败、回归没测完时，让模型对着一句
+    "我觉得修好了"产出一个 approved，比不调用 Reviewer 有害得多。
+    """
+    attempt = state.current_attempt
+    if attempt is None:
+        return "no attempt: the coding stage produced no patch record"
+    if not attempt.validation.passed:
+        return "the current patch was not approved by PatchValidator"
+    if state.issue_analysis is None:
+        return "no issue analysis to review against"
+    if state.execution is None:
+        return "target tests were never executed"
+    if state.execution.status is not ExecutionStatus.PASS:
+        return f"target tests ended as {state.execution.status.value}"
+    if state.regression is None:
+        return "regression was not measured"
+    if not state.regression.complete:
+        return f"regression is incomplete ({state.regression.status})"
+    if state.regression.has_regression:
+        return f"regression confirmed new failures: {sorted(state.regression.new_failures)[:5]}"
+    return None
+
+
+def pending_review_calls(state: RepairState, *, candidate_digest: str = "") -> int:
+    """闭环还**欠着**几次独立审查（预留的计数口径）。
+
+    与 :func:`review_preconditions` 的区别必须说清，否则两者会被当同一个东西用：
+    那一条判的是"**此刻**能不能审"，这一条判的是"还要为审查留多少钱"。编码派发时
+    补丁还不存在，用前置条件去算预留会一律得出 0 —— 于是"给审查留钱"这件事从未
+    发生过，闭环照样饿死。
+
+    计数规则（与 ``max_review_calls=2`` 的"初审 + 一次高危复审"政策同源）：
+
+    * run 已进终态 → 0：审查不再可能发生，预留必须立刻释放，不得永久占用预算。
+    * 审查专属额度已花完 → 0：再有请求也只会被 ``budget_review_calls`` 拦下。
+    * 当前候选补丁**已有**审查结论 → 初审不再占额度；只有结论里带 high 且
+      ``review_repairs`` 还没用掉时，才欠一次复审。
+    * 当前候选补丁**没有**审查结论 → 欠 1 次初审；``review_repairs`` 未用掉时
+      还可能再欠 1 次复审。
+    * 结果受剩余专属额度封顶：为审不成的调用留钱等于白留。
+
+    ``candidate_digest`` 由调用方用 :func:`~codepilot.graph.stop_rules.patch_hash`
+    算出后传入：本模块刻意只做纯路由判定，不引入哈希依赖。
+    """
+    if terminated(state):
+        return 0
+    allowance = state.budget.max_review_calls - state.review_calls
+    if allowance <= 0:
+        return 0
+    review = state.review
+    reviewed_current = (
+        review is not None
+        and candidate_digest != ""
+        and review.reviewed_patch_hash == candidate_digest
+    )
+    if reviewed_current and review is not None:
+        # 初审已经落在这版补丁上：只有"high + 还没用过修复轮"才欠一次复审，
+        # 而那一次修复之后的复审就是最后一次（review_repairs 上限为 1）。
+        owed = 1 if review.has_high_issues and state.review_repairs < 1 else 0
+        return min(owed, allowance)
+    owed = 1
+    if state.review_repairs < 1:
+        owed += 1
+    return min(owed, allowance)
 
 
 def route_after_review(state: RepairState) -> Node:

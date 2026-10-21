@@ -40,6 +40,7 @@ from codepilot.failure.parser import FailureParser
 from codepilot.graph.budget import BudgetManager
 from codepilot.graph.stop_rules import StopRules
 from codepilot.llm.calls import LLMRunContext
+from codepilot.llm.config import LLMConfig
 from codepilot.llm.registry import LLMRegistry
 from codepilot.observability.events import EventSink
 from codepilot.patch.validator import PatchValidator
@@ -200,6 +201,24 @@ class Deps:
 
     simulated_llm: bool = False
     llm_registry: LLMRegistry | None = None
+    llm_config: LLMConfig | None = None
+    """生效的 LLM 配置（模型别名、单价、汇率、角色映射）。
+
+    它存在的唯一理由是**闭环预留必须按 Reviewer 实际绑定模型的单价估算**：注册表
+    按角色构造 provider，角色 → 别名 → 单价这条链就在 ``llm_config`` 里。刻意只传
+    配置、不传注册表本身：注册表跨越一个批次的所有 run 共享，``Deps.close()`` 关掉
+    它会让后面的任务拿到已关闭的 HTTP 客户端。
+    """
+    #: 派发层**已预扣但尚未结算**的费用读数 ``(金额, 币种)``；无活动账本时返回 ``None``。
+    outstanding_cost: Callable[[], tuple[float, str] | None] = lambda: None
+    """逐请求预留（:mod:`codepilot.llm.dispatch_budget`）的"已承诺未落账"部分。
+
+    ``state.usage`` 只在响应回来后累加，所以一次请求在飞行中（或被冻结成
+    ``unknown_frozen``）时，那笔钱既不在账本里、也确实已经花出去了。预算准入必须
+    看见它，否则"已花"是一个偏小的数，预留就是在一段并不存在的 headroom 上又扣一次。
+    默认 ``lambda: None``：离线/测试路径没有进程级账本，读数就是"没有预扣"。
+    """
+
     #: 恢复流程核对外部证据后置为 False，用于禁止复用已记录的测试结论。
     evidence_trusted: bool = True
 

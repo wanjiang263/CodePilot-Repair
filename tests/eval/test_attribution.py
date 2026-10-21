@@ -192,6 +192,41 @@ def test_harness_error_is_neither_env_error_nor_model_failure() -> None:
     assert len({harness, env, model}) == 3
 
 
+def test_a_closure_admission_stop_is_a_budget_stop_not_a_model_failure() -> None:
+    """闭环准入（DA-024）与费用/测试次数耗尽落进同一个归因桶。
+
+    单独成条而不是塞进上面那张九分表：那张表的断言是"每一行落到**不同**的桶"，
+    而这里要的恰恰是"同桶不同因"。``attribution.py`` 既看 ``budget_`` 前缀也看
+    ``status == budget_exhausted``，所以这条判据对家族名和状态都是稳的。
+    """
+    admitted = attribute_run(
+        execution_state="completed",
+        evaluation_state=EvaluationState.NOT_RUN,
+        resolved=None,
+        stop_reason="budget_closure_test_runs",
+        status="budget_exhausted",
+    )
+    spent_out = attribute_run(
+        execution_state="completed",
+        evaluation_state=EvaluationState.NOT_RUN,
+        resolved=None,
+        stop_reason="budget_test_runs",
+        status="budget_exhausted",
+    )
+    assert admitted is Attribution.BUDGET_STOPPED
+    assert spent_out is Attribution.BUDGET_STOPPED
+    # 反过来必须成立：一次成功的闭环收尾不会被读成预算停止。
+    closed = attribute_run(
+        execution_state="completed",
+        evaluation_state=EvaluationState.NOT_RUN,
+        resolved=None,
+        patch_produced=True,
+        stop_reason=None,
+        status="succeeded",
+    )
+    assert closed is not Attribution.BUDGET_STOPPED
+
+
 # ------------------------------------------------------------------- 指标口径
 
 

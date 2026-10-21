@@ -24,8 +24,6 @@ __all__ = [
     "validate_test_target",
 ]
 
-_NODE_ID = re.compile(r"^[A-Za-z0-9_./:\-\[\],=+]+$")
-
 
 class RunTestsInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -118,15 +116,37 @@ def finish_tool() -> Tool:
     )
 
 
+#: 路径部分的字符集：**不允许空格**，也不允许 shell 元字符。node id 部分另说。
+_PATH_PART = re.compile(r"^[A-Za-z0-9_./:\-\[\],=+]+$")
+
+#: 单个选择串的长度的上界。真实参数化 ID 可以很长（带引号的邮箱样本约 110 字符），
+#: 但一条命令里的选择项必须有界，否则"779 个测试"这种规模下拼出来的命令长度不可控。
+_MAX_TARGET_LENGTH = 1024
+
+
 def validate_test_target(policy: WorkspacePathPolicy, target: str) -> str:
+    """把"命令"和"带空格的参数化 NodeID"分开判，而不是看见空格就拒。
+
+    拒的是命令形态：以 ``-`` 开头（会变成 pytest 的 flag）、含控制字符、路径部分越界
+    或含空格/元字符、以及超过长度上界。放行的 ``::`` 之后那一段是**pytest 自己打印的
+    测试 ID**：真实仓库里存在 ``test_email_invalid[" "@example.org]`` 这种含空格与引号
+    的 ID，一律拒掉会让回归阶段在真实基线上直接炸（2026-10-20 首次真实单题运行实测：
+    marshmallow 基线 779 条里 9 条是这种 ID）。
+
+    这不是放松注入面：选择项交给沙箱时逐项 ``shlex.quote`` 后才拼进命令
+    （:func:`codepilot.sandbox.docker._validate_test_selection` 同样只看 flag、控制字符
+    与路径越界），所以空格与引号只会成为测试 ID 的字面内容，不会成为第二个 argv 词。
+    """
     if (
         not target
         or target.startswith("-")
-        or not _NODE_ID.fullmatch(target)
-        or any(character in target for character in ";|&><`$(){}!\r\n\t ")
+        or len(target) > _MAX_TARGET_LENGTH
+        or any(character in target for character in "\r\n\t\x00")
     ):
         raise ValueError("test target must be a path or pytest NodeID, never a command")
     path_text = target.split("::", 1)[0].replace("\\", "/")
+    if not _PATH_PART.fullmatch(path_text):
+        raise ValueError("test target must be a path or pytest NodeID, never a command")
     resolved = policy.resolve(path_text, must_exist=True)
     relative = resolved.relative_to(policy.root).as_posix()
     pure = PurePosixPath(relative)

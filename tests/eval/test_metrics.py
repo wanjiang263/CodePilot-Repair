@@ -42,6 +42,23 @@ def _outcome(task_id: str, **kwargs: Any) -> TaskOutcome:
     return TaskOutcome(task_id=task_id, **kwargs)
 
 
+def test_a_closure_admission_stop_counts_as_over_budget() -> None:
+    """DA-024 的 ``budget_closure_test_runs`` 必须进 ``over_budget`` 比例。
+
+    分桶按 ``budget_`` 前缀判定：一次"剩余次数撑不起闭环所以没启动那一轮"的运行，
+    在指标上是预算停止，不是修复失败。把它掉出这个桶，"停在预算上的任务占比"就会
+    悄悄少算，而那个占比正是决定要不要调 ``max_test_runs`` 的唯一依据。
+    """
+    admitted = _outcome("admitted", stop_reason="budget_closure_test_runs")
+    exhausted = _outcome("exhausted", stop_reason="budget_test_runs")
+    model_failure = _outcome("model", stop_reason=None)
+    assert admitted.over_budget and exhausted.over_budget
+    assert not model_failure.over_budget
+    reliability = reliability_metrics([admitted, exhausted, model_failure])
+    assert reliability["over_budget"]["numerator"] == 2
+    assert reliability["over_budget"]["denominator"] == 3
+
+
 def _resolved(task_id: str, **kwargs: Any) -> TaskOutcome:
     """默认"成功解决、自称成功、埋点齐全"的任务结论，只覆盖测试关心的差异。
 

@@ -1,4 +1,4 @@
-"""G-04 / G-05：六类预算、边界口径与节点入口检查。
+"""G-04 / G-05：七类预算、边界口径与节点入口检查。
 
 重点不是"能不能读出超限"，而是那些**只在边界上出错**的口径：
 
@@ -6,7 +6,8 @@
 * ``max_iterations`` 只数 ``repair_patch``，首轮 ``generate_patch`` 不算——
   这条 off-by-one 决定了一个 run 最多产生几条 Attempt；
 * 恢复时不能把已花的预算清零（计数器全部从 state 推导，不在内存里另存一份）；
-* 同一个节点重放不能重复扣费（写回的是绝对值而不是 ``+= 1``）。
+* 同一个节点重放不能重复扣费（写回的是绝对值而不是 ``+= 1``）；
+* ``max_review_calls`` 是审查的专属额度，编码阶段的工具消耗动不到它（Phase 11）。
 """
 
 from __future__ import annotations
@@ -194,9 +195,12 @@ def test_finalizing_is_always_allowed_because_it_has_no_budget_activity() -> Non
         assert manager.check(exhausted, activity) is not None
 
 
-def test_all_six_categories_are_covered_by_some_activity() -> None:
+def test_all_seven_categories_are_covered_by_some_activity() -> None:
     covered = {category for group in ACTIVITY_CATEGORIES.values() for category in group}
     assert covered == set(Category)
+    # Phase 11：审查活动必须**只**受自己的调用额度约束，不受编码工具额度约束。
+    assert Category.REVIEW_CALLS in ACTIVITY_CATEGORIES[Activity.REVIEW]
+    assert Category.TOOL_CALLS not in ACTIVITY_CATEGORIES[Activity.REVIEW]
 
 
 # ------------------------------------------------------------------ 记账完整性

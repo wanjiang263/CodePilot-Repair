@@ -16,6 +16,48 @@ from codepilot.schemas.regression import RegressionLevel, RegressionMode, Regres
 from codepilot.schemas.state import RepairState
 from codepilot.tools.write_tools import validate_test_target
 
+__all__ = [
+    "MAX_FULL_REGRESSION_RUNS",
+    "RegressionRunner",
+    "full_regression_runs",
+    "new_failures",
+    "usable_baseline",
+]
+
+#: L3 全量回归在一个 run 里最多跑几次。超过之后 :class:`RegressionRunner` 直接判定
+#: "L3 full-run limit reached"（``complete=False``），**不再**多花一次容器执行。
+MAX_FULL_REGRESSION_RUNS = 2
+
+
+def usable_baseline(state: RepairState) -> TestBaseline | None:
+    """回归可以依据的基线；不完整、与当前 base commit 不一致或为空时返回 ``None``。
+
+    闭环准入也要问同一个问题（"这一版候选还会不会真的跑 L2/L3"）。这条判据抄第二份
+    就会与回归实现漂移，于是"准入以为要跑、实际不跑"会凭空多留一次测试额度。
+    """
+    baseline = state.baseline
+    if (
+        baseline is None
+        or not baseline.complete
+        or baseline.base_commit != state.base_commit
+        or not baseline.outcomes
+    ):
+        return None
+    return baseline
+
+
+def full_regression_runs(state: RepairState) -> int:
+    """历史轮次（不含当前轮）里已经跑过多少次 L3 全量回归。
+
+    闭环准入必须问**同一个问题**：它算的是"下一版候选还要不要跑 L3"。两处各写一遍
+    迟早会漂移——准入以为要跑、实际不跑，就会凭空多留一次额度。
+    """
+    return sum(
+        RegressionLevel.FULL in attempt.regression.levels_run
+        for attempt in state.attempts[:-1]
+        if attempt.regression
+    )
+
 
 def new_failures(baseline: TestBaseline, after: ExecutionResult) -> list[str]:
     """Exact parametrized NodeIDs only; missing baseline is never assumed PASS."""
@@ -36,14 +78,9 @@ class RegressionRunner:
         self.seed = seed
 
     def run(self, state: RepairState, deps: Deps) -> RegressionResult:
-        baseline = state.baseline
+        baseline = usable_baseline(state)
         result = RegressionResult()
-        if (
-            baseline is None
-            or not baseline.complete
-            or baseline.base_commit != state.base_commit
-            or not baseline.outcomes
-        ):
+        if baseline is None:
             result.failure_reason = "missing, incomplete or mismatched baseline"
             return result
         result.baseline_commit = baseline.base_commit
@@ -170,12 +207,8 @@ class RegressionRunner:
             if baseline.duration_seconds is not None
             else deps.env_spec.timeout_seconds
         )
-        full_runs = sum(
-            RegressionLevel.FULL in a.regression.levels_run
-            for a in state.attempts[:-1]
-            if a.regression
-        )
-        if full_runs >= 2:
+        full_runs = full_regression_runs(state)
+        if full_runs >= MAX_FULL_REGRESSION_RUNS:
             result.failure_reason = "L3 full-run limit reached"
             return result
         scope = authorized

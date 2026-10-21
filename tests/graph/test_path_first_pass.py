@@ -110,7 +110,11 @@ def test_first_pass_does_not_fake_phase9_results(tmp_path: Path) -> None:
     assert state.review is None
     assert state.report_artifacts["regression"] == "DEFERRED:phase9-not-implemented"
     assert state.report_artifacts["review"] == "DEFERRED:phase9-not-implemented"
-    assert any("regression and review were NOT executed" in item for item in state.failure_reasons)
+    # 未执行的阶段必须**逐条**写成未执行，不能被一句笼统的话糊过去。
+    boundary = " ".join(state.failure_reasons)
+    assert "regression was not measured" in boundary
+    assert "review was NOT executed" in boundary
+    assert "This is not M2 verification" in boundary
 
     # 进度快照也必须声明回归未测量，否则未测量会被读成"0 个新增失败"。
     assert state.current_attempt is not None

@@ -43,6 +43,7 @@ class CodingResult(BaseModel):
         "model_completed",
         "tool_limit",
         "token_budget",
+        "cost_budget",
     ]
     finished: bool = False
     tool_calls: list[ToolCallAudit] = Field(default_factory=list)
@@ -76,7 +77,29 @@ class CodingAgent:
         issue_analysis: IssueAnalysis,
         plan: RepairPlan,
         retrieval: RetrievalResult | None = None,
+        token_ceiling: int | None = None,
+        cost_ceiling: float | None = None,
+        test_run_ceiling: int | None = None,
     ) -> CodingResult:
+        """跑一轮编码。
+
+        ``token_ceiling`` / ``cost_ceiling`` 是**本轮派发**的局部上限（累计口径），
+        由 BudgetManager 从硬上限里扣掉"验证与审查必须留给闭环"的预留后给出。
+        循环内部每一圈都对着它判定，因为节点入口只检查一次，而一次编码可能有
+        几十次模型调用——只在入口检查就等于把闭环额度交给编码阶段随意支配。
+        二者只会**收紧** ``max_total_tokens`` / ``max_cost`` 硬上限，不会放宽。
+
+        ``test_run_ceiling`` 是本轮允许模型**自己**调用 ``run_tests`` 的次数上限
+        （DA-024）。它同样是"派发前算好的局部上限"，但管的不是累计值而是本轮次数：
+        测试执行额度与闭环共用同一个计数器，模型多跑一次，闭环就少一次。超出份额时
+        这一类工具调用被拒绝并回话给模型（其余工具照常可用），因此被限制的是"模型再
+        自己验一遍"，不是"这一版补丁不被验证"。``None`` = 本轮不设额外份额。
+        """
+        token_limit = (
+            self.max_total_tokens
+            if token_ceiling is None
+            else min(self.max_total_tokens, token_ceiling)
+        )
         context = self.builder.build_for_issue(
             "coder",
             issue_analysis,
@@ -90,10 +113,15 @@ class CodingAgent:
         specs = self.registry.specs(ToolRole.CODER)
         audits: list[ToolCallAudit] = []
         llm_calls = 0
+        test_runs_this_round = 0
         while True:
-            if self.usage.total_tokens >= self.max_total_tokens:
+            if self.usage.total_tokens >= token_limit:
                 return CodingResult(
                     stop_reason="token_budget", tool_calls=audits, llm_calls=llm_calls
+                )
+            if cost_ceiling is not None and self.usage.cost >= cost_ceiling:
+                return CodingResult(
+                    stop_reason="cost_budget", tool_calls=audits, llm_calls=llm_calls
                 )
             response = self.provider.complete(
                 LLMRequest(messages=messages, tools=specs, purpose="coder")
@@ -124,6 +152,22 @@ class CodingAgent:
                             "message": call.arguments_error or "invalid tool arguments",
                         },
                     }
+                elif (
+                    call.name == "run_tests"
+                    and test_run_ceiling is not None
+                    and test_runs_this_round >= test_run_ceiling
+                ):
+                    result = {
+                        "ok": False,
+                        "error": {
+                            "code": "closure_reserved",
+                            "message": (
+                                f"this coding round may trigger at most {test_run_ceiling} "
+                                "test run(s); the rest of the test-run allowance is reserved "
+                                "for the verification closure of this candidate patch"
+                            ),
+                        },
+                    }
                 else:
                     try:
                         response_result = self.registry.execute(
@@ -136,6 +180,8 @@ class CodingAgent:
                         }
                     else:
                         result = response_result.model_dump(mode="json")
+                        if call.name == "run_tests" and bool(result.get("ok")):
+                            test_runs_this_round += 1
                 elapsed = int((time.monotonic() - started) * 1000)
                 error = result.get("error")
                 error_code = error.get("code") if isinstance(error, dict) else None

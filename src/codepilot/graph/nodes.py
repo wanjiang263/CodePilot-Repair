@@ -28,13 +28,26 @@ from typing import Any
 from codepilot.artifacts import DIAGNOSIS_JSON, EXECUTION_JSON, PATCH_DIFF, VALIDATION_JSON
 from codepilot.failure.compressor import compress_failures
 from codepilot.failure.signature import execution_signatures
-from codepilot.graph.budget import Activity
+from codepilot.graph.budget import (
+    RESERVATION_BEARING_ACTIVITIES,
+    Activity,
+    ClosureReservation,
+    ClosureTestPlan,
+    outstanding_in_budget_currency,
+)
 from codepilot.graph.deps import Deps, DepsConfigurationError
 from codepilot.graph.progress import build_progress_snapshot
+from codepilot.graph.regression import (
+    MAX_FULL_REGRESSION_RUNS,
+    full_regression_runs,
+    usable_baseline,
+)
 from codepilot.graph.repair_policy import RepairPolicy
 from codepilot.graph.routing import (
     Node,
+    pending_review_calls,
     reproduction_target_tests,
+    review_preconditions,
     selected_target_tests,
 )
 from codepilot.graph.stop_rules import patch_hash
@@ -144,34 +157,114 @@ def _terminal(
     }
 
 
+def _outstanding_cost(state: RepairState, deps: Deps) -> tuple[float, ClosureReservation | None]:
+    """派发层**已预扣但未结算**的费用（换算到预算币种）。
+
+    返回 ``(金额, 额外预留或 None)``。第二项非 ``None`` 时代表"这笔预扣换算不到预算
+    币种"：金额未知，而硬费用上限已经设了 —— 按既有的 fail-closed 口径，此时**先于
+    审查花钱的活动**一律按"预留付不起"处理（:class:`ClosureReservation` 的
+    ``estimated=False`` 分支），而不是拿 ``convert()`` 缺汇率时的 1.0 硬套一个方向
+    可能反了七倍的数。
+    """
+    raw = deps.outstanding_cost()
+    rates = deps.llm_config.exchange_rates if deps.llm_config is not None else None
+    converted = outstanding_in_budget_currency(
+        raw, target=state.budget.budget_currency, exchange_rates=rates
+    )
+    if converted is not None:
+        return converted, None
+    if state.budget.max_cost is None:
+        return 0.0, None
+    return 0.0, ClosureReservation(
+        tokens=0,
+        cost=float("inf"),
+        review_calls=0,
+        estimated=False,
+        basis="outstanding-currency-unknown",
+    )
+
+
+def _closure_reservation(state: RepairState, deps: Deps) -> ClosureReservation:
+    """闭环还欠着审查时，为它留出额度；不欠了就是 0（预留不得永久占用预算）。
+
+    这是**统一预算准入**用到的那份预留：编码派发与 Diagnose 之类的前置模型调用共用
+    同一个口径，节点里不再各自算钱。``reviewer_available`` 取"这次 run 到底接没接
+    Reviewer"，``pending_review_calls`` 取状态机里还欠几次审查。
+    """
+    return deps.budget.closure_reservation(
+        state,
+        reviewer_available=deps.reviewer is not None,
+        pending_review_calls=pending_review_calls(
+            state, candidate_digest=patch_hash(state.current_patch)
+        ),
+        reviewer_config=deps.llm_config,
+        simulated_provider=deps.simulated_llm,
+    )
+
+
 def _budget_guard(
     state: RepairState,
     deps: Deps,
     activity: Activity,
     node: Node,
+    *,
+    reservation: ClosureReservation | None = None,
 ) -> dict[str, Any] | None:
     """节点入口预算检查（G-05）。耗尽时返回终态更新，节点立即 return。
 
     放在**每个**可能产生 LLM 调用、Sandbox 执行、Workspace 修改或补丁生成的节点
     入口，而不只放在修复循环里（02 §16："Check the budget before every node"）。
+
+    ``reservation`` 只由编码派发显式传入（它还要同一份数字去算循环内天花板）。
+    其余"排在审查之前的模型调用"（:data:`RESERVATION_BEARING_ACTIVITIES`）在这里
+    **自动**取同一份闭环预留：首轮真实运行之后剩下的缺口正是这一条 —— 编码让了路，
+    Diagnose 没让，审查的预留照样被花光。
+    预留把"验证与审查必须留下的额度"从本局可用上限里扣掉，于是预算不足在**派发前**
+    就阻断，而不是等跑到 Reviewer 才发现没钱。
+    预留按哪个口径估的（``basis``）必须一起写进事件与阻断消息：同一个"预算不足"
+    可能是单价缺失、币种对不上，也可能只是真的花完了，三种情况的修法完全不同。
+
+    ``outstanding`` 是派发层已预扣、尚未写进 ``state.usage`` 的费用：它先加进费用
+    读数，再扣预留，同一段钱不会被算两遍。
     """
-    evaluation = deps.budget.evaluate(state, activity)
+    outstanding, unknown = _outstanding_cost(state, deps)
+    if activity in RESERVATION_BEARING_ACTIVITIES:
+        if unknown is not None:
+            # 预扣换算不出来：不知道它占掉多少钱时，任何估算的预留都不如"把剩余
+            # 余额整段视为预留"保守，所以直接用它（fail closed）。
+            reservation = unknown
+        elif reservation is None:
+            reservation = _closure_reservation(state, deps)
+    evaluation = deps.budget.evaluate(
+        state, activity, reservation=reservation, outstanding=outstanding
+    )
+    observed: dict[str, Any] = {}
+    if reservation is not None and reservation.review_calls:
+        observed["closure_reservation"] = reservation.summary()
     deps.events.emit(
         node=node.value,
         type=EventType.BUDGET_CHECK,
         status="exhausted" if evaluation.is_exhausted else "ok",
         summary=str(evaluation.summary()),
         activity=activity.value,
+        **observed,
     )
     if evaluation.primary is None:
         return None
     reason = evaluation.primary
     status = RunStatus.BUDGET_EXHAUSTED
+    withheld = ""
+    if evaluation.reserved:
+        withheld = "; reserved for the verification/review closure: " + ", ".join(
+            f"{category.value}={amount:g}" for category, amount in evaluation.reserved
+        )
+        if reservation is not None:
+            withheld += f" (estimated={reservation.estimated}, basis={reservation.basis})"
     message = f"{node.value}: budget exhausted ({reason.value}); usage={evaluation.summary()}"
     return {
         "status": status,
         "stop_reason": reason,
-        "failure_reasons": [*state.failure_reasons, message],
+        "failure_reasons": [*state.failure_reasons, message + withheld],
         "usage": deps.usage,
         "test_runs": deps.test_runs,
         "events": _emit(state, deps, node.value, f"blocked:{reason.value}"),
@@ -519,16 +612,46 @@ def _authorized_targets(deps: Deps, state: RepairState) -> list[str]:
     return targets
 
 
+#: Coding Agent 内部触发的局部额度停止 → 权威 StopReason（G-08："不能静默忽略"）。
+_LOCAL_CODING_STOPS: dict[str, StopReason] = {
+    "tool_limit": StopReason.BUDGET_TOOL_CALLS,
+    "token_budget": StopReason.BUDGET_TOKENS,
+    "cost_budget": StopReason.BUDGET_COST,
+}
+
+
 def _run_coder(
     state: RepairState,
     deps: Deps,
     round_plan: Any,
     node: str,
+    *,
+    token_ceiling: int | None = None,
+    cost_ceiling: float | None = None,
+    test_run_ceiling: int | None = None,
 ) -> dict[str, Any]:
     """执行一次 Coding Agent 工具循环并把补丁从 Workspace 读回来。
 
     真实文件修改只发生在 ``deps.workspace``（授权 Workspace），由工具层的
     :class:`WorkspacePathPolicy` 约束；原始仓库从不被写。
+
+    ## 局部额度耗尽不是这次运行的终点（Phase 11 场景 A / B）
+
+    Coder 撞到每轮工具调用上限、或撞到本局 token/费用上限时：
+
+    * **手上已有补丁** → 冻结这一版补丁（SHA-256 写进 ``frozen_patch_hash``），把
+      原因记进 ``coding_stop_reason``，**不**写 ``status``。状态机继续走
+      PatchValidator → 目标测试 → 回归 → Reviewer。局部额度只说明"不能再改代码了"，
+      不说明"不需要验证了"。
+    * **没有补丁** → 这才是真终态：``EMPTY_PATCH`` 写进失败原因，验证与审查都无从
+      谈起，绝不能拿一个空补丁去骗一次成功判定。
+
+    工具/ token 上限由 Coding Agent 内部触发，两种情况都映射成权威 StopReason，
+    不能只留一个字符串标签。
+
+    ``test_run_ceiling`` 是本轮**测试额度份额**（DA-024）：编码阶段自己可以调用几次
+    ``run_tests``。它不是局部停止原因而是工具层的一次拒绝——被拦下的是"模型自己再跑一轮
+    测试"，不是"这版补丁不再验证"，闭环那几次执行仍然由状态机保证会发生。
     """
     if state.issue_analysis is None:
         raise ValueError(f"{node} requires an issue analysis")
@@ -537,58 +660,164 @@ def _run_coder(
         issue_analysis=state.issue_analysis,
         plan=round_plan,
         retrieval=state.retrieval,
+        token_ceiling=token_ceiling,
+        cost_ceiling=cost_ceiling,
+        test_run_ceiling=test_run_ceiling,
     )
     patch = _workspace_patch(deps, state)
+    digest = patch_hash(patch)
     calls = [item.model_dump(mode="json") for item in result.tool_calls]
+    local = _LOCAL_CODING_STOPS.get(result.stop_reason)
     update: dict[str, Any] = {
         "current_patch": patch,
+        # 冻结「这一轮编码交出去的补丁版本」；空补丁没有可验证身份，写空串。
+        "frozen_patch_hash": digest if patch else "",
         "tool_calls": calls,
+        "coding_stop_reason": local,
+        # 上一轮留下的审查缺口与本补丁无关：进入新的编码阶段即作废。
+        "review_skip_reason": None,
         "usage": deps.usage,
         "test_runs": deps.test_runs,
         "events": _emit(state, deps, node, result.stop_reason, tool_call_count=len(calls)),
     }
-    # 工具/ token 上限由 Coding Agent 内部触发，必须映射成权威 StopReason，
-    # 不能只留一个字符串标签就继续跑（G-08 的"不能静默忽略"）。
-    if result.stop_reason == "tool_limit":
+    if local is None:
+        if not patch and any(not item.ok and item.name != "finish" for item in result.tool_calls):
+            return {
+                **update,
+                "status": RunStatus.TOOL_ERROR,
+                "stop_reason": StopReason.TOOL_ERROR,
+                "failure_reasons": [
+                    *state.failure_reasons,
+                    f"{node}: every editing tool call failed",
+                ],
+            }
+        return update
+    if patch:
         return {
             **update,
-            "status": RunStatus.BUDGET_EXHAUSTED,
-            "stop_reason": StopReason.BUDGET_TOOL_CALLS,
             "failure_reasons": [
                 *state.failure_reasons,
-                f"{node}: per-iteration tool call budget exhausted "
-                f"({len(calls)} calls, limit {deps.coder.max_tool_calls})",
+                f"{node}: coding stage stopped early on its local budget ({local.value}) "
+                f"with a patch in hand; frozen {digest[:12]} for validation, tests and "
+                f"review ({len(calls)} tool calls, limit {deps.coder.max_tool_calls})",
             ],
         }
-    if result.stop_reason == "token_budget":
-        return {
-            **update,
-            "status": RunStatus.BUDGET_EXHAUSTED,
-            "stop_reason": StopReason.BUDGET_TOKENS,
-            "failure_reasons": [
-                *state.failure_reasons,
-                f"{node}: token budget exhausted inside the coding loop",
-            ],
-        }
-    if not patch and any(not item.ok and item.name != "finish" for item in result.tool_calls):
-        return {
-            **update,
-            "status": RunStatus.TOOL_ERROR,
-            "stop_reason": StopReason.TOOL_ERROR,
-            "failure_reasons": [
-                *state.failure_reasons,
-                f"{node}: every editing tool call failed",
-            ],
-        }
-    return update
+    return {
+        **update,
+        "status": RunStatus.BUDGET_EXHAUSTED,
+        "stop_reason": local,
+        "failure_reasons": [
+            *state.failure_reasons,
+            f"{node}: coding stage stopped early on its local budget ({local.value}) "
+            "and produced EMPTY_PATCH; there is nothing to validate, test or review",
+        ],
+    }
+
+
+def _closure_test_plan(state: RepairState, deps: Deps) -> ClosureTestPlan:
+    """这一版候选补丁的闭环还要几次测试执行、当时还剩几次（DA-024 的准入算式）。
+
+    三个条件都**问即将真正执行的那段代码**，不在这里另写一套判据：
+
+    * 目标测试：``selected_target_tests`` 有内容才会真的执行一次。为空时
+      :func:`~codepilot.graph.routing.route_after_validate_patch` 直接进回归，本来就不该
+      为它预留一次 L1。
+    * L2 / L3：只看 :func:`~codepilot.graph.regression.usable_baseline`（回归自己的前置
+      条件）与 L3 全量次数上限。**当前**这一版补丁测试还没跑过或跑成失败并不影响这一项
+      ——修复轮要算的是"下一版候选"的闭环。
+    * 抽样降级（``regression_mode=sampled``）同样是一次 ``run_tests``，所以准入不足
+      **从来不是**把 FULL 改成 SAMPLED 的理由。
+
+    计数用 ``deps.test_runs``（AccountingSandbox 的实时值），不是 ``state.test_runs``：
+    后者只在节点返回时才落账，派发瞬间它是滞后的，用它会低估已经花掉的次数。
+    """
+    measured = usable_baseline(state) is not None
+    return deps.budget.closure_test_plan(
+        state,
+        target_tests_planned=bool(selected_target_tests(state)),
+        impact_level_expected=measured,
+        full_level_expected=measured and full_regression_runs(state) < MAX_FULL_REGRESSION_RUNS,
+        runs_spent=deps.test_runs,
+    )
+
+
+def _repair_trigger(state: RepairState) -> str:
+    """这一轮修复是被谁要求的——准入读数里必须能看出触发方。
+
+    ``review`` 与 ``diagnosis`` 的修法完全不同：前者是"审查提出 high、政策允许再修一轮"，
+    后者是"测试证据不支持当前补丁"。``repair_patch`` 在派发前会把 ``review`` 清空，
+    所以这里读到的永远是**触发本轮的那次**审查。
+    """
+    review = state.review
+    if review is not None and review.has_high_issues:
+        return "review"
+    attempt = state.current_attempt
+    if attempt is not None and attempt.diagnosis is not None:
+        return "diagnosis"
+    return "validation"
+
+
+def _coding_stage(
+    state: RepairState,
+    deps: Deps,
+    round_plan: Any,
+    node: Node,
+    *,
+    trigger: str = "generation",
+) -> dict[str, Any]:
+    """派发一次编码：先把闭环额度留给验证与审查，再让 Coder 花钱。
+
+    预留在这里生效三次，缺一次都会退回真实运行观察到的失败形状：
+
+    1. **派发前判定（token/费用）**：剩余不足以保证闭环时，直接阻断这次编码派发，
+       而不是等烧完钱才发现 Reviewer 没有预算。
+    2. **循环内判定（token/费用）**：预留后的上限作为本局天花板传给 Coding Agent。节点
+       入口只检查一次，而一次编码可能有几十次模型调用，只在入口检查等于把闭环额度
+       交给编码阶段随意支配。
+    3. **本轮测试份额（DA-024）**：``plan.coder_share`` 限制编码阶段自己能调用几次
+       ``run_tests``。次数与闭环共用同一个计数器，不先扣出来就会重演 glm14：编码把最后
+       几次花掉，第二轮候选的 L3 被拦在门外、审查从未发生。
+
+    没有 Reviewer 时 token/费用预留为 0：审查会如实记录为未执行，不该为它空占额度。费用
+    口径取 **Reviewer 实际绑定模型**的单价（``deps.llm_config``），不是账本平均单价——
+    编码与审查用不同模型时，平均单价不是保守数字。
+    """
+    live = state.model_copy(update={"usage": deps.usage, "test_runs": deps.test_runs})
+    reservation = _closure_reservation(live, deps)
+    plan = _closure_test_plan(live, deps)
+    record = plan.record(trigger=trigger)
+    blocked = _budget_guard(live, deps, Activity.CODEGEN, node, reservation=reservation)
+    deps.events.emit(
+        node=node.value,
+        type=EventType.BUDGET_CHECK,
+        status="ok" if plan.feasible else "insufficient",
+        summary=plan.detail(),
+        activity=Activity.CODEGEN.value,
+        closure_test_runs=record.summary(),
+    )
+    if blocked is not None:
+        return {**blocked, "closure_admission": record}
+    return {
+        **_run_coder(
+            state,
+            deps,
+            round_plan,
+            node.value,
+            token_ceiling=deps.budget.coding_token_ceiling(live, reservation),
+            cost_ceiling=deps.budget.coding_cost_ceiling(live, reservation),
+            test_run_ceiling=plan.coder_share,
+        ),
+        "closure_admission": record,
+    }
 
 
 async def generate_patch(state: RepairState, deps: Deps) -> dict[str, Any]:
-    """首轮补丁生成。首轮**不计入** ``max_iterations``（口径见 budget.py）。"""
+    """首轮补丁生成。首轮**不计入** ``max_iterations``（口径见 budget.py）。
+
+    预算守卫在 :func:`_coding_stage` 里：它必须带着闭环预留判定，否则"派发时没算
+    上审查要花的额度"就会原样复发。
+    """
     _identity(state, deps)
-    blocked = _budget_guard(state, deps, Activity.CODEGEN, Node.GENERATE_PATCH)
-    if blocked is not None:
-        return blocked
     if state.plan is None:
         return _terminal(
             state,
@@ -598,7 +827,7 @@ async def generate_patch(state: RepairState, deps: Deps) -> dict[str, Any]:
             StopReason.WORKFLOW_ERROR,
             ["generate_patch requires a plan"],
         )
-    return _run_coder(state, deps, state.plan, Node.GENERATE_PATCH.value)
+    return _coding_stage(state, deps, state.plan, Node.GENERATE_PATCH)
 
 
 async def validate_patch(state: RepairState, deps: Deps) -> dict[str, Any]:
@@ -618,6 +847,15 @@ async def validate_patch(state: RepairState, deps: Deps) -> dict[str, Any]:
     replayed = _replayed_attempt(state, digest)
     tests = list(state.plan.tests_to_run) if state.plan else []
     validation = deps.validator.validate(related_tests=tests, impact=state.impact)
+    integrity: list[str] = []
+    if state.frozen_patch_hash and digest != state.frozen_patch_hash:
+        # 补丁在编码阶段之外被改动：冻结身份就是用来发现这件事的，绝不能悄悄拿一个
+        # 没被编码阶段交出去的版本去验证。
+        integrity.append(
+            f"validate_patch: candidate {digest[:12]} does not match the patch frozen by the "
+            f"coding stage ({state.frozen_patch_hash[:12]}); the coding stage must hand over "
+            "every version that gets verified"
+        )
     if replayed is not None:
         # 同一轮的重放：保留原 Attempt，不重复追加。
         attempt = replayed
@@ -641,10 +879,14 @@ async def validate_patch(state: RepairState, deps: Deps) -> dict[str, Any]:
         errors=len(validation.errors),
     )
     if validation.passed:
-        return {"attempts": attempts, "events": events}
+        return {
+            "attempts": attempts,
+            "failure_reasons": [*state.failure_reasons, *integrity],
+            "events": events,
+        }
     return {
         "attempts": attempts,
-        "failure_reasons": [*state.failure_reasons, *validation.errors],
+        "failure_reasons": [*state.failure_reasons, *integrity, *validation.errors],
         "events": events,
     }
 
@@ -853,25 +1095,68 @@ async def run_regression(state: RepairState, deps: Deps) -> dict[str, Any]:
 
 
 async def review(state: RepairState, deps: Deps) -> dict[str, Any]:
-    """Run independent review after completed regression with bounded high-risk repair."""
+    """Run independent review after completed regression with bounded high-risk repair.
+
+    三条不可让的规矩（Phase 11 §五）：
+
+    * **前置条件不满足就不调用**。没有已批准补丁、目标测试没跑过或没通过、回归没测完
+      时，让模型对着一句"我觉得修好了"产出一个 approved 比不调用有害得多；这种情况
+      把原因写进 ``review_skip_reason``，报告里审查就是 NOT EXECUTED，而不是通过。
+    * **结论绑定补丁身份**。审查结果盖上当前补丁的 SHA-256；同一补丁的重放复用已有
+      结论（不重复调用模型、不重复计数、不重复记账），补丁换了版本则旧结论作废。
+    * **额度独立**。审查用的是自己的 ``max_review_calls``，不是编码阶段剩下的工具次数
+      ——否则 Coder 烧光 30 次工具调用就会把 Reviewer 一起冻结，正是首次真实运行的形状。
+
+    判定顺序也是有意的：**先判能不能复用/该不该跳过，再判额度**。把额度检查放在最
+    前面会让"同一版补丁早已审过"的重放被拦在门外，也会让一次没钱了的审查在
+    Operation Journal 里留下一条没有结果的意图行（下次重进直接判"结果不确定"）。
+    """
     _identity(state, deps)
-    blocked = _budget_guard(state, deps, Activity.LLM, Node.REVIEW)
-    if blocked is not None and deps.reviewer is None:
-        return blocked
     if deps.reviewer is None:
         return {
+            "review_skip_reason": "no reviewer wired into this run",
             "events": _emit(state, deps, Node.REVIEW.value, _DEFERRED),
             "report_artifacts": {**state.report_artifacts, "review": _DEFERRED},
         }
-    if state.regression is not None and (
-        not state.regression.complete or state.regression.has_regression
-    ):
-        return {}
+    digest = patch_hash(state.current_patch)
+    attempt = state.current_attempt
+    recorded = attempt.review if attempt is not None else None
+    if recorded is not None and recorded.reviewed_patch_hash == digest:
+        # 同一版补丁已经有审查结论：重放时绝不重复调用模型，也不重复计审查次数。
+        # 写回的是**绝对值**而不是 ``+= 0``：恢复场景下同一条边可能被再走一次，
+        # 增量写法会把复用读成第二次审查。
+        return {
+            "review": recorded,
+            "review_calls": state.review_calls,
+            "review_skip_reason": None,
+            "usage": deps.usage,
+            "events": _emit(
+                state, deps, Node.REVIEW.value, f"reused:{recorded.reviewed_iteration}"
+            ),
+        }
+    unmet = review_preconditions(state)
+    if unmet is not None:
+        return {
+            "review_skip_reason": unmet,
+            "usage": deps.usage,
+            "test_runs": deps.test_runs,
+            "events": _emit(state, deps, Node.REVIEW.value, f"not-executed:{unmet}"),
+        }
+    blocked = _budget_guard(state, deps, Activity.REVIEW, Node.REVIEW)
+    if blocked is not None:
+        # 审查因预算拦下时，"未执行"必须写进 ``review_skip_reason``：报告里的
+        # ``review_executed=False`` 只说"没审"，说不出是没审还是没钱审。留空会让
+        # closure 写成 "the reviewer produced no result"，把预算问题读成接线问题。
+        reason = blocked["stop_reason"]
+        blocked["review_skip_reason"] = f"not executed: {reason.value} spent before any call"
+        return blocked
     from codepilot.agents.reviewer import ReviewBudgetError
 
     try:
         result = deps.reviewer.review(state, deps)
     except ReviewBudgetError as exc:
+        # 第二道闸：Reviewer 自己按"审查上下文实际占多少 token"再判一次（节点入口只
+        # 看累计用量，看不到还没构造的上下文）。同样必须把未执行原因写清楚。
         return _terminal(
             state,
             deps,
@@ -879,19 +1164,27 @@ async def review(state: RepairState, deps: Deps) -> dict[str, Any]:
             RunStatus.BUDGET_EXHAUSTED,
             exc.reason,
             ["review budget exhausted before model call"],
+            review_skip_reason=f"not executed: {exc.reason.value} spent before the model call",
         )
+    stamped = result.model_copy(
+        update={"reviewed_patch_hash": digest, "reviewed_iteration": state.iteration}
+    )
     fields: dict[str, Any] = {}
-    if state.current_attempt is not None:
-        fields["attempts"] = _update_last(
-            state, state.current_attempt.model_copy(update={"review": result})
-        )
+    if attempt is not None:
+        fields["attempts"] = _update_last(state, attempt.model_copy(update={"review": stamped}))
     return {
         **fields,
-        "usage_uncertain": state.usage_uncertain or not result.usage_known,
-        "review": result,
+        "usage_uncertain": state.usage_uncertain or not stamped.usage_known,
+        "review": stamped,
+        "review_calls": state.review_calls + 1,
+        "review_skip_reason": None,
         "usage": deps.usage,
         "events": _emit(
-            state, deps, Node.REVIEW.value, "approved" if result.approved else "changes-requested"
+            state,
+            deps,
+            Node.REVIEW.value,
+            "approved" if stamped.approved else "changes-requested",
+            reviewed_patch_hash=digest[:12],
         ),
     }
 
@@ -1031,6 +1324,49 @@ async def check_budget(state: RepairState, deps: Deps) -> dict[str, Any]:
     }
 
 
+def _closure_refused(
+    state: RepairState, deps: Deps, plan: ClosureTestPlan, *, trigger: str
+) -> dict[str, Any]:
+    """额度撑不起闭环时**不启动**修复轮：留在手里的那一版补丁与它的审查结论原样保留。
+
+    这里刻意**不**清空 ``current_patch`` / ``review`` / ``regression``，也不写
+    ``review_repairs``、不回退 Workspace、不重新规划、不向模型要任何东西：DA-024 要的
+    结果不是"少修一轮"，而是"绝不产出一版注定无法完成验证的新候选"。已经挣到过一次完整
+    闭环的补丁仍然是那一版，报告里它绑定的审查结论仍然成立；被拒掉的只是下一轮。
+
+    ``RunStatus.BUDGET_EXHAUSTED`` 复用既有的类型化状态，而区分口径落在
+    :attr:`StopReason.BUDGET_CLOSURE_TEST_RUNS` 上：``budget_test_runs`` 说的是
+    "12 次已经花完"，这一条说的是"还剩 2 次，而闭环要 3 次"——后者的修法是提高额度或改变
+    回归政策，前者的修法是这一轮本来就跑不动。留在 ``budget_*`` 家族里不是随手起名：
+    评测侧的 ``over_budget`` / ``BUDGET_STOPPED`` 分桶按前缀判定，换成家族外的名字会让
+    一次预算准入被读成"补丁无效"或"模型没修好"。
+    """
+    record = plan.record(trigger=trigger)
+    message = f"{Node.REPAIR_PATCH.value}: {record.detail}"
+    deps.events.emit(
+        node=Node.REPAIR_PATCH.value,
+        type=EventType.BUDGET_CHECK,
+        status="refused",
+        summary=record.detail,
+        activity=Activity.REPAIR.value,
+        closure_test_runs=record.summary(),
+    )
+    return {
+        "closure_admission": record,
+        "status": RunStatus.BUDGET_EXHAUSTED,
+        "stop_reason": StopReason.BUDGET_CLOSURE_TEST_RUNS,
+        "failure_reasons": [*state.failure_reasons, message],
+        "usage": deps.usage,
+        "test_runs": deps.test_runs,
+        "events": _emit(
+            state,
+            deps,
+            Node.REPAIR_PATCH.value,
+            f"refused:{StopReason.BUDGET_CLOSURE_TEST_RUNS.value}",
+        ),
+    }
+
+
 async def repair_patch(state: RepairState, deps: Deps) -> dict[str, Any]:
     """按生效策略真正改变 Workspace 或下一轮输入，然后再生成补丁（G-09）。
 
@@ -1040,11 +1376,24 @@ async def repair_patch(state: RepairState, deps: Deps) -> dict[str, Any]:
     * ``revert_and_retry``：隔离 Workspace 回退到 base commit，重新规划并带上
       Planner 的 ``alternatives``；
     * ``expand_scope``：按诊断给出的 symbol 重新做 symbol 级定位。
+
+    审查后修复（Phase 11 场景 D）最多**一次**：``review_repairs`` 的上限由 Schema
+    钉在 1，第二次 high 直接安全停止并把未解决问题留在报告里。旧补丁的回归与审查
+    结论在这里一并清空——补丁身份变了，结论必须重新挣。
+
+    **闭环准入在动任何东西之前**（DA-024）：剩余测试额度撑不起"目标测试 + 当前配置要求
+    的回归层级"时，本轮直接以 :attr:`StopReason.BUDGET_CLOSURE_TEST_RUNS` 结束，
+    不回退 Workspace、不重新规划、不派发编码。清空结论那一步发生在这道判定**之后**，
+    所以被拒的轮次不会把已经挣到的审查证据一起带走。
     """
     _identity(state, deps)
+    trigger = _repair_trigger(state)
     blocked = _budget_guard(state, deps, Activity.REPAIR, Node.REPAIR_PATCH)
     if blocked is not None:
         return blocked
+    plan = _closure_test_plan(state, deps)
+    if not plan.feasible:
+        return _closure_refused(state, deps, plan, trigger=trigger)
     attempt = state.current_attempt
     diagnosis = attempt.diagnosis if attempt is not None else None
     strategy = diagnosis.repair_strategy if diagnosis is not None else RepairStrategy.REFINE
@@ -1120,7 +1469,7 @@ async def repair_patch(state: RepairState, deps: Deps) -> dict[str, Any]:
             )
     fields.update(regression=None, review=None)
     base_state = state.model_copy(update={"events": events, **fields})
-    produced = _run_coder(base_state, deps, round_plan, Node.REPAIR_PATCH.value)
+    produced = _coding_stage(base_state, deps, round_plan, Node.REPAIR_PATCH, trigger=trigger)
     merged: dict[str, Any] = {**produced, **fields}
     if round_plan is not state.plan:
         merged["plan"] = round_plan
@@ -1329,6 +1678,10 @@ async def finalize(state: RepairState, deps: Deps) -> dict[str, Any]:
     status = state.status
     stop_reason = state.stop_reason
     reasons = list(state.failure_reasons)
+    digest = patch_hash(state.current_patch)
+    stop_note = state.coding_stop_reason.value if state.coding_stop_reason else ""
+    # 审查结论必须绑定**当前**候选补丁：审过 v1 不等于审过 v2（§五.5）。
+    review_trusted = state.review is not None and state.review.reviewed_patch_hash == digest
     if status is RunStatus.RUNNING:
         # 一路走到 finalize 却没有终态：按真实证据判定，而不是默认成功。
         last_attempt = state.current_attempt
@@ -1347,6 +1700,13 @@ async def finalize(state: RepairState, deps: Deps) -> dict[str, Any]:
             status = RunStatus.FAILED
             stop_reason = StopReason.TESTS_FAILED
             reasons.append("regression incomplete or confirmed new failures")
+        elif state.review is not None and not review_trusted:
+            status = RunStatus.FAILED
+            stop_reason = StopReason.TESTS_FAILED
+            reasons.append(
+                "finalize: the recorded review was made against a different patch identity "
+                f"(reviewed {state.review.reviewed_patch_hash[:12]}, candidate {digest[:12]})"
+            )
         elif state.review is not None and state.review.has_high_issues:
             status = RunStatus.STOPPED
             stop_reason = StopReason.TESTS_FAILED
@@ -1355,16 +1715,30 @@ async def finalize(state: RepairState, deps: Deps) -> dict[str, Any]:
             execution.status is ExecutionStatus.PASS
             and state.regression is not None
             and state.regression.complete
-            and state.review is not None
+            and review_trusted
         ):
             status = RunStatus.SUCCEEDED
             stop_reason = None
         elif execution.status is ExecutionStatus.PASS:
             status = RunStatus.PROVISIONALLY_VERIFIED
             stop_reason = None
+            missing: list[str] = []
+            if state.regression is None:
+                missing.append("regression was not measured")
+            elif not state.regression.complete:
+                missing.append(f"regression is incomplete ({state.regression.status})")
+            if state.review is None:
+                missing.append(
+                    "review was NOT executed "
+                    f"({state.review_skip_reason or 'the reviewer produced no result'})"
+                )
+            if stop_note:
+                missing.append(f"the coding stage stopped early on its local budget ({stop_note})")
             reasons.append(
-                "finalize: target tests passed; regression and review were NOT executed "
-                f"({_DEFERRED}), so this is not M2 verification"
+                "finalize: target tests passed, but the verification closure is incomplete — "
+                + "; ".join(missing)
+                + ". This is not M2 verification: each stage listed here is reported as not "
+                "executed, never as passed"
             )
         else:
             status = RunStatus.FAILED
@@ -1379,7 +1753,9 @@ async def finalize(state: RepairState, deps: Deps) -> dict[str, Any]:
         state.base_commit,
         policy=deps.validator.policy,
         delivery=True,
-        new_tests_reviewed=state.review is not None and not state.review.has_high_issues,
+        new_tests_reviewed=review_trusted
+        and state.review is not None
+        and not state.review.has_high_issues,
     )
     paths["final_patch"] = "patch_final.diff"
     deps.artifacts.write_text(paths["final_patch"], patch.text)

@@ -55,6 +55,16 @@ class ReviewResult(BaseModel):
     issues: list[ReviewIssue] = Field(default_factory=list)
     summary: str = ""
 
+    reviewed_patch_hash: str = ""
+    """本次审查所绑定的补丁 SHA-256（由 ``review`` 节点盖章，不是模型自报）。
+
+    审查结论必须能回答"审的是哪一版补丁"：审查之后又改了代码时，旧结论不得直接
+    用于新补丁，否则 ``m2_verified`` 会建立在一个从未审过的补丁上。
+    """
+
+    reviewed_iteration: int = 0
+    """盖章时已完成的修复轮数（``state.iteration``）。"""
+
     @property
     def has_high_issues(self) -> bool:
         """决定是否需要额外修复轮。"""
