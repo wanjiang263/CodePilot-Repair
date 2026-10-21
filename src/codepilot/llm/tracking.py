@@ -26,7 +26,7 @@ from codepilot.llm.types import LLMRequest, LLMResponse
 from codepilot.observability.events import EventSink, EventType, EventUsage
 from codepilot.schemas.usage import Usage
 
-__all__ = ["UsageTrackingProvider"]
+__all__ = ["UsageTrackingProvider", "tracks_usage"]
 
 #: 一个 Agent 可能为同一角色发多次不同 purpose 的请求（Localizer 先选文件再选符号）。
 #: 不归一的话 ``by_role`` 会出现 ``localizer_files`` 与 ``localizer_symbols`` 两个桶，
@@ -241,6 +241,30 @@ class UsageTrackingProvider:
                 duration_ms=duration_ms,
             )
         )
+
+
+def tracks_usage(provider: object, usage: Usage) -> bool:
+    """这条 provider 链上是否**已经有一层**在往 ``usage`` 记账。
+
+    存在的理由是一次真实运行抓到的重复计费。调用方原本只想"没有统计层就补一层"，判据
+    写成 ``isinstance(provider, UsageTrackingProvider)``；可真实链路里这个 provider 常
+    被装饰器包在最外面（smoke 的 ``--temperature`` / ``--max-output-tokens`` 覆盖层就是
+    一个非 ``UsageTrackingProvider`` 的包装），于是套上第二层 —— 同一个 HTTP 请求记两次
+    ``add_call``、发两条 ``llm_call`` 事件，调用数与费用各多算一份。审查是唯一会自己补
+    统计层的 Agent，所以这份多算正好落在 Reviewer 那一次调用上（真实运行里表现为
+    "账本 26 次 / 派发账本 25 次"，差额恰好等于一次审查费用）。
+
+    判据因此按**账本对象**而不是按最外层的类型：沿 ``inner`` 逐层剥开，只要有任何一层
+    在往同一个 :class:`Usage` 记，就不再补第二层。带环的装饰器链用 ``seen`` 兜住。
+    """
+    seen: set[int] = set()
+    node: object = provider
+    while node is not None and id(node) not in seen:
+        seen.add(id(node))
+        if isinstance(node, UsageTrackingProvider) and node.usage is usage:
+            return True
+        node = getattr(node, "inner", None)
+    return False
 
 
 def _ms(seconds: float) -> int:

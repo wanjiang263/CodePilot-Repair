@@ -21,6 +21,7 @@ import httpx
 from codepilot.llm.capabilities import build_request_body, parse_tool_protocol, prepare_messages
 from codepilot.llm.config import ModelSpec, ProviderSpec
 from codepilot.llm.cost import compute_cost
+from codepilot.llm.dispatch_budget import guarded_send
 from codepilot.llm.errors import (
     ContextTooLongError,
     ProviderError,
@@ -172,8 +173,12 @@ class OpenAICompatibleProvider:
         """发一次请求，把 HTTP 层的失败翻译成本层的异常类型。"""
         self.attempts += 1
         try:
-            response = self._client.post(
-                CHAT_COMPLETIONS_PATH, json=body, headers=self._request_headers
+            response = guarded_send(
+                self.spec,
+                body,
+                lambda: self._client.post(
+                    CHAT_COMPLETIONS_PATH, json=body, headers=self._request_headers
+                ),
             )
         except httpx.TimeoutException as exc:
             # 请求已经离开本机：服务端可能已经生成并计费，也可能没有。
