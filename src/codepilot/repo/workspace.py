@@ -28,6 +28,8 @@ import hashlib
 import os
 import re
 import secrets
+import shutil
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -252,10 +254,15 @@ class WorkspaceManager:
         cache_root: Path,
         allow_local: bool = True,
         timeout: float = 600.0,
+        git_config: Mapping[str, str] | None = None,
     ) -> None:
         """
         ``allow_local=False`` 时拒绝一切非远端 URL 的来源。API 层必须这样构造
         （03 §29：拒绝 ``file://`` 和本地路径），CLI 层保持默认的 True。
+
+        ``git_config`` 是一组只作用于本实例克隆命令的 ``git -c`` 覆盖。API
+        Worker 用 ``http.followRedirects=false`` 防止白名单域名通过 30x 把
+        克隆重定向到另一个主机。
         """
         # 缓存路径必须是绝对路径：``_fetch_base`` 把它当 git 远端传给
         # ``git fetch <cache>``，而那条命令的 cwd 是新建的 workspace，不是调用方
@@ -265,6 +272,7 @@ class WorkspaceManager:
         self.cache_root = Path(cache_root).expanduser().absolute()
         self.allow_local = allow_local
         self.timeout = timeout
+        self.git_config = tuple(sorted((git_config or {}).items()))
 
     # ------------------------------------------------------------ 缓存
 
@@ -301,10 +309,18 @@ class WorkspaceManager:
         # 常走的而不是边角。
         staging = target.with_name(f"{target.name}.tmp-{os.getpid()}-{secrets.token_hex(6)}")
 
-        clone_from = str(src.local_path) if src.is_local else src.normalized
+        # Local paths go to git in POSIX form. On Windows, backslash paths make
+        # git's local transport invoke an MSYS `sh -c` whose startup can fail
+        # outright (observed: NtCreateDirectoryObject access denied), even though
+        # the same clone works when the path is written with forward slashes.
+        clone_from = src.local_path.as_posix() if src.local_path is not None else src.normalized
+        clone_options = [
+            item for key, value in self.git_config for item in ("-c", f"{key}={value}")
+        ]
         try:
             run_git(
                 [
+                    *clone_options,
                     "clone",
                     "--bare",
                     # --no-hardlinks：本地路径克隆时 git 默认把原仓库的
@@ -324,8 +340,20 @@ class WorkspaceManager:
                 timeout=self.timeout,
             )
         except GitError as exc:
-            remove_tree(staging, ignore_errors=True)
-            raise WorkspaceError(self._explain_clone_failure(src, exc)) from exc
+            # Windows + Git for Windows: the local transport spawns MSYS `sh`,
+            # which can fail before the repository is even opened with
+            # NtCreateDirectoryObject / 0xC0000022. The bytes of a local clone are
+            # fully reproducible from the source's object database, so fall back
+            # to a byte copy and make the copy bare. Remote clones are unaffected.
+            if src.local_path is not None and _is_msys_shell_launch_failure(exc):
+                try:
+                    _copy_local_bare(src.local_path, staging, timeout=self.timeout)
+                except BaseException:
+                    remove_tree(staging, ignore_errors=True)
+                    raise
+            else:
+                remove_tree(staging, ignore_errors=True)
+                raise WorkspaceError(self._explain_clone_failure(src, exc)) from exc
         except BaseException:
             # 只在自己的 clone 失败时删自己的暂存目录。以前是在开头无条件删掉
             # "同名的那个"，那正是并发下互相破坏的来源。
@@ -710,6 +738,9 @@ class WorkspaceManager:
                 timeout=self.timeout,
             )
             if fetched.returncode != 0:
+                if _is_msys_shell_launch_failure_text(fetched.stderr):
+                    _local_fetch_base(cache, commit, target, timeout=self.timeout)
+                    continue
                 raise WorkspaceError(
                     "从缓存 fetch base commit 失败。\n"
                     f"  缓存: {cache}\n  目标: {target}\n  提交: {commit}\n"
@@ -895,3 +926,98 @@ def _is_bare_repo(path: Path) -> bool:
     if not (path / "HEAD").exists():
         return False
     return (path / "objects").is_dir() and (path / "refs").is_dir()
+
+
+def _is_msys_shell_launch_failure(exc: GitError) -> bool:
+    return _is_msys_shell_launch_failure_text(f"{exc.stderr}\n{exc}")
+
+
+def _is_msys_shell_launch_failure_text(text: str) -> bool:
+    return "NtCreateDirectoryObject" in text or "msys-2.0" in text
+
+
+def _local_fetch_base(cache: Path, commit: str, target: Path, *, timeout: float) -> None:
+    """Fallback for ``git fetch <local cache>`` when MSYS cannot launch.
+
+    Copies only objects reachable from ``commit`` (never a later commit), then
+    writes the same merged tag refs as the normal fetch path. Repository objects
+    are written through ``git hash-object -w`` so packed and loose storage both
+    work without invoking the local transport.
+    """
+    import subprocess
+
+    listed = run_git(
+        ["rev-list", "--objects", commit],
+        cwd=cache,
+        check=False,
+        timeout=timeout,
+    )
+    if listed.returncode != 0:
+        raise WorkspaceError(f"列出 base 对象失败: {listed.stderr.strip()}")
+    for line in listed.lines:
+        sha, _, _path = line.partition(" ")
+        if not _FULL_SHA.match(sha):
+            raise WorkspaceError(f"rev-list 返回了非法对象 ID: {sha!r}")
+        loose = cache / "objects" / sha[:2] / sha[2:]
+        if loose.is_file():
+            destination = target / ".git" / "objects" / sha[:2] / sha[2:]
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(loose, destination)
+            continue
+        kind = run_git(["cat-file", "-t", sha], cwd=cache, check=False, timeout=timeout)
+        if kind.returncode != 0:
+            raise WorkspaceError(f"读取对象类型失败: {sha}")
+        content = subprocess.run(
+            ["git", "cat-file", "-p", sha],
+            cwd=cache,
+            capture_output=True,
+            check=False,
+        )
+        if content.returncode != 0:
+            raise WorkspaceError(f"读取对象失败: {sha}")
+        written = subprocess.run(
+            ["git", "hash-object", "-w", "-t", kind.stdout.strip(), "--stdin"],
+            cwd=target,
+            input=content.stdout,
+            capture_output=True,
+            check=False,
+        )
+        if written.returncode != 0 or written.stdout.decode("ascii", "replace").strip() != sha:
+            raise WorkspaceError(f"写入 workspace 对象失败: {sha}")
+    run_git(["update-ref", "refs/codepilot/base", commit], cwd=target, check=False)
+    tags = run_git(
+        ["for-each-ref", "--merged", commit, "--format=%(refname) %(objectname)", "refs/tags/"],
+        cwd=cache,
+        check=False,
+        timeout=timeout,
+    )
+    for line in tags.lines:
+        ref, _, object_id = line.partition(" ")
+        if ref and object_id:
+            run_git(["update-ref", ref, object_id], cwd=target, check=False)
+
+
+def _copy_local_bare(source: Path, target: Path, *, timeout: float) -> None:
+    """Byte-for-byte local fallback when Git's MSYS local transport cannot start.
+
+    Only reached for local repositories on Windows after ``git clone`` failed
+    before opening the source. The copy keeps the same objects and refs as a
+    bare clone and, importantly, never hard-links the user's object database.
+    """
+    source = Path(source).resolve()
+    git_dir = source / ".git" if (source / ".git").is_dir() else source
+    if not (git_dir / "objects").is_dir():
+        raise WorkspaceError(f"本地路径不是 git 仓库（缺少 objects）: {source}")
+    remove_tree(target, ignore_errors=True)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(
+        git_dir,
+        target,
+        ignore=shutil.ignore_patterns("index", "logs", "worktrees", "ORIG_HEAD", "FETCH_HEAD"),
+    )
+    run_git(["--git-dir", str(target), "config", "core.bare", "true"], timeout=timeout)
+    run_git(
+        ["--git-dir", str(target), "config", "--unset", "core.worktree"],
+        check=False,
+        timeout=timeout,
+    )

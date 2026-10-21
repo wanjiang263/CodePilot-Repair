@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, SecretStr, field_validator, model_validator
 
 from codepilot.config import read_secret_env
 
@@ -90,13 +90,29 @@ class ProviderSpec(BaseModel):
 
     name: str
     base_url: str
-    api_key_env: str
+    api_key_env: str = ""
     api_key_env_fallback: str | None = None
     """备用密钥环境变量名，用于改名过渡期。
 
     智谱的两家平台历史上分别用过 ``ZHIPU_API_KEY`` 与 ``GLM_API_KEY``。只认一个名字
     会让旧 ``.env`` 在升级后静默变成"provider 未配置"；两个都认又会让配置里出现歧义。
     显式的 fallback 让优先级写在配置里，读密钥的代码只有一条路径。
+    """
+
+    protocol: str = "openai_compatible"
+    """``openai_compatible`` / ``anthropic_messages`` / ``bedrock_converse``.
+
+    协议属于 provider，而不是模型：同一家服务商的模型共享端点语义。
+    """
+
+    region: str | None = None
+    aws_profile: str | None = None
+
+    api_key_value: SecretStr | None = Field(default=None, exclude=True, repr=False)
+    """Runtime-only credential injected by the settings service.
+
+    It is excluded from dumps and task snapshots. YAML/CLI configurations leave
+    it unset and keep resolving credentials by environment variable name.
     """
 
     max_concurrency: int = 4
@@ -113,16 +129,32 @@ class ProviderSpec(BaseModel):
 
     extra_headers: dict[str, str] = Field(default_factory=dict)
 
+    @field_validator("protocol")
+    @classmethod
+    def _known_protocol(cls, value: str) -> str:
+        allowed = {"openai_compatible", "anthropic_messages", "bedrock_converse"}
+        if value not in allowed:
+            raise ValueError(f"unsupported provider protocol: {value}")
+        return value
+
     def api_key(self) -> str | None:
-        """按 ``api_key_env`` → ``api_key_env_fallback`` 的顺序读密钥。"""
-        value = read_secret_env(self.api_key_env)
-        if value is not None:
-            return value
+        """按运行时注入值 → ``api_key_env`` → fallback 的顺序读密钥。"""
+        if self.api_key_value is not None:
+            injected = self.api_key_value.get_secret_value().strip()
+            if injected:
+                return injected
+        if not self.api_key_env:
+            return None
+        env_value = read_secret_env(self.api_key_env)
+        if env_value is not None:
+            return env_value
         if self.api_key_env_fallback:
             return read_secret_env(self.api_key_env_fallback)
         return None
 
     def has_api_key(self) -> bool:
+        if self.protocol == "bedrock_converse":
+            return True
         return self.api_key() is not None
 
 

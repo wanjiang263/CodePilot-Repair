@@ -10,6 +10,8 @@ Phase 0 只把 ``config`` 与 ``doctor`` 做实。其余子命令**注册但不�
 
 from __future__ import annotations
 
+import contextlib
+import hashlib
 import json
 import secrets
 import shlex
@@ -41,9 +43,7 @@ __all__ = ["app"]
 #: 尚未实现的子命令 → 计划落地的阶段。值会出现在报错信息里。
 #: ``index`` 已在 R-18 落地，不再列在这里——``test_unimplemented_commands_fail_loudly``
 #: 以 ``sorted(_PLANNED)`` 参数化，删键即自动不再要求 index 退出码 2。
-_PLANNED: dict[str, str] = {
-    "report": "Phase 13（Run Report 与 Dashboard）",
-}
+_PLANNED: dict[str, str] = {}
 
 app = typer.Typer(
     name="codepilot",
@@ -1519,13 +1519,232 @@ def bench_swebench(
     raise typer.Exit(code=code)
 
 
+@app.command("api")
+def api(
+    host: str | None = typer.Option(None, "--host", help="监听地址；默认 127.0.0.1。"),
+    port: int | None = typer.Option(None, "--port", help="监听端口；默认 8000。"),
+) -> None:
+    """启动 FastAPI 服务（默认只监听回环地址，API key 必填）。"""
+    import uvicorn
+
+    from codepilot.api.app import create_app
+
+    settings = get_settings()
+    application = create_app(settings)
+    uvicorn.run(
+        application,
+        host=host or settings.api_host,
+        port=port or settings.api_port,
+        log_level=settings.log_level.lower(),
+    )
+
+
+@app.command("worker")
+def worker(
+    once: bool = typer.Option(False, "--once", help="只领取并执行一个任务后退出。"),
+) -> None:
+    """启动独立后台 Worker，执行真实 M2 Graph。"""
+    from codepilot.api.database import ApiDatabase
+    from codepilot.api.worker import ApiWorker
+
+    settings = get_settings()
+    database = ApiDatabase(
+        settings.resolved_api_queue_path,
+        artifacts_dir=settings.artifacts_dir,
+    )
+    runner = ApiWorker(settings=settings, database=database)
+    if once:
+        row = runner.run_once()
+        typer.echo("no queued task" if row is None else f"processed {row.run_id}")
+        return
+    typer.echo(f"worker {runner.worker_id} started; queue={database.path}", err=True)
+    runner.run_forever()
+
+
 @app.command("report")
 def report(
-    run_id: str = typer.Argument(..., help="运行 ID。"),
+    run_id: str | None = typer.Argument(None, help="运行 ID；也可用 --run-dir 直接指定目录。"),
+    run_dir: Path | None = typer.Option(
+        None, "--run-dir", help="包含 report.json/state_final.json 的目录（只读）。"
+    ),
+    html: bool = typer.Option(False, "--html", help="生成自包含静态 HTML 报告。"),
+    output: Path | None = typer.Option(
+        None, "--output", help="HTML 输出路径；默认 artifacts/html/<run_id>.html。"
+    ),
+    artifacts_dir: Path | None = typer.Option(
+        None, "--artifacts-dir", help="覆盖 artifacts 根目录。"
+    ),
 ) -> None:
-    """[未实现] 渲染运行报告。"""
-    del run_id
-    _not_yet("report")
+    """从已落盘的 Artifact 渲染报告（默认 Markdown，可导出离线 HTML）。"""
+    from codepilot.api.history import HistoryCatalog
+    from codepilot.api.reporting import build_patch_view, build_report_view, load_json
+    from codepilot.api.security import PathScrubber
+    from codepilot.html_report import write_html_report
+
+    settings = get_settings()
+    if artifacts_dir is not None:
+        settings = settings.model_copy(update={"artifacts_dir": artifacts_dir})
+    catalog = HistoryCatalog(settings)
+    entry = catalog.get_by_run(run_id) if run_id else None
+    directory = run_dir
+    if directory is None and run_id:
+        candidate = settings.runs_dir() / run_id
+        if candidate.is_dir():
+            directory = candidate
+        elif entry is not None:
+            directory = entry.run_dir
+    if directory is None:
+        raise typer.BadParameter("请提供存在的 RUN_ID 或 --run-dir")
+    directory = Path(directory)
+    if (directory / "run-artifacts").is_dir() and not (directory / "state_final.json").exists():
+        directory = directory / "run-artifacts"
+    state = load_json(directory / "state_final.json")
+    report_payload = load_json(directory / "report.json")
+    if not state and not report_payload:
+        raise typer.BadParameter(f"目录中没有 report.json / state_final.json: {directory}")
+    resolved_id = run_id or str(report_payload.get("run_id") or state.get("run_id") or "")
+    if entry is None and resolved_id:
+        entry = catalog.get_by_run(resolved_id)
+    official = (
+        catalog.official_view(entry) if entry is not None else _official_from_reports(directory)
+    )
+    status = str(state.get("status") or report_payload.get("status") or "unknown")
+    stop_reason = state.get("stop_reason") or report_payload.get("stop_reason")
+    scrubber = PathScrubber(
+        settings,
+        extra_roots={
+            str(Path(directory).resolve()): "<run>",
+            "/root/cp-run": "<history-root>",
+            "/workspace": "<workspace>",
+        },
+        scrub_absolute_paths=False,
+    )
+    view = build_report_view(
+        run_id=resolved_id,
+        task_id=str(state.get("task_id") or report_payload.get("task_id") or ""),
+        run_dir=directory,
+        report=report_payload,
+        state=state,
+        status=status,
+        stop_reason=str(stop_reason) if stop_reason else None,
+        official=official,
+        events_count=_event_count(directory / "events.jsonl"),
+        readonly=True,
+    )
+    payload = view.model_dump(mode="json")
+    payload["markdown"] = scrubber.text(str(payload.get("markdown") or ""))
+    payload["raw"] = {}
+    view = type(view).model_validate(payload)
+    if not html:
+        markdown = view.markdown.strip()
+        if not markdown:
+            markdown = (
+                f"# CodePilot-Repair run {resolved_id}\n\n"
+                f"- Status: `{status}`\n- Stop reason: `{stop_reason or 'none'}`\n"
+                f"- Verification level: `{view.verification_level or 'NOT RECORDED'}`\n"
+            )
+        typer.echo(markdown)
+        return
+    patch_text = ""
+    with contextlib.suppress(OSError):
+        patch_text = (directory / "patch_final.diff").read_text(encoding="utf-8")
+    patch = None
+    if patch_text.strip():
+        expected = hashlib.sha256(str(state.get("current_patch") or "").encode("utf-8")).hexdigest()
+        actual = hashlib.sha256(patch_text.encode("utf-8")).hexdigest()
+        patch = build_patch_view(
+            run_id=resolved_id,
+            task_id=view.task_id,
+            diff=patch_text,
+            report=report_payload,
+            simulated=bool(
+                view.summary.get("simulated_llm") or view.summary.get("simulated_sandbox")
+            ),
+            identity_verified=actual == expected,
+            identity_note=(
+                "Patch matches state_final.current_patch."
+                if actual == expected
+                else "Patch does not match state_final.current_patch."
+            ),
+        )
+    events = _read_events(directory / "events.jsonl", scrubber)
+    target = output or (settings.artifacts_dir / "html" / f"{resolved_id or 'report'}.html")
+    written = write_html_report(
+        report=view,
+        events=events,
+        patch=patch,
+        output=target,
+    )
+    typer.echo(str(written))
+
+
+def _official_from_reports(run_dir: Path) -> Any:
+    """Use an archived official report even when the directory is not catalogued."""
+    import json
+
+    from codepilot.api.schemas import OfficialVerdictView
+
+    reports = Path(run_dir) / "reports"
+    candidates = sorted(reports.glob("*.json")) if reports.is_dir() else []
+    if not candidates:
+        return OfficialVerdictView()
+    try:
+        payload = json.loads(candidates[0].read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return OfficialVerdictView()
+    harness = payload.get("harness") if isinstance(payload.get("harness"), dict) else {}
+    verdicts = harness.get("verdicts") if isinstance(harness.get("verdicts"), list) else []
+    first = verdicts[0] if verdicts and isinstance(verdicts[0], dict) else {}
+    comparison = (
+        payload.get("m2_vs_official") if isinstance(payload.get("m2_vs_official"), dict) else {}
+    )
+    verdict = first.get("verdict") or comparison.get("official")
+    resolved = first.get("resolved")
+    if resolved is None and isinstance(verdict, str):
+        resolved = verdict.upper() == "RESOLVED"
+    return OfficialVerdictView(
+        recorded=True,
+        verdict=str(verdict) if verdict is not None else None,
+        resolved=bool(resolved) if resolved is not None else None,
+        status=str(payload.get("status")) if payload.get("status") else None,
+        harness_status=str(harness.get("decision")) if harness.get("decision") else "NOT RECORDED",
+        authoritative=bool(comparison.get("official_authoritative", True)),
+        source=candidates[0].name,
+        note=str(comparison.get("note")) if comparison.get("note") else None,
+    )
+
+
+def _event_count(path: Path) -> int:
+    try:
+        return sum(1 for line in path.read_text(encoding="utf-8").splitlines() if line.strip())
+    except OSError:
+        return 0
+
+
+def _read_events(path: Path, scrubber: Any) -> list[dict[str, Any]]:
+    import json
+
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return []
+    events: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    for line in lines:
+        if not line.strip():
+            continue
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(payload, dict):
+            continue
+        seq = payload.get("seq")
+        if not isinstance(seq, int) or seq in seen:
+            continue
+        seen.add(seq)
+        events.append(scrubber.payload(payload))
+    return sorted(events, key=lambda item: int(item["seq"]))
 
 
 if __name__ == "__main__":  # pragma: no cover

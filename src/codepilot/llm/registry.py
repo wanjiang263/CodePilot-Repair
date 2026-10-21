@@ -22,7 +22,9 @@ from typing import Any
 
 import httpx
 
+from codepilot.llm.anthropic_messages import AnthropicMessagesProvider
 from codepilot.llm.base import LLMProvider
+from codepilot.llm.bedrock_converse import BedrockConverseProvider
 from codepilot.llm.calls import CallRecorder, LLMRunContext
 from codepilot.llm.config import LLMConfig, ModelSpec, ProviderSpec
 from codepilot.llm.errors import ProviderNotConfiguredError
@@ -78,6 +80,7 @@ class LLMRegistry:
         budget_currency: str | None = None,
         policy: RetryPolicy | None = None,
         client_factory: Any = None,
+        bedrock_client_factory: Any = None,
         recorder: CallRecorder | None = None,
     ) -> None:
         """
@@ -88,6 +91,8 @@ class LLMRegistry:
                 未绑定就发请求会显式报错，而不是静默丢掉一份录制。
             client_factory: 测试注入点，签名 ``(ProviderSpec, api_key) -> httpx.Client``。
                 生产环境不传，用默认实现。
+            bedrock_client_factory: 测试注入点，返回一个 boto3 ``bedrock-runtime`` 形状的
+                客户端。生产环境由 AWS SDK 凭据链构造。
             recorder: 逐请求元数据记录器（``llm_requests.jsonl``）。同一 run 内所有角色
                 共用一个，序号才是全局单调的。
         """
@@ -101,6 +106,7 @@ class LLMRegistry:
         self.budget_currency = budget_currency or config.budget_currency
         self.policy = policy or RetryPolicy()
         self._client_factory = client_factory
+        self._bedrock_client_factory = bedrock_client_factory
         self.recorder = recorder
 
         self._cache: dict[str, LLMProvider] = {}
@@ -202,24 +208,53 @@ class LLMRegistry:
                     "（uv run codepilot config check 可查看待填项）。"
                 )
 
-            api_key = _api_key_for(provider_spec)
-            client = (
-                self._client_factory(provider_spec, api_key)
-                if self._client_factory is not None
-                else _default_client(provider_spec, api_key)
-            )
-
-            inner = OpenAICompatibleProvider(
-                spec=spec,
-                provider=provider_spec,
-                api_key=api_key,
-                client=client,
-                policy=self._policy_for(provider_spec),
-                limiter=self._limiter_for(provider_spec.name, provider_spec.max_concurrency),
-                exchange_rates=self.config.exchange_rates,
-                budget_currency=self.budget_currency,
-                allowed_providers=self.config.allowed_providers,
-            )
+            if provider_spec.protocol == "bedrock_converse":
+                inner = BedrockConverseProvider(
+                    spec=spec,
+                    provider=provider_spec,
+                    client=(
+                        self._bedrock_client_factory(provider_spec)
+                        if self._bedrock_client_factory is not None
+                        else None
+                    ),
+                    exchange_rates=self.config.exchange_rates,
+                    budget_currency=self.budget_currency,
+                )
+            else:
+                api_key = _api_key_for(provider_spec)
+                client = (
+                    self._client_factory(provider_spec, api_key)
+                    if self._client_factory is not None
+                    else _default_client(provider_spec, api_key)
+                )
+                if provider_spec.protocol == "anthropic_messages":
+                    inner = AnthropicMessagesProvider(
+                        spec=spec,
+                        provider=provider_spec,
+                        api_key=api_key,
+                        client=client,
+                        policy=self._policy_for(provider_spec),
+                        limiter=self._limiter_for(
+                            provider_spec.name, provider_spec.max_concurrency
+                        ),
+                        exchange_rates=self.config.exchange_rates,
+                        budget_currency=self.budget_currency,
+                        allowed_providers=self.config.allowed_providers,
+                    )
+                else:
+                    inner = OpenAICompatibleProvider(
+                        spec=spec,
+                        provider=provider_spec,
+                        api_key=api_key,
+                        client=client,
+                        policy=self._policy_for(provider_spec),
+                        limiter=self._limiter_for(
+                            provider_spec.name, provider_spec.max_concurrency
+                        ),
+                        exchange_rates=self.config.exchange_rates,
+                        budget_currency=self.budget_currency,
+                        allowed_providers=self.config.allowed_providers,
+                    )
 
             if self.mode == LLMMode.RECORD:
                 inner = RecordingLLM(inner, self._calls_path_or_pending())

@@ -1,109 +1,338 @@
-"""FastAPI 应用（F-18，Phase 0 只做 ``GET /health``）。
+"""FastAPI application for Phase 13.
 
-三条来自 03 §29 的硬约束，从第一天就生效：
+Hard constraints carried from Phase 0:
 
-1. **没有配置 API key 就拒绝启动**。不是"启动后拒绝请求"——一个没有鉴权的
-   服务只要监听上了端口，就有被扫到的窗口期。
-2. **默认只监听 127.0.0.1**。要对外暴露必须显式改配置。
-3. Agent 运行**不在请求处理函数里执行**（Phase 13 落地时走后台 worker）。
-   本模块现在不包含任何运行入口，因此这条天然成立。
+1. Without a configured API key the service **refuses to start**; there is no
+   unauthenticated mode.
+2. The default bind address is loopback and CORS is not enabled. The React app is
+   served same-origin (or through the Vite proxy) and authenticates with
+   ``X-API-Key``.
+3. Agent execution never happens in a request handler. ``POST /tasks`` only
+   writes a durable queue row; ``codepilot worker`` executes the graph.
 
-``/health`` 也校验 key。它不泄露任何业务信息，但一个开放的探活端点足以
-让扫描器确认服务存在。
+The API key is never logged, stored in artifacts or compiled into the frontend.
 """
 
 from __future__ import annotations
 
-import secrets
-from collections.abc import Callable
-from typing import Annotated
+import json
+import logging
+import time
+import uuid
+from pathlib import Path
+from typing import Any
 
-from fastapi import Depends, FastAPI, Header, HTTPException, status
+from fastapi import Depends, FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from starlette.datastructures import MutableHeaders
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from codepilot.api.auth import (
+    api_key_dependency,
+    assert_api_key_configured,
+    verify_api_key,
+)
+from codepilot.api.database import ApiDatabase
+from codepilot.api.history import HistoryCatalog
+from codepilot.api.routes import ApiContext, build_router
+from codepilot.api.security import PathScrubber
+from codepilot.api.settings_routes import build_settings_router
 from codepilot.config import Settings, get_settings
+from codepilot.settings.credentials import CredentialVault
+from codepilot.settings.service import SettingsError, SettingsService
+from codepilot.settings.store import SettingsStore, VersionConflictError
 
-__all__ = ["api_key_dependency", "create_app", "verify_api_key"]
+__all__ = [
+    "api_key_dependency",
+    "create_app",
+    "verify_api_key",
+]
 
-
-def verify_api_key(provided: str | None, settings: Settings) -> None:
-    """校验 ``X-API-Key``，不通过则抛 401。
-
-    用 ``secrets.compare_digest`` 而不是 ``==``：字符串比较会在第一个不同的
-    字节处提前返回，把密钥长度和前缀泄露给能测量响应时间的人。
-    """
-    expected = settings.api_key
-    if expected is None:
-        # create_app 已经拦住了这种情况，这里是防御性兜底：
-        # 如果有人绕开工厂函数直接挂载路由，也不能变成开放服务。
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="服务未配置 API key",
-        )
-
-    if provided is None or not secrets.compare_digest(provided, expected.get_secret_value()):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="缺少或错误的 X-API-Key",
-        )
+log = logging.getLogger("codepilot.api")
 
 
-def api_key_dependency(settings: Settings) -> Callable[..., None]:
-    """为一份**具体的** Settings 生成校验依赖。
-
-    必须是工厂函数，不能写成 ``Depends(get_settings)``：后者读的是进程级单例，
-    于是 ``create_app(my_settings)`` 会用一份配置做启动检查、用另一份做请求校验。
-    症状是所有请求都返回 503「服务未配置 API key」，而配置明明传进去了。
-    """
-
-    def verify(
-        x_api_key: Annotated[str | None, Header(alias="X-API-Key")] = None,
-    ) -> None:
-        verify_api_key(x_api_key, settings)
-
-    return verify
+class _OversizedBodyError(Exception):
+    pass
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
-    """构造应用。
+class ApiMiddleware:
+    """Trace IDs, request logging, body limit and conservative response headers."""
 
-    Raises:
-        RuntimeError: 未配置 ``CODEPILOT_API_KEY``。拒绝启动而不是降级为
-            无鉴权模式——后者会让"忘了配"变成"悄悄对外开放"。
-    """
+    def __init__(self, app: ASGIApp, *, settings: Settings) -> None:
+        self.app = app
+        self.settings = settings
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        trace_id = uuid.uuid4().hex
+        scope.setdefault("state", {})["trace_id"] = trace_id
+        headers = MutableHeaders(scope=scope)
+        declared = headers.get("content-length")
+        if declared is not None:
+            try:
+                if int(declared) > self.settings.api_max_body_bytes:
+                    await _send_error(
+                        send,
+                        413,
+                        "payload_too_large",
+                        "Request body exceeds the configured limit.",
+                        trace_id,
+                    )
+                    return
+            except ValueError:
+                await _send_error(
+                    send, 400, "invalid_content_length", "Invalid Content-Length.", trace_id
+                )
+                return
+        seen = 0
+
+        async def limited_receive() -> Message:
+            nonlocal seen
+            message = await receive()
+            if message["type"] == "http.request":
+                seen += len(message.get("body", b""))
+                if seen > self.settings.api_max_body_bytes:
+                    raise _OversizedBodyError
+            return message
+
+        status_code = 500
+        started = time.perf_counter()
+
+        async def traced_send(message: Message) -> None:
+            nonlocal status_code
+            if message["type"] == "http.response.start":
+                status_code = int(message["status"])
+                out = MutableHeaders(scope=message)
+                out["X-Trace-ID"] = trace_id
+                out["X-Content-Type-Options"] = "nosniff"
+                out["Referrer-Policy"] = "no-referrer"
+                if scope["path"].startswith("/api/"):
+                    out["Cache-Control"] = "no-store"
+            await send(message)
+
+        path = str(scope.get("path") or "")
+        try:
+            await self.app(scope, limited_receive, traced_send)
+        except _OversizedBodyError:
+            await _send_error(
+                send,
+                413,
+                "payload_too_large",
+                "Request body exceeds the configured limit.",
+                trace_id,
+            )
+        finally:
+            log.info(
+                "api.request",
+                extra={
+                    "method": scope.get("method"),
+                    "path": path,
+                    "status": status_code,
+                    "duration_ms": round((time.perf_counter() - started) * 1000, 1),
+                    "trace_id": trace_id,
+                    "client": (scope.get("client") or ("",))[0],
+                },
+            )
+
+
+async def _send_error(
+    send: Send,
+    status_code: int,
+    code: str,
+    message: str,
+    trace_id: str,
+) -> None:
+    payload = json.dumps(
+        {"error": {"code": code, "message": message, "trace_id": trace_id}},
+        ensure_ascii=False,
+    ).encode("utf-8")
+    await send(
+        {
+            "type": "http.response.start",
+            "status": status_code,
+            "headers": [
+                (b"content-type", b"application/json; charset=utf-8"),
+                (b"content-length", str(len(payload)).encode()),
+                (b"x-trace-id", trace_id.encode()),
+                (b"x-content-type-options", b"nosniff"),
+                (b"cache-control", b"no-store"),
+            ],
+        }
+    )
+    await send({"type": "http.response.body", "body": payload})
+
+
+def _error_response(
+    status_code: int,
+    code: str,
+    message: str,
+    trace_id: str,
+    headers: dict[str, str] | None = None,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status_code,
+        content={"error": {"code": code, "message": message, "trace_id": trace_id}},
+        headers=headers,
+    )
+
+
+def create_app(
+    settings: Settings | None = None,
+    *,
+    settings_service: SettingsService | None = None,
+) -> FastAPI:
+    """Build the API. Refuses to start without a sufficiently long API key."""
     resolved = settings if settings is not None else get_settings()
+    assert_api_key_configured(resolved)
 
-    if resolved.api_key is None or not resolved.api_key.get_secret_value().strip():
-        raise RuntimeError(
-            "未配置 CODEPILOT_API_KEY，拒绝启动。\n"
-            "请在 .env 中设置 CODEPILOT_API_KEY=<一个足够长的随机串>。\n"
-            "本服务不提供无鉴权模式。"
+    database = ApiDatabase(
+        resolved.resolved_api_queue_path,
+        artifacts_dir=resolved.artifacts_dir,
+    )
+    history = HistoryCatalog(resolved)
+    if settings_service is None:
+        settings_store = SettingsStore(resolved.resolved_settings_path)
+        vault = CredentialVault(
+            resolved.resolved_settings_credentials_dir,
+            master_key=(
+                resolved.settings_master_key.get_secret_value()
+                if resolved.settings_master_key is not None
+                else None
+            ),
         )
+        settings_service = SettingsService(settings_store, vault)
+    context = ApiContext(
+        settings=resolved,
+        database=database,
+        history=history,
+        scrubber=PathScrubber(resolved),
+        content_scrubber=PathScrubber(resolved, scrub_absolute_paths=False),
+        settings_service=settings_service,
+    )
 
     app = FastAPI(
         title="CodePilot-Repair API",
         version="0.1.0",
         description=(
-            "仓库级自主修复 Agent 的 HTTP 接口。"
-            "Phase 0 只提供 /health；任务提交与事件流见 Phase 13。"
+            "Repository-level autonomous repair agent: durable tasks, a separate "
+            "worker, resumable SSE events, patches and read-only benchmark replay."
         ),
-        # 文档页与 OpenAPI 描述本身是**无需鉴权的静态响应**，
-        # 会把全部端点、参数与模型结构告诉未授权的人。关掉。
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
     )
-
-    @app.get(
-        "/health",
-        summary="健康检查",
+    app.state.api_context = context
+    app.state.settings = resolved
+    app.add_middleware(ApiMiddleware, settings=resolved)
+    app.include_router(
+        build_router(),
         dependencies=[Depends(api_key_dependency(resolved))],
     )
-    def health() -> dict[str, str]:
-        """返回服务状态。
+    app.include_router(
+        build_settings_router(),
+        dependencies=[Depends(api_key_dependency(resolved))],
+    )
 
-        刻意只回报常量：任何来自配置或环境的字段（模型名、路径、版本）
-        都是给扫描器的免费信息。
-        """
+    @app.get("/health", dependencies=[Depends(api_key_dependency(resolved))])
+    def health() -> dict[str, str]:
         return {"status": "ok"}
 
+    @app.exception_handler(VersionConflictError)
+    async def version_conflict(request: Request, exc: VersionConflictError) -> JSONResponse:
+        trace_id = str(getattr(request.state, "trace_id", ""))
+        return _error_response(
+            409,
+            "version_conflict",
+            f"Settings changed elsewhere (current version {exc.actual}). Reload and retry.",
+            trace_id,
+        )
+
+    @app.exception_handler(SettingsError)
+    async def settings_error(request: Request, exc: SettingsError) -> JSONResponse:
+        trace_id = str(getattr(request.state, "trace_id", ""))
+        return _error_response(exc.status, exc.code, str(exc), trace_id)
+
+    @app.exception_handler(StarletteHTTPException)
+    async def http_error(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+        trace_id = str(getattr(request.state, "trace_id", ""))
+        detail: Any = exc.detail
+        if isinstance(detail, dict):
+            code = str(detail.get("code") or "http_error")
+            message = str(detail.get("message") or "Request failed.")
+        else:
+            code = _code_for_status(exc.status_code)
+            message = str(detail or "Request failed.")
+        return _error_response(
+            exc.status_code,
+            code,
+            message,
+            trace_id,
+            headers=dict(exc.headers) if exc.headers else None,
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
+        trace_id = str(getattr(request.state, "trace_id", ""))
+        errors = [
+            {
+                "location": ".".join(str(part) for part in item.get("loc", ())),
+                "message": str(item.get("msg") or "invalid value"),
+                "type": str(item.get("type") or "value_error"),
+            }
+            for item in exc.errors()
+        ]
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "validation_error",
+                    "message": "Request validation failed.",
+                    "trace_id": trace_id,
+                    "fields": errors,
+                }
+            },
+        )
+
+    @app.exception_handler(Exception)
+    async def unhandled(request: Request, exc: Exception) -> JSONResponse:
+        trace_id = str(getattr(request.state, "trace_id", ""))
+        # Do not log the exception message or traceback: it may contain provider
+        # error bodies or credentials. The trace id is enough to correlate with
+        # the worker's own redacted logs.
+        log.error(
+            "api.unhandled",
+            extra={"trace_id": trace_id, "error_type": type(exc).__name__},
+        )
+        return _error_response(
+            500,
+            "internal_error",
+            "Internal server error. Use the trace id when reporting this.",
+            trace_id,
+        )
+
+    dist = Path(resolved.web_dist_dir)
+    if dist.is_dir():
+        app.mount("/app", StaticFiles(directory=dist, html=True), name="dashboard")
+
+        @app.get("/", include_in_schema=False)
+        def root() -> RedirectResponse:
+            return RedirectResponse(url="/app/")
+
     return app
+
+
+def _code_for_status(status_code: int) -> str:
+    return {
+        400: "bad_request",
+        401: "unauthorized",
+        403: "forbidden",
+        404: "not_found",
+        409: "conflict",
+        413: "payload_too_large",
+        422: "validation_error",
+    }.get(status_code, "http_error")

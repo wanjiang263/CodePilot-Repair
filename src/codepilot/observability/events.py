@@ -21,15 +21,35 @@ from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
 from types import TracebackType
-from typing import Any
+from typing import Any, Protocol
 
 from pydantic import BaseModel, Field
 
 from codepilot.clock import utcnow
 from codepilot.observability.redaction import redact
-from codepilot.storage.repository import EventStore
 
-__all__ = ["EventRecord", "EventSink", "EventType", "EventUsage"]
+__all__ = ["EventRecord", "EventSink", "EventStoreProtocol", "EventType", "EventUsage"]
+
+
+class EventStoreProtocol(Protocol):
+    """The two operations :class:`EventSink` needs from a durable event store.
+
+    The API worker uses this seam to mirror real events into the queue database
+    without importing SQLAlchemy models into the observability layer.
+    """
+
+    def next_seq(self, run_id: str) -> int: ...
+
+    def append(
+        self,
+        *,
+        run_id: str,
+        node: str,
+        type: str,
+        payload: dict[str, Any] | None = None,
+        seq: int | None = None,
+        timestamp: datetime | None = None,
+    ) -> object: ...
 
 
 class EventType(StrEnum):
@@ -100,7 +120,7 @@ class EventSink:
         run_id: str,
         task_id: str,
         jsonl_path: Path,
-        store: EventStore | None = None,
+        store: EventStoreProtocol | None = None,
         start_seq: int | None = None,
         clock: Callable[[], datetime] = utcnow,
     ) -> None:

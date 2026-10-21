@@ -58,7 +58,7 @@ from codepilot.llm.dispatch_budget import current_outstanding
 from codepilot.llm.fake import FakeLLM, Reply
 from codepilot.llm.registry import LLMMode, LLMRegistry
 from codepilot.llm.tracking import UsageTrackingProvider
-from codepilot.observability.events import EventSink
+from codepilot.observability.events import EventSink, EventStoreProtocol
 from codepilot.patch.validator import PatchValidator
 from codepilot.repo.graph import RepoGraph
 from codepilot.repo.index import Indexer, RepositoryIndex
@@ -208,6 +208,8 @@ class ProviderBundle:
         *,
         budget_currency: str | None = None,
         record_llm: bool = False,
+        client_factory: Any = None,
+        bedrock_client_factory: Any = None,
     ) -> ProviderBundle:
         """真实 provider。可能产生费用，因此必须由调用方显式授权后才构造。
 
@@ -223,6 +225,8 @@ class ProviderBundle:
             config,
             mode=LLMMode.RECORD if record_llm else LLMMode.LIVE,
             budget_currency=budget_currency,
+            client_factory=client_factory,
+            bedrock_client_factory=bedrock_client_factory,
         )
         return cls(
             roles={role: registry.for_role(role) for role in ROLES},
@@ -389,6 +393,12 @@ class InferenceAssembly:
         allow_new_tests: bool = False,
         record_llm: bool = False,
         checkpoint: bool = False,
+        env_spec_factory: Callable[[Path], EnvSpec] | None = None,
+        enforce_base_only: bool = True,
+        allow_build_network: bool = True,
+        event_store: EventStoreProtocol | None = None,
+        cancel_check: Callable[[], bool] | None = None,
+        workspace_factory: Callable[[ArtifactStore], Workspace] | None = None,
     ) -> None:
         self._task = task
         self._manager = workspace_manager
@@ -400,6 +410,18 @@ class InferenceAssembly:
         self._allow_new_tests = allow_new_tests
         self._record_llm = record_llm
         self._checkpoint = checkpoint
+        #: Web/user tasks clone an ordinary repository; the base-only invariant is
+        #: specific to evaluation fixtures and SWE-bench mirrors.
+        self._env_spec_factory = env_spec_factory
+        self._enforce_base_only = enforce_base_only
+        self._allow_build_network = allow_build_network
+        self._event_store = event_store
+        self._cancel_check = cancel_check
+        #: Optional seam for environments where cloning is unavailable (for
+        #: example the bundled offline demo on a host whose MSYS `sh` cannot be
+        #: spawned from the worker). It must return a clean, self-contained git
+        #: workspace; identity recording and resume verification stay the same.
+        self._workspace_factory = workspace_factory
         #: 上一次 :meth:`run` 是否真的从节点级 checkpoint 续跑过。
         self.resumed_from_checkpoint = False
         self._recorder: CallRecorder | None = None
@@ -421,13 +443,19 @@ class InferenceAssembly:
             # 非空目录，正是为了拦住"把旧现场当成新现场"，所以这里显式地承认它是旧的。
             workspace = self._reopen(artifacts)
         else:
-            workspace = self._manager.create(
-                source=str(self._task.repository),
-                base_commit=self._task.base_commit,
-                target=artifacts.run_dir / "workspace",
+            workspace = (
+                self._workspace_factory(artifacts)
+                if self._workspace_factory is not None
+                else self._manager.create(
+                    source=str(self._task.repository),
+                    base_commit=self._task.base_commit,
+                    target=artifacts.run_dir / "workspace",
+                )
             )
             self._record_identity(artifacts, workspace)
-        self._assert_isolated(workspace)
+        if self._enforce_base_only:
+            self._assert_isolated(workspace)
+        env_spec = self._resolve_env_spec(workspace.path)
         policy = WorkspacePathPolicy(
             workspace.path,
             deny_directories=WorkspacePathPolicy.DEFAULT_DENY_DIRECTORIES
@@ -454,6 +482,7 @@ class InferenceAssembly:
                     artifacts=artifacts,
                     policy=policy,
                     index=index,
+                    env_spec=env_spec,
                     checkpoint_path=checkpoint_path if self._checkpoint else None,
                     resuming=resuming,
                 )
@@ -516,6 +545,11 @@ class InferenceAssembly:
             repository_id=str(recorded.get("repository_id") or ""),
         )
 
+    def _resolve_env_spec(self, workspace: Path) -> EnvSpec:
+        if self._env_spec_factory is None:
+            return self._task.env_spec
+        return self._env_spec_factory(workspace)
+
     # ------------------------------------------------------------------ 隔离
 
     @staticmethod
@@ -550,6 +584,7 @@ class InferenceAssembly:
         artifacts: ArtifactStore,
         policy: WorkspacePathPolicy,
         index: RepositoryIndex,
+        env_spec: EnvSpec,
         checkpoint_path: Path | None = None,
         resuming: bool = False,
     ) -> RepairState:
@@ -559,7 +594,10 @@ class InferenceAssembly:
         files = list(index.files())
         provider = self._providers.roles
         events = EventSink(
-            run_id=run_id, task_id=task.task_id, jsonl_path=artifacts.run_dir / "events.jsonl"
+            run_id=run_id,
+            task_id=task.task_id,
+            jsonl_path=artifacts.run_dir / "events.jsonl",
+            store=self._event_store,
         )
         # 逐请求观测要在**任何模型调用之前**接好：装配期没有 run_id，只有现在能绑。
         # 首次真实 GLM 运行没做这一步，于是 events.jsonl 的 usage 全为 null、
@@ -585,8 +623,8 @@ class InferenceAssembly:
             repository=str(task.repository),
             base_commit=workspace.base_commit,
             workspace=workspace.path,
-            env_spec=task.env_spec,
-            allow_network=True,
+            env_spec=env_spec,
+            allow_network=self._allow_build_network,
         )
         tools = build_tool_registry(
             policy=policy,
@@ -595,7 +633,7 @@ class InferenceAssembly:
             base_commit=workspace.base_commit,
             sandbox=sandbox,
             environment=environment,
-            env_spec=task.env_spec,
+            env_spec=env_spec,
             test_budget=TestRunBudget(self._budget.max_test_runs),
         )
         deps = Deps(
@@ -645,7 +683,7 @@ class InferenceAssembly:
             ),
             sandbox=sandbox,
             environment=environment,
-            env_spec=task.env_spec,
+            env_spec=env_spec,
             validator=PatchValidator(policy, workspace.base_commit, index=index),
             tools=tools,
             context_builder=ContextBuilder(workspace_root=workspace.path),
@@ -662,6 +700,7 @@ class InferenceAssembly:
             # 之后累加，飞行中的那笔钱否则是隐形的，预留就会在一个并不存在的余额上
             # 再扣一次。未启用进程级账本（离线批次）时这个读数恒为 None，行为不变。
             outstanding_cost=current_outstanding,
+            cancel_check=self._cancel_check,
             regression_runner=RegressionRunner(),
             reviewer=PatchReviewer(provider["reviewer"]),
             reproducer=(
@@ -670,7 +709,7 @@ class InferenceAssembly:
                     policy=policy,
                     validator=BaseWorkspaceValidator(
                         sandbox=sandbox,
-                        env_spec=task.env_spec,
+                        env_spec=env_spec,
                         environment=environment,
                         provider=WorkspaceManagerBaseProvider(
                             self._manager,

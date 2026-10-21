@@ -87,19 +87,13 @@ def test_doctor_survives_a_stopped_docker_daemon(monkeypatch: pytest.MonkeyPatch
     assert "failed to connect to the docker API" in result.stdout
 
 
-@pytest.mark.parametrize("command", sorted(_PLANNED))
-def test_unimplemented_commands_fail_loudly(command: str) -> None:
-    """03 §2.2：不得把未完成的实现呈现为完成。
+def test_no_unimplemented_cli_placeholders_remain() -> None:
+    """03 §2.2：已有占位命令全部落地后，`_PLANNED` 必须为空。
 
-    退出码 2 是一个刻意的选择：它不是 argparse 的用法错误（1），
-    也不是成功（0），CI 里任何把它当成功的写法都会立刻暴露。
+    如果未来新增一个只注册、不实现的命令，这里会先变红，提醒补上真正的
+    退出码测试，而不是让参数化测试因为空参数集被静默跳过。
     """
-    args = [command]
-    if command in {"index", "retrieve", "run-tests", "bench", "report"}:
-        args.append("dummy")
-
-    result = runner.invoke(app, args)
-    assert result.exit_code == 2
+    assert _PLANNED == {}
 
 
 def test_solve_never_uses_live_provider_without_explicit_authorization() -> None:

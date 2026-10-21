@@ -1,0 +1,48 @@
+# Read-only historical experiment catalog for the Phase 13 API/Dashboard.
+#
+# These paths point at archived artifacts produced by earlier phases. The replay
+# server never writes to them: no report regeneration, no event completion, no
+# patch normalisation. `official_report` is optional; by default the first JSON
+# under `<run_artifacts>/reports/` is used.
+benchmarks:
+  - id: glm14-marshmallow-1343
+    label: GLM14 · marshmallow-1343
+    package: artifacts/phase11-glm14-20261020
+    run_artifacts: run-artifacts
+    instance_id: marshmallow-code__marshmallow-1343
+    repository: https://github.com/marshmallow-code/marshmallow
+    model: glm-5.3-flash-main
+    recorded_at: "2026-10-20T13:31:52Z"
+    note: >-
+      Official RESOLVED while the internal run stopped on budget_test_runs.
+      Official and internal verdicts are separate and must never be merged.
+
+  - id: glm13-marshmallow-1343
+    label: GLM13 · marshmallow-1343
+    package: artifacts/phase11-glm13-20261020
+    run_artifacts: run-artifacts
+    instance_id: marshmallow-code__marshmallow-1343
+    repository: https://github.com/marshmallow-code/marshmallow
+    model: glm-5.3-flash-main
+    recorded_at: "2026-10-20"
+    note: Archived real single-instance run; replay is read-only.
+
+  - id: glm12-marshmallow-1343
+    label: GLM12 · marshmallow-1343
+    package: artifacts/phase11-glm12-20261020
+    run_artifacts: run-artifacts
+    instance_id: marshmallow-code__marshmallow-1343
+    repository: https://github.com/marshmallow-code/marshmallow
+    model: glm-5.3-flash-main
+    recorded_at: "2026-10-20"
+    note: Archived real single-instance run; replay is read-only.
+
+  - id: glm11-marshmallow-1343
+    label: GLM11 · marshmallow-1343
+    package: artifacts/phase11-glm11-20261020
+    run_artifacts: run-artifacts
+    instance_id: marshmallow-code__marshmallow-1343
+    repository: https://github.com/marshmallow-code/marshmallow
+    model: glm-5.3-flash-main
+    recorded_at: "2026-10-20"
+    note: Archived real single-instance run; replay is read-only.

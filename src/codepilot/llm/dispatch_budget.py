@@ -11,6 +11,7 @@ import json
 import math
 import os
 import threading
+import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -50,7 +51,16 @@ class DispatchBudget:
         }
         staging = self.path.with_suffix(".tmp")
         staging.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-        staging.replace(self.path)
+        # Windows Defender/indexers can briefly hold the destination open; a
+        # replace failure must not corrupt the ledger or drop a reservation.
+        for attempt in range(6):
+            try:
+                staging.replace(self.path)
+                return
+            except PermissionError:
+                if attempt == 5:
+                    raise
+                time.sleep(0.05 * (attempt + 1))
 
     def send(
         self, spec: ModelSpec, body: dict[str, Any], send: Callable[[], httpx.Response]

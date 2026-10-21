@@ -41,6 +41,13 @@ cache/
 # ---- Docker / 沙箱 ----
 sandbox/out/
 
+# ---- Phase 13 Dashboard ----
+web/node_modules/
+web/dist/
+web/.vite/
+web/coverage/
+*.tsbuildinfo
+
 # ---- 编辑器 / 系统 ----
 .idea/
 .vscode/

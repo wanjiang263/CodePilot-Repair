@@ -136,7 +136,7 @@ class OpenAICompatibleProvider:
 
         with self.limiter:
             response = call_with_retry(
-                lambda: self._post(body),
+                lambda: self._post(body, request.purpose),
                 policy=self.policy,
                 sleep=self.sleep,
                 on_retry=self.on_retry,
@@ -169,16 +169,15 @@ class OpenAICompatibleProvider:
             return text.replace(self._api_key, REDACTED)
         return text
 
-    def _post(self, body: dict[str, Any]) -> httpx.Response:
+    def _post(self, body: dict[str, Any], purpose: str = "generic") -> httpx.Response:
         """发一次请求，把 HTTP 层的失败翻译成本层的异常类型。"""
         self.attempts += 1
+        headers = {**self._request_headers, "X-CodePilot-Purpose": purpose}
         try:
             response = guarded_send(
                 self.spec,
                 body,
-                lambda: self._client.post(
-                    CHAT_COMPLETIONS_PATH, json=body, headers=self._request_headers
-                ),
+                lambda: self._client.post(CHAT_COMPLETIONS_PATH, json=body, headers=headers),
             )
         except httpx.TimeoutException as exc:
             # 请求已经离开本机：服务端可能已经生成并计费，也可能没有。

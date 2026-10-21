@@ -99,3 +99,23 @@ def test_unpriceable_or_foreign_currency_never_reaches_the_network(
     assert not calls
     assert guard.records == []
     assert not guard.frozen  # 从未派发，也就没有需要冻结的不确定支出
+
+
+def test_ledger_replace_retries_a_transient_windows_lock(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Windows 索引器/杀软可能短暂占用目标文件；一次失败不能让预占丢失。"""
+    guard = DispatchBudget(10, tmp_path / "ledger.json")
+    original = Path.replace
+    calls: list[int] = []
+
+    def flaky(self: Path, target: Path) -> Path:
+        calls.append(1)
+        if len(calls) == 1:
+            raise PermissionError(13, "temporarily locked")
+        return original(self, target)
+
+    monkeypatch.setattr(Path, "replace", flaky)
+    guard._save()
+    assert len(calls) == 2
+    assert guard.path.exists()

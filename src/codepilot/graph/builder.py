@@ -104,6 +104,9 @@ def _guard(
     """
 
     async def runner(state: RepairState) -> dict[str, Any]:
+        if node is not Node.FINALIZE and deps.cancel_check is not None and deps.cancel_check():
+            return _cancelled_update(state, deps, node, when="before")
+        deps.events.emit(node=node.value, type=EventType.NODE_START, status="started")
         deps.bind_llm_context(node.value, state.iteration)
         try:
             update = await fn(state, deps)
@@ -137,9 +140,69 @@ def _guard(
                 ],
             }
         _assert_partial(node, update)
+        if (
+            node is not Node.FINALIZE
+            and deps.cancel_check is not None
+            and deps.cancel_check()
+            and update.get("status") in (None, RunStatus.RUNNING)
+        ):
+            cancellation = _cancelled_update(state, deps, node, when="after")
+            cancellation["events"] = [
+                *update.get("events", state.events),
+                *cancellation["events"][len(state.events) :],
+            ]
+            cancellation["failure_reasons"] = [
+                *update.get("failure_reasons", state.failure_reasons),
+                *cancellation["failure_reasons"][len(state.failure_reasons) :],
+            ]
+            # A node that already produced a partial update keeps its own
+            # counters. Cancellation only changes the terminal state, the
+            # reason and the audit trail.
+            return {
+                **update,
+                "status": cancellation["status"],
+                "stop_reason": cancellation["stop_reason"],
+                "failure_reasons": cancellation["failure_reasons"],
+                "events": cancellation["events"],
+                "usage": update.get("usage", cancellation["usage"]),
+                "test_runs": update.get("test_runs", cancellation["test_runs"]),
+            }
         return update
 
     return runner
+
+
+def _cancelled_update(state: RepairState, deps: Deps, node: Node, *, when: str) -> dict[str, Any]:
+    """Stop before the next dispatch at a node boundary.
+
+    A bounded cooperative check: we do not kill Docker, the daemon or a running
+    subprocess. Whatever the node already produced (patch, usage, evidence) stays
+    in ``state`` and is written by ``finalize`` with ``status=cancelled``.
+    """
+    message = f"cancelled at a safe node boundary {when} {node.value}"
+    deps.events.emit(
+        node=node.value,
+        type=EventType.STOP,
+        status="cancelled",
+        summary=message,
+    )
+    return {
+        "status": RunStatus.CANCELLED,
+        "stop_reason": StopReason.CANCELLED,
+        "failure_reasons": [*state.failure_reasons, message],
+        "usage": deps.usage,
+        "test_runs": deps.test_runs,
+        "events": [
+            *state.events,
+            {
+                "seq": len(state.events) + 1,
+                "node": node.value,
+                "status": "cancelled",
+                "error": None,
+                "extra": f"boundary={when}",
+            },
+        ],
+    }
 
 
 def _assert_partial(node: Node, update: Any) -> None:

@@ -1,0 +1,87 @@
+name: codepilot-repair
+
+x-common: &common
+  image: codepilot-repair:phase14
+  build:
+    context: .
+    dockerfile: Dockerfile
+  env_file:
+    - path: .env
+      required: false
+  environment:
+    CODEPILOT_API_KEY: ${CODEPILOT_API_KEY:?Set CODEPILOT_API_KEY in .env before starting Compose}
+    CODEPILOT_API_EXECUTION_BACKEND: docker
+    CODEPILOT_API_ALLOW_LIVE_LLM: "true"
+    CODEPILOT_API_LIVE_ALLOW_SIMULATED_SANDBOX: "false"
+    CODEPILOT_API_ALLOWED_REPOSITORY_HOSTS: ${CODEPILOT_API_ALLOWED_REPOSITORY_HOSTS:-github.com}
+    CODEPILOT_API_MAX_LIVE_COST: ${CODEPILOT_API_MAX_LIVE_COST:-1000}
+    CODEPILOT_API_WORKER_POLL_SECONDS: ${CODEPILOT_API_WORKER_POLL_SECONDS:-0.5}
+    CODEPILOT_API_WORKER_LEASE_SECONDS: ${CODEPILOT_API_WORKER_LEASE_SECONDS:-120}
+    CODEPILOT_SETTINGS_MASTER_KEY: ${CODEPILOT_SETTINGS_MASTER_KEY:-}
+    CODEPILOT_LOG_LEVEL: ${CODEPILOT_LOG_LEVEL:-INFO}
+    # Container paths must win over any local values in .env.
+    CODEPILOT_CONFIG_DIR: /app/configs
+    CODEPILOT_API_DEMO_ROOT: /app/demo
+    CODEPILOT_WEB_DIST_DIR: /app/web/dist
+    CODEPILOT_DOCS_DIR: /app/docs
+    CODEPILOT_README_PATH: /app/README.md
+    CODEPILOT_ARTIFACTS_DIR: /data/artifacts
+    CODEPILOT_CACHE_DIR: /data/cache
+    CODEPILOT_API_QUEUE_PATH: /data/artifacts/api/api.sqlite3
+    CODEPILOT_WORKER_HEALTH_PATH: /data/worker.heartbeat.json
+    CODEPILOT_API_HOST: 0.0.0.0
+    CODEPILOT_API_PORT: "8000"
+  volumes:
+    - codepilot-data:/data
+    - /var/run/docker.sock:/var/run/docker.sock
+  group_add:
+    - "${DOCKER_GID:-0}"
+  init: true
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  labels:
+    com.codepilot.project: codepilot-repair
+    com.codepilot.phase: phase14
+
+services:
+  api:
+    <<: *common
+    command: ["codepilot", "api"]
+    ports:
+      - "127.0.0.1:${CODEPILOT_API_PORT:-8000}:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import os, urllib.request; r=urllib.request.Request('http://127.0.0.1:8000/health', headers={'X-API-Key': os.environ['CODEPILOT_API_KEY']}); urllib.request.urlopen(r, timeout=3).read()",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  worker:
+    <<: *common
+    command: ["codepilot", "worker"]
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import json, pathlib, time; d=json.loads(pathlib.Path('/data/worker.heartbeat.json').read_text()); raise SystemExit(0 if time.time()-d['epoch'] < 90 else 1)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+
+volumes:
+  codepilot-data:
+    name: codepilot-repair-phase14-data

@@ -62,6 +62,9 @@ class StopReason(StrEnum):
     #: "还剩 2 次而闭环要 3 次"（派发前的算术），修法完全不同。
     BUDGET_CLOSURE_TEST_RUNS = "budget_closure_test_runs"
     WORKFLOW_ERROR = "workflow_error"
+    #: 用户/服务请求的协作式取消。位于安全节点边界，已经发生的外部副作用、
+    #: 已花费的费用与补丁证据全部保留；它不是成功，也不是模型失败。
+    CANCELLED = "cancelled"
     #: 计划被语义/Schema 校验拒绝（纠正预算耗尽）。刻意与 ``workflow_error`` 分开：
     #: 前者是"模型没给出可执行的计划"，后者是"Harness 自己出了问题"，
     #: 混在一起会让一次基础设施崩溃被计入模型修复失败的分母。
@@ -83,6 +86,7 @@ class RunStatus(StrEnum):
     SANDBOX_ERROR = "sandbox_error"
     TOOL_ERROR = "tool_error"
     BUDGET_EXHAUSTED = "budget_exhausted"
+    CANCELLED = "cancelled"
 
 
 class TaskMode(StrEnum):

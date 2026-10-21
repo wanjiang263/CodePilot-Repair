@@ -83,6 +83,102 @@ class Settings(BaseSettings):
     )
     api_host: str = Field(default="127.0.0.1", description="默认只监听回环地址。")
     api_port: int = 8000
+    api_allowed_repository_hosts: str = Field(
+        default="github.com",
+        description="API 允许克隆的 HTTPS 域名，逗号分隔。默认只放行 github.com。",
+    )
+    api_queue_path: Path | None = Field(
+        default=None,
+        description="API 任务队列 SQLite 路径。None 表示 artifacts_dir/api/api.sqlite3。",
+    )
+    api_max_body_bytes: int = Field(
+        default=262_144,
+        ge=1024,
+        le=8_388_608,
+        description="单个 API 请求体的上限（字节）。",
+    )
+    api_max_diff_bytes: int = Field(
+        default=1_000_000,
+        ge=4096,
+        le=16_000_000,
+        description="Patch / 报告接口返回的 diff 字节上限。",
+    )
+    api_worker_poll_seconds: float = Field(
+        default=0.5,
+        ge=0.05,
+        le=30.0,
+        description="Worker 空闲时轮询队列的间隔。",
+    )
+    api_worker_lease_seconds: int = Field(
+        default=120,
+        ge=30,
+        le=3600,
+        description="Worker 对运行中任务的租约；过期后由下一次启动的 Worker 做恢复判定。",
+    )
+    api_sse_poll_seconds: float = Field(
+        default=0.25,
+        ge=0.05,
+        le=5.0,
+        description="SSE 读取已持久化事件的间隔（不是重新执行，也不是读取完整报告）。",
+    )
+    api_sse_heartbeat_seconds: int = Field(
+        default=15,
+        ge=1,
+        le=120,
+        description="SSE 心跳注释的间隔。",
+    )
+    api_execution_backend: str = Field(
+        default="fake",
+        description="Web Worker 的执行后端：fake（离线、显式标记）或 docker（需要 daemon）。",
+    )
+    api_allow_live_llm: bool = Field(
+        default=True,
+        description="是否允许 Web 任务使用设置中心里配置的真实模型（仍需 Docker 沙箱）。",
+    )
+    api_live_allow_simulated_sandbox: bool = Field(
+        default=False,
+        description="测试/演示逃生门：允许 live 模型配合模拟沙箱。默认关闭，报告会明确标记。",
+    )
+    api_max_live_cost: float = Field(
+        default=1000.0,
+        ge=0.01,
+        le=10_000.0,
+        description="单个 live 任务的费用硬上限（预算币种），设置中心不能突破。",
+    )
+    settings_path: Path | None = Field(
+        default=None,
+        description="设置中心 SQLite 路径。None 表示 artifacts_dir/settings/settings.sqlite3。",
+    )
+    settings_master_key: SecretStr | None = Field(
+        default=None,
+        description="可选的 Fernet 主密钥；未设置时使用设置目录内的 0600 密钥文件。",
+    )
+
+    api_demo_root: Path = Field(
+        default=PROJECT_ROOT / "demo",
+        description="Web 演示任务使用的仓库模板目录（仅服务端映射，客户端不能传路径）。",
+    )
+    api_history_catalog: Path | None = Field(
+        default=None,
+        description="历史实验只读回放目录清单。None 表示 config_dir/benchmarks.yaml。",
+    )
+    api_max_page_size: int = Field(default=100, ge=1, le=500)
+    web_dist_dir: Path = Field(
+        default=PROJECT_ROOT / "web" / "dist",
+        description="Dashboard 构建产物目录。容器内通过环境变量指向 /app/web/dist。",
+    )
+    docs_dir: Path = Field(
+        default=PROJECT_ROOT / "docs",
+        description="关于页只读文档目录。",
+    )
+    readme_path: Path = Field(
+        default=PROJECT_ROOT / "README.md",
+        description="关于页 README 路径。",
+    )
+    worker_health_path: Path | None = Field(
+        default=None,
+        description="Worker 心跳文件。None 表示 artifacts_dir/worker.heartbeat.json。",
+    )
 
     # ---- LLM 录制与回放 ----
     record_llm: bool = Field(
@@ -124,6 +220,34 @@ class Settings(BaseSettings):
 
     def repo_cache_dir(self) -> Path:
         return self.cache_dir / "repos"
+
+    @property
+    def resolved_api_queue_path(self) -> Path:
+        return self.api_queue_path or (self.artifacts_dir / "api" / "api.sqlite3")
+
+    @property
+    def allowed_repository_hosts(self) -> frozenset[str]:
+        return frozenset(
+            item.strip().lower()
+            for item in self.api_allowed_repository_hosts.split(",")
+            if item.strip()
+        )
+
+    @property
+    def resolved_history_catalog(self) -> Path:
+        return self.api_history_catalog or (self.config_dir / "benchmarks.yaml")
+
+    @property
+    def resolved_settings_path(self) -> Path:
+        return self.settings_path or (self.artifacts_dir / "settings" / "settings.sqlite3")
+
+    @property
+    def resolved_settings_credentials_dir(self) -> Path:
+        return self.resolved_settings_path.parent
+
+    @property
+    def resolved_worker_health_path(self) -> Path:
+        return self.worker_health_path or (self.artifacts_dir / "worker.heartbeat.json")
 
 
 @lru_cache(maxsize=1)
