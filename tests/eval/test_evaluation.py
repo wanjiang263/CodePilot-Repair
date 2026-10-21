@@ -357,13 +357,16 @@ def test_docker_and_fake_backends_are_distinguishable() -> None:
     # 断网并打上归属标签——评测结论的可归因性依赖这两条。
     config = execution_container_config(
         image_ref="img",
-        workspace=Path(),
-        output_dir=Path(),
+        workspace_volume="codepilot-token-ws",
+        output_volume="codepilot-token-out",
         command="pytest",
         environment={},
     )
     assert config["network_mode"] == "none"
     assert config["labels"]["codepilot"] == "1"
+    # 卷的 key 是卷名而不是宿主路径：daemon 看不见调用方文件系统时，宿主路径只会
+    # 让容器静默地拿到空目录（Phase 11R 首次真实实验就是这么停的）。
+    assert all(not Path(name).is_absolute() for name in config["volumes"])
     assert DockerSandbox is not None
 
 

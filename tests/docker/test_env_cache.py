@@ -56,6 +56,9 @@ def test_second_build_hits_same_image_without_reinstalling(
 ) -> None:
     repo = fixture_workspace(
         {"test_cache_probe.py": PASSING_TEST},
+        # 身份里带上本轮唯一后缀：镜像缓存活在引擎里，路径复用会让"冷构建"
+        # 断言在第二次运行时莫名成立。
+        name=f"cache-hit-{acceptance_run_id}",
     )
     cold_sandbox, cold_client = make_sandbox()
     cold = _build(cold_sandbox, repo, env_spec=CACHE_ENV_SPEC)
@@ -292,10 +295,13 @@ def test_missing_image_is_rebuilt_and_cached_again(
 def test_cli_shows_cache_hit_on_the_second_run_of_the_same_identity(
     fixture_workspace: Any,
     make_sandbox: Any,
+    acceptance_run_id: str,
     record_evidence: Any,
 ) -> None:
     """同一次进程里连续两次 build_env：第二次直接命中，不做任何容器工作。"""
-    repo = fixture_workspace({"test_cache_probe.py": PASSING_TEST})
+    repo = fixture_workspace(
+        {"test_cache_probe.py": PASSING_TEST}, name=f"same-identity-{acceptance_run_id}"
+    )
     sandbox, client = make_sandbox()
     first = _build(sandbox, repo, env_spec=spec_with())
     second = _build(sandbox, repo, env_spec=spec_with())

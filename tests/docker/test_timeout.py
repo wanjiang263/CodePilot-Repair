@@ -85,7 +85,10 @@ def test_infinite_loop_is_killed_and_reported_as_timeout(
     assert "running" in states, f"容器从未进入 running 状态: {states}"
 
     # 3) 等待时长受配置约束：到点就终止，不会无限等。
-    assert result.duration_seconds >= TIMEOUT_SECONDS
+    # 下界留 1 秒容差：duration 取的是宿主墙钟，WSL2 的 Hyper-V 时间同步会把时钟
+    # 往回步进，实测出现过 14.94s 对 15s 上界的边界假失败（同一用例复跑两次均 > 15s）。
+    # 上界保持严格，所以"没到点就提前收工"依然会被抓住。
+    assert result.duration_seconds >= TIMEOUT_SECONDS - 1.0, result.duration_seconds
     assert result.duration_seconds < TIMEOUT_SECONDS + 45, result.duration_seconds
 
     # 4) 超时后容器被 kill + remove：daemon 侧再也查不到它。
@@ -154,3 +157,23 @@ def test_timeout_survives_a_cleanup_failure(
         assert labels.get("codepilot") == "1", f"拒绝回收非 CodePilot 拥有的容器: {identifier}"
         docker_client.api.remove_container(identifier, force=True)
     assert assert_no_run_residue(docker_client, acceptance_run_id) == []
+
+    # 注入期间被容器占住的命名卷删不掉（这正是 cleanup_error 要报的内容）；容器回收后
+    # 必须能被产品自己的过期扫描拿回来，不能靠人工或 docker volume prune。
+    leftover = [
+        str(row.get("Name"))
+        for row in (
+            docker_client.api.volumes(filters={"label": "codepilot=1"}).get("Volumes") or []
+        )
+        if str(row.get("Name", "")).startswith("codepilot-")
+        and not str(row.get("Name", "")).startswith("codepilot-inspect-")
+    ]
+    reclaimed = sandbox.cleanup(older_than_seconds=0)
+    assert set(leftover) <= set(reclaimed), (leftover, reclaimed)
+    assert not [
+        str(row.get("Name"))
+        for row in (
+            docker_client.api.volumes(filters={"label": "codepilot=1"}).get("Volumes") or []
+        )
+        if str(row.get("Name", "")).startswith("codepilot-")
+    ], "传输用卷必须被产品自身的扫描回收，不留引擎侧垃圾"

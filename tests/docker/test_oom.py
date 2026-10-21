@@ -14,6 +14,12 @@ from typing import Any
 import pytest
 
 from codepilot.sandbox.status import execution_route
+from codepilot.sandbox.transfer import (
+    new_volume_token,
+    output_volume_name,
+    stage_into_volumes,
+    workspace_volume_name,
+)
 from codepilot.schemas.enums import ExecutionStatus
 from conftest import assert_no_run_residue, spec_with
 
@@ -48,11 +54,23 @@ def test_daemon_reports_real_oomkilled_for_memory_over_the_limit(
 ) -> None:
     """独立于 Sandbox 的真实证据：这台 daemon 确实会置位 OOMKilled。"""
     workspace = tmp_path / "hog-workspace"
-    output = tmp_path / "hog-out"
     workspace.mkdir()
-    output.mkdir()
     (workspace / "test_memory_hog.py").write_text(MEMORY_HOG, encoding="utf-8")
 
+    # 传输走产品路径：命名卷 + staging 上传，测试容器自己保持只读根。
+    token = new_volume_token()
+    workspace_volume, output_volume = workspace_volume_name(token), output_volume_name(token)
+    labels = {"codepilot": "1", "codepilot.kind": "acceptance-oom-probe"}
+    for name in (workspace_volume, output_volume):
+        docker_client.api.create_volume(name=name, labels=labels)
+    stage_into_volumes(
+        docker_client,
+        image_ref=sandbox_environment.image_ref or "",
+        workspace=workspace,
+        workspace_volume=workspace_volume,
+        output_volume=output_volume,
+        labels=labels,
+    )
     container = docker_client.containers.create(
         image=sandbox_environment.image_ref or "",
         command=[
@@ -73,10 +91,10 @@ def test_daemon_reports_real_oomkilled_for_memory_over_the_limit(
         security_opt=["no-new-privileges"],
         privileged=False,
         detach=True,
-        labels={"codepilot": "1", "codepilot.kind": "acceptance-oom-probe"},
+        labels=labels,
         volumes={
-            str(workspace.resolve()): {"bind": "/workspace", "mode": "rw"},
-            str(output.resolve()): {"bind": "/out", "mode": "rw"},
+            workspace_volume: {"bind": "/workspace", "mode": "rw"},
+            output_volume: {"bind": "/out", "mode": "rw"},
         },
     )
     try:
@@ -92,6 +110,13 @@ def test_daemon_reports_real_oomkilled_for_memory_over_the_limit(
                 "oom_killed": state.get("OOMKilled"),
                 "state": state.get("Status"),
                 "memory_limit": OOM_MEMORY_LIMIT,
+                "transfer": "named-volumes",
+                "mounts": [
+                    (item.get("Type"), item.get("Destination"))
+                    for item in (
+                        docker_client.api.inspect_container(container.id).get("Mounts") or []
+                    )
+                ],
             },
         )
         assert state.get("OOMKilled") is True, "daemon 未报告 OOMKilled，OOM 验收不成立"
@@ -100,6 +125,8 @@ def test_daemon_reports_real_oomkilled_for_memory_over_the_limit(
         assert state.get("OOMKilled") is not None
     finally:
         docker_client.api.remove_container(container.id, force=True)
+        for name in (workspace_volume, output_volume):
+            docker_client.api.remove_volume(name, force=True)
 
 
 @pytest.mark.docker

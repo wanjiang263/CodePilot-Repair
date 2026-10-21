@@ -7,12 +7,12 @@
 from __future__ import annotations
 
 import hashlib
-import io
+import re
 import shlex
-import tarfile
 import tempfile
 import time
 from collections.abc import Mapping, Sequence
+from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -27,8 +27,19 @@ from codepilot.sandbox.artifacts import persist_logs
 from codepilot.sandbox.base import EnvironmentBuildResult
 from codepilot.sandbox.env_spec import EnvSpec
 from codepilot.sandbox.junit import JUnitParseError, JUnitReport, parse_junit
-from codepilot.sandbox.paths import docker_bind_source, validate_workspace_path
+from codepilot.sandbox.paths import validate_workspace_path
 from codepilot.sandbox.status import classify_execution
+from codepilot.sandbox.transfer import (
+    DEFAULT_WORKSPACE_TARGET,
+    OUTPUT_TARGET,
+    TransferError,
+    collect_output,
+    new_volume_token,
+    output_volume_name,
+    stage_into_volumes,
+    upload_archive,
+    workspace_volume_name,
+)
 from codepilot.schemas.enums import ExecutionStatus, TestOutcome
 from codepilot.schemas.execution import ExecutionResult, TestCaseResult
 
@@ -36,7 +47,16 @@ __all__ = ["DockerSandbox", "environment_cache_key", "execution_container_config
 
 _LABEL_OWNER = "codepilot"
 _LABEL_CREATED = "codepilot.created_at"
+_LABEL_KIND = "codepilot.kind"
+_KIND_EXECUTION = "execution"
+_KIND_EXECUTION_STAGE = "execution-stage"
 _ENV_REPOSITORY = "codepilot-env"
+#: 只读根文件系统下 daemon 拒绝 ``put_archive``（实测），所以上传必须由一个
+#: 临时的可写 staging 容器代做，测试容器本身保持与旧契约完全一致。
+_STAGE_MEMORY = "1g"
+
+#: daemon 报的 ISO 时间可能是纳秒精度，``fromisoformat`` 只接受到微秒。
+_FRACTION = re.compile(r"\.(\d+)")
 
 
 def environment_cache_key(repository: str, base_commit: str, env_spec: EnvSpec) -> str:
@@ -48,18 +68,25 @@ def environment_cache_key(repository: str, base_commit: str, env_spec: EnvSpec) 
 def execution_container_config(
     *,
     image_ref: str,
-    workspace: Path,
-    output_dir: Path,
+    workspace_volume: str,
+    output_volume: str,
     command: str,
     environment: Mapping[str, str],
+    workspace_target: str = DEFAULT_WORKSPACE_TARGET,
     created_at: float | None = None,
 ) -> dict[str, Any]:
-    """02 §13.3 的逐字段配置；保持为纯函数方便无 daemon 审计。"""
+    """02 §13.3 的逐字段配置；保持为纯函数方便无 daemon 审计。
+
+    两个卷都是 **daemon 侧的命名卷**（key 是卷名，不是宿主路径）。宿主 bind 曾经
+    写在这里，而卷的宿主路径解析发生在 daemon 那一侧：一旦 daemon 看不见调用方的
+    文件系统（WSL2 连 Docker Desktop 就是这种拓扑），容器拿到的就是空目录，而且
+    失败点在 ``containers.create`` 之后，症状是"测试莫名全挂"。
+    """
     labels = {_LABEL_OWNER: "1", _LABEL_CREATED: str(created_at or time.time())}
     return {
         "image": image_ref,
         "command": ["/bin/sh", "-lc", command],
-        "working_dir": "/workspace",
+        "working_dir": workspace_target,
         "network_mode": "none",
         "user": "1000:1000",
         "read_only": True,
@@ -75,8 +102,8 @@ def execution_container_config(
         "labels": labels,
         "environment": dict(environment),
         "volumes": {
-            docker_bind_source(workspace): {"bind": "/workspace", "mode": "rw"},
-            docker_bind_source(output_dir): {"bind": "/out", "mode": "rw"},
+            workspace_volume: {"bind": workspace_target, "mode": "rw"},
+            output_volume: {"bind": OUTPUT_TARGET, "mode": "rw"},
         },
     }
 
@@ -93,9 +120,16 @@ class DockerSandbox:
         base_dockerfile: Path | None = None,
         log_tail_bytes: int = 16_384,
         clock: Any = time.time,
+        workspace_target: str = DEFAULT_WORKSPACE_TARGET,
     ) -> None:
         if log_tail_bytes < 0:
             raise ValueError("log_tail_bytes 不能为负数")
+        if (
+            not workspace_target.startswith("/")
+            or ".." in PurePosixPath(workspace_target).parts
+            or workspace_target in {"/", OUTPUT_TARGET}
+        ):
+            raise ValueError(f"非法容器工作区路径: {workspace_target!r}")
         self.artifacts = artifacts
         self.allowed_workspace_root = Path(allowed_workspace_root)
         self.client = client if client is not None else docker.from_env()
@@ -105,6 +139,7 @@ class DockerSandbox:
         self.log_tail_bytes = log_tail_bytes
         self._clock = clock
         self._startup_cleanup_done = False
+        self.workspace_target = workspace_target
 
     def build_env(
         self,
@@ -362,29 +397,57 @@ class DockerSandbox:
         timed_out = False
         oom_killed = False
         sandbox_error: str | None = None
-        cleanup_error: str | None = None
+        #: 清理失败可以有多条（kill、容器删除、卷删除、staging 删除），全部记账，
+        #: 后面的失败不允许把前面的证据顶掉。
+        cleanup_notes: list[str] = []
+        token = new_volume_token()
+        volumes = (workspace_volume_name(token), output_volume_name(token))
+        created: list[str] = []
         try:
             workspace = validate_workspace_path(workspace, allowed_root=self.allowed_workspace_root)
             selected = _validate_test_selection(tests, workspace=workspace)
-            output_dir.chmod(0o777)
             command = env_spec.test_command
             if selected:
                 command += " " + " ".join(shlex.quote(item) for item in selected)
-            command += " > /out/stdout.log 2> /out/stderr.log"
+            command += f" > {OUTPUT_TARGET}/stdout.log 2> {OUTPUT_TARGET}/stderr.log"
             environment_values = {
                 "PYTHONDONTWRITEBYTECODE": "1",
                 "PYTHONUNBUFFERED": "1",
                 **env_spec.env,
             }
+            labels = {
+                _LABEL_OWNER: "1",
+                _LABEL_CREATED: str(self._clock()),
+                "codepilot.run_id": self.artifacts.run_id,
+                "codepilot.transfer": token,
+            }
+            for name in volumes:
+                self.client.api.create_volume(name=name, labels={**labels, _LABEL_KIND: "volume"})
+                created.append(name)
             config = execution_container_config(
                 image_ref=environment.image_ref or "",
-                workspace=workspace,
-                output_dir=output_dir,
+                workspace_volume=volumes[0],
+                output_volume=volumes[1],
                 command=command,
                 environment=environment_values,
+                workspace_target=self.workspace_target,
                 created_at=self._clock(),
             )
             container = self.client.containers.create(**config)
+            # 上传只能由另一个容器代做：daemon 对只读 rootfs 的容器直接拒绝
+            # ``put_archive``（实测 400 "container rootfs is marked read-only"），
+            # 而把测试容器改成可写就等于放弃本轮要守住的只读根契约。
+            staged = stage_into_volumes(
+                self.client,
+                image_ref=environment.image_ref or "",
+                workspace=workspace,
+                workspace_volume=volumes[0],
+                output_volume=volumes[1],
+                labels={**labels, _LABEL_KIND: _KIND_EXECUTION_STAGE},
+            )
+            if staged.cleanup_error:
+                # staging 容器删不掉要留证据（它可能还占着卷），但不改写主判定。
+                cleanup_notes.append(staged.cleanup_error)
             container.start()
             try:
                 wait_result = container.wait(timeout=env_spec.timeout_seconds)
@@ -396,7 +459,19 @@ class DockerSandbox:
                 try:
                     container.kill()
                 except DockerException as kill_error:
-                    cleanup_error = f"超时后 kill 失败: {redact_text(str(kill_error))}"
+                    cleanup_notes.append(f"超时后 kill 失败: {redact_text(str(kill_error))}")
+            # 回传必须发生在 remove 之前：卷随容器删除后就没有读取入口了。
+            # 超时被 kill 的场合同样先回传，留下的部分日志是归因证据；回传失败
+            # 会被记成 sandbox_error，但 classify 仍按 TIMEOUT 优先归因。
+            try:
+                collect_output(self.client, str(container.id), destination=output_dir)
+            except (DockerException, OSError, ValueError, RuntimeError) as exc:
+                if sandbox_error is None:
+                    sandbox_error = (
+                        f"结果归档回传失败: {type(exc).__name__}: {redact_text(str(exc))}"
+                    )
+        except TransferError as exc:
+            sandbox_error = f"工作区传输失败: {redact_text(str(exc))}"
         except DockerException as exc:
             sandbox_error = redact_text(str(exc))
         except (OSError, ValueError, RuntimeError) as exc:
@@ -414,7 +489,10 @@ class DockerSandbox:
                 try:
                     container.remove(force=True)
                 except DockerException as exc:
-                    cleanup_error = f"容器强制删除失败: {redact_text(str(exc))}"
+                    cleanup_notes.append(f"容器强制删除失败: {redact_text(str(exc))}")
+            cleanup_notes.extend(self._remove_volumes(created))
+
+        cleanup_error = "; ".join(cleanup_notes) or None
 
         stdout = _read_text(output_dir / "stdout.log")
         stderr = _read_text(output_dir / "stderr.log")
@@ -497,6 +575,45 @@ class DockerSandbox:
             diagnostics=diagnostics,
         )
 
+    def _remove_volumes(self, names: Sequence[str]) -> list[str]:
+        """删除本轮创建的卷；失败回报卷名，绝不静默把磁盘当临时堆放区。"""
+        failures: list[str] = []
+        for name in names:
+            try:
+                self.client.api.remove_volume(name, force=True)
+            except DockerException as exc:
+                failures.append(f"卷 {name} 删除失败: {redact_text(str(exc))}")
+            except Exception as exc:  # pragma: no cover - SDK 传输层的意外形态
+                failures.append(f"卷 {name} 删除失败: {type(exc).__name__}")
+        return failures
+
+    def _cleanup_stale_volumes(self, *, cutoff: float) -> tuple[list[str], list[str]]:
+        """扫掉崩溃残留的 codepilot 卷。
+
+        卷没有 ``created_at`` 标签（创建时间来自 daemon 的 ``CreatedAt``），所以这里
+        认不出时间的卷一律**不删**——宁可留一个孤儿卷等人来看，也不误删别人正在
+        用的卷。名字前缀与 ``codepilot=1`` 标签是双重归属确认。
+        """
+        removed: list[str] = []
+        failures: list[str] = []
+        listing = self.client.api.volumes(filters={"label": f"{_LABEL_OWNER}=1"}) or {}
+        for row in listing.get("Volumes") or []:
+            name = str(row.get("Name") or "")
+            if not name.startswith("codepilot-"):
+                continue
+            labels = row.get("Labels") or {}
+            if labels.get(_LABEL_OWNER) != "1":
+                continue
+            created = _parse_created_at(row.get("CreatedAt"))
+            if created is None or created > cutoff:
+                continue
+            try:
+                self.client.api.remove_volume(name, force=True)
+                removed.append(name)
+            except DockerException as exc:
+                failures.append(f"{name}: {redact_text(str(exc))}")
+        return removed, failures
+
     def cleanup(self, *, older_than_seconds: int = 3600) -> list[str]:
         if older_than_seconds < 0:
             raise ValueError("older_than_seconds 不能为负数")
@@ -522,8 +639,11 @@ class DockerSandbox:
                 removed.append(identifier)
             except DockerException as exc:
                 failures.append(f"{identifier}: {redact_text(str(exc))}")
+        volume_removed, volume_failures = self._cleanup_stale_volumes(cutoff=cutoff)
+        removed.extend(volume_removed)
+        failures.extend(volume_failures)
         if failures:
-            raise RuntimeError("残留容器清理失败: " + "; ".join(failures))
+            raise RuntimeError("残留容器或卷清理失败: " + "; ".join(failures))
         return removed
 
     def _startup_cleanup(self) -> None:
@@ -541,20 +661,25 @@ def _build_script(env_spec: EnvSpec) -> str:
 
 
 def _workspace_archive(workspace: Path) -> bytes:
-    excluded = {".env", ".git-credentials", ".aws", ".codex", "artifacts"}
+    """环境构建路径的归档：条目以 ``workspace/`` 为根，配合 ``put_archive("/")``。
 
-    def archive_filter(info: tarfile.TarInfo) -> tarfile.TarInfo | None:
-        relative = PurePosixPath(info.name)
-        if any(part in excluded for part in relative.parts):
-            return None
-        if relative.parts[-2:] == (".git", "config"):
-            return None
-        return info
+    归属统一成容器内 uid、排除项与符号链接边界检查都在 :mod:`codepilot.sandbox.transfer`
+    里，构建容器与测试执行共用同一套规则。
+    """
+    return upload_archive(workspace, arcname="workspace")
 
-    buffer = io.BytesIO()
-    with tarfile.open(fileobj=buffer, mode="w") as archive:
-        archive.add(workspace, arcname="workspace", recursive=True, filter=archive_filter)
-    return buffer.getvalue()
+
+def _parse_created_at(value: Any) -> float | None:
+    """把 daemon 的 ``CreatedAt``（可能带纳秒）转成 epoch 秒；认不出就返回 None。"""
+    text = str(value or "").strip()
+    if not text:
+        return None
+    normalized = text.replace("Z", "+00:00")
+    normalized = _FRACTION.sub(lambda match: f".{match.group(1)[:6]}", normalized, count=1)
+    try:
+        return datetime.fromisoformat(normalized).timestamp()
+    except ValueError:
+        return None
 
 
 def _exec_result(execution: Any) -> tuple[int, Any]:

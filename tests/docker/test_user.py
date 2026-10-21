@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any
 
 import pytest
@@ -146,23 +145,20 @@ def test_in_container_identity_filesystem_and_privilege_contract(
 def test_daemon_inspect_matches_security_and_resource_contract(
     docker_client: Any,
     sandbox_environment: Any,
-    tmp_path: Path,
     acceptance_run_id: str,
     record_evidence: Any,
 ) -> None:
     """直接按生产配置建一个真实容器，从 daemon inspect 核对逐字段契约。"""
-    workspace = tmp_path / "inspect-workspace"
-    output = tmp_path / "inspect-out"
-    workspace.mkdir()
-    output.mkdir()
     config = execution_container_config(
         image_ref=sandbox_environment.image_ref or "",
-        workspace=workspace,
-        output_dir=output,
+        workspace_volume="codepilot-inspect-ws",
+        output_volume="codepilot-inspect-out",
         command="sleep 25",
         environment={},
         created_at=1.0,
     )
+    for name in config["volumes"] or {}:
+        docker_client.volumes.create(name=name, labels=dict(config["labels"]))
     labels = {**config["labels"], "codepilot.acceptance_run": acceptance_run_id}
     container = docker_client.containers.create(**{**config, "labels": labels})
     try:
@@ -208,15 +204,25 @@ def test_daemon_inspect_matches_security_and_resource_contract(
         assert host.get("Privileged") is False
         assert host.get("NetworkMode") == "none"
 
-        # 只有 workspace 与 out 两个可写 bind 挂载；没有 Docker Socket、没有额外卷。
+        # 两个可写挂载都必须是 daemon 侧命名卷：**没有任何宿主 bind**，也没有 Docker Socket。
         assert {item.get("Destination") for item in mounts} == {"/workspace", "/out"}
         assert {item.get("Destination"): item.get("RW") for item in mounts} == {
             "/workspace": True,
             "/out": True,
         }
-        assert all(item.get("Type") == "bind" for item in mounts)
+        assert all(item.get("Type") == "volume" for item in mounts), mounts
+        assert not [item for item in mounts if item.get("Type") == "bind"]
         assert not [item for item in mounts if "docker.sock" in str(item.get("Source", ""))]
+        binds = host.get("Binds") or []
+        assert all(not str(item).split(":")[0].startswith(("/", "\\")) for item in binds), binds
     finally:
         docker_client.api.remove_container(container.id, force=True)
+        for name in config["volumes"] or {}:
+            docker_client.api.remove_volume(name, force=True)
 
     assert assert_no_run_residue(docker_client, acceptance_run_id) == []
+    assert not [
+        str(row.get("Name"))
+        for row in (docker_client.api.volumes().get("Volumes") or [])
+        if str(row.get("Name", "")).startswith("codepilot-inspect-")
+    ], "本轮建的卷必须原样回收"
