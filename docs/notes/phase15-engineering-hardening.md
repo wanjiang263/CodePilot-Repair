@@ -5,8 +5,9 @@
 merge 或 push；未修改 GLM11–GLM14 原始运行产物、`configs/benchmarks.yaml` 或只读回放数据；
 **未发起任何付费模型请求，实际费用 CNY 0.00**。
 
-Phase 15 提交：`PHASE15_COMMIT_TBD`（本地提交，未 push）。基线 `b4effac`；本文档写入后的
-补充记录提交见 `git log --oneline -2`。
+Phase 15 提交：`a9d3620`（本地提交，未 push；含 Phase 13–15 冻结内容）。基线 `b4effac`；
+本文档随后仅做提交哈希补记，最终 HEAD 见 `git log --oneline -2`。截图与浏览器验收对应
+`a9d3620` 的界面代码，文档补记不改变界面。
 
 ---
 
