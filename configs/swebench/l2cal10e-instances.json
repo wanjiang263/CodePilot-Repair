@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "label": "l2cal10e",
+  "instances": [
+    {
+      "instance_id": "pytest-dev__pytest-11148",
+      "base_commit": "2f7415cfbc4b6ca62f9013f1abd27136f46b9653",
+      "image_ref": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-11148:latest",
+      "image_id": "sha256:b8eef9af40c714067a5455e8d88620439b536a5455fed96c5646b4ed37028442"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "base_commit": "02dc9ed680e7f53f1b0d410dcdd37341c7958eb1",
+      "image_ref": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-12471:latest",
+      "image_id": "sha256:57ac1dbdfb6e37c3ab6f8ec5d4a5374369f0b32dc4ffe895e49141e0a7901f5c"
+    }
+  ]
+}

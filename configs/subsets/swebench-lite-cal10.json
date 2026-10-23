@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "name": "swebench-lite-cal10",
+  "description": "L2 费用/口径校准子集：按 dev30 冻结顺序取 10 个不同 repo 的首题；只用于费用与判定口径校准，不用于解决率结论。",
+  "dataset": {
+    "name": "princeton-nlp/SWE-bench_Lite",
+    "revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2"
+  },
+  "source_split": "test",
+  "seed": 20261019,
+  "count": 10,
+  "instance_ids": [
+    "astropy__astropy-12907",
+    "django__django-11910",
+    "matplotlib__matplotlib-23314",
+    "mwaskom__seaborn-3010",
+    "pallets__flask-4045",
+    "psf__requests-2148",
+    "pydata__xarray-4493",
+    "pylint-dev__pylint-6506",
+    "pytest-dev__pytest-11148",
+    "scikit-learn__scikit-learn-12471"
+  ],
+  "instance_list_sha256": "1e8fb7a42078a23757183ae7ceb80ffb495545a3a193ea0d975ccf97156f5c3e",
+  "repo_distribution": {
+    "astropy/astropy": 1,
+    "django/django": 1,
+    "matplotlib/matplotlib": 1,
+    "mwaskom/seaborn": 1,
+    "pallets/flask": 1,
+    "psf/requests": 1,
+    "pydata/xarray": 1,
+    "pylint-dev/pylint": 1,
+    "pytest-dev/pytest": 1,
+    "scikit-learn/scikit-learn": 1
+  }
+}

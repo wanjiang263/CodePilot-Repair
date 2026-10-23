@@ -70,13 +70,16 @@ __all__ = [
     "DockerSdkBackend",
     "EnvironmentHandle",
     "ImageInfo",
+    "InstanceImageOverride",
     "PlatformInfo",
     "PreflightReport",
+    "ResolvedInstanceImage",
     "SWEBenchEnvironmentAdapter",
     "SWEBenchEnvironmentError",
     "SWEBenchEnvironmentIdentity",
     "SWEBenchEnvironmentKind",
     "SWEBenchEnvironmentSpec",
+    "SWEBenchInstanceImageResolver",
     "SWEBenchSandboxFactory",
     "SWEBenchSandboxPlan",
     "SWEBenchTaskLike",
@@ -520,11 +523,177 @@ class SWEBenchTaskLike(Protocol):
     def dataset(self) -> Any: ...
 
 
+class InstanceImageOverride(BaseModel):
+    """官方实例镜像的显式替代镜像；必须绑定父镜像与完整镜像 ID。
+
+    替代只在 ``instance_id`` 精确命中时生效。缺失或 ID 不匹配一律 fail closed，
+    绝不回退到官方 ``:latest``——那会把一个已知坏环境伪装成可用环境。
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    instance_id: str
+    image_ref: str
+    image_id: str
+    parent_image_ref: str
+    parent_image_id: str
+    reason: str
+    evidence: str | None = None
+    validated_at: str | None = None
+
+
+class ResolvedInstanceImage(BaseModel):
+    """一次解析的最终执行镜像；``image_id`` 是必须命中的完整 digest。"""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    instance_id: str
+    image_ref: str
+    image_id: str | None = None
+    override: bool = False
+    parent_image_ref: str | None = None
+    parent_image_id: str | None = None
+    selection_reason: str | None = None
+
+
+_IMAGE_ID = re.compile(r"^sha256:[0-9a-f]{64}$")
+_IMAGE_REF = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*(?::[A-Za-z0-9._-]+)?$")
+_OVERRIDE_SCHEMA_VERSION = 1
+#: 加入 execution_image_* 后提升；旧身份/缓存按 fail closed 处理，不静默复用。
+_IDENTITY_SCHEMA_VERSION = 2
+
+
+class SWEBenchInstanceImageResolver:
+    """实例 → 执行镜像的显式解析器。
+
+    无覆盖项时返回官方 ``instance_image_key``；有覆盖项时返回经审计的替代镜像，
+    并把父镜像与完整 ID 一起带出，供执行记录和对账使用。
+    """
+
+    def __init__(self, overrides: Mapping[str, InstanceImageOverride] | None = None) -> None:
+        self._overrides: dict[str, InstanceImageOverride] = {}
+        for key, item in dict(overrides or {}).items():
+            if key != item.instance_id:
+                raise SWEBenchEnvironmentError(
+                    f"镜像覆盖键与 instance_id 不一致：{key!r} != {item.instance_id!r}",
+                    kind=SWEBenchEnvironmentKind.ENV_ERROR,
+                )
+            self._validate_override(item)
+            self._overrides[key] = item
+
+    @staticmethod
+    def _validate_override(item: InstanceImageOverride) -> None:
+        if _INSTANCE_ID.fullmatch(item.instance_id) is None:
+            raise SWEBenchEnvironmentError(
+                f"镜像覆盖含非法 instance_id: {item.instance_id!r}",
+                kind=SWEBenchEnvironmentKind.ENV_ERROR,
+            )
+        for name in ("image_ref", "parent_image_ref"):
+            value = getattr(item, name)
+            if _IMAGE_REF.fullmatch(value) is None:
+                raise SWEBenchEnvironmentError(
+                    f"镜像覆盖 {item.instance_id} 的 {name} 非法：{value!r}",
+                    kind=SWEBenchEnvironmentKind.ENV_ERROR,
+                )
+        for name in ("image_id", "parent_image_id"):
+            value = getattr(item, name)
+            if _IMAGE_ID.fullmatch(value) is None:
+                raise SWEBenchEnvironmentError(
+                    f"镜像覆盖 {item.instance_id} 的 {name} 必须是完整 sha256 digest：{value!r}",
+                    kind=SWEBenchEnvironmentKind.ENV_ERROR,
+                )
+        if item.parent_image_ref != instance_image_key(item.instance_id):
+            raise SWEBenchEnvironmentError(
+                f"镜像覆盖 {item.instance_id} 的父镜像不是该实例的官方镜像："
+                f"{item.parent_image_ref!r} != {instance_image_key(item.instance_id)!r}",
+                kind=SWEBenchEnvironmentKind.ENV_ERROR,
+            )
+        if not item.reason.strip():
+            raise SWEBenchEnvironmentError(
+                f"镜像覆盖 {item.instance_id} 缺少原因说明",
+                kind=SWEBenchEnvironmentKind.ENV_ERROR,
+            )
+
+    @classmethod
+    def load(cls, path: Path | None) -> SWEBenchInstanceImageResolver:
+        """加载覆盖文件；``None`` 表示只用官方镜像。格式错误一律 fail closed。"""
+        if path is None:
+            return cls()
+        snapshot = Path(path)
+        try:
+            text = snapshot.read_text(encoding="utf-8-sig")
+        except OSError as exc:
+            raise SWEBenchEnvironmentError(
+                f"无法读取实例镜像覆盖文件: {snapshot}（{exc}）",
+                kind=SWEBenchEnvironmentKind.ENV_ERROR,
+            ) from exc
+        try:
+            payload: object = json.loads(text)
+        except json.JSONDecodeError as exc:
+            raise SWEBenchEnvironmentError(
+                f"实例镜像覆盖文件不是合法 JSON: {snapshot}（{exc}）",
+                kind=SWEBenchEnvironmentKind.ENV_ERROR,
+            ) from exc
+        if not isinstance(payload, Mapping):
+            raise SWEBenchEnvironmentError(
+                f"实例镜像覆盖文件顶层必须是对象: {snapshot}",
+                kind=SWEBenchEnvironmentKind.ENV_ERROR,
+            )
+        if payload.get("schema_version") != _OVERRIDE_SCHEMA_VERSION:
+            raise SWEBenchEnvironmentError(
+                f"实例镜像覆盖 schema 版本不匹配: {payload.get('schema_version')!r}",
+                kind=SWEBenchEnvironmentKind.ENV_ERROR,
+            )
+        raw_overrides = payload.get("overrides")
+        if not isinstance(raw_overrides, list):
+            raise SWEBenchEnvironmentError(
+                f"实例镜像覆盖文件缺少 overrides 列表: {snapshot}",
+                kind=SWEBenchEnvironmentKind.ENV_ERROR,
+            )
+        overrides: dict[str, InstanceImageOverride] = {}
+        for raw in raw_overrides:
+            try:
+                item = InstanceImageOverride.model_validate(raw)
+            except ValidationError as exc:
+                raise SWEBenchEnvironmentError(
+                    f"实例镜像覆盖条目无效: {exc}",
+                    kind=SWEBenchEnvironmentKind.ENV_ERROR,
+                ) from exc
+            if item.instance_id in overrides:
+                raise SWEBenchEnvironmentError(
+                    f"实例镜像覆盖重复: {item.instance_id}",
+                    kind=SWEBenchEnvironmentKind.ENV_ERROR,
+                )
+            overrides[item.instance_id] = item
+        return cls(overrides)
+
+    @property
+    def overrides(self) -> Mapping[str, InstanceImageOverride]:
+        return MappingProxyType(self._overrides)
+
+    def resolve(self, instance_id: str) -> ResolvedInstanceImage:
+        official = instance_image_key(instance_id)
+        item = self._overrides.get(instance_id)
+        if item is None:
+            return ResolvedInstanceImage(instance_id=instance_id, image_ref=official)
+        return ResolvedInstanceImage(
+            instance_id=instance_id,
+            image_ref=item.image_ref,
+            image_id=item.image_id,
+            override=True,
+            parent_image_ref=item.parent_image_ref,
+            parent_image_id=item.parent_image_id,
+            selection_reason=item.reason,
+        )
+
+
 class SWEBenchEnvironmentIdentity(BaseModel):
     """单个任务的官方环境身份；environment_hash 是全部身份字段的 sha256。"""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
+    #: 旧身份缺少新字段时保持默认值 1，``ensure`` 会显式拒绝而不是复用旧缓存。
+    identity_schema_version: int = 1
     instance_id: str
     repo: str
     base_commit: str
@@ -536,6 +705,10 @@ class SWEBenchEnvironmentIdentity(BaseModel):
     env_image_key: str
     instance_image_key: str
     base_image_key: str
+    execution_image_key: str = ""
+    execution_image_id: str | None = None
+    execution_image_override: bool = False
+    execution_image_selection_reason: str | None = None
     spec_sha256: str
     environment_hash: str
 
@@ -561,6 +734,9 @@ class PreflightReport(BaseModel):
     required_instance: str | None = None
     image_key: str | None = None
     image_present: bool | None = None
+    image_expected_id: str | None = None
+    image_override: bool = False
+    image_selection_reason: str | None = None
     problems: tuple[str, ...] = ()
     warnings: tuple[str, ...] = ()
     deferred: tuple[str, ...] = DEFERRED_CAPABILITIES
@@ -576,6 +752,11 @@ class EnvironmentHandle(BaseModel):
     image_id: str
     from_cache: bool
     cache_state: Literal["hit", "revalidated", "miss", "pulled"]
+    image_override: bool = False
+    expected_image_id: str | None = None
+    parent_image_ref: str | None = None
+    parent_image_id: str | None = None
+    selection_reason: str | None = None
     warnings: tuple[str, ...] = ()
 
 
@@ -836,6 +1017,7 @@ class SWEBenchEnvironmentAdapter:
         allow_build: bool = False,
         disk_limit_gb: float | None = None,
         platform: PlatformInfo | None = None,
+        images: SWEBenchInstanceImageResolver | None = None,
     ) -> None:
         if disk_limit_gb is not None and disk_limit_gb < 0:
             raise ValueError("disk_limit_gb 不能为负数")
@@ -846,10 +1028,15 @@ class SWEBenchEnvironmentAdapter:
         self.allow_build = allow_build
         self.disk_limit_gb = disk_limit_gb
         self._platform = platform if platform is not None else PlatformInfo.detect()
+        self._images = images if images is not None else SWEBenchInstanceImageResolver()
 
     @property
     def spec(self) -> SWEBenchEnvironmentSpec:
         return self._spec
+
+    @property
+    def images(self) -> SWEBenchInstanceImageResolver:
+        return self._images
 
     @property
     def platform_info(self) -> PlatformInfo:
@@ -895,7 +1082,9 @@ class SWEBenchEnvironmentAdapter:
         base_image_key = _base_image_key(raw)
         env_image_key = _candidate_env_image_key(repo, version, raw)
         instance_key = instance_image_key(instance_id)
+        resolved_image = self._images.resolve(instance_id)
         payload = _identity_payload(
+            identity_schema_version=_IDENTITY_SCHEMA_VERSION,
             instance_id=instance_id,
             repo=repo,
             base_commit=base_commit,
@@ -907,10 +1096,14 @@ class SWEBenchEnvironmentAdapter:
             env_image_key=env_image_key,
             instance_image_key=instance_key,
             base_image_key=base_image_key,
+            execution_image_key=resolved_image.image_ref,
+            execution_image_id=resolved_image.image_id,
             spec_sha256=spec_sha256,
         )
         return SWEBenchEnvironmentIdentity(
-            **payload,
+            **{**payload, "execution_image_id": resolved_image.image_id},
+            execution_image_override=resolved_image.override,
+            execution_image_selection_reason=resolved_image.selection_reason,
             environment_hash=_sha256(_canonical_json(payload)),
         )
 
@@ -929,8 +1122,15 @@ class SWEBenchEnvironmentAdapter:
             )
         image_key: str | None = None
         image_present: bool | None = None
+        image_expected_id: str | None = None
+        image_override = False
+        image_selection_reason: str | None = None
         if required_instance is not None:
-            image_key = instance_image_key(required_instance)
+            resolved = self._images.resolve(required_instance)
+            image_key = resolved.image_ref
+            image_expected_id = resolved.image_id
+            image_override = resolved.override
+            image_selection_reason = resolved.selection_reason
             if self._backend is None or not probe.daemon_ok:
                 warnings.append(f"未检查镜像 {image_key}：Docker daemon 不可用")
             else:
@@ -948,6 +1148,12 @@ class SWEBenchEnvironmentAdapter:
                         image_present = False
                         problems.append(
                             f"镜像存在但校验失败（OS/架构/tag 不匹配，已按失效处理）：{image_key}"
+                        )
+                    elif image_expected_id is not None and info.image_id != image_expected_id:
+                        image_present = False
+                        problems.append(
+                            "镜像身份不匹配（override 期望 "
+                            f"{image_expected_id}，实际 {info.image_id}）：{image_key}"
                         )
                     else:
                         image_present = True
@@ -976,6 +1182,9 @@ class SWEBenchEnvironmentAdapter:
             required_instance=required_instance,
             image_key=image_key,
             image_present=image_present,
+            image_expected_id=image_expected_id,
+            image_override=image_override,
+            image_selection_reason=image_selection_reason,
             problems=tuple(problems),
             warnings=tuple(warnings),
         )
@@ -993,7 +1202,8 @@ class SWEBenchEnvironmentAdapter:
             raise SWEBenchEnvironmentError(
                 "未配置 DockerBackend", kind=SWEBenchEnvironmentKind.RESOURCE_BLOCKED
             )
-        key = identity.instance_image_key
+        resolved = self._images.resolve(identity.instance_id)
+        key = resolved.image_ref
         entries, warnings = self._cache.load()
         warnings_list = list(warnings)
         entry = entries.pop(identity.environment_hash, None)
@@ -1008,6 +1218,7 @@ class SWEBenchEnvironmentAdapter:
                     info is not None
                     and _image_is_valid(info, key)
                     and info.image_id == entry.image_id
+                    and (resolved.image_id is None or info.image_id == resolved.image_id)
                 ):
                     return EnvironmentHandle(
                         identity=identity,
@@ -1015,6 +1226,11 @@ class SWEBenchEnvironmentAdapter:
                         image_id=entry.image_id,
                         from_cache=True,
                         cache_state="hit",
+                        image_override=resolved.override,
+                        expected_image_id=resolved.image_id,
+                        parent_image_ref=resolved.parent_image_ref,
+                        parent_image_id=resolved.parent_image_id,
+                        selection_reason=resolved.selection_reason,
                         warnings=tuple(warnings_list),
                     )
                 info = None
@@ -1022,8 +1238,15 @@ class SWEBenchEnvironmentAdapter:
         if info is None:
             info = self._inspect_or_raise(key)
         if info is not None and _image_is_valid(info, key):
+            if resolved.image_id is not None and info.image_id != resolved.image_id:
+                raise SWEBenchEnvironmentError(
+                    "实例镜像身份不匹配，已停止该实例（禁止回退到官方镜像）："
+                    f"{identity.instance_id} 期望 {resolved.image_id}，实际 {info.image_id} "
+                    f"（{key}）",
+                    kind=SWEBenchEnvironmentKind.ENV_ERROR,
+                )
             cache_state = "revalidated" if entry is not None else "miss"
-            entries[identity.environment_hash] = _cache_entry(identity, info)
+            entries[identity.environment_hash] = _cache_entry(identity, info, image_key=key)
             warnings_list.extend(self._cache.save(entries))
             return EnvironmentHandle(
                 identity=identity,
@@ -1031,9 +1254,20 @@ class SWEBenchEnvironmentAdapter:
                 image_id=info.image_id,
                 from_cache=True,
                 cache_state=cache_state,
+                image_override=resolved.override,
+                expected_image_id=resolved.image_id,
+                parent_image_ref=resolved.parent_image_ref,
+                parent_image_id=resolved.parent_image_id,
+                selection_reason=resolved.selection_reason,
                 warnings=tuple(warnings_list),
             )
         reason = "镜像不存在" if info is None else "镜像校验失败（OS/架构/tag 不匹配）"
+        if resolved.override:
+            raise SWEBenchEnvironmentError(
+                f"实例 {identity.instance_id} 的显式镜像不可用：{key}（{reason}）；"
+                "已停止该实例，禁止静默回退到官方镜像",
+                kind=SWEBenchEnvironmentKind.ENV_ERROR,
+            )
         if not self.allow_build:
             warnings_list.extend(self._cache.save(entries))
             raise SWEBenchEnvironmentError(
@@ -1060,7 +1294,13 @@ class SWEBenchEnvironmentAdapter:
                 f"拉取后镜像校验失败（OS/架构/tag 不匹配）：{key}",
                 kind=SWEBenchEnvironmentKind.BUILD_FAILED,
             )
-        entries[identity.environment_hash] = _cache_entry(identity, refreshed)
+        if resolved.image_id is not None and refreshed.image_id != resolved.image_id:
+            raise SWEBenchEnvironmentError(
+                "拉取后镜像身份与 override 不符，已停止该实例："
+                f"期望 {resolved.image_id}，实际 {refreshed.image_id}（{key}）",
+                kind=SWEBenchEnvironmentKind.BUILD_FAILED,
+            )
+        entries[identity.environment_hash] = _cache_entry(identity, refreshed, image_key=key)
         warnings_list.extend(self._cache.save(entries))
         return EnvironmentHandle(
             identity=identity,
@@ -1068,6 +1308,11 @@ class SWEBenchEnvironmentAdapter:
             image_id=refreshed.image_id,
             from_cache=False,
             cache_state="pulled",
+            image_override=resolved.override,
+            expected_image_id=resolved.image_id,
+            parent_image_ref=resolved.parent_image_ref,
+            parent_image_id=resolved.parent_image_id,
+            selection_reason=resolved.selection_reason,
             warnings=tuple(warnings_list),
         )
 
@@ -1221,6 +1466,12 @@ class SWEBenchEnvironmentAdapter:
             ) from exc
 
     def _validate_identity(self, identity: SWEBenchEnvironmentIdentity) -> None:
+        if identity.identity_schema_version != _IDENTITY_SCHEMA_VERSION:
+            raise SWEBenchEnvironmentError(
+                "环境身份 schema 版本已过期，旧缓存不得复用："
+                f"{identity.identity_schema_version!r} != {_IDENTITY_SCHEMA_VERSION!r}",
+                kind=SWEBenchEnvironmentKind.ENV_ERROR,
+            )
         if identity.harness_version != self._spec.harness_version:
             raise SWEBenchEnvironmentError(
                 "身份 harness 版本与冻结快照不一致："
@@ -1230,6 +1481,19 @@ class SWEBenchEnvironmentAdapter:
         if identity.instance_image_key != instance_image_key(identity.instance_id):
             raise SWEBenchEnvironmentError(
                 f"身份 instance_image_key 与 instance_id 不一致：{identity.instance_image_key!r}",
+                kind=SWEBenchEnvironmentKind.ENV_ERROR,
+            )
+        resolved = self._images.resolve(identity.instance_id)
+        if identity.execution_image_key != resolved.image_ref:
+            raise SWEBenchEnvironmentError(
+                "身份 execution_image_key 与当前镜像解析结果不一致："
+                f"{identity.execution_image_key!r} != {resolved.image_ref!r}",
+                kind=SWEBenchEnvironmentKind.ENV_ERROR,
+            )
+        if identity.execution_image_id != resolved.image_id:
+            raise SWEBenchEnvironmentError(
+                "身份 execution_image_id 与当前 override 不一致："
+                f"{identity.execution_image_id!r} != {resolved.image_id!r}",
                 kind=SWEBenchEnvironmentKind.ENV_ERROR,
             )
         payload = _identity_payload_from_identity(identity)
@@ -1370,6 +1634,7 @@ def _candidate_env_image_key(repo: str, version: str, raw: Mapping[str, Any]) ->
 
 def _identity_payload(
     *,
+    identity_schema_version: int,
     instance_id: str,
     repo: str,
     base_commit: str,
@@ -1381,9 +1646,12 @@ def _identity_payload(
     env_image_key: str,
     instance_image_key: str,
     base_image_key: str,
+    execution_image_key: str,
+    execution_image_id: str | None,
     spec_sha256: str,
 ) -> dict[str, str]:
     return {
+        "identity_schema_version": str(identity_schema_version),
         "instance_id": instance_id,
         "repo": repo,
         "base_commit": base_commit,
@@ -1395,12 +1663,15 @@ def _identity_payload(
         "env_image_key": env_image_key,
         "instance_image_key": instance_image_key,
         "base_image_key": base_image_key,
+        "execution_image_key": execution_image_key,
+        "execution_image_id": execution_image_id or "",
         "spec_sha256": spec_sha256,
     }
 
 
 def _identity_payload_from_identity(identity: SWEBenchEnvironmentIdentity) -> dict[str, str]:
     return _identity_payload(
+        identity_schema_version=identity.identity_schema_version,
         instance_id=identity.instance_id,
         repo=identity.repo,
         base_commit=identity.base_commit,
@@ -1412,13 +1683,17 @@ def _identity_payload_from_identity(identity: SWEBenchEnvironmentIdentity) -> di
         env_image_key=identity.env_image_key,
         instance_image_key=identity.instance_image_key,
         base_image_key=identity.base_image_key,
+        execution_image_key=identity.execution_image_key,
+        execution_image_id=identity.execution_image_id,
         spec_sha256=identity.spec_sha256,
     )
 
 
-def _cache_entry(identity: SWEBenchEnvironmentIdentity, info: ImageInfo) -> _CacheEntry:
+def _cache_entry(
+    identity: SWEBenchEnvironmentIdentity, info: ImageInfo, *, image_key: str
+) -> _CacheEntry:
     return _CacheEntry(
-        image_key=identity.instance_image_key,
+        image_key=image_key,
         image_id=info.image_id,
         spec_sha256=identity.spec_sha256,
         validated_at=datetime.now(UTC).isoformat(timespec="seconds"),

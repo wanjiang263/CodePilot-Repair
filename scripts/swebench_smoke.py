@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sys
 import time
@@ -93,6 +94,7 @@ class SmokeConfig:
     artifact_root: Path = DEFAULT_ARTIFACT_ROOT
     snapshot_root: Path = DEFAULT_SNAPSHOT_ROOT
     spec_snapshot: Path = DEFAULT_SPEC_SNAPSHOT
+    image_overrides: Path | None = None
     harness_python: Path | None = None
     run_label: str = "A"
     dry_run: bool = False
@@ -126,6 +128,16 @@ class SmokeConfig:
             raise SmokeError(f"resume 必须是 {RESUME_LEVELS}，收到 {self.resume!r}")
         if self.resume is not None and self.dry_run:
             raise SmokeError("--resume 与 --dry-run 不能同时使用（dry-run 没有可恢复的现场）")
+        if self.image_overrides is not None:
+            overrides = Path(self.image_overrides)
+            if not overrides.is_file():
+                raise SmokeError(f"--image-overrides 文件不存在或不是普通文件: {overrides}")
+            try:
+                with overrides.open("rb"):
+                    pass
+            except OSError as exc:
+                raise SmokeError(f"--image-overrides 文件不可读: {overrides}（{exc}）") from exc
+            object.__setattr__(self, "image_overrides", overrides)
 
     @property
     def model_identity(self) -> str:
@@ -136,7 +148,7 @@ class SmokeConfig:
         """
         return self.model or self.provider or "unspecified"
 
-    def identity_payload(self) -> dict[str, Any]:
+    def config_payload(self) -> dict[str, Any]:
         """参与 run_id 推导的配置身份；改预算/模型/seed 必须得到不同的现场。"""
         return {
             "instance_id": self.instance_id,
@@ -149,10 +161,13 @@ class SmokeConfig:
             "temperature": self.temperature,
             "max_output_tokens": self.max_output_tokens,
             "budget_currency": self.budget_currency,
+            "image_overrides_sha256": _sha256_file(self.image_overrides)
+            if self.image_overrides is not None
+            else None,
         }
 
     def config_hash(self) -> str:
-        payload = json.dumps(self.identity_payload(), sort_keys=True, separators=(",", ":"))
+        payload = json.dumps(self.config_payload(), sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -209,6 +224,7 @@ class SmokeDeps:
 
     loader: Any = None
     environment_adapter: Any = None
+    image_resolver: Any = None
     sandbox_factory: Callable[[Any], Any] | None = None
     provider_bundle: Any = None
     provider_factory: Callable[[], Any] | None = None
@@ -315,7 +331,16 @@ def _default_loader(config: SmokeConfig) -> Any:
     )
 
 
-def _default_environment_adapter(config: SmokeConfig, *, allow_build: bool = False) -> Any:
+def _image_resolver(config: SmokeConfig) -> Any:
+    module = _import_module("codepilot.sandbox.swebench_env")
+    return module.SWEBenchInstanceImageResolver.load(
+        Path(config.image_overrides) if config.image_overrides is not None else None
+    )
+
+
+def _default_environment_adapter(
+    config: SmokeConfig, *, allow_build: bool = False, images: Any = None
+) -> Any:
     module = _import_module("codepilot.sandbox.swebench_env")
     docker = None if config.dry_run else module.DockerSdkBackend()
     return module.SWEBenchEnvironmentAdapter(
@@ -324,56 +349,32 @@ def _default_environment_adapter(config: SmokeConfig, *, allow_build: bool = Fal
         cache_dir=Path(config.artifact_root) / "env-cache",
         allow_build=allow_build,
         disk_limit_gb=None,
+        images=images if images is not None else _image_resolver(config),
     )
 
 
-def _default_sandbox_factory(config: SmokeConfig) -> Callable[[Any], Any]:
-    from codepilot.sandbox.base import EnvironmentBuildResult
-    from codepilot.sandbox.docker import DockerSandbox
-    from codepilot.sandbox.swebench_env import instance_image_key
-    from codepilot.schemas.enums import ExecutionStatus
+def _default_sandbox_factory(
+    config: SmokeConfig,
+    *,
+    images: Any = None,
+    record: list[Any] | None = None,
+    client: Any = None,
+) -> Callable[[Any], Any]:
+    from codepilot.sandbox.official import OfficialInstanceSandbox
 
-    class CachedOfficialSandbox(DockerSandbox):
-        def build_env(self, **kwargs: Any) -> Any:
-            from codepilot.repo.gitcmd import run_git
-
-            head = run_git(["rev-parse", "HEAD"], cwd=kwargs["workspace"]).stdout.strip()
-            if head != kwargs["base_commit"]:
-                raise SmokeError("official sandbox workspace base commit mismatch")
-            # No builds or pulls: use the same cached official instance environment.
-            image_ref = instance_image_key(config.instance_id)
-            image = self.client.images.get(image_ref)
-            return EnvironmentBuildResult(
-                status=ExecutionStatus.PASS,
-                image_ref=image_ref,
-                image_id=image.id,
-                cache_key=f"official:{image.id}",
-                from_cache=True,
-            )
-
-        def run_tests(self, **kwargs: Any) -> Any:
-            spec = kwargs["env_spec"]
-            command = re.sub(
-                r"^(?:python(?:3)? -m )?pytest\b",
-                "/opt/miniconda3/envs/testbed/bin/python -m pytest",
-                spec.test_command,
-            )
-            kwargs["env_spec"] = spec.model_copy(
-                update={
-                    "test_command": command,
-                    # 工作区以卷的形式出现在 /testbed，与被测镜像原本的布局一致。
-                    "env": {**spec.env, "PYTHONPATH": "/testbed/src:/testbed"},
-                }
-            )
-            return super().run_tests(**kwargs)
+    resolver = images if images is not None else _image_resolver(config)
 
     def factory(artifacts: Any) -> Any:
-        return CachedOfficialSandbox(
+        sandbox = OfficialInstanceSandbox(
             artifacts=artifacts,
             allowed_workspace_root=Path(config.artifact_root),
-            # 覆盖镜像自带的 checkout（含它的 Git 历史），只留推理工作区的内容。
-            workspace_target="/testbed",
+            instance_id=config.instance_id,
+            images=resolver,
+            client=client,
         )
+        if record is not None:
+            record.append(sandbox)
+        return sandbox
 
     return factory
 
@@ -486,10 +487,15 @@ def _default_harness_runner(
 def _build_budget(config: SmokeConfig) -> Any:
     from codepilot.schemas.budget import RepairBudget
 
+    raw_runs = os.environ.get("CODEPILOT_MAX_TEST_RUNS")
+    max_test_runs = int(raw_runs) if raw_runs else 12
+    if not 3 <= max_test_runs <= 60:
+        raise SmokeError(f"CODEPILOT_MAX_TEST_RUNS 超出 3..60: {max_test_runs}")
     return RepairBudget(
         max_cost=config.budget,
         budget_currency=config.budget_currency,
         max_runtime_seconds=config.timeout,
+        max_test_runs=max_test_runs,
     )
 
 
@@ -669,7 +675,7 @@ def _image_ids_for_environment(
     instance_id: str, environment: Mapping[str, Any]
 ) -> dict[str, str] | None:
     """D 的 ``image_ids``：同一实例的 instance/env/base 三层镜像身份。"""
-    instance_key = environment.get("instance_image_key")
+    instance_key = environment.get("execution_image_key") or environment.get("instance_image_key")
     env_key = environment.get("env_image_key")
     base_key = environment.get("base_image_key")
     if not all(isinstance(value, str) and value for value in (instance_key, env_key, base_key)):
@@ -706,13 +712,17 @@ def _run_inference(
     deps: SmokeDeps,
     budget: Any,
     bundle: Any,
+    images: Any = None,
+    sandboxes: list[Any] | None = None,
 ) -> Any:
     if deps.inference_executor is not None:
         return deps.inference_executor(task, config)
     from codepilot.eval.assembly import InferenceAssembly
 
     manager = deps.workspace_manager or _default_workspace_manager(config)
-    sandbox_factory = deps.sandbox_factory or _default_sandbox_factory(config)
+    sandbox_factory = deps.sandbox_factory or _default_sandbox_factory(
+        config, images=images, record=sandboxes
+    )
     assembly = InferenceAssembly(
         task=task,
         workspace_manager=manager,
@@ -731,10 +741,10 @@ def _run_inference(
 
 
 def _ensure_environment(
-    config: SmokeConfig, task: Any, deps: SmokeDeps
+    config: SmokeConfig, task: Any, deps: SmokeDeps, *, images: Any = None
 ) -> tuple[dict[str, Any], Any, str | None]:
     """返回 (环境报告, adapter, 错误信息)。错误只记录，不在这里伪造结论。"""
-    adapter = deps.environment_adapter or _default_environment_adapter(config)
+    adapter = deps.environment_adapter or _default_environment_adapter(config, images=images)
     try:
         identity = adapter.identity(task)
     except Exception as exc:
@@ -756,10 +766,35 @@ def _ensure_environment(
         return payload, adapter, str(exc)
     payload["ensured"] = True
     payload["handle"] = _jsonable(handle)
+    payload["execution_image_key"] = handle.image_key
+    payload["execution_image_id"] = handle.image_id
+    payload["execution_image_override"] = handle.image_override
+    payload["execution_image_expected_id"] = handle.expected_image_id
+    payload["execution_image_parent_ref"] = handle.parent_image_ref
+    payload["execution_image_selection_reason"] = handle.selection_reason
     # 只有 identity digest 存在**且** ensure 真的校验过镜像，才算"环境身份已验证"；
     # 否则 D/F 的缓存里 image_ids/environment_identity 为空，不能声称已绑定镜像。
     payload["identity_verified"] = payload["identity_digest"] is not None
     return payload, adapter, None
+
+
+def _assert_execution_image_matches(environment: Mapping[str, Any], sandboxes: list[Any]) -> None:
+    """ensure 记录的执行镜像必须与实际 sandbox 使用的镜像一致。"""
+    expected_key = environment.get("execution_image_key")
+    expected_id = environment.get("execution_image_id")
+    if not isinstance(expected_key, str) or not expected_key:
+        return
+    for sandbox in sandboxes:
+        last = getattr(sandbox, "last_image", None)
+        if not isinstance(last, Mapping):
+            continue
+        actual_key = last.get("image_ref")
+        actual_id = last.get("image_id")
+        if actual_key != expected_key or actual_id != expected_id:
+            raise SmokeError(
+                "执行镜像与已 ensure 的环境身份不一致："
+                f"ensure={expected_key}/{expected_id} sandbox={actual_key}/{actual_id}"
+            )
 
 
 def _harness_payload(execution: Any) -> dict[str, Any]:
@@ -853,6 +888,15 @@ def _prepare_paths(config: SmokeConfig, paths: SmokePaths) -> None:
     """检查产物路径：fresh 运行不得静默覆盖旧现场；恢复时允许旧现场存在。"""
     if not config.dry_run and config.resume is None:
         existing = _paths_existing(paths)
+        reuse = os.environ.get("CODEPILOT_REUSE_WORKSPACE")
+        # A prepared workspace is the only thing under this run dir; the caller
+        # explicitly asked to continue it instead of cloning again.
+        if (
+            reuse
+            and existing == [paths.run_dir]
+            and Path(reuse).resolve() == (paths.run_dir / "workspace").resolve()
+        ):
+            existing = []
         if existing:
             raise SmokeError(
                 "目标产物已存在，拒绝静默覆盖；换 --run-label 或显式 --resume: "
@@ -1077,6 +1121,9 @@ def run_smoke(config: SmokeConfig, *, deps: SmokeDeps | None = None) -> dict[str
     _require_authored(config, deps)
     paths = SmokePaths.build(config)
     _prepare_paths(config, paths)
+    # 一次 run 只解析一次覆盖文件；preflight/ensure 与 sandbox factory 共用同一结果。
+    images = deps.image_resolver or _image_resolver(config)
+    sandboxes: list[Any] = []
 
     base: dict[str, Any] = {
         "schema_version": 1,
@@ -1104,7 +1151,9 @@ def run_smoke(config: SmokeConfig, *, deps: SmokeDeps | None = None) -> dict[str
         loader.load_dataset(config.split)
         task = loader.get_inference_task(config.split, config.instance_id)
         isolation = {"inference_task": _assert_inference_task_clean(task)}
-        environment, _adapter, environment_error = _ensure_environment(config, task, deps)
+        environment, _adapter, environment_error = _ensure_environment(
+            config, task, deps, images=images
+        )
 
         if environment_error is not None and not config.dry_run:
             base.update(
@@ -1158,6 +1207,8 @@ def run_smoke(config: SmokeConfig, *, deps: SmokeDeps | None = None) -> dict[str
                 environment=environment,
                 isolation=isolation,
                 started=started,
+                images=images,
+                sandboxes=sandboxes,
             )
 
         bundle = deps.provider_for_assembly()
@@ -1167,7 +1218,17 @@ def run_smoke(config: SmokeConfig, *, deps: SmokeDeps | None = None) -> dict[str
         bundle = _wrap_request_overrides(bundle, config)
         base["model_run_status"] = _model_run_status(config, bundle)
         budget = _build_budget(config)
-        outcome = _run_inference(config, paths, task, deps=deps, budget=budget, bundle=bundle)
+        outcome = _run_inference(
+            config,
+            paths,
+            task,
+            deps=deps,
+            budget=budget,
+            bundle=bundle,
+            images=images,
+            sandboxes=sandboxes,
+        )
+        _assert_execution_image_matches(environment, sandboxes)
         allow_existing = config.resume == "evaluation"
         if deps.prediction_writer_factory is not None:
             prediction = deps.prediction_writer_factory(
@@ -1390,6 +1451,11 @@ def _inference_payload(outcome: Any) -> dict[str, Any]:
         "final_patch_bytes": len(str(getattr(outcome, "final_patch", "") or "")),
         "error_class": getattr(outcome, "error_class", None),
         "error_origin": getattr(outcome, "error_origin", None),
+        "target_test_source": getattr(outcome, "target_test_source", None),
+        "target_tests": list(getattr(outcome, "target_tests", ()) or ()),
+        "plan_corrections": getattr(outcome, "plan_corrections", 0),
+        "plan_semantic_rejections": getattr(outcome, "plan_semantic_rejections", 0),
+        "plan_schema_rejections": getattr(outcome, "plan_schema_rejections", 0),
         "failure_reasons": list(getattr(outcome, "failure_reasons", ()) or ()),
         "artifact_dir": getattr(outcome, "artifact_dir", None),
         "usage_uncertain": getattr(outcome, "usage_uncertain", None),
@@ -1513,6 +1579,8 @@ def _run_resume(
     environment: Mapping[str, Any],
     isolation: Mapping[str, Any],
     started: float,
+    images: Any = None,
+    sandboxes: list[Any] | None = None,
 ) -> dict[str, Any]:
     """单实例恢复：委托 SWEBenchRunner，保持三层语义只实现一份。"""
     runner_module = _import_module("codepilot.eval.swebench_runner")
@@ -1533,7 +1601,9 @@ def _run_resume(
         from codepilot.eval.assembly import InferenceAssembly
 
         manager = deps.workspace_manager or _default_workspace_manager(config)
-        sandbox_factory = deps.sandbox_factory or _default_sandbox_factory(config)
+        sandbox_factory = deps.sandbox_factory or _default_sandbox_factory(
+            config, images=images, record=sandboxes
+        )
         return InferenceAssembly(
             task=task,
             workspace_manager=manager,
@@ -1574,6 +1644,7 @@ def _run_resume(
             config=run_config,
         )
         report = runner.run([config.instance_id], seed=config.seed, resume=level)
+    _assert_execution_image_matches(environment, sandboxes or [])
     metrics = report.metrics() if hasattr(report, "metrics") else {}
     payload = {
         "schema_version": 1,
@@ -1737,6 +1808,7 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--artifact-root", type=Path, default=DEFAULT_ARTIFACT_ROOT)
     parser.add_argument("--snapshot-root", type=Path, default=DEFAULT_SNAPSHOT_ROOT)
     parser.add_argument("--spec-snapshot", type=Path, default=DEFAULT_SPEC_SNAPSHOT)
+    parser.add_argument("--image-overrides", type=Path, default=None)
     parser.add_argument("--harness-python", type=Path, default=None)
     parser.add_argument("--run-label", default="A")
     parser.add_argument("--repeats", type=int, default=1, choices=(1, 2))
@@ -1764,6 +1836,7 @@ def _config_from_args(args: argparse.Namespace) -> SmokeConfig:
         artifact_root=args.artifact_root,
         snapshot_root=args.snapshot_root,
         spec_snapshot=args.spec_snapshot,
+        image_overrides=args.image_overrides,
         harness_python=args.harness_python,
         run_label=args.run_label,
         dry_run=args.dry_run,

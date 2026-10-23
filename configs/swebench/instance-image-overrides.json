@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "description": "Per-instance execution image overrides. Each entry is bound to the official instance image it was derived from and is verified by full image ID at runtime. A missing or mismatched override image fails closed; it never falls back to the official tag.",
+  "overrides": [
+    {
+      "instance_id": "pvlib__pvlib-python-1072",
+      "image_ref": "phase17/sweb.eval.x86_64.pvlib_1776_pvlib-python-1072:phase17-numpy1264",
+      "image_id": "sha256:e80d07e55c35282ad03d085a9476376586bddb287c239bea1d69f4d92fe31a82",
+      "parent_image_ref": "swebench/sweb.eval.x86_64.pvlib_1776_pvlib-python-1072:latest",
+      "parent_image_id": "sha256:c8e43bebd10d7d2330820af520361dc6adc9642f98c7b7b7c415cca39852ffdd",
+      "reason": "Original pvlib image has NumPy 2.0.2 with PyTables 3.9.2 (cp39 wheel built for NumPy 1.x ABI), so conftest import fails before collection. Phase 17 pinned NumPy to 1.26.4 without changing /testbed, tests or the official harness logic; the official harness then produced 19 passed and RESOLVED.",
+      "evidence": "artifacts/phase17/official-rerun/phase17-official-numpy1264-20261022/manifest.json",
+      "validated_at": "2026-10-22"
+    }
+  ]
+}
