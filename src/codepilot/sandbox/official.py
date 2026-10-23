@@ -59,6 +59,7 @@ def _archive_members(archive: bytes) -> tarfile.TarFile:
 def _extract_suffix(archive: bytes, workspace: Path, *, prefix: str, suffix: str) -> int:
     """Copy matching files from a ``get_archive`` tar into the workspace."""
     extracted = 0
+    workspace_root = workspace.resolve()
     with _archive_members(archive) as tar:
         for member in tar.getmembers():
             if not member.isfile():
@@ -75,6 +76,10 @@ def _extract_suffix(archive: bytes, workspace: Path, *, prefix: str, suffix: str
             if relative_path.is_absolute() or ".." in relative_path.parts:
                 continue
             target = workspace / root / relative
+            # Also catch Windows drive/UNC components and symlinked parents,
+            # not just POSIX ``..`` segments.
+            if not target.resolve().is_relative_to(workspace_root):
+                continue
             if target.exists():
                 continue
             data = tar.extractfile(member)
