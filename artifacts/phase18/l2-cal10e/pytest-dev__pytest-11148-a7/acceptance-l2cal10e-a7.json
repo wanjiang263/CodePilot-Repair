@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-22T18:32:17+00:00",
+  "instance_id": "pytest-dev__pytest-11148",
+  "label": "l2cal10e-a7",
+  "run_id": "swebench-smoke-l2cal10e-a7-pytest-dev__pytest-11148-s0-61524fec",
+  "run_report": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a7/runs/swebench-smoke-l2cal10e-a7-pytest-dev__pytest-11148-s0-61524fec/report.json",
+  "accepted": false,
+  "verdict": "REJECTED",
+  "checks": {
+    "real_run": true,
+    "patch_present": true,
+    "patch_validator": true,
+    "reproduce_recorded": true,
+    "target_test_executed": true,
+    "target_test_passed": true,
+    "target_test_present": true,
+    "target_test_source_visible": true,
+    "regression_clean": false,
+    "review_executed": false,
+    "review_approved": false,
+    "review_no_high_issues": true,
+    "review_bound_to_candidate": false
+  },
+  "evidence": {
+    "candidate_patch_sha256": "15ad5d893f85d2a4dcb1c1c2aa1804615f7ceb8e901e2246ab3ea362f7b75f17",
+    "final_patch_sha256": "df7344517873e7c2cbe54912a15a4446698983ebd2e8178a050bb19ef3ff4ae6",
+    "candidate_equals_delivered_patch": false,
+    "reviewed_patch_hash": null,
+    "target_test_source": "reproduction",
+    "target_tests": [
+      "tests/_codepilot_repro/test_importlib_double_import.py::test_importlib_mode_reuses_module_from_sys_modules"
+    ],
+    "reproduction_status": "reproduced",
+    "regression_new_failures": 0,
+    "review_high_issues": 0,
+    "official_evaluation": "DEFERRED"
+  }
+}

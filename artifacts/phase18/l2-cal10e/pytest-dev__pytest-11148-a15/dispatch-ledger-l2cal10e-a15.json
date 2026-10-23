@@ -1,0 +1,654 @@
+{
+  "currency": "CNY",
+  "limit": 20.0,
+  "accounted_or_reserved": 5.84870968,
+  "frozen": false,
+  "opening_balance": 5.37488128,
+  "opening_source": {
+    "kind": "per_instance",
+    "recovery_manifest": "artifacts/phase18/l2-cal10e/recovery-manifest-l2cal10e-a15.json",
+    "recovery_manifest_sha256": "9769da41afed33f97eed10e419da3810c54a7526d5784c07b3e68eb678e5fa98"
+  },
+  "requests": [
+    {
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0110072,
+      "input_tokens": 13038,
+      "cached_input_tokens": 0,
+      "output_tokens": 206
+    },
+    {
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0185624,
+      "input_tokens": 21789,
+      "cached_input_tokens": 0,
+      "output_tokens": 404
+    },
+    {
+      "seq": 3,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00808,
+      "input_tokens": 6327,
+      "cached_input_tokens": 0,
+      "output_tokens": 1078
+    },
+    {
+      "seq": 4,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.007097600000000001,
+      "input_tokens": 7283,
+      "cached_input_tokens": 0,
+      "output_tokens": 454
+    },
+    {
+      "seq": 5,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0166096,
+      "input_tokens": 6426,
+      "cached_input_tokens": 0,
+      "output_tokens": 4096
+    },
+    {
+      "seq": 6,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0166792,
+      "input_tokens": 6513,
+      "cached_input_tokens": 0,
+      "output_tokens": 4096
+    },
+    {
+      "seq": 7,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0166792,
+      "input_tokens": 6513,
+      "cached_input_tokens": 0,
+      "output_tokens": 4096
+    },
+    {
+      "seq": 8,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.010924399999999999,
+      "input_tokens": 6372,
+      "cached_input_tokens": 0,
+      "output_tokens": 2081
+    },
+    {
+      "seq": 9,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.009228,
+      "input_tokens": 7811,
+      "cached_input_tokens": 0,
+      "output_tokens": 1064
+    },
+    {
+      "seq": 10,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0097808,
+      "input_tokens": 6367,
+      "cached_input_tokens": 0,
+      "output_tokens": 1674
+    },
+    {
+      "seq": 11,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.017588799999999998,
+      "input_tokens": 7650,
+      "cached_input_tokens": 0,
+      "output_tokens": 4096
+    },
+    {
+      "seq": 12,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.009383200000000001,
+      "input_tokens": 8677,
+      "cached_input_tokens": 0,
+      "output_tokens": 872
+    },
+    {
+      "seq": 13,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0114956,
+      "input_tokens": 13974,
+      "cached_input_tokens": 0,
+      "output_tokens": 113
+    },
+    {
+      "seq": 14,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00678736,
+      "input_tokens": 16647,
+      "cached_input_tokens": 13952,
+      "output_tokens": 508
+    },
+    {
+      "seq": 15,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.009774,
+      "input_tokens": 17889,
+      "cached_input_tokens": 16640,
+      "output_tokens": 1767
+    },
+    {
+      "seq": 16,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0187916,
+      "input_tokens": 19440,
+      "cached_input_tokens": 0,
+      "output_tokens": 1157
+    },
+    {
+      "seq": 17,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00834016,
+      "input_tokens": 20770,
+      "cached_input_tokens": 19392,
+      "output_tokens": 992
+    },
+    {
+      "seq": 18,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0063648,
+      "input_tokens": 7837,
+      "cached_input_tokens": 0,
+      "output_tokens": 34
+    },
+    {
+      "seq": 19,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0034122400000000004,
+      "input_tokens": 9216,
+      "cached_input_tokens": 7808,
+      "output_tokens": 175
+    },
+    {
+      "seq": 20,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.004695680000000001,
+      "input_tokens": 10658,
+      "cached_input_tokens": 9216,
+      "output_tokens": 508
+    },
+    {
+      "seq": 21,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00262352,
+      "input_tokens": 10730,
+      "cached_input_tokens": 10624,
+      "output_tokens": 34
+    },
+    {
+      "seq": 22,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0026106400000000004,
+      "input_tokens": 10798,
+      "cached_input_tokens": 10688,
+      "output_tokens": 23
+    },
+    {
+      "seq": 23,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00292176,
+      "input_tokens": 11201,
+      "cached_input_tokens": 10752,
+      "output_tokens": 32
+    },
+    {
+      "seq": 24,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.003382,
+      "input_tokens": 12099,
+      "cached_input_tokens": 11200,
+      "output_tokens": 31
+    },
+    {
+      "seq": 25,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.013397600000000003,
+      "input_tokens": 12778,
+      "cached_input_tokens": 0,
+      "output_tokens": 1134
+    },
+    {
+      "seq": 26,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00388608,
+      "input_tokens": 13176,
+      "cached_input_tokens": 12736,
+      "output_tokens": 216
+    },
+    {
+      "seq": 27,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0036967999999999997,
+      "input_tokens": 13437,
+      "cached_input_tokens": 13120,
+      "output_tokens": 152
+    },
+    {
+      "seq": 28,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0035908800000000003,
+      "input_tokens": 13928,
+      "cached_input_tokens": 13376,
+      "output_tokens": 26
+    },
+    {
+      "seq": 29,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00339264,
+      "input_tokens": 14031,
+      "cached_input_tokens": 13888,
+      "output_tokens": 30
+    },
+    {
+      "seq": 30,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00448368,
+      "input_tokens": 14660,
+      "cached_input_tokens": 14016,
+      "output_tokens": 266
+    },
+    {
+      "seq": 31,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00521768,
+      "input_tokens": 14969,
+      "cached_input_tokens": 12096,
+      "output_tokens": 49
+    },
+    {
+      "seq": 32,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0038180799999999997,
+      "input_tokens": 15068,
+      "cached_input_tokens": 14656,
+      "output_tokens": 42
+    },
+    {
+      "seq": 33,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.006686960000000001,
+      "input_tokens": 18539,
+      "cached_input_tokens": 14912,
+      "output_tokens": 127
+    },
+    {
+      "seq": 34,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00451208,
+      "input_tokens": 18696,
+      "cached_input_tokens": 18496,
+      "output_tokens": 35
+    },
+    {
+      "seq": 35,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00480504,
+      "input_tokens": 19178,
+      "cached_input_tokens": 18688,
+      "output_tokens": 41
+    },
+    {
+      "seq": 36,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00909368,
+      "input_tokens": 22758,
+      "cached_input_tokens": 19136,
+      "output_tokens": 641
+    },
+    {
+      "seq": 37,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.017242,
+      "input_tokens": 26294,
+      "cached_input_tokens": 15040,
+      "output_tokens": 1707
+    },
+    {
+      "seq": 38,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0076787999999999995,
+      "input_tokens": 27080,
+      "cached_input_tokens": 26240,
+      "output_tokens": 347
+    },
+    {
+      "seq": 39,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0095408,
+      "input_tokens": 27470,
+      "cached_input_tokens": 22720,
+      "output_tokens": 184
+    },
+    {
+      "seq": 40,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00677976,
+      "input_tokens": 27697,
+      "cached_input_tokens": 27072,
+      "output_tokens": 19
+    },
+    {
+      "seq": 41,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00962368,
+      "input_tokens": 31193,
+      "cached_input_tokens": 27456,
+      "output_tokens": 114
+    },
+    {
+      "seq": 42,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.009355039999999998,
+      "input_tokens": 31302,
+      "cached_input_tokens": 27648,
+      "output_tokens": 26
+    },
+    {
+      "seq": 43,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00731248,
+      "input_tokens": 31376,
+      "cached_input_tokens": 31296,
+      "output_tokens": 18
+    },
+    {
+      "seq": 44,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.010054800000000001,
+      "input_tokens": 34797,
+      "cached_input_tokens": 31360,
+      "output_tokens": 33
+    },
+    {
+      "seq": 45,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.012738639999999999,
+      "input_tokens": 35523,
+      "cached_input_tokens": 31168,
+      "output_tokens": 745
+    },
+    {
+      "seq": 46,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0063648,
+      "input_tokens": 7837,
+      "cached_input_tokens": 0,
+      "output_tokens": 34
+    },
+    {
+      "seq": 47,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0031206400000000005,
+      "input_tokens": 9296,
+      "cached_input_tokens": 7808,
+      "output_tokens": 48
+    },
+    {
+      "seq": 48,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00439024,
+      "input_tokens": 10876,
+      "cached_input_tokens": 7808,
+      "output_tokens": 50
+    },
+    {
+      "seq": 49,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.005461280000000001,
+      "input_tokens": 14372,
+      "cached_input_tokens": 10816,
+      "output_tokens": 46
+    },
+    {
+      "seq": 50,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00644088,
+      "input_tokens": 17989,
+      "cached_input_tokens": 14336,
+      "output_tokens": 79
+    },
+    {
+      "seq": 51,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.006260320000000001,
+      "input_tokens": 18084,
+      "cached_input_tokens": 17984,
+      "output_tokens": 730
+    },
+    {
+      "seq": 52,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0020934400000000002,
+      "input_tokens": 7837,
+      "cached_input_tokens": 7808,
+      "output_tokens": 98
+    },
+    {
+      "seq": 53,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00397664,
+      "input_tokens": 9981,
+      "cached_input_tokens": 7808,
+      "output_tokens": 158
+    },
+    {
+      "seq": 54,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0037588,
+      "input_tokens": 11448,
+      "cached_input_tokens": 9920,
+      "output_tokens": 91
+    },
+    {
+      "seq": 55,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00632744,
+      "input_tokens": 13028,
+      "cached_input_tokens": 7808,
+      "output_tokens": 127
+    },
+    {
+      "seq": 56,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00528416,
+      "input_tokens": 13196,
+      "cached_input_tokens": 11392,
+      "output_tokens": 436
+    },
+    {
+      "seq": 57,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0019142400000000002,
+      "input_tokens": 7837,
+      "cached_input_tokens": 7808,
+      "output_tokens": 34
+    },
+    {
+      "seq": 58,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00364984,
+      "input_tokens": 9296,
+      "cached_input_tokens": 7808,
+      "output_tokens": 237
+    },
+    {
+      "seq": 59,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0036172,
+      "input_tokens": 10976,
+      "cached_input_tokens": 9280,
+      "output_tokens": 45
+    },
+    {
+      "seq": 60,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00399232,
+      "input_tokens": 12683,
+      "cached_input_tokens": 10944,
+      "output_tokens": 30
+    },
+    {
+      "seq": 61,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0037653599999999997,
+      "input_tokens": 13312,
+      "cached_input_tokens": 12672,
+      "output_tokens": 121
+    },
+    {
+      "seq": 62,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0060492,
+      "input_tokens": 13477,
+      "cached_input_tokens": 9280,
+      "output_tokens": 199
+    },
+    {
+      "seq": 63,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0035037600000000003,
+      "input_tokens": 13721,
+      "cached_input_tokens": 13312,
+      "output_tokens": 41
+    },
+    {
+      "seq": 64,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00413088,
+      "input_tokens": 13816,
+      "cached_input_tokens": 13696,
+      "output_tokens": 316
+    }
+  ]
+}

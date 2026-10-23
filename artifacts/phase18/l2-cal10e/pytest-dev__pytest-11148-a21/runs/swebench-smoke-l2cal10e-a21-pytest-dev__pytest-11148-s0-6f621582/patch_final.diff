@@ -1,0 +1,44 @@
+diff --git a/src/_pytest/_py/path.py b/src/_pytest/_py/path.py
+index 73a070d..92d8d24 100644
+--- a/src/_pytest/_py/path.py
++++ b/src/_pytest/_py/path.py
+@@ -1099,6 +1099,13 @@ class LocalPath:
+                 raise ImportError(
+                     f"Can't find module {modname} at location {str(self)}"
+                 )
++            existing = sys.modules.get(modname)
++            if (
++                existing is not None
++                and getattr(existing, "__file__", None) is not None
++                and self.samefile(existing.__file__)
++            ):
++                return existing
+             mod = importlib.util.module_from_spec(spec)
+             spec.loader.exec_module(mod)
+             return mod
+diff --git a/src/_pytest/pathlib.py b/src/_pytest/pathlib.py
+index e43310e..3370f2e 100644
+--- a/src/_pytest/pathlib.py
++++ b/src/_pytest/pathlib.py
+@@ -524,6 +524,21 @@ def import_path(
+     if mode is ImportMode.importlib:
+         module_name = module_name_from_path(path, root)
+ 
++        # If the module was already imported by normal means (for example
++        # as a side-effect of importing a package), reuse the existing module
++        # so there is a single module identity per file. Otherwise the module
++        # would exist twice, and side-effects made through one of the module
++        # objects (e.g. by core.initialize()) would not be visible through
++        # the other (#11341).
++        existing = sys.modules.get(module_name)
++        if existing is not None and getattr(existing, "__file__", None) is not None:
++            try:
++                already_imported = _is_same(str(path), existing.__file__)
++            except FileNotFoundError:
++                already_imported = False
++            if already_imported:
++                return existing
++
+         for meta_importer in sys.meta_path:
+             spec = meta_importer.find_spec(module_name, [str(path.parent)])
+             if spec is not None:

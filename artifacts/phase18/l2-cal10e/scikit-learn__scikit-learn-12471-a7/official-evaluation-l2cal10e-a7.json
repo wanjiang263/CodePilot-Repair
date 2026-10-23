@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-22T18:48:34+00:00",
+  "instance_id": "scikit-learn__scikit-learn-12471",
+  "label": "l2cal10e-a7",
+  "run_id": "swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54",
+  "predictions_path": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/predictions/swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54.jsonl",
+  "official_verdict": "UNRESOLVED",
+  "official": {
+    "run_id": "swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54",
+    "command": {
+      "argv": [
+        "/root/swebench-venv/bin/python",
+        "-m",
+        "swebench.harness.run_evaluation",
+        "-d",
+        "/root/cp-run/CodePilot-Repair/cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/test.jsonl",
+        "-s",
+        "test",
+        "-i",
+        "scikit-learn__scikit-learn-12471",
+        "-p",
+        "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/predictions/swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54.jsonl",
+        "-id",
+        "swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54",
+        "--max_workers",
+        "1",
+        "-t",
+        "1800",
+        "--report_dir",
+        "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/runs/swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54/official-report",
+        "-n",
+        "swebench",
+        "--cache_level",
+        "instance"
+      ],
+      "cwd": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/runs/swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54/official-report",
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONUTF8": "1"
+      },
+      "expected_report": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/runs/swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54/official-report/glm-5.3-flash-main.swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54.json"
+    },
+    "decision": "EXECUTED",
+    "exit_code": 0,
+    "timed_out": false,
+    "runtime_seconds": 104.95789672599494,
+    "error_kind": null,
+    "error_detail": null,
+    "reused": false,
+    "reused_reason": "报告不存在，执行官方 harness",
+    "warnings": [],
+    "verdicts": [
+      {
+        "instance_id": "scikit-learn__scikit-learn-12471",
+        "verdict": "UNRESOLVED",
+        "resolved": false,
+        "report_path": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/runs/swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54/official-report/glm-5.3-flash-main.swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54.json",
+        "report_sha256": "e0090396ea6629056461c506eb358ad033e30f1c45da830d1047218242c2ce72",
+        "error_kind": null,
+        "error_detail": null,
+        "runtime_seconds": 104.95789672599494
+      }
+    ],
+    "report_path": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/runs/swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54/official-report/glm-5.3-flash-main.swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54.json",
+    "report_sha256": "e0090396ea6629056461c506eb358ad033e30f1c45da830d1047218242c2ce72",
+    "report": {
+      "schema_version": 2,
+      "total_instances": 1,
+      "submitted_instances": 1,
+      "completed_instances": 1,
+      "resolved_instances": 0,
+      "unresolved_instances": 1,
+      "empty_patch_instances": 0,
+      "error_instances": 0,
+      "completed_ids": [
+        "scikit-learn__scikit-learn-12471"
+      ],
+      "incomplete_ids": [],
+      "empty_patch_ids": [],
+      "submitted_ids": [
+        "scikit-learn__scikit-learn-12471"
+      ],
+      "resolved_ids": [],
+      "unresolved_ids": [
+        "scikit-learn__scikit-learn-12471"
+      ],
+      "error_ids": [],
+      "unstopped_instances": null,
+      "unstopped_containers": [],
+      "unremoved_images": [],
+      "source_path": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/runs/swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54/official-report/glm-5.3-flash-main.swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54.json",
+      "source_sha256": "e0090396ea6629056461c506eb358ad033e30f1c45da830d1047218242c2ce72"
+    },
+    "counts_toward_resolved_rate": true
+  }
+}

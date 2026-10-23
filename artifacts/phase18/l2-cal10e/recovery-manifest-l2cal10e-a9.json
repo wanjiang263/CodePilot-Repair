@@ -1,0 +1,208 @@
+{
+  "schema_version": 2,
+  "currency": "CNY",
+  "source_run_id": "l2cal10e-a9",
+  "sources": [
+    {
+      "path": "artifacts/phase18/l2-cal10/pydata__xarray-4493/dispatch-ledger-l2cal10c.json",
+      "sha256": "291026a82dcd006f26c6ed15cb0885cd7bd36db7ba7e450b5088cd42e9696a2a",
+      "instance_id": "pydata__xarray-4493",
+      "frozen": true,
+      "settled_cny": 0.019966,
+      "unknown_reserved_cny": 0.8114688000000001,
+      "total_upper_bound_cny": 0.8314348000000001,
+      "unknown_cost_calls": 1
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10-resume/pylint-dev__pylint-6506/dispatch-ledger-l2cal10d.json",
+      "sha256": "ad42c144162055ed0ff972cc2e0910f7419f4caa132731cd4db768bef1800867",
+      "instance_id": "pylint-dev__pylint-6506",
+      "frozen": true,
+      "settled_cny": 0.12979744,
+      "unknown_reserved_cny": 0.8114688000000001,
+      "total_upper_bound_cny": 0.94126624,
+      "unknown_cost_calls": 1
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a4/dispatch-ledger-l2cal10e-a4.json",
+      "sha256": "6edddb028b50e224ab8728f3cdf119ccfe43b146ec987eefb06d23c09396082d",
+      "instance_id": "pytest-dev__pytest-11148",
+      "frozen": true,
+      "settled_cny": 0.09083240000000001,
+      "unknown_reserved_cny": 0.8114688000000001,
+      "total_upper_bound_cny": 0.9023012000000001,
+      "unknown_cost_calls": 1
+    }
+  ],
+  "additional_settled_ledgers": [
+    {
+      "path": "artifacts/phase18/l2-cal10/astropy__astropy-12907/dispatch-ledger-l2cal10c.json",
+      "sha256": "d115ca0497af95aa0301401f48dcfce53305c9e1a029b675bec92f33c596bce7",
+      "instance_id": "astropy__astropy-12907",
+      "frozen": false,
+      "settled_cny": 0.14240864,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.14240864,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/django__django-11910/dispatch-ledger-l2cal10c.json",
+      "sha256": "339b4ce8bd37742f2717e476b9cff363c17eb77df065359209f69ca3ab237f38",
+      "instance_id": "django__django-11910",
+      "frozen": false,
+      "settled_cny": 0.18717488000000002,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.18717488000000002,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/matplotlib__matplotlib-23314/dispatch-ledger-l2cal10c.json",
+      "sha256": "d71b12735a6ad7e185f563d4fbfa6f580f5aa1bd07a91c82531809f3329f23ef",
+      "instance_id": "matplotlib__matplotlib-23314",
+      "frozen": false,
+      "settled_cny": 0.12194800000000001,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.12194800000000001,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/mwaskom__seaborn-3010/dispatch-ledger-l2cal10c.json",
+      "sha256": "624ed3800d292ef79150d3601eeae0e622cb4e08fbe2dc0513d4615a78d8db79",
+      "instance_id": "mwaskom__seaborn-3010",
+      "frozen": false,
+      "settled_cny": 0.13423608,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.13423608,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/pallets__flask-4045/dispatch-ledger-l2cal10c.json",
+      "sha256": "ee70b18865c3fa1e76d5e1de01c0b8fa0c93d4b66b288522f0d6395674031909",
+      "instance_id": "pallets__flask-4045",
+      "frozen": false,
+      "settled_cny": 0.24215040000000007,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.24215040000000007,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/psf__requests-2148/dispatch-ledger-l2cal10c.json",
+      "sha256": "6626e3955f1c849f0470d7a1ed48ca7af40d06547c844743937e2dc69b59a141",
+      "instance_id": "psf__requests-2148",
+      "frozen": false,
+      "settled_cny": 0.20903536,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.20903536,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148/dispatch-ledger-l2cal10e.json",
+      "sha256": "6325ecc5f996a9c55be9b766ca328f785e5aa03f27206e614c6074b82866b977",
+      "instance_id": "pytest-dev__pytest-11148",
+      "frozen": false,
+      "settled_cny": 0.06022280000000001,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.06022280000000001,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/dispatch-ledger-l2cal10e-a3.json",
+      "sha256": "6042a08032d8c9538adb1817c36d6a3054790bf8c701740e0af515a5bd3eac11",
+      "instance_id": "pytest-dev__pytest-11148",
+      "frozen": false,
+      "settled_cny": 0.1493916,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.1493916,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a5/dispatch-ledger-l2cal10e-a5.json",
+      "sha256": "301c7ee035bef188861dc0e1054e3fa330b188d2d07776a3cf217fbe4ee05953",
+      "instance_id": "pytest-dev__pytest-11148",
+      "frozen": false,
+      "settled_cny": 0.21996400000000002,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.21996400000000002,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a6/dispatch-ledger-l2cal10e-a6.json",
+      "sha256": "27868d2cb1ac8126013c64c2bc24d07c47eb171228c6112de3f0d52583a0e487",
+      "instance_id": "pytest-dev__pytest-11148",
+      "frozen": false,
+      "settled_cny": 0.20097608,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.20097608,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a7/dispatch-ledger-l2cal10e-a7.json",
+      "sha256": "1c3db51ed94e31e3709bc2e6c90172632fac8f4e709b780ce7fd57431d3de805",
+      "instance_id": "pytest-dev__pytest-11148",
+      "frozen": false,
+      "settled_cny": 0.25586424,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.25586424,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a8/dispatch-ledger-l2cal10e-a8.json",
+      "sha256": "f423c31e3db0ef14b28586521ebfe6368b3dd795f78f607f95753d7020e10876",
+      "instance_id": "pytest-dev__pytest-11148",
+      "frozen": false,
+      "settled_cny": 0.39458943999999996,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.39458943999999996,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471/dispatch-ledger-l2cal10e.json",
+      "sha256": "9e65392ce6d223946ca521b6056faa03dcec256fede2ec5345134707ecf1b410",
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "frozen": false,
+      "settled_cny": 0.13424664000000003,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.13424664000000003,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a5/dispatch-ledger-l2cal10e-a5.json",
+      "sha256": "49d3471a9e8c143bc6386c7228fa046a58496981fb5908bb7eacdda17a57d28d",
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "frozen": false,
+      "settled_cny": 0.14510112000000003,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.14510112000000003,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a6/dispatch-ledger-l2cal10e-a6.json",
+      "sha256": "3b3af14b0e8621dc24746437f6b0fe365a20d06a0f3b1c0e730e0f1e4d6caacb",
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "frozen": false,
+      "settled_cny": 0.16163632000000003,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.16163632000000003,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/dispatch-ledger-l2cal10e-a7.json",
+      "sha256": "31816c24a9b26de575482eb6b6540d4c21a6cb6086106220e43cbc8fd1b40ac2",
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "frozen": false,
+      "settled_cny": 0.18305096,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.18305096,
+      "unknown_cost_calls": 0
+    }
+  ],
+  "settled_cny": 3.1825924000000003,
+  "unknown_reserved_cny": 2.4344064000000003,
+  "total_upper_bound_cny": 5.616998800000001,
+  "unknown_cost_calls": 3,
+  "actual_usage_unknown_calls": 3,
+  "unreconciled_cost_calls": 0,
+  "reconciliation_complete": true,
+  "reason": "l2cal10e opening: l2cal10c plus l2cal10d upper bounds",
+  "created_at": "2026-10-22T19:12:22+00:00"
+}

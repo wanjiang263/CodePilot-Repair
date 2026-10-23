@@ -1,0 +1,128 @@
+{
+  "schema_version": 2,
+  "currency": "CNY",
+  "source_run_id": "l2cal10e-a4",
+  "sources": [
+    {
+      "path": "artifacts/phase18/l2-cal10/pydata__xarray-4493/dispatch-ledger-l2cal10c.json",
+      "sha256": "291026a82dcd006f26c6ed15cb0885cd7bd36db7ba7e450b5088cd42e9696a2a",
+      "instance_id": "pydata__xarray-4493",
+      "frozen": true,
+      "settled_cny": 0.019966,
+      "unknown_reserved_cny": 0.8114688000000001,
+      "total_upper_bound_cny": 0.8314348000000001,
+      "unknown_cost_calls": 1
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10-resume/pylint-dev__pylint-6506/dispatch-ledger-l2cal10d.json",
+      "sha256": "ad42c144162055ed0ff972cc2e0910f7419f4caa132731cd4db768bef1800867",
+      "instance_id": "pylint-dev__pylint-6506",
+      "frozen": true,
+      "settled_cny": 0.12979744,
+      "unknown_reserved_cny": 0.8114688000000001,
+      "total_upper_bound_cny": 0.94126624,
+      "unknown_cost_calls": 1
+    }
+  ],
+  "additional_settled_ledgers": [
+    {
+      "path": "artifacts/phase18/l2-cal10/astropy__astropy-12907/dispatch-ledger-l2cal10c.json",
+      "sha256": "d115ca0497af95aa0301401f48dcfce53305c9e1a029b675bec92f33c596bce7",
+      "instance_id": "astropy__astropy-12907",
+      "frozen": false,
+      "settled_cny": 0.14240864,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.14240864,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/django__django-11910/dispatch-ledger-l2cal10c.json",
+      "sha256": "339b4ce8bd37742f2717e476b9cff363c17eb77df065359209f69ca3ab237f38",
+      "instance_id": "django__django-11910",
+      "frozen": false,
+      "settled_cny": 0.18717488000000002,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.18717488000000002,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/matplotlib__matplotlib-23314/dispatch-ledger-l2cal10c.json",
+      "sha256": "d71b12735a6ad7e185f563d4fbfa6f580f5aa1bd07a91c82531809f3329f23ef",
+      "instance_id": "matplotlib__matplotlib-23314",
+      "frozen": false,
+      "settled_cny": 0.12194800000000001,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.12194800000000001,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/mwaskom__seaborn-3010/dispatch-ledger-l2cal10c.json",
+      "sha256": "624ed3800d292ef79150d3601eeae0e622cb4e08fbe2dc0513d4615a78d8db79",
+      "instance_id": "mwaskom__seaborn-3010",
+      "frozen": false,
+      "settled_cny": 0.13423608,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.13423608,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/pallets__flask-4045/dispatch-ledger-l2cal10c.json",
+      "sha256": "ee70b18865c3fa1e76d5e1de01c0b8fa0c93d4b66b288522f0d6395674031909",
+      "instance_id": "pallets__flask-4045",
+      "frozen": false,
+      "settled_cny": 0.24215040000000007,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.24215040000000007,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/psf__requests-2148/dispatch-ledger-l2cal10c.json",
+      "sha256": "6626e3955f1c849f0470d7a1ed48ca7af40d06547c844743937e2dc69b59a141",
+      "instance_id": "psf__requests-2148",
+      "frozen": false,
+      "settled_cny": 0.20903536,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.20903536,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148/dispatch-ledger-l2cal10e.json",
+      "sha256": "6325ecc5f996a9c55be9b766ca328f785e5aa03f27206e614c6074b82866b977",
+      "instance_id": "pytest-dev__pytest-11148",
+      "frozen": false,
+      "settled_cny": 0.06022280000000001,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.06022280000000001,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/dispatch-ledger-l2cal10e-a3.json",
+      "sha256": "6042a08032d8c9538adb1817c36d6a3054790bf8c701740e0af515a5bd3eac11",
+      "instance_id": "pytest-dev__pytest-11148",
+      "frozen": false,
+      "settled_cny": 0.1493916,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.1493916,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471/dispatch-ledger-l2cal10e.json",
+      "sha256": "9e65392ce6d223946ca521b6056faa03dcec256fede2ec5345134707ecf1b410",
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "frozen": false,
+      "settled_cny": 0.13424664000000003,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.13424664000000003,
+      "unknown_cost_calls": 0
+    }
+  ],
+  "settled_cny": 1.53057784,
+  "unknown_reserved_cny": 1.6229376000000002,
+  "total_upper_bound_cny": 3.1535154400000005,
+  "unknown_cost_calls": 2,
+  "actual_usage_unknown_calls": 2,
+  "unreconciled_cost_calls": 0,
+  "reconciliation_complete": true,
+  "reason": "l2cal10e opening: l2cal10c plus l2cal10d upper bounds",
+  "created_at": "2026-10-22T17:04:35+00:00"
+}

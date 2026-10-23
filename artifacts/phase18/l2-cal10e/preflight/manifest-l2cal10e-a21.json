@@ -1,0 +1,9 @@
+{
+  "output": "artifacts/phase18/l2-cal10e/recovery-manifest-l2cal10e-a21.json",
+  "opening_cny": 10.79486704,
+  "settled_cny": 6.73752304,
+  "unknown_reserved_cny": 4.0573440000000005,
+  "unknown_cost_calls": 5,
+  "source_count": 5,
+  "settled_count": 27
+}

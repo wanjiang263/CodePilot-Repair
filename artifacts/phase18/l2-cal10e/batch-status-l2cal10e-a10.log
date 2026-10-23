@@ -1,0 +1,26 @@
+BATCH_START l2cal10e-a10 2026-10-23T07:46:27Z
+STOP_REUSE_INDEX_MISMATCH repo=repo_3c737e3238155660 index=
+BATCH_START l2cal10e-a10 2026-10-23T07:46:52Z
+REUSE_SCENE_OK run_dir=artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a10/runs/swebench-smoke-l2cal10e-a10-pytest-dev__pytest-11148-s0-361f4d0a repo_id=repo_3c737e3238155660
+RUN_IDENTITY_OK swebench-smoke-l2cal10e-a10-pytest-dev__pytest-11148-s0-361f4d0a
+OPENING 6.484939
+BUDGET OK opening=6.484939 spent=0.000000 total=6.484939 remaining=93.515061 allowed=16.948750 ledgers=0 instance=pytest-dev__pytest-11148 instance_prior=3.051250 instance_current=0.000000 instance_total=3.051250 instance_remaining=16.948750
+START pytest-dev__pytest-11148 allowed=16.948750 graph_budget=16.948750 2026-10-23T07:46:54Z
+END pytest-dev__pytest-11148 exit=1 ledger=missing attempt=not_dispatched 2026-10-23T07:46:55Z
+STOP_PRE_DISPATCH
+BATCH_START l2cal10e-a10 2026-10-23T07:48:30Z
+REUSE_SCENE_OK run_dir=artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a10/runs/swebench-smoke-l2cal10e-a10-pytest-dev__pytest-11148-s0-361f4d0a repo_id=repo_3c737e3238155660
+RUN_IDENTITY_OK swebench-smoke-l2cal10e-a10-pytest-dev__pytest-11148-s0-361f4d0a
+OPENING 6.484939
+BUDGET OK opening=6.484939 spent=0.000000 total=6.484939 remaining=93.515061 allowed=16.948750 ledgers=0 instance=pytest-dev__pytest-11148 instance_prior=3.051250 instance_current=0.000000 instance_total=3.051250 instance_remaining=16.948750
+START pytest-dev__pytest-11148 allowed=16.948750 graph_budget=16.948750 2026-10-23T07:48:32Z
+END pytest-dev__pytest-11148 exit=0 ledger=settled attempt=completed 2026-10-23T08:04:42Z
+ACCEPTANCE code=1
+OK opening=6.484939 spent=0.297556 total=6.782495 remaining=93.217505 allowed=16.651195 ledgers=1 instance=pytest-dev__pytest-11148 instance_prior=3.051250 instance_current=0.297556 instance_total=3.348805 instance_remaining=16.651195
+{
+  "instances": {
+    "pytest-dev__pytest-11148": 3.3488051199999997,
+    "scikit-learn__scikit-learn-12471": 0.6240350400000001
+  }
+}
+BATCH_END l2cal10e-a10 2026-10-23T08:04:43Z

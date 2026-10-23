@@ -1,0 +1,8 @@
+BATCH_START l2cal10e-a13 2026-10-23T09:24:00Z
+REUSE_SCENE_OK run_dir=artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a13/runs/swebench-smoke-l2cal10e-a13-pytest-dev__pytest-11148-s0-9e0137ef repo_id=repo_3c737e3238155660
+RUN_IDENTITY_OK swebench-smoke-l2cal10e-a13-pytest-dev__pytest-11148-s0-9e0137ef
+OPENING 7.308974
+BUDGET OK opening=7.308974 spent=0.000000 total=7.308974 remaining=92.691026 allowed=16.124716 ledgers=0 instance=pytest-dev__pytest-11148 instance_prior=3.875284 instance_current=0.000000 instance_total=3.875284 instance_remaining=16.124716
+START pytest-dev__pytest-11148 allowed=16.124716 graph_budget=16.124715 2026-10-23T09:24:08Z
+END pytest-dev__pytest-11148 exit=0 ledger=frozen attempt=stopped 2026-10-23T09:39:59Z
+STOP_LEDGER state=frozen

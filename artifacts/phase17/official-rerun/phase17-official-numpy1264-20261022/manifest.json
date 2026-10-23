@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "phase": "phase17",
+  "created_at": "2026-10-22T04:06:44.346446+00:00",
+  "run_id": "phase17-official-numpy1264-20261022",
+  "rerun_of": "swebench-smoke-phase16-l1-20261022-pvlib__pvlib-python-1072-s0-52c2e7b7",
+  "rerun_of_label": "Phase 16 live M2, official literal UNRESOLVED / INVALID_ENV",
+  "instance_id": "pvlib__pvlib-python-1072",
+  "split": "dev",
+  "dataset": {
+    "name": "princeton-nlp/SWE-bench_Lite",
+    "revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+    "snapshot": "/root/cp-run/CodePilot-Repair/cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/dev.jsonl",
+    "snapshot_sha256": "bff2c0441656b2aed0c6d7d9788955d31116920c6fb135059ac373521e8b1836"
+  },
+  "prediction": {
+    "path": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase16/live/predictions/swebench-smoke-phase16-l1-20261022-pvlib__pvlib-python-1072-s0-52c2e7b7.jsonl",
+    "sha256": "35b4a6fe82835e834ad176d501993f4a79b488854d93b0d5b5fa6f0e4f905dfd",
+    "bytes": 3936,
+    "model_patch_sha256": "ab393289bf1dc1da0a5c0d7b7f0153d656081d581898ba755b363c30068643a7",
+    "model_patch_bytes": 3736,
+    "model_name_or_path": "glm-5.3-flash-main"
+  },
+  "patch_final": {
+    "path": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase16/live/runs/swebench-smoke-phase16-l1-20261022-pvlib__pvlib-python-1072-s0-52c2e7b7/patch_final.diff",
+    "sha256": "ab393289bf1dc1da0a5c0d7b7f0153d656081d581898ba755b363c30068643a7"
+  },
+  "images": {
+    "original_tag": "swebench/sweb.eval.x86_64.pvlib_1776_pvlib-python-1072:latest",
+    "original_id": "sha256:c8e43bebd10d7d2330820af520361dc6adc9642f98c7b7b7c415cca39852ffdd",
+    "original_size": 5917247577,
+    "fixed_tag": "phase17/sweb.eval.x86_64.pvlib_1776_pvlib-python-1072:phase17-numpy1264",
+    "fixed_id": "sha256:e80d07e55c35282ad03d085a9476376586bddb287c239bea1d69f4d92fe31a82",
+    "fixed_size": 6014307693,
+    "fixed_created": "2026-10-22T04:04:29.542493034Z",
+    "fixed_labels": {
+      "org.codepilot.phase17.fix": "numpy==1.26.4 for PyTables 3.9.2 cp39 NumPy-1.x ABI",
+      "org.codepilot.phase17.parent_image": "swebench/sweb.eval.x86_64.pvlib_1776_pvlib-python-1072@sha256:c8e43bebd10d7d2330820af520361dc6adc9642f98c7b7b7c415cca39852ffdd",
+      "org.opencontainers.image.ref.name": "ubuntu",
+      "org.opencontainers.image.version": "22.04"
+    },
+    "dockerfile": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase17/image/Dockerfile",
+    "dockerfile_sha256": "33be762f1f5f13530e5286369945373515997eaaf55a909bccfd95cde480bb19"
+  },
+  "dependencies": {
+    "python": "3.9.21",
+    "numpy_before": "2.0.2",
+    "numpy_after": "1.26.4",
+    "tables": "3.9.2",
+    "pandas": "2.2.3",
+    "scipy": "1.13.1",
+    "fix_reason": "PyTables 3.9.2 is the last Python 3.9-compatible release and its cp39 manylinux wheel is built for the NumPy 1.x ABI; the original image had NumPy 2.0.2, causing numpy.dtype size mismatch at import. NumPy 1.26.4 is the last 1.x release for Python 3.9 and satisfies the declared pandas/scipy/tables constraints."
+  },
+  "command": [
+    "/root/swebench-venv/bin/python",
+    "-m",
+    "swebench.harness.run_evaluation",
+    "-d",
+    "/root/cp-run/CodePilot-Repair/cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/dev.jsonl",
+    "-s",
+    "dev",
+    "-i",
+    "pvlib__pvlib-python-1072",
+    "-p",
+    "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase16/live/predictions/swebench-smoke-phase16-l1-20261022-pvlib__pvlib-python-1072-s0-52c2e7b7.jsonl",
+    "-id",
+    "phase17-official-numpy1264-20261022",
+    "--max_workers",
+    "1",
+    "-t",
+    "1800",
+    "--report_dir",
+    "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase17/official-rerun/phase17-official-numpy1264-20261022",
+    "-n",
+    "phase17",
+    "--instance_image_tag",
+    "phase17-numpy1264",
+    "--cache_level",
+    "instance"
+  ],
+  "model_calls": 0,
+  "model_cost_cny": 0.0,
+  "note": "Uses the Phase 16 prediction and patch unchanged. Does not run the Coding Agent, does not regenerate a prediction, and does not modify the image tag or contents of the original official image."
+}

@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-22T19:16:40+00:00",
+  "label": "l2cal10e",
+  "authorization": {
+    "instances": [
+      "pytest-dev__pytest-11148",
+      "scikit-learn__scikit-learn-12471"
+    ],
+    "batch_cap_cny": 30.0,
+    "per_instance_cny": 3.0,
+    "opening_cny": 2.8096544000000003,
+    "available_cny": 27.1903456
+  },
+  "p2": {
+    "status": "AWAITING_ADDITIONAL_BUDGET",
+    "verified": false,
+    "instances": {
+      "pytest-dev__pytest-11148": {
+        "final_attempt": "l2cal10e-a9",
+        "accepted": false,
+        "checks": {
+          "real_run": false,
+          "patch_present": false,
+          "patch_validator": false,
+          "reproduce_recorded": false,
+          "target_test_executed": false,
+          "target_test_passed": false,
+          "target_test_present": false,
+          "target_test_source_visible": false,
+          "regression_clean": false,
+          "review_executed": false,
+          "review_no_high_issues": true,
+          "review_bound_to_candidate": false
+        },
+        "official_verdict": "NOT_EVALUATED",
+        "target_test_source": null,
+        "stop_reason": "workflow_error",
+        "failure_reasons": [
+          "localize: [llm_request_uncertain/provider] budget_stopped: insufficient pre-dispatch reserve"
+        ]
+      },
+      "scikit-learn__scikit-learn-12471": {
+        "final_attempt": "l2cal10e-a7",
+        "accepted": true,
+        "checks": {
+          "real_run": true,
+          "patch_present": true,
+          "patch_validator": true,
+          "reproduce_recorded": true,
+          "target_test_executed": true,
+          "target_test_passed": true,
+          "target_test_present": true,
+          "target_test_source_visible": true,
+          "regression_clean": true,
+          "review_executed": true,
+          "review_no_high_issues": true,
+          "review_bound_to_candidate": true
+        },
+        "official_verdict": "UNRESOLVED",
+        "target_test_source": "impact",
+        "stop_reason": null,
+        "failure_reasons": []
+      }
+    }
+  },
+  "cost": {
+    "schema_version": 1,
+    "generated_at": "2026-10-22T19:16:40+00:00",
+    "currency": "CNY",
+    "opening_upper_bound_cny": 2.8096544000000003,
+    "new_settled_cny": 2.007048,
+    "new_unknown_reserved_cny": 0.8114688000000001,
+    "new_accounted_upper_bound_cny": 2.8185168000000003,
+    "registry_total_upper_bound_cny": 2.8185168000000003,
+    "new_attempt_labels": [
+      "l2cal10e",
+      "l2cal10e-a3",
+      "l2cal10e-a4",
+      "l2cal10e-a5",
+      "l2cal10e-a6",
+      "l2cal10e-a7",
+      "l2cal10e-a8",
+      "l2cal10e-a9",
+      "l2cal10e",
+      "l2cal10e-a5",
+      "l2cal10e-a6",
+      "l2cal10e-a7"
+    ],
+    "opening_included_attempt_labels": [],
+    "opening_ledger_count": 8,
+    "total_upper_bound_cny": 5.628171200000001,
+    "remaining_batch_budget_cny": 24.3718288,
+    "batch_cap_cny": 30.0,
+    "per_instance_cap_cny": 3.0,
+    "per_instance_totals": {
+      "pytest-dev__pytest-11148": 2.19448176,
+      "scikit-learn__scikit-learn-12471": 0.6240350400000001
+    },
+    "per_instance_remaining_cny": {
+      "pytest-dev__pytest-11148": 0.80551824,
+      "scikit-learn__scikit-learn-12471": 2.37596496
+    },
+    "next_dispatch_reserve_cny": 0.8114688,
+    "caps_respected": true,
+    "unknown_cost_calls": 1,
+    "opening_sources": 2,
+    "settled_sources": 6,
+    "note": "opening is added once; only attempt ledgers that are not already listed in the opening manifest count as new settled/unknown spend"
+  },
+  "official": {
+    "l2cal10c": {
+      "scope": 10,
+      "executed": 7,
+      "not_executed": 3,
+      "valid_denominator": 5,
+      "resolved": 2,
+      "unresolved": 3,
+      "effective_official_solve_rate": 0.4
+    },
+    "l2cal10d": {
+      "scope": 3,
+      "executed": 1,
+      "not_executed": 2,
+      "valid_denominator": 0,
+      "resolved": 0,
+      "unresolved": 0,
+      "effective_official_solve_rate": null
+    },
+    "l2cal10e": {
+      "scope": 2,
+      "executed_internal": 11,
+      "accepted": 1,
+      "official_valid": 1,
+      "resolved": 0,
+      "unresolved": 1,
+      "verdicts": {
+        "pytest-dev__pytest-11148": "NOT_EVALUATED",
+        "scikit-learn__scikit-learn-12471": "UNRESOLVED"
+      }
+    },
+    "combined": {
+      "valid_denominator": 6,
+      "resolved": 2,
+      "effective_official_solve_rate": 0.3333333333333333,
+      "note": "segments are listed separately; the 40% l2cal10c rate is not rewritten"
+    }
+  },
+  "closure_items": {
+    "1_1_p2_real_chain": "AWAITING_ADDITIONAL_BUDGET",
+    "1_2_l2cal10d_frozen_ledger": "preserved (hash checked below)",
+    "1_3_pylint_candidate_not_official": {
+      "patch_sha256": "0630c45aa4ac6e0489786cebd33ceb9f8ac651df7d4b4eb9ae962d2e42b482eb",
+      "status": "UNVERIFIED_CANDIDATE",
+      "official_harness_executed": false
+    },
+    "1_4_cache_preflight": "enforced; see preflight-l2cal10e.json",
+    "1_5_artifact_inventory": "artifacts/phase18/l2-cal10e/preflight/artifact-inventory-l2cal10.json",
+    "1_6_no_records": "no docs/, commit, push or PR in this batch"
+  },
+  "protected_artifacts": {
+    "ok": true,
+    "unchanged": 12,
+    "expected": 12,
+    "mismatched": [],
+    "missing": []
+  },
+  "not_run": [
+    "xarray pydata__xarray-4493 rerun (l2cal10c frozen)",
+    "pylint-dev__pylint-6506 rerun (l2cal10d frozen)",
+    "the seven l2cal10c instances",
+    "full pytest suite",
+    "full-repository ruff/mypy",
+    "Docker test suite"
+  ]
+}

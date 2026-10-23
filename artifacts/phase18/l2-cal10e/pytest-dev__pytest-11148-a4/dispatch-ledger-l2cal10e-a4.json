@@ -1,0 +1,88 @@
+{
+  "currency": "CNY",
+  "limit": 2.790386,
+  "accounted_or_reserved": 0.9023012,
+  "frozen": true,
+  "opening_balance": 0.0,
+  "opening_source": null,
+  "requests": [
+    {
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.010856000000000001,
+      "input_tokens": 13038,
+      "cached_input_tokens": 0,
+      "output_tokens": 152
+    },
+    {
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0184024,
+      "input_tokens": 21946,
+      "cached_input_tokens": 0,
+      "output_tokens": 302
+    },
+    {
+      "seq": 3,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.011241600000000001,
+      "input_tokens": 6303,
+      "cached_input_tokens": 0,
+      "output_tokens": 2214
+    },
+    {
+      "seq": 4,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0076728000000000005,
+      "input_tokens": 7596,
+      "cached_input_tokens": 0,
+      "output_tokens": 570
+    },
+    {
+      "seq": 5,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.008624799999999998,
+      "input_tokens": 8765,
+      "cached_input_tokens": 0,
+      "output_tokens": 576
+    },
+    {
+      "seq": 6,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0164652,
+      "input_tokens": 6424,
+      "cached_input_tokens": 0,
+      "output_tokens": 4045
+    },
+    {
+      "seq": 7,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.017569599999999998,
+      "input_tokens": 7626,
+      "cached_input_tokens": 0,
+      "output_tokens": 4096
+    },
+    {
+      "seq": 8,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "unknown_frozen",
+      "cost_cny": null,
+      "error_type": "OperatorStopped"
+    }
+  ]
+}

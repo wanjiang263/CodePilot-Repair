@@ -1,0 +1,14 @@
+{
+  "attempt_label": "l2cal10e-a7",
+  "instance_id": "scikit-learn__scikit-learn-12471",
+  "artifact_root": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7",
+  "ledger_path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/dispatch-ledger-l2cal10e-a7.json",
+  "ledger_sha256": "31816c24a9b26de575482eb6b6540d4c21a6cb6086106220e43cbc8fd1b40ac2",
+  "ledger_present": true,
+  "status": "completed",
+  "settled_cny": 0.18305096,
+  "unknown_reserved_cny": 0.0,
+  "total_upper_bound_cny": 0.18305096,
+  "created_at": "2026-10-22T18:44:39+00:00",
+  "updated_at": "2026-10-22T18:44:39+00:00"
+}

@@ -1,0 +1,20 @@
+{
+  "currency": "CNY",
+  "limit": 0.816691,
+  "accounted_or_reserved": 0.011172399999999971,
+  "frozen": false,
+  "opening_balance": 0.0,
+  "opening_source": null,
+  "requests": [
+    {
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0111724,
+      "input_tokens": 13038,
+      "cached_input_tokens": 0,
+      "output_tokens": 265
+    }
+  ]
+}

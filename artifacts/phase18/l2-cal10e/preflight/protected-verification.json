@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "note": "The original preflight copy was lost during later preflights; expected values are the hashes captured before the batch and are re-verified against the current files.",
+  "files": {
+    "artifacts/phase18/l2-cal10/pydata__xarray-4493/dispatch-ledger-l2cal10c.json": {
+      "expected_sha256": "291026a82dcd006f26c6ed15cb0885cd7bd36db7ba7e450b5088cd42e9696a2a",
+      "actual_sha256": "291026a82dcd006f26c6ed15cb0885cd7bd36db7ba7e450b5088cd42e9696a2a",
+      "match": true
+    },
+    "artifacts/phase18/l2-cal10/astropy__astropy-12907/dispatch-ledger-l2cal10c.json": {
+      "expected_sha256": "d115ca0497af95aa0301401f48dcfce53305c9e1a029b675bec92f33c596bce7",
+      "actual_sha256": "d115ca0497af95aa0301401f48dcfce53305c9e1a029b675bec92f33c596bce7",
+      "match": true
+    },
+    "artifacts/phase18/l2-cal10/django__django-11910/dispatch-ledger-l2cal10c.json": {
+      "expected_sha256": "339b4ce8bd37742f2717e476b9cff363c17eb77df065359209f69ca3ab237f38",
+      "actual_sha256": "339b4ce8bd37742f2717e476b9cff363c17eb77df065359209f69ca3ab237f38",
+      "match": true
+    },
+    "artifacts/phase18/l2-cal10/matplotlib__matplotlib-23314/dispatch-ledger-l2cal10c.json": {
+      "expected_sha256": "d71b12735a6ad7e185f563d4fbfa6f580f5aa1bd07a91c82531809f3329f23ef",
+      "actual_sha256": "d71b12735a6ad7e185f563d4fbfa6f580f5aa1bd07a91c82531809f3329f23ef",
+      "match": true
+    },
+    "artifacts/phase18/l2-cal10/mwaskom__seaborn-3010/dispatch-ledger-l2cal10c.json": {
+      "expected_sha256": "624ed3800d292ef79150d3601eeae0e622cb4e08fbe2dc0513d4615a78d8db79",
+      "actual_sha256": "624ed3800d292ef79150d3601eeae0e622cb4e08fbe2dc0513d4615a78d8db79",
+      "match": true
+    },
+    "artifacts/phase18/l2-cal10/pallets__flask-4045/dispatch-ledger-l2cal10c.json": {
+      "expected_sha256": "ee70b18865c3fa1e76d5e1de01c0b8fa0c93d4b66b288522f0d6395674031909",
+      "actual_sha256": "ee70b18865c3fa1e76d5e1de01c0b8fa0c93d4b66b288522f0d6395674031909",
+      "match": true
+    },
+    "artifacts/phase18/l2-cal10/psf__requests-2148/dispatch-ledger-l2cal10c.json": {
+      "expected_sha256": "6626e3955f1c849f0470d7a1ed48ca7af40d06547c844743937e2dc69b59a141",
+      "actual_sha256": "6626e3955f1c849f0470d7a1ed48ca7af40d06547c844743937e2dc69b59a141",
+      "match": true
+    },
+    "artifacts/phase18/l2-cal10-resume/pylint-dev__pylint-6506/dispatch-ledger-l2cal10d.json": {
+      "expected_sha256": "ad42c144162055ed0ff972cc2e0910f7419f4caa132731cd4db768bef1800867",
+      "actual_sha256": "ad42c144162055ed0ff972cc2e0910f7419f4caa132731cd4db768bef1800867",
+      "match": true
+    },
+    "artifacts/phase18/l2-cal10-resume/recovery-manifest-l2cal10c.json": {
+      "expected_sha256": "5f76a2b3c1221dacc746267642d6d46d9b5f5e38aaa6931fab91e94522c75769",
+      "actual_sha256": "5f76a2b3c1221dacc746267642d6d46d9b5f5e38aaa6931fab91e94522c75769",
+      "match": true
+    },
+    "artifacts/phase18/l2-cal10-resume/cost-ledger-reconciliation-l2cal10d.json": {
+      "expected_sha256": "ad1f89264d7713e158292a25d703c8a552b78fc1e195c1606aeb7667180a68f2",
+      "actual_sha256": "ad1f89264d7713e158292a25d703c8a552b78fc1e195c1606aeb7667180a68f2",
+      "match": true
+    },
+    "artifacts/phase18/l2-cal10-resume/official-evaluation-summary-l2cal10d.json": {
+      "expected_sha256": "c38ac70e911842bad8ae697da73e84d11612092cdd928dc406815087bcb738cc",
+      "actual_sha256": "c38ac70e911842bad8ae697da73e84d11612092cdd928dc406815087bcb738cc",
+      "match": true
+    },
+    "artifacts/phase18/l2-cal10-resume/pylint-dev__pylint-6506/runs/swebench-smoke-l2cal10d-pylint-dev__pylint-6506-s0-5982fd91/patch_final.diff": {
+      "expected_sha256": "0630c45aa4ac6e0489786cebd33ceb9f8ac651df7d4b4eb9ae962d2e42b482eb",
+      "actual_sha256": "0630c45aa4ac6e0489786cebd33ceb9f8ac651df7d4b4eb9ae962d2e42b482eb",
+      "match": true
+    }
+  },
+  "all_match": true
+}

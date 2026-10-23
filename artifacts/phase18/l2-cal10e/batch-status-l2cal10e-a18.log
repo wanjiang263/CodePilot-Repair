@@ -1,0 +1,16 @@
+BATCH_START l2cal10e-a18 2026-10-23T11:38:56Z
+REUSE_SCENE_OK run_dir=artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a18/runs/swebench-smoke-l2cal10e-a18-pytest-dev__pytest-11148-s0-31ccfbc9 repo_id=repo_3c737e3238155660
+RUN_IDENTITY_OK swebench-smoke-l2cal10e-a18-pytest-dev__pytest-11148-s0-31ccfbc9
+OPENING 9.656801
+BUDGET OK opening=9.656801 spent=0.000000 total=9.656801 remaining=90.343199 allowed=13.776888 ledgers=0 instance=pytest-dev__pytest-11148 instance_prior=6.223112 instance_current=0.000000 instance_total=6.223112 instance_remaining=13.776888
+START pytest-dev__pytest-11148 allowed=13.776888 graph_budget=13.776888 2026-10-23T11:39:02Z
+END pytest-dev__pytest-11148 exit=0 ledger=settled attempt=completed 2026-10-23T11:59:14Z
+ACCEPTANCE code=1
+OK opening=9.656801 spent=0.316907 total=9.973708 remaining=90.026292 allowed=13.459981 ledgers=1 instance=pytest-dev__pytest-11148 instance_prior=6.223112 instance_current=0.316907 instance_total=6.540019 instance_remaining=13.459981
+{
+  "instances": {
+    "pytest-dev__pytest-11148": 6.540018880000002,
+    "scikit-learn__scikit-learn-12471": 0.6240350400000001
+  }
+}
+BATCH_END l2cal10e-a18 2026-10-23T11:59:15Z

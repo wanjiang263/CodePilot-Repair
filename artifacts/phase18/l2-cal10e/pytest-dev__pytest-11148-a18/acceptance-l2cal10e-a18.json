@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-23T11:59:14+00:00",
+  "instance_id": "pytest-dev__pytest-11148",
+  "label": "l2cal10e-a18",
+  "run_id": "swebench-smoke-l2cal10e-a18-pytest-dev__pytest-11148-s0-31ccfbc9",
+  "run_report": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a18/runs/swebench-smoke-l2cal10e-a18-pytest-dev__pytest-11148-s0-31ccfbc9/report.json",
+  "accepted": false,
+  "verdict": "REJECTED",
+  "checks": {
+    "real_run": true,
+    "patch_present": true,
+    "patch_validator": true,
+    "reproduce_recorded": true,
+    "target_test_executed": true,
+    "target_test_passed": true,
+    "target_test_present": true,
+    "target_test_source_visible": true,
+    "regression_clean": false,
+    "review_executed": false,
+    "review_no_high_issues": true,
+    "review_bound_to_candidate": false
+  },
+  "evidence": {
+    "candidate_patch_sha256": "09e0b866306d7cbd6f7291d64639a683d093030fb4c2142d8450896400948cd8",
+    "final_patch_sha256": "e284a4d75a1e16debe650aea387ef80b53c17f178fdf78fe088841e621439571",
+    "candidate_equals_delivered_patch": false,
+    "reviewed_patch_hash": null,
+    "review_approved": null,
+    "target_test_source": "planner",
+    "target_tests": [
+      "testing/_py/test_local.py::TestImportlibImport::test_pyimport",
+      "testing/_py/test_local.py::TestImportlibImport::test_pyimport_doesnt_use_sys_modules",
+      "testing/_py/test_local.py::TestImportlibImport::test_pyimport_dir_fails",
+      "testing/test_monkeypatch.py::test_syspath_prepend_with_namespace_packages",
+      "testing/test_monkeypatch.py::test_syspath_prepend",
+      "testing/test_monkeypatch.py::test_syspath_prepend_double_undo"
+    ],
+    "reproduction_status": "failed",
+    "regression_new_failures": 0,
+    "review_high_issues": 0,
+    "official_evaluation": "DEFERRED"
+  }
+}

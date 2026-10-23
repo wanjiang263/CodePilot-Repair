@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-23T08:04:42+00:00",
+  "instance_id": "pytest-dev__pytest-11148",
+  "label": "l2cal10e-a10",
+  "run_id": "swebench-smoke-l2cal10e-a10-pytest-dev__pytest-11148-s0-361f4d0a",
+  "run_report": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a10/runs/swebench-smoke-l2cal10e-a10-pytest-dev__pytest-11148-s0-361f4d0a/report.json",
+  "accepted": false,
+  "verdict": "REJECTED",
+  "checks": {
+    "real_run": true,
+    "patch_present": true,
+    "patch_validator": true,
+    "reproduce_recorded": true,
+    "target_test_executed": true,
+    "target_test_passed": true,
+    "target_test_present": true,
+    "target_test_source_visible": true,
+    "regression_clean": false,
+    "review_executed": false,
+    "review_no_high_issues": true,
+    "review_bound_to_candidate": false
+  },
+  "evidence": {
+    "candidate_patch_sha256": "33f7eab5464293d89d7029c7b3b690f39b02b97b23f2954da6683edca60f317d",
+    "final_patch_sha256": "59dfc56577f0655d0ec50e9cc548da98414cd69dfee409c1d91d5543718d54f2",
+    "candidate_equals_delivered_patch": false,
+    "reviewed_patch_hash": null,
+    "review_approved": null,
+    "target_test_source": "planner",
+    "target_tests": [
+      "testing/test_pathlib.py"
+    ],
+    "reproduction_status": "failed",
+    "regression_new_failures": 7,
+    "review_high_issues": 0,
+    "official_evaluation": "DEFERRED"
+  }
+}

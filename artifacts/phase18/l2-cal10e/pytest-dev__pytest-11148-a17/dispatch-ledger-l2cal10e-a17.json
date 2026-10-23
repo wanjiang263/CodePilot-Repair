@@ -1,0 +1,34 @@
+{
+  "currency": "CNY",
+  "limit": 20.0,
+  "accounted_or_reserved": 6.223111599999999,
+  "frozen": false,
+  "opening_balance": 6.1938868,
+  "opening_source": {
+    "kind": "per_instance",
+    "recovery_manifest": "artifacts/phase18/l2-cal10e/recovery-manifest-l2cal10e-a17.json",
+    "recovery_manifest_sha256": "cab2cbac9c0ef99c94c7feb6cc20559d289d79f4c169d8f857a439d5f9e1aeed"
+  },
+  "requests": [
+    {
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.011108000000000002,
+      "input_tokens": 13038,
+      "cached_input_tokens": 0,
+      "output_tokens": 242
+    },
+    {
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0181168,
+      "input_tokens": 21946,
+      "cached_input_tokens": 0,
+      "output_tokens": 200
+    }
+  ]
+}

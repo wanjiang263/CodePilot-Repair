@@ -1,0 +1,11 @@
+{
+  "timestamp": "20261023T160240Z",
+  "backup_root": "artifacts/sync-backups/20261023T160240Z",
+  "core_total": 1849,
+  "artifact_total": 1644,
+  "copied_new": 115,
+  "backed_up_overwritten": 0,
+  "conflicts": 6,
+  "identical_core": 1837,
+  "identical_artifacts": 1535
+}

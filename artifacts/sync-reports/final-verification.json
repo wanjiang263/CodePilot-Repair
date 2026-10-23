@@ -1,0 +1,391 @@
+{
+  "generated_at": "2026-10-23T16:10:37.957935+00:00",
+  "registry": {
+    "total": 25,
+    "pytest": 21,
+    "sklearn": 4,
+    "pytest_labels": [
+      "l2cal10e",
+      "l2cal10e-a10",
+      "l2cal10e-a11",
+      "l2cal10e-a12",
+      "l2cal10e-a13",
+      "l2cal10e-a14",
+      "l2cal10e-a15",
+      "l2cal10e-a16",
+      "l2cal10e-a17",
+      "l2cal10e-a18",
+      "l2cal10e-a19",
+      "l2cal10e-a20",
+      "l2cal10e-a21",
+      "l2cal10e-a3",
+      "l2cal10e-a4",
+      "l2cal10e-a5",
+      "l2cal10e-a6",
+      "l2cal10e-a7",
+      "l2cal10e-a8",
+      "l2cal10e-a9",
+      "l2cal10e-a9-resume"
+    ],
+    "sklearn_labels": [
+      "l2cal10e",
+      "l2cal10e-a5",
+      "l2cal10e-a6",
+      "l2cal10e-a7"
+    ],
+    "ledger_present_and_matching": 25,
+    "ledger_rows": [
+      {
+        "attempt_label": "l2cal10e",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148/dispatch-ledger-l2cal10e.json",
+        "ledger_present": true,
+        "expected_sha256": "6325ecc5f996a9c55be9b766ca328f785e5aa03f27206e614c6074b82866b977",
+        "actual_sha256": "6325ecc5f996a9c55be9b766ca328f785e5aa03f27206e614c6074b82866b977",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a10",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a10/dispatch-ledger-l2cal10e-a10.json",
+        "ledger_present": true,
+        "expected_sha256": "08ebe3d52746b47378185acec54dff97695449bb8f856b77ce3bfc9ef20f2050",
+        "actual_sha256": "08ebe3d52746b47378185acec54dff97695449bb8f856b77ce3bfc9ef20f2050",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a11",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/dispatch-ledger-l2cal10e-a11.json",
+        "ledger_present": true,
+        "expected_sha256": "a93bd3ed03e7d811b5011e3f4484b01d7f27d2b0c5fbfee48544a23186b33e5c",
+        "actual_sha256": "a93bd3ed03e7d811b5011e3f4484b01d7f27d2b0c5fbfee48544a23186b33e5c",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a12",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a12/dispatch-ledger-l2cal10e-a12.json",
+        "ledger_present": true,
+        "expected_sha256": "544466e5cbb055366d9b2145eff83809de1972a9f71bbb779e9019a7c3988d2c",
+        "actual_sha256": "544466e5cbb055366d9b2145eff83809de1972a9f71bbb779e9019a7c3988d2c",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a13",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a13/dispatch-ledger-l2cal10e-a13.json",
+        "ledger_present": true,
+        "expected_sha256": "cec3e60476a8b34634cdc633f62d9060a948a34f062772e2614963a3abedfd1c",
+        "actual_sha256": "cec3e60476a8b34634cdc633f62d9060a948a34f062772e2614963a3abedfd1c",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a14",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a14/dispatch-ledger-l2cal10e-a14.json",
+        "ledger_present": true,
+        "expected_sha256": "df86db4e9f18ecb0f4de311c322c93d4d874160bbc1b6983bf2bb22c2db94eaa",
+        "actual_sha256": "df86db4e9f18ecb0f4de311c322c93d4d874160bbc1b6983bf2bb22c2db94eaa",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a15",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a15/dispatch-ledger-l2cal10e-a15.json",
+        "ledger_present": true,
+        "expected_sha256": "e1b762f6a31b3d76c80d1e42cc7cf9d7ca77b2f6451e86affcf0b28d1b419e33",
+        "actual_sha256": "e1b762f6a31b3d76c80d1e42cc7cf9d7ca77b2f6451e86affcf0b28d1b419e33",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a16",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a16/dispatch-ledger-l2cal10e-a16.json",
+        "ledger_present": true,
+        "expected_sha256": "d2c0b254a4e9221d76db21c9e49ce261ead8e3bbcfb8c4c54707acad1b050f4d",
+        "actual_sha256": "d2c0b254a4e9221d76db21c9e49ce261ead8e3bbcfb8c4c54707acad1b050f4d",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a17",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a17/dispatch-ledger-l2cal10e-a17.json",
+        "ledger_present": true,
+        "expected_sha256": "f9d6d45c05c1e51aa8b07839f76f34d40f97d23e82758787d16906f19fb32785",
+        "actual_sha256": "f9d6d45c05c1e51aa8b07839f76f34d40f97d23e82758787d16906f19fb32785",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a18",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a18/dispatch-ledger-l2cal10e-a18.json",
+        "ledger_present": true,
+        "expected_sha256": "b40a7916a95068d2d4f5704ecbc44aab86ef5707e840df81f399ebb6f5a5923b",
+        "actual_sha256": "b40a7916a95068d2d4f5704ecbc44aab86ef5707e840df81f399ebb6f5a5923b",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a19",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a19/dispatch-ledger-l2cal10e-a19.json",
+        "ledger_present": true,
+        "expected_sha256": "4be2c3d1b6b2673fee1e79f4aea4275868cd4880c3ebaa9db184d2a621768c02",
+        "actual_sha256": "4be2c3d1b6b2673fee1e79f4aea4275868cd4880c3ebaa9db184d2a621768c02",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a20",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a20/dispatch-ledger-l2cal10e-a20.json",
+        "ledger_present": true,
+        "expected_sha256": "86df79fb5f6c7421b70292f9951f0e969daa63793715f43022ce86b7924237c7",
+        "actual_sha256": "86df79fb5f6c7421b70292f9951f0e969daa63793715f43022ce86b7924237c7",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a21",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a21/dispatch-ledger-l2cal10e-a21.json",
+        "ledger_present": true,
+        "expected_sha256": "c3d43260522f7358f4a4381eafe261b648d72ede9b5ba63475893cc9230e0a91",
+        "actual_sha256": "c3d43260522f7358f4a4381eafe261b648d72ede9b5ba63475893cc9230e0a91",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a3",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/dispatch-ledger-l2cal10e-a3.json",
+        "ledger_present": true,
+        "expected_sha256": "6042a08032d8c9538adb1817c36d6a3054790bf8c701740e0af515a5bd3eac11",
+        "actual_sha256": "6042a08032d8c9538adb1817c36d6a3054790bf8c701740e0af515a5bd3eac11",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a4",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a4/dispatch-ledger-l2cal10e-a4.json",
+        "ledger_present": true,
+        "expected_sha256": "6edddb028b50e224ab8728f3cdf119ccfe43b146ec987eefb06d23c09396082d",
+        "actual_sha256": "6edddb028b50e224ab8728f3cdf119ccfe43b146ec987eefb06d23c09396082d",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a5",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a5/dispatch-ledger-l2cal10e-a5.json",
+        "ledger_present": true,
+        "expected_sha256": "301c7ee035bef188861dc0e1054e3fa330b188d2d07776a3cf217fbe4ee05953",
+        "actual_sha256": "301c7ee035bef188861dc0e1054e3fa330b188d2d07776a3cf217fbe4ee05953",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a6",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a6/dispatch-ledger-l2cal10e-a6.json",
+        "ledger_present": true,
+        "expected_sha256": "27868d2cb1ac8126013c64c2bc24d07c47eb171228c6112de3f0d52583a0e487",
+        "actual_sha256": "27868d2cb1ac8126013c64c2bc24d07c47eb171228c6112de3f0d52583a0e487",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a7",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a7/dispatch-ledger-l2cal10e-a7.json",
+        "ledger_present": true,
+        "expected_sha256": "1c3db51ed94e31e3709bc2e6c90172632fac8f4e709b780ce7fd57431d3de805",
+        "actual_sha256": "1c3db51ed94e31e3709bc2e6c90172632fac8f4e709b780ce7fd57431d3de805",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a8",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a8/dispatch-ledger-l2cal10e-a8.json",
+        "ledger_present": true,
+        "expected_sha256": "f423c31e3db0ef14b28586521ebfe6368b3dd795f78f607f95753d7020e10876",
+        "actual_sha256": "f423c31e3db0ef14b28586521ebfe6368b3dd795f78f607f95753d7020e10876",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a9",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a9/dispatch-ledger-l2cal10e-a9.json",
+        "ledger_present": true,
+        "expected_sha256": "94de58a16ac3b7d01025ca6899feb540a1b553e73e773748f0f484911d6cfb2f",
+        "actual_sha256": "94de58a16ac3b7d01025ca6899feb540a1b553e73e773748f0f484911d6cfb2f",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a9-resume",
+        "instance_id": "pytest-dev__pytest-11148",
+        "ledger_path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a9/dispatch-ledger-l2cal10e-a9-resume.json",
+        "ledger_present": true,
+        "expected_sha256": "4753500dddb15fb38c59d56aa25020736f6c4746fd23a184358ee9cf92d0c26d",
+        "actual_sha256": "4753500dddb15fb38c59d56aa25020736f6c4746fd23a184358ee9cf92d0c26d",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e",
+        "instance_id": "scikit-learn__scikit-learn-12471",
+        "ledger_path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471/dispatch-ledger-l2cal10e.json",
+        "ledger_present": true,
+        "expected_sha256": "9e65392ce6d223946ca521b6056faa03dcec256fede2ec5345134707ecf1b410",
+        "actual_sha256": "9e65392ce6d223946ca521b6056faa03dcec256fede2ec5345134707ecf1b410",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a5",
+        "instance_id": "scikit-learn__scikit-learn-12471",
+        "ledger_path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a5/dispatch-ledger-l2cal10e-a5.json",
+        "ledger_present": true,
+        "expected_sha256": "49d3471a9e8c143bc6386c7228fa046a58496981fb5908bb7eacdda17a57d28d",
+        "actual_sha256": "49d3471a9e8c143bc6386c7228fa046a58496981fb5908bb7eacdda17a57d28d",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a6",
+        "instance_id": "scikit-learn__scikit-learn-12471",
+        "ledger_path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a6/dispatch-ledger-l2cal10e-a6.json",
+        "ledger_present": true,
+        "expected_sha256": "3b3af14b0e8621dc24746437f6b0fe365a20d06a0f3b1c0e730e0f1e4d6caacb",
+        "actual_sha256": "3b3af14b0e8621dc24746437f6b0fe365a20d06a0f3b1c0e730e0f1e4d6caacb",
+        "match": true
+      },
+      {
+        "attempt_label": "l2cal10e-a7",
+        "instance_id": "scikit-learn__scikit-learn-12471",
+        "ledger_path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/dispatch-ledger-l2cal10e-a7.json",
+        "ledger_present": true,
+        "expected_sha256": "31816c24a9b26de575482eb6b6540d4c21a6cb6086106220e43cbc8fd1b40ac2",
+        "actual_sha256": "31816c24a9b26de575482eb6b6540d4c21a6cb6086106220e43cbc8fd1b40ac2",
+        "match": true
+      }
+    ]
+  },
+  "a21": {
+    "verdict": "REJECTED",
+    "accepted": false,
+    "target_test_passed": false,
+    "regression_clean": false,
+    "review_executed": false,
+    "review_bound_to_candidate": false,
+    "run_status": "SMOKE_COMPLETED",
+    "stop_reason": "repeated_patch",
+    "model_run_status": "LIVE_RUN",
+    "harness_decision": "DEFERRED",
+    "harness_verdict": "NOT_EVALUATED",
+    "harness_report_path": null,
+    "counts_toward_resolved_rate": false
+  },
+  "pytest_official_harness_files": [],
+  "sklearn": {
+    "recheck_verdict": "ACCEPTED",
+    "recheck_accepted": true,
+    "official_verdict": "UNRESOLVED"
+  },
+  "protected": {
+    "matched": 12,
+    "total": 12,
+    "all_match": true,
+    "rows": [
+      {
+        "path": "artifacts/phase18/l2-cal10/pydata__xarray-4493/dispatch-ledger-l2cal10c.json",
+        "present": true,
+        "expected_sha256": "291026a82dcd006f26c6ed15cb0885cd7bd36db7ba7e450b5088cd42e9696a2a",
+        "actual_sha256": "291026a82dcd006f26c6ed15cb0885cd7bd36db7ba7e450b5088cd42e9696a2a",
+        "match": true
+      },
+      {
+        "path": "artifacts/phase18/l2-cal10/astropy__astropy-12907/dispatch-ledger-l2cal10c.json",
+        "present": true,
+        "expected_sha256": "d115ca0497af95aa0301401f48dcfce53305c9e1a029b675bec92f33c596bce7",
+        "actual_sha256": "d115ca0497af95aa0301401f48dcfce53305c9e1a029b675bec92f33c596bce7",
+        "match": true
+      },
+      {
+        "path": "artifacts/phase18/l2-cal10/django__django-11910/dispatch-ledger-l2cal10c.json",
+        "present": true,
+        "expected_sha256": "339b4ce8bd37742f2717e476b9cff363c17eb77df065359209f69ca3ab237f38",
+        "actual_sha256": "339b4ce8bd37742f2717e476b9cff363c17eb77df065359209f69ca3ab237f38",
+        "match": true
+      },
+      {
+        "path": "artifacts/phase18/l2-cal10/matplotlib__matplotlib-23314/dispatch-ledger-l2cal10c.json",
+        "present": true,
+        "expected_sha256": "d71b12735a6ad7e185f563d4fbfa6f580f5aa1bd07a91c82531809f3329f23ef",
+        "actual_sha256": "d71b12735a6ad7e185f563d4fbfa6f580f5aa1bd07a91c82531809f3329f23ef",
+        "match": true
+      },
+      {
+        "path": "artifacts/phase18/l2-cal10/mwaskom__seaborn-3010/dispatch-ledger-l2cal10c.json",
+        "present": true,
+        "expected_sha256": "624ed3800d292ef79150d3601eeae0e622cb4e08fbe2dc0513d4615a78d8db79",
+        "actual_sha256": "624ed3800d292ef79150d3601eeae0e622cb4e08fbe2dc0513d4615a78d8db79",
+        "match": true
+      },
+      {
+        "path": "artifacts/phase18/l2-cal10/pallets__flask-4045/dispatch-ledger-l2cal10c.json",
+        "present": true,
+        "expected_sha256": "ee70b18865c3fa1e76d5e1de01c0b8fa0c93d4b66b288522f0d6395674031909",
+        "actual_sha256": "ee70b18865c3fa1e76d5e1de01c0b8fa0c93d4b66b288522f0d6395674031909",
+        "match": true
+      },
+      {
+        "path": "artifacts/phase18/l2-cal10/psf__requests-2148/dispatch-ledger-l2cal10c.json",
+        "present": true,
+        "expected_sha256": "6626e3955f1c849f0470d7a1ed48ca7af40d06547c844743937e2dc69b59a141",
+        "actual_sha256": "6626e3955f1c849f0470d7a1ed48ca7af40d06547c844743937e2dc69b59a141",
+        "match": true
+      },
+      {
+        "path": "artifacts/phase18/l2-cal10-resume/pylint-dev__pylint-6506/dispatch-ledger-l2cal10d.json",
+        "present": true,
+        "expected_sha256": "ad42c144162055ed0ff972cc2e0910f7419f4caa132731cd4db768bef1800867",
+        "actual_sha256": "ad42c144162055ed0ff972cc2e0910f7419f4caa132731cd4db768bef1800867",
+        "match": true
+      },
+      {
+        "path": "artifacts/phase18/l2-cal10-resume/recovery-manifest-l2cal10c.json",
+        "present": true,
+        "expected_sha256": "5f76a2b3c1221dacc746267642d6d46d9b5f5e38aaa6931fab91e94522c75769",
+        "actual_sha256": "5f76a2b3c1221dacc746267642d6d46d9b5f5e38aaa6931fab91e94522c75769",
+        "match": true
+      },
+      {
+        "path": "artifacts/phase18/l2-cal10-resume/cost-ledger-reconciliation-l2cal10d.json",
+        "present": true,
+        "expected_sha256": "ad1f89264d7713e158292a25d703c8a552b78fc1e195c1606aeb7667180a68f2",
+        "actual_sha256": "ad1f89264d7713e158292a25d703c8a552b78fc1e195c1606aeb7667180a68f2",
+        "match": true
+      },
+      {
+        "path": "artifacts/phase18/l2-cal10-resume/official-evaluation-summary-l2cal10d.json",
+        "present": true,
+        "expected_sha256": "c38ac70e911842bad8ae697da73e84d11612092cdd928dc406815087bcb738cc",
+        "actual_sha256": "c38ac70e911842bad8ae697da73e84d11612092cdd928dc406815087bcb738cc",
+        "match": true
+      },
+      {
+        "path": "artifacts/phase18/l2-cal10-resume/pylint-dev__pylint-6506/runs/swebench-smoke-l2cal10d-pylint-dev__pylint-6506-s0-5982fd91/patch_final.diff",
+        "present": true,
+        "expected_sha256": "0630c45aa4ac6e0489786cebd33ceb9f8ac651df7d4b4eb9ae962d2e42b482eb",
+        "actual_sha256": "0630c45aa4ac6e0489786cebd33ceb9f8ac651df7d4b4eb9ae962d2e42b482eb",
+        "match": true
+      }
+    ]
+  },
+  "old_top_level_summaries": {
+    "cost-ledger-reconciliation-l2cal10e.json": {
+      "generated_at": "2026-10-22T19:16:40+00:00",
+      "sha256": "7f9969a29c990d5eb817be77dc361c26ec70b7c32fe64705e52fd90e9bb8c955"
+    },
+    "official-evaluation-summary-l2cal10e.json": {
+      "generated_at": null,
+      "sha256": "2484af9fe2191279edd21d5d05d7560e57a74ed369da4d4d19ef82451fbcc131"
+    },
+    "phase18e-summary.json": {
+      "generated_at": "2026-10-22T19:16:40+00:00",
+      "sha256": "d6311035664223617d4041b8d413be2c3c99235db6e99a699b73296dfc7efb57"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "allowed_types": 45,
+  "base_commit": "2f7415cfbc4b6ca62f9013f1abd27136f46b9653",
+  "checkpoint_path": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a21/runs/swebench-smoke-l2cal10e-a21-pytest-dev__pytest-11148-s0-6f621582/checkpoints.sqlite",
+  "code_version": "0.1.0+d5734ad-dirty",
+  "run_id": "swebench-smoke-l2cal10e-a21-pytest-dev__pytest-11148-s0-6f621582",
+  "schema_version": 1
+}

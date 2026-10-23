@@ -1,0 +1,330 @@
+{
+  "schema_version": 1,
+  "kind": "swebench_smoke",
+  "generated_at": "2026-10-22T16:51:12Z",
+  "run_id": "swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df",
+  "run_label": "l2cal10e-a3",
+  "dry_run": false,
+  "live_llm_requested": true,
+  "model_run_status": "LIVE_RUN",
+  "dataset": {
+    "name": "princeton-nlp/SWE-bench_Lite",
+    "revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+    "harness_version": "4.1.0",
+    "split": "test"
+  },
+  "paths": {
+    "artifact_root": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3",
+    "run_id": "swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df",
+    "run_dir": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/runs/swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df",
+    "workspace": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/runs/swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df/workspace",
+    "checkpoint": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/runs/swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df/checkpoints.sqlite",
+    "prediction": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/predictions/swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df.jsonl",
+    "evaluation_dir": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/eval/swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df",
+    "usage": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/usage/swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df.json",
+    "cost": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/cost/swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df.json",
+    "report": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/reports/swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df.json",
+    "journal": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/journal/swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df.sqlite",
+    "created_for_dry_run": false
+  },
+  "budget": {
+    "max_iterations": 5,
+    "max_test_runs": 12,
+    "max_files_changed": 5,
+    "max_lines_changed": 150,
+    "max_tool_calls_per_iteration": 30,
+    "max_review_calls": 2,
+    "max_runtime_seconds": 1800,
+    "max_total_tokens": 1000000,
+    "max_cost": 2.939777,
+    "budget_currency": "CNY",
+    "max_cost_from_cli": 2.939777,
+    "cost_limit_enforced": true
+  },
+  "resources": {
+    "requested": {
+      "docker_cpus": 2.0,
+      "docker_memory": "4g",
+      "timeout_seconds": 1800
+    },
+    "effective": {
+      "nano_cpus": 2000000000,
+      "mem_limit": "4g",
+      "source": "codepilot.sandbox.docker.container_config（固定策略）"
+    },
+    "honest_note": "请求值只记录，不声称已改变沙箱限额；真实运行前需先改沙箱策略"
+  },
+  "errors": [],
+  "status": "SMOKE_COMPLETED_NO_PATCH",
+  "attribution": "env_error",
+  "attribution_detail": {
+    "prediction_status": "ENV_ERROR",
+    "harness_error_kind": null,
+    "harness_error_detail": null,
+    "official_verdict": "NOT_EVALUATED",
+    "m2_claims_success": false,
+    "reason": "环境未就绪，推理未开始"
+  },
+  "instance": {
+    "instance_id": "pytest-dev__pytest-11148",
+    "repo": "pytest-dev/pytest",
+    "base_commit": "2f7415cfbc4b6ca62f9013f1abd27136f46b9653",
+    "version": "8.0",
+    "mode": "swebench",
+    "split": "test",
+    "dataset": {
+      "name": "princeton-nlp/SWE-bench_Lite",
+      "revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+      "harness_version": "4.1.0",
+      "split": "test"
+    },
+    "problem_statement_chars": 3188,
+    "problem_statement_sha256": "162b684e380a7530185eade0f4ede569c02e98697a631516fe77fb5f90cdcc40"
+  },
+  "environment": {
+    "identity_schema_version": 2,
+    "instance_id": "pytest-dev__pytest-11148",
+    "repo": "pytest-dev/pytest",
+    "base_commit": "2f7415cfbc4b6ca62f9013f1abd27136f46b9653",
+    "version": "8.0",
+    "environment_setup_commit": "10056865d2a4784934ce043908a0e78d0578f677",
+    "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+    "harness_version": "4.1.0",
+    "python_version": "3.9",
+    "env_image_key": "sweb.env.py.x86_64.48e0ba767b6d429d43629d:latest",
+    "instance_image_key": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-11148:latest",
+    "base_image_key": "sweb.base.py.x86_64:latest",
+    "execution_image_key": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-11148:latest",
+    "execution_image_id": "sha256:b8eef9af40c714067a5455e8d88620439b536a5455fed96c5646b4ed37028442",
+    "execution_image_override": false,
+    "execution_image_selection_reason": null,
+    "spec_sha256": "1d4b2b1db8ffef288dd90e0b1026c74f94a4702e8737704f0c477d0bdbfe11cb",
+    "environment_hash": "cfef30f427556cd0364d7af8b5df64eff04c32499784e648f42b1577a81b670c",
+    "identity_digest": "d455258500d291a16409258dd55523aac548a3219e4fe1aa3a92c97210a4e4b8",
+    "ensured": true,
+    "handle": {
+      "identity": {
+        "identity_schema_version": 2,
+        "instance_id": "pytest-dev__pytest-11148",
+        "repo": "pytest-dev/pytest",
+        "base_commit": "2f7415cfbc4b6ca62f9013f1abd27136f46b9653",
+        "version": "8.0",
+        "environment_setup_commit": "10056865d2a4784934ce043908a0e78d0578f677",
+        "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+        "harness_version": "4.1.0",
+        "python_version": "3.9",
+        "env_image_key": "sweb.env.py.x86_64.48e0ba767b6d429d43629d:latest",
+        "instance_image_key": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-11148:latest",
+        "base_image_key": "sweb.base.py.x86_64:latest",
+        "execution_image_key": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-11148:latest",
+        "execution_image_id": null,
+        "execution_image_override": false,
+        "execution_image_selection_reason": null,
+        "spec_sha256": "1d4b2b1db8ffef288dd90e0b1026c74f94a4702e8737704f0c477d0bdbfe11cb",
+        "environment_hash": "cfef30f427556cd0364d7af8b5df64eff04c32499784e648f42b1577a81b670c"
+      },
+      "image_key": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-11148:latest",
+      "image_id": "sha256:b8eef9af40c714067a5455e8d88620439b536a5455fed96c5646b4ed37028442",
+      "from_cache": true,
+      "cache_state": "miss",
+      "image_override": false,
+      "expected_image_id": null,
+      "parent_image_ref": null,
+      "parent_image_id": null,
+      "selection_reason": null,
+      "warnings": []
+    },
+    "execution_image_expected_id": null,
+    "execution_image_parent_ref": null,
+    "identity_verified": true
+  },
+  "isolation": {
+    "inference_task": {
+      "checked_fields": 9,
+      "gold_fields_present": [],
+      "forbidden_field_names": [
+        "FAIL_TO_PASS",
+        "PASS_TO_PASS",
+        "fail_to_pass",
+        "gold_patch",
+        "gold_patch_sha256",
+        "hints_text",
+        "pass_to_pass",
+        "patch",
+        "test_patch",
+        "test_patch_sha256"
+      ]
+    }
+  },
+  "runtime": {
+    "provider": "bigmodel",
+    "model": "glm-5.3-flash-main",
+    "model_identity": "glm-5.3-flash-main",
+    "temperature": 0.0,
+    "max_output_tokens": 4096,
+    "simulated_llm": false,
+    "provider_model_identity": "localizer=glm-5.3-flash/planner=glm-5.3-flash/coder=glm-5.3-flash/reproducer=glm-5.3-flash/diagnoser=glm-5.3-flash/reviewer=glm-5.3-flash",
+    "roles": [
+      "coder",
+      "diagnoser",
+      "localizer",
+      "planner",
+      "reproducer",
+      "reviewer"
+    ],
+    "live_llm_requested": true
+  },
+  "inference": {
+    "run_id": "swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df",
+    "status": "sandbox_error",
+    "stop_reason": "sandbox_failure",
+    "iterations": 0,
+    "attempts_saved": 0,
+    "test_runs": 3,
+    "runtime_seconds": 574.5375709533691,
+    "empty_patch": true,
+    "invalid_patch": false,
+    "agent_claims_success": false,
+    "verification_mode": "none",
+    "simulated_llm": false,
+    "sandbox_backend": "unknown",
+    "final_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final_patch_bytes": 0,
+    "error_class": null,
+    "error_origin": null,
+    "target_test_source": null,
+    "target_tests": [],
+    "plan_corrections": 0,
+    "plan_semantic_rejections": 0,
+    "plan_schema_rejections": 0,
+    "failure_reasons": [
+      "reproduce environment failure: env_error | env_error | MISSING_THIRD_PARTY_DEPENDENCY | declared=test_import_path_importlib_reuses_sys_modules and test_pyimport_reuses_sys_modules fail with AssertionError on the second import: import_path/pyimport under ImportMode.importlib returns a freshly created module object instead of the one already registered in sys.modules, so `assert module2 is module1` fails ('import_path(mode=importlib) imported the same file twice, producing two distinct module objects'). This mirrors the pmxbot failure where pmxbot.logging existed twice, so logging.Logger.store was missing."
+    ],
+    "artifact_dir": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/runs/swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df",
+    "usage_uncertain": false,
+    "resumed_from_checkpoint": false
+  },
+  "prediction": {
+    "status": "ENV_ERROR",
+    "path": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/predictions/swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df.jsonl",
+    "predictions_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "predictions_bytes": 0,
+    "written": 0,
+    "skipped": 1,
+    "status_counts": {
+      "PATCH_READY": 0,
+      "EMPTY_PATCH": 0,
+      "INVALID_PATCH": 0,
+      "MODEL_OUTPUT_INVALID": 0,
+      "WORKFLOW_STOPPED": 0,
+      "ENV_ERROR": 1,
+      "BUDGET_EXHAUSTED": 0
+    },
+    "manifest_path": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/predictions/swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df.manifest.json",
+    "manifest": {
+      "schema_version": 1,
+      "run_id": "swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df",
+      "model_name_or_path": "glm-5.3-flash-main",
+      "dataset_name": "princeton-nlp/SWE-bench_Lite",
+      "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+      "harness_version": "4.1.0",
+      "predictions_file": "swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df.jsonl",
+      "predictions_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "predictions_bytes": 0,
+      "include_empty": false,
+      "written": 0,
+      "skipped": 1,
+      "overwrites": 0,
+      "status_counts": {
+        "PATCH_READY": 0,
+        "EMPTY_PATCH": 0,
+        "INVALID_PATCH": 0,
+        "MODEL_OUTPUT_INVALID": 0,
+        "WORKFLOW_STOPPED": 0,
+        "ENV_ERROR": 1,
+        "BUDGET_EXHAUSTED": 0
+      },
+      "entries": [
+        {
+          "instance_id": "pytest-dev__pytest-11148",
+          "status": "ENV_ERROR",
+          "patch_sha256": null,
+          "run_id": "swebench-smoke-l2cal10e-a3-pytest-dev__pytest-11148-s0-998784df",
+          "model_name_or_path": "glm-5.3-flash-main",
+          "written": false,
+          "error_kind": null
+        }
+      ]
+    },
+    "patch_sha256": null
+  },
+  "harness": {
+    "verdicts": [
+      {
+        "instance_id": "pytest-dev__pytest-11148",
+        "verdict": "NOT_EVALUATED",
+        "resolved": null,
+        "error_kind": null,
+        "error_detail": "prediction status=ENV_ERROR，没有可提交的合法补丁，未执行官方 harness"
+      }
+    ],
+    "skipped": true
+  },
+  "m2_vs_official": {
+    "internal_m2": "M2_DOES_NOT_CLAIM_SUCCESS",
+    "official": "NOT_EVALUATED",
+    "discrepancy": "OFFICIAL_NOT_EVALUATED",
+    "official_authoritative": true,
+    "note": "官方 resolved 是唯一结论来源；内部 M2 状态不参与判定"
+  },
+  "usage": {
+    "input_tokens": 102806,
+    "output_tokens": 23981,
+    "cached_input_tokens": 0,
+    "cost": 0.1493916,
+    "llm_calls": 12,
+    "cost_unknown_calls": 0,
+    "currency": "CNY",
+    "by_model": {
+      "glm-5.3-flash-main": {
+        "alias": "glm-5.3-flash-main",
+        "input_tokens": 102806,
+        "output_tokens": 23981,
+        "cached_input_tokens": 0,
+        "cost": 0.1493916,
+        "llm_calls": 12,
+        "cost_unknown_calls": 0
+      }
+    },
+    "by_role": {
+      "localizer": {
+        "alias": "localizer",
+        "input_tokens": 34984,
+        "output_tokens": 512,
+        "cached_input_tokens": 0,
+        "cost": 0.0294208,
+        "llm_calls": 2,
+        "cost_unknown_calls": 0
+      },
+      "reproducer": {
+        "alias": "reproducer",
+        "input_tokens": 67822,
+        "output_tokens": 23469,
+        "cached_input_tokens": 0,
+        "cost": 0.11997079999999999,
+        "llm_calls": 10,
+        "cost_unknown_calls": 0
+      }
+    }
+  },
+  "cost": {
+    "budget_currency": "CNY",
+    "known_cost": 0.1493916,
+    "cost_is_lower_bound": false,
+    "unknown_cost_calls": 0,
+    "budget_max_cost": 2.939777,
+    "simulated_llm": false,
+    "note": "真实 provider 记账：金额由服务商回传的用量与配置单价算出；unknown_cost_calls>0 时它是下界而不是总额"
+  },
+  "latency_seconds": 578.31
+}

@@ -1,0 +1,408 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-22T16:34:30+00:00",
+  "read_only": true,
+  "wsl_snapshot_files": 15977,
+  "wsl_current_files": 15989,
+  "wsl_new_since_snapshot": {
+    "count": 12,
+    "files": [
+      "django__django-11910/runs/swebench-smoke-l2cal10c-django__django-11910-s0-beb08826/workspace/docs/_theme/djangodocs-epub/static/docicons-behindscenes.png",
+      "django__django-11910/runs/swebench-smoke-l2cal10c-django__django-11910-s0-beb08826/workspace/docs/_theme/djangodocs-epub/static/docicons-note.png",
+      "django__django-11910/runs/swebench-smoke-l2cal10c-django__django-11910-s0-beb08826/workspace/docs/_theme/djangodocs-epub/static/docicons-philosophy.png",
+      "django__django-11910/runs/swebench-smoke-l2cal10c-django__django-11910-s0-beb08826/workspace/docs/_theme/djangodocs-epub/static/docicons-warning.png",
+      "matplotlib__matplotlib-23314/runs/swebench-smoke-l2cal10c-matplotlib__matplotlib-23314-s0-75fd39e4/workspace/lib/matplotlib/mpl-data/images/back-symbolic.svg",
+      "matplotlib__matplotlib-23314/runs/swebench-smoke-l2cal10c-matplotlib__matplotlib-23314-s0-75fd39e4/workspace/lib/matplotlib/mpl-data/images/filesave-symbolic.svg",
+      "matplotlib__matplotlib-23314/runs/swebench-smoke-l2cal10c-matplotlib__matplotlib-23314-s0-75fd39e4/workspace/lib/matplotlib/mpl-data/images/forward-symbolic.svg",
+      "matplotlib__matplotlib-23314/runs/swebench-smoke-l2cal10c-matplotlib__matplotlib-23314-s0-75fd39e4/workspace/lib/matplotlib/mpl-data/images/help-symbolic.svg",
+      "matplotlib__matplotlib-23314/runs/swebench-smoke-l2cal10c-matplotlib__matplotlib-23314-s0-75fd39e4/workspace/lib/matplotlib/mpl-data/images/home-symbolic.svg",
+      "matplotlib__matplotlib-23314/runs/swebench-smoke-l2cal10c-matplotlib__matplotlib-23314-s0-75fd39e4/workspace/lib/matplotlib/mpl-data/images/move-symbolic.svg",
+      "matplotlib__matplotlib-23314/runs/swebench-smoke-l2cal10c-matplotlib__matplotlib-23314-s0-75fd39e4/workspace/lib/matplotlib/mpl-data/images/subplots-symbolic.svg",
+      "matplotlib__matplotlib-23314/runs/swebench-smoke-l2cal10c-matplotlib__matplotlib-23314-s0-75fd39e4/workspace/lib/matplotlib/mpl-data/images/zoom_to_rect-symbolic.svg"
+    ]
+  },
+  "windows_mirror_files": 183,
+  "prior_reported_windows_files": 190,
+  "prior_190_reproducible": false,
+  "prior_190_note": "The earlier 190-file figure is retained as reported history; the current retained evidence measures 183 and does not contain a file list that explains the 7-file delta.",
+  "windows_mirror_not_in_wsl_current": {
+    "count": 45,
+    "files": [
+      "aggregate-dryrun.log",
+      "aggregate-final.log",
+      "aggregate_cal10.py",
+      "artifact-sizes.txt",
+      "astropy-classification.json",
+      "astropy-report.json",
+      "batch-console-v2.log",
+      "batch-console.log",
+      "batch_budget.py",
+      "classify_run.py",
+      "copy-artifacts.log",
+      "copy_artifacts.py",
+      "django-report.json",
+      "docker-cleanup-check.txt",
+      "ledger_summary.py",
+      "matplotlib-report.json",
+      "old-report-l2cal10.json",
+      "preflight.txt",
+      "prepare-all-caches.log",
+      "prepare-astropy-v2-status.txt",
+      "prepare-astropy-v2.log",
+      "prepare-astropy.log",
+      "prepare_cal10_caches.py",
+      "progress-latest.txt",
+      "progress-stderr.txt",
+      "progress.txt",
+      "progress1.txt",
+      "progress2.txt",
+      "pylint-dev__pylint-6506/not-executed.json",
+      "pytest-dev__pytest-11148/not-executed.json",
+      "render_report.py",
+      "report-summaries.txt",
+      "run_batch_v2.sh",
+      "scikit-learn__scikit-learn-12471/not-executed.json",
+      "seaborn-report.json",
+      "summarize_reports.py",
+      "verify-astropy-workspace.log",
+      "verify_workspace.py",
+      "wsl-cache-state.txt",
+      "wsl-inspect-result.txt",
+      "wsl-sources.txt",
+      "wsl-state.txt",
+      "wsl_find_sources.sh",
+      "wsl_inspect.sh",
+      "wsl_progress.sh"
+    ]
+  },
+  "windows_mirror_hash_mismatch": {
+    "count": 0,
+    "files": []
+  },
+  "windows_only_classification": [
+    {
+      "path": "aggregate-dryrun.log",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "aggregate-final.log",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "aggregate_cal10.py",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "artifact-sizes.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "astropy-classification.json",
+      "category": "status_marker",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "astropy-report.json",
+      "category": "report_copy",
+      "canonical_wsl_path": "astropy__astropy-12907/reports/swebench-smoke-l2cal10c-astropy__astropy-12907-s0-70dad557.json",
+      "same_sha_as_canonical": true,
+      "protected_result": true
+    },
+    {
+      "path": "batch-console-v2.log",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "batch-console.log",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "batch_budget.py",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "classify_run.py",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "copy-artifacts.log",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "copy_artifacts.py",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "django-report.json",
+      "category": "report_copy",
+      "canonical_wsl_path": "django__django-11910/reports/swebench-smoke-l2cal10c-django__django-11910-s0-beb08826.json",
+      "same_sha_as_canonical": true,
+      "protected_result": true
+    },
+    {
+      "path": "docker-cleanup-check.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "ledger_summary.py",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "matplotlib-report.json",
+      "category": "report_copy",
+      "canonical_wsl_path": "matplotlib__matplotlib-23314/reports/swebench-smoke-l2cal10c-matplotlib__matplotlib-23314-s0-75fd39e4.json",
+      "same_sha_as_canonical": true,
+      "protected_result": true
+    },
+    {
+      "path": "old-report-l2cal10.json",
+      "category": "report_copy",
+      "canonical_wsl_path": "astropy__astropy-12907/reports/swebench-smoke-l2cal10-astropy__astropy-12907-s0-f843d180.json",
+      "same_sha_as_canonical": true,
+      "protected_result": true
+    },
+    {
+      "path": "preflight.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "prepare-all-caches.log",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "prepare-astropy-v2-status.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "prepare-astropy-v2.log",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "prepare-astropy.log",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "prepare_cal10_caches.py",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "progress-latest.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "progress-stderr.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "progress.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "progress1.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "progress2.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "pylint-dev__pylint-6506/not-executed.json",
+      "category": "status_marker",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "pytest-dev__pytest-11148/not-executed.json",
+      "category": "status_marker",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "render_report.py",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "report-summaries.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "run_batch_v2.sh",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "scikit-learn__scikit-learn-12471/not-executed.json",
+      "category": "status_marker",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "seaborn-report.json",
+      "category": "report_copy",
+      "canonical_wsl_path": "mwaskom__seaborn-3010/reports/swebench-smoke-l2cal10c-mwaskom__seaborn-3010-s0-218e3094.json",
+      "same_sha_as_canonical": true,
+      "protected_result": true
+    },
+    {
+      "path": "summarize_reports.py",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "verify-astropy-workspace.log",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "verify_workspace.py",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "wsl-cache-state.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "wsl-inspect-result.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "wsl-sources.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "wsl-state.txt",
+      "category": "log_or_status",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "wsl_find_sources.sh",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "wsl_inspect.sh",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    },
+    {
+      "path": "wsl_progress.sh",
+      "category": "script",
+      "canonical_wsl_path": null,
+      "same_sha_as_canonical": null,
+      "protected_result": false
+    }
+  ],
+  "protected_category_check": {
+    "protected_entries": 5,
+    "report_copies": 5,
+    "unsafe_hits": [],
+    "no_protected_result_only_on_windows": true,
+    "token_note": "render_report.py, summarize_reports.py and report-summaries.txt contain the word report in their names but are scripts/status text, not run results.",
+    "note": "The five root-level report copies are byte-identical to canonical per-run reports in WSL. No prediction, patch, eval, usage, cost or dispatch-ledger file exists only on Windows."
+  },
+  "wsl_new_files_are_workspace_assets": true
+}

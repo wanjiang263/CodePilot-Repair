@@ -1,0 +1,376 @@
+{
+  "schema_version": 1,
+  "kind": "swebench_smoke",
+  "generated_at": "2026-10-23T08:20:56Z",
+  "run_id": "swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235",
+  "run_label": "l2cal10e-a11",
+  "dry_run": false,
+  "live_llm_requested": true,
+  "model_run_status": "LIVE_RUN",
+  "dataset": {
+    "name": "princeton-nlp/SWE-bench_Lite",
+    "revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+    "harness_version": "4.1.0",
+    "split": "test"
+  },
+  "paths": {
+    "artifact_root": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11",
+    "run_id": "swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235",
+    "run_dir": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/runs/swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235",
+    "workspace": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/runs/swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235/workspace",
+    "checkpoint": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/runs/swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235/checkpoints.sqlite",
+    "prediction": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/predictions/swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235.jsonl",
+    "evaluation_dir": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/eval/swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235",
+    "usage": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/usage/swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235.json",
+    "cost": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/cost/swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235.json",
+    "report": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/reports/swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235.json",
+    "journal": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/journal/swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235.sqlite",
+    "created_for_dry_run": false
+  },
+  "budget": {
+    "max_iterations": 5,
+    "max_test_runs": 12,
+    "max_files_changed": 5,
+    "max_lines_changed": 150,
+    "max_tool_calls_per_iteration": 30,
+    "max_review_calls": 2,
+    "max_runtime_seconds": 1800,
+    "max_total_tokens": 1000000,
+    "max_cost": 16.651194,
+    "budget_currency": "CNY",
+    "max_cost_from_cli": 16.651194,
+    "cost_limit_enforced": true
+  },
+  "resources": {
+    "requested": {
+      "docker_cpus": 2.0,
+      "docker_memory": "4g",
+      "timeout_seconds": 1800
+    },
+    "effective": {
+      "nano_cpus": 2000000000,
+      "mem_limit": "4g",
+      "source": "codepilot.sandbox.docker.container_config（固定策略）"
+    },
+    "honest_note": "请求值只记录，不声称已改变沙箱限额；真实运行前需先改沙箱策略"
+  },
+  "errors": [],
+  "status": "SMOKE_COMPLETED",
+  "attribution": "model_not_resolved",
+  "attribution_detail": {
+    "prediction_status": "PATCH_READY",
+    "harness_error_kind": null,
+    "harness_error_detail": null,
+    "official_verdict": "NOT_EVALUATED",
+    "m2_claims_success": false,
+    "reason": "有合法补丁但官方未给出可判定结论"
+  },
+  "instance": {
+    "instance_id": "pytest-dev__pytest-11148",
+    "repo": "pytest-dev/pytest",
+    "base_commit": "2f7415cfbc4b6ca62f9013f1abd27136f46b9653",
+    "version": "8.0",
+    "mode": "swebench",
+    "split": "test",
+    "dataset": {
+      "name": "princeton-nlp/SWE-bench_Lite",
+      "revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+      "harness_version": "4.1.0",
+      "split": "test"
+    },
+    "problem_statement_chars": 3188,
+    "problem_statement_sha256": "162b684e380a7530185eade0f4ede569c02e98697a631516fe77fb5f90cdcc40"
+  },
+  "environment": {
+    "identity_schema_version": 2,
+    "instance_id": "pytest-dev__pytest-11148",
+    "repo": "pytest-dev/pytest",
+    "base_commit": "2f7415cfbc4b6ca62f9013f1abd27136f46b9653",
+    "version": "8.0",
+    "environment_setup_commit": "10056865d2a4784934ce043908a0e78d0578f677",
+    "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+    "harness_version": "4.1.0",
+    "python_version": "3.9",
+    "env_image_key": "sweb.env.py.x86_64.48e0ba767b6d429d43629d:latest",
+    "instance_image_key": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-11148:latest",
+    "base_image_key": "sweb.base.py.x86_64:latest",
+    "execution_image_key": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-11148:latest",
+    "execution_image_id": "sha256:b8eef9af40c714067a5455e8d88620439b536a5455fed96c5646b4ed37028442",
+    "execution_image_override": false,
+    "execution_image_selection_reason": null,
+    "spec_sha256": "1d4b2b1db8ffef288dd90e0b1026c74f94a4702e8737704f0c477d0bdbfe11cb",
+    "environment_hash": "cfef30f427556cd0364d7af8b5df64eff04c32499784e648f42b1577a81b670c",
+    "identity_digest": "d455258500d291a16409258dd55523aac548a3219e4fe1aa3a92c97210a4e4b8",
+    "ensured": true,
+    "handle": {
+      "identity": {
+        "identity_schema_version": 2,
+        "instance_id": "pytest-dev__pytest-11148",
+        "repo": "pytest-dev/pytest",
+        "base_commit": "2f7415cfbc4b6ca62f9013f1abd27136f46b9653",
+        "version": "8.0",
+        "environment_setup_commit": "10056865d2a4784934ce043908a0e78d0578f677",
+        "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+        "harness_version": "4.1.0",
+        "python_version": "3.9",
+        "env_image_key": "sweb.env.py.x86_64.48e0ba767b6d429d43629d:latest",
+        "instance_image_key": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-11148:latest",
+        "base_image_key": "sweb.base.py.x86_64:latest",
+        "execution_image_key": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-11148:latest",
+        "execution_image_id": null,
+        "execution_image_override": false,
+        "execution_image_selection_reason": null,
+        "spec_sha256": "1d4b2b1db8ffef288dd90e0b1026c74f94a4702e8737704f0c477d0bdbfe11cb",
+        "environment_hash": "cfef30f427556cd0364d7af8b5df64eff04c32499784e648f42b1577a81b670c"
+      },
+      "image_key": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-11148:latest",
+      "image_id": "sha256:b8eef9af40c714067a5455e8d88620439b536a5455fed96c5646b4ed37028442",
+      "from_cache": true,
+      "cache_state": "hit",
+      "image_override": false,
+      "expected_image_id": null,
+      "parent_image_ref": null,
+      "parent_image_id": null,
+      "selection_reason": null,
+      "warnings": []
+    },
+    "execution_image_expected_id": null,
+    "execution_image_parent_ref": null,
+    "identity_verified": true
+  },
+  "isolation": {
+    "inference_task": {
+      "checked_fields": 9,
+      "gold_fields_present": [],
+      "forbidden_field_names": [
+        "FAIL_TO_PASS",
+        "PASS_TO_PASS",
+        "fail_to_pass",
+        "gold_patch",
+        "gold_patch_sha256",
+        "hints_text",
+        "pass_to_pass",
+        "patch",
+        "test_patch",
+        "test_patch_sha256"
+      ]
+    }
+  },
+  "runtime": {
+    "provider": "bigmodel",
+    "model": "glm-5.3-flash-main",
+    "model_identity": "glm-5.3-flash-main",
+    "temperature": 0.0,
+    "max_output_tokens": 4096,
+    "simulated_llm": false,
+    "provider_model_identity": "localizer=glm-5.3-flash/planner=glm-5.3-flash/coder=glm-5.3-flash/reproducer=glm-5.3-flash/diagnoser=glm-5.3-flash/reviewer=glm-5.3-flash",
+    "roles": [
+      "coder",
+      "diagnoser",
+      "localizer",
+      "planner",
+      "reproducer",
+      "reviewer"
+    ],
+    "live_llm_requested": true
+  },
+  "inference": {
+    "run_id": "swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235",
+    "status": "budget_exhausted",
+    "stop_reason": "budget_closure_test_runs",
+    "iterations": 1,
+    "attempts_saved": 1,
+    "test_runs": 11,
+    "runtime_seconds": 912.0777049064636,
+    "empty_patch": false,
+    "invalid_patch": false,
+    "agent_claims_success": false,
+    "verification_mode": "full",
+    "simulated_llm": false,
+    "sandbox_backend": "docker",
+    "final_patch_sha256": "c1007ded709c4d1e9e825b085fbcf43769fee2120c4de4e797616180171d7ecc",
+    "final_patch_bytes": 1490,
+    "error_class": null,
+    "error_origin": null,
+    "target_test_source": "reproduction",
+    "target_tests": [
+      "tests/_codepilot_repro/test_importlib_mode_reimport.py::test_importlib_mode_does_not_reimport_existing_module"
+    ],
+    "plan_corrections": 1,
+    "plan_semantic_rejections": 1,
+    "plan_schema_rejections": 0,
+    "failure_reasons": [
+      "repair_patch: test runs: 11 spent of 12, 1 left; closure requires 3 (patch validation needs 0 container run(s), target tests need 1, regression L2 needs 1, regression L3 needs 1) → the repair round is refused before any spend: it would leave a new candidate patch without the verification its review and success claim require"
+    ],
+    "artifact_dir": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/runs/swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235",
+    "usage_uncertain": false,
+    "resumed_from_checkpoint": false
+  },
+  "prediction": {
+    "status": "PATCH_READY",
+    "path": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/predictions/swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235.jsonl",
+    "predictions_sha256": "b6de6fac7cb08cf2c158c388df3bbe54463d81f41f65793a94e3d9cc62e79bc6",
+    "predictions_bytes": 1631,
+    "written": 1,
+    "skipped": 0,
+    "status_counts": {
+      "PATCH_READY": 1,
+      "EMPTY_PATCH": 0,
+      "INVALID_PATCH": 0,
+      "MODEL_OUTPUT_INVALID": 0,
+      "WORKFLOW_STOPPED": 0,
+      "ENV_ERROR": 0,
+      "BUDGET_EXHAUSTED": 0
+    },
+    "manifest_path": "/root/cp-run/phase16/CodePilot-Repair/artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/predictions/swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235.manifest.json",
+    "manifest": {
+      "schema_version": 1,
+      "run_id": "swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235",
+      "model_name_or_path": "glm-5.3-flash-main",
+      "dataset_name": "princeton-nlp/SWE-bench_Lite",
+      "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+      "harness_version": "4.1.0",
+      "predictions_file": "swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235.jsonl",
+      "predictions_sha256": "b6de6fac7cb08cf2c158c388df3bbe54463d81f41f65793a94e3d9cc62e79bc6",
+      "predictions_bytes": 1631,
+      "include_empty": false,
+      "written": 1,
+      "skipped": 0,
+      "overwrites": 0,
+      "status_counts": {
+        "PATCH_READY": 1,
+        "EMPTY_PATCH": 0,
+        "INVALID_PATCH": 0,
+        "MODEL_OUTPUT_INVALID": 0,
+        "WORKFLOW_STOPPED": 0,
+        "ENV_ERROR": 0,
+        "BUDGET_EXHAUSTED": 0
+      },
+      "entries": [
+        {
+          "instance_id": "pytest-dev__pytest-11148",
+          "status": "PATCH_READY",
+          "patch_sha256": "c1007ded709c4d1e9e825b085fbcf43769fee2120c4de4e797616180171d7ecc",
+          "run_id": "swebench-smoke-l2cal10e-a11-pytest-dev__pytest-11148-s0-97761235",
+          "model_name_or_path": "glm-5.3-flash-main",
+          "written": true,
+          "error_kind": null
+        }
+      ]
+    },
+    "patch_sha256": "c1007ded709c4d1e9e825b085fbcf43769fee2120c4de4e797616180171d7ecc"
+  },
+  "harness": {
+    "run_id": null,
+    "command": null,
+    "decision": "DEFERRED",
+    "exit_code": null,
+    "timed_out": false,
+    "runtime_seconds": 0.0,
+    "error_kind": null,
+    "error_detail": null,
+    "reused": false,
+    "reused_reason": null,
+    "warnings": [],
+    "verdicts": [
+      {
+        "instance_id": "pytest-dev__pytest-11148",
+        "verdict": "NOT_EVALUATED",
+        "resolved": null,
+        "report_path": null,
+        "report_sha256": null,
+        "error_kind": null,
+        "error_detail": "official harness deferred until the internal closure is accepted",
+        "runtime_seconds": null
+      }
+    ],
+    "report_path": null,
+    "report_sha256": null,
+    "report": null,
+    "counts_toward_resolved_rate": false
+  },
+  "m2_vs_official": {
+    "internal_m2": "M2_DOES_NOT_CLAIM_SUCCESS",
+    "official": "NOT_EVALUATED",
+    "discrepancy": "OFFICIAL_NOT_EVALUATED",
+    "official_authoritative": true,
+    "note": "官方 resolved 是唯一结论来源；内部 M2 状态不参与判定"
+  },
+  "usage": {
+    "input_tokens": 325367,
+    "output_tokens": 19825,
+    "cached_input_tokens": 159104,
+    "cost": 0.22511431999999998,
+    "llm_calls": 24,
+    "cost_unknown_calls": 0,
+    "currency": "CNY",
+    "by_model": {
+      "glm-5.3-flash-main": {
+        "alias": "glm-5.3-flash-main",
+        "input_tokens": 325367,
+        "output_tokens": 19825,
+        "cached_input_tokens": 159104,
+        "cost": 0.22511431999999998,
+        "llm_calls": 24,
+        "cost_unknown_calls": 0
+      }
+    },
+    "by_role": {
+      "localizer": {
+        "alias": "localizer",
+        "input_tokens": 34984,
+        "output_tokens": 486,
+        "cached_input_tokens": 0,
+        "cost": 0.029348,
+        "llm_calls": 2,
+        "cost_unknown_calls": 0
+      },
+      "reproducer": {
+        "alias": "reproducer",
+        "input_tokens": 41746,
+        "output_tokens": 7778,
+        "cached_input_tokens": 0,
+        "cost": 0.05517520000000001,
+        "llm_calls": 6,
+        "cost_unknown_calls": 0
+      },
+      "planner": {
+        "alias": "planner",
+        "input_tokens": 82880,
+        "output_tokens": 4614,
+        "cached_input_tokens": 44864,
+        "cost": 0.05365072,
+        "llm_calls": 5,
+        "cost_unknown_calls": 0
+      },
+      "coder": {
+        "alias": "coder",
+        "input_tokens": 150534,
+        "output_tokens": 5924,
+        "cached_input_tokens": 114240,
+        "cost": 0.0718976,
+        "llm_calls": 10,
+        "cost_unknown_calls": 0
+      },
+      "diagnoser": {
+        "alias": "diagnoser",
+        "input_tokens": 15223,
+        "output_tokens": 1023,
+        "cached_input_tokens": 0,
+        "cost": 0.0150428,
+        "llm_calls": 1,
+        "cost_unknown_calls": 0
+      }
+    }
+  },
+  "cost": {
+    "budget_currency": "CNY",
+    "known_cost": 0.22511431999999998,
+    "cost_is_lower_bound": false,
+    "unknown_cost_calls": 0,
+    "budget_max_cost": 16.651194,
+    "simulated_llm": false,
+    "note": "真实 provider 记账：金额由服务商回传的用量与配置单价算出；unknown_cost_calls>0 时它是下界而不是总额"
+  },
+  "latency_seconds": 925.266
+}

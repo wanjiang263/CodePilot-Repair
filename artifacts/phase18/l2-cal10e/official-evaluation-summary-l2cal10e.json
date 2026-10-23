@@ -1,0 +1,38 @@
+{
+  "l2cal10c": {
+    "scope": 10,
+    "executed": 7,
+    "not_executed": 3,
+    "valid_denominator": 5,
+    "resolved": 2,
+    "unresolved": 3,
+    "effective_official_solve_rate": 0.4
+  },
+  "l2cal10d": {
+    "scope": 3,
+    "executed": 1,
+    "not_executed": 2,
+    "valid_denominator": 0,
+    "resolved": 0,
+    "unresolved": 0,
+    "effective_official_solve_rate": null
+  },
+  "l2cal10e": {
+    "scope": 2,
+    "executed_internal": 11,
+    "accepted": 1,
+    "official_valid": 1,
+    "resolved": 0,
+    "unresolved": 1,
+    "verdicts": {
+      "pytest-dev__pytest-11148": "NOT_EVALUATED",
+      "scikit-learn__scikit-learn-12471": "UNRESOLVED"
+    }
+  },
+  "combined": {
+    "valid_denominator": 6,
+    "resolved": 2,
+    "effective_official_solve_rate": 0.3333333333333333,
+    "note": "segments are listed separately; the 40% l2cal10c rate is not rewritten"
+  }
+}

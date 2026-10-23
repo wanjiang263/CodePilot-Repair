@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-22T19:16:40+00:00",
+  "currency": "CNY",
+  "opening_upper_bound_cny": 2.8096544000000003,
+  "new_settled_cny": 2.007048,
+  "new_unknown_reserved_cny": 0.8114688000000001,
+  "new_accounted_upper_bound_cny": 2.8185168000000003,
+  "registry_total_upper_bound_cny": 2.8185168000000003,
+  "new_attempt_labels": [
+    "l2cal10e",
+    "l2cal10e-a3",
+    "l2cal10e-a4",
+    "l2cal10e-a5",
+    "l2cal10e-a6",
+    "l2cal10e-a7",
+    "l2cal10e-a8",
+    "l2cal10e-a9",
+    "l2cal10e",
+    "l2cal10e-a5",
+    "l2cal10e-a6",
+    "l2cal10e-a7"
+  ],
+  "opening_included_attempt_labels": [],
+  "opening_ledger_count": 8,
+  "total_upper_bound_cny": 5.628171200000001,
+  "remaining_batch_budget_cny": 24.3718288,
+  "batch_cap_cny": 30.0,
+  "per_instance_cap_cny": 3.0,
+  "per_instance_totals": {
+    "pytest-dev__pytest-11148": 2.19448176,
+    "scikit-learn__scikit-learn-12471": 0.6240350400000001
+  },
+  "per_instance_remaining_cny": {
+    "pytest-dev__pytest-11148": 0.80551824,
+    "scikit-learn__scikit-learn-12471": 2.37596496
+  },
+  "next_dispatch_reserve_cny": 0.8114688,
+  "caps_respected": true,
+  "unknown_cost_calls": 1,
+  "opening_sources": 2,
+  "settled_sources": 6,
+  "note": "opening is added once; only attempt ledgers that are not already listed in the opening manifest count as new settled/unknown spend"
+}

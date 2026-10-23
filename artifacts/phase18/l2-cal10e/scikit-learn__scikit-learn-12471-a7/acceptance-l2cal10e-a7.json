@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-22T18:44:39+00:00",
+  "instance_id": "scikit-learn__scikit-learn-12471",
+  "label": "l2cal10e-a7",
+  "run_id": "swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54",
+  "run_report": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/runs/swebench-smoke-l2cal10e-a7-scikit-learn__scikit-learn-12471-s0-f7993c54/report.json",
+  "accepted": false,
+  "verdict": "REJECTED",
+  "checks": {
+    "real_run": true,
+    "patch_present": true,
+    "patch_validator": true,
+    "reproduce_recorded": true,
+    "target_test_executed": true,
+    "target_test_passed": true,
+    "target_test_present": true,
+    "target_test_source_visible": true,
+    "regression_clean": true,
+    "review_executed": true,
+    "review_approved": false,
+    "review_no_high_issues": true,
+    "review_bound_to_candidate": true
+  },
+  "evidence": {
+    "candidate_patch_sha256": "0df042d03d1b2afdc11d63c17517ecddce93fda4be12aaa6742640b2e7211343",
+    "final_patch_sha256": "9f1205069dcd1c6bb8c155ad97177b9ffe30c5c612afa3769099817c54cef74c",
+    "candidate_equals_delivered_patch": false,
+    "reviewed_patch_hash": "0df042d03d1b2afdc11d63c17517ecddce93fda4be12aaa6742640b2e7211343",
+    "target_test_source": "impact",
+    "target_tests": [
+      "sklearn/compose/tests/test_column_transformer.py",
+      "sklearn/preprocessing/tests/test_base.py",
+      "sklearn/preprocessing/tests/test_discretization.py"
+    ],
+    "reproduction_status": "failed",
+    "regression_new_failures": 0,
+    "review_high_issues": 0,
+    "official_evaluation": "DEFERRED"
+  }
+}
