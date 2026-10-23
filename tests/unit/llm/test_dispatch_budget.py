@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import json
 from pathlib import Path
 
 import httpx
@@ -119,3 +122,28 @@ def test_ledger_replace_retries_a_transient_windows_lock(
     guard._save()
     assert len(calls) == 2
     assert guard.path.exists()
+
+
+def test_guarded_send_accepts_a_per_instance_opening_balance(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import codepilot.llm.dispatch_budget as dispatch_budget
+
+    ledger = tmp_path / "ledger.json"
+    source = {"kind": "per_instance", "recovery_manifest_sha256": "a" * 64}
+    monkeypatch.setattr(dispatch_budget, "_guard", None)
+    monkeypatch.setenv("CODEPILOT_DISPATCH_BUDGET_CNY", "20")
+    monkeypatch.setenv("CODEPILOT_DISPATCH_LEDGER", str(ledger))
+    monkeypatch.setenv("CODEPILOT_DISPATCH_OPENING_CNY", "2.194482")
+    monkeypatch.setenv("CODEPILOT_DISPATCH_OPENING_SOURCE", json.dumps(source))
+
+    dispatch_budget.guarded_send(
+        model(),
+        {"max_tokens": 4096},
+        lambda: response({"prompt_tokens": 100, "completion_tokens": 10}),
+    )
+
+    payload = json.loads(ledger.read_text(encoding="utf-8"))
+    assert payload["opening_balance"] == pytest.approx(2.194482)
+    assert payload["opening_source"] == source
+    assert payload["accounted_or_reserved"] == pytest.approx(2.194482 + 0.000108)

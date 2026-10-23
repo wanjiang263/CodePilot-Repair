@@ -27,12 +27,25 @@ class DispatchBudgetStoppedError(RuntimeError):
 
 
 class DispatchBudget:
-    def __init__(self, limit: float, path: Path) -> None:
+    def __init__(
+        self,
+        limit: float,
+        path: Path,
+        *,
+        opening_balance: float = 0.0,
+        opening_source: dict[str, Any] | None = None,
+    ) -> None:
         if not math.isfinite(limit) or limit <= 0:
             raise ValueError("dispatch budget must be finite and positive")
+        if not math.isfinite(opening_balance) or opening_balance < 0:
+            raise ValueError("opening balance must be finite and non-negative")
+        if opening_source is not None and not isinstance(opening_source, dict):
+            raise ValueError("opening source must be a mapping")
         self.limit = limit
         self.path = path
-        self.total = 0.0
+        self.opening_balance = opening_balance
+        self.opening_source = opening_source
+        self.total = opening_balance
         self.frozen = False
         self.records: list[dict[str, Any]] = []
         self.lock = threading.Lock()
@@ -47,6 +60,8 @@ class DispatchBudget:
             "limit": self.limit,
             "accounted_or_reserved": self.total,
             "frozen": self.frozen,
+            "opening_balance": self.opening_balance,
+            "opening_source": self.opening_source,
             "requests": self.records,
         }
         staging = self.path.with_suffix(".tmp")
@@ -169,5 +184,14 @@ def guarded_send(
         return send()
     with _init_lock:
         if _guard is None:
-            _guard = DispatchBudget(float(limit), Path(os.environ["CODEPILOT_DISPATCH_LEDGER"]))
+            opening_raw = os.environ.get("CODEPILOT_DISPATCH_OPENING_CNY")
+            opening = float(opening_raw) if opening_raw else 0.0
+            source_raw = os.environ.get("CODEPILOT_DISPATCH_OPENING_SOURCE")
+            opening_source = json.loads(source_raw) if source_raw else None
+            _guard = DispatchBudget(
+                float(limit),
+                Path(os.environ["CODEPILOT_DISPATCH_LEDGER"]),
+                opening_balance=opening,
+                opening_source=opening_source,
+            )
     return _guard.send(spec, body, send)
