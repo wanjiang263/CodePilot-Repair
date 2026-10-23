@@ -24,6 +24,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import os
 import time
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
@@ -324,8 +325,20 @@ class InferenceOutcome:
     error_origin: str | None = None
     """责任侧：model / provider / tool / workspace / harness。"""
 
+    target_test_source: str | None = None
+    """目标测试来源：reproduction/planner/impact/baseline/related/none。"""
+
+    target_tests: tuple[str, ...] = ()
+    """实际交给 Sandbox 的目标测试；空元组只表示没有目标，不表示通过。"""
+
     plan_corrections: int = 0
     """Planner 被重新问了几次。与服务商 HTTP 重试分开计。"""
+
+    plan_semantic_rejections: int = 0
+    """被语义校验拒绝的计划次数。"""
+
+    plan_schema_rejections: int = 0
+    """未通过 JSON Schema / Pydantic 的次数。"""
 
     plan_tool_audit: dict[str, Any] = field(default_factory=dict)
     """Planner 工具审计摘要。``{}`` = **没有采集到**，不等于"模型没调用工具"。"""
@@ -462,6 +475,7 @@ class InferenceAssembly:
             | INFERENCE_DENIED_DIRECTORIES,
             repro_write=self._with_reproducer,
             allow_new_tests=self._allow_new_tests,
+            deny_existing_test_edits=os.environ.get("CODEPILOT_DENY_EXISTING_TEST_EDITS") == "1",
         )
         database = artifacts.run_dir / "index.sqlite3"
         engine = create_engine_from_url(f"sqlite:///{database.as_posix()}")
@@ -828,7 +842,19 @@ class InferenceAssembly:
             failure_reasons=tuple(state.failure_reasons),
             error_class=state.error_class,
             error_origin=state.error_origin,
+            target_test_source=(
+                state.current_attempt.target_test_source
+                if state.current_attempt is not None
+                else None
+            ),
+            target_tests=(
+                tuple(state.current_attempt.target_tests)
+                if state.current_attempt is not None
+                else ()
+            ),
             plan_corrections=state.plan_corrections,
+            plan_semantic_rejections=state.plan_semantic_rejections,
+            plan_schema_rejections=state.plan_schema_rejections,
             plan_tool_audit=(state.plan_tools.summary() if state.plan_tools is not None else {}),
             llm_requests=self._recorder.summary() if self._recorder is not None else {},
             checkpointed=self._checkpoint,

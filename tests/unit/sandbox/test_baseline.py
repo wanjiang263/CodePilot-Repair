@@ -101,3 +101,33 @@ def test_budget_preflight_blocks_second_external_run(tmp_path: Path) -> None:
     assert len(sandbox.run_calls) == 1
     assert not baseline.complete
     assert "status=TIMEOUT" in baseline.evidence[1]
+
+
+def test_explicit_scope_is_forwarded_and_pseudo_paths_are_filtered(tmp_path: Path) -> None:
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests/test_ok.py").write_text("", encoding="utf-8")
+    sandbox = FakeSandbox(
+        [
+            execution(
+                ("tests/test_ok.py::test_ok", TestOutcome.PASSED),
+                ("testing.py::python::metafunc::test_x", TestOutcome.PASSED),
+            )
+        ]
+        * 2
+    )
+    environment = sandbox.build_env(
+        repository="repo", base_commit="base", workspace=tmp_path, env_spec=EnvSpec()
+    )
+
+    baseline = build_test_baseline(
+        sandbox,
+        base_commit="base",
+        workspace=tmp_path,
+        environment=environment,
+        env_spec=EnvSpec(),
+        tests=("tests/test_ok.py",),
+    )
+
+    assert baseline.outcomes == {"tests/test_ok.py::test_ok": TestOutcome.PASSED}
+    assert all(call[1] == ("tests/test_ok.py",) for call in sandbox.run_calls)
+    assert "scope=1 explicit test targets" in baseline.evidence

@@ -50,6 +50,7 @@ class FailureClass(StrEnum):
 
     MODEL_OUTPUT_INVALID = "model_output_invalid"
     PLAN_SEMANTIC_INVALID = "plan_semantic_invalid"
+    TARGET_TEST_UNAVAILABLE = "target_test_unavailable"
     TOOL_PERMISSION_DENIED = "tool_permission_denied"
     LLM_PROVIDER_ERROR = "llm_provider_error"
     LLM_REQUEST_UNCERTAIN = "llm_request_uncertain"
@@ -193,6 +194,49 @@ def classify_exception(exc: BaseException, *, node: str | None = None) -> AgentF
         if exc.node is None:
             exc.node = node
         return exc
+
+    # 派发账本冻结是 provider 侧的未知结果，不是 Harness 崩溃。xarray 的
+    # ReadTimeout 曾被归成 HARNESS_INTERNAL_ERROR，正是这条缺失的映射。
+    from codepilot.llm.dispatch_budget import DispatchBudgetStoppedError
+
+    if isinstance(exc, DispatchBudgetStoppedError):
+        return AgentFailureError(
+            redact_text(str(exc)),
+            failure_class=FailureClass.LLM_REQUEST_UNCERTAIN,
+            origin=ErrorOrigin.PROVIDER,
+            node=node,
+            details={"error_type": type(exc).__name__},
+        )
+
+    import httpx
+
+    if isinstance(exc, httpx.TimeoutException):
+        return AgentFailureError(
+            redact_text(str(exc)),
+            failure_class=FailureClass.LLM_REQUEST_UNCERTAIN,
+            origin=ErrorOrigin.PROVIDER,
+            node=node,
+            details={"error_type": type(exc).__name__},
+        )
+    if isinstance(exc, httpx.TransportError):
+        return AgentFailureError(
+            redact_text(str(exc)),
+            failure_class=FailureClass.LLM_PROVIDER_ERROR,
+            origin=ErrorOrigin.PROVIDER,
+            node=node,
+            details={"error_type": type(exc).__name__},
+        )
+
+    from docker.errors import DockerException
+
+    if isinstance(exc, DockerException):
+        return AgentFailureError(
+            redact_text(str(exc)),
+            failure_class=FailureClass.WORKSPACE_ERROR,
+            origin=ErrorOrigin.WORKSPACE,
+            node=node,
+            details={"error_type": type(exc).__name__},
+        )
 
     if isinstance(exc, StructuredOutputError):
         semantic = exc.last_stage == "semantic"

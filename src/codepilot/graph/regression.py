@@ -28,6 +28,11 @@ __all__ = [
 #: "L3 full-run limit reached"（``complete=False``），**不再**多花一次容器执行。
 MAX_FULL_REGRESSION_RUNS = 2
 
+#: 一次回归检查里所有新失败共享的 flaky 重试预算。每个新失败各重试两次会把
+#: ``max_test_runs`` 耗尽（真实 pytest run 里 9 个新失败 × 2 = 18 次），修复循环
+#: 反而没有额度执行；预留量与 closure admission 的 ``retry_reserve`` 一致。
+MAX_NEW_FAILURE_RETRIES = 2
+
 
 def usable_baseline(state: RepairState) -> TestBaseline | None:
     """回归可以依据的基线；不完整、与当前 base commit 不一致或为空时返回 ``None``。
@@ -86,7 +91,12 @@ class RegressionRunner:
         result.baseline_commit = baseline.base_commit
         result.baseline_hash = digest(baseline.model_dump(mode="json"))
         result.flaky = set(baseline.flaky)
-        authorized = sorted(baseline.outcomes)
+        # Re-sorting node ids reorders session-scoped fixtures: a test that
+        # moves a shared directory can run before the tests that read it, and
+        # those failures are not regressions at all. ``outcomes`` is sorted for
+        # stable storage; the first run keeps pytest's collection order.
+        source_order = baseline.run_outcomes[0] if baseline.run_outcomes else baseline.outcomes
+        authorized = list(source_order)
         result.unexecuted_tests = list(authorized)
         if state.execution is None or state.execution.status is not ExecutionStatus.PASS:
             result.failure_reason = "L1 has not passed"
@@ -172,12 +182,19 @@ class RegressionRunner:
                     if baseline.outcomes.get(t.node_id) in {TestOutcome.FAILED, TestOutcome.ERROR}
                 }
             )
+            retries_left = MAX_NEW_FAILURE_RETRIES
             for node in new_failures(baseline, execution):
                 if node in result.flaky:
                     continue
+                if retries_left <= 0:
+                    result.new_failures.append(node)
+                    continue
                 retries = []
                 for attempt in range(2):
+                    if retries_left <= 0:
+                        break
                     retry = run_scope(f"{key}-retry-{digest(node)[:16]}-{attempt}", [node])
+                    retries_left -= 1
                     retries.append(retry)
                     result.retries[node] = retries
                     if retry.status not in {ExecutionStatus.PASS, ExecutionStatus.FAIL} or [
@@ -186,6 +203,9 @@ class RegressionRunner:
                         result.status = retry.status.value
                         result.failure_reason = "flaky retry incomplete"
                         return False
+                if len(retries) < 2:
+                    result.new_failures.append(node)
+                    continue
                 if any(r.tests[0].outcome is TestOutcome.PASSED for r in retries):
                     result.flaky.add(node)
                 elif all(
@@ -215,6 +235,15 @@ class RegressionRunner:
         key = "L3"
         if estimate > remaining:
             candidates = sorted(set(authorized) - set(affected))
+            if not candidates and affected:
+                # L2 already executed the entire baseline scope; a second full
+                # pass would repeat the same tests and evidence. Require that L2
+                # actually ran: an empty first baseline run must not turn into a
+                # "complete" regression with zero executed tests.
+                result.levels_run.append(RegressionLevel.FULL)
+                result.complete = True
+                result.status = "completed"
+                return result
             scope = sorted(
                 random.Random(self.seed).sample(candidates, math.ceil(len(candidates) * 0.2))
             )

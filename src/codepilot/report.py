@@ -70,6 +70,12 @@ class VerificationClosure(BaseModel):
     target_test_sha256: str
     """目标测试执行时所在补丁版本（Attempt 上记录的 SHA-256）。"""
 
+    target_test_source: str | None = None
+    """目标测试来源：reproduction/planner/impact/baseline/related/none。"""
+
+    target_tests: list[str] = Field(default_factory=list)
+    """实际交给 Sandbox 的目标测试；空列表不等于通过。"""
+
     regression_executed: bool
     regression_complete: bool
     regression_levels: list[str]
@@ -142,6 +148,8 @@ class VerificationClosure(BaseModel):
             target_tests_executed=execution is not None,
             target_tests_status=execution.status.value if execution is not None else None,
             target_test_sha256=attempt.patch_hash if attempt is not None else "",
+            target_test_source=attempt.target_test_source if attempt is not None else None,
+            target_tests=attempt.target_tests if attempt is not None else [],
             regression_executed=regression is not None,
             regression_complete=bool(regression and regression.complete),
             regression_levels=[
@@ -255,6 +263,12 @@ class RunReport(BaseModel):
     plan_corrections: int = 0
     """Planner 被重新问的次数。与服务商 HTTP 重试分开计。"""
 
+    plan_semantic_rejections: int = 0
+    """被语义校验拒绝的计划次数（每次都有 artifact）。"""
+
+    plan_schema_rejections: int = 0
+    """未通过 JSON Schema / Pydantic 的次数。"""
+
     plan_tool_audit: dict[str, Any] = Field(default_factory=dict)
     """Planner 工具审计摘要。空 dict = **没采集到**，不等于"模型没调用工具"。"""
 
@@ -333,6 +347,8 @@ class RunReport(BaseModel):
             error_class=state.error_class,
             error_origin=state.error_origin,
             plan_corrections=state.plan_corrections,
+            plan_semantic_rejections=state.plan_semantic_rejections,
+            plan_schema_rejections=state.plan_schema_rejections,
             plan_tool_audit=(state.plan_tools.summary() if state.plan_tools is not None else {}),
             artifacts=artifact_map,
             evidence=evidence,
@@ -440,7 +456,9 @@ class RunReport(BaseModel):
         attribution = (
             f"- Failure attribution: `{self.error_class or 'none'}` / "
             f"`{self.error_origin or 'none'}`\n"
-            f"- Planner corrections: `{self.plan_corrections}`; "
+            f"- Planner corrections: `{self.plan_corrections}` "
+            f"(semantic rejections `{self.plan_semantic_rejections}`, "
+            f"schema rejections `{self.plan_schema_rejections}`); "
             f"planner tool audit: "
             f"`{self.plan_tool_audit or 'NOT COLLECTED (not the same as zero calls)'}`\n"
         )

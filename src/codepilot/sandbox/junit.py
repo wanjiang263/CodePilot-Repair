@@ -39,15 +39,15 @@ class JUnitReport(BaseModel):
     declared_tests: int = 0
 
 
-def parse_junit(path: Path) -> JUnitReport:
+def parse_junit(path: Path, *, workspace: Path | None = None) -> JUnitReport:
     try:
         text = Path(path).read_text(encoding="utf-8", errors="replace")
     except OSError as exc:
         raise JUnitParseError(f"无法读取 JUnit XML: {path}") from exc
-    return parse_junit_text(text)
+    return parse_junit_text(text, workspace=workspace)
 
 
-def parse_junit_text(text: str) -> JUnitReport:
+def parse_junit_text(text: str, *, workspace: Path | None = None) -> JUnitReport:
     try:
         root = ElementTree.fromstring(text)
     except ElementTree.ParseError as exc:
@@ -58,7 +58,7 @@ def parse_junit_text(text: str) -> JUnitReport:
     suites = [root] if root.tag == "testsuite" else list(root.iter("testsuite"))
     cases: list[TestCaseResult] = []
     for element in root.iter("testcase"):
-        cases.append(_parse_case(element))
+        cases.append(_parse_case(element, workspace=workspace))
     return JUnitReport(
         tests=cases,
         suite_errors=sum(_integer(suite.get("errors")) for suite in suites),
@@ -68,7 +68,7 @@ def parse_junit_text(text: str) -> JUnitReport:
     )
 
 
-def _parse_case(element: ElementTree.Element) -> TestCaseResult:
+def _parse_case(element: ElementTree.Element, *, workspace: Path | None = None) -> TestCaseResult:
     outcome = TestOutcome.PASSED
     detail: ElementTree.Element | None = None
     if (failure := element.find("failure")) is not None:
@@ -88,7 +88,7 @@ def _parse_case(element: ElementTree.Element) -> TestCaseResult:
     except ValueError:
         duration = 0.0
     return TestCaseResult(
-        node_id=_node_id(element),
+        node_id=_node_id(element, workspace=workspace),
         outcome=outcome,
         duration=max(duration, 0.0),
         message=message,
@@ -126,7 +126,7 @@ def failure_type_from_traceback(traceback: str) -> str | None:
     return None
 
 
-def _node_id(element: ElementTree.Element) -> str:
+def _node_id(element: ElementTree.Element, *, workspace: Path | None = None) -> str:
     name = element.get("name", "<unknown>")
     file_name = element.get("file")
     class_name = element.get("classname", "")
@@ -142,6 +142,17 @@ def _node_id(element: ElementTree.Element) -> str:
         return name
 
     parts = class_name.replace("/", ".").split(".")
+    if workspace is not None:
+        # pytest 的 JUnit 不总是写 ``file``；classname 的点分模块名可以解析到
+        # 工作区里的真实文件，尤其是 ``testing/python/metafunc.py`` 这种模块名
+        # 不以 ``test`` 开头的目录结构。
+        for index in range(len(parts), 0, -1):
+            candidate = workspace / Path(*parts[:index]).with_suffix(".py")
+            if candidate.is_file():
+                relative = candidate.relative_to(workspace).as_posix()
+                suffix = [*parts[index:], name]
+                return "::".join([relative, *suffix])
+
     module_index = next(
         (index for index in range(len(parts) - 1, -1, -1) if parts[index].startswith("test")),
         len(parts) - 1,

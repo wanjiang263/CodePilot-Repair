@@ -107,10 +107,12 @@ def selected_target_tests(state: RepairState) -> tuple[str, ...]:
 
 
 def route_after_validate_patch(state: RepairState) -> Node:
-    """validate_patch → check_budget | run_target_tests | run_regression | finalize。
+    """validate_patch → check_budget | run_target_tests | finalize。
 
     无效补丁**不执行测试**，直接进 check_budget：那里才会数出"连续三次校验失败"
-    并触发 ``validation_loop``（02 §15.5）。
+    并触发 ``validation_loop``（02 §15.5）。有效补丁一律进入目标测试节点：哪怕
+    Planner 没给测试，目标选择器还要检查 impact/baseline/related；真的没有合法
+    目标时由该节点写成 ``TARGET_TEST_UNAVAILABLE``，而不是跳过验证。
     """
     if terminated(state):
         return Node.FINALIZE
@@ -120,9 +122,6 @@ def route_after_validate_patch(state: RepairState) -> Node:
         return Node.FINALIZE
     if not attempt.validation.passed:
         return Node.CHECK_BUDGET
-    if not selected_target_tests(state):
-        # 02 §15.2：没有目标测试时直接进入回归/待验收边界，不伪造目标测试通过。
-        return Node.RUN_REGRESSION
     return Node.RUN_TARGET_TESTS
 
 
@@ -134,6 +133,10 @@ def route_after_target_tests(state: RepairState) -> Node:
     if execution is None:
         return Node.FINALIZE
     if execution.is_environment_problem:
+        # 补丁自身导致的 collection/导入错误属于模型侧，必须能进入诊断；
+        # 基础设施错误仍按 02 §13.4 终止。
+        if state.error_origin == "model":
+            return Node.DIAGNOSE
         return Node.FINALIZE
     if execution.status is ExecutionStatus.PASS:
         return Node.RUN_REGRESSION

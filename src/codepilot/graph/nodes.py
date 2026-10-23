@@ -51,6 +51,7 @@ from codepilot.graph.routing import (
     selected_target_tests,
 )
 from codepilot.graph.stop_rules import patch_hash
+from codepilot.graph.target_tests import changed_files, select_target_tests
 from codepilot.observability.events import EventType
 from codepilot.observability.redaction import redact_text
 from codepilot.patch.diff import generate_git_diff
@@ -69,6 +70,7 @@ from codepilot.schemas.localization import (
 from codepilot.schemas.reproduction import ReproductionResult, ReproductionStatus
 from codepilot.schemas.retrieval import RankedFile, RankedSymbol
 from codepilot.schemas.state import Attempt, RepairState
+from codepilot.tools.base import PathAccessError, WorkspacePathPolicy, is_test_path
 from codepilot.tools.write_tools import validate_test_target
 
 __all__ = [
@@ -436,7 +438,8 @@ async def build_env(state: RepairState, deps: Deps) -> dict[str, Any]:
             StopReason.BUDGET_TEST_RUNS,
             ["baseline requires two test runs"],
         )
-    baseline: TestBaseline = _build_baseline(deps, state)
+    scope = _baseline_scope(state, deps.validator.policy)
+    baseline: TestBaseline = _build_baseline(deps, state, scope)
     return {
         "baseline": baseline,
         "test_runs": deps.test_runs,
@@ -448,11 +451,38 @@ async def build_env(state: RepairState, deps: Deps) -> dict[str, Any]:
             complete=baseline.complete,
             tests=len(baseline.outcomes),
             flaky=len(baseline.flaky),
+            scope=len(scope),
         ),
     }
 
 
-def _build_baseline(deps: Deps, state: RepairState) -> TestBaseline:
+def _baseline_scope(state: RepairState, policy: WorkspacePathPolicy) -> tuple[str, ...]:
+    """Impact-related existing test files used as the baseline's explicit scope.
+
+    An empty tuple keeps the official test command's full range. The scope is
+    filtered through the same path/test-target policy as any executable target;
+    repository files such as ``conftest.py`` and ``__init__.py`` are excluded.
+    """
+    impact = state.impact
+    if impact is None:
+        return ()
+    candidates = [*impact.related_tests, *(item.path for item in impact.related_test_evidence)]
+    valid: set[str] = set()
+    for raw in candidates:
+        path = str(raw).split("::", 1)[0].strip()
+        if not path or path.rsplit("/", 1)[-1] in {"__init__.py", "conftest.py"}:
+            continue
+        try:
+            policy.resolve(path, must_exist=True)
+            validate_test_target(policy, path)
+        except (PathAccessError, ValueError, OSError):
+            continue
+        if is_test_path(path):
+            valid.add(path)
+    return tuple(sorted(valid))
+
+
+def _build_baseline(deps: Deps, state: RepairState, scope: tuple[str, ...]) -> TestBaseline:
     from codepilot.sandbox.baseline import build_test_baseline
     from codepilot.sandbox.env_spec import EnvSpec
 
@@ -474,6 +504,7 @@ def _build_baseline(deps: Deps, state: RepairState) -> TestBaseline:
         workspace=deps.require_workspace(),
         environment=deps.environment,
         env_spec=deps.env_spec,
+        tests=scope,
         before_run=before_run,
     )
 
@@ -569,14 +600,18 @@ async def plan(state: RepairState, deps: Deps) -> dict[str, Any]:
             retrieval=state.retrieval,
         )
     finally:
-        # 失败的那次运行更需要工具证据：计划被拒时如果只留下 ``plan_rejections.jsonl``
+        # 失败的那次运行更需要工具证据：计划被拒时如果只留下 ``plan_semantic_rejections.jsonl``
         # 而没有 ``plan_tools.json``，事后就看不出模型到底查过什么才写出这个计划。
         audit = deps.planner.write_audit()
     corrections = int(getattr(deps.planner, "last_plan_corrections", 0))
+    semantic_rejections = int(getattr(deps.planner, "last_semantic_rejections", 0))
+    schema_rejections = int(getattr(deps.planner, "last_schema_rejections", 0))
     return {
         "plan": repair_plan,
         "plan_tools": audit,
         "plan_corrections": state.plan_corrections + corrections,
+        "plan_semantic_rejections": state.plan_semantic_rejections + semantic_rejections,
+        "plan_schema_rejections": state.plan_schema_rejections + schema_rejections,
         "usage": deps.usage,
         "events": _emit(
             state,
@@ -587,6 +622,8 @@ async def plan(state: RepairState, deps: Deps) -> dict[str, Any]:
             tests=len(repair_plan.tests_to_run),
             planned_new_tests=len(repair_plan.planned_new_tests),
             plan_corrections=corrections,
+            plan_semantic_rejections=semantic_rejections,
+            plan_schema_rejections=schema_rejections,
             tool_audit=audit.summary(),
         ),
     }
@@ -595,21 +632,59 @@ async def plan(state: RepairState, deps: Deps) -> dict[str, Any]:
 # --------------------------------------------------------------- 补丁生成与校验
 
 
-def _authorized_targets(deps: Deps, state: RepairState) -> list[str]:
-    """把目标测试名过一遍 Workspace 路径策略，越界的直接拒。"""
-    targets: list[str] = []
-    for raw in selected_target_tests(state):
-        try:
-            if (
-                state.baseline is not None
-                and not reproduction_target_tests(state)
-                and not any(n == raw or n.startswith(raw + "::") for n in state.baseline.outcomes)
-            ):
-                continue
-            targets.append(validate_test_target(deps.validator.policy, raw))
-        except ValueError:
-            continue
-    return targets
+def _patched_file_mentioned(text: str, changed: tuple[str, ...]) -> bool:
+    normalized = text.replace("\\", "/")
+    for path in changed:
+        if path in normalized:
+            return True
+        module = path[:-3].replace("/", ".") if path.endswith(".py") else ""
+        if module and module in normalized:
+            return True
+    return False
+
+
+def _target_execution_attribution(
+    execution: ExecutionResult, changed: tuple[str, ...]
+) -> tuple[str, str, str] | None:
+    """COLLECTION_ERROR / ENV_ERROR 的归因；返回 ``(class, origin, reason)``。
+
+    第三方依赖缺失与 Docker/环境故障属于基础设施；补丁导致的语法/导入错误属于
+    模型。无法归到补丁的 collection 失败按基础设施处理，宁可承认没测到，也不把
+    它算成模型修复失败。
+    """
+    if execution.status is ExecutionStatus.COLLECTION_ERROR:
+        text = "\n".join(
+            [
+                execution.stdout_tail,
+                execution.stderr_tail,
+                execution.error_reason or "",
+                *(f"{test.message or ''}\n{test.traceback or ''}" for test in execution.tests),
+            ]
+        )
+        if _patched_file_mentioned(text, changed):
+            return (
+                "model_output_invalid",
+                "model",
+                "COLLECTION_ERROR caused by the patched code; entering diagnosis",
+            )
+        return (
+            "workspace_error",
+            "workspace",
+            "COLLECTION_ERROR during collection; treated as an infrastructure failure",
+        )
+    if execution.status is ExecutionStatus.ENV_ERROR:
+        return (
+            "workspace_error",
+            "workspace",
+            f"ENV_ERROR before target tests could run: {execution.error_reason or 'unspecified'}",
+        )
+    if execution.status is ExecutionStatus.SANDBOX_ERROR:
+        return (
+            "workspace_error",
+            "workspace",
+            f"SANDBOX_ERROR during target tests: {execution.error_reason or 'unspecified'}",
+        )
+    return None
 
 
 #: Coding Agent 内部触发的局部额度停止 → 权威 StopReason（G-08："不能静默忽略"）。
@@ -719,10 +794,10 @@ def _closure_test_plan(state: RepairState, deps: Deps) -> ClosureTestPlan:
 
     三个条件都**问即将真正执行的那段代码**，不在这里另写一套判据：
 
-    * 目标测试：``selected_target_tests`` 有内容才会真的执行一次。为空时
-      :func:`~codepilot.graph.routing.route_after_validate_patch` 直接进回归，本来就不该
-      为它预留一次 L1。
-    * L2 / L3：只看 :func:`~codepilot.graph.regression.usable_baseline`（回归自己的前置
+    * 目标测试：有效补丁现在一律进入 ``run_target_tests``（选择器可能从 impact/
+      baseline/related 找到 Planner 没写的测试），因此每轮候选都按一次 L1 预留；
+      真的没有合法目标时该节点会以 ``TARGET_TEST_UNAVAILABLE`` 终止，预留自然不用。
+    * L2 / L3：只看 :func:`codepilot.graph.regression.usable_baseline`（回归自己的前置
       条件）与 L3 全量次数上限。**当前**这一版补丁测试还没跑过或跑成失败并不影响这一项
       ——修复轮要算的是"下一版候选"的闭环。
     * 抽样降级（``regression_mode=sampled``）同样是一次 ``run_tests``，所以准入不足
@@ -734,7 +809,7 @@ def _closure_test_plan(state: RepairState, deps: Deps) -> ClosureTestPlan:
     measured = usable_baseline(state) is not None
     return deps.budget.closure_test_plan(
         state,
-        target_tests_planned=bool(selected_target_tests(state)),
+        target_tests_planned=True,
         impact_level_expected=measured,
         full_level_expected=measured and full_regression_runs(state) < MAX_FULL_REGRESSION_RUNS,
         runs_spent=deps.test_runs,
@@ -938,23 +1013,45 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
     blocked = _budget_guard(state, deps, Activity.TEST, Node.RUN_TARGET_TESTS)
     if blocked is not None:
         return blocked
-    targets = _authorized_targets(deps, state)
+    selection = select_target_tests(
+        state,
+        policy=deps.validator.policy,
+        index=deps.index,
+        repo_graph=deps.repo_graph,
+        baseline=state.baseline,
+    )
+    targets = list(selection.tests)
     if not targets:
-        # 没有可执行的目标测试：**不伪造**"目标测试通过"。
-        return {
-            **_terminal(
-                state,
-                deps,
-                Node.RUN_TARGET_TESTS.value,
-                RunStatus.FAILED,
-                StopReason.TESTS_FAILED,
-                [
-                    "no authorized target test available: the patch was never executed, "
-                    "so repair cannot be self-assessed"
-                ],
-            ),
-            "test_runs": deps.test_runs,
-        }
+        # 没有可执行的目标测试：**不伪造**"目标测试通过"。这是模型侧缺口，
+        # 不是 Harness 崩溃；回归与审查保持 NOT EXECUTED。
+        updated = attempt.model_copy(
+            update={"target_test_source": selection.source, "target_tests": []}
+        )
+        result = _terminal(
+            state,
+            deps,
+            Node.RUN_TARGET_TESTS.value,
+            RunStatus.FAILED,
+            StopReason.TESTS_FAILED,
+            [
+                "TARGET_TEST_UNAVAILABLE: no_authorized_target_test; the patch was never "
+                "executed, so repair cannot be self-assessed"
+            ],
+            attempts=_update_last(state, updated),
+            test_runs=deps.test_runs,
+        )
+        result["error_class"] = "target_test_unavailable"
+        result["error_origin"] = "model"
+        result["events"] = _emit(
+            state,
+            deps,
+            Node.RUN_TARGET_TESTS.value,
+            "target_test_unavailable",
+            error="no_authorized_target_test",
+            target_test_source=selection.source,
+            rejected=len(selection.rejected),
+        )
+        return result
     execution = deps.sandbox.run_tests(
         workspace=deps.require_workspace(),
         environment=deps.environment,
@@ -977,7 +1074,11 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
         node=Node.RUN_TARGET_TESTS.value,
         type=EventType.SANDBOX_RUN,
         status=execution.status.value,
-        extra={"iteration": attempt.iteration, "tests": len(targets)},
+        extra={
+            "iteration": attempt.iteration,
+            "tests": len(targets),
+            "target_test_source": selection.source,
+        },
     )
     failures = deps.failure_parser.parse_execution(execution).failures
     classified = [
@@ -995,6 +1096,8 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
             "execution": execution,
             "failure_signatures": signatures,
             "progress": snapshot,
+            "target_test_source": selection.source,
+            "target_tests": list(targets),
         }
     )
     fields: dict[str, Any] = {
@@ -1008,8 +1111,29 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
             execution.status.value,
             iteration=attempt.iteration,
             failed=execution.tests_failed,
+            target_test_source=selection.source,
         ),
     }
+    attribution = _target_execution_attribution(execution, changed_files(state.current_patch))
+    if attribution is not None:
+        failure_class, origin, reason = attribution
+        if origin == "model":
+            # 补丁语法/导入错误可以纠正：保留执行证据，交给 diagnose 进入修复循环。
+            return {
+                **fields,
+                "error_class": failure_class,
+                "error_origin": origin,
+                "failure_reasons": [*state.failure_reasons, reason],
+            }
+        # 第三方依赖、Docker 或 collection 环境故障：直接终止，不进入诊断。
+        return {
+            **fields,
+            "status": RunStatus.SANDBOX_ERROR,
+            "stop_reason": StopReason.SANDBOX_FAILURE,
+            "error_class": failure_class,
+            "error_origin": origin,
+            "failure_reasons": [*state.failure_reasons, reason],
+        }
     if execution.is_environment_problem:
         # 环境问题直接终止（02 §13.4）；OOM 已在 Phase 4 归为 SANDBOX_ERROR。
         return {

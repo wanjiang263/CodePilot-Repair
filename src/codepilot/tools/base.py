@@ -106,6 +106,7 @@ class WorkspacePathPolicy:
         deny_files: Iterable[str] = DEFAULT_DENY_FILES,
         repro_write: bool = False,
         allow_new_tests: bool = False,
+        deny_existing_test_edits: bool = False,
     ) -> None:
         root = Path(workspace).resolve(strict=True)
         if not root.is_dir():
@@ -115,6 +116,7 @@ class WorkspacePathPolicy:
         self.deny_files = frozenset(self._normalize_rule(item) for item in deny_files)
         self.repro_write = bool(repro_write)
         self.allow_new_tests = bool(allow_new_tests)
+        self.deny_existing_test_edits = bool(deny_existing_test_edits)
 
     @staticmethod
     def _normalize_rule(value: str) -> str:
@@ -178,6 +180,16 @@ class WorkspacePathPolicy:
         ):
             raise PathAccessError(
                 "forbidden_path", "resolved new test requires trusted task authorization"
+            )
+        if (
+            for_write
+            and must_exist
+            and self.deny_existing_test_edits
+            and is_test_path(resolved.relative_to(self.root).as_posix())
+            and not (self.repro_write and _touches_reproduction_directory(posix))
+        ):
+            raise PathAccessError(
+                "forbidden_path", "existing test files cannot be modified by the coder"
             )
         if for_write:
             self._check_reproduction_parent(posix, resolved, for_write=for_write)

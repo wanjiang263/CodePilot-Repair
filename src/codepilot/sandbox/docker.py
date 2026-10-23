@@ -499,7 +499,7 @@ class DockerSandbox:
         junit: JUnitReport | None = None
         junit_error: str | None = None
         try:
-            junit = parse_junit(output_dir / JUNIT_XML)
+            junit = parse_junit(output_dir / JUNIT_XML, workspace=workspace)
         except JUnitParseError as exc:
             junit_error = str(exc)
 

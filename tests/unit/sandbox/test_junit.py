@@ -53,3 +53,35 @@ def test_incomplete_but_well_formed_xml_has_explicit_defaults() -> None:
 def test_malformed_xml_is_not_inferred_from_stdout() -> None:
     with pytest.raises(JUnitParseError, match="损坏"):
         parse_junit(FIXTURES / "malformed.xml")
+
+
+def test_classname_resolves_to_the_real_workspace_file(tmp_path: Path) -> None:
+    (tmp_path / "testing/python").mkdir(parents=True)
+    (tmp_path / "testing/python/metafunc.py").write_text("", encoding="utf-8")
+    xml = (
+        '<?xml version="1.0" encoding="utf-8"?>'
+        '<testsuites><testsuite tests="1" errors="0" failures="0" skipped="0">'
+        '<testcase classname="testing.python.metafunc" name="test_example" time="0"/>'
+        "</testsuite></testsuites>"
+    )
+    junit = tmp_path / "junit.xml"
+    junit.write_text(xml, encoding="utf-8")
+
+    report = parse_junit(junit, workspace=tmp_path)
+
+    assert report.tests[0].node_id == "testing/python/metafunc.py::test_example"
+
+
+def test_classname_falls_back_without_a_workspace(tmp_path: Path) -> None:
+    xml = (
+        '<?xml version="1.0" encoding="utf-8"?>'
+        '<testsuites><testsuite tests="1" errors="0" failures="0" skipped="0">'
+        '<testcase classname="testing.python.metafunc" name="test_example" time="0"/>'
+        "</testsuite></testsuites>"
+    )
+    junit = tmp_path / "junit.xml"
+    junit.write_text(xml, encoding="utf-8")
+
+    report = parse_junit(junit)
+
+    assert report.tests[0].node_id == "testing.py::python::metafunc::test_example"

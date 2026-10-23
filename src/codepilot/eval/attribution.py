@@ -121,6 +121,8 @@ def attribute_run(
     # 没做独立评测：先说清楚是**谁**让评测没发生的。
     if error_class == "plan_semantic_invalid":
         return Attribution.MODEL_INVALID_PLAN
+    if error_class == "target_test_unavailable":
+        return Attribution.MODEL_OUTPUT_ERROR
     if error_class == "model_output_invalid" and error_origin == "model":
         return Attribution.MODEL_OUTPUT_ERROR
     if env_stopped:

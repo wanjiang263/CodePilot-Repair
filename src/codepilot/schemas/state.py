@@ -48,6 +48,11 @@ class Attempt(BaseModel):
     failure_signatures: list[str] = Field(default_factory=list)
     """本轮失败签名排序后的集合，用于重复失败检测。"""
 
+    target_test_source: str | None = None
+    """目标测试来源：reproduction/planner/impact/baseline/related/none。"""
+    target_tests: list[str] = Field(default_factory=list)
+    """本轮实际交给 Sandbox 的目标测试 NodeID（空列表不等于未测量）。"""
+
     regression: RegressionResult | None = None
     review: ReviewResult | None = None
     diagnosis: Diagnosis | None = None
@@ -141,6 +146,12 @@ class RepairState(BaseModel):
 
     plan_corrections: int = Field(default=0, ge=0)
     """Planner 语义/Schema 纠正重试的**已使用**次数，与服务商 HTTP 重试分开计。"""
+
+    plan_semantic_rejections: int = Field(default=0, ge=0)
+    """被语义校验拒绝的计划次数（每次都有 artifact）。"""
+
+    plan_schema_rejections: int = Field(default=0, ge=0)
+    """未通过 JSON Schema / Pydantic 的次数。"""
 
     @property
     def iteration(self) -> int:

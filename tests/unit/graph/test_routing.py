@@ -136,15 +136,15 @@ def test_invalid_patch_goes_to_check_budget_without_running_tests() -> None:
     assert route_after_validate_patch(state) is Node.CHECK_BUDGET
 
 
-def test_valid_patch_without_targets_goes_to_the_regression_boundary() -> None:
-    """没有目标测试时按 02 §15.2 直接进入回归/待验收边界，不伪造目标测试通过。"""
+def test_valid_patch_without_planner_targets_still_enters_target_selection() -> None:
+    """Planner 没写测试时仍要进入 run_target_tests：impact/baseline 可能补上。"""
     from codepilot.schemas.plan import RepairPlan
 
     state = _state(
         attempts=[_attempt()],
         plan=RepairPlan(root_cause_hypothesis="h", tests_to_run=[], alternatives=[]),
     )
-    assert route_after_validate_patch(state) is Node.RUN_REGRESSION
+    assert route_after_validate_patch(state) is Node.RUN_TARGET_TESTS
     assert selected_target_tests(state) == ()
 
 
@@ -310,14 +310,14 @@ def test_a_local_coding_stop_with_a_patch_is_not_a_terminal_state() -> None:
     assert route_after_validate_patch(state) is Node.RUN_TARGET_TESTS
 
 
-def test_a_local_coding_stop_without_target_tests_still_reaches_regression() -> None:
-    """没有目标测试时也不得直奔 finalize：回归边界照走，成功判定由 finalize 保守处理。"""
+def test_a_local_coding_stop_without_planner_targets_still_reaches_target_selection() -> None:
+    """没有 Planner 目标时也不得跳过验证：选择器仍可回退到 impact/baseline。"""
     state = _state(
         attempts=[_attempt()],
         coding_stop_reason=StopReason.BUDGET_COST,
         plan=RepairPlan(root_cause_hypothesis="x", alternatives=[]),
     )
-    assert route_after_validate_patch(state) is Node.RUN_REGRESSION
+    assert route_after_validate_patch(state) is Node.RUN_TARGET_TESTS
 
 
 def test_a_local_coding_stop_without_a_patch_is_terminal() -> None:

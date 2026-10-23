@@ -399,6 +399,9 @@ def classify_outcome(
 
     if error_class == FailureClass.PLAN_SEMANTIC_INVALID.value:
         return SWEBenchAttribution.MODEL_INVALID_PLAN
+    if error_class == FailureClass.TARGET_TEST_UNAVAILABLE.value:
+        # 没有合法目标测试是模型侧的可验证性缺口，不是 Harness 崩溃。
+        return SWEBenchAttribution.MODEL_NOT_RESOLVED
     if (
         error_class
         in {
