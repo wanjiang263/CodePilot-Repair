@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "currency": "CNY",
+  "source_ledger": "artifacts/phase18/l2-cal10/pydata__xarray-4493/dispatch-ledger-l2cal10c.json",
+  "source_ledger_sha256": "291026a82dcd006f26c6ed15cb0885cd7bd36db7ba7e450b5088cd42e9696a2a",
+  "source_run_id": "swebench-smoke-l2cal10c-pydata__xarray-4493-s0-2f7daa64",
+  "source_frozen": true,
+  "settled_cny": 1.0569193600000002,
+  "unknown_reserved_cny": 0.8114688000000001,
+  "total_upper_bound_cny": 1.8683881600000003,
+  "unknown_cost_calls": 1,
+  "actual_usage_unknown_calls": 1,
+  "unreconciled_cost_calls": 0,
+  "reconciliation_complete": true,
+  "additional_settled_ledgers": [
+    {
+      "path": "artifacts/phase18/l2-cal10/astropy__astropy-12907/dispatch-ledger-l2cal10c.json",
+      "sha256": "d115ca0497af95aa0301401f48dcfce53305c9e1a029b675bec92f33c596bce7",
+      "settled_cny": 0.14240864
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/django__django-11910/dispatch-ledger-l2cal10c.json",
+      "sha256": "339b4ce8bd37742f2717e476b9cff363c17eb77df065359209f69ca3ab237f38",
+      "settled_cny": 0.18717488000000002
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/matplotlib__matplotlib-23314/dispatch-ledger-l2cal10c.json",
+      "sha256": "d71b12735a6ad7e185f563d4fbfa6f580f5aa1bd07a91c82531809f3329f23ef",
+      "settled_cny": 0.12194800000000001
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/mwaskom__seaborn-3010/dispatch-ledger-l2cal10c.json",
+      "sha256": "624ed3800d292ef79150d3601eeae0e622cb4e08fbe2dc0513d4615a78d8db79",
+      "settled_cny": 0.13423608
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/pallets__flask-4045/dispatch-ledger-l2cal10c.json",
+      "sha256": "ee70b18865c3fa1e76d5e1de01c0b8fa0c93d4b66b288522f0d6395674031909",
+      "settled_cny": 0.24215040000000007
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/psf__requests-2148/dispatch-ledger-l2cal10c.json",
+      "sha256": "6626e3955f1c849f0470d7a1ed48ca7af40d06547c844743937e2dc69b59a141",
+      "settled_cny": 0.20903536
+    }
+  ],
+  "reason": "ReadTimeout on call 3; actual usage unknown; charge full reservation as upper bound",
+  "created_at": "2026-10-22T13:26:00+00:00"
+}

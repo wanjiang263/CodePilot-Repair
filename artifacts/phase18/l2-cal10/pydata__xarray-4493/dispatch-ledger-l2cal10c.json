@@ -1,0 +1,36 @@
+{
+  "currency": "CNY",
+  "limit": 3.0,
+  "accounted_or_reserved": 0.8314348000000001,
+  "frozen": true,
+  "requests": [
+    {
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.005146400000000001,
+      "input_tokens": 6111,
+      "cached_input_tokens": 0,
+      "output_tokens": 92
+    },
+    {
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0148196,
+      "input_tokens": 18416,
+      "cached_input_tokens": 0,
+      "output_tokens": 31
+    },
+    {
+      "seq": 3,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "unknown_frozen",
+      "cost_cny": null,
+      "error_type": "ReadTimeout"
+    }
+  ]
+}

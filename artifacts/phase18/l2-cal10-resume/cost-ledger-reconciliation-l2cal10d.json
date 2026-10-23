@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-22T13:43:27.789452+00:00",
+  "currency": "CNY",
+  "run_label": "l2cal10d",
+  "per_instance_cap": 3.0,
+  "batch_cap": 30.0,
+  "opening_upper_bound_cny": 1.868388,
+  "new_settled_spend_cny": 0.129797,
+  "new_unknown_reserved_cny": 0.811469,
+  "new_accounted_upper_bound_cny": 0.941266,
+  "total_spend_accounted_upper_bound_cny": 2.809654,
+  "remaining_batch_budget_cny": 27.190346,
+  "max_instance_spend_cny": 0.941266,
+  "opening_unknown_cost_calls": 1,
+  "new_unknown_cost_calls": 1,
+  "unknown_cost_calls": 2,
+  "actual_usage_unknown_calls": 2,
+  "unreconciled_cost_calls": 0,
+  "reconciliation_complete": true,
+  "caps_respected": true,
+  "unsettled_or_frozen": [
+    "pylint-dev__pylint-6506"
+  ],
+  "manual_reconciliation": [
+    {
+      "instance_id": "pylint-dev__pylint-6506",
+      "seq": 17,
+      "status": "unknown_frozen",
+      "error_type": "HTTPStatusError",
+      "reserved_cny": 0.8114688000000001,
+      "policy": "charge the full pre-dispatch reservation; no usage was observable"
+    }
+  ],
+  "usage_ledger_deltas": [
+    {
+      "instance_id": "pylint-dev__pylint-6506",
+      "delta_cny": 0.811469
+    }
+  ],
+  "reconciled_usage_ledger_deltas": [],
+  "instances": [
+    {
+      "instance_id": "pylint-dev__pylint-6506",
+      "calls": 17,
+      "settled_calls": 16,
+      "unsettled_calls": 1,
+      "frozen": true,
+      "tokens": {
+        "input": 144253,
+        "cached_input": 19968,
+        "output": 9206
+      },
+      "ledger_accounted_cny": 0.941266,
+      "report_known_cost_cny": 0.12979744,
+      "delta_cny": 0.811469
+    },
+    {
+      "instance_id": "pytest-dev__pytest-11148",
+      "calls": 0,
+      "settled_calls": 0,
+      "unsettled_calls": 0,
+      "frozen": false,
+      "tokens": {
+        "input": 0,
+        "cached_input": 0,
+        "output": 0
+      },
+      "ledger_accounted_cny": 0.0,
+      "report_known_cost_cny": null,
+      "delta_cny": null
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "calls": 0,
+      "settled_calls": 0,
+      "unsettled_calls": 0,
+      "frozen": false,
+      "tokens": {
+        "input": 0,
+        "cached_input": 0,
+        "output": 0
+      },
+      "ledger_accounted_cny": 0.0,
+      "report_known_cost_cny": null,
+      "delta_cny": null
+    }
+  ],
+  "note": "opening=1.868388 is the l2cal10c upper bound (one unknown ReadTimeout call, charged at full reservation). New calls are settled from provider usage; any new unknown is charged at its reservation and stops the batch."
+}

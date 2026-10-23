@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-22T13:43:27.789459+00:00",
+  "subsets": "swebench-lite-cal10",
+  "segments": {
+    "l2cal10c": {
+      "scope": 10,
+      "executed": 7,
+      "not_executed": 3,
+      "valid_denominator": 5,
+      "resolved": 2,
+      "unresolved": 3,
+      "effective_official_solve_rate": 0.4
+    },
+    "l2cal10d": {
+      "scope": 3,
+      "executed": 1,
+      "not_executed": 2,
+      "valid_denominator": 0,
+      "resolved": 0,
+      "unresolved": 0,
+      "effective_official_solve_rate": null
+    }
+  },
+  "combined": {
+    "instance_denominator": 10,
+    "valid_denominator": 5,
+    "resolved": 2,
+    "unresolved": 3,
+    "effective_official_solve_rate": 0.4,
+    "resolved_over_all_instances": 0.2,
+    "note": "two denominators are reported separately; the combined rate uses the combined valid denominator, not 40% rewritten over the 3 new instances"
+  },
+  "invalid_instances": [
+    {
+      "instance_id": "pylint-dev__pylint-6506",
+      "batch_status": "STOPPED_LEDGER_FROZEN",
+      "unexecuted_stage": "INTERNAL_M2_GRAPH",
+      "reason": "NO_PATCH: WORKFLOW_STOPPED / workflow_error"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-11148",
+      "batch_status": "NOT_EXECUTED",
+      "unexecuted_stage": "PRE_MODEL_DISPATCH",
+      "reason": "NOT_EXECUTED: batch stopped before model dispatch"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "batch_status": "NOT_EXECUTED",
+      "unexecuted_stage": "PRE_MODEL_DISPATCH",
+      "reason": "NOT_EXECUTED: batch stopped before model dispatch"
+    }
+  ],
+  "note": "分母只含真实执行完成的官方 RESOLVED/UNRESOLVED；内部 M2 不参与官方判定"
+}
