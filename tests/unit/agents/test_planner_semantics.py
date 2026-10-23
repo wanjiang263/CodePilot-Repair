@@ -12,12 +12,13 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
 import pytest
 
-from codepilot.agents.planner import Planner
+from codepilot.agents.planner import Planner, _normalize_test_targets
 from codepilot.errors import ErrorOrigin, FailureClass, PlanSemanticError, classify_exception
 from codepilot.llm.errors import StructuredOutputError
 from codepilot.llm.fake import FakeLLM
@@ -261,8 +262,10 @@ def test_correction_loop_accepts_a_fixed_plan(repo: Path, built: Any) -> None:
     )
     plan = _call(planner, built)
     assert plan.tests_to_run == [VALID_TARGET]
+    assert planner.last_plan_attempts == 2
     assert planner.last_plan_corrections == 1
     assert planner.last_semantic_rejections == 1
+    assert planner.last_schema_rejections == 0
     assert llm.remaining == 0, "纠正一次就够，不该把队列用光"
 
     prompts = llm.prompt_texts()
@@ -271,6 +274,106 @@ def test_correction_loop_accepts_a_fixed_plan(repo: Path, built: Any) -> None:
     assert "intent_marker_in_tests_to_run" in correction
     assert "planned_new_tests" in correction
     assert "已存在" in correction, "纠正反馈要讲清 tests_to_run 与新增测试的区别"
+
+
+def test_class_dot_method_node_id_is_normalized(repo: Path) -> None:
+    (repo / "testing").mkdir(exist_ok=True)
+    (repo / "testing/acceptance_test.py").write_text(
+        "class TestInvocationVariants:\n    def test_cmdline(self):\n        pass\n",
+        encoding="utf-8",
+    )
+    plan = RepairPlan.model_validate(
+        _plan_payload(
+            tests_to_run=[
+                VALID_TARGET,
+                "testing/acceptance_test.py::TestInvocationVariants.test_cmdline",
+            ]
+        )
+    )
+
+    normalized, changed = _normalize_test_targets(plan)
+
+    assert normalized.tests_to_run == [
+        VALID_TARGET,
+        "testing/acceptance_test.py::TestInvocationVariants::test_cmdline",
+    ]
+    assert changed == ("testing/acceptance_test.py::TestInvocationVariants::test_cmdline",)
+    assert plan.tests_to_run[1] == (
+        "testing/acceptance_test.py::TestInvocationVariants.test_cmdline"
+    )
+
+
+def test_plan_attempts_are_bounded_at_five_and_record_each_rejection(
+    repo: Path, built: Any, tmp_path: Path
+) -> None:
+    """Schema 3 次 + 语义 2 次 = 5 次；每次拒绝都带字段/错误码/原值/提示。"""
+    from codepilot.artifacts import PLAN_SEMANTIC_REJECTIONS_JSONL, ArtifactStore
+
+    artifacts = ArtifactStore(tmp_path / "artifacts", "planner-run")
+    replies = [
+        _plan_payload(tests_to_run=[GLM_LIVE_PLANNED_TARGET]),
+        _plan_payload(tests_to_run=["tests/test_ledger.py::test_new"]),
+        _plan_payload(changes=[{**_plan_payload()["changes"][0], "file": "src/budget/nope.py"}]),
+        _plan_payload(changes=[{**_plan_payload()["changes"][0], "symbol": "budget.ledger.Nope"}]),
+        _plan_payload(tests_to_run=[], planned_new_tests=["tests/test_extra.py::test_new"]),
+    ]
+    planner, llm = _planner(repo, built, replies, artifacts=artifacts)
+
+    with pytest.raises(StructuredOutputError) as raised:
+        _call(planner, built)
+
+    assert raised.value.attempts == 5
+    assert raised.value.last_stage == "semantic"
+    assert planner.last_plan_attempts == 5
+    assert planner.last_plan_corrections == 4
+    assert planner.last_semantic_rejections == 5
+    assert planner.last_schema_rejections == 0
+    assert llm.remaining == 0
+
+    path = artifacts.path_for(PLAN_SEMANTIC_REJECTIONS_JSONL)
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    assert [row["attempt"] for row in rows] == [1, 2, 3, 4, 5]
+    assert [row["codes"] for row in rows] == [
+        ["intent_marker_in_tests_to_run"],
+        ["test_case_not_found"],
+        ["not_found"],
+        ["symbol_mismatch"],
+        ["unauthorized_new_test", "new_tests_are_not_sole_evidence"],
+    ]
+    for row in rows:
+        assert row["field_errors"][0]["field"]
+        assert row["field_errors"][0]["code"]
+        assert "value" in row["field_errors"][0]
+        assert row["field_errors"][0]["hint"]
+
+
+def test_repeating_the_same_semantic_error_stops_early(
+    repo: Path, built: Any, tmp_path: Path
+) -> None:
+    """连续两次字段+错误码完全相同：不再花第三次请求。"""
+    from codepilot.artifacts import PLAN_SEMANTIC_REJECTIONS_JSONL, ArtifactStore
+
+    artifacts = ArtifactStore(tmp_path / "artifacts", "planner-run")
+    bad = _plan_payload(tests_to_run=[GLM_LIVE_PLANNED_TARGET])
+    planner, llm = _planner(repo, built, [bad, bad, _plan_payload()], artifacts=artifacts)
+
+    with pytest.raises(StructuredOutputError) as raised:
+        _call(planner, built)
+
+    assert raised.value.attempts == 2
+    assert raised.value.last_stage == "semantic"
+    assert planner.last_plan_attempts == 2
+    assert planner.last_plan_corrections == 1
+    assert planner.last_semantic_rejections == 2
+    assert llm.remaining == 1, "提前终止后不再消费第三次回复"
+    rows = [
+        json.loads(line)
+        for line in artifacts.path_for(PLAN_SEMANTIC_REJECTIONS_JSONL)
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+    assert [row["attempt"] for row in rows] == [1, 2]
+    assert rows[0]["codes"] == rows[1]["codes"] == ["intent_marker_in_tests_to_run"]
 
 
 def test_system_prompt_states_the_test_contract(repo: Path, built: Any) -> None:
@@ -387,7 +490,17 @@ def test_correction_budget_exhaustion_is_a_model_failure_not_a_crash(
     planner, llm = _planner(
         repo,
         built,
-        [_plan_payload(tests_to_run=[GLM_LIVE_PLANNED_TARGET]) for _ in range(10)],
+        [
+            _plan_payload(tests_to_run=[GLM_LIVE_PLANNED_TARGET]),
+            _plan_payload(tests_to_run=["tests/test_ledger.py::test_new"]),
+            _plan_payload(
+                changes=[{**_plan_payload()["changes"][0], "file": "src/budget/nope.py"}]
+            ),
+            _plan_payload(
+                changes=[{**_plan_payload()["changes"][0], "symbol": "budget.ledger.Nope"}]
+            ),
+            _plan_payload(tests_to_run=[], planned_new_tests=["tests/test_extra.py::test_new"]),
+        ],
     )
     with pytest.raises(StructuredOutputError) as raised:
         _call(planner, built)
@@ -407,14 +520,23 @@ def test_model_that_never_fixes_stops_without_fake_fallback(repo: Path, built: A
     planner, llm = _planner(
         repo,
         built,
-        [_plan_payload(tests_to_run=[GLM_LIVE_PLANNED_TARGET]) for _ in range(10)],
+        [
+            _plan_payload(tests_to_run=[GLM_LIVE_PLANNED_TARGET]),
+            _plan_payload(tests_to_run=["tests/test_ledger.py::test_new"]),
+            _plan_payload(
+                changes=[{**_plan_payload()["changes"][0], "file": "src/budget/nope.py"}]
+            ),
+            _plan_payload(
+                changes=[{**_plan_payload()["changes"][0], "symbol": "budget.ledger.Nope"}]
+            ),
+        ],
         max_semantic_repairs=1,
     )
     with pytest.raises(StructuredOutputError):
         _call(planner, built)
     # 收缩纠正预算后请求数跟着减少：预算是真的在起作用，不是摆设。
     assert len(llm.calls) == STRUCTURED_MAX_ATTEMPTS + 1
-    assert llm.remaining == 10 - (STRUCTURED_MAX_ATTEMPTS + 1)
+    assert llm.remaining == 4 - (STRUCTURED_MAX_ATTEMPTS + 1)
 
 
 def test_no_path_access_error_escapes_planning(repo: Path, built: Any) -> None:

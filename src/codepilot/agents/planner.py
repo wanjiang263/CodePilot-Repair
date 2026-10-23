@@ -34,6 +34,7 @@ from codepilot.context.builder import ContextBuilder
 from codepilot.errors import PlanSemanticError, SemanticFieldError
 from codepilot.llm.base import LLMProvider
 from codepilot.llm.calls import LLMRunContext
+from codepilot.llm.errors import StructuredOutputError
 from codepilot.llm.structured import STRUCTURED_MAX_ATTEMPTS, complete_structured
 from codepilot.llm.types import LLMRequest, LLMResponse, Message
 from codepilot.observability.events import EventSink, EventType
@@ -129,6 +130,16 @@ class Planner:
         self.last_plan_corrections = 0
         self.last_semantic_rejections = 0
         self.last_schema_rejections = 0
+        self.last_plan_attempts = 0
+        #: 语义校验前被丢弃的 ``tests_to_run`` 条目（策略不接受的路径/标记）。
+        self.last_dropped_test_targets: list[str] = []
+        #: 被规范化的 NodeID（例如把 ``Class.method`` 改成 ``Class::method``）。
+        self.last_normalized_test_targets: list[str] = []
+
+    @property
+    def max_plan_attempts(self) -> int:
+        """有界纠正环的总尝试次数：Schema 3 次 + 语义纠正 2 次（默认 5）。"""
+        return STRUCTURED_MAX_ATTEMPTS + self.max_semantic_repairs
 
     @property
     def tool_names(self) -> list[str]:
@@ -148,6 +159,9 @@ class Planner:
         self.last_plan_corrections = 0
         self.last_semantic_rejections = 0
         self.last_schema_rejections = 0
+        self.last_plan_attempts = 0
+        self.last_dropped_test_targets = []
+        self.last_normalized_test_targets = []
         plan_context = json.dumps(
             {
                 "localization": localization.model_dump(mode="json"),
@@ -201,13 +215,28 @@ class Planner:
     ) -> RepairPlan:
         chain = _PrefetchedProvider(first, self.provider)
         counts = _AttemptCounts()
+        previous_signature: tuple[tuple[str, str], ...] | None = None
+        dropped_targets: tuple[str, ...] = ()
 
         def validate(candidate: RepairPlan) -> None:
+            nonlocal previous_signature, dropped_targets
+            candidate, _ = _normalize_test_targets(candidate)
+            candidate, dropped_targets = _drop_invalid_test_targets(candidate, self.policy)
             try:
                 self.validate_plan(candidate, localization, impact)
             except PlanSemanticError as exc:
                 counts.semantic_failures += 1
-                self._record_rejection(exc, candidate)
+                self._record_rejection(exc, candidate, attempt=counts.attempts)
+                signature = tuple(sorted((item.field, item.code) for item in exc.field_errors))
+                if signature == previous_signature:
+                    # 同一字段、同一错误码连续出现两次：再问一次只会重复计费。
+                    raise StructuredOutputError(
+                        "连续两次语义拒绝的错误字段与错误码完全相同，已提前终止纠正",
+                        attempts=counts.attempts,
+                        last_error=exc.correction_prompt(),
+                        last_stage="semantic",
+                    ) from exc
+                previous_signature = signature
                 raise
 
         def on_attempt(attempt: int, content: str | None) -> None:
@@ -218,19 +247,26 @@ class Planner:
             parsed_response = complete_structured(
                 chain,
                 LLMRequest(messages=messages, response_schema=RepairPlan, purpose="planner"),
-                max_attempts=STRUCTURED_MAX_ATTEMPTS + self.max_semantic_repairs,
+                max_attempts=self.max_plan_attempts,
                 on_attempt=on_attempt,
                 semantic_validator=validate,
             )
         finally:
+            self.last_plan_attempts = counts.attempts
             self.last_plan_corrections = max(0, counts.attempts - 1)
             self.last_semantic_rejections = counts.semantic_failures
             self.last_schema_rejections = max(0, counts.attempts - 1 - counts.semantic_failures)
         if not isinstance(parsed_response.parsed, RepairPlan):
             raise TypeError("structured planner response was not a RepairPlan")
-        return parsed_response.parsed
+        plan, normalized_targets = _normalize_test_targets(parsed_response.parsed)
+        plan, dropped_targets = _drop_invalid_test_targets(plan, self.policy)
+        self.last_normalized_test_targets = list(normalized_targets)
+        self.last_dropped_test_targets = list(dropped_targets)
+        return plan
 
-    def _record_rejection(self, exc: PlanSemanticError, rejected: RepairPlan) -> None:
+    def _record_rejection(
+        self, exc: PlanSemanticError, rejected: RepairPlan, *, attempt: int = 0
+    ) -> None:
         """被语义拒绝的计划要留下证据。
 
         首次真实 GLM 运行里那份计划根本没被保存下来——事后只能从一行
@@ -243,6 +279,7 @@ class Planner:
             {
                 "node": self.node,
                 "iteration": self._iteration(),
+                "attempt": attempt,
                 "codes": list(exc.codes),
                 "field_errors": [item.model_dump(mode="json") for item in exc.field_errors],
                 "rejected_plan": rejected.model_dump(mode="json"),
@@ -668,6 +705,63 @@ def _intent_marker(target: str) -> str | None:
         if lowered.startswith(marker):
             return marker
     return None
+
+
+def _normalize_test_targets(plan: RepairPlan) -> tuple[RepairPlan, tuple[str, ...]]:
+    """Normalize the common ``Class.method`` NodeID typo to ``Class::method``.
+
+    This does not widen the policy: the resulting NodeID still goes through
+    ``validate_test_target`` and the existing-case check.
+    """
+    normalized: list[str] = []
+    changed: list[str] = []
+    for target in plan.tests_to_run:
+        path_text, separator, suffix = target.partition("::")
+        if separator and "::" not in suffix and "." in suffix:
+            class_name, method = suffix.split(".", 1)
+            if class_name and method:
+                fixed = f"{path_text}::{class_name}::{method}"
+                normalized.append(fixed)
+                changed.append(fixed)
+                continue
+        normalized.append(target)
+    if not changed:
+        return plan, ()
+    return plan.model_copy(update={"tests_to_run": normalized}), tuple(changed)
+
+
+def _drop_invalid_test_targets(
+    plan: RepairPlan, policy: WorkspacePathPolicy
+) -> tuple[RepairPlan, tuple[str, ...]]:
+    """Drop test targets the execution policy will not authorize.
+
+    The whole plan is not discarded: the invalid entries are removed and the
+    remaining valid targets (or the empty list) go through the normal semantic
+    validation. This keeps ``validate_test_target`` untouched while avoiding a
+    model loop that repeats the same impossible target until the plan fails.
+    """
+    kept: list[str] = []
+    dropped: list[str] = []
+    for target in plan.tests_to_run:
+        if _intent_marker(target) is not None:
+            kept.append(target)
+            continue
+        path_text = target.partition("::")[0]
+        try:
+            policy.resolve(path_text, must_exist=True)
+        except PathAccessError:
+            kept.append(target)
+            continue
+        if is_test_path(path_text):
+            kept.append(target)
+            continue
+        if path_text.endswith("_test.py"):
+            dropped.append(target)
+            continue
+        kept.append(target)
+    if not dropped:
+        return plan, ()
+    return plan.model_copy(update={"tests_to_run": kept}), tuple(dropped)
 
 
 #: 工具"没崩，但拒绝执行"的错误码。它们必须记成 **denied** 而不是 failed：

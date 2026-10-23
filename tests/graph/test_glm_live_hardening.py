@@ -66,6 +66,8 @@ def test_planned_marker_is_corrected_and_the_run_completes(tmp_path: Path) -> No
     assert state.status is RunStatus.PROVISIONALLY_VERIFIED, state.failure_reasons
     assert state.error_class is None
     assert state.plan_corrections == 1
+    assert state.plan_semantic_rejections == 1
+    assert state.plan_schema_rejections == 0
     assert state.plan_tools is not None
     assert state.plan_tools.requested >= 1
     assert state.plan_tools.records_present is True
@@ -104,7 +106,7 @@ def test_uncorrectable_plan_ends_as_plan_rejected_not_workflow_error(
 
     # 被拒的计划必须留下证据——首轮实验什么都没存，事后只能猜模型写了什么。
     run_dir = harness.artifacts_root / "runs" / state.run_id
-    rejections = run_dir / "plan_rejections.jsonl"
+    rejections = run_dir / "plan_semantic_rejections.jsonl"
     lines = [json.loads(item) for item in rejections.read_text(encoding="utf-8").splitlines()]
     assert lines
     assert "intent_marker_in_tests_to_run" in lines[0]["codes"]
