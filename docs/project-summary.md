@@ -197,7 +197,7 @@ token 相同而 call_id 不同。修复提交 `a1afbaf` 将 `tracks_usage` 改�
 
 ## Phase 18E（2026-10-23/24）
 
-> 本节是 l2cal10e 追加尝试的最终口径；上方 Phase 18 段落保留为原 Cal10 历史快照（截至 a9 时点）。
+> 本节是 l2cal10e 追加尝试的最终口径；上方 Phase 18 段落保留为原 Cal10 历史快照（截至 xarray 停止点）。
 
 - **pytest P2：`NOT VERIFIED`。** 最后 attempt 为 `l2cal10e-a21`，内部验收 `REJECTED`（`accepted=false`）。真实 Docker 图运行已发生，但 `target_test_passed=false`、`regression_clean=false`、`review_executed=false`；模型没有得到满足六项验收的补丁，`stop_reason=repeated_patch`。不是预算、环境或 Harness 故障。
 - **官方评测边界：** pytest 没有运行官方 Harness，官方 verdict 只能是 `NOT_EVALUATED` / `DEFERRED`，不得写成 `UNRESOLVED`、`RESOLVED` 或「已评测」。
