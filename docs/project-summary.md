@@ -1,6 +1,6 @@
 # CodePilot-Repair 项目说明
 
-日期：2026-10-21。本文从工程架构、技术难点、测试质量和真实评测四方面总结当前交付。
+日期：2026-10-24（初稿 2026-10-21）。本文从工程架构、技术难点、测试质量和真实评测四方面总结当前交付。
 所有数字均来自仓库内可复核的 artifact、测试输出或只读历史实验；**不使用模拟运行推导
 SWE-bench 解决率**。
 
@@ -185,3 +185,27 @@ token 相同而 call_id 不同。修复提交 `a1afbaf` 将 `tracks_usage` 改�
 2. 在独立 runner 主机上实现 Docker socket 代理与每任务资源配额，替代本地 socket 直挂。
 3. 增加多用户身份、每用户设置与预算、审计导出。
 4. 在真实 SWE-bench 子集上执行可复现的官方评测，并保留预测、成本与 artifact 的完整链路。
+
+## Phase 18（2026-10-22）
+
+- **已验证**：内部 M2 环境恢复（生产组件级）。生产链路在 `pvlib__pvlib-python-1072` 上完成补丁应用、1 项复现测试收集、未修复复现 FAIL、打补丁复现/目标/回归 PASS、JUnit 解析与 Graph 状态/路由回传；使用 `OfficialInstanceSandbox`、生产 JUnit/status 解析和 `execution_route`，未运行 `InferenceAssembly`/完整 LangGraph。实际镜像为 Phase 17 修复镜像 `sha256:e80d07e5…`，清理后无新增容器/卷，模型费用 CNY 0.00。定向测试 90 passed。
+- **生产变更**：`SWEBenchInstanceImageResolver` + `OfficialInstanceSandbox` + `configs/swebench/instance-image-overrides.json`；镜像缺失或 ID 不匹配 fail closed，不回退官方标签；override 仅对 pvlib 生效。
+- **部分完成**：Cal10 真实执行 7/10。有效官方评测 5（astropy、django、seaborn、flask、requests），官方 RESOLVED 2（astropy、seaborn），有效官方解决率 40.0%；内部链路形成终态 3/10（seaborn、flask、requests），但 seaborn 为 `failed/tests_failed`、requests 为 `stopped/diagnosis_give_up`，不等于验证通过；内部声称成功仅 1/10（flask）。官方与内部口径未混用。
+- **停止**：`pydata__xarray-4493` 第 3 次调用 `ReadTimeout`，派发账本 `unknown_frozen`；保留 CNY 0.811469 未知预留并停止后续派发，`pylint`、`pytest`、`scikit-learn` 未执行。
+- **费用**：已结算 CNY 1.056919 + 未知预留 CNY 0.811469 = 记账上界 CNY 1.868388；单题最大 0.831435 ≤ 3.00，整批 ≤ 30.00，剩余 28.131612。费用对账按保守上界完成（`reconciliation_complete=true`、`unreconciled_cost_calls=0`、`actual_usage_unknown_calls=1`）；xarray 超时调用实际用量不可见，不能声称与服务商账单一致，也不按零计费。
+- **未执行**：L3 test50、L4 M4/test300。详细证据见 `docs/notes/phase18-m2-environment-and-l2-cal10.md` 与 `artifacts/phase18/`。
+
+## Phase 18E（2026-10-23/24）
+
+> 本节是 l2cal10e 追加尝试的最终口径；上方 Phase 18 段落保留为原 Cal10 历史快照（截至 a9 时点）。
+
+- **pytest P2：`NOT VERIFIED`。** 最后 attempt 为 `l2cal10e-a21`，内部验收 `REJECTED`（`accepted=false`）。真实 Docker 图运行已发生，但 `target_test_passed=false`、`regression_clean=false`、`review_executed=false`；模型没有得到满足六项验收的补丁，`stop_reason=repeated_patch`。不是预算、环境或 Harness 故障。
+- **官方评测边界：** pytest 没有运行官方 Harness，官方 verdict 只能是 `NOT_EVALUATED` / `DEFERRED`，不得写成 `UNRESOLVED`、`RESOLVED` 或「已评测」。
+- **sklearn：** 既有内部验收为 `ACCEPTED`（`acceptance-l2cal10e-a7-recheck.json`；原始 acceptance 为 `REJECTED`，保留追溯），官方 verdict 为 `UNRESOLVED`。本轮没有重跑 sklearn。
+- **未重跑：** `pydata__xarray-4493`、`pylint-dev__pylint-6506` 与原 `l2cal10c` 的既有结果均未重跑。
+- **金额（CNY）：** pytest 单题累计上界 `7.80709616`；sklearn `0.62403504`；批次已结算 `7.18344160`；未知预留 `4.05734400`（5 次，绝不按零计费）；批次累计上界 `11.24078560`；pytest 剩余单题预算 `12.19290384`；批次剩余预算 `88.75921440`。
+- **护栏：** 20/100 未触发；停止原因是补丁未满足验收，不是护栏。
+- **受保护哈希：** 12/12 一致（`artifacts/phase18/l2-cal10e/preflight/protected-verification.json`，`all_match=true`）。
+- **registry：** 新版 `attempts.json` 共 25 条（pytest 21、sklearn 4），25/25 账本存在且 SHA-256 与 registry 一致；数组按 `(instance_id, attempt_label)` 字典序排列，末尾不是 a21，最后 attempt 以 batch status 与 a21 manifest 为准。
+- **旧汇总边界：** 顶层 `cost-ledger-reconciliation-l2cal10e.json`、`official-evaluation-summary-l2cal10e.json`、`phase18e-summary.json` 只覆盖 a9 时点，不能充当 a10–a21 的最终汇总。最终口径指向 a21 manifest / ledger / acceptance / report / batch status 与新版 `attempts.json`。
+- **停止派发：** 不得继续派发 a22 或任何新实时运行。

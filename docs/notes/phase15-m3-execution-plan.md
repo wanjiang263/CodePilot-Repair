@@ -222,3 +222,20 @@ estimated_total = c̄ × task_count × groups × seeds + rerun_reserve
 
 下一步顺序：修复 Docker 命名管道访问 → 在 Linux/WSL2 执行 `--dry-run` → 书面确认 L1
 费用上限（CNY 3.00）→ 仅执行 `pvlib__pvlib-python-1072` 一次 → 通过后再冻结 cal10。
+
+## Phase 18 更新（2026-10-22，原 Cal10 历史快照）
+
+- 内部 M2 已恢复并用 Phase 16 原补丁/预测完成一次零模型真实 Docker 验证（收集 1 项、未修复复现 FAIL、打补丁复现/目标/回归 PASS、清理通过）。该恢复是生产组件级：使用 `OfficialInstanceSandbox`、生产 JUnit/status 解析和 `execution_route`，没有运行 `InferenceAssembly`/完整 LangGraph。
+- 生产执行镜像改为按实例解析并校验完整 ID；只有 `pvlib__pvlib-python-1072` 使用 Phase 17 修复镜像，其他实例不得套用。
+- L2-Cal10 已真实执行 7/10：有效官方评测 5，RESOLVED 2，有效官方解决率 40.0%；内部链路形成终态 3/10（seaborn、flask、requests），其中 seaborn 为 `failed/tests_failed`、requests 为 `stopped/diagnosis_give_up`，不等于验证通过；内部声称成功 1/10（flask）。
+- 停止于 `pydata__xarray-4493` 第 3 次调用 `ReadTimeout`：派发账本 `unknown_frozen`，保留 CNY 0.811469 上界并停止后续派发；`pylint`、`pytest`、`scikit-learn` 未执行。
+- 已结算 CNY 1.056919，记账上界 CNY 1.868388，剩余 CNY 28.131612；单题与整批硬上限均未突破。xarray 超时调用的实际用量不可见；费用对账按保守上界完成（`reconciliation_complete=true`、`unreconciled_cost_calls=0`、`actual_usage_unknown_calls=1`），不能声称与服务商账单一致，也不按零计费。
+- 后续进入条件：先解决 xarray 的未结算费用（不得重置/拆分账本、不得按零计费），再决定是否补跑后 3 题；不得复用本轮现场或历史预测。
+
+## Phase 18E 更新（2026-10-23/24，l2cal10e 最终口径）
+
+- L2 的 pytest 子项最终状态：**`NOT VERIFIED`**。最后 attempt `l2cal10e-a21` 的内部验收为 `REJECTED`；真实 Docker 图运行已发生，但目标测试未通过、完整回归未完成、Reviewer 未执行。停止原因是模型没有得到满足六项验收的补丁（`repeated_patch`），不是预算、环境或 Harness 故障。
+- **官方 Harness 未运行**：pytest 的官方字段固定为 `NOT_EVALUATED` / `DEFERRED`，不得写成 `UNRESOLVED`、`RESOLVED` 或「已评测」。sklearn 的既有结果为内部 `ACCEPTED`、官方 `UNRESOLVED`；本轮未重跑 sklearn、xarray、pylint。
+- L2 费用口径：pytest 单题累计上界 `CNY 7.80709616`；sklearn `CNY 0.62403504`；批次已结算 `CNY 7.18344160`；未知预留 `CNY 4.05734400`（5 次，绝不按零计费）；批次累计上界 `CNY 11.24078560`；pytest 剩余单题预算 `CNY 12.19290384`；批次剩余预算 `CNY 88.75921440`。20/100 护栏未触发。
+- 证据口径：以 a21 manifest / ledger / acceptance / report / batch status 与新版 `attempts.json` 为准。顶层 `cost-ledger-reconciliation-l2cal10e.json`、`official-evaluation-summary-l2cal10e.json`、`phase18e-summary.json` 只覆盖 a9 时点，不能充当 a10–a21 的最终汇总。
+- 进入 L3/L4 的条件没有改变，且更严格：在 pytest P2 未验证、官方 Harness 未运行的前提下，**不得继续派发 a22 或任何新实时运行**；任何补跑或升级都需要新的书面授权与新的预算口径确认。

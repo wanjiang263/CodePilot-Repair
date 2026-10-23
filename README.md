@@ -267,6 +267,24 @@ Phase 13 的 Linux 门禁为 6 skipped，Phase 14 为 8 skipped。新增的两�
 Phase 15 没有新增无理由 skip、没有降低覆盖率阈值。定向结果见
 [`docs/notes/phase15-engineering-hardening.md`](docs/notes/phase15-engineering-hardening.md)。
 
+## Phase 16–18 摘要
+
+- Phase 16 完成一次真实推理与 Live M2 全链路（32 次调用，CNY 0.205089），但官方镜像的
+  NumPy/PyTables ABI 问题使官方判分记为 `INVALID_ENV`；原记录未被改写。
+- Phase 17 定位并修复该镜像问题，用 Phase 16 原预测/补丁完成有效官方 Harness 评测，verdict
+  为 `RESOLVED / VALID_EVAL`，模型费用 CNY 0.00。
+- Phase 18 完成生产组件级内部 M2 环境恢复（零模型费用），并在 L2-Cal10 真实执行 7/10：
+  有效官方评测 5、RESOLVED 2、有效官方解决率 40.0%；内部链路形成终态 3/10，内部声称成功
+  1/10。`pydata__xarray-4493` 因 `ReadTimeout` 未知费用冻结账本后停批，后 3 题未执行。
+  费用记账上界 CNY 1.868388（已结算 1.056919 + 未知预留 0.811469），对账按保守上界完成，
+  实际用量未知。详见
+  [`docs/notes/phase18-m2-environment-and-l2-cal10.md`](docs/notes/phase18-m2-environment-and-l2-cal10.md)。
+- Phase 18E 追加 l2cal10e 至 `l2cal10e-a21`：pytest 子项仍为 **`NOT VERIFIED`**（内部验收
+  `REJECTED`），pytest 官方 Harness **未运行**，官方状态只能是 `NOT_EVALUATED` / `DEFERRED`；
+  sklearn 的既有内部 recheck 为 `ACCEPTED`、官方为 `UNRESOLVED`，本轮未重跑。pytest 累计
+  上界 CNY 7.80709616，sklearn CNY 0.62403504，未知预留 CNY 4.05734400（5 次，绝不按零
+  计费）；受保护哈希 12/12、registry 25/25 账本哈希一致。不得继续派发 a22 或任何新实时运行。
+
 ## 文档
 
 | 文件 | 内容 |
@@ -293,6 +311,6 @@ Phase 15 没有新增无理由 skip、没有降低覆盖率阈值。定向结果
   模型或凭据引用改变后旧结果标为「验证已过期」。
 - Bedrock 需要可选 `boto3` 依赖；未安装时标为不可用。
 - Live 任务仍要求 Docker 沙箱；测试用的 simulated-sandbox 逃生门默认关闭且不应在生产启用。
-- 本阶段未产生任何付费调用；真实 Provider 冒烟、Live M2 E2E 与官方 SWE-bench 批跑均未执行。
-- 官方 SWE-bench 批跑、消融、CI 与真实多题费用校准尚未完成；本项目不会用模拟运行推导解决率。
+- 付费调用与官方 SWE-bench 批跑已按阶段单独授权执行（Phase 16–18）；40% 只是 5 个有效官方
+  评测的读数，不是 test50/test300/M4 结论。当前仍未执行 test50/test300/M4 与消融。
 - 演示视频未在本环境录制（见演示脚本中的 NOT RUN 声明）；截图为真实浏览器生成。
