@@ -235,7 +235,10 @@ def main() -> int:
                     and "not found" not in inspect.stderr.lower()
                 ):
                     raise RuntimeError(f"image inspect failed: {inspect.stderr.strip()}")
-                _required(_docker("pull", resolution.image_ref), "pull missing official image")
+                _required(
+                    _docker("pull", resolution.image_ref, timeout=3600),
+                    "pull missing official image",
+                )
                 inspect = _docker("image", "inspect", resolution.image_ref)
             image = json.loads(_required(inspect, "inspect image").stdout)[0]
             if resolution.image_id is not None and image["Id"] != resolution.image_id:
