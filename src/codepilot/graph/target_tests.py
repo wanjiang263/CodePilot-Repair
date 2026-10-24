@@ -37,6 +37,14 @@ class TargetTestSelection:
     source: str
     rejected: tuple[dict[str, str], ...] = ()
     detail: str | None = None
+    baseline_failures: tuple[str, ...] = ()
+    """A file target's baseline-failing nodes that were not turned into L1 targets.
+
+    They are still part of the authorized regression scope, but hiding them from
+    the selection record made a file target look like "everything in this file
+    passes". ``target_tests`` is only the L1 boundary; these are disclosed
+    separately rather than silently dropped.
+    """
 
 
 def select_target_tests(
@@ -68,12 +76,15 @@ def select_target_tests(
         ("related", _graph_related_tests(changed, index, repo_graph, baseline), True),
     ]
 
+    baseline_failures: list[str] = []
     for source, candidates, require_baseline in groups:
         if source == "impact" and baseline is None:
             continue
         selected: list[str] = []
         for raw in candidates:
-            for candidate in _expand_file_target(raw, baseline):
+            expanded, existing_failures = _expand_file_target(raw, baseline)
+            baseline_failures.extend(existing_failures)
+            for candidate in expanded:
                 normalized_or_error = _validate_candidate(
                     candidate,
                     source=source,
@@ -93,6 +104,7 @@ def select_target_tests(
                 tests=tuple(selected),
                 source=source,
                 rejected=tuple(rejected),
+                baseline_failures=tuple(dict.fromkeys(baseline_failures)),
             )
 
     return TargetTestSelection(
@@ -100,26 +112,57 @@ def select_target_tests(
         source="none",
         rejected=tuple(rejected),
         detail="no_authorized_target_test",
+        baseline_failures=tuple(dict.fromkeys(baseline_failures)),
     )
 
 
-def _expand_file_target(raw: str, baseline: TestBaseline | None) -> list[str]:
-    """Turn a file target into its baseline-passing node ids.
+def _baseline_order(baseline: TestBaseline) -> list[str]:
+    """Baseline NodeIDs in pytest collection order.
+
+    ``TestBaseline.outcomes`` is sorted for stable storage. Reusing that order
+    for a file target reorders session-scoped fixtures: pytest's own suite moves
+    ``sampledir`` in ``test_move_dir``, and doing that before ``test_visit_*``
+    turns baseline-passing tests into false failures.
+    """
+    ordered: list[str] = []
+    seen: set[str] = set()
+    for mapping in baseline.run_outcomes:
+        for node_id in mapping:
+            if node_id not in seen:
+                seen.add(node_id)
+                ordered.append(node_id)
+    for node_id in baseline.outcomes:
+        if node_id not in seen:
+            seen.add(node_id)
+            ordered.append(node_id)
+    return ordered
+
+
+def _expand_file_target(
+    raw: str, baseline: TestBaseline | None
+) -> tuple[list[str], list[str]]:
+    """Turn a file target into baseline-passing NodeIDs in collection order.
 
     A whole test file can contain tests that already fail on the base commit;
     requiring an absolute PASS for the file would make the target unreachable
     even when the patch fixes the issue. Only the passing baseline nodes are a
-    fair target boundary.
+    fair target boundary. The failures are returned separately so the report can
+    disclose them instead of silently claiming the whole file was targeted.
     """
     target = raw.strip() if isinstance(raw, str) else ""
     if not target or "::" in target or not target.endswith(".py") or baseline is None:
-        return [raw]
-    nodes = [
-        node_id
-        for node_id, outcome in baseline.outcomes.items()
-        if outcome is TestOutcome.PASSED and node_id.startswith(target + "::")
-    ]
-    return nodes or [raw]
+        return [raw], []
+    passing: list[str] = []
+    failing: list[str] = []
+    for node_id in _baseline_order(baseline):
+        if not node_id.startswith(target + "::"):
+            continue
+        outcome = baseline.outcomes.get(node_id)
+        if outcome is TestOutcome.PASSED and node_id not in baseline.flaky:
+            passing.append(node_id)
+        elif outcome in {TestOutcome.FAILED, TestOutcome.ERROR}:
+            failing.append(node_id)
+    return (passing or [raw]), failing
 
 
 def _validate_candidate(

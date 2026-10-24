@@ -23,6 +23,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from codepilot.artifacts import DIAGNOSIS_JSON, EXECUTION_JSON, PATCH_DIFF, VALIDATION_JSON
@@ -632,13 +633,32 @@ async def plan(state: RepairState, deps: Deps) -> dict[str, Any]:
 # --------------------------------------------------------------- 补丁生成与校验
 
 
+_TRACEBACK_FILE = re.compile(r'File\s+"([^"]+)"')
+_SOURCE_FRAME = re.compile(r"(?m)^([^\s:]+\.py):(\d+)(?::|$)")
+_COLLECTING_FILE = re.compile(r"(?m)^ERROR collecting ([^\s:]+\.py)")
+
+
+def _structured_error_paths(text: str) -> list[str]:
+    """Paths pytest itself named in a traceback/collection header.
+
+    Substring matching would attribute an incidental ``path.py`` mention in an
+    unrelated stack to the patch. Only structured frames are evidence.
+    """
+    paths: list[str] = []
+    for pattern in (_TRACEBACK_FILE, _SOURCE_FRAME, _COLLECTING_FILE):
+        paths.extend(match.group(1) for match in pattern.finditer(text))
+    return paths
+
+
 def _patched_file_mentioned(text: str, changed: tuple[str, ...]) -> bool:
-    normalized = text.replace("\\", "/")
-    for path in changed:
-        if path in normalized:
+    """Whether a traceback *frame* points exactly at one of the changed files."""
+    changed_set = {path.replace("\\", "/").lstrip("./") for path in changed}
+    for raw in _structured_error_paths(text):
+        path = raw.replace("\\", "/").lstrip("./")
+        if path in changed_set:
             return True
-        module = path[:-3].replace("/", ".") if path.endswith(".py") else ""
-        if module and module in normalized:
+        # Tracebacks usually carry the container-absolute form (/testbed/...).
+        if any(path.endswith("/" + candidate) for candidate in changed_set):
             return True
     return False
 
@@ -670,7 +690,8 @@ def _target_execution_attribution(
         return (
             "workspace_error",
             "workspace",
-            "COLLECTION_ERROR during collection; treated as an infrastructure failure",
+            "COLLECTION_ERROR attribution UNKNOWN: no traceback frame points at a changed "
+            "file; treated as an infrastructure failure, not as model-introduced",
         )
     if execution.status is ExecutionStatus.ENV_ERROR:
         return (
@@ -1025,7 +1046,11 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
         # 没有可执行的目标测试：**不伪造**"目标测试通过"。这是模型侧缺口，
         # 不是 Harness 崩溃；回归与审查保持 NOT EXECUTED。
         updated = attempt.model_copy(
-            update={"target_test_source": selection.source, "target_tests": []}
+            update={
+                "target_test_source": selection.source,
+                "target_tests": [],
+                "target_test_baseline_failures": list(selection.baseline_failures),
+            }
         )
         result = _terminal(
             state,
@@ -1098,6 +1123,7 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
             "progress": snapshot,
             "target_test_source": selection.source,
             "target_tests": list(targets),
+            "target_test_baseline_failures": list(selection.baseline_failures),
         }
     )
     fields: dict[str, Any] = {

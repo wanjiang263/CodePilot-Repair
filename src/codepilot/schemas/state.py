@@ -53,6 +53,13 @@ class Attempt(BaseModel):
     target_tests: list[str] = Field(default_factory=list)
     """本轮实际交给 Sandbox 的目标测试 NodeID（空列表不等于未测量）。"""
 
+    target_test_baseline_failures: list[str] = Field(default_factory=list)
+    """文件目标里 base commit 上本来就失败的 NodeID。
+
+    它们不是 L1 目标（否则修复补丁永远无法让文件级目标通过），但必须披露，
+    不能被"文件目标只取 baseline PASS"静默隐藏。
+    """
+
     regression: RegressionResult | None = None
     review: ReviewResult | None = None
     diagnosis: Diagnosis | None = None

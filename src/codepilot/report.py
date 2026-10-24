@@ -76,13 +76,28 @@ class VerificationClosure(BaseModel):
     target_tests: list[str] = Field(default_factory=list)
     """实际交给 Sandbox 的目标测试；空列表不等于通过。"""
 
+    target_test_baseline_failures: list[str] = Field(default_factory=list)
+    """文件目标中 base commit 本来就失败的 NodeID（不进入 L1，但必须披露）。"""
+
     regression_executed: bool
     regression_complete: bool
+    regression_mode: str | None = None
+    """``full`` / ``sampled``。``sampled`` 不能当作全量回归通过。"""
+
     regression_levels: list[str]
     regression_new_failures: int
+    regression_fixed_tests: list[str] = Field(default_factory=list)
+    """base 上失败、patch 后通过的测试：独立于 L1 目标选择的 Issue 修复证据。"""
+
+    regression_unexecuted_tests: int = 0
+    """授权基线里没有拿到执行结果的 NodeID 数；全量完成时必须为 0。"""
+
     review_executed: bool
     review_approved: bool | None
     review_high_issues: int
+    review_high_issues_known: bool = True
+    """``review_executed=False`` 时高危问题数是未知，不是 0。"""
+
     review_bound_to_candidate: bool
     post_review_repair: bool
     review_calls: int
@@ -150,12 +165,20 @@ class VerificationClosure(BaseModel):
             target_test_sha256=attempt.patch_hash if attempt is not None else "",
             target_test_source=attempt.target_test_source if attempt is not None else None,
             target_tests=attempt.target_tests if attempt is not None else [],
+            target_test_baseline_failures=(
+                attempt.target_test_baseline_failures if attempt is not None else []
+            ),
             regression_executed=regression is not None,
             regression_complete=bool(regression and regression.complete),
+            regression_mode=regression.mode.value if regression is not None else None,
             regression_levels=[
                 level.value for level in (regression.levels_run if regression else ())
             ],
             regression_new_failures=len(regression.new_failures) if regression else 0,
+            regression_fixed_tests=list(regression.fixed_tests) if regression else [],
+            regression_unexecuted_tests=(
+                len(regression.unexecuted_tests) if regression is not None else 0
+            ),
             review_executed=review is not None,
             review_approved=review.approved if review is not None else None,
             review_high_issues=(
@@ -163,6 +186,7 @@ class VerificationClosure(BaseModel):
                 if review is not None
                 else 0
             ),
+            review_high_issues_known=review is not None,
             review_bound_to_candidate=bool(review and review.reviewed_patch_hash == candidate),
             post_review_repair=state.review_repairs > 0,
             review_calls=state.review_calls,
@@ -199,13 +223,13 @@ def verification_level(state: RepairState) -> str:
         state.regression and state.regression.complete and not state.regression.has_regression
     )
     review = state.review
+    # 空 ``reviewed_patch_hash`` 是"没有绑定"，不是"历史版本所以默认通过"。
+    # 当前候选必须被当前审查结论明确盖章；否则审过 v1 会给 v2 背书。
     review_verified = bool(
         review
+        and review.approved
         and not review.has_high_issues
-        and (
-            not review.reviewed_patch_hash
-            or review.reviewed_patch_hash == patch_hash(state.current_patch)
-        )
+        and review.reviewed_patch_hash == patch_hash(state.current_patch)
     )
     if target_verified and regression_verified and review_verified:
         return (
@@ -247,6 +271,11 @@ class RunReport(BaseModel):
     modified_files: list[str] = Field(default_factory=list)
     git_diff: str = ""
     patch_hash: str = ""
+    """交付补丁原始字节的 SHA-256（与 official prediction 的哈希口径一致）。"""
+
+    delivered_patch_identity_sha256: str = ""
+    """交付补丁规范化 diff 的 SHA-256（与候选/审查身份口径一致）。"""
+
     patch_validation: ValidationResult | None = None
     test_execution: ExecutionResult | None = None
     usage: Usage = Field(default_factory=Usage)
@@ -292,6 +321,8 @@ class RunReport(BaseModel):
         simulated_llm: bool,
         artifacts: dict[str, str] | None = None,
     ) -> RunReport:
+        from codepilot.graph.stop_rules import patch_hash as delivered_patch_hash
+
         validation = state.current_attempt.validation if state.current_attempt else None
         execution = state.execution or (
             state.current_attempt.execution if state.current_attempt else None
@@ -337,6 +368,9 @@ class RunReport(BaseModel):
             modified_files=modified_files,
             git_diff=git_diff,
             patch_hash=hashlib.sha256(git_diff.encode()).hexdigest(),
+            delivered_patch_identity_sha256=(
+                delivered_patch_hash(git_diff) if git_diff else ""
+            ),
             patch_validation=validation,
             test_execution=execution,
             usage=state.usage,

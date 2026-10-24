@@ -97,6 +97,19 @@ class RegressionRunner:
         # stable storage; the first run keeps pytest's collection order.
         source_order = baseline.run_outcomes[0] if baseline.run_outcomes else baseline.outcomes
         authorized = list(source_order)
+        seen = set(authorized)
+        # The first run gives pytest's collection order. Later runs can
+        # discover a node the first run did not reach; dropping those would make
+        # "complete" mean "the first run's subset", not the full baseline.
+        for mapping in baseline.run_outcomes[1:]:
+            for node in mapping:
+                if node not in seen:
+                    seen.add(node)
+                    authorized.append(node)
+        for node in baseline.outcomes:
+            if node not in seen:
+                seen.add(node)
+                authorized.append(node)
         result.unexecuted_tests = list(authorized)
         if state.execution is None or state.execution.status is not ExecutionStatus.PASS:
             result.failure_reason = "L1 has not passed"
@@ -174,6 +187,17 @@ class RegressionRunner:
                     if node in baseline.outcomes and baseline.outcomes[node] != outcome
                 }
             )
+            # A file-level L1 target only includes baseline PASS nodes. Tests
+            # that failed on base and now pass are still independent evidence
+            # that the issue was fixed, even though they cannot be an L1 target.
+            result.fixed_tests = sorted(
+                {
+                    node
+                    for node, (before, after) in result.status_changes.items()
+                    if before in {TestOutcome.FAILED.value, TestOutcome.ERROR.value}
+                    and after == TestOutcome.PASSED.value
+                }
+            )
             result.existing_failures = sorted(
                 set(result.existing_failures)
                 | {
@@ -237,9 +261,23 @@ class RegressionRunner:
             candidates = sorted(set(authorized) - set(affected))
             if not candidates and affected:
                 # L2 already executed the entire baseline scope; a second full
-                # pass would repeat the same tests and evidence. Require that L2
-                # actually ran: an empty first baseline run must not turn into a
-                # "complete" regression with zero executed tests.
+                # pass would repeat the same tests and evidence. Completion still
+                # requires (a) L2 actually ran, (b) it passed, (c) every authorized
+                # node got a result, and (d) the authorized list had no duplicate
+                # that a set comparison would hide.
+                l2 = result.executions.get("L2")
+                covered = set(result.executed_tests) == set(authorized)
+                if (
+                    l2 is None
+                    or l2.status is not ExecutionStatus.PASS
+                    or result.unexecuted_tests
+                    or not covered
+                    or len(authorized) != len(set(authorized))
+                ):
+                    result.failure_reason = (
+                        "L3 candidates were empty but L2 did not cover the authorized baseline"
+                    )
+                    return result
                 result.levels_run.append(RegressionLevel.FULL)
                 result.complete = True
                 result.status = "completed"
@@ -257,6 +295,9 @@ class RegressionRunner:
         if key == "L3":
             result.levels_run.append(RegressionLevel.FULL)
         if not inspect(key, scope):
+            return result
+        if key == "L3" and result.unexecuted_tests:
+            result.failure_reason = "L3 did not cover every authorized baseline node"
             return result
         result.complete = True
         result.status = "completed"

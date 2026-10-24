@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 
 import pytest
 
+from codepilot.graph.stop_rules import patch_hash
 from codepilot.report import RunReport
 from codepilot.schemas.enums import ExecutionStatus, RunStatus
 from codepilot.schemas.execution import ExecutionResult
@@ -66,7 +67,9 @@ def test_complete_evidence_preserves_verification_scope(mode, level):
         execution=ExecutionResult(status=ExecutionStatus.PASS),
         attempts=[Attempt(iteration=1, validation=ValidationResult(passed=True))],
         regression=RegressionResult(complete=True, mode=mode),
-        review=ReviewResult(approved=True),
+        # The report's git_diff is "patch"; a complete-evidence fixture must
+        # bind the review to that identity, not rely on an empty legacy hash.
+        review=ReviewResult(approved=True, reviewed_patch_hash=patch_hash("patch")),
     )
     report = RunReport.from_state(
         state, repository="repo", git_diff="patch", modified_files=[], simulated_llm=True

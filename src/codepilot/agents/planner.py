@@ -755,9 +755,6 @@ def _drop_invalid_test_targets(
         if is_test_path(path_text):
             kept.append(target)
             continue
-        if path_text.endswith("_test.py"):
-            dropped.append(target)
-            continue
         kept.append(target)
     if not dropped:
         return plan, ()
