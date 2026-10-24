@@ -315,6 +315,12 @@ class OfficialInstanceSandbox(DockerSandbox):
                     )
             else:
                 count = _extract_single_file(archive, workspace / "src/_pytest/_version.py")
+            if self.instance_id.startswith("matplotlib__matplotlib-"):
+                stream, _ = container.get_archive("/testbed/lib/matplotlib/_version.py")
+                version_archive = b"".join(stream)
+                count += _extract_single_file(
+                    version_archive, workspace / "lib/matplotlib/_version.py"
+                )
             if self.last_image is not None:
                 self.last_image["overlaid_build_artifacts"] = count
         except (DockerException, OSError, tarfile.TarError) as exc:

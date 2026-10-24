@@ -113,11 +113,12 @@ def test_matplotlib_overlay_restores_image_compiled_extensions(tmp_path: Path) -
             "lib/matplotlib/__init__.py": b"source",
         }
     )
+    version_archive = _tar({"_version.py": b"version = '3.3'\n"})
 
     class Container:
         def get_archive(self, path: str) -> tuple[list[bytes], dict[str, int]]:
-            assert path == "/testbed/lib"
-            return [archive], {"size": len(archive)}
+            payload = version_archive if path.endswith("_version.py") else archive
+            return [payload], {"size": len(payload)}
 
         def remove(self, *, force: bool) -> None:
             assert force
@@ -138,8 +139,11 @@ def test_matplotlib_overlay_restores_image_compiled_extensions(tmp_path: Path) -
 
     restored = workspace / "lib/matplotlib/_c_internal_utils.cpython-38-x86_64-linux-gnu.so"
     assert restored.read_bytes() == b"binary"
+    assert (workspace / "lib/matplotlib/_version.py").read_text(encoding="utf-8") == (
+        "version = '3.3'\n"
+    )
     assert not (workspace / "lib/matplotlib/__init__.py").exists()
-    assert sandbox.last_image["overlaid_build_artifacts"] == 1
+    assert sandbox.last_image["overlaid_build_artifacts"] == 2
 
 
 def test_pytest_fixture_missing_module_is_a_test_failure_not_environment() -> None:

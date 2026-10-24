@@ -148,6 +148,9 @@ def _collect(
         ),
         "create collection container",
     ).stdout.strip()
+    runner_contract = command.lstrip().startswith(
+        ("tox ", "/opt/miniconda3/envs/testbed/bin/python -m pytest")
+    )
     try:
         _required(_docker("start", create), "start collection container")
         waited = _required(_docker("wait", create, timeout=900), "wait for collection")
@@ -167,7 +170,8 @@ def _collect(
         "command": command,
         "stdout": str(output / "stdout.log"),
         "stderr": str(output / "stderr.log"),
-        "ok": exit_code == 0,
+        "runner_contract": "pytest_or_tox" if runner_contract else "unsupported",
+        "ok": exit_code == 0 and runner_contract,
     }
 
 
