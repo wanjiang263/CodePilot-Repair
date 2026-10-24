@@ -34,7 +34,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from codepilot.fsutil import pid_alive, remove_tree, strip_reparse_points
+from codepilot.fsutil import pid_alive, remove_tree, replace_path, strip_reparse_points
 from codepilot.observability.logging import get_logger
 from codepilot.repo.gitcmd import GitError, run_git
 
@@ -255,6 +255,7 @@ class WorkspaceManager:
         allow_local: bool = True,
         timeout: float = 600.0,
         git_config: Mapping[str, str] | None = None,
+        default_mode: WorkspaceMode = "fetch",
     ) -> None:
         """
         ``allow_local=False`` 时拒绝一切非远端 URL 的来源。API 层必须这样构造
@@ -273,6 +274,9 @@ class WorkspaceManager:
         self.allow_local = allow_local
         self.timeout = timeout
         self.git_config = tuple(sorted((git_config or {}).items()))
+        if default_mode not in ("fetch", "copy", "worktree"):
+            raise WorkspaceError(f"未知的 workspace 模式: {default_mode!r}")
+        self.default_mode = default_mode
 
     # ------------------------------------------------------------ 缓存
 
@@ -415,7 +419,7 @@ class WorkspaceManager:
         source: str | RepoSource,
         base_commit: str,
         target: Path,
-        mode: WorkspaceMode = "fetch",
+        mode: WorkspaceMode | None = None,
     ) -> Workspace:
         """从缓存取出一份可写的 workspace，checkout 到 ``base_commit``。
 
@@ -427,6 +431,8 @@ class WorkspaceManager:
         创建完成后会断言 workspace 干净（02 §6）。不干净时抛
         ``WorkspaceError`` 而不是返回一个"能用但 patch 会是垃圾"的目录。
         """
+        if mode is None:
+            mode = self.default_mode
         cache, src = self.ensure_cache(source)
 
         resolved = self.rev_parse(cache, base_commit)
@@ -582,7 +588,7 @@ class WorkspaceManager:
            而表现是"索引结果一直是空的"，与真正的原因毫无关系。
         """
         try:
-            Path(staging).replace(target)
+            replace_path(staging, target)
             return
         except OSError:
             pass
@@ -604,7 +610,7 @@ class WorkspaceManager:
             )
 
         try:
-            Path(staging).replace(target)
+            replace_path(staging, target)
         except OSError as exc:
             remove_tree(staging, ignore_errors=True)
             if not self._cache_usable(target):

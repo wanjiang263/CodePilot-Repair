@@ -28,7 +28,8 @@ from codepilot.sandbox.base import EnvironmentBuildResult
 from codepilot.sandbox.env_spec import EnvSpec
 from codepilot.sandbox.junit import JUnitParseError, JUnitReport, parse_junit
 from codepilot.sandbox.paths import validate_workspace_path
-from codepilot.sandbox.status import classify_execution
+from codepilot.sandbox.runners import NativeParse, RunnerAdapter
+from codepilot.sandbox.status import classify_execution, is_third_party_dependency_error
 from codepilot.sandbox.transfer import (
     DEFAULT_WORKSPACE_TARGET,
     OUTPUT_TARGET,
@@ -122,6 +123,7 @@ class DockerSandbox:
         clock: Any = time.time,
         workspace_target: str = DEFAULT_WORKSPACE_TARGET,
         bind_workspace: bool = False,
+        runner_adapter: RunnerAdapter | None = None,
     ) -> None:
         if log_tail_bytes < 0:
             raise ValueError("log_tail_bytes 不能为负数")
@@ -142,6 +144,7 @@ class DockerSandbox:
         self._startup_cleanup_done = False
         self.workspace_target = workspace_target
         self.bind_workspace = bind_workspace
+        self.runner_adapter = runner_adapter
 
     def build_env(
         self,
@@ -410,10 +413,18 @@ class DockerSandbox:
         created: list[str] = []
         try:
             workspace = validate_workspace_path(workspace, allowed_root=self.allowed_workspace_root)
-            selected = _validate_test_selection(tests, workspace=workspace)
-            command = env_spec.test_command
-            if selected:
-                command += " " + " ".join(shlex.quote(item) for item in selected)
+            adapter = self.runner_adapter
+            if adapter is not None and adapter.native:
+                command = adapter.build_command(
+                    env_spec.test_command, tuple(tests), workspace=workspace
+                )
+            else:
+                selected = _validate_test_selection(tests, workspace=workspace)
+                command = env_spec.test_command
+                if adapter is not None:
+                    command = adapter.build_command(command, selected, workspace=workspace)
+                if selected:
+                    command += " " + " ".join(shlex.quote(item) for item in selected)
             command += f" > {OUTPUT_TARGET}/stdout.log 2> {OUTPUT_TARGET}/stderr.log"
             environment_values = {
                 "PYTHONDONTWRITEBYTECODE": "1",
@@ -505,34 +516,75 @@ class DockerSandbox:
 
         stdout = _read_text(output_dir / "stdout.log")
         stderr = _read_text(output_dir / "stderr.log")
+        native_parse: NativeParse | None = None
         junit: JUnitReport | None = None
         junit_error: str | None = None
-        try:
-            junit = parse_junit(output_dir / JUNIT_XML, workspace=workspace)
-        except JUnitParseError as exc:
-            junit_error = str(exc)
+        if self.runner_adapter is not None and self.runner_adapter.native:
+            # Native selectors may be file/module scopes (no ``::``); only
+            # canonical NodeIDs ask the parser to filter the observed results.
+            requested_nodes = tuple(item for item in tests if "::" in item)
+            native_parse = self.runner_adapter.parse(
+                stdout=stdout,
+                stderr=stderr,
+                exit_code=exit_code,
+                workspace=workspace,
+                requested=requested_nodes,
+                timed_out=timed_out,
+            )
+            if native_parse is None:  # pragma: no cover - adapter contract
+                raise RuntimeError("native runner produced no parse result")
+        else:
+            try:
+                junit = parse_junit(output_dir / JUNIT_XML, workspace=workspace)
+            except JUnitParseError as exc:
+                junit_error = str(exc)
 
-        diagnostic = "\n".join(
-            [
-                stdout,
-                stderr,
-                *(
-                    (test.traceback or "") + "\n" + (test.message or "")
-                    for test in (junit.tests if junit else [])
-                ),
-            ]
-        )
-        if cleanup_error and not timed_out:
-            sandbox_error = cleanup_error
-        decision = classify_execution(
-            exit_code=exit_code,
-            junit=junit,
-            timed_out=timed_out,
-            sandbox_error=sandbox_error,
-            oom_killed=oom_killed,
-            workspace=workspace,
-            diagnostic_text=diagnostic,
-        )
+        if native_parse is not None:
+            diagnostic = "\n".join([stdout, stderr, *(t.message or "" for t in native_parse.tests)])
+            decision = None
+            status = native_parse.status
+            error_reason = native_parse.error_reason
+            diagnostics = dict(native_parse.diagnostics)
+            if sandbox_error and not timed_out:
+                status = ExecutionStatus.SANDBOX_ERROR
+                error_reason = "DOCKER_OR_CONTAINER_ERROR"
+            elif cleanup_error and not timed_out:
+                status = ExecutionStatus.SANDBOX_ERROR
+                error_reason = "CONTAINER_CLEANUP_FAILED"
+            if (
+                status is ExecutionStatus.COLLECTION_ERROR
+                and not native_parse.tests
+                and is_third_party_dependency_error(diagnostic, workspace=workspace)
+            ):
+                status = ExecutionStatus.ENV_ERROR
+                error_reason = "MISSING_THIRD_PARTY_DEPENDENCY"
+            cases = [_redacted_case(case) for case in native_parse.tests]
+        else:
+            diagnostic = "\n".join(
+                [
+                    stdout,
+                    stderr,
+                    *(
+                        (test.traceback or "") + "\n" + (test.message or "")
+                        for test in (junit.tests if junit else [])
+                    ),
+                ]
+            )
+            if cleanup_error and not timed_out:
+                sandbox_error = cleanup_error
+            decision = classify_execution(
+                exit_code=exit_code,
+                junit=junit,
+                timed_out=timed_out,
+                sandbox_error=sandbox_error,
+                oom_killed=oom_killed,
+                workspace=workspace,
+                diagnostic_text=diagnostic,
+            )
+            status = decision.status
+            error_reason = decision.error_reason
+            diagnostics = dict(decision.diagnostics)
+            cases = [_redacted_case(case) for case in (junit.tests if junit else [])]
         try:
             logs = persist_logs(
                 self.artifacts,
@@ -556,8 +608,6 @@ class DockerSandbox:
                 diagnostics={"detail": redact_text(str(exc))},
                 artifact_dir="",
             )
-        cases = [_redacted_case(case) for case in (junit.tests if junit else [])]
-        diagnostics = dict(decision.diagnostics)
         diagnostics.update(
             {
                 "execution_backend": "docker",
@@ -568,8 +618,10 @@ class DockerSandbox:
                 "junit_error": junit_error,
             }
         )
+        if self.runner_adapter is not None:
+            diagnostics["runner_kind"] = self.runner_adapter.kind
         return ExecutionResult(
-            status=decision.status,
+            status=status,
             exit_code=exit_code,
             duration_seconds=max(self._clock() - started, 0.0),
             tests=cases,
@@ -580,7 +632,7 @@ class DockerSandbox:
             stdout_tail=logs.stdout_tail,
             stderr_tail=logs.stderr_tail,
             artifact_dir=logs.artifact_dir,
-            error_reason=decision.error_reason,
+            error_reason=error_reason,
             diagnostics=diagnostics,
         )
 

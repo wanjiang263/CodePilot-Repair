@@ -15,6 +15,7 @@ from __future__ import annotations
 import os
 import shutil
 import stat
+import time
 from collections.abc import Callable
 from pathlib import Path, PurePosixPath
 
@@ -23,9 +24,37 @@ __all__ = [
     "pid_alive",
     "remove_link",
     "remove_tree",
+    "replace_path",
     "strip_reparse_points",
     "workspace_source_path",
 ]
+
+#: Windows errors that can be transient while another process (Defender,
+#: Search indexer, a just-exited git child) still holds a handle:
+#: ERROR_ACCESS_DENIED and ERROR_SHARING_VIOLATION.
+_TRANSIENT_RENAME_WINERRORS = frozenset({5, 32})
+
+
+def replace_path(source: Path, target: Path, *, attempts: int = 5, base_delay: float = 0.1) -> None:
+    """``os.replace`` with a **bounded** retry for transient Windows handles.
+
+    Only access-denied/sharing-violation on Windows is retried.  A persistent
+    failure (or any POSIX error) is raised immediately, so a leaked handle is
+    still visible instead of being masked by an unbounded sleep loop.
+    """
+    if attempts < 1:
+        raise ValueError("attempts must be positive")
+    for attempt in range(attempts):
+        try:
+            Path(source).replace(target)
+            return
+        except OSError as exc:
+            transient = os.name == "nt" and getattr(exc, "winerror", None) in (
+                _TRANSIENT_RENAME_WINERRORS
+            )
+            if not transient or attempt == attempts - 1:
+                raise
+            time.sleep(base_delay * (2**attempt))
 
 
 def workspace_source_path(

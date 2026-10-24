@@ -21,6 +21,11 @@ from docker.errors import DockerException, ImageNotFound
 from codepilot.repo.gitcmd import run_git
 from codepilot.sandbox.base import EnvironmentBuildResult
 from codepilot.sandbox.docker import DockerSandbox
+from codepilot.sandbox.runners import (
+    PYTEST_REQUESTS_COMPAT,
+    RunnerOverrides,
+    adapter_for,
+)
 from codepilot.sandbox.swebench_env import (
     SWEBenchInstanceImageResolver,
     _image_is_valid,
@@ -168,19 +173,24 @@ def _copy_testdeps(source: str | Path | None, workspace: Path) -> int:
     if not src.is_dir():
         return 0
     target = workspace / "testdeps"
-    if target.exists():
-        return 0
     exclude = _git_exclude_path(workspace)
     if exclude is None:
         raise OfficialImageError("cannot locate git exclude for the testdeps directory")
     if not exclude.resolve().is_relative_to(workspace.resolve()):
         raise OfficialImageError("git exclude resolved outside the workspace; refusing to write it")
-    shutil.copytree(src, target, symlinks=True)
+    if target.exists():
+        shutil.copytree(src, target, dirs_exist_ok=True, symlinks=True)
+    else:
+        shutil.copytree(src, target, symlinks=True)
     exclude.parent.mkdir(parents=True, exist_ok=True)
     current = exclude.read_text(encoding="utf-8", errors="replace") if exclude.is_file() else ""
     if "testdeps/" not in {line.strip() for line in current.splitlines()}:
         exclude.write_text(current.rstrip("\n") + "\ntestdeps/\n", encoding="utf-8")
     return sum(1 for path in target.rglob("*") if path.is_file())
+
+
+def instance_testdeps_root(instance_id: str) -> Path:
+    return Path(__file__).resolve().parents[3] / "configs" / "swebench" / "testdeps" / instance_id
 
 
 class OfficialImageError(RuntimeError):
@@ -198,16 +208,20 @@ class OfficialInstanceSandbox(DockerSandbox):
         instance_id: str,
         images: SWEBenchInstanceImageResolver,
         client: Any | None = None,
+        runners: RunnerOverrides | None = None,
     ) -> None:
+        self.instance_id = instance_id
+        self.images = images
+        self.runners = runners
+        self.runner = adapter_for(instance_id, runners)
         super().__init__(
             artifacts=artifacts,
             allowed_workspace_root=allowed_workspace_root,
             client=client,
             workspace_target="/testbed",
             bind_workspace=os.environ.get("CODEPILOT_BIND_WORKSPACE") == "1",
+            runner_adapter=self.runner,
         )
-        self.instance_id = instance_id
-        self.images = images
         self.last_image: dict[str, Any] | None = None
 
     def build_env(
@@ -262,9 +276,27 @@ class OfficialInstanceSandbox(DockerSandbox):
         self._overlay_build_artifacts(workspace)
         testdeps = 0
         if self.instance_id.startswith("pytest-dev__pytest-"):
-            testdeps = _copy_testdeps(os.environ.get("CODEPILOT_TESTDEPS_DIR"), workspace)
+            testdeps += _copy_testdeps(os.environ.get("CODEPILOT_TESTDEPS_DIR"), workspace)
+        per_instance = instance_testdeps_root(self.instance_id)
+        if per_instance.is_dir():
+            testdeps += _copy_testdeps(per_instance, workspace)
+        if self.runner is not None and self.runner.kind == PYTEST_REQUESTS_COMPAT:
+            plugin = workspace / "testdeps" / "codepilot_requests_compat.py"
+            if not plugin.is_file():
+                raise OfficialImageError(
+                    "requests compatibility plugin is missing from the instance testdeps"
+                )
         if self.last_image is not None:
             self.last_image["overlaid_testdeps_files"] = testdeps
+            self.last_image["runner"] = (
+                {
+                    "kind": self.runner.kind,
+                    "test_command": self.runner.config.test_command,
+                    "preflight_scope": list(self.runner.config.preflight_scope),
+                }
+                if self.runner is not None
+                else {"kind": "pytest"}
+            )
         return EnvironmentBuildResult(
             status=ExecutionStatus.PASS,
             image_ref=resolution.image_ref,
@@ -335,9 +367,6 @@ class OfficialInstanceSandbox(DockerSandbox):
 
     def run_tests(self, **kwargs: Any) -> Any:
         spec = kwargs["env_spec"]
-        command = _PYTEST_PREFIX.sub(
-            "/opt/miniconda3/envs/testbed/bin/python -m pytest", spec.test_command
-        )
         env = {
             **spec.env,
             "PATH": (
@@ -346,9 +375,17 @@ class OfficialInstanceSandbox(DockerSandbox):
             ),
             "PYTHONPATH": "/testbed/src:/testbed:/testbed/testdeps",
         }
-        command = _pytest_command(self.instance_id, command)
+        native = self.runner is not None and self.runner.native
+        command = spec.test_command
+        if not native:
+            command = _PYTEST_PREFIX.sub(
+                "/opt/miniconda3/envs/testbed/bin/python -m pytest", command
+            )
+            command = _pytest_command(self.instance_id, command)
         kwargs["env_spec"] = spec.model_copy(update={"test_command": command, "env": env})
         result = super().run_tests(**kwargs)
+        if native:
+            return result
         return _reclassify_pytest_fixture_dependency(self.instance_id, result)
 
 

@@ -6,6 +6,7 @@ import os
 import re
 import shutil
 import subprocess
+import time
 from collections.abc import Iterator
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
@@ -101,6 +102,9 @@ def read_file_tool(policy: WorkspacePathPolicy) -> Tool:
 
 _MAX_SEARCH_MATCHES = 50
 _MAX_SEARCH_FILE_BYTES = 5 * 1024 * 1024
+_MAX_SEARCH_FILES = 20_000
+_SEARCH_DEADLINE_SECONDS = 20.0
+_RG_TIMEOUT_SECONDS = 15
 _BINARY_PROBE_BYTES = 8192
 
 
@@ -133,17 +137,35 @@ def _iter_search_files(
             yield relative, base / name
 
 
-def _search_with_python(policy: WorkspacePathPolicy, args: SearchCodeInput) -> ToolResponse:
-    """ripgrep 缺失时的纯 Python 回退；输出形状与 rg 路径保持一致。
+def _search_with_python(
+    policy: WorkspacePathPolicy,
+    args: SearchCodeInput,
+    *,
+    fallback_reason: str,
+    started: float | None = None,
+) -> ToolResponse:
+    """Bounded, policy-constrained fallback used when ripgrep is absent/slow.
 
-    真实 GLM 实验里 Planner 的 ``search_code`` 因为宿主机没有 ``rg`` 直接失败
-    （``dependency_missing``）。工具不该把"可选二进制缺失"变成"搜索能力为零"：
-    这里提供确定性、受 workspace 策略约束的回退实现。
+    The fallback is not an unbounded replacement for rg: it has its own file
+    count, file size, binary-content and total-time limits.  The diagnostics
+    say which engine ran and why the accelerator was skipped, so a Planner
+    timeout cannot be mistaken for a harness internal error.
     """
+    stage = time.perf_counter() if started is None else started
+    deadline = time.monotonic() + _SEARCH_DEADLINE_SECONDS
     pattern: re.Pattern[str] | None = re.compile(args.pattern) if args.regex else None
     matches: list[dict[str, str | int]] = []
     truncated = False
+    fallback_timed_out = False
+    scanned = 0
     for relative, path in _iter_search_files(policy, args.path_glob):
+        if time.monotonic() > deadline:
+            fallback_timed_out = True
+            truncated = True
+            break
+        if scanned >= _MAX_SEARCH_FILES:
+            truncated = True
+            break
         if path.is_symlink():
             continue
         try:
@@ -151,6 +173,7 @@ def _search_with_python(policy: WorkspacePathPolicy, args: SearchCodeInput) -> T
             data = path.read_bytes()
         except (OSError, ValueError):
             continue
+        scanned += 1
         if len(data) > _MAX_SEARCH_FILE_BYTES:
             continue
         if b"\x00" in data[:_BINARY_PROBE_BYTES]:
@@ -175,7 +198,18 @@ def _search_with_python(policy: WorkspacePathPolicy, args: SearchCodeInput) -> T
             break
     matches.sort(key=lambda item: (str(item["path"]), int(item["line"]), int(item["column"])))
     return ToolResponse.success(
-        "search_code", matches=matches[:_MAX_SEARCH_MATCHES], truncated=truncated
+        "search_code",
+        matches=matches[:_MAX_SEARCH_MATCHES],
+        truncated=truncated,
+        engine="python_fallback",
+        fallback_reason=fallback_reason,
+        fallback_timed_out=fallback_timed_out,
+        files_scanned=scanned,
+        max_files=_MAX_SEARCH_FILES,
+        max_file_bytes=_MAX_SEARCH_FILE_BYTES,
+        max_matches=_MAX_SEARCH_MATCHES,
+        deadline_seconds=_SEARCH_DEADLINE_SECONDS,
+        elapsed_ms=round((time.perf_counter() - stage) * 1000.0, 2),
     )
 
 
@@ -196,6 +230,7 @@ def _search_with_ripgrep(
     for denied in sorted(policy.deny_directories):
         command.extend(["--glob", f"!{denied}/**"])
     command.extend(["--", args.pattern, "."])
+    started = time.perf_counter()
     try:
         completed = subprocess.run(
             command,
@@ -204,18 +239,22 @@ def _search_with_ripgrep(
             text=True,
             encoding="utf-8",
             errors="replace",
-            timeout=15,
+            timeout=_RG_TIMEOUT_SECONDS,
             check=False,
         )
     except subprocess.TimeoutExpired:
         # Large repositories can exceed the external search timeout. Falling
         # back keeps an optional accelerator from turning into an internal error.
-        return _search_with_python(policy, args)
+        return _search_with_python(policy, args, fallback_reason="rg_timeout", started=started)
     if completed.returncode not in (0, 1):
         return ToolResponse.failure(
             "search_code",
             "search_failed",
             completed.stderr.strip()[:1000] or "ripgrep failed",
+            engine="ripgrep",
+            exit_code=completed.returncode,
+            stderr=completed.stderr.strip()[:1000],
+            elapsed_ms=round((time.perf_counter() - started) * 1000.0, 2),
         )
     matches: list[dict[str, str | int]] = []
     for line in completed.stdout.splitlines():
@@ -243,6 +282,12 @@ def _search_with_ripgrep(
         "search_code",
         matches=matches,
         truncated=len(completed.stdout.splitlines()) > _MAX_SEARCH_MATCHES,
+        engine="ripgrep",
+        fallback_reason=None,
+        fallback_timed_out=False,
+        max_matches=_MAX_SEARCH_MATCHES,
+        timeout_seconds=_RG_TIMEOUT_SECONDS,
+        elapsed_ms=round((time.perf_counter() - started) * 1000.0, 2),
     )
 
 
@@ -256,7 +301,7 @@ def search_code_tool(policy: WorkspacePathPolicy) -> Tool:
                 return ToolResponse.failure("search_code", "invalid_regex", str(exc))
         executable = shutil.which("rg")
         if executable is None:
-            return _search_with_python(policy, args)
+            return _search_with_python(policy, args, fallback_reason="rg_missing")
         return _search_with_ripgrep(policy, args, executable)
 
     return Tool(

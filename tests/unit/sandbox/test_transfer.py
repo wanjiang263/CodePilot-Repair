@@ -166,15 +166,30 @@ def member_names(payload: bytes) -> dict[str, tarfile.TarInfo]:
         return {member.name.rstrip("/"): member for member in archive.getmembers()}
 
 
+def _symlink_or_skip(link: Path, target: Path) -> None:
+    """Create a real symlink or skip with the OS capability error.
+
+    Windows without Developer Mode (or SeCreateSymbolicLinkPrivilege) cannot
+    create symlinks.  That is a platform capability, not a product failure; the
+    same cases run on Linux/`/mnt/c` and the assertion is unchanged there.
+    """
+    try:
+        link.symlink_to(target)
+    except (OSError, NotImplementedError) as exc:
+        pytest.skip(f"symlink capability unavailable: {exc}")
+
+
 @pytest.fixture
 def workspace(tmp_path: Path) -> Path:
     root = tmp_path / "workspace"
     (root / "src" / "pkg").mkdir(parents=True)
     (root / "src" / "pkg" / "__init__.py").write_text("", encoding="utf-8")
-    (root / "src" / "pkg" / "mod.py").write_text("VALUE = 1\n", encoding="utf-8")
+    # Bytes, not text: write_text translates LF to CRLF on Windows and the
+    # upload is required to preserve file bytes exactly.
+    (root / "src" / "pkg" / "mod.py").write_bytes(b"VALUE = 1\n")
     (root / "empty_dir").mkdir()
     script = root / "run.sh"
-    script.write_text("#!/bin/sh\necho ok\n", encoding="utf-8")
+    script.write_bytes(b"#!/bin/sh\necho ok\n")
     script.chmod(0o755)
     return root
 
@@ -190,7 +205,12 @@ def test_upload_keeps_sources_and_exec_bit_and_drops_evaluation_material(
     members = member_names(upload_archive(workspace))
     assert "src/pkg/mod.py" in members
     assert "empty_dir" in members, "空目录也要留在容器里，否则被测代码可能找不到路径"
-    assert members["run.sh"].mode & 0o111, "可执行位必须保留，否则构建脚本跑不起来"
+    if os.name == "posix":
+        assert members["run.sh"].mode & 0o111, "可执行位必须保留，否则构建脚本跑不起来"
+    else:
+        # NTFS has no Unix exec bit; assert the mode that the platform can
+        # represent is carried through instead of pretending chmod(755) worked.
+        assert members["run.sh"].mode & 0o777 == ((workspace / "run.sh").stat().st_mode & 0o777)
     for name in members:
         assert not name.startswith(("workspace/", "./")), name
     forbidden = [name for name in members if ".git" in name or name.startswith(("eval/", ".env"))]
@@ -214,7 +234,7 @@ def test_upload_accepts_unicode_names(workspace: Path) -> None:
 
 
 def test_upload_keeps_internal_symlink_as_relative_link(workspace: Path) -> None:
-    (workspace / "link.py").symlink_to("src/pkg/mod.py")
+    _symlink_or_skip(workspace / "link.py", Path("src/pkg/mod.py"))
     member = member_names(upload_archive(workspace))["link.py"]
     assert member.issym()
     assert member.linkname == "src/pkg/mod.py"
@@ -223,12 +243,14 @@ def test_upload_keeps_internal_symlink_as_relative_link(workspace: Path) -> None
 def test_upload_rejects_symlink_that_escapes_workspace(workspace: Path, tmp_path: Path) -> None:
     secret = tmp_path / "secret.env"
     secret.write_text("TOKEN=secret\n", encoding="utf-8")
-    (workspace / "escape.py").symlink_to(secret)
+    _symlink_or_skip(workspace / "escape.py", secret)
     with pytest.raises(TransferError, match="逃逸"):
         upload_archive(workspace)
 
 
 def test_upload_rejects_special_files(workspace: Path) -> None:
+    if not hasattr(os, "mkfifo"):
+        pytest.skip("os.mkfifo is not available on this platform")
     os.mkfifo(workspace / "pipe")
     with pytest.raises(TransferError, match="special file"):
         upload_archive(workspace)

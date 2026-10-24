@@ -20,7 +20,7 @@ from pathlib import Path
 
 import pytest
 
-from codepilot.fsutil import remove_tree
+from codepilot.fsutil import remove_tree, replace_path
 from codepilot.repo.workspace import (
     Workspace,
     WorkspaceError,
@@ -1098,7 +1098,11 @@ def test_fetch_mode_survives_without_the_cache(tmp_path: Path) -> None:
     manager = WorkspaceManager(cache_root=tmp_path / "cache")
     ws = manager.create(source=str(origin.path), base_commit=origin.head, target=tmp_path / "ws")
 
-    (tmp_path / "cache").rename(tmp_path / "cache-hidden")
+    # A just-exited git child (or Defender scanning the new objects) can hold a
+    # transient handle on the cache directory. The retry is bounded and only
+    # applies to Windows access-denied/sharing violations; a real leak still
+    # raises instead of waiting forever.
+    replace_path(tmp_path / "cache", tmp_path / "cache-hidden")
 
     for args in (["log", "--oneline"], ["status", "--porcelain"], ["describe"]):
         result = subprocess.run(["git", *args], cwd=ws.path, capture_output=True, text=True)
