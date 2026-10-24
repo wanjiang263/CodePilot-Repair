@@ -51,6 +51,7 @@ from codepilot.failure.parser import FailureParser
 from codepilot.graph.builder import run_graph
 from codepilot.graph.checkpoint import open_checkpointer, resume_run, run_with_checkpoint
 from codepilot.graph.deps import AccountingSandbox, Deps
+from codepilot.graph.stop_rules import patch_hash
 from codepilot.graph.regression import RegressionRunner
 from codepilot.llm.base import LLMProvider
 from codepilot.llm.calls import CallRecorder, LLMRunContext
@@ -372,6 +373,14 @@ class InferenceOutcome:
 
     checkpointed: bool = False
     resumed_from_checkpoint: bool = False
+    candidate_patch_sha256: str = ""
+    """编码阶段冻结的候选补丁（规范化 diff 的 SHA-256）。"""
+
+    final_patch_identity_sha256: str = ""
+    """实际交付补丁的规范化身份；与 ``final_patch_sha256``（原始字节）分开。"""
+
+    review_high_issues_known: bool = False
+    """``review_executed=False`` 时高危问题数未知；不能把默认 0 当审查通过。"""
 
     @staticmethod
     def digest(text: str) -> str:
@@ -469,13 +478,25 @@ class InferenceAssembly:
         if self._enforce_base_only:
             self._assert_isolated(workspace)
         env_spec = self._resolve_env_spec(workspace.path)
+        deny_existing = os.environ.get("CODEPILOT_DENY_EXISTING_TEST_EDITS") == "1"
         policy = WorkspacePathPolicy(
             workspace.path,
             deny_directories=WorkspacePathPolicy.DEFAULT_DENY_DIRECTORIES
             | INFERENCE_DENIED_DIRECTORIES,
-            repro_write=self._with_reproducer,
+            # Coder/Planner never get the reproduction write exception. The
+            # Reproducer receives a separate trusted policy below; sharing one
+            # object let the Coder rewrite confirmed reproduction evidence.
+            repro_write=False,
             allow_new_tests=self._allow_new_tests,
-            deny_existing_test_edits=os.environ.get("CODEPILOT_DENY_EXISTING_TEST_EDITS") == "1",
+            deny_existing_test_edits=deny_existing,
+        )
+        reproducer_policy = WorkspacePathPolicy(
+            workspace.path,
+            deny_directories=policy.deny_directories,
+            deny_files=policy.deny_files,
+            repro_write=True,
+            allow_new_tests=self._allow_new_tests,
+            deny_existing_test_edits=deny_existing,
         )
         database = artifacts.run_dir / "index.sqlite3"
         engine = create_engine_from_url(f"sqlite:///{database.as_posix()}")
@@ -720,7 +741,7 @@ class InferenceAssembly:
             reproducer=(
                 ReproductionAgent(
                     provider["reproducer"],
-                    policy=policy,
+                    policy=reproducer_policy,
                     validator=BaseWorkspaceValidator(
                         sandbox=sandbox,
                         env_spec=env_spec,
@@ -785,6 +806,14 @@ class InferenceAssembly:
         runtime: float,
     ) -> InferenceOutcome:
         final = state.current_patch
+        # finalize may filter newly added tests out of the delivered patch when
+        # they were not reviewed. The prediction must carry exactly that
+        # delivered text, not the pre-delivery workspace diff.
+        try:
+            if artifacts.exists("patch_final.diff"):
+                final = artifacts.read_text("patch_final.diff")
+        except (OSError, ValueError):
+            pass
         first = state.attempts[0].patch_diff if state.attempts else None
         localization = state.localization
         backend = "unknown"
@@ -859,4 +888,7 @@ class InferenceAssembly:
             llm_requests=self._recorder.summary() if self._recorder is not None else {},
             checkpointed=self._checkpoint,
             resumed_from_checkpoint=self.resumed_from_checkpoint,
+            candidate_patch_sha256=patch_hash(state.current_patch),
+            final_patch_identity_sha256=patch_hash(final),
+            review_high_issues_known=closure.review_high_issues_known,
         )

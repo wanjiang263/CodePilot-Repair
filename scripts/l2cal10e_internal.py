@@ -144,6 +144,7 @@ def main(argv: list[str] | None = None) -> int:
             else smoke.LIVE_NOT_RUN
         ),
         "official_evaluation": "DEFERRED",
+        "official_evaluation_semantics": "deferred_at_acceptance",
         "runs": [
             {
                 "run_label": report.get("run_label"),
