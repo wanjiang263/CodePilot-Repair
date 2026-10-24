@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "note": "Phase 21 engineering-recovery runner decisions. preflight_scope is derived from the issue's public area (not from gold/test_patch/FAIL_TO_PASS/PASS_TO_PASS) and is used only for the environment smoke, never as agent input.",
+  "instances": {
+    "django__django-11422": {
+      "kind": "django",
+      "test_command": "./tests/runtests.py --verbosity 2 --settings=test_sqlite --parallel 1",
+      "preflight_scope": [
+        "utils_tests.test_autoreload"
+      ],
+      "timeout_seconds": 600,
+      "note": "Django's custom unittest runner has no pytest flags and no JUnit output."
+    },
+    "sphinx-doc__sphinx-8273": {
+      "kind": "pytest",
+      "test_command": "tox --current-env -epy39 -v --",
+      "preflight_scope": [],
+      "timeout_seconds": 900,
+      "note": "Official command is tox-wrapped pytest; JUnit is appended by the env spec."
+    },
+    "sympy__sympy-22714": {
+      "kind": "sympy",
+      "test_command": "PYTHONWARNINGS='ignore::UserWarning,ignore::SyntaxWarning' bin/test -C --verbose",
+      "preflight_scope": [
+        "sympy/geometry/tests/test_point.py"
+      ],
+      "timeout_seconds": 600,
+      "note": "bin/test ignores --junitxml and exits 0 for unknown selectors; native parsing is mandatory."
+    },
+    "matplotlib__matplotlib-18869": {
+      "kind": "pytest",
+      "test_command": "pytest -rA",
+      "preflight_scope": [],
+      "timeout_seconds": 600,
+      "note": "Full collection is bounded and was fast in Phase 20 after the build-artifact overlay."
+    },
+    "scikit-learn__scikit-learn-10297": {
+      "kind": "pytest",
+      "test_command": "pytest -rA",
+      "preflight_scope": [
+        "sklearn/linear_model/tests"
+      ],
+      "timeout_seconds": 600,
+      "note": "setup.cfg adds --doctest-modules; full-repo collection exceeds 900s, so the smoke scope is the issue's public module test directory."
+    },
+    "psf__requests-3362": {
+      "kind": "pytest_requests_compat",
+      "test_command": "pytest -rA",
+      "preflight_scope": [
+        "tests/test_utils.py"
+      ],
+      "timeout_seconds": 300,
+      "note": "TestSuperLen contains a 2016-era malformed parametrize MarkDecorator; the scoped plugin reproduces the intended skipif parameter without touching the test."
+    }
+  }
+}

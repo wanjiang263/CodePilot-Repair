@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "note": "Issue-derived engineering scopes for Phase 21 zero-model execution checks. These are not gold/test_patch/FAIL_TO_PASS lists and are never given to the agent; baselines and target nodes are selected from existing repository tests.",
+  "instances": {
+    "django__django-11422": {
+      "baseline_scope": ["utils_tests.test_autoreload"],
+      "target_tests": ["tests/utils_tests/test_autoreload.py::StatReloaderTests::test_file"],
+      "patch_file": "django/utils/autoreload.py"
+    },
+    "sphinx-doc__sphinx-8273": {
+      "baseline_scope": ["tests/test_build_manpage.py"],
+      "target_tests": ["tests/test_build_manpage.py::test_default_man_pages"],
+      "patch_file": "sphinx/builders/manpage.py"
+    },
+    "sympy__sympy-22714": {
+      "baseline_scope": ["sympy/geometry/tests/test_point.py"],
+      "target_tests": ["sympy/geometry/tests/test_point.py::test_Point2D"],
+      "patch_file": "sympy/geometry/point.py"
+    },
+    "matplotlib__matplotlib-18869": {
+      "baseline_scope": ["lib/matplotlib/tests/test_matplotlib.py"],
+      "target_tests": ["lib/matplotlib/tests/test_matplotlib.py::test_use_doc_standard_backends"],
+      "patch_file": "lib/matplotlib/__init__.py"
+    },
+    "scikit-learn__scikit-learn-10297": {
+      "baseline_scope": ["sklearn/linear_model/tests/test_ridge.py"],
+      "target_tests": ["sklearn/linear_model/tests/test_ridge.py::test_ridge"],
+      "patch_file": "sklearn/linear_model/ridge.py"
+    },
+    "psf__requests-3362": {
+      "baseline_scope": ["tests/test_utils.py"],
+      "target_tests": ["tests/test_utils.py::TestSuperLen::test_string"],
+      "patch_file": "requests/utils.py"
+    }
+  }
+}

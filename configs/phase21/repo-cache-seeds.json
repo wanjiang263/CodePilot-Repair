@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "note": "Phase 20 base-only bare caches reused as read-only seeds. Seeding copies a bare object database; it does not reuse a workspace or any uncommitted state.",
+  "seeds": {
+    "django__django-11422": "artifacts/phase20/m3-20261024-live/instances/django__django-11422/repo-cache",
+    "sphinx-doc__sphinx-8273": "artifacts/phase20/m3-20261024-formal6/instances/sphinx-doc__sphinx-8273/repo-cache",
+    "sympy__sympy-22714": "artifacts/phase20/m3-20261024-formal6/instances/sympy__sympy-22714/repo-cache",
+    "matplotlib__matplotlib-18869": "artifacts/phase20/m3-20261024-formal6/instances/matplotlib__matplotlib-18869/repo-cache",
+    "scikit-learn__scikit-learn-10297": "artifacts/phase20/m3-20261024-formal6/instances/scikit-learn__scikit-learn-10297/repo-cache",
+    "psf__requests-3362": "artifacts/phase20/m3-20261024-formal6/instances/psf__requests-3362/repo-cache"
+  }
+}
