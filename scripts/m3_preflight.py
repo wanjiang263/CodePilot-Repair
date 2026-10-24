@@ -299,7 +299,7 @@ def main() -> int:
                 task.env_spec,
             )
             result["ok"] = result["collection"]["ok"]
-        except (OSError, RuntimeError, ValueError) as exc:
+        except (OSError, RuntimeError, ValueError, subprocess.TimeoutExpired) as exc:
             result["error"] = f"{type(exc).__name__}: {exc}"
         result["finished_at"] = _now()
         _write_json(preflight_root / "result.json", result)
