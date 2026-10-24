@@ -51,8 +51,8 @@ from codepilot.failure.parser import FailureParser
 from codepilot.graph.builder import run_graph
 from codepilot.graph.checkpoint import open_checkpointer, resume_run, run_with_checkpoint
 from codepilot.graph.deps import AccountingSandbox, Deps
-from codepilot.graph.stop_rules import patch_hash
 from codepilot.graph.regression import RegressionRunner
+from codepilot.graph.stop_rules import patch_hash
 from codepilot.llm.base import LLMProvider
 from codepilot.llm.calls import CallRecorder, LLMRunContext
 from codepilot.llm.config import LLMConfig
@@ -516,6 +516,7 @@ class InferenceAssembly:
                     workspace=workspace,
                     artifacts=artifacts,
                     policy=policy,
+                    reproducer_policy=reproducer_policy,
                     index=index,
                     env_spec=env_spec,
                     checkpoint_path=checkpoint_path if self._checkpoint else None,
@@ -618,6 +619,7 @@ class InferenceAssembly:
         workspace: Workspace,
         artifacts: ArtifactStore,
         policy: WorkspacePathPolicy,
+        reproducer_policy: WorkspacePathPolicy,
         index: RepositoryIndex,
         env_spec: EnvSpec,
         checkpoint_path: Path | None = None,

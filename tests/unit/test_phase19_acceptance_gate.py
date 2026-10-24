@@ -15,6 +15,7 @@ if str(ROOT / "scripts") not in sys.path:
 
 import l2cal10e_acceptance as acceptance  # noqa: E402
 import l2cal10e_official as official  # noqa: E402
+
 from codepilot.graph.stop_rules import patch_hash  # noqa: E402
 
 PATCH = (
@@ -70,7 +71,7 @@ def _write_run(tmp_path: Path, *, run_id: str = "run-a", review_approved: bool =
             "target_tests_status": "PASS",
             "target_test_sha256": candidate,
             "target_test_source": "planner",
-            "target_tests": [f"tests/test_core.py::test_normalize"],
+            "target_tests": ["tests/test_core.py::test_normalize"],
             "regression_executed": True,
             "regression_complete": True,
             "regression_mode": "full",

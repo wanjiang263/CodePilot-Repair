@@ -64,6 +64,7 @@ def test_complete_evidence_preserves_verification_scope(mode, level):
         issue="issue",
         started_at=datetime.now(UTC),
         status=RunStatus.SUCCEEDED,
+        current_patch="patch",
         execution=ExecutionResult(status=ExecutionStatus.PASS),
         attempts=[Attempt(iteration=1, validation=ValidationResult(passed=True))],
         regression=RegressionResult(complete=True, mode=mode),

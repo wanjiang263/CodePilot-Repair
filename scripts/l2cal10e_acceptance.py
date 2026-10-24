@@ -88,9 +88,7 @@ def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def evaluate(
-    root: Path, *, instance: str, label: str, run_id: str | None = None
-) -> dict[str, Any]:
+def evaluate(root: Path, *, instance: str, label: str, run_id: str | None = None) -> dict[str, Any]:
     found = _run_report(root, instance=instance, label=label, run_id=run_id)
     if found is None:
         raise ValueError(f"no internal run report for {instance} label={label}")
@@ -111,8 +109,17 @@ def evaluate(
     delivered = str(run.get("git_diff") or "")
     delivered_identity = patch_hash(delivered) if delivered else None
     delivered_raw = _sha256(delivered) if delivered else None
-    target_source = inference.get("target_test_source") or last_attempt.get("target_test_source")
-    target_tests = inference.get("target_tests") or last_attempt.get("target_tests") or []
+    target_source = (
+        inference.get("target_test_source")
+        or last_attempt.get("target_test_source")
+        or closure.get("target_test_source")
+    )
+    target_tests = (
+        inference.get("target_tests")
+        or last_attempt.get("target_tests")
+        or closure.get("target_tests")
+        or []
+    )
     repro_status = str(reproduction.get("status") or "")
     regression = run.get("regression") or {}
     regression_mode = closure.get("regression_mode") or regression.get("mode")
@@ -134,12 +141,8 @@ def evaluate(
         "candidate_equals_delivered_patch": bool(
             candidate and delivered_identity and candidate == delivered_identity
         ),
-        "delivered_patch_matches_report": bool(
-            final and delivered_raw and final == delivered_raw
-        ),
-        "validated_patch_bound": bool(
-            candidate and last_attempt.get("patch_hash") == candidate
-        ),
+        "delivered_patch_matches_report": bool(final and delivered_raw and final == delivered_raw),
+        "validated_patch_bound": bool(candidate and last_attempt.get("patch_hash") == candidate),
         "target_tested_patch_bound": bool(
             candidate and closure.get("target_test_sha256") == candidate
         ),
@@ -169,9 +172,7 @@ def evaluate(
         ),
         "review_executed": review_executed,
         # An unexecuted review has an unknown issue count, not zero issues.
-        "review_no_high_issues": bool(
-            review_executed and review_known and review_high == 0
-        ),
+        "review_no_high_issues": bool(review_executed and review_known and review_high == 0),
         "review_approved": bool(review_executed and review.get("approved") is True),
         "review_bound_to_candidate": bool(
             review_executed
@@ -222,9 +223,7 @@ def evaluate(
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
-        payload = evaluate(
-            args.root, instance=args.instance, label=args.label, run_id=args.run_id
-        )
+        payload = evaluate(args.root, instance=args.instance, label=args.label, run_id=args.run_id)
     except (OSError, ValueError) as exc:
         print(f"ERROR {exc}")
         return 2

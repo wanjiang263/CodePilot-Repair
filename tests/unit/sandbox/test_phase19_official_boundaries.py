@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import io
+import os
+import subprocess
 import tarfile
 from pathlib import Path
 
@@ -18,7 +20,9 @@ def _result(status: ExecutionStatus, *, exit_code: int, outcome: TestOutcome) ->
     return ExecutionResult(
         status=status,
         exit_code=exit_code,
-        error_reason="MISSING_THIRD_PARTY_DEPENDENCY" if status is ExecutionStatus.ENV_ERROR else None,
+        error_reason="MISSING_THIRD_PARTY_DEPENDENCY"
+        if status is ExecutionStatus.ENV_ERROR
+        else None,
         tests=[TestCaseResult(node_id="tests/test_a.py::test_x", outcome=outcome, duration=0)],
     )
 
@@ -56,7 +60,18 @@ def test_archive_extraction_skips_traversal_and_links(tmp_path: Path) -> None:
     (workspace / "root").mkdir(parents=True)
     outside = tmp_path / "outside"
     outside.mkdir()
-    (workspace / "root" / "linked").symlink_to(outside, target_is_directory=True)
+    linked = workspace / "root" / "linked"
+    try:
+        linked.symlink_to(outside, target_is_directory=True)
+    except OSError as exc:
+        if os.name != "nt" or exc.winerror != 1314:
+            raise
+        completed = subprocess.run(
+            ["cmd", "/c", "mklink", "/J", str(linked), str(outside)],
+            capture_output=True,
+            check=False,
+        )
+        assert completed.returncode == 0, completed.stderr
 
     link = tarfile.TarInfo("root/skip-link")
     link.type = tarfile.SYMTYPE

@@ -22,11 +22,8 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 import swebench_smoke as smoke  # noqa: E402
-from l2cal10e_acceptance import (  # noqa: E402
-    _root_report,
-    _run_report,
-    evaluate as evaluate_acceptance,
-)
+from l2cal10e_acceptance import _root_report, _run_report  # noqa: E402
+from l2cal10e_acceptance import evaluate as evaluate_acceptance  # noqa: E402
 
 _RECHECK_SCHEMA_VERSION = 2
 _RECHECK_CHECKS = frozenset(
@@ -167,9 +164,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     from codepilot.artifacts import ArtifactStore
     from codepilot.eval import swebench_harness as harness
 
-    found = _run_report(
-        args.root, instance=args.instance, label=args.label, run_id=args.run_id
-    )
+    found = _run_report(args.root, instance=args.instance, label=args.label, run_id=args.run_id)
     if found is None:
         raise ValueError(f"no internal run report for {args.instance} label={args.label}")
     report_path, run = found
@@ -198,9 +193,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     if not model:
         raise ValueError("model identity is missing from the internal report")
     evidence = acceptance.get("evidence") or {}
-    expected_patch = evidence.get("delivered_patch_sha256") or evidence.get(
-        "final_patch_sha256"
-    )
+    expected_patch = evidence.get("delivered_patch_sha256") or evidence.get("final_patch_sha256")
     if not expected_patch:
         raise ValueError("acceptance does not record a delivered patch hash")
     predictions_path, prediction_evidence = _verify_prediction(

@@ -530,14 +530,14 @@ def validate_recovery_manifest(
     unknown = _amount(
         manifest.get("unknown_reserved_cny"), "recovery manifest unknown_reserved_cny"
     )
-    if not math.isclose(settled, float(totals["settled_cny"]), rel_tol=0, abs_tol=1e-9):
-        raise ValueError("source dispatch ledger settled amount does not match the manifest")
     if not math.isclose(unknown, float(totals["unknown_reserved_cny"]), rel_tol=0, abs_tol=1e-9):
         raise ValueError("source dispatch ledger unknown reservation does not match the manifest")
 
     additional = manifest.get("additional_settled_ledgers") or []
     if not isinstance(additional, list):
         raise ValueError("recovery manifest additional_settled_ledgers is invalid")
+    expected_settled = float(totals["settled_cny"])
+    resolved_paths = [source.resolve()]
     for item in additional:
         if not isinstance(item, dict):
             raise ValueError("recovery manifest additional ledger entry is invalid")
@@ -556,6 +556,12 @@ def validate_recovery_manifest(
             extra_settled, float(extra_totals["settled_cny"]), rel_tol=0, abs_tol=1e-9
         ):
             raise ValueError(f"additional dispatch ledger settled amount changed: {extra}")
+        expected_settled += extra_settled
+        resolved_paths.append(extra.resolve())
+    if len(resolved_paths) != len(set(resolved_paths)):
+        raise ValueError("recovery manifest lists the same ledger more than once")
+    if not math.isclose(settled, expected_settled, rel_tol=0, abs_tol=1e-9):
+        raise ValueError("recovery manifest settled total does not match its sources")
 
 
 def create_recovery_ledger(
@@ -881,7 +887,7 @@ def record_attempt_from_ledger(
     ):
         new_settled = float(totals["settled_cny"])
         new_unknown = float(totals["unknown_reserved_cny"])
-        if new_settled + 1e-9 < float(previous_settled):
+        if new_settled + 1e-9 < _amount(previous_settled, "previous settled_cny"):
             raise ValueError(
                 "attempt registry refuses to lower already-settled spend: "
                 f"{ledger_reference} ({previous_settled} -> {new_settled})"
@@ -890,8 +896,9 @@ def record_attempt_from_ledger(
         # a smaller bound that still has unresolved reservations does not.
         if (
             new_unknown > 0
-            and float(previous_unknown) > 0
-            and float(totals["total_upper_bound_cny"]) + 1e-9 < float(previous_total)
+            and _amount(previous_unknown, "previous unknown_reserved_cny") > 0
+            and float(totals["total_upper_bound_cny"]) + 1e-9
+            < _amount(previous_total, "previous total_upper_bound_cny")
         ):
             raise ValueError(
                 "attempt registry refuses an unexplained upper-bound decrease with "

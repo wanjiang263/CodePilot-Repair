@@ -289,6 +289,11 @@ class WorkspaceManager:
         """
         src = normalize_source(source) if isinstance(source, str) else source
         self._check_allowed(src)
+        if src.local_path is not None:
+            if not src.local_path.exists():
+                raise WorkspaceError(f"本地路径不存在: {src.local_path}")
+            if not (src.local_path / ".git").exists() and not _is_bare_repo(src.local_path):
+                raise WorkspaceError(f"本地路径不是 git 仓库（没有 .git）: {src.local_path}")
 
         target = self.cache_path(src)
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -767,9 +772,15 @@ class WorkspaceManager:
             check=False,
         )
         if result.returncode != 0:
-            raise WorkspaceError(
-                "复制缓存创建 workspace 失败。\n"
-                f"  缓存: {cache}\n  目标: {target}\n  stderr: {result.stderr.strip()}"
+            if not _is_msys_shell_launch_failure_text(result.stderr):
+                raise WorkspaceError(
+                    "复制缓存创建 workspace 失败。\n"
+                    f"  缓存: {cache}\n  目标: {target}\n  stderr: {result.stderr.strip()}"
+                )
+            _copy_local_bare(cache, target / ".git", timeout=self.timeout)
+            run_git(
+                ["--git-dir", str(target / ".git"), "config", "core.bare", "false"],
+                timeout=self.timeout,
             )
         self._apply_repo_config(target)
         checkout = run_git(
@@ -954,15 +965,25 @@ def _local_fetch_base(cache: Path, commit: str, target: Path, *, timeout: float)
     )
     if listed.returncode != 0:
         raise WorkspaceError(f"列出 base 对象失败: {listed.stderr.strip()}")
-    for line in listed.lines:
+    tags = run_git(
+        ["for-each-ref", "--merged", commit, "--format=%(refname) %(objectname)", "refs/tags/"],
+        cwd=cache,
+        check=False,
+        timeout=timeout,
+    )
+    if tags.returncode != 0:
+        raise WorkspaceError(f"列出 base 标签失败: {tags.stderr.strip()}")
+    object_lines = [*listed.lines, *(line.partition(" ")[2] for line in tags.lines)]
+    for line in object_lines:
         sha, _, _path = line.partition(" ")
         if not _FULL_SHA.match(sha):
             raise WorkspaceError(f"rev-list 返回了非法对象 ID: {sha!r}")
         loose = cache / "objects" / sha[:2] / sha[2:]
         if loose.is_file():
             destination = target / ".git" / "objects" / sha[:2] / sha[2:]
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(loose, destination)
+            if not destination.exists():
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(loose, destination)
             continue
         kind = run_git(["cat-file", "-t", sha], cwd=cache, check=False, timeout=timeout)
         if kind.returncode != 0:
@@ -985,12 +1006,6 @@ def _local_fetch_base(cache: Path, commit: str, target: Path, *, timeout: float)
         if written.returncode != 0 or written.stdout.decode("ascii", "replace").strip() != sha:
             raise WorkspaceError(f"写入 workspace 对象失败: {sha}")
     run_git(["update-ref", "refs/codepilot/base", commit], cwd=target, check=False)
-    tags = run_git(
-        ["for-each-ref", "--merged", commit, "--format=%(refname) %(objectname)", "refs/tags/"],
-        cwd=cache,
-        check=False,
-        timeout=timeout,
-    )
     for line in tags.lines:
         ref, _, object_id = line.partition(" ")
         if ref and object_id:

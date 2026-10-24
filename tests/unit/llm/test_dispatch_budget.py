@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -8,6 +9,12 @@ import pytest
 
 from codepilot.llm.config import ModelPrice, ModelSpec
 from codepilot.llm.dispatch_budget import DispatchBudget, DispatchBudgetStoppedError
+from codepilot.llm.dispatch_recovery import (
+    RecoveryLedgerSource,
+    build_multi_source_recovery_manifest,
+    instance_opening_cny,
+    write_recovery_manifest,
+)
 
 
 def model() -> ModelSpec:
@@ -130,11 +137,35 @@ def test_guarded_send_accepts_a_per_instance_opening_balance(
     import codepilot.llm.dispatch_budget as dispatch_budget
 
     ledger = tmp_path / "ledger.json"
-    source = {"kind": "per_instance", "recovery_manifest_sha256": "a" * 64}
+    source_ledger = tmp_path / "source.json"
+    previous = DispatchBudget(20, source_ledger)
+    previous.send(
+        model(),
+        {"max_tokens": 4096},
+        lambda: response({"prompt_tokens": 100, "completion_tokens": 10}),
+    )
+    instance = "pytest-dev__pytest-11148"
+    manifest_path = tmp_path / "recovery.json"
+    manifest = build_multi_source_recovery_manifest(
+        [RecoveryLedgerSource(source_ledger, instance)],
+        run_id="source",
+        reason="test opening",
+        repo_root=tmp_path,
+    )
+    write_recovery_manifest(manifest, manifest_path)
+    opening = instance_opening_cny(manifest, instance, repo_root=tmp_path)
+    source = {
+        "kind": "per_instance",
+        "instance_id": instance,
+        "instance_opening_cny": opening,
+        "repo_root": str(tmp_path),
+        "recovery_manifest": str(manifest_path),
+        "recovery_manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
+    }
     monkeypatch.setattr(dispatch_budget, "_guard", None)
     monkeypatch.setenv("CODEPILOT_DISPATCH_BUDGET_CNY", "20")
     monkeypatch.setenv("CODEPILOT_DISPATCH_LEDGER", str(ledger))
-    monkeypatch.setenv("CODEPILOT_DISPATCH_OPENING_CNY", "2.194482")
+    monkeypatch.setenv("CODEPILOT_DISPATCH_OPENING_CNY", str(opening))
     monkeypatch.setenv("CODEPILOT_DISPATCH_OPENING_SOURCE", json.dumps(source))
 
     dispatch_budget.guarded_send(
@@ -144,6 +175,6 @@ def test_guarded_send_accepts_a_per_instance_opening_balance(
     )
 
     payload = json.loads(ledger.read_text(encoding="utf-8"))
-    assert payload["opening_balance"] == pytest.approx(2.194482)
+    assert payload["opening_balance"] == pytest.approx(opening)
     assert payload["opening_source"] == source
-    assert payload["accounted_or_reserved"] == pytest.approx(2.194482 + 0.000108)
+    assert payload["accounted_or_reserved"] == pytest.approx(opening + 0.000108)

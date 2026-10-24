@@ -26,9 +26,7 @@ class DispatchBudgetStoppedError(RuntimeError):
     """No further HTTP dispatch is safe (deliberately not retryable)."""
 
 
-def _validate_per_instance_opening(
-    opening: float, source: dict[str, Any] | None
-) -> None:
+def _validate_per_instance_opening(opening: float, source: dict[str, Any] | None) -> None:
     """Reject an instance opening that is not the validated manifest share.
 
     A ledger SHA alone is not enough: the same manifest can be paired with a
@@ -52,7 +50,7 @@ def _validate_per_instance_opening(
     if isinstance(declared, bool) or not isinstance(declared, (int, float)):
         raise ValueError("per-instance opening requires numeric instance_opening_cny")
     if not math.isclose(float(declared), float(opening), rel_tol=0, abs_tol=1e-9):
-        raise ValueError("opening balance does not match the declared instance opening")
+        raise ValueError("opening balance does not match the declared instance share")
     raw_manifest = source.get("recovery_manifest")
     if not isinstance(raw_manifest, str) or not raw_manifest.strip():
         raise ValueError("per-instance opening requires recovery_manifest")
@@ -68,8 +66,7 @@ def _validate_per_instance_opening(
     computed = instance_opening_cny(manifest, instance_id.strip(), repo_root=repo_root)
     if not math.isclose(computed, float(opening), rel_tol=0, abs_tol=1e-9):
         raise ValueError(
-            "opening balance does not equal the manifest instance share: "
-            f"{opening} != {computed}"
+            f"opening balance does not equal the manifest instance share: {opening} != {computed}"
         )
 
 
