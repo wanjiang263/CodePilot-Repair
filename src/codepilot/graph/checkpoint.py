@@ -65,6 +65,7 @@ from codepilot.schemas.state import RepairState
 
 __all__ = [
     "CHECKPOINT_SCHEMA_VERSION",
+    "CheckpointIdentityError",
     "CheckpointManifest",
     "RecoveryReport",
     "open_checkpointer",
@@ -153,6 +154,37 @@ class CheckpointHandle:
 
     async def __aexit__(self, *exc_info: object) -> None:
         await self.close()
+
+
+class CheckpointIdentityError(ValueError):
+    """A checkpoint exists but its manifest cannot be safely interpreted by this code."""
+
+
+def checkpoint_identity_problem(path: Path, run_id: str) -> str | None:
+    """Reason a stored checkpoint must not be resumed, or ``None`` when compatible.
+
+    A checkpoint file without a readable manifest is not "a fresh run"; it is an
+    unidentifiable prior run. Silently starting over would discard paid work and
+    hide a schema mismatch.
+    """
+    try:
+        manifest = read_manifest(Path(path))
+    except (OSError, ValueError, TypeError) as exc:
+        return f"checkpoint manifest is unreadable: {type(exc).__name__}: {exc}"
+    if manifest is None:
+        return "checkpoint exists without checkpoint_manifest.json"
+    if manifest.get("run_id") != run_id:
+        return f"checkpoint run_id {manifest.get('run_id')!r} does not match {run_id!r}"
+    version = manifest.get("schema_version")
+    if version != CHECKPOINT_SCHEMA_VERSION:
+        return (
+            f"checkpoint schema {version!r} is not supported by current code "
+            f"(expected {CHECKPOINT_SCHEMA_VERSION})"
+        )
+    base = manifest.get("base_commit")
+    if not isinstance(base, str) or not base.strip():
+        return "checkpoint manifest has no base_commit"
+    return None
 
 
 async def open_checkpointer(path: Path, run_id: str) -> CheckpointHandle:
@@ -435,9 +467,23 @@ async def resume_run(
     调用方必须是**新进程**（或至少是重新构造的 Deps）：恢复的意义就在于验证
     "内存里的计数器归零之后还能不能正确接续"，同进程内模拟函数重复调用证明不了它。
     """
+    problem = checkpoint_identity_problem(handle.path, run_id)
+    if problem is not None:
+        # Refuse before deserializing an incompatible state: a schema mismatch
+        # should not surface as an unrelated Pydantic error.
+        deps.events.emit(node="resume", type=EventType.STOP, status="refused", error=problem)
+        raise CheckpointIdentityError(problem)
     stored = await checkpoint_state(handle.saver, run_id)
     if stored is None:
         raise ValueError(f"run_id={run_id!r} 没有可用的 checkpoint")
+    manifest_base = str((read_manifest(handle.path) or {}).get("base_commit") or "")
+    if manifest_base != stored.base_commit:
+        message = (
+            f"checkpoint manifest base {manifest_base!r} does not match state base "
+            f"{stored.base_commit!r}"
+        )
+        deps.events.emit(node="resume", type=EventType.STOP, status="refused", error=message)
+        raise CheckpointIdentityError(message)
     if stored.status is not RunStatus.RUNNING:
         # 已经跑到终态的 run 不需要恢复；重跑会把已停止的外部副作用再来一遍。
         return stored
