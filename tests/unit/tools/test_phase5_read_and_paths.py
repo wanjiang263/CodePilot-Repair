@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pytest
 
+import codepilot.tools.read_tools as read_tools
 from codepilot.tools.base import WorkspacePathPolicy
 from codepilot.tools.read_tools import read_file_tool, search_code_tool
 
@@ -62,3 +64,23 @@ def test_search_code_is_deterministic_and_rejects_invalid_regex(tmp_path: Path) 
     invalid = tool.execute({"pattern": "[", "regex": True})
     assert not invalid.ok
     assert invalid.error is not None and invalid.error.code == "invalid_regex"
+
+
+def test_search_code_falls_back_when_ripgrep_times_out(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "repo"
+    root.mkdir()
+    (root / "a.py").write_text("needle = 1\n", encoding="utf-8")
+
+    def timeout(*args: object, **kwargs: object) -> None:
+        raise subprocess.TimeoutExpired("rg", 15)
+
+    monkeypatch.setattr(read_tools.shutil, "which", lambda _name: "rg")
+    monkeypatch.setattr(read_tools.subprocess, "run", timeout)
+    result = search_code_tool(WorkspacePathPolicy(root)).execute(
+        {"pattern": "needle", "path_glob": "*.py"}
+    )
+
+    assert result.ok
+    assert [item["path"] for item in result.data["matches"]] == ["a.py"]

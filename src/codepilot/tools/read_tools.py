@@ -196,16 +196,21 @@ def _search_with_ripgrep(
     for denied in sorted(policy.deny_directories):
         command.extend(["--glob", f"!{denied}/**"])
     command.extend(["--", args.pattern, "."])
-    completed = subprocess.run(
-        command,
-        cwd=policy.root,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        timeout=15,
-        check=False,
-    )
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=policy.root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=15,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        # Large repositories can exceed the external search timeout. Falling
+        # back keeps an optional accelerator from turning into an internal error.
+        return _search_with_python(policy, args)
     if completed.returncode not in (0, 1):
         return ToolResponse.failure(
             "search_code",
