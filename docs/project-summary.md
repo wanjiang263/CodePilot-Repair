@@ -209,3 +209,20 @@ token 相同而 call_id 不同。修复提交 `a1afbaf` 将 `tracks_usage` 改�
 - **registry：** 新版 `attempts.json` 共 25 条（pytest 21、sklearn 4），25/25 账本存在且 SHA-256 与 registry 一致；数组按 `(instance_id, attempt_label)` 字典序排列，末尾不是 a21，最后 attempt 以 batch status 与 a21 manifest 为准。
 - **旧汇总边界：** 顶层 `cost-ledger-reconciliation-l2cal10e.json`、`official-evaluation-summary-l2cal10e.json`、`phase18e-summary.json` 只覆盖 a9 时点，不能充当 a10–a21 的最终汇总。最终口径指向 a21 manifest / ledger / acceptance / report / batch status 与新版 `attempts.json`。
 - **停止派发：** 不得继续派发 a22 或任何新实时运行。
+
+## Phase 19（2026-10-24，静态可靠性复审）
+
+> 本节只记录静态复审、源码修改、测试编写和本地提交；**没有运行测试、构建、Docker、Harness 或模型调用**。
+
+- **工作区：** 基线 `58f7a91`；开始时无 tracked/staged 改动；`tests/graph/test_phase9_regression.py` 索引与工作区均为 LF、无差异。仓库无 `.gitattributes`，既有文件混合 CRLF/LF，本轮保留各文件原行尾，不做全仓归一化。
+- **三次尝试复盘：**
+  - a12：Reviewer 请求没有包含补丁（`prompt_contains_diff=false`），模型照抄 issue 中 pmxbot 的 `tests/unit/test_commands.py`，Harness 证据校验抛 `ValueError`；首次审查后即停止，没有纠正重问。target/回归本身 PASS。
+  - a18：L2 实际 `368 passed, 0 failed, exit_code=0`，但 pytest 可选依赖 `requests` 的 skip 被重新归类为 `FAIL`，回归判成状态矛盾；L3 未执行。
+  - a21：文件目标按字典序展开，`test_move_dir` 先于 `test_visit_*` 执行，`sampledir` 被移走，8 个基线 PASS 节点变成假失败；`repeated_patch` 由 iteration 3/4 同哈希触发。
+  - 三次的 candidate 与 delivered 补丁文本相同，旧 acceptance 因“规范化哈希 vs 原始字节哈希”必然报 `candidate_equals_delivered_patch=false`。
+- **已修复（源码）：** 目标展开保持 pytest 收集顺序；L2/L3 完成要求真实覆盖；pytest 可选依赖 exit-0 不再误判 FAIL；candidate/reviewed/validated/tested/delivered 身份统一绑定；未执行 review 时高危数为未知；acceptance 取消 mtime 并支持显式 run_id；official recheck 必须 schema 2 且绑定全部哈希；official 校验 prediction 字节；单题 opening 从 manifest 份额校验；registry 拒绝已结算金额下降；checkpoint 身份不兼容明确失败；Coder 不再拥有复现目录写权限；COLLECTION_ERROR 只用结构化帧归因。
+- **测试：** 新增 `tests/graph/test_phase19_static_reliability.py`、`tests/unit/test_phase19_acceptance_gate.py`、`tests/unit/graph/test_phase19_checkpoint_identity.py`、`tests/unit/sandbox/test_phase19_official_boundaries.py`、`tests/unit/llm/test_phase19_budget_binding.py`、`tests/unit/tools/test_phase19_repro_permissions.py`。**全部为“已编写、未执行”**；不声称通过。
+- **本地提交：** `254a8b2`（graph/report）、`31f7d68`（acceptance/official/repro）、`579abe2`（budget/sandbox）、`8744072`（checkpoint）；文档与证据摘要见下一提交。
+- **证据：** `docs/evidence/phase19/static-review-evidence.json`；registry 25/25 账本已提交且哈希一致；受保护 12/12 已提交且哈希一致。a12/a18 的 run report/patch_final 未提交，关键字段已脱敏摘要，原始 reviewer 请求/事件仍为本地证据缺口。
+- **M3：** 方案见 `docs/notes/phase19-static-reliability-review-and-m3-plan.md`。pytest 已反复调试，后续只能作调试样本；主指标使用冻结的未见实例，分母不剔除无补丁/内部失败/环境失败；预算与样本数量为拟议，等待书面授权。
+- **保留结论：** pytest P2 = `NOT VERIFIED`；pytest 官方 = `NOT_EVALUATED / DEFERRED`；a22 不是默认下一步。
