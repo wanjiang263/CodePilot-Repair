@@ -129,12 +129,37 @@ def _reuse_workspace_manager(config: Any) -> Any:
     return _ReusingWorkspaceManager(delegate, Path(target))
 
 
+def _provider_bundle(config: Any) -> Any:
+    if os.environ.get("CODEPILOT_DISABLE_HTTP_RETRIES") != "1":
+        return None
+    from codepilot.eval.assembly import ProviderBundle
+
+    llm_config = smoke._load_llm_config(config)
+    providers = {
+        name: provider.model_copy(update={"max_retries": 0})
+        for name, provider in llm_config.providers.items()
+    }
+    models = llm_config.models
+    if os.environ.get("CODEPILOT_REQUIRE_TEMPERATURE") == "1":
+        models = {
+            name: model.model_copy(update={"supports_temperature": True})
+            for name, model in models.items()
+        }
+    disabled = llm_config.model_copy(update={"providers": providers, "models": models})
+    return ProviderBundle.live(
+        disabled,
+        budget_currency=config.budget_currency,
+        record_llm=config.record_llm,
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     args = smoke._parse_args(argv)
     config = smoke._config_from_args(args)
     deps = smoke.SmokeDeps(
         harness_runner=_DeferredHarness(config.instance_id),
         workspace_manager=_reuse_workspace_manager(config),
+        provider_factory=lambda: _provider_bundle(config),
     )
     reports = smoke.run_smoke_set(config, repeats=args.repeats, deps=deps)
     payload: dict[str, Any] = {

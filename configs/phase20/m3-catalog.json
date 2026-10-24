@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "batch_id": "m3-20261024",
+  "created_at": "2026-10-24T06:53:55+00:00",
+  "dataset": "princeton-nlp/SWE-bench_Lite",
+  "split": "test",
+  "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+  "dataset_snapshot": "cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/test.jsonl",
+  "dataset_snapshot_sha256": "5c7a40b4812a0d3daaffbbd63664fbf1cd8291ed520c80e304aa5c1b7e21ff7a",
+  "selection_algorithm": "sha256(f'{seed}:{instance_id}') ascending; one instance per repository; first six",
+  "selection_seed": 20261024,
+  "metadata_fields_used": [
+    "instance_id",
+    "repo",
+    "base_commit",
+    "version",
+    "environment_setup_commit"
+  ],
+  "forbidden_fields_not_used": [
+    "patch",
+    "test_patch",
+    "FAIL_TO_PASS",
+    "PASS_TO_PASS",
+    "hints_text"
+  ],
+  "exclusion_method": "instance IDs from historical artifact directory/file names plus the numpy1264 live artifact",
+  "excluded_instances": [
+    {
+      "instance_id": "astropy__astropy-12907",
+      "evidence": "artifacts/phase18/l2-cal10/astropy__astropy-12907"
+    },
+    {
+      "instance_id": "django__django-11910",
+      "evidence": "artifacts/phase18/l2-cal10/django__django-11910"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23314",
+      "evidence": "artifacts/phase18/l2-cal10/matplotlib__matplotlib-23314"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3010",
+      "evidence": "artifacts/phase18/l2-cal10/mwaskom__seaborn-3010"
+    },
+    {
+      "instance_id": "pallets__flask-4045",
+      "evidence": "artifacts/phase18/l2-cal10/pallets__flask-4045"
+    },
+    {
+      "instance_id": "psf__requests-2148",
+      "evidence": "artifacts/phase18/l2-cal10/psf__requests-2148"
+    },
+    {
+      "instance_id": "pydata__xarray-4493",
+      "evidence": "artifacts/phase18/l2-cal10/pydata__xarray-4493"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-6506",
+      "evidence": "artifacts/phase18/l2-cal10/pylint-dev__pylint-6506"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-11148",
+      "evidence": "artifacts/phase18/l2-cal10/pytest-dev__pytest-11148"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "evidence": "artifacts/phase18/l2-cal10/scikit-learn__scikit-learn-12471"
+    }
+  ],
+  "candidate_count_after_exclusion": 290,
+  "instances": [
+    {
+      "instance_id": "django__django-11422",
+      "repo": "django/django",
+      "base_commit": "df46b329e0900e9e4dc1d60816c1dce6dfc1094e",
+      "version": "3.0",
+      "environment_setup_commit": "419a78300f7cd27611196e1e464d50fd0385ff27"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "repo": "sphinx-doc/sphinx",
+      "base_commit": "88b81a06eb635a1596617f8971fa97a84c069e93",
+      "version": "3.3",
+      "environment_setup_commit": "3b85187ffa3401e88582073c23188c147857a8a3"
+    },
+    {
+      "instance_id": "sympy__sympy-22714",
+      "repo": "sympy/sympy",
+      "base_commit": "3ff4717b6aef6086e78f01cdfa06f64ae23aed7e",
+      "version": "1.10",
+      "environment_setup_commit": "fd40404e72921b9e52a5f9582246e4a6cd96c431"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-18869",
+      "repo": "matplotlib/matplotlib",
+      "base_commit": "b7d05919865fc0c37a0164cf467d5d5513bd0ede",
+      "version": "3.3",
+      "environment_setup_commit": "28289122be81e0bc0a6ee0c4c5b7343a46ce2e4e"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "repo": "scikit-learn/scikit-learn",
+      "base_commit": "b90661d6a46aa3619d3eec94d5281f5888add501",
+      "version": "0.20",
+      "environment_setup_commit": "55bf5d93e5674f13a1134d93a11fd0cd11aabcd1"
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "repo": "psf/requests",
+      "base_commit": "36453b95b13079296776d11b09cab2567ea3e703",
+      "version": "2.10",
+      "environment_setup_commit": "36453b95b13079296776d11b09cab2567ea3e703"
+    }
+  ]
+}
