@@ -179,12 +179,28 @@ for id in "${IDS[@]}"; do
     break
   fi
   allowed=$(printf '%s\n' "$budget_out" | sed -n 's/.*allowed=\([0-9.]*\).*/\1/p')
+  instance_opening=$(printf '%s\n' "$budget_out" | sed -n 's/.*instance_opening=\([0-9.]*\).*/\1/p')
   if [ -z "$allowed" ] || ! awk -v a="$allowed" 'BEGIN {exit !(a > 0 && a <= 3.0)}'; then
     echo "STOP_BUDGET $id invalid_allowed=$allowed" >> "$STATUS"
     break
   fi
+  if [ -z "$instance_opening" ]; then
+    echo "STOP_BUDGET $id missing_instance_opening" >> "$STATUS"
+    break
+  fi
+  # allowed is the total incl. the manifest share; the HTTP ledger must reserve
+  # the opening and only the remainder is new spend.
+  if ! awk -v a="$allowed" -v o="$instance_opening" 'BEGIN {exit !(a > o + 0.05)}'; then
+    echo "STOP_BUDGET $id allowed=$allowed does_not_exceed_opening=$instance_opening" >> "$STATUS"
+    break
+  fi
 
+  manifest_sha=$(sha256sum "$MANIFEST" | awk '{print $1}')
+  opening_source=$(printf '{"kind":"per_instance","instance_id":"%s","instance_opening_cny":%s,"repo_root":".","recovery_manifest":"%s","recovery_manifest_sha256":"%s"}' \
+    "$id" "$instance_opening" "$MANIFEST" "$manifest_sha")
   export CODEPILOT_DISPATCH_BUDGET_CNY="$allowed"
+  export CODEPILOT_DISPATCH_OPENING_CNY="$instance_opening"
+  export CODEPILOT_DISPATCH_OPENING_SOURCE="$opening_source"
   export CODEPILOT_DISPATCH_LEDGER="$ledger"
   echo "START $id allowed=$allowed $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$STATUS"
   "$PY" -u scripts/l2cal10e_internal.py \
@@ -206,6 +222,7 @@ for id in "${IDS[@]}"; do
     > "$root/smoke-$LABEL.log" 2>&1
   run_code=$?
   unset CODEPILOT_DISPATCH_BUDGET_CNY CODEPILOT_DISPATCH_LEDGER
+  unset CODEPILOT_DISPATCH_OPENING_CNY CODEPILOT_DISPATCH_OPENING_SOURCE
 
   ledger_state=missing
   if [ -f "$ledger" ]; then
@@ -235,7 +252,15 @@ PY
     --ledger "$ledger" \
     --status "$attempt_status" \
     --repo-root "$REPO" > "$root/attempt-$LABEL.json" 2>&1
-  echo "END $id exit=$run_code ledger=$ledger_state attempt=$attempt_status $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$STATUS"
+  record_code=$?
+  echo "END $id exit=$run_code ledger=$ledger_state attempt=$attempt_status registry=$record_code $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$STATUS"
+  if [ "$record_code" -ne 0 ]; then
+    # A settled ledger is not a successful batch if its spend never reached the
+    # registry: stop before acceptance/official and keep every original file.
+    echo "STOP_REGISTRY_RECORD $id code=$record_code" >> "$STATUS"
+    touch "$root/.registry-failed-$LABEL"
+    break
+  fi
 
   if [ "$ledger_state" = "frozen" ] || [ "$ledger_state" = "unsettled" ]; then
     touch "$root/.stopped-$LABEL"
@@ -248,10 +273,27 @@ PY
     break
   fi
 
+  run_id=$("$PY" - "$root" "$LABEL" <<'PY'
+import glob
+import json
+import sys
+root, label = sys.argv[1], sys.argv[2]
+for path in sorted(glob.glob(root + "/reports/*.json")):
+    payload = json.load(open(path, encoding="utf-8"))
+    if payload.get("run_label") == label:
+        print(payload.get("run_id") or "")
+        break
+PY
+)
+  if [ -z "$run_id" ]; then
+    echo "STOP_RUN_ID_UNRESOLVED $id" >> "$STATUS"
+    break
+  fi
   "$PY" scripts/l2cal10e_acceptance.py \
     --root "$root" \
     --instance "$id" \
     --label "$LABEL" \
+    --run-id "$run_id" \
     --output "$root/acceptance-$LABEL.json" > "$root/acceptance-$LABEL.log" 2>&1
   accept_code=$?
   echo "ACCEPTANCE $id code=$accept_code" >> "$STATUS"
@@ -260,6 +302,7 @@ PY
       --root "$root" \
       --instance "$id" \
       --label "$LABEL" \
+      --run-id "$run_id" \
       --snapshot-root "$REPO/cache/swebench" \
       --harness-python /root/swebench-venv/bin/python \
       --output "$root/official-evaluation-$LABEL.json" > "$root/official-$LABEL.log" 2>&1

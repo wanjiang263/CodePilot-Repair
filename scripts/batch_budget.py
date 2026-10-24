@@ -29,6 +29,7 @@ if str(ROOT / "src") not in sys.path:  # pragma: no cover - direct script execut
 from codepilot.llm.dispatch_recovery import (  # noqa: E402
     MULTI_SOURCE_SCHEMA_VERSION,
     attempt_instance_totals,
+    instance_opening_cny,
     load_attempt_registry,
     load_recovery_manifest,
     validate_recovery_manifest,
@@ -213,26 +214,27 @@ def _manifest_ledgers(manifest: dict[str, Any], root: Path) -> set[Path]:
     return {(root / item).resolve() for item in raw if isinstance(item, str)}
 
 
-def _opening_instance(manifest: dict[str, Any] | None, instance: str) -> float | None:
-    """Instance-bound share of the opening, or ``None`` for schema 1.
+def _opening_instance(
+    manifest: dict[str, Any] | None,
+    instance: str,
+    *,
+    repo_root: Path | None = None,
+) -> float | None:
+    """Instance-bound share of a validated schema-2 opening.
 
     A schema-2 opening already contains every earlier attempt (including the ones
     in the registry). Counting the registry on top would double count retries.
+    Schema 1 cannot authorize a per-instance dispatch because it carries no
+    instance attribution; it remains readable for historical batch accounting.
     """
-    if manifest is None or manifest.get("schema_version") != MULTI_SOURCE_SCHEMA_VERSION:
+    if manifest is None:
         return None
-    total = 0.0
-    for key in ("sources", "additional_settled_ledgers"):
-        items = manifest.get(key) or []
-        if not isinstance(items, list):
-            continue
-        for item in items:
-            if not isinstance(item, dict) or item.get("instance_id") != instance:
-                continue
-            raw = item.get("total_upper_bound_cny", item.get("settled_cny", 0.0))
-            if isinstance(raw, (int, float)) and not isinstance(raw, bool):
-                total += float(raw)
-    return total
+    if manifest.get("schema_version") != MULTI_SOURCE_SCHEMA_VERSION:
+        raise ValueError(
+            "schema 1 recovery manifests have no instance attribution; "
+            "a new per-instance dispatch requires schema 2"
+        )
+    return instance_opening_cny(manifest, instance, repo_root=repo_root)
 
 
 def evaluate(args: argparse.Namespace) -> tuple[int, str]:
@@ -261,7 +263,10 @@ def evaluate(args: argparse.Namespace) -> tuple[int, str]:
             )
 
     instance = args.instance
-    opening_instance = _opening_instance(manifest, instance) if instance else None
+    root = Path(args.repo_root) if args.repo_root is not None else ROOT
+    opening_instance = (
+        _opening_instance(manifest, instance, repo_root=root) if instance else None
+    )
     registry_prior = float(registry_totals.get(instance, 0.0)) if instance else 0.0
     if opening_instance is not None and registry_prior > opening_instance + 1e-9:
         return 9, (
@@ -314,7 +319,7 @@ def evaluate(args: argparse.Namespace) -> tuple[int, str]:
     )
     if instance:
         message += (
-            f" instance={instance} instance_prior={prior_instance:.6f} "
+            f" instance={instance} instance_opening={prior_instance:.6f} "
             f"instance_current={current_instance:.6f} "
             f"instance_total={instance_total:.6f} "
             f"instance_remaining={instance_remaining:.6f}"

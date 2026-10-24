@@ -38,6 +38,7 @@ __all__ = [
     "build_multi_source_recovery_manifest",
     "build_recovery_manifest",
     "create_recovery_ledger",
+    "instance_opening_cny",
     "load_attempt_registry",
     "load_recovery_manifest",
     "record_attempt_from_ledger",
@@ -518,6 +519,22 @@ def validate_recovery_manifest(
     if actual != manifest.get("source_ledger_sha256"):
         raise ValueError("source dispatch ledger hash does not match the recovery manifest")
 
+    totals = _ledger_totals(source)
+    if "source_frozen" in manifest and bool(totals["frozen"]) != bool(
+        manifest.get("source_frozen")
+    ):
+        raise ValueError("source dispatch ledger frozen flag does not match the recovery manifest")
+    if int(totals["unknown_cost_calls"]) and not totals["frozen"]:
+        raise ValueError("source ledger with unknown cost must be frozen")
+    settled = _amount(manifest.get("settled_cny"), "recovery manifest settled_cny")
+    unknown = _amount(
+        manifest.get("unknown_reserved_cny"), "recovery manifest unknown_reserved_cny"
+    )
+    if not math.isclose(settled, float(totals["settled_cny"]), rel_tol=0, abs_tol=1e-9):
+        raise ValueError("source dispatch ledger settled amount does not match the manifest")
+    if not math.isclose(unknown, float(totals["unknown_reserved_cny"]), rel_tol=0, abs_tol=1e-9):
+        raise ValueError("source dispatch ledger unknown reservation does not match the manifest")
+
     additional = manifest.get("additional_settled_ledgers") or []
     if not isinstance(additional, list):
         raise ValueError("recovery manifest additional_settled_ledgers is invalid")
@@ -531,6 +548,14 @@ def validate_recovery_manifest(
             raise ValueError(f"additional dispatch ledger is missing: {extra}")
         if _sha256_file(extra) != item.get("sha256"):
             raise ValueError("additional dispatch ledger hash does not match the recovery manifest")
+        extra_totals = _ledger_totals(extra)
+        if int(extra_totals["unknown_cost_calls"]):
+            raise ValueError(f"additional ledger contains a non-settled record: {extra}")
+        extra_settled = _amount(item.get("settled_cny"), "additional settled_cny")
+        if not math.isclose(
+            extra_settled, float(extra_totals["settled_cny"]), rel_tol=0, abs_tol=1e-9
+        ):
+            raise ValueError(f"additional dispatch ledger settled amount changed: {extra}")
 
 
 def create_recovery_ledger(
@@ -711,6 +736,40 @@ def _validated_attempt_entries(
     return entries
 
 
+def instance_opening_cny(
+    manifest: dict[str, Any], instance_id: str, *, repo_root: Path | None = None
+) -> float:
+    """Instance-bound share of a *validated* multi-source opening.
+
+    Schema 1 has no per-instance attribution, so it cannot authorize a new
+    per-instance dispatch. Callers must not treat the batch total as one
+    instance's opening.
+    """
+    if not instance_id.strip():
+        raise ValueError("instance_id is required for an instance opening")
+    if manifest.get("schema_version") != MULTI_SOURCE_SCHEMA_VERSION:
+        raise ValueError(
+            "schema 1 recovery manifests have no instance attribution; "
+            "per-instance dispatch requires schema 2"
+        )
+    validate_recovery_manifest(
+        manifest, repo_root=Path(repo_root) if repo_root is not None else None
+    )
+    total = 0.0
+    for key in ("sources", "additional_settled_ledgers"):
+        items = manifest.get(key) or []
+        if not isinstance(items, list):
+            raise ValueError(f"recovery manifest {key} is invalid")
+        for item in items:
+            if not isinstance(item, dict) or item.get("instance_id") != instance_id:
+                continue
+            raw = item.get("total_upper_bound_cny", item.get("settled_cny", 0.0))
+            total += _amount(raw, f"instance opening {key} entry")
+    if not math.isfinite(total) or total < 0:
+        raise ValueError("instance opening must be finite and non-negative")
+    return total
+
+
 def attempt_instance_totals(
     registry: dict[str, Any], *, repo_root: Path | None = None
 ) -> dict[str, float]:
@@ -813,6 +872,31 @@ def record_attempt_from_ledger(
         }
         present = False
         ledger_sha = None
+    previous_settled = (existing or {}).get("settled_cny")
+    previous_unknown = (existing or {}).get("unknown_reserved_cny")
+    previous_total = (existing or {}).get("total_upper_bound_cny")
+    if (existing or {}).get("ledger_present") and all(
+        isinstance(value, (int, float)) and not isinstance(value, bool)
+        for value in (previous_settled, previous_unknown, previous_total)
+    ):
+        new_settled = float(totals["settled_cny"])
+        new_unknown = float(totals["unknown_reserved_cny"])
+        if new_settled + 1e-9 < float(previous_settled):
+            raise ValueError(
+                "attempt registry refuses to lower already-settled spend: "
+                f"{ledger_reference} ({previous_settled} -> {new_settled})"
+            )
+        # A reservation becoming settled legitimately lowers the upper bound;
+        # a smaller bound that still has unresolved reservations does not.
+        if (
+            new_unknown > 0
+            and float(previous_unknown) > 0
+            and float(totals["total_upper_bound_cny"]) + 1e-9 < float(previous_total)
+        ):
+            raise ValueError(
+                "attempt registry refuses an unexplained upper-bound decrease with "
+                f"unknown reservations still open: {ledger_reference}"
+            )
     now = updated_at or datetime.now(UTC).isoformat(timespec="seconds")
     attempts = [
         item

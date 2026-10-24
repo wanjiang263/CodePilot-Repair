@@ -122,7 +122,23 @@ def _reclassify_pytest_fixture_dependency(
         and result.error_reason == "MISSING_THIRD_PARTY_DEPENDENCY"
         and result.tests
     ):
-        return result.model_copy(update={"status": ExecutionStatus.FAIL, "error_reason": None})
+        # A missing optional module can be an intentional skip in pytest's own
+        # suite.  ``EnvironmentError`` is also produced by the diagnostic text,
+        # so an all-skipped + exit-0 run must stay PASS; turning it into FAIL
+        # made L2 reject its own "368 passed, 0 failed" result.
+        status = (
+            ExecutionStatus.PASS
+            if result.exit_code == 0 and not result.failed_tests
+            else ExecutionStatus.FAIL
+        )
+        diagnostics = {
+            **result.diagnostics,
+            "reclassified_from": "ENV_ERROR",
+            "reclassify_reason": "pytest fixture imports a missing optional module",
+        }
+        return result.model_copy(
+            update={"status": status, "error_reason": None, "diagnostics": diagnostics}
+        )
     return result
 
 

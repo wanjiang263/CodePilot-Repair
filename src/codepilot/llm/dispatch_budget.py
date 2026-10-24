@@ -26,6 +26,53 @@ class DispatchBudgetStoppedError(RuntimeError):
     """No further HTTP dispatch is safe (deliberately not retryable)."""
 
 
+def _validate_per_instance_opening(
+    opening: float, source: dict[str, Any] | None
+) -> None:
+    """Reject an instance opening that is not the validated manifest share.
+
+    A ledger SHA alone is not enough: the same manifest can be paired with a
+    different amount or another instance. All of those must fail before the
+    first model request, not after the batch has already been charged.
+    """
+    if source is None or source.get("kind") != "per_instance":
+        return
+    import hashlib
+    from pathlib import Path
+
+    from codepilot.llm.dispatch_recovery import (
+        instance_opening_cny,
+        load_recovery_manifest,
+    )
+
+    instance_id = source.get("instance_id")
+    if not isinstance(instance_id, str) or not instance_id.strip():
+        raise ValueError("per-instance opening requires instance_id")
+    declared = source.get("instance_opening_cny")
+    if isinstance(declared, bool) or not isinstance(declared, (int, float)):
+        raise ValueError("per-instance opening requires numeric instance_opening_cny")
+    if not math.isclose(float(declared), float(opening), rel_tol=0, abs_tol=1e-9):
+        raise ValueError("opening balance does not match the declared instance opening")
+    raw_manifest = source.get("recovery_manifest")
+    if not isinstance(raw_manifest, str) or not raw_manifest.strip():
+        raise ValueError("per-instance opening requires recovery_manifest")
+    manifest_path = Path(raw_manifest)
+    if not manifest_path.is_file():
+        raise ValueError(f"recovery manifest is missing: {manifest_path}")
+    expected_sha = source.get("recovery_manifest_sha256")
+    actual_sha = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    if expected_sha != actual_sha:
+        raise ValueError("recovery manifest hash does not match the opening source")
+    repo_root = Path(str(source.get("repo_root") or Path.cwd()))
+    manifest = load_recovery_manifest(manifest_path)
+    computed = instance_opening_cny(manifest, instance_id.strip(), repo_root=repo_root)
+    if not math.isclose(computed, float(opening), rel_tol=0, abs_tol=1e-9):
+        raise ValueError(
+            "opening balance does not equal the manifest instance share: "
+            f"{opening} != {computed}"
+        )
+
+
 class DispatchBudget:
     def __init__(
         self,
@@ -41,6 +88,7 @@ class DispatchBudget:
             raise ValueError("opening balance must be finite and non-negative")
         if opening_source is not None and not isinstance(opening_source, dict):
             raise ValueError("opening source must be a mapping")
+        _validate_per_instance_opening(opening_balance, opening_source)
         self.limit = limit
         self.path = path
         self.opening_balance = opening_balance

@@ -21,7 +21,9 @@ from codepilot.llm.dispatch_recovery import (  # noqa: E402
     RecoveryLedgerSource,
     attempt_instance_totals,
     build_multi_source_recovery_manifest,
+    instance_opening_cny,
     load_attempt_registry,
+    load_recovery_manifest,
     record_attempt_from_ledger,
     write_recovery_manifest,
 )
@@ -65,6 +67,11 @@ def _parser() -> argparse.ArgumentParser:
     totals.add_argument("--registry", type=Path, required=True)
     totals.add_argument("--instance", default=None)
     totals.add_argument("--repo-root", type=Path, default=None)
+
+    opening = sub.add_parser("opening")
+    opening.add_argument("--manifest", type=Path, required=True)
+    opening.add_argument("--instance", required=True)
+    opening.add_argument("--repo-root", type=Path, default=None)
     return parser
 
 
@@ -128,9 +135,27 @@ def _totals(args: argparse.Namespace) -> dict[str, object]:
     return {"instances": totals}
 
 
+def _opening(args: argparse.Namespace) -> dict[str, object]:
+    manifest = load_recovery_manifest(args.manifest)
+    amount = instance_opening_cny(
+        manifest, args.instance, repo_root=_repo_root(args.repo_root)
+    )
+    return {
+        "manifest": str(args.manifest),
+        "instance": args.instance,
+        "instance_opening_cny": amount,
+        "batch_opening_cny": manifest.get("total_upper_bound_cny"),
+    }
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(list(argv) if argv is not None else None)
-    handlers = {"manifest": _manifest, "record": _record, "totals": _totals}
+    handlers = {
+        "manifest": _manifest,
+        "record": _record,
+        "totals": _totals,
+        "opening": _opening,
+    }
     try:
         payload = handlers[args.command](args)
     except (OSError, ValueError) as exc:
