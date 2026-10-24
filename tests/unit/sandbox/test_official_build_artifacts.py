@@ -5,8 +5,13 @@ from __future__ import annotations
 import io
 import tarfile
 from pathlib import Path
+from types import SimpleNamespace
 
-from codepilot.sandbox.official import _extract_single_file, _extract_suffix
+from codepilot.sandbox.official import (
+    OfficialInstanceSandbox,
+    _extract_single_file,
+    _extract_suffix,
+)
 
 
 def _tar(entries: dict[str, bytes]) -> bytes:
@@ -99,6 +104,42 @@ def test_copy_testdeps_is_excluded_from_git_status(tmp_path: Path) -> None:
 
     assert _copy_testdeps(source, workspace) == 1
     assert "testdeps/" in exclude.read_text(encoding="utf-8").splitlines()
+
+
+def test_matplotlib_overlay_restores_image_compiled_extensions(tmp_path: Path) -> None:
+    archive = _tar(
+        {
+            "lib/matplotlib/_c_internal_utils.cpython-38-x86_64-linux-gnu.so": b"binary",
+            "lib/matplotlib/__init__.py": b"source",
+        }
+    )
+
+    class Container:
+        def get_archive(self, path: str) -> tuple[list[bytes], dict[str, int]]:
+            assert path == "/testbed/lib"
+            return [archive], {"size": len(archive)}
+
+        def remove(self, *, force: bool) -> None:
+            assert force
+
+    client = SimpleNamespace(containers=SimpleNamespace(create=lambda *a, **k: Container()))
+    sandbox = OfficialInstanceSandbox(
+        artifacts=SimpleNamespace(),
+        allowed_workspace_root=tmp_path,
+        instance_id="matplotlib__matplotlib-18869",
+        images=SimpleNamespace(),
+        client=client,
+    )
+    sandbox.last_image = {"image_ref": "official"}
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+
+    sandbox._overlay_build_artifacts(workspace)
+
+    restored = workspace / "lib/matplotlib/_c_internal_utils.cpython-38-x86_64-linux-gnu.so"
+    assert restored.read_bytes() == b"binary"
+    assert not (workspace / "lib/matplotlib/__init__.py").exists()
+    assert sandbox.last_image["overlaid_build_artifacts"] == 1
 
 
 def test_pytest_fixture_missing_module_is_a_test_failure_not_environment() -> None:

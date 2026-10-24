@@ -295,6 +295,11 @@ class OfficialInstanceSandbox(DockerSandbox):
             prefix = ""
             suffix = ""
             required = False
+        elif self.instance_id.startswith("matplotlib__matplotlib-"):
+            archive_path = "/testbed/lib"
+            prefix = "lib"
+            suffix = ".so"
+            required = True
         else:
             return
         container: Any | None = None
@@ -327,7 +332,14 @@ class OfficialInstanceSandbox(DockerSandbox):
         command = _PYTEST_PREFIX.sub(
             "/opt/miniconda3/envs/testbed/bin/python -m pytest", spec.test_command
         )
-        env = {**spec.env, "PYTHONPATH": "/testbed/src:/testbed:/testbed/testdeps"}
+        env = {
+            **spec.env,
+            "PATH": (
+                "/opt/miniconda3/envs/testbed/bin:/opt/miniconda3/bin:"
+                "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            ),
+            "PYTHONPATH": "/testbed/src:/testbed:/testbed/testdeps",
+        }
         command = _pytest_command(self.instance_id, command)
         kwargs["env_spec"] = spec.model_copy(update={"test_command": command, "env": env})
         result = super().run_tests(**kwargs)

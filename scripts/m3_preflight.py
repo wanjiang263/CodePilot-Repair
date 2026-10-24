@@ -131,6 +131,8 @@ def _collect(
             "--env",
             "PYTHONPATH=/testbed/src:/testbed:/testbed/testdeps",
             "--env",
+            "PATH=/opt/miniconda3/envs/testbed/bin:/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "--env",
             "HOME=/tmp",
             "--label",
             "codepilot=1",
@@ -255,19 +257,23 @@ def main() -> int:
                 "parent_id": resolution.parent_image_id,
             }
             source = preflight_root / "source-testbed"
-            _extract_image_source(resolution.image_ref, source)
-            _git(source, "config", "core.filemode", "false")
-            _git(source, "config", "core.autocrlf", "false")
-            _git(source, "checkout", "--detach", item["base_commit"])
-            if _git(source, "rev-parse", "HEAD").stdout.strip() != item["base_commit"]:
-                raise RuntimeError("source base identity mismatch")
             manager = WorkspaceManager(cache_root=instance_root / "repo-cache")
-            cache = _prepare_cache(source, item["base_commit"], manager)
+            cache = manager.cache_path(str(source))
             workspace = preflight_root / "workspace"
-            if not workspace.exists():
-                manager.create(
-                    source=str(source), base_commit=item["base_commit"], target=workspace
-                )
+            if not cache.exists() or not workspace.exists():
+                _extract_image_source(resolution.image_ref, source)
+                _git(source, "config", "core.filemode", "false")
+                _git(source, "config", "core.autocrlf", "false")
+                _git(source, "checkout", "--detach", item["base_commit"])
+                if _git(source, "rev-parse", "HEAD").stdout.strip() != item["base_commit"]:
+                    raise RuntimeError("source base identity mismatch")
+                cache = _prepare_cache(source, item["base_commit"], manager)
+                if not workspace.exists():
+                    manager.create(
+                        source=str(source), base_commit=item["base_commit"], target=workspace
+                    )
+            else:
+                _prepare_cache(source, item["base_commit"], manager)
             if _git(workspace, "rev-parse", "HEAD").stdout.strip() != item["base_commit"]:
                 raise RuntimeError("workspace base identity mismatch")
             if _git(workspace, "rev-list", "--all", "--count").stdout.strip() != "1":
