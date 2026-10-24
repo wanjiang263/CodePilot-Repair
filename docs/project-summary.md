@@ -222,7 +222,7 @@ token 相同而 call_id 不同。修复提交 `a1afbaf` 将 `tracks_usage` 改�
   - 三次的 candidate 与 delivered 补丁文本相同，旧 acceptance 因“规范化哈希 vs 原始字节哈希”必然报 `candidate_equals_delivered_patch=false`。
 - **已修复（源码）：** 目标展开保持 pytest 收集顺序；L2/L3 完成要求真实覆盖；pytest 可选依赖 exit-0 不再误判 FAIL；candidate/reviewed/validated/tested/delivered 身份统一绑定；未执行 review 时高危数为未知；acceptance 取消 mtime 并支持显式 run_id；official recheck 必须 schema 2 且绑定全部哈希；official 校验 prediction 字节；单题 opening 从 manifest 份额校验；registry 拒绝已结算金额下降；checkpoint 身份不兼容明确失败；Coder 不再拥有复现目录写权限；COLLECTION_ERROR 只用结构化帧归因。
 - **测试：** 新增 `tests/graph/test_phase19_static_reliability.py`、`tests/unit/test_phase19_acceptance_gate.py`、`tests/unit/graph/test_phase19_checkpoint_identity.py`、`tests/unit/sandbox/test_phase19_official_boundaries.py`、`tests/unit/llm/test_phase19_budget_binding.py`、`tests/unit/tools/test_phase19_repro_permissions.py`。**全部为“已编写、未执行”**；不声称通过。
-- **本地提交：** `254a8b2`（graph/report）、`31f7d68`（acceptance/official/repro）、`579abe2`（budget/sandbox）、`8744072`（checkpoint）；文档与证据摘要见下一提交。
+- **本地提交：** `254a8b2`（graph/report）、`31f7d68`（acceptance/official/repro）、`579abe2`、`9e3d248`（budget/sandbox）、`8744072`（checkpoint）、`3693054`（文档与证据摘要）。
 - **证据：** `docs/evidence/phase19/static-review-evidence.json`；registry 25/25 账本已提交且哈希一致；受保护 12/12 已提交且哈希一致。a12/a18 的 run report/patch_final 未提交，关键字段已脱敏摘要，原始 reviewer 请求/事件仍为本地证据缺口。
 - **M3：** 方案见 `docs/notes/phase19-static-reliability-review-and-m3-plan.md`。pytest 已反复调试，后续只能作调试样本；主指标使用冻结的未见实例，分母不剔除无补丁/内部失败/环境失败；预算与样本数量为拟议，等待书面授权。
 - **保留结论：** pytest P2 = `NOT VERIFIED`；pytest 官方 = `NOT_EVALUATED / DEFERRED`；a22 不是默认下一步。
