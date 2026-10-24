@@ -174,9 +174,7 @@ def _copy_testdeps(source: str | Path | None, workspace: Path) -> int:
     if exclude is None:
         raise OfficialImageError("cannot locate git exclude for the testdeps directory")
     if not exclude.resolve().is_relative_to(workspace.resolve()):
-        raise OfficialImageError(
-            "git exclude resolved outside the workspace; refusing to write it"
-        )
+        raise OfficialImageError("git exclude resolved outside the workspace; refusing to write it")
     shutil.copytree(src, target, symlinks=True)
     exclude.parent.mkdir(parents=True, exist_ok=True)
     current = exclude.read_text(encoding="utf-8", errors="replace") if exclude.is_file() else ""
@@ -206,6 +204,7 @@ class OfficialInstanceSandbox(DockerSandbox):
             allowed_workspace_root=allowed_workspace_root,
             client=client,
             workspace_target="/testbed",
+            bind_workspace=os.environ.get("CODEPILOT_BIND_WORKSPACE") == "1",
         )
         self.instance_id = instance_id
         self.images = images

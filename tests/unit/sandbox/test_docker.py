@@ -320,6 +320,43 @@ def test_execution_container_config_matches_security_contract(tmp_path: Path) ->
     assert all("docker.sock" not in name.lower() for name in config["volumes"])
 
 
+def test_bind_workspace_mounts_current_project_paths_without_named_volumes(
+    tmp_path: Path,
+) -> None:
+    client = FakeClient()
+    workspace = tmp_path / "workspace"
+    (workspace / "tests").mkdir(parents=True)
+    (workspace / "tests" / "test_x.py").write_text("def test_x():\n    assert True\n", "utf-8")
+    artifacts = ArtifactStore(tmp_path / "artifacts", "run")
+    engine = DockerSandbox(
+        artifacts=artifacts,
+        allowed_workspace_root=tmp_path,
+        client=client,
+        bind_workspace=True,
+    )
+    result = engine.run_tests(
+        workspace=workspace,
+        environment=EnvironmentBuildResult(
+            status=ExecutionStatus.PASS,
+            image_ref="env",
+            image_id="id",
+            cache_key="key",
+        ),
+        env_spec=EnvSpec(),
+        tests=("tests/test_x.py::test_x",),
+    )
+    container = client.test_container
+    assert container is not None
+    volumes = container.create_kwargs["volumes"]
+    assert isinstance(volumes, dict)
+    assert volumes[str(workspace.resolve())] == {"bind": "/workspace", "mode": "rw"}
+    output_mount = next(name for name, spec in volumes.items() if spec["bind"] == "/out")
+    assert Path(output_mount).resolve().is_relative_to(artifacts.run_dir.resolve())
+    assert client.volumes_created == []
+    assert all(not item.is_staging_container for item in client.containers.created)
+    assert result.status is ExecutionStatus.PASS
+
+
 def test_execution_container_config_honours_the_workspace_target() -> None:
     """官方实例镜像的 checkout 在 /testbed，工作区必须覆盖到同一个路径。"""
     config = execution_container_config(

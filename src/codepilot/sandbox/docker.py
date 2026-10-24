@@ -121,6 +121,7 @@ class DockerSandbox:
         log_tail_bytes: int = 16_384,
         clock: Any = time.time,
         workspace_target: str = DEFAULT_WORKSPACE_TARGET,
+        bind_workspace: bool = False,
     ) -> None:
         if log_tail_bytes < 0:
             raise ValueError("log_tail_bytes 不能为负数")
@@ -140,6 +141,7 @@ class DockerSandbox:
         self._clock = clock
         self._startup_cleanup_done = False
         self.workspace_target = workspace_target
+        self.bind_workspace = bind_workspace
 
     def build_env(
         self,
@@ -369,7 +371,10 @@ class DockerSandbox:
 
         # Container output is staged outside ArtifactStore.  Raw repository output may
         # contain secrets; only the redacted copy below is allowed into the run record.
-        with tempfile.TemporaryDirectory(prefix="codepilot-out-") as temporary_output:
+        with tempfile.TemporaryDirectory(
+            prefix="codepilot-out-",
+            dir=self.artifacts.run_dir if self.bind_workspace else None,
+        ) as temporary_output:
             return self._run_tests_in_container(
                 workspace=workspace,
                 environment=environment,
@@ -421,33 +426,37 @@ class DockerSandbox:
                 "codepilot.run_id": self.artifacts.run_id,
                 "codepilot.transfer": token,
             }
-            for name in volumes:
-                self.client.api.create_volume(name=name, labels={**labels, _LABEL_KIND: "volume"})
-                created.append(name)
+            if not self.bind_workspace:
+                for name in volumes:
+                    self.client.api.create_volume(
+                        name=name, labels={**labels, _LABEL_KIND: "volume"}
+                    )
+                    created.append(name)
             config = execution_container_config(
                 image_ref=environment.image_ref or "",
-                workspace_volume=volumes[0],
-                output_volume=volumes[1],
+                workspace_volume=(str(workspace.resolve()) if self.bind_workspace else volumes[0]),
+                output_volume=str(output_dir.resolve()) if self.bind_workspace else volumes[1],
                 command=command,
                 environment=environment_values,
                 workspace_target=self.workspace_target,
                 created_at=self._clock(),
             )
             container = self.client.containers.create(**config)
-            # 上传只能由另一个容器代做：daemon 对只读 rootfs 的容器直接拒绝
-            # ``put_archive``（实测 400 "container rootfs is marked read-only"），
-            # 而把测试容器改成可写就等于放弃本轮要守住的只读根契约。
-            staged = stage_into_volumes(
-                self.client,
-                image_ref=environment.image_ref or "",
-                workspace=workspace,
-                workspace_volume=volumes[0],
-                output_volume=volumes[1],
-                labels={**labels, _LABEL_KIND: _KIND_EXECUTION_STAGE},
-            )
-            if staged.cleanup_error:
-                # staging 容器删不掉要留证据（它可能还占着卷），但不改写主判定。
-                cleanup_notes.append(staged.cleanup_error)
+            if not self.bind_workspace:
+                # 上传只能由另一个容器代做：daemon 对只读 rootfs 的容器直接拒绝
+                # ``put_archive``（实测 400 "container rootfs is marked read-only"），
+                # 而把测试容器改成可写就等于放弃本轮要守住的只读根契约。
+                staged = stage_into_volumes(
+                    self.client,
+                    image_ref=environment.image_ref or "",
+                    workspace=workspace,
+                    workspace_volume=volumes[0],
+                    output_volume=volumes[1],
+                    labels={**labels, _LABEL_KIND: _KIND_EXECUTION_STAGE},
+                )
+                if staged.cleanup_error:
+                    # staging 容器删不掉要留证据（它可能还占着卷），但不改写主判定。
+                    cleanup_notes.append(staged.cleanup_error)
             container.start()
             try:
                 wait_result = container.wait(timeout=env_spec.timeout_seconds)

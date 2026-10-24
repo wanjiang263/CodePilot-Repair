@@ -588,6 +588,7 @@ class M3Batch:
             "CODEPILOT_LLM_CONFIG": str(self.llm_config_path),
             "CODEPILOT_DISABLE_HTTP_RETRIES": "1",
             "CODEPILOT_REQUIRE_TEMPERATURE": "1",
+            "CODEPILOT_BIND_WORKSPACE": "1",
             "CODEPILOT_DISPATCH_BUDGET_CNY": str(request.instance_opening + request.budget_limit),
             "CODEPILOT_DISPATCH_OPENING_CNY": str(request.instance_opening),
             "CODEPILOT_DISPATCH_OPENING_SOURCE": opening_source,
