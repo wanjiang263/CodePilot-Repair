@@ -378,11 +378,20 @@ class M3Batch:
         self._validate_live_source()
         if self.code_sha != self.freeze["code_sha"]:
             raise BatchStopError("source changed after batch freeze")
-        self._preflight = self._load_preflight() if self.config.get("require_preflight") else {}
-        if self.config.get("require_preflight") and not any(
-            item["ok"] for item in self._preflight.values()
-        ):
-            raise BatchStopError("no frozen instance has a usable environment")
+        if self.config.get("require_preflight"):
+            try:
+                self._preflight = self._load_preflight()
+            except BatchStopError as exc:
+                self._stop(str(exc))
+                return self._summary()
+            if not any(item["ok"] for item in self._preflight.values()):
+                for entry in self.state["instances"]:
+                    entry["status"] = "ENV_ERROR"
+                    entry["terminal"] = True
+                self._stop("no frozen instance has a usable environment")
+                return self._summary()
+        else:
+            self._preflight = {}
         self.state["status"] = "running"
         self._save()
         try:

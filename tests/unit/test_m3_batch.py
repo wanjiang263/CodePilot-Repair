@@ -503,6 +503,24 @@ def test_m3_post_dispatch_interruption_refuses_second_paid_attempt(fixture: Fixt
     assert "second paid attempt" in summary["stop_reason"]
 
 
+def test_m3_all_unavailable_preflight_stops_without_dispatch(tmp_path: Path) -> None:
+    fixture = Fixture(tmp_path, require_preflight=True)
+    calls = []
+    batch = fixture.make(_success_internal(calls), _success_official([]))
+    _write_json(
+        fixture.artifact / "preflight/preflight.json",
+        {
+            "credential_reference_present": True,
+            "instances": [{"instance_id": instance, "ok": False} for instance in IDS],
+        },
+    )
+    summary = batch.run()
+    assert summary["status"] == "stopped"
+    assert calls == []
+    assert all(item["status"] == "ENV_ERROR" for item in summary["instances"])
+    assert summary["metrics"]["environment_invalid_rate"] == 1.0
+
+
 def test_m3_cancellation_stops_before_next_instance(fixture: Fixture) -> None:
     calls = []
 
