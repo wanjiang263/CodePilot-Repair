@@ -319,7 +319,8 @@ def evaluate(args: argparse.Namespace) -> tuple[int, str]:
     )
     if instance:
         message += (
-            f" instance={instance} instance_opening={prior_instance:.6f} "
+            f" instance={instance} instance_prior={prior_instance:.6f} "
+            f"instance_opening={prior_instance:.6f} "
             f"instance_current={current_instance:.6f} "
             f"instance_total={instance_total:.6f} "
             f"instance_remaining={instance_remaining:.6f}"
