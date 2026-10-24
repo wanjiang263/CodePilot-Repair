@@ -226,3 +226,16 @@ token 相同而 call_id 不同。修复提交 `a1afbaf` 将 `tracks_usage` 改�
 - **证据：** `docs/evidence/phase19/static-review-evidence.json`；registry 25/25 账本已提交且哈希一致；受保护 12/12 已提交且哈希一致。a12/a18 的 run report/patch_final 未提交，关键字段已脱敏摘要，原始 reviewer 请求/事件仍为本地证据缺口。
 - **M3：** 方案见 `docs/notes/phase19-static-reliability-review-and-m3-plan.md`。pytest 已反复调试，后续只能作调试样本；主指标使用冻结的未见实例，分母不剔除无补丁/内部失败/环境失败；预算与样本数量为拟议，等待书面授权。
 - **保留结论：** pytest P2 = `NOT VERIFIED`；pytest 官方 = `NOT_EVALUATED / DEFERRED`；a22 不是默认下一步。
+
+## Phase 20（2026-10-24，运行验证与 M3 六实例批次）
+
+- **Phase 19 验证：** 定向 50 passed，Windows workspace 62 passed，关联范围 802 passed / 6 个 Windows 平台失败 / 3 skipped；Linux transfer 20/20。ruff、format、mypy 通过。修复了 acceptance 目标回退、schema1 多账本、reproducer policy、Windows workspace fallback。
+- **零模型重放：** a21 字典序 159/9，pytest 收集序 168/168；历史 8 个节点全部由顺序解释。a18 L2/L3 各 385 节点，均 368 passed + 17 skipped、exit 0。a12 Reviewer/纠正/归因 4 passed。模型调用 0，官方 Harness 0；pytest P2 仍为 `NOT VERIFIED`。
+- **M3：** 新入口默认 dry-run，真实运行显式 `--live`；离线的成功、失败、预算、registry、run_id、hash、重复启动、取消与恢复矩阵 16 passed。直接 bind 当前 Windows workspace，默认命名卷行为不变。
+- **六实例：** 冻结 seed `20261024`、revision `6ec7bb89…`，排除 10 个已用 test 实例，仓库去重。4 题环境无效（Django、SymPy、sklearn、requests），2 题可执行。
+- **真实结果：** Sphinx 内部 `REJECTED`，原因是 test-runs 12/12 耗尽、L3 flaky retry 不完整、Reviewer 未执行；Matplotlib `NO_PATCH`，原因是 Planner `rg` 15 秒超时被误归因为 harness internal error。两题官方均为 `NOT_EVALUATED`，没有运行 Harness。
+- **指标：** 官方覆盖率 0/6，任务解决率 0/6，内部通过率 0/6，环境无效率 4/6；有效官方解决率不适用。没有把内部结果写成官方 RESOLVED 或 UNRESOLVED。
+- **费用：** 历史 opening CNY 11.24078560；本轮 settled CNY 0.25156496，unknown 0，新增上界 CNY 0.25156496；含历史累计上界 CNY 11.49235056；新增授权剩余 CNY 29.74843504。36 次请求，模型 `glm-5.3-flash`，temperature 0.0，seed 未下发，HTTP 重试 0。
+- **批次后发现并修复：** `search_code` 的 rg 超时现会回退到受策略约束的 Python 搜索，避免 optional accelerator 变成 harness 内部错误；未对已付费实例重跑。
+- **未执行：** 全仓 pytest、全量 Docker suite、M4/test50/test300、a22。当前不满足 test50 条件。
+- 报告：`docs/notes/phase20-runtime-verification-and-m3-batch.md`；脱敏证据：`docs/evidence/phase20/summary.json`。未 push、未创建 PR。

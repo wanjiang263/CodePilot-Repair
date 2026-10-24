@@ -1,0 +1,653 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-24T12:09:40+00:00",
+  "evaluated_code_sha": "28892a70e408a7cd77c5b7f535199d072ee244d0",
+  "post_run_reliability_fix_sha": "b465fba91429b944f34040d042268a5161132ffb",
+  "batch": {
+    "batch_id": "m3-20261024",
+    "artifact_root": "artifacts/phase20/m3-20261024-formal6",
+    "freeze": {
+      "schema_version": 1,
+      "batch_id": "m3-20261024",
+      "created_at": "2026-10-24T10:37:14+00:00",
+      "code_sha": "28892a70e408a7cd77c5b7f535199d072ee244d0",
+      "catalog": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\configs\\phase20\\m3-catalog.json",
+      "catalog_sha256": "9c6c747ecc31e34beba3b63777f6ee94a30f4a3f0b21c9287619d0e62595b168",
+      "config": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\configs\\phase20\\m3-config.json",
+      "config_sha256": "2002da875e40cbd02d1fd9c2d293278fe3ab5b00977f9db0fffc6f7d9a7fc602",
+      "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+      "selection_seed": 20261024,
+      "opening_manifest": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\configs\\phase20\\m3-opening.json",
+      "opening_manifest_sha256": "f1088aa87f19116e3e7599e12a5be32fa990cf418e9675e7936240cfb785cc5b",
+      "model": "glm-5.3-flash-main",
+      "temperature": 0.0,
+      "seed_support": "not_dispatched_by_provider",
+      "http_retries": 0,
+      "artifact_root": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase20\\m3-20261024-formal6"
+    },
+    "catalog_sha256": "9c6c747ecc31e34beba3b63777f6ee94a30f4a3f0b21c9287619d0e62595b168",
+    "config_sha256": "2002da875e40cbd02d1fd9c2d293278fe3ab5b00977f9db0fffc6f7d9a7fc602",
+    "opening_manifest_sha256": "f1088aa87f19116e3e7599e12a5be32fa990cf418e9675e7936240cfb785cc5b",
+    "opening_total_upper_bound_cny": 11.2407856,
+    "selection_seed": 20261024,
+    "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+    "dataset_snapshot_sha256": "5c7a40b4812a0d3daaffbbd63664fbf1cd8291ed520c80e304aa5c1b7e21ff7a",
+    "excluded_instance_ids": [
+      "astropy__astropy-12907",
+      "django__django-11910",
+      "matplotlib__matplotlib-23314",
+      "mwaskom__seaborn-3010",
+      "pallets__flask-4045",
+      "psf__requests-2148",
+      "pydata__xarray-4493",
+      "pylint-dev__pylint-6506",
+      "pytest-dev__pytest-11148",
+      "scikit-learn__scikit-learn-12471"
+    ],
+    "selected_instance_ids": [
+      "django__django-11422",
+      "sphinx-doc__sphinx-8273",
+      "sympy__sympy-22714",
+      "matplotlib__matplotlib-18869",
+      "scikit-learn__scikit-learn-10297",
+      "psf__requests-3362"
+    ]
+  },
+  "preflight": [
+    {
+      "instance_id": "django__django-11422",
+      "ok": false,
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-11422:latest",
+      "image_id": "sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+      "architecture": "amd64",
+      "base_commit": "df46b329e0900e9e4dc1d60816c1dce6dfc1094e",
+      "cache": {
+        "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase20\\m3-20261024-live\\instances\\django__django-11422\\repo-cache\\ecb606ac8b0e5478",
+        "base_commit": "df46b329e0900e9e4dc1d60816c1dce6dfc1094e",
+        "commits": 1
+      },
+      "collection_exit": 1,
+      "runner_contract": null,
+      "error": null
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "ok": true,
+      "image_ref": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8273:latest",
+      "image_id": "sha256:11f6809c7e3d3bfcd53ed280f0885d0b0950836391a84e732fc5f2ea9e096038",
+      "architecture": "amd64",
+      "base_commit": "88b81a06eb635a1596617f8971fa97a84c069e93",
+      "cache": {
+        "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase20\\m3-20261024-formal6\\instances\\sphinx-doc__sphinx-8273\\repo-cache\\c6641fd73dfad180",
+        "base_commit": "88b81a06eb635a1596617f8971fa97a84c069e93",
+        "commits": 1
+      },
+      "collection_exit": 0,
+      "runner_contract": "pytest_or_tox",
+      "error": null
+    },
+    {
+      "instance_id": "sympy__sympy-22714",
+      "ok": false,
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-22714:latest",
+      "image_id": "sha256:f8f6b7d2e72a05ea8c4ec8143b5da6cefd6f5fd7e679d74257e25a59c082a15d",
+      "architecture": "amd64",
+      "base_commit": "3ff4717b6aef6086e78f01cdfa06f64ae23aed7e",
+      "cache": {
+        "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase20\\m3-20261024-formal6\\instances\\sympy__sympy-22714\\repo-cache\\6b19b50142def20b",
+        "base_commit": "3ff4717b6aef6086e78f01cdfa06f64ae23aed7e",
+        "commits": 1
+      },
+      "collection_exit": 0,
+      "runner_contract": "unsupported",
+      "error": null
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-18869",
+      "ok": true,
+      "image_ref": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-18869:latest",
+      "image_id": "sha256:5a237c238da682b5203cd965183e00dd6fdbe9a0844c492f503a42f12a25f1ca",
+      "architecture": "amd64",
+      "base_commit": "b7d05919865fc0c37a0164cf467d5d5513bd0ede",
+      "cache": {
+        "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase20\\m3-20261024-formal6\\instances\\matplotlib__matplotlib-18869\\repo-cache\\84863a80fe88b482",
+        "base_commit": "b7d05919865fc0c37a0164cf467d5d5513bd0ede",
+        "commits": 1
+      },
+      "collection_exit": 0,
+      "runner_contract": "pytest_or_tox",
+      "error": null
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "ok": false,
+      "image_ref": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-10297:latest",
+      "image_id": "sha256:c48ade7195b167b2562f90f3a3a60ebb410276e7583bd1212e324c16157d7eb0",
+      "architecture": "amd64",
+      "base_commit": "b90661d6a46aa3619d3eec94d5281f5888add501",
+      "cache": {
+        "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase20\\m3-20261024-formal6\\instances\\scikit-learn__scikit-learn-10297\\repo-cache\\8e773aa72402b28a",
+        "base_commit": "b90661d6a46aa3619d3eec94d5281f5888add501",
+        "commits": 1
+      },
+      "collection_exit": null,
+      "runner_contract": null,
+      "error": "RuntimeError: remove collection container: Error response from daemon: cannot remove container \"a0a98461f366736cf09898d9662e3e10644d820f0a6da38703ab9288d1ef546b\": container is running: stop the container before removing or force remove"
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "ok": false,
+      "image_ref": "swebench/sweb.eval.x86_64.psf_1776_requests-3362:latest",
+      "image_id": "sha256:d1c8c15eeb5e12b7eb3815307d1131d68c72d53419fa2f8b89bc46bc0009a61b",
+      "architecture": "amd64",
+      "base_commit": "36453b95b13079296776d11b09cab2567ea3e703",
+      "cache": {
+        "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase20\\m3-20261024-formal6\\instances\\psf__requests-3362\\repo-cache\\0d1a89c543bad402",
+        "base_commit": "36453b95b13079296776d11b09cab2567ea3e703",
+        "commits": 1
+      },
+      "collection_exit": 2,
+      "runner_contract": "pytest_or_tox",
+      "error": null
+    }
+  ],
+  "results": {
+    "batch": {
+      "schema_version": 1,
+      "batch_id": "m3-20261024",
+      "status": "completed",
+      "stop_reason": null,
+      "planned_instances": 6,
+      "instances": [
+        {
+          "instance_id": "django__django-11422",
+          "repo": "django/django",
+          "status": "ENV_ERROR",
+          "run_id": null,
+          "internal": "NOT_RUN",
+          "official": "NOT_EVALUATED",
+          "settled_cny": 0.0,
+          "unknown_reserved_cny": 0.0,
+          "terminal": true
+        },
+        {
+          "instance_id": "sphinx-doc__sphinx-8273",
+          "repo": "sphinx-doc/sphinx",
+          "status": "REJECTED",
+          "run_id": "swebench-smoke-m3-20261024-sphinx-doc__sphinx-8273-s0-70586dbc",
+          "internal": "REJECTED",
+          "official": "NOT_EVALUATED",
+          "settled_cny": 0.18606408000000005,
+          "unknown_reserved_cny": 0.0,
+          "terminal": true
+        },
+        {
+          "instance_id": "sympy__sympy-22714",
+          "repo": "sympy/sympy",
+          "status": "ENV_ERROR",
+          "run_id": null,
+          "internal": "NOT_RUN",
+          "official": "NOT_EVALUATED",
+          "settled_cny": 0.0,
+          "unknown_reserved_cny": 0.0,
+          "terminal": true
+        },
+        {
+          "instance_id": "matplotlib__matplotlib-18869",
+          "repo": "matplotlib/matplotlib",
+          "status": "NO_PATCH",
+          "run_id": "swebench-smoke-m3-20261024-matplotlib__matplotlib-18869-s0-46563a3e",
+          "internal": "REJECTED",
+          "official": "NOT_EVALUATED",
+          "settled_cny": 0.06550088,
+          "unknown_reserved_cny": 0.0,
+          "terminal": true
+        },
+        {
+          "instance_id": "scikit-learn__scikit-learn-10297",
+          "repo": "scikit-learn/scikit-learn",
+          "status": "ENV_ERROR",
+          "run_id": null,
+          "internal": "NOT_RUN",
+          "official": "NOT_EVALUATED",
+          "settled_cny": 0.0,
+          "unknown_reserved_cny": 0.0,
+          "terminal": true
+        },
+        {
+          "instance_id": "psf__requests-3362",
+          "repo": "psf/requests",
+          "status": "ENV_ERROR",
+          "run_id": null,
+          "internal": "NOT_RUN",
+          "official": "NOT_EVALUATED",
+          "settled_cny": 0.0,
+          "unknown_reserved_cny": 0.0,
+          "terminal": true
+        }
+      ],
+      "metrics": {
+        "valid_official_resolution_rate": null,
+        "official_coverage": 0.0,
+        "task_resolution_rate": 0.0,
+        "internal_acceptance_rate": 0.0,
+        "environment_invalid_rate": 0.6666666666666666
+      },
+      "cost": {
+        "historical_opening_cny": 11.2407856,
+        "historical_settled_cny": 7.1834416,
+        "historical_unknown_reserved_cny": 4.0573440000000005,
+        "new_settled_cny": 0.25156496000000006,
+        "new_unknown_reserved_cny": 0.0,
+        "new_upper_bound_cny": 0.25156496000000006,
+        "cumulative_upper_bound_cny": 11.49235056,
+        "new_authorization_cny": 30.0,
+        "new_authorization_remaining_cny": 29.74843504,
+        "main_batch_limit_cny": 24.0,
+        "requests": 36,
+        "unknown_calls": 0
+      }
+    },
+    "ledgers": {
+      "matplotlib__matplotlib-18869": {
+        "requests": 13,
+        "settled_cny": 0.06550088,
+        "input_tokens": 86026,
+        "output_tokens": 2775,
+        "cached_input_tokens": 19456,
+        "models": [
+          "glm-5.3-flash"
+        ]
+      },
+      "sphinx-doc__sphinx-8273": {
+        "requests": 23,
+        "settled_cny": 0.18606408000000002,
+        "input_tokens": 265120,
+        "output_tokens": 7627,
+        "cached_input_tokens": 83136,
+        "models": [
+          "glm-5.3-flash"
+        ]
+      }
+    },
+    "runs": {
+      "matplotlib__matplotlib-18869": {
+        "report": "artifacts\\phase20\\m3-20261024-formal6\\instances\\matplotlib__matplotlib-18869\\runs\\swebench-smoke-m3-20261024-matplotlib__matplotlib-18869-s0-46563a3e\\report.json",
+        "status": "error",
+        "stop_reason": "workflow_error",
+        "error_class": "harness_internal_error",
+        "error_origin": "harness",
+        "failure_reasons": [
+          "plan: [harness_internal_error/harness] TimeoutExpired: Command '['C:\\\\Users\\\\lenovo\\\\.qoder-cn\\\\plugins\\\\cache\\\\qoderapp-bundler\\\\qoder-context\\\\1.0.84.f756706\\\\bin\\\\rg.EXE', '--line-number', '--column', '--no-heading', '--color=never', '--fixed-strings', '--glob', '!.codepilot/**', '--glob', '!.git/**', '--glob', '!artifacts/runs/**', '--glob', '!eval/**', '--glob', '!hidden-answers/**', '--glob', '!private-eval/**', '--', 'version_info', '.']' timed out after 15 seconds"
+        ],
+        "verification_level": "error",
+        "patch_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "delivered_patch_identity_sha256": "",
+        "usage": {
+          "input_tokens": 86026,
+          "output_tokens": 2775,
+          "cached_input_tokens": 19456,
+          "cost": 0.06550088,
+          "llm_calls": 13,
+          "cost_unknown_calls": 0,
+          "currency": "CNY",
+          "by_model": {
+            "glm-5.3-flash-main": {
+              "alias": "glm-5.3-flash-main",
+              "input_tokens": 86026,
+              "output_tokens": 2775,
+              "cached_input_tokens": 19456,
+              "cost": 0.06550088,
+              "llm_calls": 13,
+              "cost_unknown_calls": 0
+            }
+          },
+          "by_role": {
+            "localizer": {
+              "alias": "localizer",
+              "input_tokens": 16133,
+              "output_tokens": 20,
+              "cached_input_tokens": 0,
+              "cost": 0.0129624,
+              "llm_calls": 1,
+              "cost_unknown_calls": 0
+            },
+            "reproducer": {
+              "alias": "reproducer",
+              "input_tokens": 43248,
+              "output_tokens": 2574,
+              "cached_input_tokens": 0,
+              "cost": 0.0418056,
+              "llm_calls": 8,
+              "cost_unknown_calls": 0
+            },
+            "planner": {
+              "alias": "planner",
+              "input_tokens": 26645,
+              "output_tokens": 181,
+              "cached_input_tokens": 19456,
+              "cost": 0.01073288,
+              "llm_calls": 4,
+              "cost_unknown_calls": 0
+            }
+          }
+        },
+        "prediction": {
+          "status": "WORKFLOW_STOPPED",
+          "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase20\\m3-20261024-formal6\\instances\\matplotlib__matplotlib-18869\\predictions\\swebench-smoke-m3-20261024-matplotlib__matplotlib-18869-s0-46563a3e.jsonl",
+          "predictions_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "predictions_bytes": 0,
+          "written": 0,
+          "skipped": 1,
+          "status_counts": {
+            "PATCH_READY": 0,
+            "EMPTY_PATCH": 0,
+            "INVALID_PATCH": 0,
+            "MODEL_OUTPUT_INVALID": 0,
+            "WORKFLOW_STOPPED": 1,
+            "ENV_ERROR": 0,
+            "BUDGET_EXHAUSTED": 0
+          },
+          "manifest_path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase20\\m3-20261024-formal6\\instances\\matplotlib__matplotlib-18869\\predictions\\swebench-smoke-m3-20261024-matplotlib__matplotlib-18869-s0-46563a3e.manifest.json",
+          "manifest": {
+            "schema_version": 1,
+            "run_id": "swebench-smoke-m3-20261024-matplotlib__matplotlib-18869-s0-46563a3e",
+            "model_name_or_path": "glm-5.3-flash-main",
+            "dataset_name": "princeton-nlp/SWE-bench_Lite",
+            "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+            "harness_version": "4.1.0",
+            "predictions_file": "swebench-smoke-m3-20261024-matplotlib__matplotlib-18869-s0-46563a3e.jsonl",
+            "predictions_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "predictions_bytes": 0,
+            "include_empty": false,
+            "written": 0,
+            "skipped": 1,
+            "overwrites": 0,
+            "status_counts": {
+              "PATCH_READY": 0,
+              "EMPTY_PATCH": 0,
+              "INVALID_PATCH": 0,
+              "MODEL_OUTPUT_INVALID": 0,
+              "WORKFLOW_STOPPED": 1,
+              "ENV_ERROR": 0,
+              "BUDGET_EXHAUSTED": 0
+            },
+            "entries": [
+              {
+                "instance_id": "matplotlib__matplotlib-18869",
+                "status": "WORKFLOW_STOPPED",
+                "patch_sha256": null,
+                "run_id": "swebench-smoke-m3-20261024-matplotlib__matplotlib-18869-s0-46563a3e",
+                "model_name_or_path": "glm-5.3-flash-main",
+                "written": false,
+                "error_kind": "harness_internal_error"
+              }
+            ]
+          },
+          "patch_sha256": null
+        }
+      },
+      "sphinx-doc__sphinx-8273": {
+        "report": "artifacts\\phase20\\m3-20261024-formal6\\instances\\sphinx-doc__sphinx-8273\\runs\\swebench-smoke-m3-20261024-sphinx-doc__sphinx-8273-s0-70586dbc\\report.json",
+        "status": "budget_exhausted",
+        "stop_reason": "budget_test_runs",
+        "error_class": null,
+        "error_origin": null,
+        "failure_reasons": [],
+        "verification_level": "budget_exhausted",
+        "patch_hash": "d3d1a68d6d53e52ff90188753e36ea029fb346d6a1c4143460bee1a180c03a6d",
+        "delivered_patch_identity_sha256": "9c20e42283dffed115d7ff127655f4d7790565bcb5a9f2b643a0a123962dec8d",
+        "usage": {
+          "input_tokens": 265120,
+          "output_tokens": 7627,
+          "cached_input_tokens": 83136,
+          "cost": 0.18606408000000005,
+          "llm_calls": 23,
+          "cost_unknown_calls": 0,
+          "currency": "CNY",
+          "by_model": {
+            "glm-5.3-flash-main": {
+              "alias": "glm-5.3-flash-main",
+              "input_tokens": 265120,
+              "output_tokens": 7627,
+              "cached_input_tokens": 83136,
+              "cost": 0.18606408000000005,
+              "llm_calls": 23,
+              "cost_unknown_calls": 0
+            }
+          },
+          "by_role": {
+            "localizer": {
+              "alias": "localizer",
+              "input_tokens": 31975,
+              "output_tokens": 281,
+              "cached_input_tokens": 0,
+              "cost": 0.026366800000000003,
+              "llm_calls": 2,
+              "cost_unknown_calls": 0
+            },
+            "reproducer": {
+              "alias": "reproducer",
+              "input_tokens": 43820,
+              "output_tokens": 3312,
+              "cached_input_tokens": 0,
+              "cost": 0.044329600000000004,
+              "llm_calls": 8,
+              "cost_unknown_calls": 0
+            },
+            "planner": {
+              "alias": "planner",
+              "input_tokens": 97455,
+              "output_tokens": 1891,
+              "cached_input_tokens": 30400,
+              "cost": 0.06593080000000001,
+              "llm_calls": 3,
+              "cost_unknown_calls": 0
+            },
+            "coder": {
+              "alias": "coder",
+              "input_tokens": 79046,
+              "output_tokens": 1553,
+              "cached_input_tokens": 52736,
+              "cost": 0.03752568,
+              "llm_calls": 9,
+              "cost_unknown_calls": 0
+            },
+            "diagnoser": {
+              "alias": "diagnoser",
+              "input_tokens": 12824,
+              "output_tokens": 590,
+              "cached_input_tokens": 0,
+              "cost": 0.0119112,
+              "llm_calls": 1,
+              "cost_unknown_calls": 0
+            }
+          }
+        },
+        "prediction": {
+          "status": "PATCH_READY",
+          "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase20\\m3-20261024-formal6\\instances\\sphinx-doc__sphinx-8273\\predictions\\swebench-smoke-m3-20261024-sphinx-doc__sphinx-8273-s0-70586dbc.jsonl",
+          "predictions_sha256": "be04aec932d3f0e8e134dfd8362d3a63bd49bd71a0cca7e7e38651956d80d932",
+          "predictions_bytes": 1251,
+          "written": 1,
+          "skipped": 0,
+          "status_counts": {
+            "PATCH_READY": 1,
+            "EMPTY_PATCH": 0,
+            "INVALID_PATCH": 0,
+            "MODEL_OUTPUT_INVALID": 0,
+            "WORKFLOW_STOPPED": 0,
+            "ENV_ERROR": 0,
+            "BUDGET_EXHAUSTED": 0
+          },
+          "manifest_path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase20\\m3-20261024-formal6\\instances\\sphinx-doc__sphinx-8273\\predictions\\swebench-smoke-m3-20261024-sphinx-doc__sphinx-8273-s0-70586dbc.manifest.json",
+          "manifest": {
+            "schema_version": 1,
+            "run_id": "swebench-smoke-m3-20261024-sphinx-doc__sphinx-8273-s0-70586dbc",
+            "model_name_or_path": "glm-5.3-flash-main",
+            "dataset_name": "princeton-nlp/SWE-bench_Lite",
+            "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+            "harness_version": "4.1.0",
+            "predictions_file": "swebench-smoke-m3-20261024-sphinx-doc__sphinx-8273-s0-70586dbc.jsonl",
+            "predictions_sha256": "be04aec932d3f0e8e134dfd8362d3a63bd49bd71a0cca7e7e38651956d80d932",
+            "predictions_bytes": 1251,
+            "include_empty": false,
+            "written": 1,
+            "skipped": 0,
+            "overwrites": 0,
+            "status_counts": {
+              "PATCH_READY": 1,
+              "EMPTY_PATCH": 0,
+              "INVALID_PATCH": 0,
+              "MODEL_OUTPUT_INVALID": 0,
+              "WORKFLOW_STOPPED": 0,
+              "ENV_ERROR": 0,
+              "BUDGET_EXHAUSTED": 0
+            },
+            "entries": [
+              {
+                "instance_id": "sphinx-doc__sphinx-8273",
+                "status": "PATCH_READY",
+                "patch_sha256": "d3d1a68d6d53e52ff90188753e36ea029fb346d6a1c4143460bee1a180c03a6d",
+                "run_id": "swebench-smoke-m3-20261024-sphinx-doc__sphinx-8273-s0-70586dbc",
+                "model_name_or_path": "glm-5.3-flash-main",
+                "written": true,
+                "error_kind": null
+              }
+            ]
+          },
+          "patch_sha256": "d3d1a68d6d53e52ff90188753e36ea029fb346d6a1c4143460bee1a180c03a6d"
+        }
+      }
+    }
+  },
+  "zero_model_replay": {
+    "artifact_root": "artifacts/phase20/zero-model-replay-r4",
+    "summary_sha256": "1ff219bd4215e55f6026a5c3ee41233ce59f170223cc4bb8b77042f2b0342f25",
+    "model_calls": 0,
+    "official_harness_runs": 0,
+    "image": {
+      "ref": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-11148:latest",
+      "id": "sha256:b8eef9af40c714067a5455e8d88620439b536a5455fed96c5646b4ed37028442",
+      "architecture": "amd64"
+    },
+    "a18_parsing": {
+      "historical_source": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase18\\l2-cal10e\\pytest-dev__pytest-11148-a18\\runs\\swebench-smoke-l2cal10e-a18-pytest-dev__pytest-11148-s0-31ccfbc9\\regression\\1\\L2.json",
+      "historical_sha256": "084a856a69346b73d9fde37478e4f1e93c6d5cf6ad437e5e96055371c0fb1e6c",
+      "historical_status": "FAIL",
+      "historical_exit_code": 0,
+      "historical_passed": 368,
+      "historical_failed": 0,
+      "historical_skipped": 17,
+      "replay_input_status": "ENV_ERROR",
+      "reclassified_status": "PASS",
+      "reclassified_error_reason": null
+    },
+    "a18_L2": {
+      "status": "PASS",
+      "requested": 385,
+      "outcomes": {
+        "passed": 368,
+        "skipped": 17
+      }
+    },
+    "a18_L3": {
+      "status": "PASS",
+      "requested": 385,
+      "outcomes": {
+        "passed": 368,
+        "skipped": 17
+      }
+    },
+    "a21_eight_nodes": {
+      "testing/_py/test_local.py::TestLocalPath::test_visit_endswith": {
+        "lexicographic": "failed",
+        "collection": "passed"
+      },
+      "testing/_py/test_local.py::TestLocalPath::test_visit_filesonly": {
+        "lexicographic": "failed",
+        "collection": "passed"
+      },
+      "testing/_py/test_local.py::TestLocalPath::test_visit_filterfunc_is_string[*dir0]": {
+        "lexicographic": "failed",
+        "collection": "passed"
+      },
+      "testing/_py/test_local.py::TestLocalPath::test_visit_filterfunc_is_string[*dir1]": {
+        "lexicographic": "failed",
+        "collection": "passed"
+      },
+      "testing/_py/test_local.py::TestLocalPath::test_visit_filterfunc_is_string[fil2]": {
+        "lexicographic": "failed",
+        "collection": "passed"
+      },
+      "testing/_py/test_local.py::TestLocalPath::test_visit_nodotfiles": {
+        "lexicographic": "failed",
+        "collection": "passed"
+      },
+      "testing/_py/test_local.py::TestLocalPath::test_visit_nofilter": {
+        "lexicographic": "failed",
+        "collection": "passed"
+      },
+      "testing/_py/test_local.py::TestLocalPath::test_visit_norecurse": {
+        "lexicographic": "failed",
+        "collection": "passed"
+      }
+    },
+    "a21_order_explains_historical_failures": true,
+    "historical_pytest_agent_p2": "NOT VERIFIED"
+  },
+  "test_summary": {
+    "phase19_directed": {
+      "passed": 50,
+      "failed": 0,
+      "skipped": 0
+    },
+    "windows_workspace": {
+      "passed": 62,
+      "failed": 0,
+      "skipped": 0
+    },
+    "a12_reviewer_fake": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    "m3_fault_matrix_and_controls": {
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0
+    },
+    "official_environment_targeted": {
+      "passed": 48,
+      "failed": 0,
+      "skipped": 0
+    },
+    "bind_workspace_targeted": {
+      "passed": 53,
+      "failed": 0,
+      "skipped": 0
+    },
+    "related_windows": {
+      "passed": 802,
+      "failed": 6,
+      "skipped": 3,
+      "failures": "5 NTFS cross-platform transfer checks plus 1 transient workspace rename; transfer suite 20/20 passed under Linux"
+    },
+    "linux_transfer": {
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0
+    },
+    "rg_timeout_fallback": {
+      "passed": 7,
+      "failed": 0,
+      "skipped": 1
+    },
+    "not_run": [
+      "full Docker suite",
+      "full repository pytest",
+      "M4/test50/test300",
+      "a22"
+    ]
+  }
+}
