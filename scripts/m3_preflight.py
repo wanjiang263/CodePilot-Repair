@@ -259,7 +259,10 @@ def main() -> int:
             task = loader.get_inference_task("test", instance)
             source = preflight_root / "source-testbed"
             if args.source_root is not None:
-                reusable = args.source_root / "instances" / instance / "preflight/source-testbed"
+                source_root = (
+                    args.source_root if args.source_root.is_absolute() else root / args.source_root
+                ).resolve()
+                reusable = source_root / "instances" / instance / "preflight/source-testbed"
                 if reusable.is_dir():
                     source = reusable
             manager = WorkspaceManager(cache_root=instance_root / "repo-cache")
