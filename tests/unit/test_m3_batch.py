@@ -52,6 +52,17 @@ def _ledger(path: Path, *, cost: float = 0.01, unknown: bool = False) -> None:
     )
 
 
+def _budget() -> dict[str, Any]:
+    return {
+        "max_iterations": 5,
+        "max_test_runs": 18,
+        "max_tool_calls_per_iteration": 30,
+        "max_review_calls": 2,
+        "max_runtime_seconds": 1800,
+        "source": {"max_test_runs": "cli"},
+    }
+
+
 def _report(root: Path, batch: str, instance: str, suffix: str = "") -> str:
     run_id = f"run-{instance}{suffix}"
     candidate = patch_hash(PATCH)
@@ -73,6 +84,7 @@ def _report(root: Path, batch: str, instance: str, suffix: str = "") -> str:
             }
         ],
         "review": {"approved": True, "reviewed_patch_hash": candidate, "issues": []},
+        "budget": _budget(),
         "regression": {"mode": "full", "unexecuted_tests": []},
         "closure": {
             "patch_present": True,
@@ -147,6 +159,7 @@ def _no_patch(root: Path, batch: str, instance: str) -> None:
         "reproduction": {"status": "failed", "kind": "invalid_pass"},
         "attempts": [{"iteration": 1, "patch_hash": empty, "validation": {"passed": False}}],
         "review": None,
+        "budget": _budget(),
         "regression": None,
         "closure": {
             "patch_present": False,
@@ -246,6 +259,10 @@ class Fixture:
             "main_batch_limit_cny": 24.0,
             "per_instance_new_limit_cny": 4.0,
             "max_output_tokens": 4096,
+            "max_iterations": 5,
+            "max_test_runs": 18,
+            "max_tool_calls_per_iteration": 30,
+            "max_review_calls": 2,
             "timeout_seconds": 1800,
             "harness_python": "/unused/harness",
             "official_mode": "fake",
@@ -309,6 +326,56 @@ def test_m3_success_and_cost_summary(fixture: Fixture) -> None:
     assert summary["metrics"]["task_resolution_rate"] == 1.0
     assert summary["cost"]["new_settled_cny"] == pytest.approx(0.06)
     assert summary["cost"]["new_authorization_remaining_cny"] == pytest.approx(29.94)
+
+
+def test_external_official_pauses_and_ingests_without_a_second_paid_attempt(
+    fixture: Fixture,
+) -> None:
+    internal: list[str] = []
+    official_calls: list[str] = []
+
+    def official(request: Any) -> int:
+        official_calls.append(request.instance["instance_id"])
+        return 0
+
+    # Switch the fixture config to external mode before construction.
+    config = json.loads(fixture.config.read_text(encoding="utf-8"))
+    config["official_mode"] = "external"
+    fixture.config.write_text(json.dumps(config), encoding="utf-8")
+    batch = fixture.make(_success_internal(internal), official)
+    summary = batch.run()
+    assert summary["status"] == "stopped"
+    assert internal == [IDS[0]]
+    assert official_calls == []
+    entry = batch.state["instances"][0]
+    assert entry["status"] == "OFFICIAL_PENDING"
+    assert entry["terminal"] is False
+
+    official_path = fixture.artifact / "instances" / IDS[0] / "official-evaluation-m3-test.json"
+    _write_json(
+        official_path,
+        {"instance_id": IDS[0], "run_id": entry["run_id"], "official_verdict": "RESOLVED"},
+    )
+    ingested = batch.ingest_official()
+    assert ingested["ingested"] == 1
+    assert batch.state["instances"][0]["official"] == "RESOLVED"
+    assert batch.state["instances"][0]["terminal"] is True
+
+    # The next run continues with the next instance; the already-paid instance
+    # is terminal and is never dispatched again.
+    summary = batch.run()
+    assert internal == [IDS[0], IDS[1]]
+    assert summary["status"] == "stopped"
+
+
+def test_ingest_official_refuses_a_missing_record(fixture: Fixture) -> None:
+    config = json.loads(fixture.config.read_text(encoding="utf-8"))
+    config["official_mode"] = "external"
+    fixture.config.write_text(json.dumps(config), encoding="utf-8")
+    batch = fixture.make(_success_internal([]), lambda _request: 0)
+    batch.run()
+    with pytest.raises(m3_batch.BatchStopError, match="official record is missing"):
+        batch.ingest_official()
 
 
 def test_m3_default_dry_run_dispatches_nothing(fixture: Fixture) -> None:

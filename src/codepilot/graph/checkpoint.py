@@ -455,12 +455,30 @@ def _anchor(deps: Deps) -> RepairState:
     )
 
 
+def checkpoint_budget_problem(stored: Any, expected: Any | None) -> str | None:
+    """A resumed repair must use the exact frozen budget, never the old one.
+
+    Phase 20's Sphinx run froze ``max_test_runs=18`` but resumed/proceeded with
+    the default 12.  A checkpoint carrying a different budget is a different
+    run identity for closure accounting; continuing would silently spend the
+    wrong allowance, so it is refused before any model or sandbox work.
+    """
+    if expected is None or stored == expected:
+        return None
+    return (
+        "checkpoint budget does not match the frozen run budget; refusing to resume: "
+        f"stored={stored.model_dump(mode='json')} "
+        f"expected={expected.model_dump(mode='json')}"
+    )
+
+
 async def resume_run(
     deps: Deps,
     handle: CheckpointHandle,
     run_id: str,
     *,
     recursion_limit: int | None = None,
+    expected_budget: Any | None = None,
 ) -> RepairState:
     """从 checkpoint 恢复同一个 run_id，并从不一致的节点继续。
 
@@ -476,6 +494,10 @@ async def resume_run(
     stored = await checkpoint_state(handle.saver, run_id)
     if stored is None:
         raise ValueError(f"run_id={run_id!r} 没有可用的 checkpoint")
+    message = checkpoint_budget_problem(stored.budget, expected_budget)
+    if message is not None:
+        deps.events.emit(node="resume", type=EventType.STOP, status="refused", error=message)
+        raise CheckpointIdentityError(message)
     manifest_base = str((read_manifest(handle.path) or {}).get("base_commit") or "")
     if manifest_base != stored.base_commit:
         message = (

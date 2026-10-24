@@ -112,6 +112,12 @@ Clock = Callable[[], datetime]
 REVIEW_CONTEXT_TOKENS = 24_000
 REVIEW_OUTPUT_TOKENS = 4_096
 
+#: Wall-clock headroom kept for one pending review.  Tests take their timeout
+#: from ``max_runtime_seconds - elapsed``; without this reserve the last L3
+#: run can legally consume the entire wall clock and the Reviewer is then
+#: skipped at its own budget gate even though its token/cost reservation held.
+REVIEW_TIME_RESERVE_SECONDS = 120.0
+
 #: 闭环准入的算术常数（DA-024）。口径全部对齐 :class:`codepilot.graph.regression.RegressionRunner`
 #: 与 :func:`codepilot.graph.nodes.run_target_tests` 里**实际会发生**的 ``run_tests`` 调用次数，
 #: 而不是"大概三四次"：判定要的是可复算的数，不是印象。
@@ -227,12 +233,14 @@ class ClosureReservation:
     review_calls: int
     estimated: bool
     basis: str = ""
+    seconds: float = 0.0
 
     def summary(self) -> dict[str, str]:
         return {
             "tokens": f"{self.tokens}",
             "cost": f"{self.cost:.6f}",
             "review_calls": str(self.review_calls),
+            "seconds": f"{self.seconds:.1f}",
             "estimated": str(self.estimated),
             "basis": self.basis,
         }
@@ -606,13 +614,24 @@ class BudgetManager:
         """
         if not reviewer_available:
             return ClosureReservation(
-                tokens=0, cost=0.0, review_calls=0, estimated=True, basis="no-reviewer"
+                tokens=0,
+                cost=0.0,
+                review_calls=0,
+                estimated=True,
+                basis="no-reviewer",
+                seconds=0.0,
             )
         if pending_review_calls <= 0:
             return ClosureReservation(
-                tokens=0, cost=0.0, review_calls=0, estimated=True, basis="review-not-pending"
+                tokens=0,
+                cost=0.0,
+                review_calls=0,
+                estimated=True,
+                basis="review-not-pending",
+                seconds=0.0,
             )
         calls = pending_review_calls
+        seconds = calls * REVIEW_TIME_RESERVE_SECONDS
         per_call = float(REVIEW_CONTEXT_TOKENS + REVIEW_OUTPUT_TOKENS)
         usage = state.usage
         if usage.llm_calls > 0 and usage.total_tokens > 0:
@@ -622,7 +641,12 @@ class BudgetManager:
         if priced is not None:
             cost, basis = priced
             return ClosureReservation(
-                tokens=tokens, cost=cost, review_calls=calls, estimated=True, basis=basis
+                tokens=tokens,
+                cost=cost,
+                review_calls=calls,
+                estimated=True,
+                basis=basis,
+                seconds=seconds,
             )
         # 回退到账本实测单价。能估算的前提是"账本里没有未知费用调用，且要么已经有过
         # 一次调用可参考、要么这个 provider 本来就是**模拟**的"。
@@ -645,6 +669,7 @@ class BudgetManager:
                 review_calls=calls,
                 estimated=True,
                 basis="simulated-zero-cost",
+                seconds=seconds,
             )
         unit = usage.cost / usage.total_tokens if estimated and usage.total_tokens else 0.0
         cost = tokens * unit if estimated else float("inf")
@@ -654,6 +679,7 @@ class BudgetManager:
             review_calls=calls,
             estimated=estimated,
             basis="observed-unit" if estimated else "unknown",
+            seconds=seconds,
         )
 
     def closure_test_plan(
@@ -752,6 +778,7 @@ class BudgetManager:
         for category, amount in (
             (Category.TOKENS, float(reservation.tokens)),
             (Category.COST, reservation.cost),
+            (Category.TIME, float(reservation.seconds)),
         ):
             if category not in ordered:
                 continue

@@ -24,6 +24,7 @@ from codepilot.graph.budget import (
     CLOSURE_TARGET_TEST_RUNS,
     REVIEW_CONTEXT_TOKENS,
     REVIEW_OUTPUT_TOKENS,
+    REVIEW_TIME_RESERVE_SECONDS,
     Activity,
     BudgetConfigurationError,
     BudgetManager,
@@ -553,6 +554,24 @@ def test_the_reviewer_spends_the_reservation_it_was_given_and_bills_once() -> No
     )
 
 
+def test_reviewer_keeps_wall_clock_headroom_from_pre_review_nodes() -> None:
+    """Token/cost reservation alone is not enough: tests can eat the wall clock.
+
+    A review has no separate container, but it still needs time for its model
+    call. The reservation therefore also shrinks the TIME ceiling of LLM /
+    codegen / repair nodes, while the review activity itself uses the real
+    hard limit (the reservation is for the reviewer, not against it).
+    """
+    state = _state(budget=RepairBudget(max_runtime_seconds=100))
+    reserve = _reserve(state)
+    assert reserve.review_calls == 2
+    assert reserve.seconds == 2 * REVIEW_TIME_RESERVE_SECONDS
+    manager = BudgetManager()
+    blocked = manager.evaluate(state, Activity.LLM, reservation=reserve)
+    assert StopReason.BUDGET_TIME in blocked.exhausted
+    assert manager.evaluate(state, Activity.REVIEW).primary is None
+
+
 def test_outstanding_precharge_is_counted_once_and_never_double_billed() -> None:
     """§三.4：已结算 + 已预扣 + 预留三段各自只算一次，相加才是可用 headroom。
 
@@ -569,7 +588,8 @@ def test_outstanding_precharge_is_counted_once_and_never_double_billed() -> None
     assert evaluation.reserved == (
         (Category.TOKENS, float(reserve.tokens)),
         (Category.COST, reserve.cost),
-    ), "预留对 token 与费用各扣一次，不多不少"
+        (Category.TIME, reserve.seconds),
+    ), "预留对 token、费用与墙钟各扣一次，不多不少"
     assert (
         manager.evaluate(state, Activity.LLM, reservation=reserve, outstanding=0.3).usage[:2]
         == evaluation.usage[:2]

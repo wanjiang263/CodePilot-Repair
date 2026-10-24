@@ -89,6 +89,11 @@ class SmokeConfig:
     temperature: float = 0.0
     max_output_tokens: int = 4096
     timeout: int = 1800
+    max_iterations: int | None = None
+    max_test_runs: int | None = None
+    max_tool_calls_per_iteration: int | None = None
+    max_review_calls: int | None = None
+    runner_overrides: Path | None = None
     docker_cpus: float = 2.0
     docker_memory: str = "4g"
     artifact_root: Path = DEFAULT_ARTIFACT_ROOT
@@ -138,6 +143,59 @@ class SmokeConfig:
             except OSError as exc:
                 raise SmokeError(f"--image-overrides 文件不可读: {overrides}（{exc}）") from exc
             object.__setattr__(self, "image_overrides", overrides)
+        if self.runner_overrides is not None:
+            runners = Path(self.runner_overrides)
+            if not runners.is_file():
+                raise SmokeError(f"--runner-overrides 文件不存在: {runners}")
+            object.__setattr__(self, "runner_overrides", runners)
+        for name, value, low, high in (
+            ("max-iterations", self.max_iterations, 1, 20),
+            ("max-test-runs", self.max_test_runs, 3, 60),
+            ("max-tool-calls-per-iteration", self.max_tool_calls_per_iteration, 1, 200),
+            ("max-review-calls", self.max_review_calls, 0, 10),
+        ):
+            if value is not None and not low <= value <= high:
+                raise SmokeError(f"--{name} 超出 {low}..{high}: {value}")
+
+    def effective_limits(self) -> dict[str, int]:
+        """Resolve the six core limits once, with an explicit source for each.
+
+        ``max_test_runs`` keeps the legacy environment override for the scripts
+        under ``scripts/run_l2cal10e_*.sh``, but an explicit CLI value always
+        wins.  The M3 batch passes every limit on the command line and records
+        the sources, so a frozen config can never silently fall back to 12.
+        """
+        env_runs = os.environ.get("CODEPILOT_MAX_TEST_RUNS")
+        try:
+            env_value = int(env_runs) if env_runs else None
+        except ValueError as exc:
+            raise SmokeError(f"CODEPILOT_MAX_TEST_RUNS 不是整数: {env_runs!r}") from exc
+        if env_value is not None and not 3 <= env_value <= 60:
+            raise SmokeError(f"CODEPILOT_MAX_TEST_RUNS 超出 3..60: {env_value}")
+        return {
+            "max_iterations": self.max_iterations or 5,
+            "max_test_runs": self.max_test_runs or env_value or 12,
+            "max_tool_calls_per_iteration": self.max_tool_calls_per_iteration or 30,
+            "max_review_calls": (2 if self.max_review_calls is None else self.max_review_calls),
+        }
+
+    def limit_sources(self) -> dict[str, str]:
+        env_runs = os.environ.get("CODEPILOT_MAX_TEST_RUNS")
+        return {
+            "max_iterations": "cli" if self.max_iterations is not None else "default",
+            "max_test_runs": (
+                "cli"
+                if self.max_test_runs is not None
+                else "environment:CODEPILOT_MAX_TEST_RUNS"
+                if env_runs
+                else "default"
+            ),
+            "max_tool_calls_per_iteration": (
+                "cli" if self.max_tool_calls_per_iteration is not None else "default"
+            ),
+            "max_review_calls": "cli" if self.max_review_calls is not None else "default",
+            "max_runtime_seconds": "cli:timeout",
+        }
 
     @property
     def model_identity(self) -> str:
@@ -161,8 +219,13 @@ class SmokeConfig:
             "temperature": self.temperature,
             "max_output_tokens": self.max_output_tokens,
             "budget_currency": self.budget_currency,
+            "limits": self.effective_limits(),
+            "limit_sources": self.limit_sources(),
             "image_overrides_sha256": _sha256_file(self.image_overrides)
             if self.image_overrides is not None
+            else None,
+            "runner_overrides_sha256": _sha256_file(self.runner_overrides)
+            if self.runner_overrides is not None
             else None,
         }
 
@@ -361,8 +424,10 @@ def _default_sandbox_factory(
     client: Any = None,
 ) -> Callable[[Any], Any]:
     from codepilot.sandbox.official import OfficialInstanceSandbox
+    from codepilot.sandbox.runners import RunnerOverrides
 
     resolver = images if images is not None else _image_resolver(config)
+    runners = RunnerOverrides.load(config.runner_overrides)
 
     def factory(artifacts: Any) -> Any:
         sandbox = OfficialInstanceSandbox(
@@ -371,6 +436,7 @@ def _default_sandbox_factory(
             instance_id=config.instance_id,
             images=resolver,
             client=client,
+            runners=runners,
         )
         if record is not None:
             record.append(sandbox)
@@ -382,7 +448,11 @@ def _default_sandbox_factory(
 def _default_workspace_manager(config: SmokeConfig) -> Any:
     from codepilot.repo.workspace import WorkspaceManager
 
-    return WorkspaceManager(cache_root=Path(config.artifact_root) / "repo-cache")
+    mode = os.environ.get("CODEPILOT_WORKSPACE_MODE", "fetch")
+    return WorkspaceManager(
+        cache_root=Path(config.artifact_root) / "repo-cache",
+        default_mode=mode,  # type: ignore[arg-type]
+    )
 
 
 def _load_llm_config(config: SmokeConfig) -> Any:
@@ -487,16 +557,33 @@ def _default_harness_runner(
 def _build_budget(config: SmokeConfig) -> Any:
     from codepilot.schemas.budget import RepairBudget
 
-    raw_runs = os.environ.get("CODEPILOT_MAX_TEST_RUNS")
-    max_test_runs = int(raw_runs) if raw_runs else 12
-    if not 3 <= max_test_runs <= 60:
-        raise SmokeError(f"CODEPILOT_MAX_TEST_RUNS 超出 3..60: {max_test_runs}")
+    limits = config.effective_limits()
     return RepairBudget(
         max_cost=config.budget,
         budget_currency=config.budget_currency,
         max_runtime_seconds=config.timeout,
-        max_test_runs=max_test_runs,
+        max_iterations=limits["max_iterations"],
+        max_test_runs=limits["max_test_runs"],
+        max_tool_calls_per_iteration=limits["max_tool_calls_per_iteration"],
+        max_review_calls=limits["max_review_calls"],
     )
+
+
+def _validate_effective_budget(config: SmokeConfig, budget: Any) -> None:
+    """Fail closed before any model/environment work if the budget drifted.
+
+    Phase 20 froze ``max_test_runs=18`` in the batch config, but the value was
+    never forwarded and the internal process silently used the default 12.
+    This check compares the typed config's effective limits with the exact
+    ``RepairBudget`` that the assembly will put into ``RepairState``.
+    """
+    expected = config.effective_limits()
+    actual = {name: getattr(budget, name) for name in expected}
+    if actual != expected:
+        raise SmokeError(
+            "effective budget does not match the frozen config: "
+            f"expected={expected} actual={actual} sources={config.limit_sources()}"
+        )
 
 
 def _budget_payload(config: SmokeConfig, budget: Any) -> dict[str, Any]:
@@ -506,6 +593,11 @@ def _budget_payload(config: SmokeConfig, budget: Any) -> dict[str, Any]:
             "budget_currency": config.budget_currency,
             "max_cost_from_cli": config.budget,
             "cost_limit_enforced": config.budget is not None,
+            "source": config.limit_sources(),
+            "config_hash": config.config_hash(),
+            "runner_overrides_sha256": _sha256_file(config.runner_overrides)
+            if config.runner_overrides is not None
+            else None,
         }
     )
     return payload
@@ -730,6 +822,7 @@ def _run_inference(
         sandbox_factory=sandbox_factory,
         provider_bundle=bundle,
         budget=budget,
+        expected_budget=budget,
         with_reproducer=config.live_llm,
         allow_new_tests=False,
         record_llm=config.record_llm,
@@ -1121,6 +1214,8 @@ def run_smoke(config: SmokeConfig, *, deps: SmokeDeps | None = None) -> dict[str
     _require_authored(config, deps)
     paths = SmokePaths.build(config)
     _prepare_paths(config, paths)
+    initial_budget = _build_budget(config)
+    _validate_effective_budget(config, initial_budget)
     # 一次 run 只解析一次覆盖文件；preflight/ensure 与 sandbox factory 共用同一结果。
     images = deps.image_resolver or _image_resolver(config)
     sandboxes: list[Any] = []
@@ -1614,6 +1709,7 @@ def _run_resume(
             sandbox_factory=sandbox_factory,
             provider_bundle=_wrap_request_overrides(bundle_provider(), config),
             budget=_build_budget(config),
+            expected_budget=_build_budget(config),
             record_llm=config.record_llm,
             checkpoint=resume.enables(runner_module.ResumeLevel.GRAPH),
         )
@@ -1805,6 +1901,11 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--max-output-tokens", type=int, default=4096)
+    parser.add_argument("--max-iterations", type=int, default=None)
+    parser.add_argument("--max-test-runs", type=int, default=None)
+    parser.add_argument("--max-tool-calls-per-iteration", type=int, default=None)
+    parser.add_argument("--max-review-calls", type=int, default=None)
+    parser.add_argument("--runner-overrides", type=Path, default=None)
     parser.add_argument("--timeout", type=int, default=1800)
     parser.add_argument("--docker-cpus", type=float, default=2.0)
     parser.add_argument("--docker-memory", default="4g")
@@ -1833,6 +1934,11 @@ def _config_from_args(args: argparse.Namespace) -> SmokeConfig:
         seed=args.seed,
         temperature=args.temperature,
         max_output_tokens=args.max_output_tokens,
+        max_iterations=args.max_iterations,
+        max_test_runs=args.max_test_runs,
+        max_tool_calls_per_iteration=args.max_tool_calls_per_iteration,
+        max_review_calls=args.max_review_calls,
+        runner_overrides=args.runner_overrides,
         timeout=args.timeout,
         docker_cpus=args.docker_cpus,
         docker_memory=args.docker_memory,

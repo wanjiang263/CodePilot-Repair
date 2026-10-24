@@ -53,7 +53,9 @@ def test_full_graph(tmp_path: Path):
     assert state.status is RunStatus.SUCCEEDED, state.failure_reasons
     assert state.regression.complete
     assert state.review.approved
-    assert state.test_runs == 5
+    # L2 covered the whole authorized baseline (one test file), so its
+    # execution is the L3 evidence; no duplicate full run is spent.
+    assert state.test_runs == 4
     assert state.attempts[-1].regression == state.regression
 
 
@@ -86,7 +88,9 @@ def test_retry_classification_and_accounting(tmp_path, outcomes, flaky):
     assert ("tests/test_core.py" in result.flaky) is flaky
     assert bool(result.new_failures) is not flaky
     assert len(result.retries["tests/test_core.py"]) == 2
-    assert harness.deps.test_runs == (7 if flaky else 6)
+    # baseline 2 + target 1 + L2 1 + two re-runs = 6; L3 reuses L2's
+    # whole-baseline evidence instead of spending a seventh run.
+    assert harness.deps.test_runs == 6
 
 
 def test_budget_prevents_retry(tmp_path):
@@ -107,6 +111,60 @@ def test_budget_prevents_retry(tmp_path):
     assert harness.deps.test_runs == 4
 
 
+def test_retry_and_l3_fit_exactly_at_the_closure_boundary(tmp_path):
+    from harness import assertion_failure
+
+    from codepilot.schemas.budget import RepairBudget
+
+    def outcome(value):
+        result = assertion_failure()
+        result.tests[0].outcome = TestOutcome(value)
+        return passed_result() if value == "passed" else result
+
+    harness = build_harness(
+        tmp_path,
+        # build_harness prepends the two baseline runs; these are target, L2
+        # and the two re-runs.
+        results=[
+            passed_result(),
+            assertion_failure(),
+            *map(outcome, ["failed", "passed"]),
+        ],
+        budget=RepairBudget(max_test_runs=6),
+        coder_rounds=[[edit("src/pkg/core.py", "return value - 1", "return value"), FINISH]],
+    )
+    state = harness.run()
+    result = RegressionRunner().run(state, harness.deps)
+    assert result.flaky == {"tests/test_core.py"}
+    assert result.new_failures == []
+    assert result.complete
+    # Six runs: baseline 2 + target + L2 + two re-runs. L2 covered the whole
+    # authorized baseline, so L3 is recorded from that evidence for free.
+    assert harness.deps.test_runs == 6
+
+
+def test_retry_is_declined_when_it_would_eat_l3(tmp_path):
+    from harness import assertion_failure
+
+    from codepilot.schemas.budget import RepairBudget
+
+    harness = build_harness(
+        tmp_path,
+        results=[passed_result(), assertion_failure()],
+        budget=RepairBudget(max_test_runs=5),
+        coder_rounds=[[edit("src/pkg/core.py", "return value - 1", "return value"), FINISH]],
+    )
+    state = harness.run()
+    result = RegressionRunner().run(state, harness.deps)
+    assert not result.complete
+    assert not result.flaky
+    assert result.retry_notes and "flaky classification declined" in result.retry_notes[0]
+    # baseline 2 + target + L2 = 4; one run remains, which cannot both classify
+    # flaky (two re-runs) and leave room for the deterministic closure. No
+    # retry is attempted and the run is reported incomplete, not "flaky".
+    assert harness.deps.test_runs == 4
+
+
 def test_operation_reuse_and_corruption(tmp_path):
     import sqlite3
 
@@ -123,7 +181,7 @@ def test_operation_reuse_and_corruption(tmp_path):
     harness.deps.accounting.seed(state.test_runs)
     second = runner.run(state, harness.deps)
     assert first == second
-    assert harness.deps.test_runs == 5
+    assert harness.deps.test_runs == 4
     with sqlite3.connect(harness.deps.artifacts.run_dir / "operations.sqlite") as db:
         db.execute("UPDATE operations SET hash='corrupted'")
     with pytest.raises(OperationUncertainError):

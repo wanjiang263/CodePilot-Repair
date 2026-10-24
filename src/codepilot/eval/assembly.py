@@ -411,6 +411,7 @@ class InferenceAssembly:
         sandbox_factory: Callable[[ArtifactStore], Sandbox],
         provider_bundle: ProviderBundle,
         budget: RepairBudget | None = None,
+        expected_budget: RepairBudget | None = None,
         with_reproducer: bool = False,
         allow_new_tests: bool = False,
         record_llm: bool = False,
@@ -428,6 +429,7 @@ class InferenceAssembly:
         self._sandbox_factory = sandbox_factory
         self._providers = provider_bundle
         self._budget = budget or RepairBudget()
+        self._expected_budget = expected_budget
         self._with_reproducer = with_reproducer
         self._allow_new_tests = allow_new_tests
         self._record_llm = record_llm
@@ -457,6 +459,12 @@ class InferenceAssembly:
         "旧现场"，删掉就等于每次重启都从头再花一遍钱。
         """
         started = time.time()
+        if self._expected_budget is not None and self._budget != self._expected_budget:
+            raise RuntimeError(
+                "assembly budget does not match the frozen expected budget: "
+                f"expected={self._expected_budget.model_dump(mode='json')} "
+                f"actual={self._budget.model_dump(mode='json')}"
+            )
         artifacts = ArtifactStore(self._work_root, run_id)
         checkpoint_path = artifacts.run_dir / "checkpoints.sqlite"
         resuming = self._checkpoint and checkpoint_path.exists()
@@ -775,7 +783,15 @@ class InferenceAssembly:
         try:
             if checkpoint_path is None:
                 return run_graph(initial, deps)
-            return asyncio.run(self._run_checkpointed(initial, deps, checkpoint_path, resuming))
+            return asyncio.run(
+                self._run_checkpointed(
+                    initial,
+                    deps,
+                    checkpoint_path,
+                    resuming,
+                    expected_budget=self._expected_budget,
+                )
+            )
         finally:
             deps.close()
 
@@ -785,6 +801,8 @@ class InferenceAssembly:
         deps: Deps,
         checkpoint_path: Path,
         resuming: bool,
+        *,
+        expected_budget: RepairBudget | None = None,
     ) -> RepairState:
         """节点级 checkpoint 执行入口。复用 Phase 9 的 checkpointer 与恢复核对。
 
@@ -795,7 +813,9 @@ class InferenceAssembly:
         async with await open_checkpointer(checkpoint_path, initial.run_id) as handle:
             if resuming:
                 self.resumed_from_checkpoint = True
-                return await resume_run(deps, handle, initial.run_id)
+                return await resume_run(
+                    deps, handle, initial.run_id, expected_budget=expected_budget
+                )
             return await run_with_checkpoint(initial, deps, handle)
 
     def _outcome(

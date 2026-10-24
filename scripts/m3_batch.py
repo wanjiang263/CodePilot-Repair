@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 from collections.abc import Callable
@@ -149,6 +150,8 @@ class M3Batch:
         if not self.batch_id or self.catalog.get("batch_id") != self.batch_id:
             raise BatchStopError("batch_id must match the frozen catalog")
         self.instances = list(self.catalog.get("instances") or [])
+        self.catalog_image_ids = dict(self.catalog.get("image_ids") or {})
+        self.catalog_runner_kinds = dict(self.catalog.get("runner_kinds") or {})
         if len(self.instances) != 6:
             raise BatchStopError("the frozen M3 catalog must contain exactly six instances")
         ids = [str(item.get("instance_id") or "") for item in self.instances]
@@ -167,6 +170,48 @@ class M3Batch:
         self.model = str(self.config["model"])
         self.llm_config_path = self._absolute(Path(str(self.config["llm_config"])))
         self.model_spec = load_llm_config(self.llm_config_path).models[self.model]
+        self.limits = {
+            "max_iterations": int(self.config.get("max_iterations", 5)),
+            "max_test_runs": int(self.config.get("max_test_runs", 12)),
+            "max_tool_calls_per_iteration": int(
+                self.config.get("max_tool_calls_per_iteration", 30)
+            ),
+            "max_review_calls": int(self.config.get("max_review_calls", 2)),
+            "timeout_seconds": int(self.config.get("timeout_seconds", 1800)),
+        }
+        if not 3 <= self.limits["max_test_runs"] <= 60:
+            raise BatchStopError("max_test_runs must be in 3..60")
+        runner_path = self.config.get("runner_overrides")
+        self.runner_overrides_path = self._absolute(Path(str(runner_path))) if runner_path else None
+        if self.runner_overrides_path is not None:
+            if not self.runner_overrides_path.is_file():
+                raise BatchStopError("runner overrides file is missing")
+            self.runner_overrides_sha256 = _sha256(self.runner_overrides_path)
+            from codepilot.sandbox.runners import RunnerOverrides
+
+            self.runner_overrides = RunnerOverrides.load(self.runner_overrides_path)
+            expected_ids = {str(item["instance_id"]) for item in self.instances}
+            configured = set(self.runner_overrides.instances)
+            if configured != expected_ids:
+                raise BatchStopError(
+                    "runner overrides must cover exactly the frozen catalog: "
+                    f"missing={sorted(expected_ids - configured)} "
+                    f"extra={sorted(configured - expected_ids)}"
+                )
+            if self.catalog_runner_kinds and (
+                self.runner_overrides.kinds() != self.catalog_runner_kinds
+            ):
+                raise BatchStopError("catalog runner kinds do not match the frozen overrides")
+        else:
+            self.runner_overrides_sha256 = None
+            self.runner_overrides = None
+        seeds_value = self.config.get("repo_cache_seeds")
+        self.repo_cache_seeds_path = self._absolute(Path(str(seeds_value))) if seeds_value else None
+        self.repo_cache_seeds: dict[str, str] = {}
+        if self.repo_cache_seeds_path is not None:
+            if not self.repo_cache_seeds_path.is_file():
+                raise BatchStopError("repo cache seeds file is missing")
+            self.repo_cache_seeds = dict(_read_json(self.repo_cache_seeds_path).get("seeds") or {})
         self.reserve = compute_cost(
             price=self.model_spec.price,
             input_tokens=self.model_spec.context_window,
@@ -209,6 +254,19 @@ class M3Batch:
             "temperature": self.config["temperature"],
             "seed_support": "not_dispatched_by_provider",
             "http_retries": 0,
+            "limits": self.limits,
+            "limit_source": "typed_batch_config",
+            "runner_overrides": (
+                str(self.runner_overrides_path) if self.runner_overrides_path else None
+            ),
+            "runner_overrides_sha256": self.runner_overrides_sha256,
+            "runner_kinds": self.runner_overrides.kinds() if self.runner_overrides else {},
+            "repo_cache_seeds": (
+                str(self.repo_cache_seeds_path) if self.repo_cache_seeds_path else None
+            ),
+            "repo_cache_seeds_sha256": (
+                _sha256(self.repo_cache_seeds_path) if self.repo_cache_seeds_path else None
+            ),
             "artifact_root": str(self.artifact_root),
         }
         if self.artifact_root.exists():
@@ -224,6 +282,9 @@ class M3Batch:
                 "opening_manifest_sha256",
                 "model",
                 "temperature",
+                "limits",
+                "runner_overrides_sha256",
+                "repo_cache_seeds_sha256",
             ):
                 if previous.get(key) != freeze[key]:
                     raise BatchStopError(f"batch identity mismatch: {key}")
@@ -416,6 +477,45 @@ class M3Batch:
             self._stop("cancelled; no later instance was dispatched")
         return self._summary()
 
+    def ingest_official(self) -> dict[str, Any]:
+        """Ingest externally produced official verdicts without paid dispatch.
+
+        The Windows Python process cannot spawn ``wsl.exe`` in the current
+        environment, so an accepted instance is handed off as an explicit
+        request file.  This method only reads the official record written by the
+        WSL harness; it never re-runs the internal model or a sandbox test.
+        """
+        ingested = 0
+        for entry in self.state["instances"]:
+            if entry.get("status") != "OFFICIAL_PENDING":
+                continue
+            instance_id = entry["instance_id"]
+            root = self.artifact_root / "instances" / instance_id
+            official_path = root / f"official-evaluation-{self.batch_id}.json"
+            request_path = root / f"official-request-{self.batch_id}.json"
+            if not official_path.is_file():
+                raise BatchStopError(f"{instance_id}: official record is missing: {official_path}")
+            official_result = _read_json(official_path)
+            request = _read_json(request_path) if request_path.is_file() else {}
+            if request:
+                if str(official_result.get("instance_id") or instance_id) != instance_id:
+                    raise BatchStopError(f"{instance_id}: official instance identity mismatch")
+                if str(official_result.get("run_id") or entry.get("run_id")) != entry.get("run_id"):
+                    raise BatchStopError(f"{instance_id}: official run_id mismatch")
+            verdict = str(official_result.get("official_verdict") or "NOT_EVALUATED")
+            if verdict not in {"RESOLVED", "UNRESOLVED"}:
+                raise BatchStopError(
+                    f"{instance_id}: official record has no valid verdict: {verdict}"
+                )
+            entry["official"] = verdict
+            entry["status"] = verdict
+            entry["terminal"] = True
+            ingested += 1
+        if ingested:
+            self.state["status"] = "running"
+            self._save()
+        return {"ingested": ingested, "summary": self._summary()}
+
     def _load_preflight(self) -> dict[str, dict[str, Any]]:
         path = self.artifact_root / "preflight/preflight.json"
         if not path.is_file():
@@ -423,6 +523,10 @@ class M3Batch:
         report = _read_json(path)
         if not report.get("credential_reference_present"):
             raise BatchStopError("model credential reference is not resolvable")
+        if self.runner_overrides_sha256 is not None and (
+            report.get("runner_overrides_sha256") != self.runner_overrides_sha256
+        ):
+            raise BatchStopError("preflight runner identity does not match the frozen batch")
         instances = report.get("instances") or []
         mapped = {str(item.get("instance_id")): item for item in instances}
         expected = {item["instance_id"] for item in self.instances}
@@ -430,8 +534,44 @@ class M3Batch:
             raise BatchStopError("preflight instance identities do not match the frozen catalog")
         return mapped
 
+    def _verify_run_budget(self, run: dict[str, Any], instance_id: str) -> None:
+        """The report's effective budget must be the frozen typed config.
+
+        This is the post-run half of the Phase 20 ``18 -> 12`` guard: the
+        internal process also checks its own assembly before any model call, and
+        the batch refuses to accept a report whose budget came from anywhere
+        else (a default, an old checkpoint or an environment override).
+        """
+        budget = run.get("budget")
+        if not isinstance(budget, dict):
+            raise BatchStopError(f"{instance_id}: run report has no budget")
+        expected = {
+            "max_iterations": self.limits["max_iterations"],
+            "max_test_runs": self.limits["max_test_runs"],
+            "max_tool_calls_per_iteration": self.limits["max_tool_calls_per_iteration"],
+            "max_review_calls": self.limits["max_review_calls"],
+            "max_runtime_seconds": self.limits["timeout_seconds"],
+        }
+        actual = {name: budget.get(name) for name in expected}
+        if actual != expected:
+            raise BatchStopError(
+                f"{instance_id}: effective report budget {actual} does not match "
+                f"frozen config {expected}"
+            )
+        source = budget.get("source") or {}
+        if source.get("max_test_runs") != "cli":
+            raise BatchStopError(
+                f"{instance_id}: frozen batch limits must come from the CLI, "
+                f"not a default or environment override: {source}"
+            )
+
     def _verify_preflight_image(self, instance_id: str) -> None:
         expected = self._preflight[instance_id]["image"]["id"]
+        frozen = self.catalog_image_ids.get(instance_id)
+        if frozen is not None and frozen != expected:
+            raise BatchStopError(
+                f"preflight image {expected} does not match frozen catalog {frozen}: {instance_id}"
+            )
         completed = subprocess.run(
             [
                 "docker",
@@ -449,10 +589,42 @@ class M3Batch:
         if completed.returncode != 0 or completed.stdout.strip() != expected:
             raise BatchStopError(f"image identity changed after preflight: {instance_id}")
 
+    def _seed_repo_cache(self, instance: dict[str, Any]) -> None:
+        """Seed the batch's base-only bare cache from a frozen Phase 20 cache.
+
+        Local git fetch/clone from a Python child can fail before opening the
+        repository (MSYS ``sh`` startup).  The bare object database is
+        deterministic; copying it into the batch cache and letting the
+        WorkspaceManager use copy mode avoids the broken local transport while
+        keeping the workspace isolated from the seed.
+        """
+        if not self.repo_cache_seeds:
+            return
+        seed_value = self.repo_cache_seeds.get(instance["instance_id"])
+        if not seed_value:
+            raise BatchStopError(f"no repo cache seed for {instance['instance_id']}")
+        from codepilot.repo.workspace import WorkspaceManager
+
+        # The internal runner's artifact root is the per-instance root, so its
+        # WorkspaceManager cache lives at <instance>/repo-cache.
+        manager = WorkspaceManager(
+            cache_root=self.artifact_root / "instances" / instance["instance_id"] / "repo-cache"
+        )
+        target = manager.cache_path(str(instance["repo"]))
+        if target.exists():
+            return
+        seed_root = (self.repo_root / seed_value).resolve()
+        children = [path for path in seed_root.iterdir() if path.is_dir()]
+        if len(children) != 1:
+            raise BatchStopError(f"seed cache must contain one bare repo: {seed_root}")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(children[0], target, symlinks=True)
+
     def _run_instance(self, instance: dict[str, Any], entry: dict[str, Any]) -> None:
         instance_id = instance["instance_id"]
         root = self.artifact_root / "instances" / instance_id
         root.mkdir(parents=True, exist_ok=True)
+        self._seed_repo_cache(instance)
         if self.config.get("require_preflight"):
             preflight = self._preflight[instance_id]
             if not preflight["ok"]:
@@ -522,6 +694,7 @@ class M3Batch:
             self._save()
             raise BatchStopError("internal execution ended without a unique run report")
         _report_path, run = found
+        self._verify_run_budget(run, instance_id)
         run_id = str(run["run_id"])
         entry["run_id"] = run_id
         result = acceptance.evaluate(root, instance=instance_id, label=self.batch_id, run_id=run_id)
@@ -556,6 +729,28 @@ class M3Batch:
             expected_patch_sha256=str(evidence["delivered_patch_sha256"]),
             expected_model=str(model),
         )
+        if self.config.get("official_mode") == "external":
+            _write_json(
+                root / f"official-request-{self.batch_id}.json",
+                {
+                    "schema_version": 1,
+                    "batch_id": self.batch_id,
+                    "instance_id": instance_id,
+                    "run_id": run_id,
+                    "prediction_sha256": evidence["prediction_sha256"],
+                    "delivered_patch_sha256": evidence["delivered_patch_sha256"],
+                    "model": model,
+                    "status": "PENDING_EXTERNAL_WSL",
+                    "created_at": _now(),
+                },
+            )
+            entry["status"] = "OFFICIAL_PENDING"
+            entry["official"] = "NOT_EVALUATED"
+            entry["terminal"] = False
+            self._save()
+            raise BatchStopError(
+                "external official harness required; batch paused before any later instance"
+            )
         official_code = self.official_runner(OfficialRequest(instance, root, run_id))
         official_path = root / f"official-evaluation-{self.batch_id}.json"
         if not official_path.is_file():
@@ -589,12 +784,23 @@ class M3Batch:
             "CODEPILOT_DISABLE_HTTP_RETRIES": "1",
             "CODEPILOT_REQUIRE_TEMPERATURE": "1",
             "CODEPILOT_BIND_WORKSPACE": "1",
+            "CODEPILOT_WORKSPACE_MODE": "copy",
             "CODEPILOT_DISPATCH_BUDGET_CNY": str(request.instance_opening + request.budget_limit),
             "CODEPILOT_DISPATCH_OPENING_CNY": str(request.instance_opening),
             "CODEPILOT_DISPATCH_OPENING_SOURCE": opening_source,
             "CODEPILOT_DISPATCH_LEDGER": str(request.ledger),
             "CODEPILOT_TESTDEPS_DIR": str(self.repo_root / "artifacts/phase18/l2-cal10e/testdeps"),
         }
+        docker_host = os.environ.get("DOCKER_HOST", "")
+        if docker_host.startswith("tcp://"):
+            from urllib.parse import urlsplit
+
+            host = urlsplit(docker_host).hostname
+            if host:
+                bypass = [item for item in env.get("NO_PROXY", "").split(",") if item]
+                if host not in bypass:
+                    env["NO_PROXY"] = ",".join([*bypass, host])
+                env.setdefault("no_proxy", env["NO_PROXY"])
         command = [
             sys.executable,
             str(self.repo_root / "scripts/l2cal10e_internal.py"),
@@ -628,7 +834,17 @@ class M3Batch:
             str(self.config["run_seed"]),
             "--temperature",
             str(self.config["temperature"]),
+            "--max-iterations",
+            str(self.limits["max_iterations"]),
+            "--max-test-runs",
+            str(self.limits["max_test_runs"]),
+            "--max-tool-calls-per-iteration",
+            str(self.limits["max_tool_calls_per_iteration"]),
+            "--max-review-calls",
+            str(self.limits["max_review_calls"]),
         ]
+        if self.runner_overrides_path is not None:
+            command.extend(["--runner-overrides", str(self.runner_overrides_path)])
         overrides = self.repo_root / "configs/swebench/instance-image-overrides.json"
         if overrides.is_file():
             command.extend(["--image-overrides", str(overrides)])
@@ -716,6 +932,7 @@ def main() -> int:
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--artifact-root", type=Path, required=True)
     parser.add_argument("--live", action="store_true")
+    parser.add_argument("--ingest-official", action="store_true")
     args = parser.parse_args()
     try:
         batch = M3Batch(
@@ -725,7 +942,7 @@ def main() -> int:
             artifact_root=args.artifact_root,
             live=args.live,
         )
-        summary = batch.run()
+        summary = batch.ingest_official() if args.ingest_official else batch.run()
     except (BatchStopError, OSError, ValueError) as exc:
         print(f"STOP {type(exc).__name__}: {exc}", file=sys.stderr)
         return 2

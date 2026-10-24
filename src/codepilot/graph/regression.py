@@ -6,9 +6,11 @@ import math
 import random
 from pathlib import PurePosixPath
 
-from codepilot.graph.budget import Activity
+from codepilot.graph.budget import REVIEW_TIME_RESERVE_SECONDS, Activity
 from codepilot.graph.deps import Deps
 from codepilot.graph.operations import digest, execute_once
+from codepilot.graph.routing import pending_review_calls
+from codepilot.graph.stop_rules import patch_hash
 from codepilot.patch.diff import generate_git_diff
 from codepilot.schemas.enums import ExecutionStatus, TestOutcome
 from codepilot.schemas.execution import ExecutionResult, TestBaseline
@@ -18,9 +20,11 @@ from codepilot.tools.write_tools import validate_test_target
 
 __all__ = [
     "MAX_FULL_REGRESSION_RUNS",
+    "MAX_NEW_FAILURE_RETRIES",
     "RegressionRunner",
     "full_regression_runs",
     "new_failures",
+    "retry_allowance",
     "usable_baseline",
 ]
 
@@ -62,6 +66,20 @@ def full_regression_runs(state: RepairState) -> int:
         for attempt in state.attempts[:-1]
         if attempt.regression
     )
+
+
+def retry_allowance(state: RepairState, deps: Deps, *, full_level_expected: bool = True) -> int:
+    """Flaky re-run budget that never spends the deterministic closure's runs.
+
+    A candidate's mandatory closure is target tests plus the configured
+    regression levels.  Flaky classification is *optional* evidence: it may
+    only consume surplus runs after those mandatory runs are reserved.  When
+    fewer than two re-runs are affordable the classification is impossible, so
+    the node is conservatively kept as a new failure instead of spending the
+    last run and leaving L3 (and the Reviewer) without budget.
+    """
+    remaining = max(state.budget.max_test_runs - deps.test_runs, 0)
+    return max(remaining - (1 if full_level_expected else 0), 0)
 
 
 def new_failures(baseline: TestBaseline, after: ExecutionResult) -> list[str]:
@@ -133,7 +151,17 @@ class RegressionRunner:
             def action() -> ExecutionResult:
                 live = state.model_copy(update={"test_runs": deps.test_runs, "usage": deps.usage})
                 stop = deps.budget.check(live, Activity.TEST)
-                remaining = state.budget.max_runtime_seconds - deps.budget.elapsed_seconds(state)
+                pending = pending_review_calls(
+                    state,
+                    candidate_digest=(
+                        patch_hash(state.current_patch) if state.current_patch else ""
+                    ),
+                )
+                remaining = (
+                    state.budget.max_runtime_seconds
+                    - deps.budget.elapsed_seconds(state)
+                    - pending * REVIEW_TIME_RESERVE_SECONDS
+                )
                 if stop or remaining < 1:
                     return ExecutionResult(
                         status=ExecutionStatus.TIMEOUT, error_reason=str(stop or "budget_time")
@@ -153,7 +181,13 @@ class RegressionRunner:
                     artifact_iteration=1000 + deps.test_runs,
                 )
 
-            execution = execute_once(state, deps, key, ExecutionResult, action)
+            execution = execute_once(
+                state,
+                deps,
+                f"{key}-{digest(sorted(scope))[:12]}",
+                ExecutionResult,
+                action,
+            )
             deps.artifacts.write_json(
                 f"regression/{state.iteration}/{key}.json",
                 execution.model_dump(mode="json"),
@@ -206,29 +240,43 @@ class RegressionRunner:
                     if baseline.outcomes.get(t.node_id) in {TestOutcome.FAILED, TestOutcome.ERROR}
                 }
             )
-            retries_left = MAX_NEW_FAILURE_RETRIES
+            # L3 is a mandatory run unless L2 itself covered the whole
+            # authorized baseline (in which case its evidence *is* L3).  The
+            # retry budget is only what remains after that reservation.
+            l3_owed = full_regression_runs(state) < MAX_FULL_REGRESSION_RUNS and not (
+                authorized and set(authorized) <= set(affected)
+            )
+            allowance = retry_allowance(state, deps, full_level_expected=l3_owed)
             for node in new_failures(baseline, execution):
                 if node in result.flaky:
                     continue
-                if retries_left <= 0:
+                if allowance < 2:
                     result.new_failures.append(node)
+                    result.retry_notes.append(
+                        f"{node}: flaky classification declined; only {allowance} run(s) "
+                        "left after reserving the deterministic closure"
+                    )
                     continue
                 retries = []
-                for attempt in range(2):
-                    if retries_left <= 0:
+                for attempt in range(MAX_NEW_FAILURE_RETRIES):
+                    if allowance <= 0:
                         break
                     retry = run_scope(f"{key}-retry-{digest(node)[:16]}-{attempt}", [node])
-                    retries_left -= 1
+                    allowance -= 1
                     retries.append(retry)
                     result.retries[node] = retries
                     if retry.status not in {ExecutionStatus.PASS, ExecutionStatus.FAIL} or [
                         t.node_id for t in retry.tests
                     ] != [node]:
                         result.status = retry.status.value
-                        result.failure_reason = "flaky retry incomplete"
+                        result.failure_reason = "flaky retry execution failed"
                         return False
                 if len(retries) < 2:
                     result.new_failures.append(node)
+                    result.retry_notes.append(
+                        f"{node}: only {len(retries)} of 2 re-runs were affordable; "
+                        "kept as a new failure"
+                    )
                     continue
                 if any(r.tests[0].outcome is TestOutcome.PASSED for r in retries):
                     result.flaky.add(node)
@@ -245,43 +293,47 @@ class RegressionRunner:
             result.levels_run.append(RegressionLevel.IMPACT)
             if not inspect("L2", affected):
                 return result
+        full_runs = full_regression_runs(state)
+        if affected and set(authorized) <= set(affected):
+            # L2 already executed the entire baseline scope. A second "full"
+            # pass would re-run the same tests against the same patch and
+            # produce the same evidence — the Sphinx Phase 20 run spent runs
+            # exactly this way. Completion still requires (a) L2 actually ran,
+            # (b) it passed, (c) every authorized node got a result, and (d) the
+            # authorized list had no duplicate that a set comparison would hide.
+            l2 = result.executions.get("L2")
+            covered = set(result.executed_tests) == set(authorized)
+            if (
+                l2 is None
+                or l2.status not in {ExecutionStatus.PASS, ExecutionStatus.FAIL}
+                or result.unexecuted_tests
+                or not covered
+                or len(authorized) != len(set(authorized))
+            ):
+                result.failure_reason = (
+                    "L2 covered every authorized test but its evidence is incomplete"
+                )
+                return result
+            if full_runs >= MAX_FULL_REGRESSION_RUNS:
+                result.failure_reason = "L3 full-run limit reached"
+                return result
+            result.levels_run.append(RegressionLevel.FULL)
+            result.complete = True
+            result.status = "completed"
+            return result
+        if full_runs >= MAX_FULL_REGRESSION_RUNS:
+            result.failure_reason = "L3 full-run limit reached"
+            return result
         remaining = state.budget.max_runtime_seconds - deps.budget.elapsed_seconds(state)
         estimate = (
             baseline.duration_seconds
             if baseline.duration_seconds is not None
             else deps.env_spec.timeout_seconds
         )
-        full_runs = full_regression_runs(state)
-        if full_runs >= MAX_FULL_REGRESSION_RUNS:
-            result.failure_reason = "L3 full-run limit reached"
-            return result
         scope = authorized
         key = "L3"
         if estimate > remaining:
             candidates = sorted(set(authorized) - set(affected))
-            if not candidates and affected:
-                # L2 already executed the entire baseline scope; a second full
-                # pass would repeat the same tests and evidence. Completion still
-                # requires (a) L2 actually ran, (b) it passed, (c) every authorized
-                # node got a result, and (d) the authorized list had no duplicate
-                # that a set comparison would hide.
-                l2 = result.executions.get("L2")
-                covered = set(result.executed_tests) == set(authorized)
-                if (
-                    l2 is None
-                    or l2.status is not ExecutionStatus.PASS
-                    or result.unexecuted_tests
-                    or not covered
-                    or len(authorized) != len(set(authorized))
-                ):
-                    result.failure_reason = (
-                        "L3 candidates were empty but L2 did not cover the authorized baseline"
-                    )
-                    return result
-                result.levels_run.append(RegressionLevel.FULL)
-                result.complete = True
-                result.status = "completed"
-                return result
             scope = sorted(
                 random.Random(self.seed).sample(candidates, math.ceil(len(candidates) * 0.2))
             )

@@ -84,7 +84,7 @@ class _ReusingWorkspaceManager:
         source: Any,
         base_commit: str,
         target: Path,
-        mode: str = "fetch",
+        mode: str | None = None,
     ) -> Any:
         from codepilot.repo.gitcmd import run_git
         from codepilot.repo.workspace import (

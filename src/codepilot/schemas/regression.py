@@ -47,6 +47,7 @@ class RegressionResult(BaseModel):
     existing_failures: list[str] = Field(default_factory=list)
     executions: dict[str, ExecutionResult] = Field(default_factory=dict)
     retries: dict[str, list[ExecutionResult]] = Field(default_factory=dict)
+    retry_notes: list[str] = Field(default_factory=list)
     seed: int | None = None
     failure_reason: str | None = None
 

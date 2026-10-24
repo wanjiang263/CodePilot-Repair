@@ -33,7 +33,13 @@ def execute_once[T: BaseModel](
     state: RepairState, deps: Deps, key: str, schema: type[T], action: Callable[[], T]
 ) -> T:
     identity = operation_identity(state, deps)
-    operation_id = f"{state.iteration}:{key}"
+    # Identity (patch + baseline + environment + spec) rather than the attempt
+    # number keys the evidence.  A repair round can re-produce the exact same
+    # candidate patch; repeating L1/L2 for it spent three test runs in the
+    # Sphinx Phase 20 trajectory and then let flaky results contradict the
+    # earlier evidence.  A changed patch gets a different identity and can
+    # never reuse the old result.
+    operation_id = f"{identity[:16]}:{key}"
     with sqlite3.connect(deps.artifacts.run_dir / "operations.sqlite") as db:
         db.execute("PRAGMA synchronous=FULL")
         db.execute(
@@ -134,7 +140,7 @@ def verify_journal(state: RepairState, deps: Deps) -> None:
     with sqlite3.connect(path) as db:
         rows = db.execute(
             "SELECT identity,payload,hash FROM operations WHERE id LIKE ?",
-            (f"{state.iteration}:%",),
+            (f"{identity[:16]}:%",),
         ).fetchall()
     for recorded, raw, checksum in rows:
         if recorded != identity or raw is None or digest(raw) != checksum:

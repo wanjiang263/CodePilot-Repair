@@ -31,6 +31,7 @@ from codepilot.failure.compressor import compress_failures
 from codepilot.failure.signature import execution_signatures
 from codepilot.graph.budget import (
     RESERVATION_BEARING_ACTIVITIES,
+    REVIEW_TIME_RESERVE_SECONDS,
     Activity,
     ClosureReservation,
     ClosureTestPlan,
@@ -483,6 +484,24 @@ def _baseline_scope(state: RepairState, policy: WorkspacePathPolicy) -> tuple[st
     return tuple(sorted(valid))
 
 
+def _test_time_remaining(state: RepairState, deps: Deps) -> float:
+    """Wall-clock seconds available to the next test run, minus Reviewer headroom.
+
+    Tests use ``max_runtime_seconds - elapsed`` as their container timeout.  If
+    the last regression run is allowed to consume all of it, the Reviewer is
+    stopped by its own time gate even when all its token/cost budget is intact.
+    """
+    pending = pending_review_calls(
+        state,
+        candidate_digest=patch_hash(state.current_patch) if state.current_patch else "",
+    )
+    reserve = pending * REVIEW_TIME_RESERVE_SECONDS
+    return max(
+        state.budget.max_runtime_seconds - deps.budget.elapsed_seconds(state) - reserve,
+        0.0,
+    )
+
+
 def _build_baseline(deps: Deps, state: RepairState, scope: tuple[str, ...]) -> TestBaseline:
     from codepilot.sandbox.baseline import build_test_baseline
     from codepilot.sandbox.env_spec import EnvSpec
@@ -490,7 +509,7 @@ def _build_baseline(deps: Deps, state: RepairState, scope: tuple[str, ...]) -> T
     def before_run() -> EnvSpec | ExecutionResult:
         live = state.model_copy(update={"test_runs": deps.test_runs, "usage": deps.usage})
         stop = deps.budget.check(live, Activity.TEST)
-        remaining = state.budget.max_runtime_seconds - deps.budget.elapsed_seconds(state)
+        remaining = _test_time_remaining(state, deps)
         if stop is not None or remaining < 1:
             return ExecutionResult(
                 status=ExecutionStatus.TIMEOUT, error_reason=str(stop or StopReason.BUDGET_TIME)
@@ -1001,6 +1020,37 @@ def _artifact_evidence_valid(deps: Deps, execution: ExecutionResult) -> bool:
     return deps.artifacts.exists(execution.artifact_dir)
 
 
+def _prior_execution_for_patch(
+    state: RepairState, deps: Deps, targets: list[str]
+) -> tuple[Attempt, ExecutionResult] | None:
+    """Reuse target evidence only for the exact same candidate patch and scope.
+
+    The repair loop may hand back a byte-identical patch.  Re-running L1 for it
+    is not new evidence; it is a second sample of the same execution, and the
+    Sphinx trajectory showed that sample can be flaky enough to contradict the
+    first one.  Equality is by the canonical patch hash stored in the Attempt
+    (not by diff text, which can differ in git metadata), and the recorded
+    evidence must still exist on disk.
+    """
+    attempt = state.current_attempt
+    if attempt is None or not attempt.patch_hash:
+        return None
+    wanted = set(targets)
+    for earlier in reversed(state.attempts[:-1]):
+        execution = earlier.execution
+        if (
+            earlier.patch_hash != attempt.patch_hash
+            or execution is None
+            or execution.status not in {ExecutionStatus.PASS, ExecutionStatus.FAIL}
+            or not _artifact_evidence_valid(deps, execution)
+        ):
+            continue
+        observed = {test.node_id for test in execution.tests}
+        if wanted <= observed:
+            return earlier, execution
+    return None
+
+
 async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
     """执行目标测试、解析失败、写签名与进度快照到当前 Attempt。"""
     _identity(state, deps)
@@ -1077,10 +1127,36 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
             rejected=len(selection.rejected),
         )
         return result
+    prior = _prior_execution_for_patch(state, deps, targets)
+    if prior is not None:
+        prior_attempt, reused = prior
+        updated = attempt.model_copy(
+            update={
+                "target_test_source": prior_attempt.target_test_source,
+                "target_tests": list(prior_attempt.target_tests),
+                "target_test_baseline_failures": list(prior_attempt.target_test_baseline_failures),
+                "execution": reused,
+            }
+        )
+        return {
+            "attempts": _update_last(state, updated),
+            "execution": reused,
+            "test_runs": deps.test_runs,
+            "events": _emit(
+                state,
+                deps,
+                Node.RUN_TARGET_TESTS.value,
+                f"reused-identical-patch:{reused.status.value}",
+                reclaimed_from_iteration=prior_attempt.iteration,
+            ),
+        }
+    remaining = _test_time_remaining(state, deps)
     execution = deps.sandbox.run_tests(
         workspace=deps.require_workspace(),
         environment=deps.environment,
-        env_spec=deps.env_spec,
+        env_spec=deps.env_spec.model_copy(
+            update={"timeout_seconds": min(deps.env_spec.timeout_seconds, max(1, int(remaining)))}
+        ),
         tests=targets,
         artifact_iteration=attempt.iteration,
     )

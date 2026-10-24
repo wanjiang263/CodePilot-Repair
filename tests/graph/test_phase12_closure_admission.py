@@ -131,13 +131,13 @@ def test_a_second_round_that_cannot_finish_its_closure_is_never_started(tmp_path
         tmp_path,
         results=[passed_result(), passed_result(), passed_result()],
         coder_rounds=[ROUND_A],
-        budget=RepairBudget(max_test_runs=7),
+        budget=RepairBudget(max_test_runs=6),
     )
     reviewer = _wired(harness, [HIGH, APPROVED])
     state = harness.run()
 
-    # 前提：额度确实买不起下一轮（5 次已花，还剩 2 次，闭环要 3 次）。
-    assert harness.deps.test_runs == 5
+    # 前提：额度确实买不起下一轮（4 次已花，还剩 2 次，闭环要 3 次）。
+    assert harness.deps.test_runs == 4
     admission = state.closure_admission
     assert admission is not None
     assert admission.feasible is False
@@ -155,7 +155,7 @@ def test_a_second_round_that_cannot_finish_its_closure_is_never_started(tmp_path
     # **零新增支出**：没有第二次编码、没有新的容器执行、没有向审查模型要第二个结论。
     assert harness.llm.purposes().count("coder") == 2, "第二轮编码从未发生"
     assert len(reviewer.calls) == 1
-    assert harness.deps.test_runs == 5
+    assert harness.deps.test_runs == 4
     assert state.review_calls == 1
     assert state.review_repairs == 0, "被拒的轮次不算已经修过一轮"
 
@@ -185,7 +185,7 @@ def test_the_refused_round_keeps_the_reviewed_patch_and_its_evidence(tmp_path: P
         tmp_path,
         results=[passed_result(), passed_result(), passed_result()],
         coder_rounds=[ROUND_A],
-        budget=RepairBudget(max_test_runs=7),
+        budget=RepairBudget(max_test_runs=6),
     )
     _wired(harness, [HIGH, APPROVED])
     state = harness.run()
@@ -214,7 +214,7 @@ def test_refusal_is_idempotent_under_replay_and_recovery(tmp_path: Path) -> None
         tmp_path,
         results=[passed_result(), passed_result(), passed_result()],
         coder_rounds=[ROUND_A],
-        budget=RepairBudget(max_test_runs=7),
+        budget=RepairBudget(max_test_runs=6),
     )
     _wired(harness, [HIGH])
     state = harness.run()
@@ -253,7 +253,7 @@ def test_a_round_with_room_completes_repair_tests_regression_and_review(
         tmp_path,
         results=[passed_result() for _ in range(6)],
         coder_rounds=[ROUND_A, ROUND_B],
-        budget=RepairBudget(max_test_runs=8),
+        budget=RepairBudget(max_test_runs=7),
     )
     reviewer = _wired(harness, [HIGH, APPROVED])
     state = harness.run()
@@ -272,7 +272,8 @@ def test_a_round_with_room_completes_repair_tests_regression_and_review(
     assert state.stop_reason is None
     assert len(state.attempts) == 2
     assert state.review_repairs == 1
-    assert harness.deps.test_runs == 8
+    # baseline 2 + first closure 2 (target + L2; L3 reuses L2) + second closure 2
+    assert harness.deps.test_runs == 6
     assert _report(harness, state)["verification_level"] == "m2_verified"
 
     closure = _closure(harness, state)
@@ -426,9 +427,9 @@ def test_the_coding_stage_cannot_borrow_the_runs_reserved_for_its_own_closure(
 
     refused = [item for item in state.tool_calls if item.get("error_code") == "closure_reserved"]
     assert len(refused) == 2, "四个请求里只有两个被允许，其余原样回话给模型"
-    assert (
-        harness.deps.test_runs == admission.runs_spent + admission.coder_share + admission.required
-    )
+    # The closure spends target + L2 only; L3 reuses the whole-baseline L2
+    # evidence, so the admission's conservative 3-run reserve is not fully spent.
+    assert harness.deps.test_runs == admission.runs_spent + admission.coder_share + 2
     assert state.status is RunStatus.SUCCEEDED, state.failure_reasons
     assert state.regression is not None and state.regression.complete
     assert reviewer.calls, "闭环没有被编码阶段借走的次数拖死"
@@ -487,7 +488,7 @@ def test_an_unverified_candidate_from_a_refused_round_cannot_claim_m2(tmp_path: 
         tmp_path,
         results=[passed_result(), passed_result(), passed_result()],
         coder_rounds=[ROUND_A],
-        budget=RepairBudget(max_test_runs=7),
+        budget=RepairBudget(max_test_runs=6),
     )
     _wired(harness, [HIGH])
     state = harness.run()
@@ -497,10 +498,10 @@ def test_an_unverified_candidate_from_a_refused_round_cannot_claim_m2(tmp_path: 
     assert state.status is RunStatus.BUDGET_EXHAUSTED
     # 报告里的七类预算读数必须把测试次数写成"已用/上限"，而不是只写上限。
     closure = report["closure"]
-    assert closure["budget_usage"]["test_runs"] == "5/7"
+    assert closure["budget_usage"]["test_runs"] == "4/6"
     admission = closure["closure_admission"]
     assert admission["feasible"] is False
-    assert admission["detail"].startswith("test runs: 5 spent of 7")
+    assert admission["detail"].startswith("test runs: 4 spent of 6")
     # 事件流里同一笔账也要读得到（事后核对不依赖报告文件是否被留下）。
     rows = _admission_events(harness)
     assert rows and rows[-1]["status"] in {"insufficient", "refused"}
