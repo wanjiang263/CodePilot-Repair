@@ -73,8 +73,7 @@ def _extract_image_source(image: str, target: Path) -> None:
         _required(_docker("rm", container), "remove source container")
 
 
-def _prepare_cache(source: Path, base: str, manager: WorkspaceManager) -> Path:
-    cache = manager.cache_path(str(source))
+def _prepare_cache(source: Path, base: str, cache: Path) -> Path:
     if not cache.exists():
         cache.parent.mkdir(parents=True, exist_ok=True)
         _required(
@@ -189,6 +188,7 @@ def main() -> int:
     parser.add_argument("--catalog", type=Path, required=True)
     parser.add_argument("--artifact-root", type=Path, required=True)
     parser.add_argument("--image-overrides", type=Path, default=None)
+    parser.add_argument("--source-root", type=Path, default=None)
     args = parser.parse_args()
     root = args.repo_root.resolve()
     artifact = args.artifact_root if args.artifact_root.is_absolute() else root / args.artifact_root
@@ -256,9 +256,14 @@ def main() -> int:
                 "parent_ref": resolution.parent_image_ref,
                 "parent_id": resolution.parent_image_id,
             }
+            task = loader.get_inference_task("test", instance)
             source = preflight_root / "source-testbed"
+            if args.source_root is not None:
+                reusable = args.source_root / "instances" / instance / "preflight/source-testbed"
+                if reusable.is_dir():
+                    source = reusable
             manager = WorkspaceManager(cache_root=instance_root / "repo-cache")
-            cache = manager.cache_path(str(source))
+            cache = manager.cache_path(str(task.repository))
             workspace = preflight_root / "workspace"
             if not cache.exists() or not workspace.exists():
                 _extract_image_source(resolution.image_ref, source)
@@ -267,13 +272,15 @@ def main() -> int:
                 _git(source, "checkout", "--detach", item["base_commit"])
                 if _git(source, "rev-parse", "HEAD").stdout.strip() != item["base_commit"]:
                     raise RuntimeError("source base identity mismatch")
-                cache = _prepare_cache(source, item["base_commit"], manager)
+                cache = _prepare_cache(source, item["base_commit"], cache)
                 if not workspace.exists():
                     manager.create(
-                        source=str(source), base_commit=item["base_commit"], target=workspace
+                        source=str(task.repository),
+                        base_commit=item["base_commit"],
+                        target=workspace,
                     )
             else:
-                _prepare_cache(source, item["base_commit"], manager)
+                _prepare_cache(source, item["base_commit"], cache)
             if _git(workspace, "rev-parse", "HEAD").stdout.strip() != item["base_commit"]:
                 raise RuntimeError("workspace base identity mismatch")
             if _git(workspace, "rev-list", "--all", "--count").stdout.strip() != "1":
@@ -281,7 +288,6 @@ def main() -> int:
             clean = _git(workspace, "status", "--porcelain").stdout.strip()
             if clean:
                 raise RuntimeError(f"workspace is not clean: {clean[:500]}")
-            task = loader.get_inference_task("test", instance)
             sandbox = OfficialInstanceSandbox(
                 artifacts=ArtifactStore(preflight_root, "official-image"),
                 allowed_workspace_root=instance_root,
