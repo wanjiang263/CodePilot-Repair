@@ -13,10 +13,31 @@ class ImportResolver:
     def __init__(self, context: AnalysisContext) -> None:
         self.context = context
         self._raw = tuple(binding for file in context.files for binding in self._extract(file))
+        self._raw_by_scope_name = _group_by_scope_name(self._raw)
         self.bindings = tuple(
             replace(binding, target_ids=tuple(s.id for s in self.targets(binding)))
             for binding in self._raw
         )
+        # Call/name resolution asks "which imports are visible under this exact
+        # scope and name?" once per call site. Scanning every binding for every
+        # scope made Django indexing quadratic (observed >20 minutes with the
+        # process still in for_scope). Index the same data by its lookup key.
+        self._bindings_by_scope_name = _group_by_scope_name(self.bindings)
+        self._bindings_by_source: dict[str, tuple[ImportBinding, ...]] = {}
+        grouped_by_source: dict[str, list[ImportBinding]] = {}
+        for binding in self.bindings:
+            grouped_by_source.setdefault(binding.source_id, []).append(binding)
+        self._bindings_by_source = {key: tuple(value) for key, value in grouped_by_source.items()}
+        self._wildcard_scopes = frozenset(b.source_id for b in self.bindings if b.wildcard)
+
+    def bindings_in_scope(self, scope_id: str, name: str) -> tuple[ImportBinding, ...]:
+        return self._bindings_by_scope_name.get((scope_id, name), ())
+
+    def bindings_for_source(self, source_id: str) -> tuple[ImportBinding, ...]:
+        return self._bindings_by_source.get(source_id, ())
+
+    def has_wildcard(self, scope_id: str) -> bool:
+        return scope_id in self._wildcard_scopes
 
     def _extract(self, file: SourceFile) -> list[ImportBinding]:
         found = []
@@ -61,9 +82,7 @@ class ImportResolver:
             # 方法不能闭包捕获类体里的 import；模块和外层函数可以。
             if scope.kind == "class" and scope.id != owner.id:
                 continue
-            bindings = tuple(
-                b for b in self.bindings if b.source_id == scope.id and b.bound_name == name
-            )
+            bindings = self._bindings_by_scope_name.get((scope.id, name), ())
             if bindings:
                 return bindings
         return ()
@@ -87,12 +106,8 @@ class ImportResolver:
             if direct:
                 result.extend(direct)
                 continue
-            for exported in self._raw:
-                if (
-                    exported.source_id == parent.id
-                    and exported.bound_name == binding.name
-                    and not exported.wildcard
-                ):
+            for exported in self._raw_by_scope_name.get((parent.id, binding.name), ()):
+                if not exported.wildcard:
                     result.extend(self.targets(exported, trail | {marker}))
         return tuple({symbol.id: symbol for symbol in result}.values())
 
@@ -115,6 +130,15 @@ class ImportResolver:
                     )
                 )
         return tuple(result)
+
+
+def _group_by_scope_name(
+    bindings: tuple[ImportBinding, ...],
+) -> dict[tuple[str, str], tuple[ImportBinding, ...]]:
+    grouped: dict[tuple[str, str], list[ImportBinding]] = {}
+    for binding in bindings:
+        grouped.setdefault((binding.source_id, binding.bound_name), []).append(binding)
+    return {key: tuple(value) for key, value in grouped.items()}
 
 
 def extract_imports(context: AnalysisContext) -> tuple[ImportBinding, ...]:

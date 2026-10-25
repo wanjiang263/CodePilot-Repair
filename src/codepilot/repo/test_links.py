@@ -43,6 +43,17 @@ def extract_test_links(
             "low" if call.confidence == "low" else "high",
             call.line,
         )
+    # Index production symbols once. The previous nested "for every test over
+    # every import/target" shape was quadratic on Django and dominated index
+    # time even after import lookup was indexed.
+    module_cache: dict[str, str] = {}
+    production_by_module: dict[str, list[Symbol]] = {}
+    production_by_stem: dict[str, list[Symbol]] = {}
+    for target in production.values():
+        module = context.module_for(target)
+        module_cache[target.id] = module
+        production_by_module.setdefault(module, []).append(target)
+        production_by_stem.setdefault(PurePosixPath(target.path).stem, []).append(target)
     for test in tests.values():
         scope_ids = {
             scope.id
@@ -50,12 +61,14 @@ def extract_test_links(
             if scope.kind != "class" or scope.id == test.id
         }
         modules: set[str] = set()
-        for binding in imports.bindings:
-            if binding.source_id not in scope_ids:
-                continue
-            if binding.target_module:
-                modules.add(binding.target_module)
-            modules.update(context.module_for(context.by_id[id_]) for id_ in binding.target_ids)
+        for scope_id in scope_ids:
+            for binding in imports.bindings_for_source(scope_id):
+                if binding.target_module:
+                    modules.add(binding.target_module)
+                for target_id in binding.target_ids:
+                    bound_target = context.by_id.get(target_id)
+                    if bound_target is not None:
+                        modules.add(module_cache.get(target_id) or context.module_for(bound_target))
         stem = PurePosixPath(test.path).stem
         counterpart = (
             stem.removeprefix("test_")
@@ -64,12 +77,12 @@ def extract_test_links(
             if stem.endswith("_test")
             else None
         )
-        for target in production.values():
-            if (
-                context.module_for(target) in modules
-                and target.name.casefold() in test.name.casefold()
-            ):
-                add(test, target, "medium", test.start_line)
-            if counterpart and PurePosixPath(target.path).stem == counterpart:
+        lowered = test.name.casefold()
+        for module in modules:
+            for target in production_by_module.get(module, ()):
+                if target.name.casefold() in lowered:
+                    add(test, target, "medium", test.start_line)
+        if counterpart:
+            for target in production_by_stem.get(counterpart, ()):
                 add(test, target, "low", test.start_line)
     return tuple(links[key] for key in sorted(links))

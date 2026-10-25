@@ -121,9 +121,7 @@ class NameResolver:
                 continue
             if self._blocked(scope, name):
                 return True
-            if self.context.named(scope, name) or any(
-                b.source_id == scope.id and b.bound_name == name for b in self.imports.bindings
-            ):
+            if self.context.named(scope, name) or self.imports.bindings_in_scope(scope.id, name):
                 return False
         return False
 
@@ -134,9 +132,7 @@ class NameResolver:
             if self._blocked(scope, name):
                 return Resolution(known=True)
             definitions = self.context.named(scope, name)
-            bindings = tuple(
-                b for b in self.imports.bindings if b.source_id == scope.id and b.bound_name == name
-            )
+            bindings = self.imports.bindings_in_scope(scope.id, name)
             if definitions or bindings:
                 targets = tuple(
                     {
@@ -158,7 +154,7 @@ class NameResolver:
                 # 未解析的同名 import 也是一个遮蔽候选，不可当作确定解析。
                 certain = len(targets) == 1 and not any(not b.target_ids for b in bindings)
                 return Resolution(targets, "high" if certain else "low", True)
-            if any(b.source_id == scope.id and b.wildcard for b in self.imports.bindings):
+            if self.imports.has_wildcard(scope.id):
                 return Resolution(known=True)
         return Resolution()
 

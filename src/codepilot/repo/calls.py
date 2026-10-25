@@ -14,6 +14,14 @@ class CallResolver:
     def __init__(self, context: AnalysisContext, imports: ImportResolver | None = None) -> None:
         self.context = context
         self.names = NameResolver(context, imports or ImportResolver(context))
+        # The conservative attribute fallback used to scan every symbol for
+        # every unresolved call. Django has enough of both to make indexing
+        # quadratic; build the same lookup once.
+        methods: dict[str, list[Symbol]] = {}
+        for symbol in context.symbols:
+            if symbol.kind in {"method", "test_method"}:
+                methods.setdefault(symbol.name, []).append(symbol)
+        self._methods_by_name = {name: tuple(items) for name, items in methods.items()}
 
     def extract(self) -> tuple[GraphEdge, ...]:
         result = []
@@ -35,11 +43,7 @@ class CallResolver:
                 ):
                     attribute = function.field("attribute")
                     if attribute is not None:
-                        candidates = tuple(
-                            s
-                            for s in self.context.symbols
-                            if s.kind in {"method", "test_method"} and s.name == attribute.text
-                        )
+                        candidates = self._methods_by_name.get(attribute.text, ())
                         resolution = Resolution(
                             candidates if len(candidates) <= MAX_METHOD_CANDIDATES else ()
                         )
