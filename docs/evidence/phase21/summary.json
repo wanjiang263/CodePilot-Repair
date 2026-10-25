@@ -1401,7 +1401,6 @@
   },
   "evidence_sha256": {
     "report": "18b3680e5768915175b80a4d7d70c597931d6c86c646fa8629212e4f2824eea2",
-    "summary": "1b55e9044af1fc494d8f02fb30916f54031e4b74d20438677addc08c13a9bd6d",
     "zero_model": "62268523dd1f4d737b4607405a4683948cee505ccbc3edc48293d34edbf728ce",
     "preflight": "07fcf673d7235d41f650f10c02d8f989cca0f7df48baf7dc25cb8c80d6bce428",
     "search_tool": "1d4470f5d56db7207b288ec92dc14a0653809d073c4aacedb4d9b74c72ee2ffd",
