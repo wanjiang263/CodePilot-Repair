@@ -30,6 +30,7 @@ from codepilot.llm.dispatch_recovery import (  # noqa: E402
     record_attempt_from_ledger,
     validate_recovery_manifest,
 )
+from codepilot.sandbox.runners import RunnerOverrides  # noqa: E402
 
 TERMINAL = {
     "RESOLVED",
@@ -63,6 +64,13 @@ class OfficialRequest:
     instance: dict[str, Any]
     root: Path
     run_id: str
+
+
+def canonical_repo_source(repo: str) -> Any:
+    """The same source identity the SWE-bench loader gives the internal run."""
+    from codepilot.repo.workspace import normalize_source
+
+    return normalize_source(repo if "://" in repo else f"https://github.com/{repo}")
 
 
 def _now() -> str:
@@ -183,28 +191,26 @@ class M3Batch:
             raise BatchStopError("max_test_runs must be in 3..60")
         runner_path = self.config.get("runner_overrides")
         self.runner_overrides_path = self._absolute(Path(str(runner_path))) if runner_path else None
+        self.runner_overrides_sha256: str | None = None
+        self.runner_overrides: RunnerOverrides | None = None
         if self.runner_overrides_path is not None:
             if not self.runner_overrides_path.is_file():
                 raise BatchStopError("runner overrides file is missing")
+            overrides = RunnerOverrides.load(self.runner_overrides_path)
+            if overrides is None:
+                raise BatchStopError("runner overrides could not be loaded")
             self.runner_overrides_sha256 = _sha256(self.runner_overrides_path)
-            from codepilot.sandbox.runners import RunnerOverrides
-
-            self.runner_overrides = RunnerOverrides.load(self.runner_overrides_path)
+            self.runner_overrides = overrides
             expected_ids = {str(item["instance_id"]) for item in self.instances}
-            configured = set(self.runner_overrides.instances)
+            configured = set(overrides.instances)
             if configured != expected_ids:
                 raise BatchStopError(
                     "runner overrides must cover exactly the frozen catalog: "
                     f"missing={sorted(expected_ids - configured)} "
                     f"extra={sorted(configured - expected_ids)}"
                 )
-            if self.catalog_runner_kinds and (
-                self.runner_overrides.kinds() != self.catalog_runner_kinds
-            ):
+            if self.catalog_runner_kinds and (overrides.kinds() != self.catalog_runner_kinds):
                 raise BatchStopError("catalog runner kinds do not match the frozen overrides")
-        else:
-            self.runner_overrides_sha256 = None
-            self.runner_overrides = None
         seeds_value = self.config.get("repo_cache_seeds")
         self.repo_cache_seeds_path = self._absolute(Path(str(seeds_value))) if seeds_value else None
         self.repo_cache_seeds: dict[str, str] = {}
@@ -605,20 +611,35 @@ class M3Batch:
             raise BatchStopError(f"no repo cache seed for {instance['instance_id']}")
         from codepilot.repo.workspace import WorkspaceManager
 
-        # The internal runner's artifact root is the per-instance root, so its
-        # WorkspaceManager cache lives at <instance>/repo-cache.
+        # The internal runner loads the task from the frozen dataset and uses
+        # its normalized source (https://github.com/owner/repo). Hashing the
+        # catalog's bare "owner/repo" string instead resolves to a different
+        # cache key; the seed is then invisible and the internal run clones the
+        # full remote history (the r4 Django attempt hit 53k commits and was
+        # correctly stopped by the base-only isolation assertion).
+        source = canonical_repo_source(str(instance["repo"]))
         manager = WorkspaceManager(
             cache_root=self.artifact_root / "instances" / instance["instance_id"] / "repo-cache"
         )
-        target = manager.cache_path(str(instance["repo"]))
-        if target.exists():
-            return
-        seed_root = (self.repo_root / seed_value).resolve()
-        children = [path for path in seed_root.iterdir() if path.is_dir()]
-        if len(children) != 1:
-            raise BatchStopError(f"seed cache must contain one bare repo: {seed_root}")
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(children[0], target, symlinks=True)
+        target = manager.cache_path(source)
+        if not target.exists():
+            seed_root = (self.repo_root / seed_value).resolve()
+            children = [path for path in seed_root.iterdir() if path.is_dir()]
+            if len(children) != 1:
+                raise BatchStopError(f"seed cache must contain one bare repo: {seed_root}")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(children[0], target, symlinks=True)
+        count = subprocess.run(
+            ["git", "-C", str(target), "rev-list", "--all", "--count"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if count.returncode != 0 or count.stdout.strip() != "1":
+            raise BatchStopError(
+                f"seeded repo cache is not base-only for {instance['instance_id']}: "
+                f"{count.stdout.strip() or count.stderr.strip()}"
+            )
 
     def _run_instance(self, instance: dict[str, Any], entry: dict[str, Any]) -> None:
         instance_id = instance["instance_id"]
