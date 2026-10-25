@@ -197,8 +197,10 @@ registry `attempts.json` 记录了 Django 的 stopped attempt 与 ledger SHA；b
 | 原 30 CNY 新增授权剩余（上界口径） | 28.88937864 |
 | 主批 24 CNY 剩余（上界口径） | 23.14094360 |
 | Django 单题 4 CNY 剩余（上界口径，ledger frozen） | 3.14094360 |
-| 含历史累计上界 | 12.09984200 |
+| 含历史 opening + Phase21 上界（M3 `cumulative_upper_bound_cny`） | 12.09984200 |
+| 含历史 opening + Phase20 + Phase21 总上界 | 12.35140696 |
 
+- M3 的 `cumulative_upper_bound_cny` 只把 historical opening 与**当前** Phase21 批次相加；Phase20 是独立的上一段新增费用。最后一行把 Phase20 只加一次，避免重复计入 opening。
 - 5 次请求：4 settled + 1 unknown；没有把 unknown 记零、没有重置/拆分/另开 attempt 绕过冻结、没有自动重试。
 - 模型实际服务端 model_id：`glm-5.3-flash`（alias `glm-5.3-flash-main`）；temperature 0.0；seed 未支持/未下发；temperature 0.2、换模、best-of 未发生。
 - `CODEPILOT_DISABLE_HTTP_RETRIES=1` 与 provider `max_retries=0` 生效；不计隐藏重试。
@@ -207,7 +209,7 @@ registry `attempts.json` 记录了 Django 的 stopped attempt 与 ledger SHA；b
 
 - 最终定向回归：见 `artifacts/phase21/final-targeted-tests.log`（结果以该文件为准；包含 native runner、预算链、M3、闭环准入、索引、transfer、search、fsutil、evidence reuse）。
 - Phase 12 closure admission：13 passed；M3：18 passed；repo import/index/calls/test links：67 passed；transfer Windows 17 passed / 3 precise skip；Linux `/mnt/c` 20/20 passed。
-- ruff check / format check / mypy src：以最终提交前的本地门禁输出为准。
+- `ruff check`（Phase21 修改文件）：PASS；`mypy src`：197 files PASS；`ruff format --check`（Phase21 修改文件）：PASS。全仓 format check 仍会报告 3 个未被本轮修改的既有文件（`reviewer.py`、`target_tests.py`、`report.py`）需要格式化，本轮未做无关格式化。
 - 未运行：全仓 pytest、全量 Docker suite、test50/test300、M4、a22、官方 Harness（无 ACCEPTED）。历史 pytest P2 仍为 `NOT VERIFIED`。
 
 ## 13. 剩余阻塞与下一步授权

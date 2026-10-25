@@ -3,9 +3,9 @@
   "phase": "Phase21",
   "batch_name": "Phase21原六实例工程恢复验证批",
   "batch_id": "phase21-recovery-6",
-  "generated_at": "2026-10-25T18:12:03+00:00",
+  "generated_at": "2026-10-25T18:14:52+00:00",
   "repo_root": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair",
-  "head": "280b4660a9abae1728220f72a96d723c44ec1dcb",
+  "head": "064d758f78d467d46a281ab5523eaf2da96595b7",
   "commits": {
     "baseline": "1cb4b345c513a4736804ec72e55c1a598a333696",
     "budget_closure": "aa3cef8",
@@ -1368,6 +1368,8 @@
     "per_instance_limit_cny": 4.0,
     "django_instance_remaining_upper_bound_cny": 3.1409436,
     "cumulative_upper_bound_including_historical_cny": 12.099842,
+    "cumulative_upper_bound_including_phase20_and_phase21_cny": 12.35140696,
+    "cumulative_semantics": "M3 cumulative_upper_bound_cny adds historical opening + current batch only; Phase20 is added once in the explicit all-inclusive field.",
     "requests": 5,
     "unknown_calls": 1
   },
@@ -1400,7 +1402,7 @@
     "final_targeted_tests": "artifacts/phase21/final-targeted-tests.log"
   },
   "evidence_sha256": {
-    "report": "18b3680e5768915175b80a4d7d70c597931d6c86c646fa8629212e4f2824eea2",
+    "report": "1e43ab9018bcacf196bff482edb51d7ae9617c5e4e9c592a0d3f2f4e2c573955",
     "zero_model": "62268523dd1f4d737b4607405a4683948cee505ccbc3edc48293d34edbf728ce",
     "preflight": "07fcf673d7235d41f650f10c02d8f989cca0f7df48baf7dc25cb8c80d6bce428",
     "search_tool": "1d4470f5d56db7207b288ec92dc14a0653809d073c4aacedb4d9b74c72ee2ffd",
