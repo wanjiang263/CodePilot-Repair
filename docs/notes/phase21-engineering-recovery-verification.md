@@ -18,7 +18,7 @@
 ## 2. 工作目录、环境与现场
 
 - 唯一源码/Git/配置/报告/artifact 根：Windows 项目目录；WSL 仅 `/mnt/c/Users/lenovo/Desktop/CodePilot-Repair`。没有 `/root` 副本、没有第二份 WSL 源码、没有重新 clone 项目。
-- Windows：项目 `.venv`（CPython 3.12.7，pytest 9.1.1）；Linux：`.venv-linux`、`.venv-swebench-linux`。两套虚拟环境未混用。
+- Windows：项目 `.venv`（CPython 3.12.7，pytest 9.1.1）；Linux：`.venv-linux` / `.venv-swebench-linux`（Python 3.12.3，SWE-bench Harness 4.1.0）。两套虚拟环境未混用。
 - Docker：Desktop 29.8.2，现有 WSL2 后端。Windows 非提升 Python 进程对 Docker npipe 只有只读权限；批次通过 WSL 内 `docker.proxy.sock` 的短期 TCP relay 访问 Docker，relay 仅绑定 WSL NAT 地址，批次后停止。`NO_PROXY` 必须包含 WSL IP，否则本机 FlClash 会把 Docker API 请求代理成 502。
 - WSL 的 localhost 代理提示是环境告警，不影响 `MSYS_NO_PATHCONV=1 WSL_UTF8=1 wsl` 命令。
 - 电脑重启后，r1/r2/r3/r4 的中断现场全部保留；r1/r2/r4 没有 ledger、没有模型请求；r3 也没有成功完成内部运行。r5 才有第一次真实 HTTP 调用。

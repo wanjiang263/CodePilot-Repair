@@ -3,9 +3,19 @@
   "phase": "Phase21",
   "batch_name": "Phase21原六实例工程恢复验证批",
   "batch_id": "phase21-recovery-6",
-  "generated_at": "2026-10-25T18:14:52+00:00",
+  "generated_at": "2026-10-25T18:17:11+00:00",
   "repo_root": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair",
-  "head": "064d758f78d467d46a281ab5523eaf2da96595b7",
+  "head": "2ea15f3e7000403f01d00d597a120246cca84c4e",
+  "baseline": {
+    "start_head": "1cb4b345c513a4736804ec72e55c1a598a333696",
+    "windows_python": "3.12.7",
+    "windows_pytest": "9.1.1",
+    "docker_engine": "29.8.2",
+    "swebench_harness": "4.1.0",
+    "wsl_linux_python": "3.12.3",
+    "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+    "dataset_snapshot_sha256": "5c7a40b4812a0d3daaffbbd63664fbf1cd8291ed520c80e304aa5c1b7e21ff7a"
+  },
   "commits": {
     "baseline": "1cb4b345c513a4736804ec72e55c1a598a333696",
     "budget_closure": "aa3cef8",
@@ -1402,7 +1412,7 @@
     "final_targeted_tests": "artifacts/phase21/final-targeted-tests.log"
   },
   "evidence_sha256": {
-    "report": "1e43ab9018bcacf196bff482edb51d7ae9617c5e4e9c592a0d3f2f4e2c573955",
+    "report": "65056a9966db4344b6682969747db904d270c80fb046f6c94986b428a3bf28af",
     "zero_model": "62268523dd1f4d737b4607405a4683948cee505ccbc3edc48293d34edbf728ce",
     "preflight": "07fcf673d7235d41f650f10c02d8f989cca0f7df48baf7dc25cb8c80d6bce428",
     "search_tool": "1d4470f5d56db7207b288ec92dc14a0653809d073c4aacedb4d9b74c72ee2ffd",
