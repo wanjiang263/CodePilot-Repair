@@ -239,3 +239,18 @@ token 相同而 call_id 不同。修复提交 `a1afbaf` 将 `tracks_usage` 改�
 - **批次后发现并修复：** `search_code` 的 rg 超时现会回退到受策略约束的 Python 搜索，避免 optional accelerator 变成 harness 内部错误；未对已付费实例重跑。
 - **未执行：** 全仓 pytest、全量 Docker suite、M4/test50/test300、a22。当前不满足 test50 条件。
 - 报告：`docs/notes/phase20-runtime-verification-and-m3-batch.md`；脱敏证据：`docs/evidence/phase20/summary.json`。未 push、未创建 PR。
+
+## Phase 21（2026-10-25/26，原六实例工程恢复验证）
+
+- **执行能力恢复 6/6。** 原六实例在同一 Windows 项目目录下完成全新 workspace、官方镜像身份、正确 runner、非零测试收集/执行；零模型完成 target、机械补丁、regression、Mock Review 与 acceptance。acceptance 仅因 `real_run=false` 正确拒绝，未把零模型冒充 Agent 成功。
+- **18→12 根因：** 批次配置声明 18，但 `m3_batch` 未向内部 subprocess 传递 `max_test_runs`，`swebench_smoke` 回退默认 12。已改为类型化 CLI、首次模型请求前 effective-budget 校验、报告记录来源、checkpoint 冲突拒绝、M3 report 复核。
+- **闭环额度：** L2 覆盖全基线时复用为 L3 证据，不重复全量；flaky retry 只用确定性闭环之外的剩余次数，不足两次则保守保留失败；同候选按 patch/scope hash 复用证据；Reviewer 获得 token/费用/240 秒墙钟预留。
+- **环境修复：** Django 原生 `runtests.py` adapter（67 tests；PATH 与 pytest flag 是根因，pytz 实际存在）；SymPy `bin/test` adapter（12/12）；Requests `TestSuperLen` scoped 兼容插件（121 collected；8 passed + 1 skip）；sklearn 有界 collection scope（444 tests，14.9–25.6 秒，替代 900 秒全仓 doctest 收集）；Sphinx 1556 collected；Matplotlib 8185 collected。
+- **工具/生成物：** Matplotlib `search_code` 真实入口触发 rg 超时后回退到受限 Python 搜索（50 matches、truncated、约 17 秒、deny 目录无命中）；镜像与 workspace 的 10/10 `.so` 及 `_version.py` SHA-256 一致。
+- **六个 Phase 20 回归失败：** exec-bit/symlink/mkfifo 用精确平台能力判断，LF 夹具改 bytes，rename 仅对 Windows 5/32 有界重试；Windows 17 passed / 3 precise skip，Linux `/mnt/c` 20/20，fsutil 3 passed。
+- **额外系统修复：** 索引热点 `ImportResolver.for_scope`/test-link 二次复杂度改为索引查找；索引 SQLite 大批量边写入改用 MEMORY journal/temp（Django 全量索引约 301 秒）；M3 cache seed 使用 loader 的 canonical GitHub source（修复 r4 的完整历史 clone，零模型调用）。
+- **真实 Agent：** r5 仅 Django 一次付费主尝试；5 次 HTTP（4 settled + 1 unknown），reproduce 阶段 provider 超时/usage 不确定，ledger 按规则冻结并停止后续派发。Django settled `0.0475876`、unknown reserved `0.8114688`，无 patch、内部 `WORKFLOW_ERROR`、官方 `NOT_EVALUATED`。Sphinx/SymPy/Matplotlib/sklearn/Requests 未派发。
+- **指标：** 官方覆盖率 0/6、有效官方解决率 N/A、任务级解决率 0/6、内部通过率 0/6、环境无效率 0/6；1 次基础设施停止（provider unknown），0 模型失败，0 工具失败，5 题因冻结未派发。本轮是工程恢复验证，不是未见泛化评测。
+- **费用：** 历史 opening CNY 11.24078560；Phase20 settled 0.25156496；Phase21 settled 0.04758760、unknown 0.8114688000000001、上界 0.8590564000000001；原 30 CNY 新增授权累计上界 1.11062136，剩余 28.88937864；主批剩余 23.14094360；Django 单题剩余 3.14094360（ledger frozen）。
+- **未执行：** 官方 Harness（无 ACCEPTED）、全仓 pytest、全量 Docker suite、test50/test300/M4/a22。pytest P2 仍为 `NOT VERIFIED`。进一步付费派发需书面追加授权和新执行段，不能重置/绕过冻结 ledger。
+- 报告：`docs/notes/phase21-engineering-recovery-verification.md`；脱敏证据：`docs/evidence/phase21/summary.json`；零模型：`artifacts/phase21/zero-model/summary.json`。未 push、未创建 PR。

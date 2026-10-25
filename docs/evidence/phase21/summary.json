@@ -1,0 +1,1413 @@
+{
+  "schema_version": 1,
+  "phase": "Phase21",
+  "batch_name": "Phase21原六实例工程恢复验证批",
+  "batch_id": "phase21-recovery-6",
+  "generated_at": "2026-10-25T18:12:03+00:00",
+  "repo_root": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair",
+  "head": "280b4660a9abae1728220f72a96d723c44ec1dcb",
+  "commits": {
+    "baseline": "1cb4b345c513a4736804ec72e55c1a598a333696",
+    "budget_closure": "aa3cef8",
+    "runner_environment_tools": "cccd1c9",
+    "initial_freeze": "bb53e99",
+    "index_linear": "0aeb83d",
+    "index_journal": "2beacb0",
+    "cache_seed_identity": "280b466",
+    "r5_frozen_code_sha": "280b4660a9abae1728220f72a96d723c44ec1dcb"
+  },
+  "dataset": {
+    "name": "princeton-nlp/SWE-bench_Lite",
+    "revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+    "snapshot_sha256": "5c7a40b4812a0d3daaffbbd63664fbf1cd8291ed520c80e304aa5c1b7e21ff7a",
+    "selection_seed": 20261024,
+    "instances": [
+      "django__django-11422",
+      "sphinx-doc__sphinx-8273",
+      "sympy__sympy-22714",
+      "matplotlib__matplotlib-18869",
+      "scikit-learn__scikit-learn-10297",
+      "psf__requests-3362"
+    ]
+  },
+  "freeze": {
+    "catalog_sha256": "dbbde98c464caf52f9b98bb8f228f6a4176bc093f582fb8b7d64166c4d214c22",
+    "config_sha256": "c919cb32b5f2db68310dd8dca7e98b6ec32ce5f98ebd1aa58f1359557e9b6bfc",
+    "opening_manifest_sha256": "f1088aa87f19116e3e7599e12a5be32fa990cf418e9675e7936240cfb785cc5b",
+    "runner_overrides_sha256": "3a5f856f138a82b003403c77fffa60d47210979c4aabfc3d85dad4b649bba560",
+    "repo_cache_seeds_sha256": "388f79a0293ca83af726d169a2fcdaca6dda5810dacdc4aeb7594c8048bc4c12",
+    "limits": {
+      "max_iterations": 5,
+      "max_test_runs": 18,
+      "max_tool_calls_per_iteration": 30,
+      "max_review_calls": 2,
+      "timeout_seconds": 1800
+    },
+    "runner_kinds": {
+      "django__django-11422": "django",
+      "matplotlib__matplotlib-18869": "pytest",
+      "psf__requests-3362": "pytest_requests_compat",
+      "scikit-learn__scikit-learn-10297": "pytest",
+      "sphinx-doc__sphinx-8273": "pytest",
+      "sympy__sympy-22714": "sympy"
+    },
+    "images": {
+      "django__django-11422": "sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+      "sphinx-doc__sphinx-8273": "sha256:11f6809c7e3d3bfcd53ed280f0885d0b0950836391a84e732fc5f2ea9e096038",
+      "sympy__sympy-22714": "sha256:f8f6b7d2e72a05ea8c4ec8143b5da6cefd6f5fd7e679d74257e25a59c082a15d",
+      "matplotlib__matplotlib-18869": "sha256:5a237c238da682b5203cd965183e00dd6fdbe9a0844c492f503a42f12a25f1ca",
+      "scikit-learn__scikit-learn-10297": "sha256:c48ade7195b167b2562f90f3a3a60ebb410276e7583bd1212e324c16157d7eb0",
+      "psf__requests-3362": "sha256:d1c8c15eeb5e12b7eb3815307d1131d68c72d53419fa2f8b89bc46bc0009a61b"
+    },
+    "model": "glm-5.3-flash-main",
+    "temperature": 0.0,
+    "http_retries": 0,
+    "seed_support": "not_dispatched_by_provider"
+  },
+  "budget_audit_18_to_12": {
+    "root_cause": "config declared 18; m3_batch did not forward max_test_runs to the internal subprocess; _build_budget fell back to the default 12",
+    "layers": [
+      {
+        "layer": "configs/phase20/m3-config.json",
+        "value": 18,
+        "source": "explicit"
+      },
+      {
+        "layer": "m3_batch._internal_command (before fix)",
+        "value": null,
+        "source": "omitted"
+      },
+      {
+        "layer": "swebench_smoke._build_budget (before fix)",
+        "value": 12,
+        "source": "default because CODEPILOT_MAX_TEST_RUNS was unset"
+      },
+      {
+        "layer": "InferenceAssembly/RepairState.budget",
+        "value": 12,
+        "source": "upstream"
+      },
+      {
+        "layer": "Phase20 Sphinx run report",
+        "value": 12,
+        "source": "reported"
+      }
+    ],
+    "fix": [
+      "typed CLI limits on every internal command",
+      "effective-budget validation before model/environment work",
+      "report records effective budget and limit source",
+      "checkpoint budget mismatch refuses resume",
+      "M3 verifies report budget against frozen limits and requires source=cli"
+    ],
+    "tests": "tests/unit/test_phase21_budget_chain.py + tests/unit/test_m3_batch.py"
+  },
+  "sphinx_timeline": {
+    "phase20_run": "swebench-smoke-m3-20261024-sphinx-doc__sphinx-8273-s0-70586dbc",
+    "test_runs": 12,
+    "max_test_runs": 12,
+    "attempts": 2,
+    "levels_per_attempt": [
+      "L1_target",
+      "L2_impact"
+    ],
+    "l3_executed": false,
+    "review_calls": 0,
+    "closure_admission_at_diagnosis": {
+      "runs_spent": 9,
+      "allowance": 12,
+      "required": 3,
+      "coder_share": 0,
+      "trigger": "diagnosis"
+    },
+    "identical_candidate_hash": "9c20e42283dffed115d7ff127655f4d7790565bcb5a9f2b643a0a123962dec8d",
+    "retry_evidence": "operations journal contains L2 and two re-runs per attempt; attempt 2's final retry hit budget_test_runs",
+    "conclusion": "baseline/reproduction + two L1/L2 rounds + flaky re-runs consumed 12; L3 and Reviewer had no budget"
+  },
+  "closure_retry_review_fixes": {
+    "checks": {
+      "retry_only_for_new_failures": true,
+      "retry_preserves_deterministic_closure": true,
+      "l2_full_coverage_is_l3_evidence": true,
+      "patch_evidence_bound_to_hash": true,
+      "reviewer_has_token_cost_time_headroom": true,
+      "admission_and_execution_share_scope": true,
+      "budget_forwarded_from_typed_config": true
+    },
+    "tests": {
+      "final_targeted": "artifacts/phase21/final-targeted-tests.log",
+      "final_targeted_summary": "271 passed, 3 skipped",
+      "phase12_closure_admission": "13 passed",
+      "m3_batch": "18 passed",
+      "repo_import_index_calls_testlinks": "67 passed",
+      "transfer_windows": "17 passed, 3 precise capability skips",
+      "transfer_linux_mnt_c": "20 passed",
+      "fsutil_replace": "3 passed"
+    }
+  },
+  "environment_repairs": {
+    "django": {
+      "phase20_blocker": "ENV_ERROR: pytest/JUnit contract + missing pytz in the Phase20 preflight log",
+      "root_cause": "preflight used Python 3.11 because PATH missed the testbed conda env; runtests.py does not accept pytest/JUnit flags. pytz exists in the official image (2024.2).",
+      "fix": "DjangoRunnerAdapter; native runtests.py command; canonical path<->native label; output parser; raw logs retained",
+      "preflight": {
+        "ok": true,
+        "kind": "django",
+        "mode": "execute",
+        "parse_status": "PASS",
+        "duration_seconds": 95.276,
+        "parsed": {
+          "tests": 67,
+          "passed": 46,
+          "failed": 0,
+          "missing": [],
+          "diagnostics": {
+            "runner": "django",
+            "parse_counts": {
+              "ran": 67,
+              "parsed": 67,
+              "wanted": null,
+              "missing": 0,
+              "extra_observed": 0
+            },
+            "requested_missing": [],
+            "requested_extra_observed": []
+          }
+        },
+        "image": {
+          "ref": "swebench/sweb.eval.x86_64.django_1776_django-11422:latest",
+          "id": "sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+          "os": "linux",
+          "architecture": "amd64",
+          "override": false,
+          "parent_ref": null,
+          "parent_id": null
+        },
+        "timings": {
+          "workspace_prepare": 30.679,
+          "environment": 0.124,
+          "collection": 95.354
+        }
+      },
+      "live_baseline_test_runs": 2
+    },
+    "sympy": {
+      "phase20_blocker": "bin/test ignores --junitxml and exits 0 with unknown selectors",
+      "root_cause": "no native runner result adapter; JUnit contract not applicable",
+      "fix": "SymPyRunnerAdapter with file selectors, per-test status parsing, interleaved warnings, zero-test/exit-code contradictions, partial timeout results",
+      "preflight": {
+        "ok": true,
+        "kind": "sympy",
+        "mode": "execute",
+        "parse_status": "PASS",
+        "duration_seconds": 70.833,
+        "parsed": {
+          "tests": 12,
+          "passed": 12,
+          "failed": 0,
+          "missing": [],
+          "diagnostics": {
+            "runner": "sympy",
+            "parse_counts": {
+              "parsed": 12,
+              "wanted": null,
+              "missing": 0,
+              "extra_observed": 0,
+              "files": {
+                "sympy/geometry/tests/test_point.py": 12
+              },
+              "summary": {
+                "passed": 12
+              }
+            },
+            "requested_missing": [],
+            "requested_extra_observed": [],
+            "summary_declares_failures": 0
+          }
+        },
+        "image": {
+          "ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-22714:latest",
+          "id": "sha256:f8f6b7d2e72a05ea8c4ec8143b5da6cefd6f5fd7e679d74257e25a59c082a15d",
+          "os": "linux",
+          "architecture": "amd64",
+          "override": false,
+          "parent_ref": null,
+          "parent_id": null
+        },
+        "timings": {
+          "workspace_prepare": 12.019,
+          "environment": 0.103,
+          "collection": 70.845
+        }
+      }
+    },
+    "matplotlib": {
+      "phase20_blocker": "search_code rg 15s timeout misattributed as harness_internal_error",
+      "root_cause": "optional accelerator failure was not separated from tool failure",
+      "fix": "bounded Python fallback with engine/fallback/timeout diagnostics; path policy, deny dirs, binary/size/file/match caps",
+      "preflight": {
+        "ok": true,
+        "kind": "pytest",
+        "mode": "collect_only",
+        "parse_status": "COLLECTED",
+        "duration_seconds": 113.139,
+        "parsed": {
+          "tests_collected": 8185,
+          "junit_present": true
+        },
+        "image": {
+          "ref": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-18869:latest",
+          "id": "sha256:5a237c238da682b5203cd965183e00dd6fdbe9a0844c492f503a42f12a25f1ca",
+          "os": "linux",
+          "architecture": "amd64",
+          "override": false,
+          "parent_ref": null,
+          "parent_id": null
+        },
+        "timings": {
+          "workspace_prepare": 16.003,
+          "environment": 9.686,
+          "collection": 113.158
+        }
+      },
+      "artifacts": {
+        "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-18869:latest",
+        "workspace": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\preflight-r5\\instances\\matplotlib__matplotlib-18869\\preflight\\workspace",
+        "image_so_count": 10,
+        "host_so_count": 10,
+        "so_missing_on_host": [],
+        "so_hash_mismatches": {},
+        "version_image": "6f74be3ad2f3c7f475235285f2f16f3dd6f89212834805b661e2f541145ce863",
+        "version_host": "6f74be3ad2f3c7f475235285f2f16f3dd6f89212834805b661e2f541145ce863",
+        "version_matches": true,
+        "version_text": "# file generated by setuptools-scm\n# don't change, don't track in version control\n\n__all__ = [\"__version__\", \"__version_tuple__\", \"version\", \"version_tuple\"]\n\nTYPE_CHECKING = False\nif TYPE_CHECKING:\n    from typing import Tuple\n    from typing import Union\n\n    VERSION_TUPLE = Tuple[Union[int, str],"
+      }
+    },
+    "scikit_learn": {
+      "phase20_blocker": "fresh-workspace collection exceeded 900s",
+      "root_cause": "setup.cfg --doctest-modules makes full-repo collection scan doctests; unscoped full collection",
+      "fix": "issue-derived bounded preflight scope; fresh workspace; scoped collection 444 tests in ~15-25s; agent baseline scope from impact, not unconditional full repo",
+      "preflight": {
+        "ok": true,
+        "kind": "pytest",
+        "mode": "collect_only",
+        "parse_status": "COLLECTED",
+        "duration_seconds": 19.854,
+        "parsed": {
+          "tests_collected": 444,
+          "junit_present": true
+        },
+        "image": {
+          "ref": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-10297:latest",
+          "id": "sha256:c48ade7195b167b2562f90f3a3a60ebb410276e7583bd1212e324c16157d7eb0",
+          "os": "linux",
+          "architecture": "amd64",
+          "override": false,
+          "parent_ref": null,
+          "parent_id": null
+        },
+        "timings": {
+          "workspace_prepare": 10.036,
+          "environment": 3.69,
+          "collection": 19.867
+        }
+      }
+    },
+    "requests": {
+      "phase20_blocker": "TestSuperLen collection TypeError: MarkDecorator has no len()",
+      "root_cause": "2016-era malformed parametrize value; all tested pytest versions fail",
+      "fix": "scoped compatibility plugin converting only the malformed param to pytest.param(skipif), no test body/assertion changes; testdeps + -p",
+      "preflight": {
+        "ok": true,
+        "kind": "pytest_requests_compat",
+        "mode": "collect_only",
+        "parse_status": "COLLECTED",
+        "duration_seconds": 7.407,
+        "parsed": {
+          "tests_collected": 121,
+          "junit_present": true
+        },
+        "image": {
+          "ref": "swebench/sweb.eval.x86_64.psf_1776_requests-3362:latest",
+          "id": "sha256:d1c8c15eeb5e12b7eb3815307d1131d68c72d53419fa2f8b89bc46bc0009a61b",
+          "os": "linux",
+          "architecture": "amd64",
+          "override": false,
+          "parent_ref": null,
+          "parent_id": null
+        },
+        "timings": {
+          "workspace_prepare": 5.968,
+          "environment": 0.084,
+          "collection": 7.431
+        }
+      }
+    },
+    "sphinx": {
+      "phase20_blocker": "max_test_runs 18 became 12; closure exhausted",
+      "root_cause": "subprocess config omission",
+      "fix": "typed budget forwarding + retry/review closure fixes",
+      "preflight": {
+        "ok": true,
+        "kind": "pytest",
+        "mode": "collect_only",
+        "parse_status": "COLLECTED",
+        "duration_seconds": 35.834,
+        "parsed": {
+          "tests_collected": 1556,
+          "junit_present": true
+        },
+        "image": {
+          "ref": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8273:latest",
+          "id": "sha256:11f6809c7e3d3bfcd53ed280f0885d0b0950836391a84e732fc5f2ea9e096038",
+          "os": "linux",
+          "architecture": "amd64",
+          "override": false,
+          "parent_ref": null,
+          "parent_id": null
+        },
+        "timings": {
+          "workspace_prepare": 10.703,
+          "environment": 0.134,
+          "collection": 35.852
+        }
+      }
+    }
+  },
+  "phase20_regression_closures": [
+    {
+      "failure": "tests/unit/sandbox/test_transfer.py::test_upload_keeps_sources_and_exec_bit_and_drops_evaluation_material",
+      "class": "NTFS exec-bit semantics",
+      "fix": "POSIX asserts exec bit; Windows asserts representable mode equals source mode",
+      "result": "Windows passed; Linux 20/20"
+    },
+    {
+      "failure": "tests/unit/sandbox/test_transfer.py::test_upload_keeps_internal_symlink_as_relative_link",
+      "class": "NTFS symlink privilege",
+      "fix": "precise symlink capability skip",
+      "result": "precise skip on Windows; Linux passed"
+    },
+    {
+      "failure": "tests/unit/sandbox/test_transfer.py::test_upload_rejects_symlink_that_escapes_workspace",
+      "class": "NTFS symlink privilege",
+      "fix": "precise symlink capability skip",
+      "result": "precise skip on Windows; Linux passed"
+    },
+    {
+      "failure": "tests/unit/sandbox/test_transfer.py::test_upload_rejects_special_files",
+      "class": "os.mkfifo unavailable",
+      "fix": "precise hasattr capability skip",
+      "result": "precise skip on Windows; Linux passed"
+    },
+    {
+      "failure": "tests/unit/sandbox/test_transfer.py::test_stage_handsover_through_one_writable_container_and_cleans_it",
+      "class": "test fixture newline translation",
+      "fix": "fixture writes bytes with LF, assertions unchanged",
+      "result": "passed"
+    },
+    {
+      "failure": "tests/unit/repo/test_workspace.py rename transient WinError 5",
+      "class": "transient external handle",
+      "fix": "replace_path bounded retry only for Windows 5/32; no unbounded loop",
+      "result": "target passed; 3 fsutil tests passed"
+    }
+  ],
+  "preflight": {
+    "root": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\preflight\\preflight.json",
+    "ok": true,
+    "available_instances": 6,
+    "instances": {
+      "django__django-11422": {
+        "ok": true,
+        "kind": "django",
+        "mode": "execute",
+        "parse_status": "PASS",
+        "duration_seconds": 95.276,
+        "parsed": {
+          "tests": 67,
+          "passed": 46,
+          "failed": 0,
+          "missing": [],
+          "diagnostics": {
+            "runner": "django",
+            "parse_counts": {
+              "ran": 67,
+              "parsed": 67,
+              "wanted": null,
+              "missing": 0,
+              "extra_observed": 0
+            },
+            "requested_missing": [],
+            "requested_extra_observed": []
+          }
+        },
+        "image": {
+          "ref": "swebench/sweb.eval.x86_64.django_1776_django-11422:latest",
+          "id": "sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+          "os": "linux",
+          "architecture": "amd64",
+          "override": false,
+          "parent_ref": null,
+          "parent_id": null
+        },
+        "timings": {
+          "workspace_prepare": 30.679,
+          "environment": 0.124,
+          "collection": 95.354
+        }
+      },
+      "sphinx-doc__sphinx-8273": {
+        "ok": true,
+        "kind": "pytest",
+        "mode": "collect_only",
+        "parse_status": "COLLECTED",
+        "duration_seconds": 35.834,
+        "parsed": {
+          "tests_collected": 1556,
+          "junit_present": true
+        },
+        "image": {
+          "ref": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8273:latest",
+          "id": "sha256:11f6809c7e3d3bfcd53ed280f0885d0b0950836391a84e732fc5f2ea9e096038",
+          "os": "linux",
+          "architecture": "amd64",
+          "override": false,
+          "parent_ref": null,
+          "parent_id": null
+        },
+        "timings": {
+          "workspace_prepare": 10.703,
+          "environment": 0.134,
+          "collection": 35.852
+        }
+      },
+      "sympy__sympy-22714": {
+        "ok": true,
+        "kind": "sympy",
+        "mode": "execute",
+        "parse_status": "PASS",
+        "duration_seconds": 70.833,
+        "parsed": {
+          "tests": 12,
+          "passed": 12,
+          "failed": 0,
+          "missing": [],
+          "diagnostics": {
+            "runner": "sympy",
+            "parse_counts": {
+              "parsed": 12,
+              "wanted": null,
+              "missing": 0,
+              "extra_observed": 0,
+              "files": {
+                "sympy/geometry/tests/test_point.py": 12
+              },
+              "summary": {
+                "passed": 12
+              }
+            },
+            "requested_missing": [],
+            "requested_extra_observed": [],
+            "summary_declares_failures": 0
+          }
+        },
+        "image": {
+          "ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-22714:latest",
+          "id": "sha256:f8f6b7d2e72a05ea8c4ec8143b5da6cefd6f5fd7e679d74257e25a59c082a15d",
+          "os": "linux",
+          "architecture": "amd64",
+          "override": false,
+          "parent_ref": null,
+          "parent_id": null
+        },
+        "timings": {
+          "workspace_prepare": 12.019,
+          "environment": 0.103,
+          "collection": 70.845
+        }
+      },
+      "matplotlib__matplotlib-18869": {
+        "ok": true,
+        "kind": "pytest",
+        "mode": "collect_only",
+        "parse_status": "COLLECTED",
+        "duration_seconds": 113.139,
+        "parsed": {
+          "tests_collected": 8185,
+          "junit_present": true
+        },
+        "image": {
+          "ref": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-18869:latest",
+          "id": "sha256:5a237c238da682b5203cd965183e00dd6fdbe9a0844c492f503a42f12a25f1ca",
+          "os": "linux",
+          "architecture": "amd64",
+          "override": false,
+          "parent_ref": null,
+          "parent_id": null
+        },
+        "timings": {
+          "workspace_prepare": 16.003,
+          "environment": 9.686,
+          "collection": 113.158
+        }
+      },
+      "scikit-learn__scikit-learn-10297": {
+        "ok": true,
+        "kind": "pytest",
+        "mode": "collect_only",
+        "parse_status": "COLLECTED",
+        "duration_seconds": 19.854,
+        "parsed": {
+          "tests_collected": 444,
+          "junit_present": true
+        },
+        "image": {
+          "ref": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-10297:latest",
+          "id": "sha256:c48ade7195b167b2562f90f3a3a60ebb410276e7583bd1212e324c16157d7eb0",
+          "os": "linux",
+          "architecture": "amd64",
+          "override": false,
+          "parent_ref": null,
+          "parent_id": null
+        },
+        "timings": {
+          "workspace_prepare": 10.036,
+          "environment": 3.69,
+          "collection": 19.867
+        }
+      },
+      "psf__requests-3362": {
+        "ok": true,
+        "kind": "pytest_requests_compat",
+        "mode": "collect_only",
+        "parse_status": "COLLECTED",
+        "duration_seconds": 7.407,
+        "parsed": {
+          "tests_collected": 121,
+          "junit_present": true
+        },
+        "image": {
+          "ref": "swebench/sweb.eval.x86_64.psf_1776_requests-3362:latest",
+          "id": "sha256:d1c8c15eeb5e12b7eb3815307d1131d68c72d53419fa2f8b89bc46bc0009a61b",
+          "os": "linux",
+          "architecture": "amd64",
+          "override": false,
+          "parent_ref": null,
+          "parent_id": null
+        },
+        "timings": {
+          "workspace_prepare": 5.968,
+          "environment": 0.084,
+          "collection": 7.431
+        }
+      }
+    },
+    "note": "r5 carries the r3 preflight because r3->r5 changed only index performance and cache-seed identity, not environment/runner code."
+  },
+  "zero_model": {
+    "root": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\summary.json",
+    "recovered": 6,
+    "total": 6,
+    "identity_supplement": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\identity.json",
+    "note": "All target/regression/mock-review/acceptance paths ran; acceptance is REJECTED only because simulated_llm=true (real_run=false). Not Agent capability evidence.",
+    "instances": [
+      {
+        "instance_id": "django__django-11422",
+        "status": "PASS",
+        "workspace": {
+          "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\django__django-11422\\workspace",
+          "base_commit": "df46b329e0900e9e4dc1d60816c1dce6dfc1094e",
+          "repository_id": "repo_29746727167e79f7",
+          "fresh": true,
+          "base_only": true,
+          "clean": true
+        },
+        "runner": {
+          "kind": "django",
+          "command": "./tests/runtests.py --verbosity 2 --settings=test_sqlite --parallel 1",
+          "preflight_scope": [
+            "utils_tests.test_autoreload"
+          ]
+        },
+        "baseline": {
+          "status": "PASS",
+          "exit_code": 0,
+          "tests": 67,
+          "passed": 46,
+          "failed": 0,
+          "skipped": 21,
+          "error_reason": null,
+          "diagnostics": {
+            "runner": "django",
+            "parse_counts": {
+              "ran": 67,
+              "parsed": 67,
+              "wanted": null,
+              "missing": 0,
+              "extra_observed": 0
+            },
+            "requested_missing": [],
+            "requested_extra_observed": [],
+            "execution_backend": "docker",
+            "container_verified": true,
+            "network_mode": "none",
+            "oom_killed": false,
+            "cleanup_error": null,
+            "junit_error": null,
+            "runner_kind": "django"
+          }
+        },
+        "target_before": {
+          "status": "PASS",
+          "tests": {
+            "tests/utils_tests/test_autoreload.py::StatReloaderTests::test_file": "passed"
+          },
+          "missing": [],
+          "error_reason": null
+        },
+        "target_after": {
+          "status": "PASS",
+          "tests": {
+            "tests/utils_tests/test_autoreload.py::StatReloaderTests::test_file": "passed"
+          }
+        },
+        "regression": {
+          "status": "PASS",
+          "tests": 67,
+          "new_failures": [],
+          "baseline_missing": [],
+          "error_reason": null
+        },
+        "mechanical_patch": {
+          "file": "django/utils/autoreload.py",
+          "canonical_sha256": "2629badd4beda5a20af51a8e4ce1060e855151aaa91ac2902ab29e3c69bb1aeb",
+          "raw_sha256": "b3953368b6c273aebf122f6d5d3325a227cc499260f7417c2e4eb9f29b859b5e",
+          "files": [
+            "django/utils/autoreload.py"
+          ],
+          "is_test_file": false
+        },
+        "mock_review_bound": "2629badd4beda5a20af51a8e4ce1060e855151aaa91ac2902ab29e3c69bb1aeb",
+        "acceptance_verdict": "REJECTED",
+        "acceptance_failed_checks": [
+          "real_run"
+        ],
+        "zero_model_rejected_by_real_run_gate": true,
+        "timings": {
+          "fresh_workspace": 37.611,
+          "environment": 0.175,
+          "baseline": 76.047,
+          "target_before": 24.352,
+          "mechanical_patch": 1.166,
+          "target_after_and_regression": 101.343
+        },
+        "summary_path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\django__django-11422\\summary.json"
+      },
+      {
+        "instance_id": "sphinx-doc__sphinx-8273",
+        "status": "PASS",
+        "workspace": {
+          "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\sphinx-doc__sphinx-8273\\workspace",
+          "base_commit": "88b81a06eb635a1596617f8971fa97a84c069e93",
+          "repository_id": "repo_8bbe270c4f620a8c",
+          "fresh": true,
+          "base_only": true,
+          "clean": true
+        },
+        "runner": {
+          "kind": "pytest",
+          "command": "tox --current-env -epy39 -v --",
+          "preflight_scope": []
+        },
+        "baseline": {
+          "status": "FAIL",
+          "exit_code": 1,
+          "tests": 4,
+          "passed": 3,
+          "failed": 1,
+          "skipped": 0,
+          "error_reason": null,
+          "diagnostics": {
+            "execution_backend": "docker",
+            "container_verified": true,
+            "network_mode": "none",
+            "oom_killed": false,
+            "cleanup_error": null,
+            "junit_error": null,
+            "runner_kind": "pytest"
+          }
+        },
+        "target_before": {
+          "status": "PASS",
+          "tests": {
+            "tests/test_build_manpage.py::test_default_man_pages": "passed"
+          },
+          "missing": [],
+          "error_reason": null
+        },
+        "target_after": {
+          "status": "PASS",
+          "tests": {
+            "tests/test_build_manpage.py::test_default_man_pages": "passed"
+          }
+        },
+        "regression": {
+          "status": "FAIL",
+          "tests": 4,
+          "new_failures": [],
+          "baseline_missing": [],
+          "error_reason": null
+        },
+        "mechanical_patch": {
+          "file": "sphinx/builders/manpage.py",
+          "canonical_sha256": "d006e58c84912a61c34cbe55748ee30be3da605f28dacd37c7b101e1d450aa0c",
+          "raw_sha256": "f51fce961ca0f8215aef3dbe79dcf544edba32055567e071ae18344c47eddda7",
+          "files": [
+            "sphinx/builders/manpage.py"
+          ],
+          "is_test_file": false
+        },
+        "mock_review_bound": "d006e58c84912a61c34cbe55748ee30be3da605f28dacd37c7b101e1d450aa0c",
+        "acceptance_verdict": "REJECTED",
+        "acceptance_failed_checks": [
+          "real_run"
+        ],
+        "zero_model_rejected_by_real_run_gate": true,
+        "timings": {
+          "fresh_workspace": 7.507,
+          "environment": 0.115,
+          "baseline": 23.861,
+          "target_before": 8.047,
+          "mechanical_patch": 0.358,
+          "target_after_and_regression": 24.349
+        },
+        "summary_path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\sphinx-doc__sphinx-8273\\summary.json"
+      },
+      {
+        "instance_id": "sympy__sympy-22714",
+        "status": "PASS",
+        "workspace": {
+          "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\sympy__sympy-22714\\workspace",
+          "base_commit": "3ff4717b6aef6086e78f01cdfa06f64ae23aed7e",
+          "repository_id": "repo_e7c89bb450e6b2ac",
+          "fresh": true,
+          "base_only": true,
+          "clean": true
+        },
+        "runner": {
+          "kind": "sympy",
+          "command": "PYTHONWARNINGS='ignore::UserWarning,ignore::SyntaxWarning' bin/test -C --verbose",
+          "preflight_scope": [
+            "sympy/geometry/tests/test_point.py"
+          ]
+        },
+        "baseline": {
+          "status": "PASS",
+          "exit_code": 0,
+          "tests": 12,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0,
+          "error_reason": null,
+          "diagnostics": {
+            "runner": "sympy",
+            "parse_counts": {
+              "parsed": 12,
+              "wanted": null,
+              "missing": 0,
+              "extra_observed": 0,
+              "files": {
+                "sympy/geometry/tests/test_point.py": 12
+              },
+              "summary": {
+                "passed": 12
+              }
+            },
+            "requested_missing": [],
+            "requested_extra_observed": [],
+            "summary_declares_failures": 0,
+            "execution_backend": "docker",
+            "container_verified": true,
+            "network_mode": "none",
+            "oom_killed": false,
+            "cleanup_error": null,
+            "junit_error": null,
+            "runner_kind": "sympy"
+          }
+        },
+        "target_before": {
+          "status": "PASS",
+          "tests": {
+            "sympy/geometry/tests/test_point.py::test_Point2D": "passed"
+          },
+          "missing": [],
+          "error_reason": null
+        },
+        "target_after": {
+          "status": "PASS",
+          "tests": {
+            "sympy/geometry/tests/test_point.py::test_Point2D": "passed"
+          }
+        },
+        "regression": {
+          "status": "PASS",
+          "tests": 12,
+          "new_failures": [],
+          "baseline_missing": [],
+          "error_reason": null
+        },
+        "mechanical_patch": {
+          "file": "sympy/geometry/point.py",
+          "canonical_sha256": "0cc9340d9533cdc1e09327db2d8610442fe74a1b28d2b866fb23d41b5ad65a36",
+          "raw_sha256": "08f83e82d49d7901780c6553202a5fc722c40bea7ce3dc6d2ba3cf90a1a7fdbe",
+          "files": [
+            "sympy/geometry/point.py"
+          ],
+          "is_test_file": false
+        },
+        "mock_review_bound": "0cc9340d9533cdc1e09327db2d8610442fe74a1b28d2b866fb23d41b5ad65a36",
+        "acceptance_verdict": "REJECTED",
+        "acceptance_failed_checks": [
+          "real_run"
+        ],
+        "zero_model_rejected_by_real_run_gate": true,
+        "timings": {
+          "fresh_workspace": 17.31,
+          "environment": 0.079,
+          "baseline": 48.421,
+          "target_before": 42.037,
+          "mechanical_patch": 0.308,
+          "target_after_and_regression": 80.53
+        },
+        "summary_path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\sympy__sympy-22714\\summary.json"
+      },
+      {
+        "instance_id": "matplotlib__matplotlib-18869",
+        "status": "PASS",
+        "workspace": {
+          "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\matplotlib__matplotlib-18869\\workspace",
+          "base_commit": "b7d05919865fc0c37a0164cf467d5d5513bd0ede",
+          "repository_id": "repo_823594284716d436",
+          "fresh": true,
+          "base_only": true,
+          "clean": true
+        },
+        "runner": {
+          "kind": "pytest",
+          "command": "pytest -rA",
+          "preflight_scope": []
+        },
+        "baseline": {
+          "status": "PASS",
+          "exit_code": 0,
+          "tests": 4,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0,
+          "error_reason": null,
+          "diagnostics": {
+            "execution_backend": "docker",
+            "container_verified": true,
+            "network_mode": "none",
+            "oom_killed": false,
+            "cleanup_error": null,
+            "junit_error": null,
+            "runner_kind": "pytest"
+          }
+        },
+        "target_before": {
+          "status": "PASS",
+          "tests": {
+            "lib/matplotlib/tests/test_matplotlib.py::test_use_doc_standard_backends": "passed"
+          },
+          "missing": [],
+          "error_reason": null
+        },
+        "target_after": {
+          "status": "PASS",
+          "tests": {
+            "lib/matplotlib/tests/test_matplotlib.py::test_use_doc_standard_backends": "passed"
+          }
+        },
+        "regression": {
+          "status": "PASS",
+          "tests": 4,
+          "new_failures": [],
+          "baseline_missing": [],
+          "error_reason": null
+        },
+        "mechanical_patch": {
+          "file": "lib/matplotlib/__init__.py",
+          "canonical_sha256": "bcd3c51a596a6470c24137b3cf9d2c2627d9c9c0b265aa7f0a4d4708c2189eb6",
+          "raw_sha256": "20d6b5eff515fdc8b5ce26d0a289f1ac9107b314e32e9c7f7190743cda8a1fe4",
+          "files": [
+            "lib/matplotlib/__init__.py"
+          ],
+          "is_test_file": false
+        },
+        "mock_review_bound": "bcd3c51a596a6470c24137b3cf9d2c2627d9c9c0b265aa7f0a4d4708c2189eb6",
+        "acceptance_verdict": "REJECTED",
+        "acceptance_failed_checks": [
+          "real_run"
+        ],
+        "zero_model_rejected_by_real_run_gate": true,
+        "timings": {
+          "fresh_workspace": 14.762,
+          "environment": 8.399,
+          "baseline": 33.932,
+          "target_before": 15.77,
+          "mechanical_patch": 0.249,
+          "target_after_and_regression": 41.469
+        },
+        "summary_path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\matplotlib__matplotlib-18869\\summary.json"
+      },
+      {
+        "instance_id": "scikit-learn__scikit-learn-10297",
+        "status": "PASS",
+        "workspace": {
+          "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\scikit-learn__scikit-learn-10297\\workspace",
+          "base_commit": "b90661d6a46aa3619d3eec94d5281f5888add501",
+          "repository_id": "repo_293bcd8a543485e3",
+          "fresh": true,
+          "base_only": true,
+          "clean": true
+        },
+        "runner": {
+          "kind": "pytest",
+          "command": "pytest -rA",
+          "preflight_scope": [
+            "sklearn/linear_model/tests"
+          ]
+        },
+        "baseline": {
+          "status": "PASS",
+          "exit_code": 0,
+          "tests": 29,
+          "passed": 28,
+          "failed": 0,
+          "skipped": 1,
+          "error_reason": null,
+          "diagnostics": {
+            "execution_backend": "docker",
+            "container_verified": true,
+            "network_mode": "none",
+            "oom_killed": false,
+            "cleanup_error": null,
+            "junit_error": null,
+            "runner_kind": "pytest"
+          }
+        },
+        "target_before": {
+          "status": "PASS",
+          "tests": {
+            "sklearn/linear_model/tests/test_ridge.py::test_ridge": "passed"
+          },
+          "missing": [],
+          "error_reason": null
+        },
+        "target_after": {
+          "status": "PASS",
+          "tests": {
+            "sklearn/linear_model/tests/test_ridge.py::test_ridge": "passed"
+          }
+        },
+        "regression": {
+          "status": "PASS",
+          "tests": 29,
+          "new_failures": [],
+          "baseline_missing": [],
+          "error_reason": null
+        },
+        "mechanical_patch": {
+          "file": "sklearn/linear_model/ridge.py",
+          "canonical_sha256": "ae3cf6a7d793ddebbf44f820d68f3f7a870c2dfda859892174cebf26ef7802d0",
+          "raw_sha256": "5a14204c2f0110156c8fec183096ec7110065f0b7f4b3fecab8f119acad0fc2c",
+          "files": [
+            "sklearn/linear_model/ridge.py"
+          ],
+          "is_test_file": false
+        },
+        "mock_review_bound": "ae3cf6a7d793ddebbf44f820d68f3f7a870c2dfda859892174cebf26ef7802d0",
+        "acceptance_verdict": "REJECTED",
+        "acceptance_failed_checks": [
+          "real_run"
+        ],
+        "zero_model_rejected_by_real_run_gate": true,
+        "timings": {
+          "fresh_workspace": 9.409,
+          "environment": 7.282,
+          "baseline": 15.511,
+          "target_before": 6.63,
+          "mechanical_patch": 0.225,
+          "target_after_and_regression": 15.221
+        },
+        "summary_path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\scikit-learn__scikit-learn-10297\\summary.json"
+      },
+      {
+        "instance_id": "psf__requests-3362",
+        "status": "PASS",
+        "workspace": {
+          "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\psf__requests-3362\\workspace",
+          "base_commit": "36453b95b13079296776d11b09cab2567ea3e703",
+          "repository_id": "repo_4dc0e0add89a76b5",
+          "fresh": true,
+          "base_only": true,
+          "clean": true
+        },
+        "runner": {
+          "kind": "pytest_requests_compat",
+          "command": "pytest -rA",
+          "preflight_scope": [
+            "tests/test_utils.py"
+          ]
+        },
+        "baseline": {
+          "status": "PASS",
+          "exit_code": 0,
+          "tests": 121,
+          "passed": 120,
+          "failed": 0,
+          "skipped": 1,
+          "error_reason": null,
+          "diagnostics": {
+            "execution_backend": "docker",
+            "container_verified": true,
+            "network_mode": "none",
+            "oom_killed": false,
+            "cleanup_error": null,
+            "junit_error": null,
+            "runner_kind": "pytest_requests_compat"
+          }
+        },
+        "target_before": {
+          "status": "PASS",
+          "tests": {
+            "tests/test_utils.py::TestSuperLen::test_string": "passed"
+          },
+          "missing": [],
+          "error_reason": null
+        },
+        "target_after": {
+          "status": "PASS",
+          "tests": {
+            "tests/test_utils.py::TestSuperLen::test_string": "passed"
+          }
+        },
+        "regression": {
+          "status": "PASS",
+          "tests": 121,
+          "new_failures": [],
+          "baseline_missing": [],
+          "error_reason": null
+        },
+        "mechanical_patch": {
+          "file": "requests/utils.py",
+          "canonical_sha256": "f1ec18e256f59d6d2e7c617bba92f07262a4628526c86c10b62ec4bb356114cf",
+          "raw_sha256": "9545e47106d6781a59f5b9022bd5c3353e80bbb6bef52997a859a745cb7831b5",
+          "files": [
+            "requests/utils.py"
+          ],
+          "is_test_file": false
+        },
+        "mock_review_bound": "f1ec18e256f59d6d2e7c617bba92f07262a4628526c86c10b62ec4bb356114cf",
+        "acceptance_verdict": "REJECTED",
+        "acceptance_failed_checks": [
+          "real_run"
+        ],
+        "zero_model_rejected_by_real_run_gate": true,
+        "timings": {
+          "fresh_workspace": 6.69,
+          "environment": 0.109,
+          "baseline": 5.714,
+          "target_before": 3.853,
+          "mechanical_patch": 0.215,
+          "target_after_and_regression": 9.292
+        },
+        "summary_path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\zero-model\\psf__requests-3362\\summary.json"
+      }
+    ]
+  },
+  "search_tool_real_entry": {
+    "workspace": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase20\\m3-20261024-formal6\\instances\\matplotlib__matplotlib-18869\\preflight\\workspace",
+    "tool": "search_code",
+    "pattern": "rcParams",
+    "path_glob": "*.py",
+    "cases": {
+      "rg_timeout": {
+        "ok": true,
+        "engine": "python_fallback",
+        "fallback_reason": "rg_timeout",
+        "fallback_timed_out": false,
+        "matches": 50,
+        "truncated": true,
+        "files_scanned": 417,
+        "elapsed_ms": 16965.73,
+        "denied_dir_matches": [],
+        "first": [
+          "doc/sphinxext/custom_roles.py",
+          "doc/sphinxext/custom_roles.py",
+          "doc/sphinxext/custom_roles.py"
+        ]
+      },
+      "rg_nonzero": {
+        "ok": false,
+        "error": {
+          "code": "search_failed",
+          "message": "ripgrep failed",
+          "details": {
+            "engine": "ripgrep",
+            "exit_code": 2,
+            "stderr": "",
+            "elapsed_ms": 25.56
+          }
+        }
+      },
+      "rg_missing": {
+        "ok": true,
+        "engine": "python_fallback",
+        "fallback_reason": "rg_missing",
+        "fallback_timed_out": false,
+        "matches": 50,
+        "truncated": true,
+        "files_scanned": 417,
+        "elapsed_ms": 1941.74,
+        "denied_dir_matches": [],
+        "first": [
+          "doc/sphinxext/custom_roles.py",
+          "doc/sphinxext/custom_roles.py",
+          "doc/sphinxext/custom_roles.py"
+        ]
+      }
+    }
+  },
+  "live_batch": {
+    "segment": "r5",
+    "root": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r5",
+    "status": "stopped",
+    "stop_reason": "django__django-11422: BatchStopError: unknown usage/cost; ledger frozen after registry recording",
+    "frozen_code_sha": "280b4660a9abae1728220f72a96d723c44ec1dcb",
+    "preflight_reused_from": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\preflight\\preflight.json",
+    "django": {
+      "run_id": "swebench-smoke-phase21-recovery-6-django__django-11422-s0-eac60aa6",
+      "status": "error",
+      "stop_reason": "workflow_error",
+      "verification_level": "error",
+      "test_runs": 2,
+      "attempts": 0,
+      "patch_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_diff_empty": true,
+      "failure_reasons": [
+        "reproduce: [llm_request_uncertain/provider] budget_stopped: response/cost uncertain; further dispatch frozen"
+      ],
+      "error_class": "llm_request_uncertain",
+      "error_origin": "provider",
+      "ledger_path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r5\\instances\\django__django-11422\\dispatch-ledger-phase21-recovery-6-r1.json",
+      "ledger_sha256": "348d46f251f73f22cc207fda8374ca49b40a85d453199d2a6a1318daa439a046",
+      "ledger_frozen": true,
+      "ledger_records": [
+        {
+          "seq": 1,
+          "model": "glm-5.3-flash",
+          "reserved_cny": 0.8114688000000001,
+          "status": "settled",
+          "cost_cny": 0.012517200000000001,
+          "input_tokens": 14775,
+          "cached_input_tokens": 0,
+          "output_tokens": 249
+        },
+        {
+          "seq": 2,
+          "model": "glm-5.3-flash",
+          "reserved_cny": 0.8114688000000001,
+          "status": "settled",
+          "cost_cny": 0.020668,
+          "input_tokens": 24554,
+          "cached_input_tokens": 0,
+          "output_tokens": 366
+        },
+        {
+          "seq": 3,
+          "model": "glm-5.3-flash",
+          "reserved_cny": 0.8114688000000001,
+          "status": "settled",
+          "cost_cny": 0.0078884,
+          "input_tokens": 5132,
+          "cached_input_tokens": 0,
+          "output_tokens": 1351
+        },
+        {
+          "seq": 4,
+          "model": "glm-5.3-flash",
+          "reserved_cny": 0.8114688000000001,
+          "status": "settled",
+          "cost_cny": 0.006514,
+          "input_tokens": 6263,
+          "cached_input_tokens": 0,
+          "output_tokens": 537
+        },
+        {
+          "seq": 5,
+          "model": "glm-5.3-flash",
+          "reserved_cny": 0.8114688000000001,
+          "status": "unknown_frozen",
+          "cost_cny": null,
+          "error_type": "RemoteProtocolError"
+        }
+      ],
+      "ledger_accounted_or_reserved_cny": 0.8590564000000002,
+      "registry": [
+        {
+          "attempt_label": "phase21-recovery-6",
+          "instance_id": "django__django-11422",
+          "artifact_root": "artifacts/phase21/m3-phase21-recovery-6-r5/instances/django__django-11422",
+          "ledger_path": "artifacts/phase21/m3-phase21-recovery-6-r5/instances/django__django-11422/dispatch-ledger-phase21-recovery-6-r1.json",
+          "ledger_sha256": "348d46f251f73f22cc207fda8374ca49b40a85d453199d2a6a1318daa439a046",
+          "ledger_present": true,
+          "status": "stopped",
+          "settled_cny": 0.0475876,
+          "unknown_reserved_cny": 0.8114688000000001,
+          "total_upper_bound_cny": 0.8590564,
+          "created_at": "2026-10-25T17:59:00+00:00",
+          "updated_at": "2026-10-25T17:59:00+00:00"
+        }
+      ]
+    },
+    "other_instances": [
+      {
+        "instance_id": "sphinx-doc__sphinx-8273",
+        "status": "DRY_RUN",
+        "internal": "NOT_RUN",
+        "official": "NOT_EVALUATED",
+        "dispatched": false,
+        "reason": "frozen ledger stopped all later dispatch"
+      },
+      {
+        "instance_id": "sympy__sympy-22714",
+        "status": "DRY_RUN",
+        "internal": "NOT_RUN",
+        "official": "NOT_EVALUATED",
+        "dispatched": false,
+        "reason": "frozen ledger stopped all later dispatch"
+      },
+      {
+        "instance_id": "matplotlib__matplotlib-18869",
+        "status": "DRY_RUN",
+        "internal": "NOT_RUN",
+        "official": "NOT_EVALUATED",
+        "dispatched": false,
+        "reason": "frozen ledger stopped all later dispatch"
+      },
+      {
+        "instance_id": "scikit-learn__scikit-learn-10297",
+        "status": "DRY_RUN",
+        "internal": "NOT_RUN",
+        "official": "NOT_EVALUATED",
+        "dispatched": false,
+        "reason": "frozen ledger stopped all later dispatch"
+      },
+      {
+        "instance_id": "psf__requests-3362",
+        "status": "DRY_RUN",
+        "internal": "NOT_RUN",
+        "official": "NOT_EVALUATED",
+        "dispatched": false,
+        "reason": "frozen ledger stopped all later dispatch"
+      }
+    ],
+    "model_identity": {
+      "alias": "glm-5.3-flash-main",
+      "observed_server_model": "glm-5.3-flash",
+      "temperature": 0.0,
+      "seed": "unsupported_not_dispatched",
+      "http_retries": 0
+    }
+  },
+  "official": {
+    "harness_runs": 0,
+    "verdicts": {
+      "django__django-11422": "NOT_EVALUATED",
+      "sphinx-doc__sphinx-8273": "NOT_EVALUATED",
+      "sympy__sympy-22714": "NOT_EVALUATED",
+      "matplotlib__matplotlib-18869": "NOT_EVALUATED",
+      "scikit-learn__scikit-learn-10297": "NOT_EVALUATED",
+      "psf__requests-3362": "NOT_EVALUATED"
+    },
+    "official_coverage": 0.0,
+    "valid_official_resolution_rate": null,
+    "note": "No ACCEPTED instance; no patch/prediction to submit. NOT_EVALUATED is not UNRESOLVED."
+  },
+  "metrics": {
+    "fixed_denominator": 6,
+    "execution_capability_recovered": 6,
+    "official_coverage": "0/6",
+    "valid_official_resolution_rate": "N/A",
+    "task_resolution_rate": "0/6",
+    "internal_closure_acceptance_rate": "0/6",
+    "environment_invalid_rate": "0/6",
+    "real_agent_attempts": 1,
+    "real_agent_patches": 0,
+    "infrastructure_stops": 1,
+    "model_failures": 0,
+    "tool_failures": 0,
+    "budget_stops_not_dispatched": 5
+  },
+  "cost": {
+    "historical_opening_upper_bound_cny": 11.2407856,
+    "historical_settled_cny": 7.1834416,
+    "historical_unknown_reserved_cny": 4.057344,
+    "phase20_settled_cny": 0.25156496,
+    "phase20_unknown_reserved_cny": 0.0,
+    "phase21_settled_cny": 0.0475876,
+    "phase21_unknown_reserved_cny": 0.8114688000000001,
+    "phase21_upper_bound_cny": 0.8590564,
+    "authorization_cny": 30.0,
+    "authorization_batch_limit_cny": 29.74843504,
+    "authorization_remaining_upper_bound_cny": 28.88937864,
+    "main_batch_limit_cny": 24.0,
+    "main_batch_remaining_upper_bound_cny": 23.1409436,
+    "per_instance_limit_cny": 4.0,
+    "django_instance_remaining_upper_bound_cny": 3.1409436,
+    "cumulative_upper_bound_including_historical_cny": 12.099842,
+    "requests": 5,
+    "unknown_calls": 1
+  },
+  "tests": {
+    "final_targeted": "artifacts/phase21/final-targeted-tests.log",
+    "final_targeted_summary": "271 passed, 3 skipped",
+    "phase12_closure_admission": "13 passed",
+    "m3_batch": "18 passed",
+    "repo_import_index_calls_testlinks": "67 passed",
+    "transfer_windows": "17 passed, 3 precise capability skips",
+    "transfer_linux_mnt_c": "20 passed",
+    "fsutil_replace": "3 passed"
+  },
+  "remaining_blockers": [
+    "Phase21 real paid coverage: only Django was attempted; provider timeout/usage uncertainty froze the ledger.",
+    "No official verdicts; official coverage 0/6.",
+    "Full-repo pytest, full Docker suite, test50/test300/M4/a22: NOT RUN.",
+    "Any further paid dispatch (remaining five and/or Django) requires explicit written authorization and a new segment; the frozen Django ledger must not be reset or bypassed.",
+    "Historical pytest P2 remains NOT VERIFIED."
+  ],
+  "evidence_files": {
+    "report": "docs/notes/phase21-engineering-recovery-verification.md",
+    "summary": "docs/evidence/phase21/summary.json",
+    "zero_model": "artifacts/phase21/zero-model/summary.json",
+    "preflight": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\preflight\\preflight.json",
+    "search_tool": "artifacts/phase21/search-tool-real.json",
+    "matplotlib_artifacts": "artifacts/phase21/matplotlib-artifacts.json",
+    "r5_ledger": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r5\\instances\\django__django-11422\\dispatch-ledger-phase21-recovery-6-r1.json",
+    "r5_run_report": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r5\\instances\\django__django-11422\\runs\\swebench-smoke-phase21-recovery-6-django__django-11422-s0-eac60aa6\\report.json",
+    "final_targeted_tests": "artifacts/phase21/final-targeted-tests.log"
+  },
+  "evidence_sha256": {
+    "report": "18b3680e5768915175b80a4d7d70c597931d6c86c646fa8629212e4f2824eea2",
+    "summary": "1b55e9044af1fc494d8f02fb30916f54031e4b74d20438677addc08c13a9bd6d",
+    "zero_model": "62268523dd1f4d737b4607405a4683948cee505ccbc3edc48293d34edbf728ce",
+    "preflight": "07fcf673d7235d41f650f10c02d8f989cca0f7df48baf7dc25cb8c80d6bce428",
+    "search_tool": "1d4470f5d56db7207b288ec92dc14a0653809d073c4aacedb4d9b74c72ee2ffd",
+    "matplotlib_artifacts": "e189b025359873c15787c1c6f941211855ca55875c09eac2509feb6bbbea9595",
+    "r5_ledger": "348d46f251f73f22cc207fda8374ca49b40a85d453199d2a6a1318daa439a046",
+    "r5_run_report": "8a425fc818fea61c1741b16ae077609fc7e8dae3f34f9f69ee04126207737a53",
+    "final_targeted_tests": "ec6f7ac819b8d72f6071e97d1448f2e175d407dd4137ec9f70515c0d814b1f4e"
+  }
+}

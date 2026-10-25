@@ -384,9 +384,9 @@ def test_repo_cache_seed_uses_the_loader_source_identity(tmp_path: Path) -> None
     manager = WorkspaceManager(cache_root=tmp_path / "cache")
     catalog_style = m3_batch.canonical_repo_source("django/django")
     loader_style = "https://github.com/django/django"
-    assert manager.cache_path(catalog_style).name == manager.cache_path(
-        loader_style
-    ).name, "raw owner/repo must not resolve to a different seed cache key"
+    assert manager.cache_path(catalog_style).name == manager.cache_path(loader_style).name, (
+        "raw owner/repo must not resolve to a different seed cache key"
+    )
 
 
 def test_m3_default_dry_run_dispatches_nothing(fixture: Fixture) -> None:
