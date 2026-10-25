@@ -507,7 +507,13 @@ class InferenceAssembly:
             deny_existing_test_edits=deny_existing,
         )
         database = artifacts.run_dir / "index.sqlite3"
-        engine = create_engine_from_url(f"sqlite:///{database.as_posix()}")
+        # The index DB is rebuildable. A Django-sized edge set otherwise creates
+        # a disk journal/temp that failed to open ("unable to open database
+        # file") before the first graph node. Memory journal/temp keeps the
+        # index write self-contained; other databases keep durable defaults.
+        engine = create_engine_from_url(
+            f"sqlite:///{database.as_posix()}", sqlite_journal_mode="MEMORY"
+        )
         init_db(engine)
         factory = create_session_factory(engine)
         try:

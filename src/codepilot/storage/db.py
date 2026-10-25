@@ -23,7 +23,12 @@ __all__ = [
 ]
 
 
-def create_engine_from_url(url: str, *, echo: bool = False) -> Engine:
+_SQLITE_JOURNAL_MODES = frozenset({"DELETE", "TRUNCATE", "PERSIST", "MEMORY", "WAL", "OFF"})
+
+
+def create_engine_from_url(
+    url: str, *, echo: bool = False, sqlite_journal_mode: str | None = None
+) -> Engine:
     """按 URL 创建 Engine。
 
     SQLite 需要两处特殊处理：
@@ -48,18 +53,31 @@ def create_engine_from_url(url: str, *, echo: bool = False) -> Engine:
                 future=True,
                 connect_args={"check_same_thread": False},
             )
-        _enable_sqlite_foreign_keys(engine)
+        _enable_sqlite_foreign_keys(engine, journal_mode=sqlite_journal_mode)
         return engine
     return create_engine(url, echo=echo, future=True, pool_pre_ping=True)
 
 
-def _enable_sqlite_foreign_keys(engine: Engine) -> None:
-    """SQLite 默认不强制外键，需要逐连接打开。"""
+def _enable_sqlite_foreign_keys(engine: Engine, *, journal_mode: str | None = None) -> None:
+    """SQLite 默认不强制外键，需要逐连接打开。
+
+    ``journal_mode`` 是可选的**索引库**性能/健壮性设置：一次性写入 Django
+    规模的边集时，磁盘 journal/temp 可能打不开（实测 ``unable to open
+    database file``）。索引库可以从仓库重建，因此调用方可以显式选择
+    ``MEMORY`` journal 与内存 temp，避免把大事务压到磁盘临时文件上。其他
+    数据库（API、任务）保持默认的耐用设置。
+    """
+    if journal_mode is not None and journal_mode not in _SQLITE_JOURNAL_MODES:
+        raise ValueError(f"unsupported SQLite journal mode: {journal_mode!r}")
 
     @event.listens_for(engine, "connect")
     def _set_sqlite_pragma(dbapi_connection: object, _record: object) -> None:
         cursor = dbapi_connection.cursor()  # type: ignore[attr-defined]
         cursor.execute("PRAGMA foreign_keys=ON")
+        if journal_mode is not None:
+            cursor.execute(f"PRAGMA journal_mode={journal_mode}")
+            cursor.execute("PRAGMA temp_store=MEMORY")
+            cursor.execute("PRAGMA synchronous=OFF")
         cursor.close()
 
 
