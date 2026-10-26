@@ -1,0 +1,86 @@
+{
+  "schema_version": 2,
+  "batch_id": "phase22-six-live-r2",
+  "batch_name": "Phase22原六实例真实恢复批",
+  "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+  "selection_seed": 20261024,
+  "run_seed": 0,
+  "seed_support": "unsupported_not_dispatched",
+  "provider": "bigmodel",
+  "model": "glm-5.3-flash-main",
+  "llm_config": "configs/phase22/llm.yaml",
+  "temperature": 0.0,
+  "require_temperature": true,
+  "http_retries": 0,
+  "max_output_tokens": 4096,
+  "max_iterations": 5,
+  "max_test_runs": 18,
+  "max_tool_calls_per_iteration": 30,
+  "max_review_calls": 2,
+  "timeout_seconds": 1800,
+  "opening_manifest": "configs/phase22/opening-r2.json",
+  "historical_opening_cny": 12.37753296,
+  "batch_new_limit_cny": 28.86325264,
+  "main_batch_limit_cny": 23.973874,
+  "per_instance_new_limit_cny": 4.0,
+  "conservative_connection_and_unknown_reserve_cny": 6.0,
+  "minimum_dispatch_balance_cny": 0.05,
+  "runner_overrides": "configs/phase21/instance-runner-overrides.json",
+  "repo_cache_seeds": "configs/phase21/repo-cache-seeds.json",
+  "official_mode": "wsl",
+  "wsl_distro": "Ubuntu-24.04",
+  "linux_repo_root": "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair",
+  "linux_python": "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair/.venv-linux/bin/python",
+  "harness_python": "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair/.venv-swebench-linux/bin/python",
+  "require_preflight": true,
+  "cost_note": "Historical opening includes Phase20/21 once; remaining original30 independently derived from their requests. No diagnostic model call.",
+  "original_authorization_cny": 30,
+  "prior_authorization_sources": [
+    {
+      "path": "artifacts/phase20/m3-20261024-formal6/instances/matplotlib__matplotlib-18869/dispatch-ledger-m3-20261024-r1.json",
+      "sha256": "14f3e119d8c87945ce70b71982fc5d60974c21b9076057d4365589c63f870cd8",
+      "upper_bound_cny": 0.06550088
+    },
+    {
+      "path": "artifacts/phase20/m3-20261024-formal6/instances/sphinx-doc__sphinx-8273/dispatch-ledger-m3-20261024-r1.json",
+      "sha256": "d27b7618f42311648f3ea2c5e4fbf3da52db1d735d7db12c641f3d0688129f85",
+      "upper_bound_cny": 0.18606408000000002
+    },
+    {
+      "path": "artifacts/phase21/m3-phase21-recovery-6-r5/instances/django__django-11422/dispatch-ledger-phase21-recovery-6-r1.json",
+      "sha256": "348d46f251f73f22cc207fda8374ca49b40a85d453199d2a6a1318daa439a046",
+      "upper_bound_cny": 0.8590564
+    },
+    {
+      "path": "artifacts/phase22/live/instances/sphinx-doc__sphinx-8273/dispatch-ledger-phase22-six-live-r1.json",
+      "sha256": "aae05e2f6799d1acc00087ce916d67452df16cf4b796743a87501a1667e0530d"
+    }
+  ],
+  "index_snapshots": {
+    "django__django-11422": {
+      "path": "artifacts/phase22/index-seeds/django__django-11422.sqlite3",
+      "sha256": "baec01cb5990b4af9dee60bf85acbb8fb52539977a940d250572889af16c46be",
+      "source": "artifacts\\phase21\\m3-phase21-recovery-6-r5\\instances\\django__django-11422\\runs\\swebench-smoke-phase21-recovery-6-django__django-11422-s0-eac60aa6\\index.sqlite3",
+      "source_sha256": "b457bdd324236df65708d1f1347f5a3388980110acb10e6c8859d89f908e71d2"
+    },
+    "sphinx-doc__sphinx-8273": {
+      "path": "artifacts/phase22/index-seeds/sphinx-doc__sphinx-8273.sqlite3",
+      "sha256": "529b6f12d0ae31b355e65d4d12165d5ff01e752923bdaaed0ab6a58690454138",
+      "source": "artifacts\\phase20\\m3-20261024-formal6\\instances\\sphinx-doc__sphinx-8273\\runs\\swebench-smoke-m3-20261024-sphinx-doc__sphinx-8273-s0-70586dbc\\index.sqlite3",
+      "source_sha256": "cebbf5471624119d95867d799d1902f955582f59a07f97698f15f313a2ac848d"
+    },
+    "matplotlib__matplotlib-18869": {
+      "path": "artifacts/phase22/index-seeds/matplotlib__matplotlib-18869.sqlite3",
+      "sha256": "30a2f1923071eabe061f15c2180446ff38361c910ac9c0be36e67d10774e63ca",
+      "source": "artifacts\\phase20\\m3-20261024-formal6\\instances\\matplotlib__matplotlib-18869\\runs\\swebench-smoke-m3-20261024-matplotlib__matplotlib-18869-s0-46563a3e\\index.sqlite3",
+      "source_sha256": "42def0512b0d58c683b6a2e3a044d154b0681659e322602a2d1266c4b359ffd2"
+    }
+  },
+  "completed_segment_sources": {
+    "sphinx-doc__sphinx-8273": {
+      "path": "artifacts/phase22/live/instances/sphinx-doc__sphinx-8273/dispatch-ledger-phase22-six-live-r1.json",
+      "sha256": "aae05e2f6799d1acc00087ce916d67452df16cf4b796743a87501a1667e0530d"
+    }
+  },
+  "segment1_new_settled_cny": 0.026126000000000003
+}
