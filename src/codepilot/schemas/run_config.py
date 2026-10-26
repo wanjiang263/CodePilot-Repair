@@ -31,6 +31,7 @@ class StageRecovery(BaseModel):
         "review",
     ]
     candidate_sha256: str | None = None
+    preserve_source_edits: bool = False
     historical_ledger_hashes: dict[str, str]
     reason: str = Field(min_length=1)
     previous_runtime_seconds: float = 0

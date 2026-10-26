@@ -549,3 +549,10 @@ def adapter_for(instance_id: str, overrides: RunnerOverrides | None) -> RunnerAd
         return None
     config = overrides.for_instance(instance_id)
     return RunnerAdapter(config) if config is not None else None
+
+
+def reproduction_only(tests: tuple[str, ...]) -> bool:
+    """Agent-generated tests have an explicit pytest contract, even in native repos."""
+    from codepilot.schemas.reproduction import is_reproduction_test_path
+
+    return bool(tests) and all(is_reproduction_test_path(item.split("::", 1)[0]) for item in tests)

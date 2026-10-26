@@ -66,6 +66,7 @@ def main():
     parser.add_argument("--segment", type=int, default=1)
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--preflight-scope", nargs="+")
+    parser.add_argument("--preflight-candidate", type=Path)
     parser.add_argument("--entry")
     parser.add_argument("--source-run", type=Path)
     parser.add_argument("--reason")
@@ -241,7 +242,13 @@ def main():
                     "client_verified_before_http": True,
                 },
             )
-            candidates = list((previous / "reproduction").glob("*-candidate.py"))
+            candidates = (
+                [args.preflight_candidate.resolve(strict=True)]
+                if args.preflight_candidate
+                else list((previous / "reproduction").glob("*-candidate.py"))
+            )
+            if any(not path.is_relative_to(ROOT) for path in candidates):
+                raise ValueError("preflight candidate must remain in D project")
             if candidates:
                 import ast
 
@@ -340,6 +347,7 @@ def main():
             else ""
         )
         recovery = StageRecovery(
+            preserve_source_edits=args.instance == "django__django-11422" and entry == "plan",
             source_state=state_file,
             source_artifacts=previous,
             source_state_sha256=sha(state_file),

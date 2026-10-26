@@ -334,7 +334,9 @@ def test_target_evidence_cache_requires_same_frozen_image(monkeypatch):
     result = ExecutionResult(
         status=ExecutionStatus.PASS,
         tests=[
-            TestCaseResult(node_id="tests/test_x.py::test_x", outcome=TestOutcome.PASSED, duration=0)
+            TestCaseResult(
+                node_id="tests/test_x.py::test_x", outcome=TestOutcome.PASSED, duration=0
+            )
         ],
         diagnostics={"environment_image_id": "image-old"},
     )
@@ -352,3 +354,59 @@ def test_target_evidence_cache_requires_same_frozen_image(monkeypatch):
     )
     earlier.execution = result.model_copy(update={"diagnostics": {}})
     assert nodes._prior_execution_for_patch(state, deps, ["tests/test_x.py::test_x"]) is None
+
+
+def test_source_only_recovery_preserves_agent_source_and_protects_tests(tmp_path):
+    import hashlib
+
+    from codepilot.artifacts import ArtifactStore
+    from codepilot.patch.diff import generate_git_diff
+    from codepilot.patch.validator import PatchValidator
+
+    repo = init_repo(
+        tmp_path / "repo", {"pkg/core.py": "value = 1\n", "tests/test_core.py": "assert True\n"}
+    )
+    (repo.path / "pkg/core.py").write_text("value = 2\n", encoding="utf8")
+    (repo.path / "tests/test_core.py").write_text("assert False\n", encoding="utf8")
+    patch = generate_git_diff(repo.path, repo.head).text
+    repo.git("checkout", "--", ".")
+    initial = RepairState(
+        task_id="task",
+        run_id="new",
+        repository_id="repo",
+        base_commit=repo.head,
+        issue="x",
+        started_at=datetime.now(UTC),
+    )
+    raw = initial.model_dump(mode="json")
+    raw.update(run_id="old", current_patch=patch)
+    source = tmp_path / "old/state_final.json"
+    source.parent.mkdir()
+    source.write_text(json.dumps(raw), encoding="utf8")
+    original = source.read_bytes()
+    recovery = StageRecovery(
+        source_state=source,
+        source_state_sha256=hashlib.sha256(original).hexdigest(),
+        source_run_id="old",
+        entry="plan",
+        preserve_source_edits=True,
+        historical_ledger_hashes={},
+        reason="retain source; forbidden test edits were unapplied",
+    )
+    deps = SimpleNamespace(
+        validator=PatchValidator(
+            WorkspacePathPolicy(repo.path, deny_existing_test_edits=True), repo.head
+        ),
+        artifacts=ArtifactStore(tmp_path / "artifacts", "new"),
+    )
+    recovered = import_stage(initial, recovery, deps)
+    assert (repo.path / "pkg/core.py").read_text() == "value = 2\n"
+    assert (repo.path / "tests/test_core.py").read_text() == "assert True\n"
+    assert "tests/test_core.py" not in recovered.current_patch
+    assert "pkg/core.py" in recovered.current_patch
+    assert recovered.attempts == []
+    assert source.read_bytes() == original
+    receipt = json.loads(
+        (deps.artifacts.run_dir / "stage-recovery.json").read_text(encoding="utf8")
+    )
+    assert receipt["preserved_source_edits"]["excluded_test_paths"] == ["tests/test_core.py"]

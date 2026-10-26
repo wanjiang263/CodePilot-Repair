@@ -25,6 +25,7 @@ from codepilot.sandbox.runners import (
     PYTEST_REQUESTS_COMPAT,
     RunnerOverrides,
     adapter_for,
+    reproduction_only,
 )
 from codepilot.sandbox.swebench_env import (
     SWEBenchInstanceImageResolver,
@@ -403,8 +404,13 @@ class OfficialInstanceSandbox(DockerSandbox):
             ),
             "PYTHONPATH": "/testbed/src:/testbed:/testbed/testdeps",
         }
-        native = self.runner is not None and self.runner.native
-        command = spec.test_command
+        repro = reproduction_only(tuple(kwargs.get("tests", ())))
+        native = self.runner is not None and self.runner.native and not repro
+        command = (
+            "python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml"
+            if repro
+            else spec.test_command
+        )
         if not native:
             command = _PYTEST_PREFIX.sub(
                 "/opt/miniconda3/envs/testbed/bin/python -m pytest", command

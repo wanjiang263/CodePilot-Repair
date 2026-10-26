@@ -12,7 +12,7 @@ from typing import Any
 from codepilot.graph.deps import Deps
 from codepilot.graph.stop_rules import patch_hash
 from codepilot.observability.redaction import redact_text
-from codepilot.patch.unified_diff import apply_unified_diff
+from codepilot.patch.unified_diff import _patch_files, apply_unified_diff
 from codepilot.schemas.run_config import StageRecovery
 from codepilot.schemas.state import RepairState
 from codepilot.tools.base import is_test_path
@@ -87,9 +87,37 @@ def import_stage(initial: RepairState, recovery: StageRecovery, deps: Deps) -> R
         fields = tuple(key for key in fields if key != "retrieval")
     imported = {key: relocate(raw.get(key)) for key in fields}
     candidate = raw.get("current_patch", "") if recovery.candidate_sha256 else ""
-    if recovery.candidate_sha256:
-        if hashlib.sha256(candidate.encode()).hexdigest() != recovery.candidate_sha256:
-            raise ValueError("recovery candidate bytes changed")
+    preserved = None
+    if recovery.preserve_source_edits:
+        if recovery.entry != "plan":
+            raise ValueError("source-only recovery must restart planning")
+        original_patch = raw.get("current_patch", "")
+        blocks = re.split(r"(?=^diff --git )", original_patch, flags=re.MULTILINE)
+        kept: list[str] = []
+        excluded: list[str] = []
+        for block in blocks:
+            if not block.strip():
+                continue
+            files = _patch_files(block)
+            if not files:
+                raise ValueError("source recovery contains an unrecognized diff block")
+            if any(is_test_path(path) for path, _ in files):
+                excluded.extend(path for path, _ in files)
+            else:
+                kept.append(block)
+        candidate = "".join(kept)
+        deps.artifacts.write_text("preserved-source.diff", candidate)
+        preserved = {
+            "original_patch_sha256": hashlib.sha256(original_patch.encode()).hexdigest(),
+            "source_patch_sha256": hashlib.sha256(candidate.encode()).hexdigest(),
+            "excluded_test_paths": excluded,
+        }
+    if (
+        recovery.candidate_sha256
+        and hashlib.sha256(candidate.encode()).hexdigest() != recovery.candidate_sha256
+    ):
+        raise ValueError("recovery candidate bytes changed")
+    if candidate:
         applied = apply_unified_diff(candidate, deps.validator.policy)
         if not applied.applied:
             raise ValueError(f"recovery candidate cannot be applied: {applied.error}")
@@ -145,6 +173,7 @@ def import_stage(initial: RepairState, recovery: StageRecovery, deps: Deps) -> R
             **recovery.model_dump(mode="json"),
             "imported_fields": list(imported),
             "execution_feedback": json.loads(feedback),
+            "preserved_source_edits": preserved,
             "source_state_sha256": sha256(source),
             "proofs": proofs,
             "prior_usage": raw.get("usage"),

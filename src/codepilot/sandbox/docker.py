@@ -411,9 +411,13 @@ class DockerSandbox:
         token = new_volume_token()
         volumes = (workspace_volume_name(token), output_volume_name(token))
         created: list[str] = []
+        from codepilot.sandbox.runners import reproduction_only
+
+        adapter = self.runner_adapter
+        if adapter is not None and adapter.native and reproduction_only(tuple(tests)):
+            adapter = None
         try:
             workspace = validate_workspace_path(workspace, allowed_root=self.allowed_workspace_root)
-            adapter = self.runner_adapter
             if adapter is not None and adapter.native:
                 command = adapter.build_command(
                     env_spec.test_command, tuple(tests), workspace=workspace
@@ -519,11 +523,11 @@ class DockerSandbox:
         native_parse: NativeParse | None = None
         junit: JUnitReport | None = None
         junit_error: str | None = None
-        if self.runner_adapter is not None and self.runner_adapter.native:
+        if adapter is not None and adapter.native:
             # Native selectors may be file/module scopes (no ``::``); only
             # canonical NodeIDs ask the parser to filter the observed results.
             requested_nodes = tuple(item for item in tests if "::" in item)
-            native_parse = self.runner_adapter.parse(
+            native_parse = adapter.parse(
                 stdout=stdout,
                 stderr=stderr,
                 exit_code=exit_code,
@@ -618,8 +622,7 @@ class DockerSandbox:
                 "junit_error": junit_error,
             }
         )
-        if self.runner_adapter is not None:
-            diagnostics["runner_kind"] = self.runner_adapter.kind
+        diagnostics["runner_kind"] = adapter.kind if adapter is not None else "pytest"
         return ExecutionResult(
             status=status,
             exit_code=exit_code,

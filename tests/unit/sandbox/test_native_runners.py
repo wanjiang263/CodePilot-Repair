@@ -204,3 +204,15 @@ def test_runner_overrides_require_known_kinds_and_exact_coverage(tmp_path: Path)
     )
     with pytest.raises(ValueError):
         RunnerOverrides.load(path)
+
+
+def test_generated_reproduction_scope_uses_pytest_contract_only():
+    from codepilot.sandbox.runners import reproduction_only
+
+    assert reproduction_only(("tests/_codepilot_repro/test_issue.py::test_x",))
+    assert not reproduction_only(())
+    assert not reproduction_only(("tests/utils_tests/test_autoreload.py::Test::test_x",))
+    assert not reproduction_only(("tests/_codepilot_repro_extra/test_issue.py::test_x",))
+    assert not reproduction_only(
+        ("tests/_codepilot_repro/test_issue.py::test_x", "tests/test_existing.py")
+    )
