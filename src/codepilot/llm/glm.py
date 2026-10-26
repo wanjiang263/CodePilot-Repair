@@ -258,6 +258,15 @@ def apply_glm_env(
         ),
         max_concurrency=previous.max_concurrency if previous else 4,
     )
+    if previous is not None:
+        provider = provider.model_copy(
+            update={
+                "connect_timeout_seconds": previous.connect_timeout_seconds,
+                "write_timeout_seconds": previous.write_timeout_seconds,
+                "pool_timeout_seconds": previous.pool_timeout_seconds,
+                "trust_env": previous.trust_env,
+            }
+        )
 
     models: dict[str, ModelSpec] = {
         alias: (

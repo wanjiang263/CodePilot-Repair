@@ -175,6 +175,36 @@ class M3Batch:
         expected_opening = float(self.config["historical_opening_cny"])
         if abs(expected_opening - self.historical_opening) > 1e-9:
             raise BatchStopError("historical opening does not match the validated manifest")
+        self.prior_authorized_upper = 0.0
+        prior_sources = self.config.get("prior_authorization_sources", [])
+        covered = {
+            item["path"]
+            for item in [
+                *self.opening_manifest.get("sources", []),
+                *self.opening_manifest.get("additional_settled_ledgers", []),
+            ]
+        }
+        seen: set[str] = set()
+        for source in prior_sources:
+            relative = source["path"]
+            if relative in seen or relative not in covered:
+                raise BatchStopError("prior authorization source duplicated or absent from opening")
+            seen.add(relative)
+            path = self._absolute(Path(relative))
+            if _sha256(path) != source["sha256"]:
+                raise BatchStopError("prior authorization ledger hash mismatch")
+            costs = _ledger_totals(path)
+            self.prior_authorized_upper += costs["settled"] + costs["unknown"]
+        if (
+            prior_sources
+            and abs(
+                float(self.config["batch_new_limit_cny"])
+                + self.prior_authorized_upper
+                - float(self.config["original_authorization_cny"])
+            )
+            > 1e-9
+        ):
+            raise BatchStopError("remaining original authorization does not match ledger costs")
         self.model = str(self.config["model"])
         self.llm_config_path = self._absolute(Path(str(self.config["llm_config"])))
         self.model_spec = load_llm_config(self.llm_config_path).models[self.model]
@@ -260,6 +290,7 @@ class M3Batch:
             "temperature": self.config["temperature"],
             "seed_support": "not_dispatched_by_provider",
             "http_retries": 0,
+            "llm_config_sha256": _sha256(self.llm_config_path),
             "limits": self.limits,
             "limit_source": "typed_batch_config",
             "runner_overrides": (
@@ -289,6 +320,7 @@ class M3Batch:
                 "model",
                 "temperature",
                 "limits",
+                "llm_config_sha256",
                 "runner_overrides_sha256",
                 "repo_cache_seeds_sha256",
             ):
@@ -417,6 +449,10 @@ class M3Batch:
                 "new_settled_cny": batch["settled"],
                 "new_unknown_reserved_cny": batch["unknown"],
                 "new_upper_bound_cny": batch["settled"] + batch["unknown"],
+                "prior_authorization_upper_bound_cny": self.prior_authorized_upper,
+                "original_authorization_used_upper_bound_cny": self.prior_authorized_upper
+                + batch["settled"]
+                + batch["unknown"],
                 "cumulative_upper_bound_cny": self.historical_opening
                 + batch["settled"]
                 + batch["unknown"],
@@ -433,9 +469,38 @@ class M3Batch:
     def _stop(self, reason: str) -> None:
         self.state["status"] = "stopped"
         self.state["stop_reason"] = reason
+        frozen = self._costs()["frozen"]
+        for entry in self.state["instances"]:
+            if entry["terminal"] or entry["status"] == "OFFICIAL_PENDING":
+                continue
+            costs = self._costs(entry["instance_id"])
+            entry.update(
+                status="DISPATCHED_STOPPED" if costs["requests"] else "NOT_DISPATCHED",
+                internal=("PROVIDER_USAGE_UNCERTAIN" if costs["frozen"] else entry["internal"]),
+                stop_reason=(
+                    "BLOCKED_BY_FROZEN_LEDGER" if frozen and not costs["requests"] else reason
+                ),
+                settled_cny=costs["settled"],
+                unknown_reserved_cny=costs["unknown"],
+                terminal=True,
+            )
         self._save()
 
     def run(self) -> dict[str, Any]:
+        self.artifact_root.mkdir(parents=True, exist_ok=True)
+        lock = self.artifact_root / "batch.lock"
+        try:
+            descriptor = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError as exc:
+            raise BatchStopError("batch lock exists; inspect recorded PID before recovery") from exc
+        try:
+            os.write(descriptor, json.dumps({"pid": os.getpid(), "started_at": _now()}).encode())
+            return self._run_locked()
+        finally:
+            os.close(descriptor)
+            lock.unlink()
+
+    def _run_locked(self) -> dict[str, Any]:
         if not self.live:
             self.state["status"] = "dry_run"
             for item in self.state["instances"]:
@@ -518,6 +583,9 @@ class M3Batch:
             entry["terminal"] = True
             ingested += 1
         if ingested:
+            for entry in self.state["instances"]:
+                if entry["status"] == "NOT_DISPATCHED":
+                    entry.update(status="PENDING", terminal=False)
             self.state["status"] = "running"
             self._save()
         return {"ingested": ingested, "summary": self._summary()}
@@ -645,6 +713,10 @@ class M3Batch:
         instance_id = instance["instance_id"]
         root = self.artifact_root / "instances" / instance_id
         root.mkdir(parents=True, exist_ok=True)
+        if (root / "eval").exists():
+            raise BatchStopError(
+                "existing eval directory requires explicit recovery; refusing overwrite"
+            )
         self._seed_repo_cache(instance)
         if self.config.get("require_preflight"):
             preflight = self._preflight[instance_id]
@@ -687,7 +759,7 @@ class M3Batch:
             "stopped"
             if current and current["frozen"]
             else "not_dispatched"
-            if current is None
+            if current is None or not current["requests"]
             else "completed"
             if run_code == 0
             else "invalid"
@@ -812,6 +884,15 @@ class M3Batch:
             "CODEPILOT_DISPATCH_LEDGER": str(request.ledger),
             "CODEPILOT_TESTDEPS_DIR": str(self.repo_root / "artifacts/phase18/l2-cal10e/testdeps"),
         }
+        snapshots = self.config.get("index_snapshots", {})
+        if instance_id in snapshots:
+            seed = snapshots[instance_id]
+            env["CODEPILOT_INDEX_SNAPSHOT"] = json.dumps(
+                {
+                    "path": str(self._absolute(Path(seed["path"]))),
+                    "sha256": seed["sha256"],
+                }
+            )
         docker_host = os.environ.get("DOCKER_HOST", "")
         if docker_host.startswith("tcp://"):
             from urllib.parse import urlsplit
@@ -876,16 +957,41 @@ class M3Batch:
     def _run_internal(self, request: InternalRequest) -> int:
         command, env = self._internal_command(request)
         log = request.root / f"smoke-{self.batch_id}.log"
+        identity = request.root / "process.json"
         with log.open("ab") as handle:
-            completed = subprocess.run(
+            process = subprocess.Popen(
                 command,
                 cwd=self.repo_root,
                 env=env,
                 stdout=handle,
                 stderr=subprocess.STDOUT,
-                check=False,
             )
-        return completed.returncode
+            _write_json(
+                identity,
+                {
+                    "pid": process.pid,
+                    "supervisor_pid": os.getpid(),
+                    "started_at": _now(),
+                    "status": "running",
+                    "exit_code": None,
+                    "log": str(log),
+                    "code_sha": self.code_sha,
+                },
+            )
+            code = process.wait()
+            _write_json(
+                identity,
+                {
+                    "pid": process.pid,
+                    "supervisor_pid": os.getpid(),
+                    "finished_at": _now(),
+                    "status": "exited",
+                    "exit_code": code,
+                    "log": str(log),
+                    "code_sha": self.code_sha,
+                },
+            )
+        return code
 
     def _run_official(self, request: OfficialRequest) -> int:
         instance_id = request.instance["instance_id"]
@@ -899,6 +1005,8 @@ class M3Batch:
                 "-d",
                 str(self.config["wsl_distro"]),
                 "--",
+                "env",
+                "DOCKER_HOST=unix:///mnt/wsl/docker-desktop/shared-sockets/host-services/docker.proxy.sock",
                 str(self.config["linux_python"]),
                 f"{linux_root}/scripts/l2cal10e_official.py",
                 "--root",

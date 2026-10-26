@@ -294,6 +294,68 @@ def fixture(tmp_path: Path) -> Fixture:
     return Fixture(tmp_path)
 
 
+def test_phase22_stop_assigns_all_terminal_states(fixture: Fixture) -> None:
+    def internal(request: m3_batch.InternalRequest) -> int:
+        _ledger(request.ledger, unknown=True)
+        return 1
+
+    summary = fixture.make(internal).run()
+    assert summary["instances"][0]["status"] == "DISPATCHED_STOPPED"
+    assert summary["instances"][0]["internal"] == "PROVIDER_USAGE_UNCERTAIN"
+    for entry in summary["instances"][1:]:
+        assert entry["status"] == "NOT_DISPATCHED"
+        assert entry["stop_reason"] == "BLOCKED_BY_FROZEN_LEDGER"
+    assert all(entry["terminal"] for entry in summary["instances"])
+
+
+def test_phase22_empty_ledger_is_not_dispatched(fixture: Fixture) -> None:
+    def internal(request: m3_batch.InternalRequest) -> int:
+        DispatchBudget(4, request.ledger)
+        return 1
+
+    batch = fixture.make(internal)
+    batch.run()
+    registry = json.loads(batch.registry_path.read_text(encoding="utf-8"))
+    assert registry["attempts"][0]["status"] == "not_dispatched"
+
+
+def test_phase22_batch_lock_blocks_duplicate(fixture: Fixture) -> None:
+    batch = fixture.make()
+    (batch.artifact_root / "batch.lock").write_text('{"pid": 123}')
+    with pytest.raises(m3_batch.BatchStopError, match="batch lock"):
+        batch.run()
+
+
+def test_phase22_existing_eval_is_preserved(fixture: Fixture) -> None:
+    calls: list[str] = []
+    batch = fixture.make(_success_internal(calls))
+    sentinel = batch.artifact_root / "instances" / IDS[0] / "eval" / "sentinel"
+    sentinel.parent.mkdir(parents=True)
+    sentinel.write_text("preserve")
+    summary = batch.run()
+    assert not calls
+    assert "refusing overwrite" in summary["stop_reason"]
+    assert sentinel.read_text() == "preserve"
+
+
+def test_phase22_original_authorization_must_match_ledger(fixture: Fixture) -> None:
+    config = json.loads(fixture.config.read_text(encoding="utf-8"))
+    source = fixture.root / "history/source.json"
+    config.update(
+        original_authorization_cny=30,
+        batch_new_limit_cny=29,
+        prior_authorization_sources=[
+            {
+                "path": "history/source.json",
+                "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+            }
+        ],
+    )
+    fixture.config.write_text(json.dumps(config), encoding="utf-8")
+    with pytest.raises(m3_batch.BatchStopError, match="remaining original authorization"):
+        fixture.make()
+
+
 def _success_internal(calls: list[str]) -> Any:
     def run(request: m3_batch.InternalRequest) -> int:
         instance = request.instance["instance_id"]

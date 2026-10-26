@@ -118,7 +118,13 @@ class OpenAICompatibleProvider:
         self._owns_client = client is None
         self._client = client or build_http_client(
             base_url=provider.base_url,
-            timeout=provider.timeout_seconds,
+            timeout=httpx.Timeout(
+                provider.timeout_seconds,
+                connect=provider.connect_timeout_seconds or provider.timeout_seconds,
+                write=provider.write_timeout_seconds or provider.timeout_seconds,
+                pool=provider.pool_timeout_seconds or provider.timeout_seconds,
+            ),
+            trust_env=provider.trust_env,
         )
 
         #: 真正发出去的 HTTP 请求次数（含每一次重试）。``Usage`` 只能记录"成功的
@@ -178,6 +184,13 @@ class OpenAICompatibleProvider:
                 self.spec,
                 body,
                 lambda: self._client.post(CHAT_COMPLETIONS_PATH, json=body, headers=headers),
+                metadata={
+                    "purpose": purpose,
+                    "request_body_bytes": len(json.dumps(body).encode("utf-8")),
+                    "message_roles": [m.get("role") for m in body.get("messages", [])],
+                    "timeout": self._client.timeout.as_dict(),
+                    "trust_env": self.provider.trust_env,
+                },
             )
         except httpx.TimeoutException as exc:
             # 请求已经离开本机：服务端可能已经生成并计费，也可能没有。

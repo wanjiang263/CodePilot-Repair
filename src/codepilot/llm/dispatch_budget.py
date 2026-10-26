@@ -7,6 +7,7 @@ The ledger must be new: recovery requires explicit reconciliation, never reset.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import os
@@ -123,7 +124,12 @@ class DispatchBudget:
                 time.sleep(0.05 * (attempt + 1))
 
     def send(
-        self, spec: ModelSpec, body: dict[str, Any], send: Callable[[], httpx.Response]
+        self,
+        spec: ModelSpec,
+        body: dict[str, Any],
+        send: Callable[[], httpx.Response],
+        *,
+        metadata: dict[str, Any] | None = None,
     ) -> httpx.Response:
         with self.lock:
             price = spec.price
@@ -151,11 +157,19 @@ class DispatchBudget:
                 "reserved_cny": reserve,
                 "status": "reserved",
                 "cost_cny": None,
+                "request_sha256": hashlib.sha256(
+                    json.dumps(body, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                ).hexdigest(),
+                "dispatched_at_unix": time.time(),
+                "metadata": metadata or {},
             }
             self.records.append(record)
             self._save()  # must persist before network dispatch
+            started = time.monotonic()
             try:
                 response = send()
+                record["response_request_id"] = response.headers.get("x-request-id")
+                record["http_status"] = response.status_code
                 response.raise_for_status()
                 usage = response.json()["usage"]
                 prompt, output = usage["prompt_tokens"], usage["completion_tokens"]
@@ -177,7 +191,20 @@ class DispatchBudget:
                     raise ValueError("cost outside reservation")
             except BaseException as exc:
                 self.frozen = True
-                record.update(status="unknown_frozen", error_type=type(exc).__name__)
+                chain: list[str] = []
+                cause: BaseException | None = exc
+                while cause is not None and len(chain) < 10:
+                    chain.append(type(cause).__name__)
+                    cause = cause.__cause__ or cause.__context__
+                record.update(
+                    status="unknown_frozen",
+                    error_type=type(exc).__name__,
+                    exception_chain=chain,
+                    elapsed_seconds=time.monotonic() - started,
+                    timeout_phase=(
+                        type(exc).__name__ if isinstance(exc, httpx.TimeoutException) else None
+                    ),
+                )
                 self._save()
                 raise DispatchBudgetStoppedError(
                     "budget_stopped: response/cost uncertain; further dispatch frozen"
@@ -189,6 +216,7 @@ class DispatchBudget:
                 input_tokens=prompt,
                 cached_input_tokens=cached,
                 output_tokens=output,
+                elapsed_seconds=time.monotonic() - started,
             )
             self._save()
             return response
@@ -221,7 +249,11 @@ def current_outstanding() -> tuple[float, str] | None:
 
 
 def guarded_send(
-    spec: ModelSpec, body: dict[str, Any], send: Callable[[], httpx.Response]
+    spec: ModelSpec,
+    body: dict[str, Any],
+    send: Callable[[], httpx.Response],
+    *,
+    metadata: dict[str, Any] | None = None,
 ) -> httpx.Response:
     global _guard
     limit = os.environ.get("CODEPILOT_DISPATCH_BUDGET_CNY")
@@ -239,4 +271,4 @@ def guarded_send(
                 opening_balance=opening,
                 opening_source=opening_source,
             )
-    return _guard.send(spec, body, send)
+    return _guard.send(spec, body, send, metadata=metadata)

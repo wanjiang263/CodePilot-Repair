@@ -119,6 +119,10 @@ class ProviderSpec(BaseModel):
     """每 provider 独立的并发上限，benchmark 并行跑任务时不会撞上服务商限流。"""
 
     timeout_seconds: float = 120.0
+    connect_timeout_seconds: float | None = Field(default=None, gt=0)
+    write_timeout_seconds: float | None = Field(default=None, gt=0)
+    pool_timeout_seconds: float | None = Field(default=None, gt=0)
+    trust_env: bool = True
     max_retries: int | None = None
     """该 provider 的重试次数上限（不含首次请求）。
 

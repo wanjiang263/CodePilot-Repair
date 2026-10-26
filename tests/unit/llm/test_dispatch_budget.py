@@ -7,7 +7,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-from codepilot.llm.config import ModelPrice, ModelSpec
+from codepilot.llm.config import ModelPrice, ModelSpec, ProviderSpec
 from codepilot.llm.dispatch_budget import DispatchBudget, DispatchBudgetStoppedError
 from codepilot.llm.dispatch_recovery import (
     RecoveryLedgerSource,
@@ -15,6 +15,7 @@ from codepilot.llm.dispatch_recovery import (
     instance_opening_cny,
     write_recovery_manifest,
 )
+from codepilot.llm.openai_compatible import OpenAICompatibleProvider
 
 
 def model() -> ModelSpec:
@@ -82,6 +83,62 @@ def test_existing_ledger_cannot_be_reset(tmp_path: Path) -> None:
     DispatchBudget(20, path)
     with pytest.raises(FileExistsError):
         DispatchBudget(20, path)
+
+
+def test_phase22_provider_has_distinct_timeouts_and_direct_route(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import codepilot.llm.openai_compatible as module
+
+    captured = {}
+
+    def build(**kwargs: object) -> httpx.Client:
+        captured.update(kwargs)
+        return httpx.Client(
+            timeout=kwargs["timeout"], transport=httpx.MockTransport(lambda r: response())
+        )
+
+    monkeypatch.setattr(module, "build_http_client", build)
+    provider = OpenAICompatibleProvider(
+        spec=model(),
+        provider=ProviderSpec(
+            name="test",
+            base_url="https://example.test",
+            api_key_env="TEST_KEY",
+            timeout_seconds=120,
+            connect_timeout_seconds=10,
+            write_timeout_seconds=30,
+            pool_timeout_seconds=10,
+            trust_env=False,
+            max_retries=0,
+        ),
+        api_key="unused",
+    )
+    assert captured["trust_env"] is False
+    assert captured["timeout"].as_dict() == {"connect": 10, "read": 120, "write": 30, "pool": 10}
+    provider.close()
+
+
+@pytest.mark.parametrize(
+    "failure", [httpx.ReadTimeout, httpx.RemoteProtocolError, KeyboardInterrupt]
+)
+def test_phase22_interruption_keeps_precharge_and_telemetry(tmp_path: Path, failure: type) -> None:
+    guard = DispatchBudget(4, tmp_path / "ledger.json")
+
+    def send() -> httpx.Response:
+        persisted = json.loads(guard.path.read_text(encoding="utf-8"))
+        assert persisted["requests"][0]["status"] == "reserved"
+        raise failure("private data must not enter ledger")
+
+    with pytest.raises(DispatchBudgetStoppedError):
+        guard.send(model(), {"max_tokens": 4096}, send, metadata={"purpose": "test"})
+    record = guard.records[0]
+    assert record["elapsed_seconds"] >= 0
+    assert record["exception_chain"] == [failure.__name__]
+    assert record["metadata"]["purpose"] == "test"
+    assert "private data" not in guard.path.read_text(encoding="utf-8")
+    assert guard.frozen
+    assert guard.total == pytest.approx(0.8114688)
 
 
 @pytest.mark.parametrize(

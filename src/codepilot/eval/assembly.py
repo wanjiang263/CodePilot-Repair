@@ -507,6 +507,15 @@ class InferenceAssembly:
             deny_existing_test_edits=deny_existing,
         )
         database = artifacts.run_dir / "index.sqlite3"
+        reused_snapshot = False
+        seed_raw = os.environ.get("CODEPILOT_INDEX_SNAPSHOT")
+        if seed_raw and not resuming:
+            from codepilot.repo.index_snapshot import reuse_index
+
+            index_seed = json.loads(seed_raw)
+            reuse_index(Path(index_seed["path"]), database, workspace, index_seed["sha256"])
+            artifacts.write_json("index-reuse.json", index_seed)
+            reused_snapshot = True
         # The index DB is rebuildable. A Django-sized edge set otherwise creates
         # a disk journal/temp that failed to open ("unable to open database
         # file") before the first graph node. Memory journal/temp keeps the
@@ -517,7 +526,7 @@ class InferenceAssembly:
         init_db(engine)
         factory = create_session_factory(engine)
         try:
-            if not (resuming and database.exists()):
+            if not reused_snapshot and not (resuming and database.exists()):
                 # 索引必须在跑图**之前**提交。和图共用一个 session 时，进程被硬杀
                 # （真实中断就是这么死的）会让索引库停留在未提交状态，恢复进程拿到一个
                 # 空索引，症状是"计划里的 symbol 不在索引里"——看起来像模型乱写。
