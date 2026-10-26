@@ -33,7 +33,11 @@ def import_stage(initial: RepairState, recovery: StageRecovery, deps: Deps) -> R
     for name, expected in recovery.historical_ledger_hashes.items():
         if sha256(Path(name)) != expected:
             raise ValueError("historical recovery ledger changed")
-    previous_root = source.parent
+    previous_root = (
+        recovery.source_artifacts.resolve(strict=True)
+        if recovery.source_artifacts
+        else source.parent
+    )
     proof_root = deps.artifacts.run_dir / "reused-evidence"
     proofs = []
     for name in ("attempts", "regression", "reproduction", "reused-evidence"):

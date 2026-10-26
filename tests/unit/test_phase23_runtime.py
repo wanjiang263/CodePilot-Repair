@@ -51,6 +51,9 @@ def test_legal_candidate_is_official_eligible_even_with_internal_failure(tmp_pat
         status=RunStatus.FAILED,
         started_at=datetime.now(UTC),
     )
+    from codepilot.patch.diff import generate_git_diff
+
+    state = state.model_copy(update={"current_patch": generate_git_diff(repo.path, repo.head).text})
     (run / "state_final.json").write_text(state.model_dump_json(), encoding="utf8")
     ledger = project / "ledger.json"
     ledger.write_text(

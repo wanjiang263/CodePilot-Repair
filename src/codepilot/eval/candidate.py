@@ -7,8 +7,9 @@ import json
 from pathlib import Path
 from typing import Any
 
+from codepilot.graph.stop_rules import patch_hash
 from codepilot.patch.diff import generate_git_diff
-from codepilot.patch.validator import PatchValidator
+from codepilot.patch.validator import PatchValidator, ValidatorConfig
 from codepilot.repo.gitcmd import run_git
 from codepilot.tools.base import WorkspacePathPolicy
 
@@ -35,8 +36,17 @@ def prepare_candidate(
     if run_git(["rev-parse", "HEAD"], cwd=workspace).stdout.strip() != base:
         raise ValueError("candidate workspace base mismatch")
     policy = WorkspacePathPolicy(workspace, deny_existing_test_edits=True)
-    validation = PatchValidator(policy, base).validate()
-    patch = generate_git_diff(workspace, base, policy=policy).text
+    diff = generate_git_diff(workspace, base, policy=policy)
+    # Official legality is independent of the internal edit-size budget.
+    validation = PatchValidator(
+        policy,
+        base,
+        config=ValidatorConfig(
+            max_files_changed=max(5, len(diff.files)),
+            max_lines_changed=max(150, diff.lines_added + diff.lines_deleted),
+        ),
+    ).validate()
+    patch = diff.text
     if not patch.strip():
         return None
     if not validation.passed:
@@ -44,6 +54,12 @@ def prepare_candidate(
             validation.model_dump_json(indent=2), encoding="utf-8"
         )
         return None
+    traced = [
+        state.get("current_patch", ""),
+        *[a.get("patch_diff", "") for a in state.get("attempts", [])],
+    ]
+    if patch_hash(patch) not in {patch_hash(p) for p in traced if p.strip()}:
+        raise ValueError("workspace candidate is not a recorded Agent candidate")
     patch_file = run / "official-candidate.diff"
     patch_file.write_text(patch, encoding="utf-8", newline="\n")
     prediction = run / "official-prediction.jsonl"
@@ -73,6 +89,7 @@ def prepare_candidate(
         "internal_stop_reason": state.get("stop_reason"),
         "patch": patch_file.relative_to(project).as_posix(),
         "patch_sha256": digest(patch_file),
+        "canonical_patch_sha256": patch_hash(patch),
         "prediction": prediction.relative_to(project).as_posix(),
         "prediction_sha256": digest(prediction),
         "validation": validation.model_dump(mode="json"),

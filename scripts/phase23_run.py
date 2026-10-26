@@ -333,6 +333,7 @@ def main():
         candidate = raw.get("current_patch", "") if entry in {"review", "validate_patch"} else ""
         recovery = StageRecovery(
             source_state=state_file,
+            source_artifacts=previous,
             source_state_sha256=sha(state_file),
             source_run_id=raw["run_id"],
             entry=entry,

@@ -17,6 +17,7 @@ class IndexSnapshot(BaseModel):
 
 class StageRecovery(BaseModel):
     source_state: Path
+    source_artifacts: Path | None = None
     source_state_sha256: str
     source_run_id: str
     entry: Literal[
