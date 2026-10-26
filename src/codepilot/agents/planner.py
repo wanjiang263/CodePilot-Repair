@@ -121,6 +121,7 @@ class Planner:
         self.llm_context = llm_context
         self.node = node
         self._monotonic = monotonic
+        self.execution_feedback = ""
         self.tool_records: list[PlannerToolRecord] = []
         #: 最近一次模型请求的 call id，用于把工具审计对回到具体请求（``llm_requests.jsonl``）。
         self._last_call_id: str | None = None
@@ -180,7 +181,11 @@ class Planner:
             output_schema=json.dumps(RepairPlan.model_json_schema(), ensure_ascii=False),
             budget=32_000,
         )
-        messages = [Message.user(context.text)]
+        messages = [
+            Message.user(
+                context.text + " Verified recovery observations: " + self.execution_feedback
+            )
+        ]
         specs = self.registry.specs(ToolRole.PLANNER)
         calls = 0
         while True:

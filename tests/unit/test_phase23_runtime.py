@@ -277,3 +277,50 @@ def test_typed_model_selection_reaches_actual_batch_transport_without_http():
         assert original.roles["reviewer"] != selected.roles["reviewer"]
     finally:
         bundle.close()
+
+
+def test_repeated_test_write_switches_to_readonly_source_relocalization(tmp_path):
+    from codepilot.agents.coder import CodingAgent
+    from codepilot.llm.fake import FakeLLM
+    from codepilot.schemas.issue import IssueAnalysis
+    from codepilot.schemas.plan import PlannedChange, RepairPlan
+    from codepilot.tools.read_tools import read_file_tool
+    from codepilot.tools.registry import ToolRegistry
+
+    repo = init_repo(
+        tmp_path / "repo", {"pkg/core.py": "value = 1\n", "tests/test_core.py": "assert True\n"}
+    )
+    policy = WorkspacePathPolicy(repo.path, deny_existing_test_edits=True)
+    bad = {
+        "tool": "edit_file",
+        "arguments": {"path": "tests/test_core.py", "search": "True", "replace": "False"},
+    }
+    llm = FakeLLM(
+        [
+            bad,
+            bad,
+            {"tool": "read_file", "arguments": {"path": "pkg/core.py"}},
+            {
+                "tool": "edit_file",
+                "arguments": {"path": "pkg/core.py", "search": "value = 1", "replace": "value = 2"},
+            },
+            {},
+        ]
+    )
+    coder = CodingAgent(llm, ToolRegistry([edit_file_tool(policy), read_file_tool(policy)]))
+    coder.execution_feedback = "Previous test-only candidate was rejected. Inspect pkg/core.py."
+    plan = RepairPlan(
+        root_cause_hypothesis="fix implementation",
+        changes=[PlannedChange(file="pkg/core.py", description="fix value")],
+        alternatives=[],
+    )
+    result = coder.run(issue_text="fix", issue_analysis=IssueAnalysis(summary="fix"), plan=plan)
+    assert result.finished
+    assert (repo.path / "tests/test_core.py").read_text() == "assert True\n"
+    assert (repo.path / "pkg/core.py").read_text() == "value = 2\n"
+    assert llm.calls[2].purpose == "coder_relocalize"
+    assert all(
+        spec.name not in {"edit_file", "create_file", "run_tests"} for spec in llm.calls[2].tools
+    )
+    assert "Previous test-only candidate" in llm.calls[0].messages[0].content
+    assert len(result.tool_calls) == 4

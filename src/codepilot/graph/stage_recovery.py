@@ -4,15 +4,18 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 from pathlib import Path
 from typing import Any
 
 from codepilot.graph.deps import Deps
 from codepilot.graph.stop_rules import patch_hash
+from codepilot.observability.redaction import redact_text
 from codepilot.patch.unified_diff import apply_unified_diff
 from codepilot.schemas.run_config import StageRecovery
 from codepilot.schemas.state import RepairState
+from codepilot.tools.base import is_test_path
 
 
 def sha256(path: Path) -> str:
@@ -108,11 +111,40 @@ def import_stage(initial: RepairState, recovery: StageRecovery, deps: Deps) -> R
     if recovery.entry in {"reproduce", "localize", "plan"}:
         imported.update(attempts=[], execution=None, regression=None, reproduction=None)
     state = RepairState.model_validate({**initial.model_dump(mode="json"), **imported})
+    failures = list(dict.fromkeys(raw.get("failure_reasons", [])))
+    blocked_paths = sorted(
+        set(re.findall(r"(?:not allowed:|read-only:)\s*([^\s;]+\.py)", "\n".join(failures)))
+    )
+    candidates = [item.get("path", "") for item in (raw.get("localization") or {}).get("files", [])]
+    candidates += [item.get("file", "") for item in (raw.get("plan") or {}).get("changes", [])]
+    candidates = list(dict.fromkeys(path for path in candidates if path and not is_test_path(path)))
+    if not candidates and blocked_paths and hasattr(deps, "index"):
+        stems = {Path(path).stem.removeprefix("test_") for path in blocked_paths}
+        candidates = [
+            item.path
+            for item in deps.index.files()
+            if Path(item.path).stem in stems and not is_test_path(item.path)
+        ][:12]
+    feedback = json.dumps(
+        {
+            "reason": recovery.reason,
+            "prior_internal_failures": [redact_text(item)[:1000] for item in failures[:4]],
+            "read_only_test_paths": blocked_paths,
+            "actual_source_candidates": candidates[:12],
+            "policy": "Repair production source. Prior candidates modifying existing tests were invalid; preserve legal source edits and change diagnosis rather than repeat rejected writes.",
+        },
+        ensure_ascii=False,
+    )
+    for agent in (getattr(deps, "coder", None), getattr(deps, "planner", None)):
+        if agent is not None:
+            agent.execution_feedback = feedback
+
     deps.artifacts.write_json(
         "stage-recovery.json",
         {
             **recovery.model_dump(mode="json"),
             "imported_fields": list(imported),
+            "execution_feedback": json.loads(feedback),
             "source_state_sha256": sha256(source),
             "proofs": proofs,
             "prior_usage": raw.get("usage"),

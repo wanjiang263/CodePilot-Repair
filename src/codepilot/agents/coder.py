@@ -71,6 +71,7 @@ class CodingAgent:
         self.max_tool_calls = max_tool_calls
         self.max_total_tokens = max_total_tokens
         self._blocked_paths: set[str] = set()
+        self.execution_feedback = ""
 
     def run(
         self,
@@ -122,12 +123,24 @@ class CodingAgent:
                 + json.dumps(source_candidates)
                 + ". Previously rejected paths: "
                 + json.dumps(sorted(self._blocked_paths))
+                + "\nVerified recovery observations: "
+                + self.execution_feedback
             )
         ]
         specs = self.registry.specs(ToolRole.CODER)
         audits: list[ToolCallAudit] = []
         llm_calls = 0
         test_runs_this_round = 0
+        force_readonly = False
+        relocalizations = 0
+        readonly_names = {
+            "read_file",
+            "search_code",
+            "find_symbol",
+            "get_callers",
+            "get_callees",
+            "get_related_tests",
+        }
         while True:
             if self.usage.total_tokens >= token_limit:
                 return CodingResult(
@@ -137,11 +150,33 @@ class CodingAgent:
                 return CodingResult(
                     stop_reason="cost_budget", tool_calls=audits, llm_calls=llm_calls
                 )
+            diagnosing = force_readonly
+            force_readonly = False
+            available = (
+                [spec for spec in specs if spec.name in readonly_names] if diagnosing else specs
+            )
             response = self.provider.complete(
-                LLMRequest(messages=messages, tools=specs, purpose="coder")
+                LLMRequest(
+                    messages=messages,
+                    tools=available,
+                    purpose="coder_relocalize" if diagnosing else "coder",
+                )
             )
             llm_calls += 1
             self._record_usage(response)
+            if not response.tool_calls and diagnosing:
+                messages.append(
+                    Message(
+                        role="assistant",
+                        content=response.content or "Read-only diagnosis completed",
+                    )
+                )
+                messages.append(
+                    Message.user(
+                        "Use the source diagnosis to repair production code. Existing tests remain read-only."
+                    )
+                )
+                continue
             if not response.tool_calls:
                 return CodingResult(
                     stop_reason="model_completed",
@@ -158,7 +193,15 @@ class CodingAgent:
                         stop_reason="tool_limit", tool_calls=audits, llm_calls=llm_calls
                     )
                 started = time.monotonic()
-                if not call.is_valid:
+                if diagnosing and call.name not in readonly_names:
+                    result = {
+                        "ok": False,
+                        "error": {
+                            "code": "diagnostic_read_only",
+                            "message": "Re-localization permits only reading and source inspection; no writes or execution.",
+                        },
+                    }
+                elif not call.is_valid:
                     result = {
                         "ok": False,
                         "error": {
@@ -200,7 +243,14 @@ class CodingAgent:
                 error = result.get("error")
                 if isinstance(error, dict) and "test is read-only" in str(error.get("message", "")):
                     path = str(call.arguments.get("path", ""))
+                    repeated = path in self._blocked_paths
                     self._blocked_paths.add(path)
+                    if repeated and relocalizations < 2:
+                        force_readonly = True
+                        relocalizations += 1
+                        error["message"] += (
+                            ". Repeated rejected test edit: switch to read-only source re-localization before another write."
+                        )
                     error["message"] += (
                         f". The attempted write did not change the file. Do not repeat it. "
                         f"Read the implementation and update source candidates {source_candidates}; "
