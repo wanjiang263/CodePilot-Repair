@@ -59,6 +59,41 @@ def test_full_graph(tmp_path: Path):
     assert state.attempts[-1].regression == state.regression
 
 
+def test_phase22_large_source_does_not_drop_review_patch(tmp_path: Path, monkeypatch):
+    import harness as harness_module
+
+    from codepilot.repo.gitcmd import run_git
+
+    original_base_repo = harness_module._base_repo
+
+    def lf_base(root):
+        repo, _base = original_base_repo(root)
+        (repo / ".gitattributes").write_bytes(b"*.py text eol=lf\n")
+        run_git(["add", ".gitattributes"], cwd=repo)
+        run_git(["add", "--renormalize", "."], cwd=repo)
+        run_git(["commit", "-qm", "canonical fixture line endings"], cwd=repo)
+        return repo, run_git(["rev-parse", "HEAD"], cwd=repo).stdout.strip()
+
+    monkeypatch.setattr(harness_module, "_base_repo", lf_base)
+
+    monkeypatch.setattr(
+        harness_module,
+        "DEFECTIVE",
+        harness_module.DEFECTIVE + ("# unrelated source context " + "x" * 80 + "\n") * 2000,
+    )
+    harness = build_harness(
+        tmp_path,
+        results=[passed_result(), passed_result(), passed_result()],
+        coder_rounds=[[edit("src/pkg/core.py", "return value - 1", "return value"), FINISH]],
+    )
+    reviewer = FakeLLM([{"approved": True, "summary": "checked"}])
+    harness.deps.regression_runner = RegressionRunner()
+    harness.deps.reviewer = PatchReviewer(reviewer)
+    state = harness.run()
+    assert state.status is RunStatus.SUCCEEDED, state.failure_reasons
+    assert state.current_patch in reviewer.calls[0].messages[0].content
+
+
 @pytest.mark.parametrize(
     "outcomes,flaky",
     [

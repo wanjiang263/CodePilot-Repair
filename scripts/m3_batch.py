@@ -274,6 +274,18 @@ class M3Batch:
                 terminal=True,
                 previous_segment=source,
             )
+            if source.get("result_path"):
+                result_path = self._absolute(Path(source["result_path"]))
+                result = _read_json(result_path)
+                if (
+                    _sha256(result_path) != source["result_sha256"]
+                    or result.get("instance_id") != instance_id
+                    or result.get("ledger_sha256") != source["sha256"]
+                    or result.get("terminal") is not True
+                ):
+                    raise BatchStopError("completed segment result identity mismatch")
+                self._entry(instance_id).update(result)
+            self._entry(instance_id).update(settled_cny=costs["settled"], unknown_reserved_cny=0)
 
     def _absolute(self, path: Path) -> Path:
         return path if path.is_absolute() else self.repo_root / path
@@ -810,9 +822,17 @@ class M3Batch:
             self._save()
             raise BatchStopError("internal execution ended without a unique run report")
         _report_path, run = found
-        self._verify_run_budget(run, instance_id)
         run_id = str(run["run_id"])
         entry["run_id"] = run_id
+        budget_report = run
+        if not isinstance(run.get("budget"), dict):
+            budget_report = acceptance._root_report(root, run_id)
+            if (
+                budget_report.get("run_id") != run_id
+                or budget_report.get("run_label") != self.batch_id
+            ):
+                raise BatchStopError("budget report identity mismatch")
+        self._verify_run_budget(budget_report, instance_id)
         result = acceptance.evaluate(root, instance=instance_id, label=self.batch_id, run_id=run_id)
         _write_json(root / f"acceptance-{self.batch_id}.json", result)
         entry["internal"] = result["verdict"]

@@ -109,6 +109,7 @@ def _report(root: Path, batch: str, instance: str, suffix: str = "") -> str:
         },
     }
     _write_json(run_dir / "report.json", report)
+    _write_json(run_dir / "review/1-model.json", {"request": PATCH, "patch": PATCH})
     prediction_path = root / "predictions" / f"{run_id}.jsonl"
     prediction_path.parent.mkdir(parents=True, exist_ok=True)
     prediction_path.write_text(
@@ -382,6 +383,26 @@ def test_phase22_repaired_segment_never_redispatches_paid_instance(fixture: Fixt
     assert calls == IDS[1:]
     assert summary["instances"][0]["status"] == "DISPATCHED_STOPPED"
     assert summary["instances"][0]["terminal"]
+
+
+def test_phase22_normal_report_budget_is_read_from_identity_bound_wrapper(fixture: Fixture) -> None:
+    def internal(request: m3_batch.InternalRequest) -> int:
+        instance = request.instance["instance_id"]
+        _ledger(request.ledger)
+        run_id = _report(request.root, "m3-test", instance)
+        leaf_path = request.root / "runs" / run_id / "report.json"
+        leaf = json.loads(leaf_path.read_text())
+        del leaf["budget"]
+        _write_json(leaf_path, leaf)
+        wrapper_path = request.root / "reports" / f"{run_id}.json"
+        wrapper = json.loads(wrapper_path.read_text())
+        wrapper["budget"] = _budget()
+        _write_json(wrapper_path, wrapper)
+        return 0
+
+    summary = fixture.make(internal, _success_official([])).run()
+    assert summary["status"] == "completed"
+    assert all(row["internal"] == "ACCEPTED" for row in summary["instances"])
 
 
 def _success_internal(calls: list[str]) -> Any:

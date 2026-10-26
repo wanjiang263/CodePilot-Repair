@@ -129,6 +129,23 @@ def evaluate(root: Path, *, instance: str, label: str, run_id: str | None = None
     review_executed = bool(closure.get("review_executed") is True and review)
     review_high = closure.get("review_high_issues")
     review_known = closure.get("review_high_issues_known", review_executed)
+    # A hash stamped onto a reviewer response does not prove the model ever
+    # received the patch. Inspect the retained actual input, not the verdict.
+    review_context_bound = inference.get("simulated_llm") is True
+    if delivered and candidate and review_executed:
+        for model_path in (root / "runs" / actual_run_id / "review").glob("*-model.json"):
+            model_input = json.loads(model_path.read_text(encoding="utf-8"))
+            supplied_patch = model_input.get("patch", delivered)
+            supplied_request = model_input.get("request", "")
+            if (
+                isinstance(supplied_patch, str)
+                and supplied_patch
+                and isinstance(supplied_request, str)
+                and supplied_patch in supplied_request
+                and patch_hash(supplied_patch) == candidate
+            ):
+                review_context_bound = True
+                break
     checks: dict[str, bool] = {
         "real_run": bool(
             inference.get("simulated_llm") is False and inference.get("sandbox_backend") == "docker"
@@ -171,6 +188,7 @@ def evaluate(root: Path, *, instance: str, label: str, run_id: str | None = None
             and unexecuted == 0
         ),
         "review_executed": review_executed,
+        "review_context_bound": review_context_bound,
         # An unexecuted review has an unknown issue count, not zero issues.
         "review_no_high_issues": bool(review_executed and review_known and review_high == 0),
         "review_approved": bool(review_executed and review.get("approved") is True),

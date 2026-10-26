@@ -85,6 +85,10 @@ def _write_run(tmp_path: Path, *, run_id: str = "run-a", review_approved: bool =
         },
     }
     (run_dir / "report.json").write_text(json.dumps(report), encoding="utf-8")
+    (run_dir / "review").mkdir()
+    (run_dir / "review/1-model.json").write_text(
+        json.dumps({"request": PATCH, "patch": PATCH}), encoding="utf-8"
+    )
     reports = root / "reports"
     reports.mkdir(exist_ok=True)
     (reports / f"{run_id}.json").write_text(
@@ -102,6 +106,14 @@ def _write_run(tmp_path: Path, *, run_id: str = "run-a", review_approved: bool =
         encoding="utf-8",
     )
     return run_dir
+
+
+def test_phase22_blind_reviewer_cannot_pass_acceptance(tmp_path: Path) -> None:
+    run_dir = _write_run(tmp_path)
+    (run_dir / "review/1-model.json").write_text(json.dumps({"request": "issue only"}))
+    payload = acceptance.evaluate(tmp_path, instance=INSTANCE, label=LABEL, run_id="run-a")
+    assert payload["accepted"] is False
+    assert payload["checks"]["review_context_bound"] is False
 
 
 def test_candidate_and_delivered_hashes_are_compared_in_the_same_normal_form(
