@@ -324,3 +324,31 @@ def test_repeated_test_write_switches_to_readonly_source_relocalization(tmp_path
     )
     assert "Previous test-only candidate" in llm.calls[0].messages[0].content
     assert len(result.tool_calls) == 4
+
+
+def test_target_evidence_cache_requires_same_frozen_image(monkeypatch):
+    from codepilot.graph import nodes
+    from codepilot.schemas.enums import ExecutionStatus, TestOutcome
+    from codepilot.schemas.execution import ExecutionResult, TestCaseResult
+
+    result = ExecutionResult(
+        status=ExecutionStatus.PASS,
+        tests=[
+            TestCaseResult(node_id="tests/test_x.py::test_x", outcome=TestOutcome.PASSED, duration=0)
+        ],
+        diagnostics={"environment_image_id": "image-old"},
+    )
+    earlier = SimpleNamespace(patch_hash="same", execution=result)
+    state = SimpleNamespace(
+        current_attempt=SimpleNamespace(patch_hash="same"), attempts=[earlier, object()]
+    )
+    deps = SimpleNamespace(environment=SimpleNamespace(image_id="image-new"))
+    monkeypatch.setattr(nodes, "_artifact_evidence_valid", lambda *_: True)
+    assert nodes._prior_execution_for_patch(state, deps, ["tests/test_x.py::test_x"]) is None
+    deps.environment.image_id = "image-old"
+    assert nodes._prior_execution_for_patch(state, deps, ["tests/test_x.py::test_x"]) == (
+        earlier,
+        result,
+    )
+    earlier.execution = result.model_copy(update={"diagnostics": {}})
+    assert nodes._prior_execution_for_patch(state, deps, ["tests/test_x.py::test_x"]) is None

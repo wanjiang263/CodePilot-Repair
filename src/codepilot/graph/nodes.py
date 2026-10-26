@@ -1042,6 +1042,7 @@ def _prior_execution_for_patch(
             earlier.patch_hash != attempt.patch_hash
             or execution is None
             or execution.status not in {ExecutionStatus.PASS, ExecutionStatus.FAIL}
+            or execution.diagnostics.get("environment_image_id") != deps.environment.image_id
             or not _artifact_evidence_valid(deps, execution)
         ):
             continue
@@ -1220,6 +1221,14 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
         ),
         tests=targets,
         artifact_iteration=attempt.iteration,
+    )
+    execution = execution.model_copy(
+        update={
+            "diagnostics": {
+                **execution.diagnostics,
+                "environment_image_id": deps.environment.image_id,
+            }
+        }
     )
     # 立刻把执行结果落成 Artifact，而不是等 finalize。
     #

@@ -65,6 +65,7 @@ def main():
     parser.add_argument("--instance", required=True)
     parser.add_argument("--segment", type=int, default=1)
     parser.add_argument("--preflight", action="store_true")
+    parser.add_argument("--preflight-scope", nargs="+")
     parser.add_argument("--entry")
     parser.add_argument("--source-run", type=Path)
     parser.add_argument("--reason")
@@ -125,7 +126,7 @@ def main():
             cache_root=original.parent.parent / "repo-cache", default_mode="copy"
         )
         images = SWEBenchInstanceImageResolver.load(
-            ROOT / "configs/swebench/instance-image-overrides.json"
+            ROOT / "configs/phase23/instance-image-overrides.json"
         )
         runners = RunnerOverrides.load(ROOT / "configs/phase21/instance-runner-overrides.json")
 
@@ -219,9 +220,12 @@ def main():
                 workspace=workspace.path,
                 env_spec=task.env_spec,
             )
-            scope = read(ROOT / "configs/phase21/zero-model-scopes.json")["instances"][
-                args.instance
-            ]["target_tests"]
+            scope = (
+                args.preflight_scope
+                or read(ROOT / "configs/phase21/zero-model-scopes.json")["instances"][
+                    args.instance
+                ]["target_tests"]
+            )
             result = backend.run_tests(
                 workspace=workspace.path,
                 environment=env,
