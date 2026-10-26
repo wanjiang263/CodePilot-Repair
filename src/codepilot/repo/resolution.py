@@ -25,6 +25,12 @@ class NameResolver:
         self.assignments: dict[str, set[str]] = {}
         self.parameters: dict[str, set[str]] = {}
         self.class_nodes: dict[str, SyntaxNode] = {}
+        # AnalysisContext is immutable for the lifetime of this resolver.
+        # SymPy repeatedly asks for the same deep diamond hierarchy at many
+        # call sites; recomputing C3 for every method becomes exponential.
+        self._resolution_cache: dict[tuple[str, str], Resolution] = {}
+        self._bases_cache: dict[str, tuple[Symbol, ...]] = {}
+        self._mro_cache: dict[str, list[Symbol] | None] = {}
         for file in context.files:
             for node, owner in file.scoped_nodes():
                 if node.kind == "class_definition":
@@ -71,6 +77,12 @@ class NameResolver:
                     self.assignments.setdefault(owner.id, set()).update(bound)
 
     def resolve(self, owner: Symbol, expression: str) -> Resolution:
+        key = (owner.id, expression)
+        if key not in self._resolution_cache:
+            self._resolution_cache[key] = self._resolve_uncached(owner, expression)
+        return self._resolution_cache[key]
+
+    def _resolve_uncached(self, owner: Symbol, expression: str) -> Resolution:
         parts = expression.split(".")
         if not all(part.isidentifier() for part in parts):
             return Resolution()
@@ -185,6 +197,8 @@ class NameResolver:
         )
 
     def bases(self, clazz: Symbol) -> tuple[Symbol, ...]:
+        if clazz.id in self._bases_cache:
+            return self._bases_cache[clazz.id]
         result: list[Symbol] = []
         for node in self.base_expressions(clazz):
             expression = node.field("value") if node.kind == "subscript" else node
@@ -193,13 +207,16 @@ class NameResolver:
                     self.context.by_id[clazz.parent_id or ""], expression.text
                 )
                 result.extend(s for s in resolution.targets if s.kind == "class")
-        return tuple(result)
+        self._bases_cache[clazz.id] = tuple(result)
+        return self._bases_cache[clazz.id]
 
     def methods(self, clazz: Symbol, name: str) -> Resolution:
         direct = self.context.named(clazz, name)
         if direct:
             return Resolution(direct, "medium" if len(direct) == 1 else "low", True)
-        order = self._mro(clazz, frozenset())
+        if clazz.id not in self._mro_cache:
+            self._mro_cache[clazz.id] = self._mro(clazz, frozenset())
+        order = self._mro_cache[clazz.id]
         if order is not None:
             for parent in order[1:]:
                 methods = self.context.named(parent, name)
@@ -221,6 +238,8 @@ class NameResolver:
     def _mro(self, clazz: Symbol, trail: frozenset[str]) -> list[Symbol] | None:
         if clazz.id in trail:
             return None
+        if clazz.id in self._mro_cache:
+            return self._mro_cache[clazz.id]
         for node in self.base_expressions(clazz):
             expression = node.field("value") if node.kind == "subscript" else node
             if expression is None:
@@ -257,6 +276,7 @@ class NameResolver:
             for seq in sequences:
                 if seq[0] == head:
                     seq.pop(0)
+        self._mro_cache[clazz.id] = result
         return result
 
 

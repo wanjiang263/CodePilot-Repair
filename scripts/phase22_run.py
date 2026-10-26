@@ -11,7 +11,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "artifacts/phase22"
 SUFFIX = "-r2" if "--segment2" in sys.argv else ""
-RUN_SUFFIX = SUFFIX + ("-restart" if "--restart" in sys.argv else "")
+RUN_SUFFIX = SUFFIX + (
+    "-indexed" if "--indexed" in sys.argv else "-restart" if "--restart" in sys.argv else ""
+)
 
 
 def record(payload: dict) -> None:
