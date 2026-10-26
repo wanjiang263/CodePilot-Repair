@@ -489,6 +489,38 @@ def test_ingest_official_refuses_a_missing_record(fixture: Fixture) -> None:
         batch.ingest_official()
 
 
+def test_phase22_missing_official_record_is_error_not_unresolved(fixture: Fixture) -> None:
+    calls: list[str] = []
+    summary = fixture.make(_success_internal(calls), lambda request: 1).run()
+    assert calls == [IDS[0]]
+    entry = summary["instances"][0]
+    assert entry["internal"] == "ACCEPTED"
+    assert entry["official"] == "ERROR"
+    assert entry["status"] == "OFFICIAL_ERROR"
+    assert entry["terminal"]
+
+
+def test_phase22_external_invalid_environment_is_terminal(fixture: Fixture) -> None:
+    config = json.loads(fixture.config.read_text(encoding="utf-8"))
+    config["official_mode"] = "external"
+    fixture.config.write_text(json.dumps(config), encoding="utf-8")
+    calls: list[str] = []
+    batch = fixture.make(_success_internal(calls))
+    batch.run()
+    _write_json(
+        fixture.artifact / "instances" / IDS[0] / "official-evaluation-m3-test.json",
+        {
+            "status": "INVALID_ENV",
+            "official_verdict": "NOT_EVALUATED",
+        },
+    )
+    result = batch.ingest_official()
+    assert result["summary"]["status"] == "stopped"
+    assert batch.state["instances"][0]["official"] == "INVALID_ENV"
+    assert batch.state["instances"][0]["terminal"]
+    assert calls == [IDS[0]]
+
+
 def test_repo_cache_seed_uses_the_loader_source_identity(tmp_path: Path) -> None:
     from codepilot.repo.workspace import WorkspaceManager
 

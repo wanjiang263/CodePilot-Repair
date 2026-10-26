@@ -601,9 +601,13 @@ class M3Batch:
                     raise BatchStopError(f"{instance_id}: official run_id mismatch")
             verdict = str(official_result.get("official_verdict") or "NOT_EVALUATED")
             if verdict not in {"RESOLVED", "UNRESOLVED"}:
-                raise BatchStopError(
-                    f"{instance_id}: official record has no valid verdict: {verdict}"
+                entry.update(
+                    official=str(official_result.get("status") or "ERROR"),
+                    status="OFFICIAL_ERROR",
+                    terminal=True,
                 )
+                self._stop(f"{instance_id}: official record has no valid verdict: {verdict}")
+                return {"ingested": ingested, "summary": self._summary()}
             entry["official"] = verdict
             entry["status"] = verdict
             entry["terminal"] = True
@@ -890,6 +894,8 @@ class M3Batch:
         official_code = self.official_runner(OfficialRequest(instance, root, run_id))
         official_path = root / f"official-evaluation-{self.batch_id}.json"
         if not official_path.is_file():
+            entry.update(status="OFFICIAL_ERROR", official="ERROR", terminal=True)
+            self._save()
             raise BatchStopError("official runner returned without an evaluation record")
         official_result = _read_json(official_path)
         verdict = str(official_result.get("official_verdict") or "NOT_EVALUATED")

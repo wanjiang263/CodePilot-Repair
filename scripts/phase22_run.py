@@ -10,20 +10,34 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "artifacts/phase22"
-SUFFIX = "-r3" if "--segment3" in sys.argv else "-r2" if "--segment2" in sys.argv else ""
+SUFFIX = (
+    "-r4"
+    if "--segment4" in sys.argv
+    else "-r3"
+    if "--segment3" in sys.argv
+    else "-r2"
+    if "--segment2" in sys.argv
+    else ""
+)
 RUN_SUFFIX = SUFFIX + (
     "-indexed" if "--indexed" in sys.argv else "-restart" if "--restart" in sys.argv else ""
 )
+continuation = (
+    sys.argv[sys.argv.index("--continuation") + 1] if "--continuation" in sys.argv else None
+)
+if continuation is not None and not continuation.isdigit():
+    raise ValueError("continuation must be a non-negative integer")
+SESSION_SUFFIX = RUN_SUFFIX + (f"-c{continuation}" if continuation is not None else "")
 
 
 def record(payload: dict) -> None:
-    stage = OUT / f"supervisor{RUN_SUFFIX}.tmp"
+    stage = OUT / f"supervisor{SESSION_SUFFIX}.tmp"
     stage.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    stage.replace(OUT / f"supervisor{RUN_SUFFIX}.json")
+    stage.replace(OUT / f"supervisor{SESSION_SUFFIX}.json")
 
 
 def main() -> int:
-    with (OUT / f"launch{RUN_SUFFIX}.json").open("x", encoding="utf-8") as handle:
+    with (OUT / f"launch{SESSION_SUFFIX}.json").open("x", encoding="utf-8") as handle:
         handle.write(
             json.dumps(
                 {
@@ -62,7 +76,7 @@ def main() -> int:
         f"artifacts/phase22/live{RUN_SUFFIX}",
         "--live",
     ]
-    with (OUT / f"live{RUN_SUFFIX}.log").open("xb") as log:
+    with (OUT / f"live{SESSION_SUFFIX}.log").open("xb") as log:
         process = subprocess.Popen(
             command,
             cwd=ROOT,
@@ -77,7 +91,7 @@ def main() -> int:
                 "batch_pid": process.pid,
                 "status": "running",
                 "exit_code": None,
-                "log": f"artifacts/phase22/live{RUN_SUFFIX}.log",
+                "log": f"artifacts/phase22/live{SESSION_SUFFIX}.log",
             }
         )
         code = process.wait()
@@ -87,7 +101,7 @@ def main() -> int:
                 "batch_pid": process.pid,
                 "status": "exited",
                 "exit_code": code,
-                "log": f"artifacts/phase22/live{RUN_SUFFIX}.log",
+                "log": f"artifacts/phase22/live{SESSION_SUFFIX}.log",
             }
         )
     return code
