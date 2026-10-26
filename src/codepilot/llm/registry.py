@@ -349,5 +349,11 @@ def _default_client(provider_spec: Any, api_key: str) -> httpx.Client:
     del api_key
     return build_http_client(
         base_url=provider_spec.base_url,
-        timeout=provider_spec.timeout_seconds,
+        timeout=httpx.Timeout(
+            provider_spec.timeout_seconds,
+            connect=provider_spec.connect_timeout_seconds or provider_spec.timeout_seconds,
+            write=provider_spec.write_timeout_seconds or provider_spec.timeout_seconds,
+            pool=provider_spec.pool_timeout_seconds or provider_spec.timeout_seconds,
+        ),
+        trust_env=provider_spec.trust_env,
     )

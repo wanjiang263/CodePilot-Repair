@@ -189,7 +189,7 @@ class OpenAICompatibleProvider:
                     "request_body_bytes": len(json.dumps(body).encode("utf-8")),
                     "message_roles": [m.get("role") for m in body.get("messages", [])],
                     "timeout": self._client.timeout.as_dict(),
-                    "trust_env": self.provider.trust_env,
+                    "trust_env": self._client.trust_env,
                 },
             )
         except httpx.TimeoutException as exc:

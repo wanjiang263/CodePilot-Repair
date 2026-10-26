@@ -260,6 +260,20 @@ class M3Batch:
         self.summary_path = self.artifact_root / "batch-summary.json"
         self.freeze_path = self.artifact_root / "batch-freeze.json"
         self.state = self._load_or_initialize()
+        # Continue only undispatched tasks after an explicit repaired segment.
+        for instance_id, source in self.config.get("completed_segment_sources", {}).items():
+            path = self._absolute(Path(source["path"]))
+            costs = _ledger_totals(path)
+            if _sha256(path) != source["sha256"] or costs["frozen"] or not costs["requests"]:
+                raise BatchStopError("completed segment source is not a settled paid attempt")
+            if source["path"] not in covered:
+                raise BatchStopError("completed segment ledger is absent from opening")
+            self._entry(instance_id).update(
+                status="DISPATCHED_STOPPED",
+                internal="SYSTEM_INTERRUPTED",
+                terminal=True,
+                previous_segment=source,
+            )
 
     def _absolute(self, path: Path) -> Path:
         return path if path.is_absolute() else self.repo_root / path
@@ -781,7 +795,16 @@ class M3Batch:
         self._budget(instance_id)
         found = acceptance._run_report(root, instance=instance_id, label=self.batch_id, run_id=None)
         if found is None:
-            entry["status"] = "ENV_ERROR" if run_code else "NOT_DISPATCHED"
+            dispatched = bool(current and current["requests"])
+            entry["status"] = (
+                "DISPATCHED_STOPPED"
+                if dispatched
+                else "ENV_ERROR"
+                if run_code
+                else "NOT_DISPATCHED"
+            )
+            if dispatched:
+                entry["internal"] = "SYSTEM_INTERRUPTED"
             entry["official"] = "NOT_EVALUATED"
             entry["terminal"] = True
             self._save()

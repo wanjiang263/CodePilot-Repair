@@ -356,6 +356,34 @@ def test_phase22_original_authorization_must_match_ledger(fixture: Fixture) -> N
         fixture.make()
 
 
+def test_phase22_repaired_segment_never_redispatches_paid_instance(fixture: Fixture) -> None:
+    source = fixture.root / "history/source.json"
+    _ledger(source)
+    manifest = build_multi_source_recovery_manifest(
+        [RecoveryLedgerSource(source, IDS[0])],
+        run_id="segment2",
+        reason="repair",
+        repo_root=fixture.root,
+    )
+    fixture.opening.write_text(json.dumps(manifest), encoding="utf-8")
+    config = json.loads(fixture.config.read_text(encoding="utf-8"))
+    config.update(
+        historical_opening_cny=0.01,
+        completed_segment_sources={
+            IDS[0]: {
+                "path": "history/source.json",
+                "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+            }
+        },
+    )
+    fixture.config.write_text(json.dumps(config), encoding="utf-8")
+    calls: list[str] = []
+    summary = fixture.make(_success_internal(calls), _success_official([])).run()
+    assert calls == IDS[1:]
+    assert summary["instances"][0]["status"] == "DISPATCHED_STOPPED"
+    assert summary["instances"][0]["terminal"]
+
+
 def _success_internal(calls: list[str]) -> Any:
     def run(request: m3_batch.InternalRequest) -> int:
         instance = request.instance["instance_id"]

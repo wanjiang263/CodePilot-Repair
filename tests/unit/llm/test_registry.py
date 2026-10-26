@@ -316,3 +316,22 @@ def test_same_provider_shares_one_limiter(key: None) -> None:
     registry.for_role("planner")
     assert len(registry._limiters) == 1
     registry.close()
+
+
+def test_phase22_default_registry_client_keeps_provider_timeouts_and_route() -> None:
+    from codepilot.llm.config import ProviderSpec
+    from codepilot.llm.registry import _default_client
+
+    spec = ProviderSpec(
+        name="test",
+        base_url="https://example.test",
+        api_key_env="TEST_KEY",
+        timeout_seconds=120,
+        connect_timeout_seconds=10,
+        write_timeout_seconds=30,
+        pool_timeout_seconds=10,
+        trust_env=False,
+    )
+    with _default_client(spec, "unused") as client:
+        assert client.trust_env is False
+        assert client.timeout.as_dict() == {"connect": 10, "read": 120, "write": 30, "pool": 10}

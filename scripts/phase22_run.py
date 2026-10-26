@@ -10,20 +10,26 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "artifacts/phase22"
+SUFFIX = "-r2" if "--segment2" in sys.argv else ""
 
 
 def record(payload: dict) -> None:
-    stage = OUT / "supervisor.tmp"
+    stage = OUT / f"supervisor{SUFFIX}.tmp"
     stage.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    stage.replace(OUT / "supervisor.json")
+    stage.replace(OUT / f"supervisor{SUFFIX}.json")
 
 
 def main() -> int:
     if "--worker" not in sys.argv:
-        with (OUT / "launch.json").open("x", encoding="utf-8") as handle:
+        with (OUT / f"launch{SUFFIX}.json").open("x", encoding="utf-8") as handle:
             handle.write(json.dumps({"launcher_pid": os.getpid(), "retry": False}))
         process = subprocess.Popen(
-            [sys.executable, str(Path(__file__).resolve()), "--worker"],
+            [
+                sys.executable,
+                str(Path(__file__).resolve()),
+                "--worker",
+                *(["--segment2"] if SUFFIX else []),
+            ],
             cwd=ROOT,
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
@@ -55,14 +61,14 @@ def main() -> int:
         sys.executable,
         str(ROOT / "scripts/m3_batch.py"),
         "--catalog",
-        "configs/phase22/catalog.json",
+        f"configs/phase22/catalog{SUFFIX}.json",
         "--config",
-        "configs/phase22/config.json",
+        f"configs/phase22/config{SUFFIX}.json",
         "--artifact-root",
-        "artifacts/phase22/live",
+        f"artifacts/phase22/live{SUFFIX}",
         "--live",
     ]
-    with (OUT / "live.log").open("xb") as log:
+    with (OUT / f"live{SUFFIX}.log").open("xb") as log:
         process = subprocess.Popen(
             command,
             cwd=ROOT,
