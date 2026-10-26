@@ -536,6 +536,10 @@ class M3Batch:
         self._validate_live_source()
         if self.code_sha != self.freeze["code_sha"]:
             raise BatchStopError("source changed after batch freeze")
+        if self.state["status"] == "stopped":
+            # A stop is durable. Only explicit official ingestion may reset it;
+            # rerunning an all-terminal batch must not erase a frozen stop.
+            return self._summary()
         if self.config.get("require_preflight"):
             try:
                 self._preflight = self._load_preflight()

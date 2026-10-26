@@ -641,6 +641,25 @@ def test_m3_unknown_cost_is_recorded_and_stops_batch(fixture: Fixture) -> None:
     assert registry["attempts"][0]["unknown_reserved_cny"] == pytest.approx(0.8114688)
 
 
+def test_phase22_frozen_stop_survives_restart_without_dispatch(fixture: Fixture) -> None:
+    calls = []
+
+    def internal(request: m3_batch.InternalRequest) -> int:
+        calls.append(request.instance["instance_id"])
+        _ledger(request.ledger, unknown=True)
+        return 1
+
+    first = fixture.make(internal, _success_official([])).run()
+    ledger = next(fixture.artifact.glob("instances/*/dispatch-ledger-*.json"))
+    original_bytes = ledger.read_bytes()
+    second = fixture.make(internal, _success_official([])).run()
+    assert second["status"] == "stopped"
+    assert second["stop_reason"] == first["stop_reason"]
+    assert second["cost"] == first["cost"]
+    assert calls == [IDS[0]]
+    assert ledger.read_bytes() == original_bytes
+
+
 def test_m3_registry_failure_stops_before_acceptance_and_next_instance(
     fixture: Fixture, monkeypatch: pytest.MonkeyPatch
 ) -> None:
