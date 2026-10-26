@@ -167,7 +167,7 @@ def main():
             )
         write(segment / "actual-client.json", transport)
         archive = previous / "llm_calls.jsonl"
-        if archive.is_file() and not args.preflight:
+        if archive.is_file():
             from codepilot.llm.settled_cache import SettledResponseCache
 
             source_ledgers = list(previous.parent.parent.glob("dispatch-ledger*.json"))
@@ -175,7 +175,9 @@ def main():
                 r["status"] != "settled" for r in read(source_ledgers[0])["requests"]
             ):
                 raise RuntimeError("only fully settled response archives can be reused")
-            providers.roles = {
+            from dataclasses import replace
+
+            cached_roles = {
                 role: SettledResponseCache(
                     chain,
                     archive=archive,
@@ -184,6 +186,7 @@ def main():
                 )
                 for role, chain in providers.roles.items()
             }
+            providers = replace(providers, roles=cached_roles)
 
         if args.preflight:
             artifacts = ArtifactStore(segment, "light")
