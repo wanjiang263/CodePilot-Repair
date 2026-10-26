@@ -436,6 +436,12 @@ class InferenceAssembly:
             if runtime_config is not None
             else None
         )
+        if self._runtime_config and not self._providers.simulated:
+            from codepilot.llm.registry import transport_provider
+
+            for provider in self._providers.roles.values():
+                if transport_provider(provider).spec.alias != self._runtime_config.model_alias:
+                    raise ValueError("actual provider role differs from typed experiment model")
         self._budget = (
             self._runtime_config.budget if self._runtime_config else budget or RepairBudget()
         )

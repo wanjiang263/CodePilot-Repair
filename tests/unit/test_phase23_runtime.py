@@ -227,3 +227,40 @@ def test_settled_cache_hits_do_not_charge_and_changed_inputs_use_live(tmp_path):
     assert changed.content == "new live"
     assert len(live.calls) == 1
     assert json.loads((tmp_path / "reuse.jsonl").read_text())["new_cost_cny"] == 0
+
+
+def test_typed_model_selection_reaches_actual_batch_transport_without_http():
+    from pathlib import Path
+
+    from pydantic import SecretStr
+
+    from codepilot.eval.assembly import ProviderBundle
+    from codepilot.llm.config import load_llm_config
+    from codepilot.llm.registry import transport_provider
+    from codepilot.schemas.run_config import InferenceRunConfig
+
+    original = load_llm_config(Path(__file__).resolve().parents[2] / "configs/phase22/llm.yaml")
+    runtime = InferenceRunConfig()
+    selected = original.for_model(runtime.model_alias)
+    selected.providers["bigmodel"] = selected.providers["bigmodel"].model_copy(
+        update={"api_key_value": SecretStr("unit-test-only-not-a-credential")}
+    )
+    bundle = ProviderBundle.live(selected, budget_currency="CNY")
+    try:
+        for provider in bundle.roles.values():
+            actual = transport_provider(provider)
+            assert actual.provider.name == "bigmodel"
+            assert actual.spec.alias == runtime.model_alias
+            assert actual.spec.model == "glm-5.3-flash"
+            assert actual.spec.temperature == 0
+            assert actual.policy.max_attempts == 1
+            assert actual._client.timeout.as_dict() == {
+                "connect": 10.0,
+                "read": 120.0,
+                "write": 30.0,
+                "pool": 10.0,
+            }
+            assert actual._client.trust_env is False
+        assert original.roles["reviewer"] != selected.roles["reviewer"]
+    finally:
+        bundle.close()

@@ -139,11 +139,21 @@ def main():
                 bind_workspace=True,
             )
 
-        llm = load_llm_config(ROOT / "configs/phase22/llm.yaml")
+        run_options = InferenceRunConfig()
+        llm = load_llm_config(ROOT / "configs/phase22/llm.yaml").for_model(run_options.model_alias)
         providers = ProviderBundle.live(llm, budget_currency="CNY", record_llm=True)
         transport = []
         for role, chain in providers.roles.items():
             actual = transport_provider(chain)
+            if (
+                actual.spec.alias != run_options.model_alias
+                or actual.spec.model != "glm-5.3-flash"
+                or actual.provider.name != "bigmodel"
+                or actual.policy.max_attempts != 1
+            ):
+                raise RuntimeError(
+                    "actual batch provider is not frozen BigModel GLM with zero retries"
+                )
             config = llm.providers[llm.resolve_role(role).provider]
             expected = {
                 "connect": config.connect_timeout_seconds or config.timeout_seconds,
@@ -389,7 +399,7 @@ def main():
                     "internal": outcome.status,
                     "receipt": str(receipt) if receipt else None,
                     "ledger_frozen": budget.frozen,
-                    "requests": len(budget.requests),
+                    "requests": len(budget.records),
                 }
             ),
             flush=True,

@@ -36,7 +36,7 @@ def import_stage(initial: RepairState, recovery: StageRecovery, deps: Deps) -> R
     previous_root = source.parent
     proof_root = deps.artifacts.run_dir / "reused-evidence"
     proofs = []
-    for name in ("attempts", "regression", "reproduction"):
+    for name in ("attempts", "regression", "reproduction", "reused-evidence"):
         origin = previous_root / name
         if origin.is_dir():
             shutil.copytree(origin, proof_root / name)

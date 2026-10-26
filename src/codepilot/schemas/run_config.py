@@ -30,6 +30,7 @@ class StageRecovery(BaseModel):
 
 class InferenceRunConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    model_alias: str = "glm-5.3-flash-main"
     budget: RepairBudget = Field(default_factory=RepairBudget)
     deny_existing_test_edits: bool = True
     discover_missing_targets: bool = True
