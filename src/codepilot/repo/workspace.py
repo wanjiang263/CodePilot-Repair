@@ -994,8 +994,13 @@ def _local_fetch_base(cache: Path, commit: str, target: Path, *, timeout: float)
         kind = run_git(["cat-file", "-t", sha], cwd=cache, check=False, timeout=timeout)
         if kind.returncode != 0:
             raise WorkspaceError(f"读取对象类型失败: {sha}")
+        object_kind = kind.stdout.strip()
+        if object_kind not in {"blob", "tree", "commit", "tag"}:
+            raise WorkspaceError(f"非法 Git 对象类型: {sha}")
         content = subprocess.run(
-            ["git", "cat-file", "-p", sha],
+            # -p pretty-prints trees; hashing that display as a raw tree changes
+            # its identity (the real Requests reproduction hit this fallback).
+            ["git", "cat-file", object_kind, sha],
             cwd=cache,
             capture_output=True,
             check=False,
@@ -1003,14 +1008,16 @@ def _local_fetch_base(cache: Path, commit: str, target: Path, *, timeout: float)
         if content.returncode != 0:
             raise WorkspaceError(f"读取对象失败: {sha}")
         written = subprocess.run(
-            ["git", "hash-object", "-w", "-t", kind.stdout.strip(), "--stdin"],
+            ["git", "hash-object", "-w", "-t", object_kind, "--stdin"],
             cwd=target,
             input=content.stdout,
             capture_output=True,
             check=False,
         )
         if written.returncode != 0 or written.stdout.decode("ascii", "replace").strip() != sha:
-            raise WorkspaceError(f"写入 workspace 对象失败: {sha}")
+            raise WorkspaceError(
+                f"写入 workspace {object_kind} 对象失败: {sha}; exit={written.returncode}"
+            )
     run_git(["update-ref", "refs/codepilot/base", commit], cwd=target, check=False)
     for line in tags.lines:
         ref, _, object_id = line.partition(" ")

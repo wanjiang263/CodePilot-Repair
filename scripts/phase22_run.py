@@ -11,7 +11,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "artifacts/phase22"
 SUFFIX = (
-    "-r4"
+    "-r5"
+    if "--segment5" in sys.argv
+    else "-r4"
     if "--segment4" in sys.argv
     else "-r3"
     if "--segment3" in sys.argv

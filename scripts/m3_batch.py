@@ -828,6 +828,25 @@ class M3Batch:
         _report_path, run = found
         run_id = str(run["run_id"])
         entry["run_id"] = run_id
+        if run.get("status") == "sandbox_error" or run.get("error_origin") in {
+            "harness",
+            "sandbox",
+            "environment",
+        }:
+            entry.update(
+                status="ENV_ERROR", internal="ENV_ERROR", official="NOT_EVALUATED", terminal=True
+            )
+            record_attempt_from_ledger(
+                self.registry_path,
+                attempt_label=self.batch_id,
+                instance_id=instance_id,
+                artifact_root=root,
+                ledger=ledger,
+                status="stopped",
+                repo_root=self.repo_root,
+            )
+            self._save()
+            raise BatchStopError(f"infrastructure failure in inner run: {run.get('status')}")
         budget_report = run
         if not isinstance(run.get("budget"), dict):
             budget_report = acceptance._root_report(root, run_id)

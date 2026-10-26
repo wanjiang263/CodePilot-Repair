@@ -500,6 +500,30 @@ def test_phase22_missing_official_record_is_error_not_unresolved(fixture: Fixtur
     assert entry["terminal"]
 
 
+def test_phase22_inner_sandbox_error_stops_even_when_wrapper_says_no_patch(
+    fixture: Fixture,
+) -> None:
+    calls: list[str] = []
+
+    def internal(request: m3_batch.InternalRequest) -> int:
+        calls.append(request.instance["instance_id"])
+        _ledger(request.ledger)
+        _no_patch(request.root, "m3-test", request.instance["instance_id"])
+        path = next((request.root / "runs").glob("*/report.json"))
+        report = json.loads(path.read_text())
+        report["status"] = "sandbox_error"
+        _write_json(path, report)
+        return 0
+
+    batch = fixture.make(internal)
+    summary = batch.run()
+    assert calls == [IDS[0]]
+    assert summary["status"] == "stopped"
+    assert summary["instances"][0]["status"] == "ENV_ERROR"
+    registry = json.loads(batch.registry_path.read_text())
+    assert registry["attempts"][0]["status"] == "stopped"
+
+
 def test_phase22_external_invalid_environment_is_terminal(fixture: Fixture) -> None:
     config = json.loads(fixture.config.read_text(encoding="utf-8"))
     config["official_mode"] = "external"

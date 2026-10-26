@@ -776,6 +776,7 @@ class InferenceAssembly:
                             source=str(task.repository),
                             base_commit=workspace.base_commit,
                             root=artifacts.run_dir / "reproduction-base",
+                            mode="copy" if self._enforce_base_only else "fetch",
                         ),
                     ),
                     artifacts=artifacts,
