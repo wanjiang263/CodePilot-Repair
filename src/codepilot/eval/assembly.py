@@ -422,16 +422,30 @@ class InferenceAssembly:
         event_store: EventStoreProtocol | None = None,
         cancel_check: Callable[[], bool] | None = None,
         workspace_factory: Callable[[ArtifactStore], Workspace] | None = None,
+        runtime_config: Any = None,
     ) -> None:
         self._task = task
         self._manager = workspace_manager
         self._work_root = Path(work_root)
         self._sandbox_factory = sandbox_factory
         self._providers = provider_bundle
-        self._budget = budget or RepairBudget()
+        from codepilot.schemas.run_config import InferenceRunConfig
+
+        self._runtime_config = (
+            InferenceRunConfig.model_validate(runtime_config)
+            if runtime_config is not None
+            else None
+        )
+        self._budget = (
+            self._runtime_config.budget if self._runtime_config else budget or RepairBudget()
+        )
         self._expected_budget = expected_budget
-        self._with_reproducer = with_reproducer
-        self._allow_new_tests = allow_new_tests
+        self._with_reproducer = (
+            self._runtime_config.with_reproducer if self._runtime_config else with_reproducer
+        )
+        self._allow_new_tests = (
+            self._runtime_config.allow_new_tests if self._runtime_config else allow_new_tests
+        )
         self._record_llm = record_llm
         self._checkpoint = checkpoint
         #: Web/user tasks clone an ordinary repository; the base-only invariant is
@@ -486,7 +500,11 @@ class InferenceAssembly:
         if self._enforce_base_only:
             self._assert_isolated(workspace)
         env_spec = self._resolve_env_spec(workspace.path)
-        deny_existing = os.environ.get("CODEPILOT_DENY_EXISTING_TEST_EDITS") == "1"
+        deny_existing = (
+            self._runtime_config.deny_existing_test_edits
+            if self._runtime_config
+            else os.environ.get("CODEPILOT_DENY_EXISTING_TEST_EDITS") == "1"
+        )
         policy = WorkspacePathPolicy(
             workspace.path,
             deny_directories=WorkspacePathPolicy.DEFAULT_DENY_DIRECTORIES
@@ -508,7 +526,11 @@ class InferenceAssembly:
         )
         database = artifacts.run_dir / "index.sqlite3"
         reused_snapshot = False
-        seed_raw = os.environ.get("CODEPILOT_INDEX_SNAPSHOT")
+        seed_raw = (
+            self._runtime_config.index_snapshot.model_dump_json()
+            if self._runtime_config and self._runtime_config.index_snapshot
+            else os.environ.get("CODEPILOT_INDEX_SNAPSHOT")
+        )
         if seed_raw and not resuming:
             from codepilot.repo.index_snapshot import reuse_index
 
@@ -752,6 +774,9 @@ class InferenceAssembly:
             workspace_manager=self._manager,
             usage=self._providers.usage,
             simulated_llm=self._providers.simulated,
+            discover_missing_targets=bool(
+                self._runtime_config and self._runtime_config.discover_missing_targets
+            ),
             # 闭环预留要按 Reviewer 实际绑定模型的单价估算；这份配置就是那条链
             # （角色 → 别名 → 单价/汇率/币种）。脚本化与 Fake 批次没有注册表，
             # 传 None 让预留退回账本单价口径，零成本运行照旧放行。
@@ -796,7 +821,20 @@ class InferenceAssembly:
             started_at=datetime.now(UTC),
             budget=self._budget,
         )
+        if self._runtime_config is not None:
+            artifacts.write_json(
+                "runtime-config.json", self._runtime_config.model_dump(mode="json")
+            )
+        recovery = self._runtime_config.recovery if self._runtime_config else None
+        if recovery is not None:
+            from codepilot.graph.stage_recovery import import_stage
+
+            initial = import_stage(initial, recovery, deps)
         try:
+            if recovery is not None:
+                from codepilot.graph.routing import Node
+
+                return asyncio.run(self._run_stage(initial, deps, Node(recovery.entry)))
             if checkpoint_path is None:
                 return run_graph(initial, deps)
             return asyncio.run(
@@ -810,6 +848,12 @@ class InferenceAssembly:
             )
         finally:
             deps.close()
+
+    async def _run_stage(self, initial: RepairState, deps: Deps, entry: Any) -> RepairState:
+        async with await open_checkpointer(
+            deps.artifacts.run_dir / "checkpoints.sqlite", initial.run_id
+        ) as handle:
+            return await run_with_checkpoint(initial, deps, handle, entry=entry)
 
     async def _run_checkpointed(
         self,

@@ -214,3 +214,25 @@ def test_known_provider_timeouts_are_not_harness_errors() -> None:
         assert failure.failure_class is FailureClass.LLM_REQUEST_UNCERTAIN
         assert failure.origin is ErrorOrigin.PROVIDER
         assert failure.failure_class is not FailureClass.HARNESS_INTERNAL_ERROR
+
+
+def test_phase23_explicit_discovery_collects_and_baselines_related_module(tmp_path: Path) -> None:
+    harness = build_harness(
+        tmp_path,
+        results=[passed_result(), passed_result(), passed_result(), passed_result()],
+        coder_rounds=[ROUND],
+        baseline_results=[],
+    )
+    harness.deps.discover_missing_targets = True
+    state = _state(harness, tests_to_run=[], baseline=_baseline(harness, {}))
+    try:
+        update = asyncio.run(nodes.run_target_tests(state, harness.deps))
+    finally:
+        harness.close()
+    assert update["execution"].status is ExecutionStatus.PASS
+    assert update["baseline"].complete
+    assert update["baseline"].outcomes
+    assert len(harness.sandbox.run_calls) == 4
+    assert all(call[1] for call in harness.sandbox.run_calls)
+    assert update["attempts"][-1].target_tests
+    assert (harness.deps.artifacts.run_dir / "target-discovery.json").is_file()

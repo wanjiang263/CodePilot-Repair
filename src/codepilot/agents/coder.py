@@ -16,6 +16,7 @@ from codepilot.schemas.issue import IssueAnalysis
 from codepilot.schemas.plan import RepairPlan
 from codepilot.schemas.retrieval import RetrievalResult
 from codepilot.schemas.usage import Usage
+from codepilot.tools.base import is_test_path
 from codepilot.tools.registry import ToolRegistry, ToolRole, UnregisteredToolError
 
 __all__ = ["CodingAgent", "CodingResult", "ToolCallAudit"]
@@ -69,6 +70,7 @@ class CodingAgent:
         self.usage = usage if usage is not None else Usage()
         self.max_tool_calls = max_tool_calls
         self.max_total_tokens = max_total_tokens
+        self._blocked_paths: set[str] = set()
 
     def run(
         self,
@@ -109,7 +111,19 @@ class CodingAgent:
             system_prompt=_SYSTEM,
             budget=48_000,
         )
-        messages = [Message.user(context.text)]
+        source_candidates = [
+            change.file for change in plan.changes if not is_test_path(change.file)
+        ]
+        messages = [
+            Message.user(
+                context.text
+                + "\nExecution policy: existing tests are read-only. "
+                + "Fix the implementation, never alter expected outcomes. Production source candidates: "
+                + json.dumps(source_candidates)
+                + ". Previously rejected paths: "
+                + json.dumps(sorted(self._blocked_paths))
+            )
+        ]
         specs = self.registry.specs(ToolRole.CODER)
         audits: list[ToolCallAudit] = []
         llm_calls = 0
@@ -184,6 +198,15 @@ class CodingAgent:
                             test_runs_this_round += 1
                 elapsed = int((time.monotonic() - started) * 1000)
                 error = result.get("error")
+                if isinstance(error, dict) and "test is read-only" in str(error.get("message", "")):
+                    path = str(call.arguments.get("path", ""))
+                    self._blocked_paths.add(path)
+                    error["message"] += (
+                        f". The attempted write did not change the file. Do not repeat it. "
+                        f"Read the implementation and update source candidates {source_candidates}; "
+                        "retain any legal source edits already made. If the current hypothesis "
+                        "only changes tests, diagnose the source behavior before another edit."
+                    )
                 error_code = error.get("code") if isinstance(error, dict) else None
                 audit = ToolCallAudit(
                     sequence=len(audits) + 1,

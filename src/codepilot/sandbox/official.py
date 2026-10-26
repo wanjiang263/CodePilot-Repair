@@ -178,15 +178,24 @@ def _copy_testdeps(source: str | Path | None, workspace: Path) -> int:
         raise OfficialImageError("cannot locate git exclude for the testdeps directory")
     if not exclude.resolve().is_relative_to(workspace.resolve()):
         raise OfficialImageError("git exclude resolved outside the workspace; refusing to write it")
-    if target.exists():
-        shutil.copytree(src, target, dirs_exist_ok=True, symlinks=True)
-    else:
-        shutil.copytree(src, target, symlinks=True)
+    copied = 0
+    target.mkdir(parents=True, exist_ok=True)
+    for path in src.rglob("*"):
+        if not path.is_file() or "__pycache__" in path.parts:
+            continue
+        destination = target / path.relative_to(src)
+        if not destination.resolve().is_relative_to(workspace.resolve()):
+            raise OfficialImageError("test dependency destination escapes workspace")
+        if destination.exists():
+            continue
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, destination)
+        copied += 1
     exclude.parent.mkdir(parents=True, exist_ok=True)
     current = exclude.read_text(encoding="utf-8", errors="replace") if exclude.is_file() else ""
     if "testdeps/" not in {line.strip() for line in current.splitlines()}:
         exclude.write_text(current.rstrip("\n") + "\ntestdeps/\n", encoding="utf-8")
-    return sum(1 for path in target.rglob("*") if path.is_file())
+    return copied
 
 
 def instance_testdeps_root(instance_id: str) -> Path:
@@ -209,6 +218,7 @@ class OfficialInstanceSandbox(DockerSandbox):
         images: SWEBenchInstanceImageResolver,
         client: Any | None = None,
         runners: RunnerOverrides | None = None,
+        bind_workspace: bool | None = None,
     ) -> None:
         self.instance_id = instance_id
         self.images = images
@@ -219,10 +229,15 @@ class OfficialInstanceSandbox(DockerSandbox):
             allowed_workspace_root=allowed_workspace_root,
             client=client,
             workspace_target="/testbed",
-            bind_workspace=os.environ.get("CODEPILOT_BIND_WORKSPACE") == "1",
+            bind_workspace=(
+                os.environ.get("CODEPILOT_BIND_WORKSPACE") == "1"
+                if bind_workspace is None
+                else bind_workspace
+            ),
             runner_adapter=self.runner,
         )
         self.last_image: dict[str, Any] | None = None
+        self._prepared_workspaces: set[tuple[str, str]] = set()
 
     def build_env(
         self,
@@ -297,6 +312,7 @@ class OfficialInstanceSandbox(DockerSandbox):
                 if self.runner is not None
                 else {"kind": "pytest"}
             )
+        self._prepared_workspaces.add((str(workspace.resolve()), actual_id))
         return EnvironmentBuildResult(
             status=ExecutionStatus.PASS,
             image_ref=resolution.image_ref,
@@ -366,6 +382,18 @@ class OfficialInstanceSandbox(DockerSandbox):
                     container.remove(force=True)
 
     def run_tests(self, **kwargs: Any) -> Any:
+        # A reused image is not a prepared workspace. Reproducer/base-baseline
+        # copies need the same generated artifacts and compatibility plugins.
+        workspace = Path(kwargs["workspace"])
+        environment = kwargs["environment"]
+        key = (str(workspace.resolve()), str(environment.image_id))
+        if key not in self._prepared_workspaces:
+            head = run_git(["rev-parse", "HEAD"], cwd=workspace).stdout.strip()
+            prepared = self.build_env(
+                repository="", base_commit=head, workspace=workspace, env_spec=kwargs["env_spec"]
+            )
+            if prepared.image_id != environment.image_id:
+                raise OfficialImageError("new workspace preparation changed frozen image identity")
         spec = kwargs["env_spec"]
         env = {
             **spec.env,

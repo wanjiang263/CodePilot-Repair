@@ -57,6 +57,7 @@ from codepilot.graph.builder import (
     graph_config,
 )
 from codepilot.graph.deps import Deps
+from codepilot.graph.routing import Node
 from codepilot.graph.stop_rules import patch_hash
 from codepilot.observability.events import EventType
 from codepilot.repo.gitcmd import GitError, run_git
@@ -404,6 +405,7 @@ async def run_with_checkpoint(
     handle: CheckpointHandle,
     *,
     recursion_limit: int | None = None,
+    entry: Node = Node.UNDERSTAND_ISSUE,
 ) -> RepairState:
     """带 checkpoint 的完整执行入口。
 
@@ -418,6 +420,7 @@ async def run_with_checkpoint(
         handle,
         payload=initial.model_dump(mode="python"),
         recursion_limit=recursion_limit,
+        entry=entry,
     )
 
 
@@ -427,13 +430,14 @@ async def _ainvoke_checkpointed(
     *,
     payload: dict[str, Any] | None,
     recursion_limit: int | None,
+    entry: Node = Node.UNDERSTAND_ISSUE,
 ) -> RepairState:
     """异步执行。节点是 ``async def``，用同步 ``invoke`` 会直接 TypeError。
 
     recursion_limit 命中时与 :func:`codepilot.graph.builder.run_graph` 走同一个
     安全终止路径：回读最后一次落盘的状态，把已经发生的用量如实带出来。
     """
-    graph = build_graph(deps, checkpointer=handle.saver)
+    graph = build_graph(deps, checkpointer=handle.saver, entry=entry)
     anchor = RepairState.model_validate(payload) if payload else _anchor(deps)
     config = graph_config(deps, anchor, recursion_limit=recursion_limit)
     try:

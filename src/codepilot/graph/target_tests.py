@@ -138,9 +138,7 @@ def _baseline_order(baseline: TestBaseline) -> list[str]:
     return ordered
 
 
-def _expand_file_target(
-    raw: str, baseline: TestBaseline | None
-) -> tuple[list[str], list[str]]:
+def _expand_file_target(raw: str, baseline: TestBaseline | None) -> tuple[list[str], list[str]]:
     """Turn a file target into baseline-passing NodeIDs in collection order.
 
     A whole test file can contain tests that already fail on the base commit;
@@ -221,6 +219,36 @@ def _changed_files(patch: str) -> tuple[str, ...]:
 def changed_files(patch: str) -> tuple[str, ...]:
     """补丁修改的仓库相对路径；非法/空补丁返回空元组。"""
     return _changed_files(patch)
+
+
+def discover_target_files(patch: str, index: Any, repo_graph: Any) -> tuple[str, ...]:
+    """Bounded repository evidence, independent of an incomplete old baseline.
+
+    Exact test-module names and indexed TEST edges are meaningful evidence;
+    selecting arbitrary passing tests is not a fallback.
+    """
+    changed = set(changed_files(patch))
+    stems = {
+        PurePosixPath(path).parent.name
+        if PurePosixPath(path).stem == "__init__"
+        else PurePosixPath(path).stem
+        for path in changed
+    }
+    found: list[str] = []
+    for item in index.files():
+        path = item.path
+        stem = PurePosixPath(path).stem
+        if is_test_path(path) and any(stem in {f"test_{name}", f"{name}_test"} for name in stems):
+            found.append(path)
+    if not found:
+        for symbol in index.symbol_objects():
+            if symbol.path in changed:
+                found.extend(
+                    n.symbol.path
+                    for n in repo_graph.related_tests(symbol.qualified_name)
+                    if is_test_path(n.symbol.path)
+                )
+    return tuple(dict.fromkeys(found))[:4]
 
 
 def _impact_candidates(state: RepairState) -> list[str]:

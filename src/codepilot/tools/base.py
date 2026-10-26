@@ -189,7 +189,8 @@ class WorkspacePathPolicy:
             and not (self.repro_write and _touches_reproduction_directory(posix))
         ):
             raise PathAccessError(
-                "forbidden_path", "existing test files cannot be modified by the coder"
+                "forbidden_path",
+                f"existing test is read-only: {normalized}; edit production source instead",
             )
         if for_write:
             self._check_reproduction_parent(posix, resolved, for_write=for_write)

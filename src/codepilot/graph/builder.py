@@ -232,7 +232,9 @@ def _linear(workflow: Any, source: Node, target: Node) -> None:
     )
 
 
-def build_graph(deps: Deps, *, checkpointer: Any | None = None) -> Any:
+def build_graph(
+    deps: Deps, *, checkpointer: Any | None = None, entry: Node = Node.UNDERSTAND_ISSUE
+) -> Any:
     """按 02 §15.2 装配并编译完整状态机。
 
     ``checkpointer`` 为 ``None`` 时图不持久化（单测与纯函数路由测试用）；
@@ -244,7 +246,7 @@ def build_graph(deps: Deps, *, checkpointer: Any | None = None) -> Any:
     for node, fn in NODE_FUNCS.items():
         workflow.add_node(node.value, _guard(node, fn, deps))
 
-    workflow.add_edge(START, Node.UNDERSTAND_ISSUE.value)
+    workflow.add_edge(START, entry.value)
     _linear(workflow, Node.UNDERSTAND_ISSUE, Node.RETRIEVE)
     _linear(workflow, Node.RETRIEVE, Node.LOCALIZE)
     _linear(workflow, Node.LOCALIZE, Node.ANALYZE_IMPACT)
@@ -336,9 +338,10 @@ async def run_graph_async(
     checkpointer: Any | None = None,
     recursion_limit: int | None = None,
     durability: Durability = "sync",
+    entry: Node = Node.UNDERSTAND_ISSUE,
 ) -> RepairState:
     """异步入口：节点本身是 ``async def``，LangGraph 只有 ``ainvoke`` 能跑异步节点。"""
-    graph = build_graph(deps, checkpointer=checkpointer)
+    graph = build_graph(deps, checkpointer=checkpointer, entry=entry)
     config = graph_config(deps, initial, recursion_limit=recursion_limit)
     payload = initial.model_dump(mode="python")
     mode: Durability | None = durability if checkpointer is not None else None
@@ -366,6 +369,7 @@ def run_graph(
     checkpointer: Any | None = None,
     recursion_limit: int | None = None,
     durability: Durability = "sync",
+    entry: Node = Node.UNDERSTAND_ISSUE,
 ) -> RepairState:
     """同步入口：跑完整张图并返回最终 State。
 
@@ -380,6 +384,7 @@ def run_graph(
             checkpointer=checkpointer,
             recursion_limit=recursion_limit,
             durability=durability,
+            entry=entry,
         )
     )
 

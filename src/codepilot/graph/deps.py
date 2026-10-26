@@ -221,6 +221,7 @@ class Deps:
 
     #: 恢复流程核对外部证据后置为 False，用于禁止复用已记录的测试结论。
     evidence_trusted: bool = True
+    discover_missing_targets: bool = False
 
     #: 协作式取消信号。只允许在节点边界读取；``None`` 表示不启用（CLI/评测
     #: 行为不变）。它不删除 Workspace、不杀容器，只阻止下一次派发。

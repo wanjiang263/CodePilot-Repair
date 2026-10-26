@@ -157,12 +157,16 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--harness-python", type=Path, required=True)
     parser.add_argument("--timeout", type=int, default=1800)
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument("--candidate-receipt", type=Path, default=None)
     return parser
 
 
 def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     from codepilot.artifacts import ArtifactStore
     from codepilot.eval import swebench_harness as harness
+
+    if getattr(args, "candidate_receipt", None) is not None:
+        return evaluate_legal_candidate(args)
 
     found = _run_report(args.root, instance=args.instance, label=args.label, run_id=args.run_id)
     if found is None:
@@ -246,6 +250,49 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "prediction": prediction_evidence,
         "official_verdict": verdict,
         "official": payload,
+    }
+
+
+def evaluate_legal_candidate(args: argparse.Namespace) -> dict[str, Any]:
+    from codepilot.artifacts import ArtifactStore
+    from codepilot.eval import swebench_harness as harness
+    from codepilot.eval.candidate import verify_candidate
+
+    project = Path(__file__).resolve().parents[1]
+    receipt = json.loads(args.candidate_receipt.read_text(encoding="utf-8"))
+    if receipt["instance_id"] != args.instance or receipt["run_id"] != args.run_id:
+        raise ValueError("official candidate CLI identity mismatch")
+    prediction, patch_sha = verify_candidate(project, receipt)
+    revision = receipt["dataset_revision"]
+    snapshot = args.snapshot_root / f"princeton-nlp__SWE-bench_Lite__{revision}/test.jsonl"
+    config = harness.HarnessConfig(
+        predictions_path=prediction,
+        run_id=args.run_id,
+        report_dir=args.root / "runs" / args.run_id / "official-report",
+        max_workers=1,
+        timeout_seconds=args.timeout,
+        dataset_name="princeton-nlp/SWE-bench_Lite",
+        split="test",
+        instance_ids=(args.instance,),
+        harness_python=args.harness_python,
+        harness_version="4.1.0",
+        model_name_or_path="glm-5.3-flash-main",
+        dataset_revision=revision,
+        dataset_snapshot=snapshot,
+        cache_level="instance",
+    )
+    execution = harness.OfficialHarnessRunner(
+        config, artifacts=ArtifactStore(args.root, args.run_id)
+    ).run(dry_run=False)
+    return {
+        "schema_version": 3,
+        "instance_id": args.instance,
+        "run_id": args.run_id,
+        "patch_sha256": patch_sha,
+        "candidate_receipt": str(args.candidate_receipt),
+        "internal_status": receipt["internal_status"],
+        "official_verdict": execution.verdict_for(args.instance).value,
+        "official": smoke._harness_payload(execution),
     }
 
 

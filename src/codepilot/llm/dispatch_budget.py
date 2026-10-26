@@ -239,6 +239,15 @@ _guard: DispatchBudget | None = None
 _init_lock = threading.Lock()
 
 
+def configure_dispatch_budget(budget: DispatchBudget) -> None:
+    """Bind once before a live run; never reset the ledger mid-process."""
+    global _guard
+    with _init_lock:
+        if _guard is not None and _guard is not budget:
+            raise ValueError("dispatch budget already configured; use a separate run process")
+        _guard = budget
+
+
 def current_outstanding() -> tuple[float, str] | None:
     """Outstanding pre-charge of the process-wide ledger, or ``None`` when there is none."""
     guard = _guard
@@ -257,7 +266,7 @@ def guarded_send(
 ) -> httpx.Response:
     global _guard
     limit = os.environ.get("CODEPILOT_DISPATCH_BUDGET_CNY")
-    if limit is None:
+    if limit is None and _guard is None:
         return send()
     with _init_lock:
         if _guard is None:
@@ -266,7 +275,7 @@ def guarded_send(
             source_raw = os.environ.get("CODEPILOT_DISPATCH_OPENING_SOURCE")
             opening_source = json.loads(source_raw) if source_raw else None
             _guard = DispatchBudget(
-                float(limit),
+                float(limit or 0),
                 Path(os.environ["CODEPILOT_DISPATCH_LEDGER"]),
                 opening_balance=opening,
                 opening_source=opening_source,

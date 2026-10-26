@@ -1092,6 +1092,67 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
         baseline=state.baseline,
     )
     targets = list(selection.tests)
+    supplemental_baseline = None
+    if not targets and deps.discover_missing_targets and deps.workspace_manager is not None:
+        from codepilot.graph.target_tests import discover_target_files
+        from codepilot.sandbox.baseline import build_test_baseline
+
+        files = discover_target_files(state.current_patch, deps.index, deps.repo_graph)
+        if files and state.budget.max_test_runs - deps.test_runs >= 4:
+            base = deps.workspace_manager.create(
+                source=deps.repository,
+                base_commit=state.base_commit,
+                target=deps.artifacts.run_dir / "target-discovery-base" / str(state.iteration),
+                mode="copy",
+            )
+            timeout = max(1, min(180, int(_test_time_remaining(state, deps) / 4)))
+            spec = deps.env_spec.model_copy(update={"timeout_seconds": timeout})
+            # Collect on clean base first; pytest retains its own collection order.
+            collect = deps.sandbox.run_tests(
+                workspace=base.path,
+                environment=deps.environment,
+                env_spec=spec.model_copy(
+                    update={"test_command": spec.test_command + " --collect-only -q"}
+                ),
+                tests=files,
+                artifact_iteration=deps.test_runs + 1,
+            )
+            deps.artifacts.write_json(
+                "target-discovery.json",
+                {
+                    "changed_files": list(changed_files(state.current_patch)),
+                    "files": files,
+                    "basis": "exact test module name or indexed TEST dependency",
+                    "collection": collect.model_dump(mode="json"),
+                },
+            )
+            if collect.exit_code == 0:
+                supplemental_baseline = build_test_baseline(
+                    deps.sandbox,
+                    base_commit=state.base_commit,
+                    workspace=base.path,
+                    environment=deps.environment,
+                    env_spec=spec,
+                    tests=files,
+                    first_artifact_iteration=deps.test_runs + 1,
+                )
+                augmented = state.model_copy(update={"baseline": supplemental_baseline})
+                # Add discovered files as explicit targets after their base evidence exists.
+                if augmented.plan is not None:
+                    augmented = augmented.model_copy(
+                        update={
+                            "plan": augmented.plan.model_copy(update={"tests_to_run": list(files)})
+                        }
+                    )
+                selection = select_target_tests(
+                    augmented,
+                    policy=deps.validator.policy,
+                    index=deps.index,
+                    repo_graph=deps.repo_graph,
+                    baseline=supplemental_baseline,
+                )
+                targets = list(selection.tests)
+                state = augmented
     if not targets:
         # 没有可执行的目标测试：**不伪造**"目标测试通过"。这是模型侧缺口，
         # 不是 Harness 崩溃；回归与审查保持 NOT EXECUTED。
@@ -1216,6 +1277,8 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
             target_test_source=selection.source,
         ),
     }
+    if supplemental_baseline is not None:
+        fields.update(baseline=supplemental_baseline, plan=state.plan)
     attribution = _target_execution_attribution(execution, changed_files(state.current_patch))
     if attribution is not None:
         failure_class, origin, reason = attribution
