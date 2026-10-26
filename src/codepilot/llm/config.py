@@ -313,11 +313,14 @@ class LLMConfig(BaseModel):
     """费用与预算的主币种。Z.AI 以 USD 计价、BigModel 以 CNY 计价，混在一张报表里
     读出的总额是没有意义的，因此由配置显式决定，而不是由 provider 名字推断。"""
 
-    def for_model(self, alias: str) -> LLMConfig:
+    def for_model(self, alias: str, *, require_temperature: bool = False) -> LLMConfig:
         """Explicit experiment model selection overrides every default role."""
         if alias not in self.models:
             raise KeyError(f"unknown experiment model alias: {alias}")
-        return self.model_copy(update={"roles": dict.fromkeys(self.roles, alias)})
+        models = dict(self.models)
+        if require_temperature:
+            models[alias] = models[alias].model_copy(update={"supports_temperature": True})
+        return self.model_copy(update={"roles": dict.fromkeys(self.roles, alias), "models": models})
 
     def resolve_role(self, role: str) -> ModelSpec:
         """角色 → 模型。角色未映射时抛 KeyError，不静默兜底。"""

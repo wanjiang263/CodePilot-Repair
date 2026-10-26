@@ -186,6 +186,9 @@ class OpenAICompatibleProvider:
                 lambda: self._client.post(CHAT_COMPLETIONS_PATH, json=body, headers=headers),
                 metadata={
                     "purpose": purpose,
+                    "request_model": body.get("model"),
+                    "request_temperature": body.get("temperature"),
+                    "request_max_tokens": body.get("max_tokens"),
                     "request_body_bytes": len(json.dumps(body).encode("utf-8")),
                     "message_roles": [m.get("role") for m in body.get("messages", [])],
                     "timeout": self._client.timeout.as_dict(),

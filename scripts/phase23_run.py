@@ -140,7 +140,9 @@ def main():
             )
 
         run_options = InferenceRunConfig()
-        llm = load_llm_config(ROOT / "configs/phase22/llm.yaml").for_model(run_options.model_alias)
+        llm = load_llm_config(ROOT / "configs/phase22/llm.yaml").for_model(
+            run_options.model_alias, require_temperature=True
+        )
         providers = ProviderBundle.live(llm, budget_currency="CNY", record_llm=True)
         transport = []
         for role, chain in providers.roles.items():
@@ -150,6 +152,7 @@ def main():
                 or actual.spec.model != "glm-5.3-flash"
                 or actual.provider.name != "bigmodel"
                 or actual.policy.max_attempts != 1
+                or not actual.spec.supports_temperature
             ):
                 raise RuntimeError(
                     "actual batch provider is not frozen BigModel GLM with zero retries"
@@ -170,6 +173,9 @@ def main():
                 {
                     "role": role,
                     "model": llm.resolve_role(role).model,
+                    "alias": actual.spec.alias,
+                    "temperature": run_options.temperature,
+                    "supports_temperature": actual.spec.supports_temperature,
                     "timeout": actual._client.timeout.as_dict(),
                     "trust_env": actual._client.trust_env,
                     "retries": config.max_retries,

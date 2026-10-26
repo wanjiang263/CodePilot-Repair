@@ -241,7 +241,7 @@ def test_typed_model_selection_reaches_actual_batch_transport_without_http():
 
     original = load_llm_config(Path(__file__).resolve().parents[2] / "configs/phase22/llm.yaml")
     runtime = InferenceRunConfig()
-    selected = original.for_model(runtime.model_alias)
+    selected = original.for_model(runtime.model_alias, require_temperature=True)
     selected.providers["bigmodel"] = selected.providers["bigmodel"].model_copy(
         update={"api_key_value": SecretStr("unit-test-only-not-a-credential")}
     )
@@ -252,7 +252,17 @@ def test_typed_model_selection_reaches_actual_batch_transport_without_http():
             assert actual.provider.name == "bigmodel"
             assert actual.spec.alias == runtime.model_alias
             assert actual.spec.model == "glm-5.3-flash"
-            assert actual.spec.temperature == 0
+            assert actual.spec.supports_temperature is True
+            from codepilot.llm.capabilities import build_request_body
+            from codepilot.llm.types import LLMRequest, Message
+
+            request = LLMRequest(
+                messages=[Message.user("contract")], temperature=runtime.temperature
+            )
+            body = build_request_body(request, actual.spec, request.messages)
+            assert body["model"] == "glm-5.3-flash"
+            assert body["temperature"] == 0.0
+            assert body["max_tokens"] == 4096
             assert actual.policy.max_attempts == 1
             assert actual._client.timeout.as_dict() == {
                 "connect": 10.0,

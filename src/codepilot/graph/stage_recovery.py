@@ -67,6 +67,10 @@ def import_stage(initial: RepairState, recovery: StageRecovery, deps: Deps) -> R
         return value
 
     fields = ("issue_analysis", "retrieval", "localization", "impact", "plan", "baseline")
+    if recovery.entry == "review":
+        # Review uses the full candidate, plan, changed-source excerpts and
+        # validation facts; replaying 40MB of retrieval history adds no evidence.
+        fields = tuple(key for key in fields if key != "retrieval")
     imported = {key: relocate(raw.get(key)) for key in fields}
     candidate = raw.get("current_patch", "") if recovery.candidate_sha256 else ""
     if recovery.candidate_sha256:
