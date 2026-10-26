@@ -1,0 +1,65 @@
+{
+  "live-r2\\instances\\sympy__sympy-22714\\process.json": {
+    "pid": 60652,
+    "supervisor_pid": 58736,
+    "started_at": "2026-10-26T04:00:43+00:00",
+    "status": "running",
+    "exit_code": null,
+    "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r2\\instances\\sympy__sympy-22714\\smoke-phase22-six-live-r2.log",
+    "code_sha": "2b843ffd2d01257f83a1b734ed39137f6ba1b47d"
+  },
+  "live-r2-indexed\\instances\\sympy__sympy-22714\\process.json": {
+    "pid": 40540,
+    "supervisor_pid": 20892,
+    "started_at": "2026-10-26T04:15:09+00:00",
+    "status": "running",
+    "exit_code": null,
+    "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r2-indexed\\instances\\sympy__sympy-22714\\smoke-phase22-six-live-r2.log",
+    "code_sha": "d5fa740a925d43b4249915cff5064deb1a7ca58b"
+  },
+  "live-r3\\instances\\matplotlib__matplotlib-18869\\process.json": {
+    "pid": 48592,
+    "supervisor_pid": 59636,
+    "started_at": "2026-10-26T05:11:09+00:00",
+    "status": "running",
+    "exit_code": null,
+    "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r3\\instances\\matplotlib__matplotlib-18869\\smoke-phase22-six-live-r3.log",
+    "code_sha": "fb4630ce6cee1abe2a5d806c4ed624d77cf92ed6"
+  },
+  "live-r3\\instances\\scikit-learn__scikit-learn-10297\\process.json": {
+    "pid": 63404,
+    "supervisor_pid": 59636,
+    "started_at": "2026-10-26T05:30:18+00:00",
+    "status": "running",
+    "exit_code": null,
+    "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r3\\instances\\scikit-learn__scikit-learn-10297\\smoke-phase22-six-live-r3.log",
+    "code_sha": "fb4630ce6cee1abe2a5d806c4ed624d77cf92ed6"
+  },
+  "live-r4\\instances\\psf__requests-3362\\process.json": {
+    "pid": 37732,
+    "supervisor_pid": 12336,
+    "started_at": "2026-10-26T05:51:52+00:00",
+    "status": "running",
+    "exit_code": null,
+    "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r4\\instances\\psf__requests-3362\\smoke-phase22-six-live-r4.log",
+    "code_sha": "b67e37f71ff35fab44a5d3056ee4d1ab32f59839"
+  },
+  "live-r4\\instances\\django__django-11422\\process.json": {
+    "pid": 62208,
+    "supervisor_pid": 12336,
+    "started_at": "2026-10-26T05:55:11+00:00",
+    "status": "running",
+    "exit_code": null,
+    "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r4\\instances\\django__django-11422\\smoke-phase22-six-live-r4.log",
+    "code_sha": "b67e37f71ff35fab44a5d3056ee4d1ab32f59839"
+  },
+  "live-r5\\instances\\django__django-11422\\process.json": {
+    "pid": 39104,
+    "supervisor_pid": 60992,
+    "started_at": "2026-10-26T06:22:31+00:00",
+    "status": "running",
+    "exit_code": null,
+    "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r5\\instances\\django__django-11422\\smoke-phase22-six-live-r5.log",
+    "code_sha": "f329f3bbb638883574b65442cfc22a6bf9053fa4"
+  }
+}

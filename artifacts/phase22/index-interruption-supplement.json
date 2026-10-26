@@ -1,0 +1,8 @@
+{
+  "status": "NOT_DISPATCHED",
+  "reason": "Profiled repeated MRO/name resolution; stopped before first request to memoize immutable analysis context",
+  "sample_count": 996,
+  "mro_stacks": 541,
+  "new_model_calls": 0,
+  "code_before": "45ae6c7"
+}

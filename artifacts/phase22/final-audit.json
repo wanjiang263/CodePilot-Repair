@@ -1,0 +1,259 @@
+{
+  "historical_sources_unchanged": [
+    {
+      "path": "artifacts/phase20/m3-20261024-formal6/instances/matplotlib__matplotlib-18869/dispatch-ledger-m3-20261024-r1.json",
+      "sha256": "14f3e119d8c87945ce70b71982fc5d60974c21b9076057d4365589c63f870cd8",
+      "unchanged": true
+    },
+    {
+      "path": "artifacts/phase20/m3-20261024-formal6/instances/sphinx-doc__sphinx-8273/dispatch-ledger-m3-20261024-r1.json",
+      "sha256": "d27b7618f42311648f3ea2c5e4fbf3da52db1d735d7db12c641f3d0688129f85",
+      "unchanged": true
+    },
+    {
+      "path": "artifacts/phase21/m3-phase21-recovery-6-r5/instances/django__django-11422/dispatch-ledger-phase21-recovery-6-r1.json",
+      "sha256": "348d46f251f73f22cc207fda8374ca49b40a85d453199d2a6a1318daa439a046",
+      "unchanged": true
+    },
+    {
+      "path": "artifacts/phase22/live/instances/sphinx-doc__sphinx-8273/dispatch-ledger-phase22-six-live-r1.json",
+      "sha256": "aae05e2f6799d1acc00087ce916d67452df16cf4b796743a87501a1667e0530d",
+      "unchanged": true
+    },
+    {
+      "path": "artifacts/phase22/live-r2-indexed/instances/sympy__sympy-22714/dispatch-ledger-phase22-six-live-r2-r1.json",
+      "sha256": "78a072c2f937328353da7c8202dbe8697755022e5ca8c1f320cff24de428c280",
+      "unchanged": true
+    },
+    {
+      "path": "artifacts/phase22/live-r3/instances/matplotlib__matplotlib-18869/dispatch-ledger-phase22-six-live-r3-r1.json",
+      "sha256": "0299513e525b71147d331f8986e5e88449e3dac2053a1c07874c4db3d5aa1d6f",
+      "unchanged": true
+    },
+    {
+      "path": "artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/dispatch-ledger-phase22-six-live-r3-r1.json",
+      "sha256": "7011860fb1eccdbcced7ae06abf028f4690770a979af1da62e043401b4fb058d",
+      "unchanged": true
+    },
+    {
+      "path": "artifacts/phase22/live-r4/instances/psf__requests-3362/dispatch-ledger-phase22-six-live-r4-r1.json",
+      "sha256": "aeb7ca8b356fca6106366da54da71c6d8068203c21d2a9c761ba84ff5291a12a",
+      "unchanged": true
+    }
+  ],
+  "paid_main_attempts": [
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "paid_main_attempts": 1,
+      "path": "artifacts\\phase22\\live\\instances\\sphinx-doc__sphinx-8273\\dispatch-ledger-phase22-six-live-r1.json",
+      "sha256": "aae05e2f6799d1acc00087ce916d67452df16cf4b796743a87501a1667e0530d",
+      "requests": 2,
+      "settled_cny": 0.026126000000000003,
+      "unknown": 0
+    },
+    {
+      "instance_id": "sympy__sympy-22714",
+      "paid_main_attempts": 1,
+      "path": "artifacts\\phase22\\live-r2-indexed\\instances\\sympy__sympy-22714\\dispatch-ledger-phase22-six-live-r2-r1.json",
+      "sha256": "78a072c2f937328353da7c8202dbe8697755022e5ca8c1f320cff24de428c280",
+      "requests": 26,
+      "settled_cny": 0.19821448,
+      "unknown": 0
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-18869",
+      "paid_main_attempts": 1,
+      "path": "artifacts\\phase22\\live-r3\\instances\\matplotlib__matplotlib-18869\\dispatch-ledger-phase22-six-live-r3-r1.json",
+      "sha256": "0299513e525b71147d331f8986e5e88449e3dac2053a1c07874c4db3d5aa1d6f",
+      "requests": 28,
+      "settled_cny": 0.12506384,
+      "unknown": 0
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "paid_main_attempts": 1,
+      "path": "artifacts\\phase22\\live-r3\\instances\\scikit-learn__scikit-learn-10297\\dispatch-ledger-phase22-six-live-r3-r1.json",
+      "sha256": "7011860fb1eccdbcced7ae06abf028f4690770a979af1da62e043401b4fb058d",
+      "requests": 18,
+      "settled_cny": 0.13205432,
+      "unknown": 0
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "paid_main_attempts": 1,
+      "path": "artifacts\\phase22\\live-r4\\instances\\psf__requests-3362\\dispatch-ledger-phase22-six-live-r4-r1.json",
+      "sha256": "aeb7ca8b356fca6106366da54da71c6d8068203c21d2a9c761ba84ff5291a12a",
+      "requests": 4,
+      "settled_cny": 0.0473908,
+      "unknown": 0
+    },
+    {
+      "instance_id": "django__django-11422",
+      "paid_main_attempts": 1,
+      "path": "artifacts\\phase22\\live-r5\\instances\\django__django-11422\\dispatch-ledger-phase22-six-live-r5-r1.json",
+      "sha256": "e3757a2b8081e3dd8bad0e8c88958ef76c038098e8ea9658e64f6257796e3984",
+      "requests": 59,
+      "settled_cny": 0.39612992,
+      "unknown": 0
+    }
+  ],
+  "unknown_phase22": 0,
+  "original30_remaining_cny": 27.964399280000002,
+  "processes": [
+    {
+      "path": "artifacts\\phase22\\live\\instances\\sphinx-doc__sphinx-8273\\process.json",
+      "pid": 43536,
+      "supervisor_pid": 53888,
+      "finished_at": "2026-10-26T03:57:11+00:00",
+      "status": "exited",
+      "exit_code": 1,
+      "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live\\instances\\sphinx-doc__sphinx-8273\\smoke-phase22-six-live.log",
+      "code_sha": "6b46e0aa254df742413adba7f09ef9d7eb29b9cd"
+    },
+    {
+      "path": "artifacts\\phase22\\live-r2\\instances\\sympy__sympy-22714\\process.json",
+      "pid": 60652,
+      "supervisor_pid": 58736,
+      "started_at": "2026-10-26T04:00:43+00:00",
+      "status": "running",
+      "exit_code": null,
+      "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r2\\instances\\sympy__sympy-22714\\smoke-phase22-six-live-r2.log",
+      "code_sha": "2b843ffd2d01257f83a1b734ed39137f6ba1b47d"
+    },
+    {
+      "path": "artifacts\\phase22\\live-r2-indexed\\instances\\sympy__sympy-22714\\process.json",
+      "pid": 40540,
+      "supervisor_pid": 20892,
+      "finished_at": "2026-10-26T04:53:08+00:00",
+      "status": "exited",
+      "exit_code": 0,
+      "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r2-indexed\\instances\\sympy__sympy-22714\\smoke-phase22-six-live-r2.log",
+      "code_sha": "d5fa740a925d43b4249915cff5064deb1a7ca58b"
+    },
+    {
+      "path": "artifacts\\phase22\\live-r2-restart\\instances\\sympy__sympy-22714\\process.json",
+      "pid": 46280,
+      "supervisor_pid": 60056,
+      "finished_at": "2026-10-26T04:13:35+00:00",
+      "status": "exited",
+      "exit_code": 1,
+      "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r2-restart\\instances\\sympy__sympy-22714\\smoke-phase22-six-live-r2.log",
+      "code_sha": "45ae6c7dc3a60d687d2db8225be2c2ff7820a0f2"
+    },
+    {
+      "path": "artifacts\\phase22\\live-r3\\instances\\matplotlib__matplotlib-18869\\process.json",
+      "pid": 48592,
+      "supervisor_pid": 59636,
+      "finished_at": "2026-10-26T05:30:15+00:00",
+      "status": "exited",
+      "exit_code": 0,
+      "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r3\\instances\\matplotlib__matplotlib-18869\\smoke-phase22-six-live-r3.log",
+      "code_sha": "fb4630ce6cee1abe2a5d806c4ed624d77cf92ed6"
+    },
+    {
+      "path": "artifacts\\phase22\\live-r3\\instances\\scikit-learn__scikit-learn-10297\\process.json",
+      "pid": 63404,
+      "supervisor_pid": 59636,
+      "finished_at": "2026-10-26T05:37:01+00:00",
+      "status": "exited",
+      "exit_code": 0,
+      "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r3\\instances\\scikit-learn__scikit-learn-10297\\smoke-phase22-six-live-r3.log",
+      "code_sha": "fb4630ce6cee1abe2a5d806c4ed624d77cf92ed6"
+    },
+    {
+      "path": "artifacts\\phase22\\live-r4\\instances\\django__django-11422\\process.json",
+      "pid": 62208,
+      "supervisor_pid": 12336,
+      "finished_at": "2026-10-26T05:58:20+00:00",
+      "status": "exited",
+      "exit_code": 1,
+      "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r4\\instances\\django__django-11422\\smoke-phase22-six-live-r4.log",
+      "code_sha": "b67e37f71ff35fab44a5d3056ee4d1ab32f59839"
+    },
+    {
+      "path": "artifacts\\phase22\\live-r4\\instances\\psf__requests-3362\\process.json",
+      "pid": 37732,
+      "supervisor_pid": 12336,
+      "finished_at": "2026-10-26T05:55:08+00:00",
+      "status": "exited",
+      "exit_code": 0,
+      "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r4\\instances\\psf__requests-3362\\smoke-phase22-six-live-r4.log",
+      "code_sha": "b67e37f71ff35fab44a5d3056ee4d1ab32f59839"
+    },
+    {
+      "path": "artifacts\\phase22\\live-r5\\instances\\django__django-11422\\process.json",
+      "pid": 39104,
+      "supervisor_pid": 60992,
+      "finished_at": "2026-10-26T06:51:47+00:00",
+      "status": "exited",
+      "exit_code": 0,
+      "log": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r5\\instances\\django__django-11422\\smoke-phase22-six-live-r5.log",
+      "code_sha": "f329f3bbb638883574b65442cfc22a6bf9053fa4"
+    }
+  ],
+  "process_liveness": [
+    {
+      "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live\\instances\\sphinx-doc__sphinx-8273\\process.json",
+      "pid": 43536,
+      "record_status": "exited",
+      "active": false
+    },
+    {
+      "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r2\\instances\\sympy__sympy-22714\\process.json",
+      "pid": 60652,
+      "record_status": "running",
+      "active": false
+    },
+    {
+      "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r2-indexed\\instances\\sympy__sympy-22714\\process.json",
+      "pid": 40540,
+      "record_status": "exited",
+      "active": false
+    },
+    {
+      "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r2-restart\\instances\\sympy__sympy-22714\\process.json",
+      "pid": 46280,
+      "record_status": "exited",
+      "active": false
+    },
+    {
+      "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r3\\instances\\matplotlib__matplotlib-18869\\process.json",
+      "pid": 48592,
+      "record_status": "exited",
+      "active": false
+    },
+    {
+      "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r3\\instances\\scikit-learn__scikit-learn-10297\\process.json",
+      "pid": 63404,
+      "record_status": "exited",
+      "active": false
+    },
+    {
+      "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r4\\instances\\django__django-11422\\process.json",
+      "pid": 62208,
+      "record_status": "exited",
+      "active": false
+    },
+    {
+      "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r4\\instances\\psf__requests-3362\\process.json",
+      "pid": 37732,
+      "record_status": "exited",
+      "active": false
+    },
+    {
+      "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r5\\instances\\django__django-11422\\process.json",
+      "pid": 39104,
+      "record_status": "exited",
+      "active": false
+    }
+  ],
+  "stale_record_note": "live-r2 SymPy detached session record says running, but PID60652 is absent; predispatch session loss supplement retained",
+  "no_further_paid_dispatch": true,
+  "final_source_after_run_hardening": "See local commit; runtime freezes retained separately",
+  "next_stage_preparation_audit": {
+    "unique_candidates": 50,
+    "intersection_with_exclusions": 0,
+    "all_manifest_hashes_valid": true,
+    "paid_dispatch": false
+  }
+}

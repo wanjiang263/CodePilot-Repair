@@ -1,0 +1,84 @@
+{
+  "source_sha256": "b6d52c8ab6828ab6ab16775a60eecaa316bf6b5c85d7bf35650fa623e1a20c8d",
+  "historical_original_unchanged": true,
+  "state": {
+    "schema_version": 1,
+    "batch_id": "phase21-recovery-6",
+    "status": "stopped",
+    "stop_reason": "django__django-11422: BatchStopError: unknown usage/cost; ledger frozen after registry recording",
+    "instances": [
+      {
+        "instance_id": "django__django-11422",
+        "repo": "django/django",
+        "status": "DISPATCHED_STOPPED",
+        "run_id": null,
+        "internal": "PROVIDER_USAGE_UNCERTAIN",
+        "official": "NOT_EVALUATED",
+        "settled_cny": 0.0475876,
+        "unknown_reserved_cny": 0.8114688000000001,
+        "terminal": true,
+        "stop_reason": "PROVIDER_USAGE_UNCERTAIN"
+      },
+      {
+        "instance_id": "sphinx-doc__sphinx-8273",
+        "repo": "sphinx-doc/sphinx",
+        "status": "NOT_DISPATCHED",
+        "run_id": null,
+        "internal": "NOT_RUN",
+        "official": "NOT_EVALUATED",
+        "settled_cny": 0.0,
+        "unknown_reserved_cny": 0.0,
+        "terminal": true,
+        "stop_reason": "BLOCKED_BY_FROZEN_LEDGER"
+      },
+      {
+        "instance_id": "sympy__sympy-22714",
+        "repo": "sympy/sympy",
+        "status": "NOT_DISPATCHED",
+        "run_id": null,
+        "internal": "NOT_RUN",
+        "official": "NOT_EVALUATED",
+        "settled_cny": 0.0,
+        "unknown_reserved_cny": 0.0,
+        "terminal": true,
+        "stop_reason": "BLOCKED_BY_FROZEN_LEDGER"
+      },
+      {
+        "instance_id": "matplotlib__matplotlib-18869",
+        "repo": "matplotlib/matplotlib",
+        "status": "NOT_DISPATCHED",
+        "run_id": null,
+        "internal": "NOT_RUN",
+        "official": "NOT_EVALUATED",
+        "settled_cny": 0.0,
+        "unknown_reserved_cny": 0.0,
+        "terminal": true,
+        "stop_reason": "BLOCKED_BY_FROZEN_LEDGER"
+      },
+      {
+        "instance_id": "scikit-learn__scikit-learn-10297",
+        "repo": "scikit-learn/scikit-learn",
+        "status": "NOT_DISPATCHED",
+        "run_id": null,
+        "internal": "NOT_RUN",
+        "official": "NOT_EVALUATED",
+        "settled_cny": 0.0,
+        "unknown_reserved_cny": 0.0,
+        "terminal": true,
+        "stop_reason": "BLOCKED_BY_FROZEN_LEDGER"
+      },
+      {
+        "instance_id": "psf__requests-3362",
+        "repo": "psf/requests",
+        "status": "NOT_DISPATCHED",
+        "run_id": null,
+        "internal": "NOT_RUN",
+        "official": "NOT_EVALUATED",
+        "settled_cny": 0.0,
+        "unknown_reserved_cny": 0.0,
+        "terminal": true,
+        "stop_reason": "BLOCKED_BY_FROZEN_LEDGER"
+      }
+    ]
+  }
+}

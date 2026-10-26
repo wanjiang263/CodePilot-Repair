@@ -1,0 +1,75 @@
+{
+  "old_ledger_error_type": "RemoteProtocolError",
+  "fifth_duration_ms": 31921,
+  "old_timeouts": {
+    "connect": 120,
+    "read": 120,
+    "write": 120,
+    "pool": 120
+  },
+  "requests": [
+    {
+      "purpose": "localizer_files",
+      "request_record_chars": 44618,
+      "max_output_tokens": 4096,
+      "recorded_roles": [
+        "user"
+      ]
+    },
+    {
+      "purpose": "localizer_symbols",
+      "request_record_chars": 79998,
+      "max_output_tokens": 4096,
+      "recorded_roles": [
+        "user"
+      ]
+    },
+    {
+      "purpose": "reproducer",
+      "request_record_chars": 12684,
+      "max_output_tokens": 4096,
+      "recorded_roles": [
+        "user"
+      ]
+    },
+    {
+      "purpose": "reproducer",
+      "request_record_chars": 17632,
+      "max_output_tokens": 4096,
+      "recorded_roles": [
+        "user"
+      ]
+    },
+    {
+      "purpose": "reproducer",
+      "request_record_chars": 12979,
+      "max_output_tokens": 4096,
+      "recorded_roles": [
+        "user"
+      ]
+    }
+  ],
+  "known_input_tokens": [
+    14775,
+    24554,
+    5132,
+    6263
+  ],
+  "unknown_input_tokens": null,
+  "no_response_headers_on_failure": true,
+  "historical_exception_message_and_server_request_id": "not retained; cannot reconstruct",
+  "source_sha256": "72a06f0da1a13eae34fd2e0275a505c8a79226f230a7cf2bf8140fae457eb806",
+  "interpretation": "connection closed before 120s; proxy is a candidate, server and power/session causes not proven",
+  "direct_tls_check": "TLSv1.3 in 0.422s; no model request",
+  "new_timeouts": {
+    "connect": 10,
+    "read": 120,
+    "write": 30,
+    "pool": 10
+  },
+  "new_trust_env": false,
+  "http_retries": 0,
+  "review_reserve_seconds": 240,
+  "graph_limit_seconds": 1800,
+  "diagnostic_requests": 0
+}

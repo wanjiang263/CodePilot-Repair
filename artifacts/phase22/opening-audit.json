@@ -1,0 +1,24 @@
+{
+  "historical_opening_cny": 11.2407856,
+  "prior_authorization_sources": [
+    {
+      "path": "artifacts/phase20/m3-20261024-formal6/instances/matplotlib__matplotlib-18869/dispatch-ledger-m3-20261024-r1.json",
+      "sha256": "14f3e119d8c87945ce70b71982fc5d60974c21b9076057d4365589c63f870cd8",
+      "upper_bound_cny": 0.06550088
+    },
+    {
+      "path": "artifacts/phase20/m3-20261024-formal6/instances/sphinx-doc__sphinx-8273/dispatch-ledger-m3-20261024-r1.json",
+      "sha256": "d27b7618f42311648f3ea2c5e4fbf3da52db1d735d7db12c641f3d0688129f85",
+      "upper_bound_cny": 0.18606408000000002
+    },
+    {
+      "path": "artifacts/phase21/m3-phase21-recovery-6-r5/instances/django__django-11422/dispatch-ledger-phase21-recovery-6-r1.json",
+      "sha256": "348d46f251f73f22cc207fda8374ca49b40a85d453199d2a6a1318daa439a046",
+      "upper_bound_cny": 0.8590564
+    }
+  ],
+  "original30_used_upper_cny": 1.1106213600000001,
+  "remaining_cny": 28.88937864,
+  "full_opening_cny": 12.351406960000002,
+  "diagnostic_model_calls": 0
+}

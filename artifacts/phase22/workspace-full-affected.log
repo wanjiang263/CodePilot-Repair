@@ -1,0 +1,6 @@
+........................................................................ [ 77%]
+...................ss                                                    [100%]
+=========================== short test summary info ===========================
+SKIPPED [1] tests\graph\test_phase6_reproduction_e2e.py:610: Docker 不可用（CLI 缺失或 daemon 未运行），跳过本测试
+SKIPPED [1] tests\graph\test_phase6_reproduction_e2e.py:649: Docker 不可用（CLI 缺失或 daemon 未运行），跳过本测试
+91 passed, 2 skipped in 399.60s (0:06:39)

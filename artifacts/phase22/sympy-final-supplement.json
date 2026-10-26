@@ -1,0 +1,12 @@
+{
+  "instance_id": "sympy__sympy-22714",
+  "run_id": "swebench-smoke-phase22-six-live-r2-sympy__sympy-22714-s0-e2006a67",
+  "status": "REJECTED",
+  "internal": "REJECTED",
+  "official": "NOT_EVALUATED",
+  "terminal": true,
+  "ledger_sha256": "78a072c2f937328353da7c8202dbe8697755022e5ca8c1f320cff24de428c280",
+  "reason": "REVIEW_CONTEXT_MISSING: prior approved reviewer input omitted entire patch; no paid re-review or rerun",
+  "acceptance_path": "artifacts\\phase22\\live-r2-indexed\\instances\\sympy__sympy-22714\\acceptance-phase22-context-audit.json",
+  "acceptance_sha256": "d1f6eb653807543d55b6bb8efe632fa0496175957df41ece8ce3eafe0fbf2f6e"
+}

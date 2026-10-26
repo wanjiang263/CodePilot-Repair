@@ -1,0 +1,23 @@
+{
+  "validated": {
+    "django__django-11422": {
+      "path": "artifacts/phase22/index-seeds/django__django-11422.sqlite3",
+      "sha256": "baec01cb5990b4af9dee60bf85acbb8fb52539977a940d250572889af16c46be",
+      "source": "artifacts\\phase21\\m3-phase21-recovery-6-r5\\instances\\django__django-11422\\runs\\swebench-smoke-phase21-recovery-6-django__django-11422-s0-eac60aa6\\index.sqlite3",
+      "source_sha256": "b457bdd324236df65708d1f1347f5a3388980110acb10e6c8859d89f908e71d2"
+    },
+    "sphinx-doc__sphinx-8273": {
+      "path": "artifacts/phase22/index-seeds/sphinx-doc__sphinx-8273.sqlite3",
+      "sha256": "529b6f12d0ae31b355e65d4d12165d5ff01e752923bdaaed0ab6a58690454138",
+      "source": "artifacts\\phase20\\m3-20261024-formal6\\instances\\sphinx-doc__sphinx-8273\\runs\\swebench-smoke-m3-20261024-sphinx-doc__sphinx-8273-s0-70586dbc\\index.sqlite3",
+      "source_sha256": "cebbf5471624119d95867d799d1902f955582f59a07f97698f15f313a2ac848d"
+    },
+    "matplotlib__matplotlib-18869": {
+      "path": "artifacts/phase22/index-seeds/matplotlib__matplotlib-18869.sqlite3",
+      "sha256": "30a2f1923071eabe061f15c2180446ff38361c910ac9c0be36e67d10774e63ca",
+      "source": "artifacts\\phase20\\m3-20261024-formal6\\instances\\matplotlib__matplotlib-18869\\runs\\swebench-smoke-m3-20261024-matplotlib__matplotlib-18869-s0-46563a3e\\index.sqlite3",
+      "source_sha256": "42def0512b0d58c683b6a2e3a044d154b0681659e322602a2d1266c4b359ffd2"
+    }
+  },
+  "rejected": []
+}

@@ -1,0 +1,13 @@
+{
+  "instance_id": "psf__requests-3362",
+  "repo": "psf/requests",
+  "status": "ENV_ERROR",
+  "run_id": "swebench-smoke-phase22-six-live-r4-psf__requests-3362-s0-d24f57e7",
+  "internal": "ENV_ERROR",
+  "official": "NOT_EVALUATED",
+  "settled_cny": 0.0473908,
+  "unknown_reserved_cny": 0.0,
+  "terminal": true,
+  "ledger_sha256": "aeb7ca8b356fca6106366da54da71c6d8068203c21d2a9c761ba84ff5291a12a",
+  "reason": "REPRO_BASE_WORKSPACE_ERROR_PACKED_TREE; fixed without a paid rerun"
+}

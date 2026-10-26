@@ -1,0 +1,10 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8273",
+  "run_id": "swebench-smoke-phase22-six-live-sphinx-doc__sphinx-8273-s0-3cdd4e70",
+  "status": "DISPATCHED_STOPPED",
+  "internal": "SYSTEM_CONFIG_MISMATCH",
+  "official": "NOT_EVALUATED",
+  "terminal": true,
+  "ledger_sha256": "aae05e2f6799d1acc00087ce916d67452df16cf4b796743a87501a1667e0530d",
+  "reason": "Known-settled stop to fix shared HTTP client timeout/proxy settings"
+}

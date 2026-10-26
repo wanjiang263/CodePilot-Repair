@@ -1,0 +1,480 @@
+{
+  "schema_version": 2,
+  "batch_id": "phase22-six-live",
+  "generated_at": "2026-10-25T17:13:47+00:00",
+  "repo_root": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair",
+  "runner_overrides": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\configs\\phase21\\instance-runner-overrides.json",
+  "runner_overrides_sha256": "3a5f856f138a82b003403c77fffa60d47210979c4aabfc3d85dad4b649bba560",
+  "runner_kinds": {
+    "django__django-11422": "django",
+    "matplotlib__matplotlib-18869": "pytest",
+    "psf__requests-3362": "pytest_requests_compat",
+    "scikit-learn__scikit-learn-10297": "pytest",
+    "sphinx-doc__sphinx-8273": "pytest",
+    "sympy__sympy-22714": "sympy"
+  },
+  "docker_engine": "29.8.2",
+  "credential_reference_present": true,
+  "instances": [
+    {
+      "instance_id": "django__django-11422",
+      "repo": "django/django",
+      "base_commit": "df46b329e0900e9e4dc1d60816c1dce6dfc1094e",
+      "started_at": "2026-10-25T17:13:47+00:00",
+      "ok": true,
+      "image": {
+        "ref": "swebench/sweb.eval.x86_64.django_1776_django-11422:latest",
+        "id": "sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+        "os": "linux",
+        "architecture": "amd64",
+        "override": false,
+        "parent_ref": null,
+        "parent_id": null
+      },
+      "environment": {
+        "status": "PASS",
+        "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-11422:latest",
+        "image_id": "sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+        "cache_key": "official:sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+        "from_cache": true,
+        "duration_seconds": 0.0,
+        "error": null
+      },
+      "cache": {
+        "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\django__django-11422\\repo-cache\\68507e79e06cd903",
+        "base_commit": "df46b329e0900e9e4dc1d60816c1dce6dfc1094e",
+        "commits": 1
+      },
+      "collection": {
+        "kind": "django",
+        "collection_mode": "execute",
+        "command": "./tests/runtests.py --verbosity 2 --settings=test_sqlite --parallel 1 utils_tests.test_autoreload",
+        "scope": [
+          "utils_tests.test_autoreload"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "timed_out_at": null,
+        "duration_seconds": 95.276,
+        "parse_status": "PASS",
+        "parsed": {
+          "tests": 67,
+          "passed": 46,
+          "failed": 0,
+          "missing": [],
+          "diagnostics": {
+            "runner": "django",
+            "parse_counts": {
+              "ran": 67,
+              "parsed": 67,
+              "wanted": null,
+              "missing": 0,
+              "extra_observed": 0
+            },
+            "requested_missing": [],
+            "requested_extra_observed": []
+          }
+        },
+        "stdout": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\django__django-11422\\preflight\\collection\\stdout.log",
+        "stderr": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\django__django-11422\\preflight\\collection\\stderr.log",
+        "ok": true
+      },
+      "timings": {
+        "workspace_prepare": 30.679,
+        "environment": 0.124,
+        "collection": 95.354
+      },
+      "finished_at": "2026-10-25T17:15:54+00:00",
+      "phase22_light": {
+        "status": "PASS",
+        "tests": 1,
+        "environment": {
+          "status": "PASS",
+          "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-11422:latest",
+          "image_id": "sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+          "cache_key": "official:sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+          "from_cache": true,
+          "duration_seconds": 0.0,
+          "error": null
+        },
+        "workspace": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\django__django-11422\\preflight\\workspace",
+        "clean_base_only": true
+      }
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "repo": "sphinx-doc/sphinx",
+      "base_commit": "88b81a06eb635a1596617f8971fa97a84c069e93",
+      "started_at": "2026-10-25T17:15:54+00:00",
+      "ok": true,
+      "image": {
+        "ref": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8273:latest",
+        "id": "sha256:11f6809c7e3d3bfcd53ed280f0885d0b0950836391a84e732fc5f2ea9e096038",
+        "os": "linux",
+        "architecture": "amd64",
+        "override": false,
+        "parent_ref": null,
+        "parent_id": null
+      },
+      "environment": {
+        "status": "PASS",
+        "image_ref": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8273:latest",
+        "image_id": "sha256:11f6809c7e3d3bfcd53ed280f0885d0b0950836391a84e732fc5f2ea9e096038",
+        "cache_key": "official:sha256:11f6809c7e3d3bfcd53ed280f0885d0b0950836391a84e732fc5f2ea9e096038",
+        "from_cache": true,
+        "duration_seconds": 0.0,
+        "error": null
+      },
+      "cache": {
+        "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\sphinx-doc__sphinx-8273\\repo-cache\\c6641fd73dfad180",
+        "base_commit": "88b81a06eb635a1596617f8971fa97a84c069e93",
+        "commits": 1
+      },
+      "collection": {
+        "kind": "pytest",
+        "collection_mode": "collect_only",
+        "command": "tox --current-env -epy39 -v -- --junitxml=/out/junit.xml --collect-only -q",
+        "scope": [],
+        "exit_code": 0,
+        "timed_out": false,
+        "timed_out_at": null,
+        "duration_seconds": 35.834,
+        "parse_status": "COLLECTED",
+        "parsed": {
+          "tests_collected": 1556,
+          "junit_present": true
+        },
+        "stdout": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\sphinx-doc__sphinx-8273\\preflight\\collection\\stdout.log",
+        "stderr": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\sphinx-doc__sphinx-8273\\preflight\\collection\\stderr.log",
+        "ok": true
+      },
+      "timings": {
+        "workspace_prepare": 10.703,
+        "environment": 0.134,
+        "collection": 35.852
+      },
+      "finished_at": "2026-10-25T17:16:41+00:00",
+      "phase22_light": {
+        "status": "PASS",
+        "tests": 1,
+        "environment": {
+          "status": "PASS",
+          "image_ref": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8273:latest",
+          "image_id": "sha256:11f6809c7e3d3bfcd53ed280f0885d0b0950836391a84e732fc5f2ea9e096038",
+          "cache_key": "official:sha256:11f6809c7e3d3bfcd53ed280f0885d0b0950836391a84e732fc5f2ea9e096038",
+          "from_cache": true,
+          "duration_seconds": 0.0,
+          "error": null
+        },
+        "workspace": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\sphinx-doc__sphinx-8273\\preflight\\workspace",
+        "clean_base_only": true
+      }
+    },
+    {
+      "instance_id": "sympy__sympy-22714",
+      "repo": "sympy/sympy",
+      "base_commit": "3ff4717b6aef6086e78f01cdfa06f64ae23aed7e",
+      "started_at": "2026-10-25T17:16:41+00:00",
+      "ok": true,
+      "image": {
+        "ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-22714:latest",
+        "id": "sha256:f8f6b7d2e72a05ea8c4ec8143b5da6cefd6f5fd7e679d74257e25a59c082a15d",
+        "os": "linux",
+        "architecture": "amd64",
+        "override": false,
+        "parent_ref": null,
+        "parent_id": null
+      },
+      "environment": {
+        "status": "PASS",
+        "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-22714:latest",
+        "image_id": "sha256:f8f6b7d2e72a05ea8c4ec8143b5da6cefd6f5fd7e679d74257e25a59c082a15d",
+        "cache_key": "official:sha256:f8f6b7d2e72a05ea8c4ec8143b5da6cefd6f5fd7e679d74257e25a59c082a15d",
+        "from_cache": true,
+        "duration_seconds": 0.0,
+        "error": null
+      },
+      "cache": {
+        "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\sympy__sympy-22714\\repo-cache\\6b19b50142def20b",
+        "base_commit": "3ff4717b6aef6086e78f01cdfa06f64ae23aed7e",
+        "commits": 1
+      },
+      "collection": {
+        "kind": "sympy",
+        "collection_mode": "execute",
+        "command": "PYTHONWARNINGS='ignore::UserWarning,ignore::SyntaxWarning' bin/test -C --verbose sympy/geometry/tests/test_point.py",
+        "scope": [
+          "sympy/geometry/tests/test_point.py"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "timed_out_at": null,
+        "duration_seconds": 70.833,
+        "parse_status": "PASS",
+        "parsed": {
+          "tests": 12,
+          "passed": 12,
+          "failed": 0,
+          "missing": [],
+          "diagnostics": {
+            "runner": "sympy",
+            "parse_counts": {
+              "parsed": 12,
+              "wanted": null,
+              "missing": 0,
+              "extra_observed": 0,
+              "files": {
+                "sympy/geometry/tests/test_point.py": 12
+              },
+              "summary": {
+                "passed": 12
+              }
+            },
+            "requested_missing": [],
+            "requested_extra_observed": [],
+            "summary_declares_failures": 0
+          }
+        },
+        "stdout": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\sympy__sympy-22714\\preflight\\collection\\stdout.log",
+        "stderr": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\sympy__sympy-22714\\preflight\\collection\\stderr.log",
+        "ok": true
+      },
+      "timings": {
+        "workspace_prepare": 12.019,
+        "environment": 0.103,
+        "collection": 70.845
+      },
+      "finished_at": "2026-10-25T17:18:05+00:00",
+      "phase22_light": {
+        "status": "PASS",
+        "tests": 1,
+        "environment": {
+          "status": "PASS",
+          "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-22714:latest",
+          "image_id": "sha256:f8f6b7d2e72a05ea8c4ec8143b5da6cefd6f5fd7e679d74257e25a59c082a15d",
+          "cache_key": "official:sha256:f8f6b7d2e72a05ea8c4ec8143b5da6cefd6f5fd7e679d74257e25a59c082a15d",
+          "from_cache": true,
+          "duration_seconds": 0.0,
+          "error": null
+        },
+        "workspace": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\sympy__sympy-22714\\preflight\\workspace",
+        "clean_base_only": true
+      }
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-18869",
+      "repo": "matplotlib/matplotlib",
+      "base_commit": "b7d05919865fc0c37a0164cf467d5d5513bd0ede",
+      "started_at": "2026-10-25T17:18:05+00:00",
+      "ok": true,
+      "image": {
+        "ref": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-18869:latest",
+        "id": "sha256:5a237c238da682b5203cd965183e00dd6fdbe9a0844c492f503a42f12a25f1ca",
+        "os": "linux",
+        "architecture": "amd64",
+        "override": false,
+        "parent_ref": null,
+        "parent_id": null
+      },
+      "environment": {
+        "status": "PASS",
+        "image_ref": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-18869:latest",
+        "image_id": "sha256:5a237c238da682b5203cd965183e00dd6fdbe9a0844c492f503a42f12a25f1ca",
+        "cache_key": "official:sha256:5a237c238da682b5203cd965183e00dd6fdbe9a0844c492f503a42f12a25f1ca",
+        "from_cache": true,
+        "duration_seconds": 0.0,
+        "error": null
+      },
+      "cache": {
+        "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\matplotlib__matplotlib-18869\\repo-cache\\84863a80fe88b482",
+        "base_commit": "b7d05919865fc0c37a0164cf467d5d5513bd0ede",
+        "commits": 1
+      },
+      "collection": {
+        "kind": "pytest",
+        "collection_mode": "collect_only",
+        "command": "/opt/miniconda3/envs/testbed/bin/python -m pytest -p no:cacheprovider -rA --junitxml=/out/junit.xml --collect-only -q",
+        "scope": [],
+        "exit_code": 0,
+        "timed_out": false,
+        "timed_out_at": null,
+        "duration_seconds": 113.139,
+        "parse_status": "COLLECTED",
+        "parsed": {
+          "tests_collected": 8185,
+          "junit_present": true
+        },
+        "stdout": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\matplotlib__matplotlib-18869\\preflight\\collection\\stdout.log",
+        "stderr": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\matplotlib__matplotlib-18869\\preflight\\collection\\stderr.log",
+        "ok": true
+      },
+      "timings": {
+        "workspace_prepare": 16.003,
+        "environment": 9.686,
+        "collection": 113.158
+      },
+      "finished_at": "2026-10-25T17:20:24+00:00",
+      "phase22_light": {
+        "status": "PASS",
+        "tests": 1,
+        "environment": {
+          "status": "PASS",
+          "image_ref": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-18869:latest",
+          "image_id": "sha256:5a237c238da682b5203cd965183e00dd6fdbe9a0844c492f503a42f12a25f1ca",
+          "cache_key": "official:sha256:5a237c238da682b5203cd965183e00dd6fdbe9a0844c492f503a42f12a25f1ca",
+          "from_cache": true,
+          "duration_seconds": 0.0,
+          "error": null
+        },
+        "workspace": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\matplotlib__matplotlib-18869\\preflight\\workspace",
+        "clean_base_only": true
+      }
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "repo": "scikit-learn/scikit-learn",
+      "base_commit": "b90661d6a46aa3619d3eec94d5281f5888add501",
+      "started_at": "2026-10-25T17:20:24+00:00",
+      "ok": true,
+      "image": {
+        "ref": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-10297:latest",
+        "id": "sha256:c48ade7195b167b2562f90f3a3a60ebb410276e7583bd1212e324c16157d7eb0",
+        "os": "linux",
+        "architecture": "amd64",
+        "override": false,
+        "parent_ref": null,
+        "parent_id": null
+      },
+      "environment": {
+        "status": "PASS",
+        "image_ref": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-10297:latest",
+        "image_id": "sha256:c48ade7195b167b2562f90f3a3a60ebb410276e7583bd1212e324c16157d7eb0",
+        "cache_key": "official:sha256:c48ade7195b167b2562f90f3a3a60ebb410276e7583bd1212e324c16157d7eb0",
+        "from_cache": true,
+        "duration_seconds": 0.0,
+        "error": null
+      },
+      "cache": {
+        "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\scikit-learn__scikit-learn-10297\\repo-cache\\8e773aa72402b28a",
+        "base_commit": "b90661d6a46aa3619d3eec94d5281f5888add501",
+        "commits": 1
+      },
+      "collection": {
+        "kind": "pytest",
+        "collection_mode": "collect_only",
+        "command": "/opt/miniconda3/envs/testbed/bin/python -m pytest -p no:cacheprovider -rA --junitxml=/out/junit.xml sklearn/linear_model/tests --collect-only -q",
+        "scope": [
+          "sklearn/linear_model/tests"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "timed_out_at": null,
+        "duration_seconds": 19.854,
+        "parse_status": "COLLECTED",
+        "parsed": {
+          "tests_collected": 444,
+          "junit_present": true
+        },
+        "stdout": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\scikit-learn__scikit-learn-10297\\preflight\\collection\\stdout.log",
+        "stderr": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\scikit-learn__scikit-learn-10297\\preflight\\collection\\stderr.log",
+        "ok": true
+      },
+      "timings": {
+        "workspace_prepare": 10.036,
+        "environment": 3.69,
+        "collection": 19.867
+      },
+      "finished_at": "2026-10-25T17:20:58+00:00",
+      "phase22_light": {
+        "status": "PASS",
+        "tests": 1,
+        "environment": {
+          "status": "PASS",
+          "image_ref": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-10297:latest",
+          "image_id": "sha256:c48ade7195b167b2562f90f3a3a60ebb410276e7583bd1212e324c16157d7eb0",
+          "cache_key": "official:sha256:c48ade7195b167b2562f90f3a3a60ebb410276e7583bd1212e324c16157d7eb0",
+          "from_cache": true,
+          "duration_seconds": 0.0,
+          "error": null
+        },
+        "workspace": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\scikit-learn__scikit-learn-10297\\preflight\\workspace",
+        "clean_base_only": true
+      }
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "repo": "psf/requests",
+      "base_commit": "36453b95b13079296776d11b09cab2567ea3e703",
+      "started_at": "2026-10-25T17:20:58+00:00",
+      "ok": true,
+      "image": {
+        "ref": "swebench/sweb.eval.x86_64.psf_1776_requests-3362:latest",
+        "id": "sha256:d1c8c15eeb5e12b7eb3815307d1131d68c72d53419fa2f8b89bc46bc0009a61b",
+        "os": "linux",
+        "architecture": "amd64",
+        "override": false,
+        "parent_ref": null,
+        "parent_id": null
+      },
+      "environment": {
+        "status": "PASS",
+        "image_ref": "swebench/sweb.eval.x86_64.psf_1776_requests-3362:latest",
+        "image_id": "sha256:d1c8c15eeb5e12b7eb3815307d1131d68c72d53419fa2f8b89bc46bc0009a61b",
+        "cache_key": "official:sha256:d1c8c15eeb5e12b7eb3815307d1131d68c72d53419fa2f8b89bc46bc0009a61b",
+        "from_cache": true,
+        "duration_seconds": 0.0,
+        "error": null
+      },
+      "cache": {
+        "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\psf__requests-3362\\repo-cache\\0d1a89c543bad402",
+        "base_commit": "36453b95b13079296776d11b09cab2567ea3e703",
+        "commits": 1
+      },
+      "testdeps_files": 1,
+      "collection": {
+        "kind": "pytest_requests_compat",
+        "collection_mode": "collect_only",
+        "command": "/opt/miniconda3/envs/testbed/bin/python -m pytest -p no:cacheprovider -p codepilot_requests_compat -rA --junitxml=/out/junit.xml tests/test_utils.py --collect-only -q",
+        "scope": [
+          "tests/test_utils.py"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "timed_out_at": null,
+        "duration_seconds": 7.407,
+        "parse_status": "COLLECTED",
+        "parsed": {
+          "tests_collected": 121,
+          "junit_present": true
+        },
+        "stdout": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\psf__requests-3362\\preflight\\collection\\stdout.log",
+        "stderr": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\psf__requests-3362\\preflight\\collection\\stderr.log",
+        "ok": true
+      },
+      "timings": {
+        "workspace_prepare": 5.968,
+        "environment": 0.084,
+        "collection": 7.431
+      },
+      "finished_at": "2026-10-25T17:21:12+00:00",
+      "phase22_light": {
+        "status": "PASS",
+        "tests": 1,
+        "environment": {
+          "status": "PASS",
+          "image_ref": "swebench/sweb.eval.x86_64.psf_1776_requests-3362:latest",
+          "image_id": "sha256:d1c8c15eeb5e12b7eb3815307d1131d68c72d53419fa2f8b89bc46bc0009a61b",
+          "cache_key": "official:sha256:d1c8c15eeb5e12b7eb3815307d1131d68c72d53419fa2f8b89bc46bc0009a61b",
+          "from_cache": true,
+          "duration_seconds": 0.0,
+          "error": null
+        },
+        "workspace": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase21\\m3-phase21-recovery-6-r3\\instances\\psf__requests-3362\\preflight\\workspace",
+        "clean_base_only": true
+      }
+    }
+  ],
+  "ok": true,
+  "available_instances": 6,
+  "reused_preflight_sha256": "07fcf673d7235d41f650f10c02d8f989cca0f7df48baf7dc25cb8c80d6bce428"
+}

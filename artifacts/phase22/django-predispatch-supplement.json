@@ -1,0 +1,9 @@
+{
+  "instance_id": "django__django-11422",
+  "old_segment": "phase22-six-live-r4",
+  "status": "NOT_DISPATCHED",
+  "ledger_present": false,
+  "new_model_calls": 0,
+  "source_process_sha256": "7ff51fd3af9fe2f87b53bae2767d2d7a0662b6ee4481209a37d0dcb34cd41229",
+  "reason": "Stopped preparation after Requests inner sandbox error; no ledger before or after termination"
+}

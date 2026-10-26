@@ -1,0 +1,12 @@
+{
+  "status": "SESSION_LOST_PRE_DISPATCH",
+  "recorded_pids_confirmed_absent": [
+    58116,
+    27604,
+    58736,
+    60652
+  ],
+  "new_model_requests": 0,
+  "supervisor_record_sha256": "07e957e9359090c6203d9e21d91647c0e9d7fe28c9a9c10d48d1749cac3ac98b",
+  "recovery": "fresh artifact root; retained execution session; no automatic stale lock removal"
+}

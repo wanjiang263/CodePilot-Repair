@@ -1,0 +1,56 @@
+[
+  {
+    "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live\\instances\\sphinx-doc__sphinx-8273\\process.json",
+    "pid": 43536,
+    "record_status": "exited",
+    "active": false
+  },
+  {
+    "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r2\\instances\\sympy__sympy-22714\\process.json",
+    "pid": 60652,
+    "record_status": "running",
+    "active": false
+  },
+  {
+    "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r2-indexed\\instances\\sympy__sympy-22714\\process.json",
+    "pid": 40540,
+    "record_status": "exited",
+    "active": false
+  },
+  {
+    "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r2-restart\\instances\\sympy__sympy-22714\\process.json",
+    "pid": 46280,
+    "record_status": "exited",
+    "active": false
+  },
+  {
+    "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r3\\instances\\matplotlib__matplotlib-18869\\process.json",
+    "pid": 48592,
+    "record_status": "exited",
+    "active": false
+  },
+  {
+    "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r3\\instances\\scikit-learn__scikit-learn-10297\\process.json",
+    "pid": 63404,
+    "record_status": "exited",
+    "active": false
+  },
+  {
+    "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r4\\instances\\django__django-11422\\process.json",
+    "pid": 62208,
+    "record_status": "exited",
+    "active": false
+  },
+  {
+    "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r4\\instances\\psf__requests-3362\\process.json",
+    "pid": 37732,
+    "record_status": "exited",
+    "active": false
+  },
+  {
+    "path": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\live-r5\\instances\\django__django-11422\\process.json",
+    "pid": 39104,
+    "record_status": "exited",
+    "active": false
+  }
+]

@@ -1,0 +1,45 @@
+{
+  "results": [
+    {
+      "instance_id": "psf__requests-3362",
+      "mode": "copy",
+      "base_commit": "36453b95b13079296776d11b09cab2567ea3e703",
+      "base_only_commits": 1,
+      "clean_before_environment": true,
+      "workspace": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\base-copy-probe\\psf__requests-3362\\repro-base-01",
+      "status": "PASS",
+      "tests": 1,
+      "image": {
+        "status": "PASS",
+        "image_ref": "swebench/sweb.eval.x86_64.psf_1776_requests-3362:latest",
+        "image_id": "sha256:d1c8c15eeb5e12b7eb3815307d1131d68c72d53419fa2f8b89bc46bc0009a61b",
+        "cache_key": "official:sha256:d1c8c15eeb5e12b7eb3815307d1131d68c72d53419fa2f8b89bc46bc0009a61b",
+        "from_cache": true,
+        "duration_seconds": 0.0,
+        "error": null
+      },
+      "zero_model": true
+    },
+    {
+      "instance_id": "django__django-11422",
+      "mode": "copy",
+      "base_commit": "df46b329e0900e9e4dc1d60816c1dce6dfc1094e",
+      "base_only_commits": 1,
+      "clean_before_environment": true,
+      "workspace": "C:\\Users\\lenovo\\Desktop\\CodePilot-Repair\\artifacts\\phase22\\base-copy-probe\\django__django-11422\\repro-base-01",
+      "status": "PASS",
+      "tests": 1,
+      "image": {
+        "status": "PASS",
+        "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-11422:latest",
+        "image_id": "sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+        "cache_key": "official:sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+        "from_cache": true,
+        "duration_seconds": 0.0,
+        "error": null
+      },
+      "zero_model": true
+    }
+  ],
+  "new_model_calls": 0
+}

@@ -1,0 +1,14 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-10297",
+  "repo": "scikit-learn/scikit-learn",
+  "status": "RESOLVED",
+  "run_id": "swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f",
+  "internal": "ACCEPTED",
+  "official": "RESOLVED",
+  "settled_cny": 0.13205431999999998,
+  "unknown_reserved_cny": 0.0,
+  "terminal": true,
+  "ledger_sha256": "7011860fb1eccdbcced7ae06abf028f4690770a979af1da62e043401b4fb058d",
+  "official_path": "artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/official-evaluation-phase22-six-live-r3.json",
+  "official_sha256": "50a8a02a03a57f48999d253b264e5df709a463f2f8f2121311ab6abc8ed6a9e7"
+}

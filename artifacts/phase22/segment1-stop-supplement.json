@@ -1,0 +1,10 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8273",
+  "status": "DISPATCHED_STOPPED",
+  "internal": "SYSTEM_CONFIG_MISMATCH",
+  "ledger_sha256": "aae05e2f6799d1acc00087ce916d67452df16cf4b796743a87501a1667e0530d",
+  "new_settled_cny": 0.026126000000000003,
+  "unknown": 0,
+  "reason": "Registry client ignored trust_env and phase timeout overrides; operator stopped only child while both HTTP records settled",
+  "will_not_rerun": true
+}
