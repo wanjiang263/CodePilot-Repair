@@ -1,0 +1,211 @@
+providers:
+  deepseek:
+    base_url: https://api.deepseek.com
+    api_key_env: DEEPSEEK_API_KEY
+    max_concurrency: 4
+    timeout_seconds: 120
+  kimi:
+    base_url: https://api.moonshot.cn/v1
+    api_key_env: MOONSHOT_API_KEY
+    max_concurrency: 3
+    timeout_seconds: 120
+  bigmodel:
+    base_url: https://open.bigmodel.cn/api/paas/v4
+    api_key_env: GLM_API_KEY
+    api_key_env_fallback: ZHIPU_API_KEY
+    max_concurrency: 4
+    timeout_seconds: 120
+    max_retries: 0
+    connect_timeout_seconds: 10
+    write_timeout_seconds: 30
+    pool_timeout_seconds: 10
+    trust_env: false
+  zai:
+    base_url: https://api.z.ai/api/paas/v4
+    api_key_env: GLM_API_KEY
+    max_concurrency: 4
+    timeout_seconds: 120
+    max_retries: 2
+  openai:
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    max_concurrency: 4
+    timeout_seconds: 120
+models:
+  deepseek-chat:
+    provider: deepseek
+    model: deepseek-flash
+    context_window: 1000000
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: true
+    max_output_tokens: 4096
+    extra_body:
+      thinking:
+        type: disabled
+    price:
+      currency: CNY
+      input_per_mtok: 2.0
+      output_per_mtok: 8.0
+      cached_input_per_mtok: 0.04
+  kimi-main:
+    provider: kimi
+    model: kimi-k2.6
+    context_window: 256000
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: false
+    max_output_tokens: 4096
+    extra_body:
+      thinking:
+        type: disabled
+    price:
+      currency: CNY
+      input_per_mtok: 6.5
+      output_per_mtok: 27.0
+      cached_input_per_mtok: 1.1
+  glm-main:
+    provider: bigmodel
+    model: glm-4.7
+    context_window: 200000
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: true
+    supports_thinking: true
+    max_output_tokens: 4096
+    extra_body:
+      thinking:
+        type: disabled
+    price:
+      currency: CNY
+      input_per_mtok: 4.0
+      output_per_mtok: 16.0
+      cached_input_per_mtok: 0.8
+  glm-5-main:
+    provider: bigmodel
+    model: glm-5
+    context_window: 200000
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: false
+    supports_thinking: false
+    max_output_tokens: 4096
+    price:
+      currency: CNY
+      input_per_mtok: 6.0
+      output_per_mtok: 22.0
+      cached_input_per_mtok: 1.5
+  glm-5.1-main:
+    provider: bigmodel
+    model: glm-5.1
+    context_window: 200000
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: false
+    supports_thinking: false
+    max_output_tokens: 4096
+    price:
+      currency: CNY
+      input_per_mtok: 8.0
+      output_per_mtok: 28.0
+      cached_input_per_mtok: 2.0
+  glm-5.3-main:
+    provider: bigmodel
+    model: glm-5.3
+    context_window: 1000000
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: false
+    supports_thinking: false
+    max_output_tokens: 4096
+    price:
+      currency: CNY
+      input_per_mtok: 8.0
+      output_per_mtok: 28.0
+      cached_input_per_mtok: 2.0
+  glm-5.3-flash-main:
+    provider: bigmodel
+    model: glm-5.3-flash
+    context_window: 1000000
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: false
+    supports_thinking: true
+    max_output_tokens: 4096
+    extra_body:
+      reasoning_effort: low
+    price:
+      currency: CNY
+      input_per_mtok: 0.8
+      output_per_mtok: 2.8
+      cached_input_per_mtok: 0.23
+  glm-4.7-zai:
+    provider: zai
+    model: glm-4.7
+    context_window: 200000
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: true
+    supports_thinking: true
+    max_output_tokens: 4096
+    extra_body:
+      thinking:
+        type: disabled
+    price:
+      currency: USD
+      input_per_mtok: 0.6
+      output_per_mtok: 2.2
+      cached_input_per_mtok: 0.11
+  glm-5.3-zai:
+    provider: zai
+    model: glm-5.3
+    context_window: 1000000
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: false
+    supports_thinking: false
+    max_output_tokens: 4096
+    price:
+      currency: USD
+      input_per_mtok: 1.4
+      output_per_mtok: 4.4
+      cached_input_per_mtok: 0.26
+  glm-5-zai:
+    provider: zai
+    model: glm-5
+    context_window: 200000
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: false
+    supports_thinking: false
+    max_output_tokens: 4096
+    price:
+      currency: USD
+      input_per_mtok: 1.0
+      output_per_mtok: 3.2
+      cached_input_per_mtok: 0.2
+  glm-5.1-zai:
+    provider: zai
+    model: glm-5.1
+    context_window: 200000
+    supports_tools: true
+    supports_json_mode: true
+    supports_temperature: false
+    supports_thinking: false
+    max_output_tokens: 4096
+    price:
+      currency: USD
+      input_per_mtok: 1.4
+      output_per_mtok: 4.4
+      cached_input_per_mtok: 0.26
+roles:
+  issue_analyzer: deepseek-chat
+  localizer: deepseek-chat
+  planner: deepseek-chat
+  coder: deepseek-chat
+  reproducer: deepseek-chat
+  diagnoser: deepseek-chat
+  reviewer: deepseek-chat
+  failure_classifier: deepseek-chat
+exchange_rates:
+  CNY: 1.0
