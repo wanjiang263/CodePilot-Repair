@@ -1,0 +1,38 @@
+{
+  "status": "PREPARATION_ONLY_NOT_AUTHORIZED_TO_DISPATCH",
+  "phase22_result_sha256": "c5ee5e23dab6b94c2a9585fb804355b31aec51180c9fb7b29af2699721dfc32b",
+  "catalog_sha256": "3cfa3b13cbbf281aafb216a6942bfbdc4c249c5c082c715218ea786c2cc0c3be",
+  "exclusions_sha256": "34ff8d16ec545e4ae62518d051c2936e7604a0e8214365695f57648f76d8cb26",
+  "environment_audit_sha256": "f8f8e53011f05ac893a4b415a19f3808bb97a5786fe7dfaf7cd6d44249b7ed80",
+  "provider": "bigmodel",
+  "alias": "glm-5.3-flash-main",
+  "model_id": "glm-5.3-flash",
+  "temperature": 0.0,
+  "http_retries": 0,
+  "timeout": {
+    "connect": 10,
+    "read": 120,
+    "write": 30,
+    "pool": 10
+  },
+  "trust_env": false,
+  "graph_seconds": 1800,
+  "review_reserve_seconds": 240,
+  "max_test_runs": 18,
+  "max_iterations": 5,
+  "max_review_calls": 2,
+  "attempts_per_instance": 1,
+  "proposed_per_instance_cap_cny": 4,
+  "proposed_50_instance_cap_cny": 200,
+  "authorization": "Future explicit funding and dispatch authorization required; original30 remainder is not allocated to test50",
+  "illustrative_seen_sample_mean_cny": 0.15416322666666668,
+  "illustrative_50_mean_cny": 7.708161333333334,
+  "cost_limitation": "Six seen recovery cases; two shortened system failures and incomplete closure bias this estimate downward. 200 CNY is a proposed hard ceiling, not a forecast or authorization.",
+  "requirements_before_dispatch": [
+    "Freeze source HEAD, catalog, configs, prices, full opening and original authorization separately",
+    "Validate each base-only clean workspace, index identity, runner parsing, image ID, dependencies and scope with a real lightweight test",
+    "Precharge each HTTP; unknown usage freezes ledger and stops all later paid dispatch",
+    "No paid repeats, automatic model switching or test300/M4",
+    "Only ACCEPTED plus complete actual review context can enter one official Harness; preserve ERROR/INVALID_ENV"
+  ]
+}
