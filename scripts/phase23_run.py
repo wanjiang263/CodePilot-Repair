@@ -330,7 +330,11 @@ def main():
                 "django__django-11422": "plan",
             }[args.instance]
         )
-        candidate = raw.get("current_patch", "") if entry in {"review", "validate_patch"} else ""
+        candidate = (
+            raw.get("current_patch", "")
+            if entry in {"review", "validate_patch", "run_regression"}
+            else ""
+        )
         recovery = StageRecovery(
             source_state=state_file,
             source_artifacts=previous,

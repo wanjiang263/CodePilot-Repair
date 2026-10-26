@@ -70,8 +70,15 @@ def import_stage(initial: RepairState, recovery: StageRecovery, deps: Deps) -> R
             return value
         return value
 
-    fields = ("issue_analysis", "retrieval", "localization", "impact", "plan", "baseline")
-    if recovery.entry == "review":
+    fields: tuple[str, ...] = (
+        "issue_analysis",
+        "retrieval",
+        "localization",
+        "impact",
+        "plan",
+        "baseline",
+    )
+    if recovery.entry in {"review", "run_regression"}:
         # Review uses the full candidate, plan, changed-source excerpts and
         # validation facts; replaying 40MB of retrieval history adds no evidence.
         fields = tuple(key for key in fields if key != "retrieval")

@@ -173,12 +173,34 @@ class RegressionRunner:
                         )
                     }
                 )
-                return deps.sandbox.run_tests(
+                files = list(dict.fromkeys(node.split("::", 1)[0] for node in scope))
+                all_file_nodes = {node for node in authorized if node.split("::", 1)[0] in files}
+                file_scope = (
+                    key in {"L2", "L3"}
+                    and deps.full_regression_file_scope
+                    and set(scope) == all_file_nodes
+                )
+                dispatch = (
+                    list(dict.fromkeys(node.split("::", 1)[0] for node in scope))
+                    if file_scope
+                    else scope
+                )
+                execution = deps.sandbox.run_tests(
                     workspace=deps.workspace,
                     environment=deps.environment,
                     env_spec=spec,
-                    tests=scope,
+                    tests=dispatch,
                     artifact_iteration=1000 + deps.test_runs,
+                )
+                return execution.model_copy(
+                    update={
+                        "diagnostics": {
+                            **execution.diagnostics,
+                            "regression_dispatch": "full_files" if file_scope else "nodes",
+                            "regression_dispatch_targets": dispatch,
+                            "authorized_node_count": len(scope),
+                        }
+                    }
                 )
 
             execution = execute_once(

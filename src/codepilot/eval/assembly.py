@@ -783,6 +783,11 @@ class InferenceAssembly:
             discover_missing_targets=bool(
                 self._runtime_config and self._runtime_config.discover_missing_targets
             ),
+            full_regression_file_scope=bool(
+                self._runtime_config
+                and self._runtime_config.full_regression_file_scope
+                and not getattr(getattr(raw_sandbox, "runner", None), "native", False)
+            ),
             # 闭环预留要按 Reviewer 实际绑定模型的单价估算；这份配置就是那条链
             # （角色 → 别名 → 单价/汇率/币种）。脚本化与 Fake 批次没有注册表，
             # 传 None 让预留退回账本单价口径，零成本运行照旧放行。

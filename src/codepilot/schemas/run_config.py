@@ -21,7 +21,14 @@ class StageRecovery(BaseModel):
     source_state_sha256: str
     source_run_id: str
     entry: Literal[
-        "localize", "analyze_impact", "build_env", "reproduce", "plan", "validate_patch", "review"
+        "localize",
+        "analyze_impact",
+        "build_env",
+        "reproduce",
+        "plan",
+        "validate_patch",
+        "run_regression",
+        "review",
     ]
     candidate_sha256: str | None = None
     historical_ledger_hashes: dict[str, str]
@@ -36,6 +43,7 @@ class InferenceRunConfig(BaseModel):
     budget: RepairBudget = Field(default_factory=RepairBudget)
     deny_existing_test_edits: bool = True
     discover_missing_targets: bool = True
+    full_regression_file_scope: bool = True
     index_snapshot: IndexSnapshot | None = None
     recovery: StageRecovery | None = None
     with_reproducer: bool = True

@@ -438,3 +438,43 @@ def test_missing_baseline_is_not_a_clean_regression(tmp_path):
     assert not result.complete
     assert result.status == "NOT RUN"
     assert harness.deps.test_runs == 3
+
+
+@pytest.mark.parametrize("missing", [False, True])
+def test_phase23_full_file_dispatch_keeps_all_parameterized_nodes(tmp_path, missing):
+    harness = build_harness(tmp_path, results=[], coder_rounds=[], baseline_results=[])
+    first = r"tests/test_core.py::test_normalize[\\sphinxhref]"
+    second = "tests/test_core.py::test_normalize[quote <&> value]"
+    cases = [
+        TestCaseResult(node_id=node, outcome=TestOutcome.PASSED, duration=0.1)
+        for node in [first, second]
+    ]
+    after = ExecutionResult(
+        status=ExecutionStatus.PASS, exit_code=0, tests=cases[:1] if missing else cases
+    )
+    from codepilot.sandbox.fake import FakeSandbox
+
+    harness.deps.accounting.inner = FakeSandbox(results=[after])
+    harness.deps.full_regression_file_scope = True
+    baseline = TestBaseline(
+        base_commit=harness.base_commit,
+        outcomes={c.node_id: c.outcome for c in cases},
+        run_outcomes=[{c.node_id: c.outcome for c in cases}],
+    )
+    state = harness.initial.model_copy(
+        update={
+            "baseline": baseline,
+            "execution": ExecutionResult(status=ExecutionStatus.PASS, tests=[cases[0]]),
+        }
+    )
+    try:
+        result = RegressionRunner().run(state, harness.deps)
+        assert result.complete is (not missing)
+        assert harness.deps.accounting.inner.run_calls[0][1] == ("tests/test_core.py",)
+        assert result.executions["L3"].diagnostics["authorized_node_count"] == 2
+        if missing:
+            assert second in result.unexecuted_tests
+        else:
+            assert set(result.executed_tests) == {first, second}
+    finally:
+        harness.close()
