@@ -16,7 +16,7 @@ import tarfile
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-from docker.errors import DockerException, ImageNotFound
+from docker.errors import DockerException, ImageNotFound, NotFound
 
 from codepilot.repo.gitcmd import run_git
 from codepilot.sandbox.base import EnvironmentBuildResult
@@ -349,6 +349,11 @@ class OfficialInstanceSandbox(DockerSandbox):
             prefix = "lib"
             suffix = ".so"
             required = True
+        elif self.instance_id.startswith("astropy__astropy-"):
+            archive_path = "/testbed/astropy"
+            prefix = "astropy"
+            suffix = ".so"
+            required = True
         else:
             return
         container: Any | None = None
@@ -370,6 +375,17 @@ class OfficialInstanceSandbox(DockerSandbox):
                 count += _extract_single_file(
                     version_archive, workspace / "lib/matplotlib/_version.py"
                 )
+            if self.instance_id.startswith("astropy__astropy-"):
+                for filename in ("version.py", "_version.py"):
+                    if (workspace / "astropy" / filename).is_file():
+                        continue
+                    try:
+                        stream, _ = container.get_archive(f"/testbed/astropy/{filename}")
+                    except NotFound:
+                        continue
+                    count += _extract_single_file(
+                        b"".join(stream), workspace / "astropy" / filename
+                    )
             if self.last_image is not None:
                 self.last_image["overlaid_build_artifacts"] = count
         except (DockerException, OSError, tarfile.TarError) as exc:

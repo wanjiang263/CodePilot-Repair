@@ -176,3 +176,44 @@ def test_pytest_fixture_missing_module_is_a_test_failure_not_environment() -> No
         _reclassify_pytest_fixture_dependency("scikit-learn__scikit-learn-12471", with_tests).status
         is ExecutionStatus.ENV_ERROR
     )
+
+
+def test_astropy_overlay_restores_extensions_and_version_without_overwriting_source(
+    tmp_path: Path,
+) -> None:
+    package = _tar(
+        {
+            "astropy/utils/_compiler.cpython-39-x86_64-linux-gnu.so": b"binary",
+            "astropy/__init__.py": b"image source",
+        }
+    )
+    version = _tar({"_version.py": b"version = '5.2'\n"})
+
+    class Container:
+        def get_archive(self, path: str) -> tuple[list[bytes], dict[str, int]]:
+            payload = version if path.endswith("_version.py") else package
+            return [payload], {"size": len(payload)}
+
+        def remove(self, *, force: bool) -> None:
+            assert force
+
+    client = SimpleNamespace(containers=SimpleNamespace(create=lambda *a, **k: Container()))
+    sandbox = OfficialInstanceSandbox(
+        artifacts=SimpleNamespace(),
+        allowed_workspace_root=tmp_path,
+        instance_id="astropy__astropy-14995",
+        images=SimpleNamespace(),
+        client=client,
+    )
+    sandbox.last_image = {"image_ref": "official"}
+    workspace = tmp_path / "workspace"
+    (workspace / "astropy").mkdir(parents=True)
+    (workspace / "astropy/__init__.py").write_bytes(b"base source")
+    (workspace / "astropy/version.py").write_bytes(b"base version wrapper")
+    sandbox._overlay_build_artifacts(workspace)
+    assert (
+        workspace / "astropy/utils/_compiler.cpython-39-x86_64-linux-gnu.so"
+    ).read_bytes() == b"binary"
+    assert (workspace / "astropy/_version.py").read_bytes() == b"version = '5.2'\n"
+    assert (workspace / "astropy/__init__.py").read_bytes() == b"base source"
+    assert (workspace / "astropy/version.py").read_bytes() == b"base version wrapper"
