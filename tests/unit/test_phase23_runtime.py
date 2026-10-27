@@ -444,3 +444,19 @@ def test_independent_official_import_does_not_load_agent_graph():
         [sys.executable, "-c", code], cwd=root, capture_output=True, text=True, timeout=30
     )
     assert result.returncode == 0, result.stderr
+
+
+def test_missing_impact_recovers_actual_hunk_symbols_and_authorized_scope():
+    from codepilot.graph.target_tests import impact_from_verified_patch
+
+    patch = "diff --git a/pkg/core.py b/pkg/core.py\n--- a/pkg/core.py\n+++ b/pkg/core.py\n@@ -3,2 +3,2 @@\n-old\n+new\n"
+    index = SimpleNamespace(
+        symbol_objects=lambda: [
+            SimpleNamespace(id="changed", path="pkg/core.py", start_line=1, end_line=5),
+            SimpleNamespace(id="unrelated", path="pkg/core.py", start_line=20, end_line=30),
+        ]
+    )
+    result = impact_from_verified_patch(patch, index, ["tests/test_core.py::test_x"])
+    assert result.changed_symbols == ["changed"]
+    assert result.related_tests == ["tests/test_core.py"]
+    assert result.related_test_evidence[0].source == "verified_patch_baseline"

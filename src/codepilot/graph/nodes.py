@@ -1089,6 +1089,7 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
     )
     targets = list(selection.tests)
     supplemental_baseline = None
+    rebuilt_impact = None
     if not targets and deps.discover_missing_targets and deps.workspace_manager is not None:
         from codepilot.graph.target_tests import discover_target_files
         from codepilot.sandbox.baseline import build_test_baseline
@@ -1149,6 +1150,17 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
                 )
                 targets = list(selection.tests)
                 state = augmented
+    if (
+        targets
+        and deps.discover_missing_targets
+        and not (state.impact and state.impact.related_tests)
+    ):
+        from codepilot.graph.target_tests import impact_from_verified_patch
+
+        rebuilt_impact = impact_from_verified_patch(
+            state.current_patch, deps.index, targets, state.impact
+        )
+        state = state.model_copy(update={"impact": rebuilt_impact})
     if not targets:
         # 没有可执行的目标测试：**不伪造**"目标测试通过"。这是模型侧缺口，
         # 不是 Harness 崩溃；回归与审查保持 NOT EXECUTED。
@@ -1196,6 +1208,7 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
             }
         )
         return {
+            "impact": state.impact,
             "attempts": _update_last(state, updated),
             "execution": reused,
             "test_runs": deps.test_runs,
@@ -1281,6 +1294,8 @@ async def run_target_tests(state: RepairState, deps: Deps) -> dict[str, Any]:
             target_test_source=selection.source,
         ),
     }
+    if rebuilt_impact is not None:
+        fields["impact"] = rebuilt_impact
     if supplemental_baseline is not None:
         fields.update(baseline=supplemental_baseline, plan=state.plan)
     attribution = _target_execution_attribution(execution, changed_files(state.current_patch))

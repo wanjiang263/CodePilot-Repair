@@ -325,3 +325,48 @@ def _node_exists(policy: WorkspacePathPolicy, target: str) -> bool:
         if name and name not in names:
             return False
     return True
+
+
+def impact_from_verified_patch(patch: str, index: Any, targets: list[str], previous: Any = None):
+    """Rebuild missing impact from real diff hunks and already-authorized tests."""
+    from codepilot.schemas.impact import ImpactAnalysis, ImpactedTest
+
+    ranges: dict[str, list[tuple[int, int]]] = {}
+    current = None
+    for line in patch.splitlines():
+        match = re.match(r"diff --git a/(.+) b/(.+)$", line)
+        if match:
+            current = match.group(2)
+        hunk = re.match(r"@@ -(\d+)(?:,(\d+))? ", line)
+        if hunk and current:
+            start = int(hunk.group(1))
+            ranges.setdefault(current, []).append((start, start + int(hunk.group(2) or 1) - 1))
+    symbols = []
+    for symbol in getattr(index, "symbol_objects", lambda: [])():
+        if any(
+            symbol.start_line <= end and symbol.end_line >= start
+            for start, end in ranges.get(symbol.path, [])
+        ):
+            symbols.append(symbol.id)
+    files = list(dict.fromkeys(target.split("::", 1)[0] for target in targets))
+    old = previous or ImpactAnalysis()
+    evidence = [
+        ImpactedTest(
+            path=path,
+            source="verified_patch_baseline",
+            confidence="medium",
+            evidence="Validated diff file/module discovery and clean-base collection; preserves existing scope",
+        )
+        for path in files
+    ]
+    return old.model_copy(
+        update={
+            "changed_symbols": list(dict.fromkeys([*old.changed_symbols, *symbols])),
+            "related_tests": list(dict.fromkeys([*old.related_tests, *files])),
+            "related_test_evidence": [*old.related_test_evidence, *evidence],
+            "risk_reasons": [
+                *old.risk_reasons,
+                "Missing impact recovered from verified diff hunks and authorized collected tests; hunk context is a conservative symbol bound",
+            ],
+        }
+    )
