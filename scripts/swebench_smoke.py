@@ -50,6 +50,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT / "src") not in sys.path:  # pragma: no cover - 直接执行脚本时
     sys.path.insert(0, str(ROOT / "src"))
 
+from codepilot.eval.harness_payload import harness_payload as _harness_payload  # noqa: E402
+from codepilot.eval.harness_payload import jsonable as _jsonable  # noqa: E402
+
 DATASET_NAME = "princeton-nlp/SWE-bench_Lite"
 DATASET_REVISION = "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2"
 HARNESS_VERSION = "4.1.0"
@@ -316,30 +319,6 @@ def _sha256_file(path: Path) -> str | None:
         return hashlib.sha256(Path(path).read_bytes()).hexdigest()
     except OSError:
         return None
-
-
-def _jsonable(value: Any) -> Any:
-    """把 pydantic / dataclass / Path / enum 统一转成可 JSON 序列化的结构。"""
-    if value is None or isinstance(value, (bool, int, float, str)):
-        return value
-    if isinstance(value, Path):
-        return str(value)
-    if isinstance(value, Mapping):
-        return {str(key): _jsonable(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple, set, frozenset)):
-        return [_jsonable(item) for item in value]
-    dump = getattr(value, "model_dump", None)
-    if callable(dump):
-        return _jsonable(dump(mode="json"))
-    if hasattr(value, "__dataclass_fields__"):
-        return {
-            str(field_name): _jsonable(getattr(value, field_name))
-            for field_name in value.__dataclass_fields__
-        }
-    enum_value = getattr(value, "value", None)
-    if isinstance(enum_value, str):
-        return enum_value
-    return str(value)
 
 
 def _atomic_write_json(path: Path, payload: Any) -> Path:
@@ -888,42 +867,6 @@ def _assert_execution_image_matches(environment: Mapping[str, Any], sandboxes: l
                 "执行镜像与已 ensure 的环境身份不一致："
                 f"ensure={expected_key}/{expected_id} sandbox={actual_key}/{actual_id}"
             )
-
-
-def _harness_payload(execution: Any) -> dict[str, Any]:
-    verdicts = []
-    for item in getattr(execution, "verdicts", ()) or ():
-        verdicts.append(
-            {
-                "instance_id": getattr(item, "instance_id", None),
-                "verdict": _jsonable(getattr(item, "verdict", None)),
-                "resolved": getattr(item, "resolved", None),
-                "report_path": _jsonable(getattr(item, "report_path", None)),
-                "report_sha256": getattr(item, "report_sha256", None),
-                "error_kind": _jsonable(getattr(item, "error_kind", None)),
-                "error_detail": getattr(item, "error_detail", None),
-                "runtime_seconds": getattr(item, "runtime_seconds", None),
-            }
-        )
-    report = getattr(execution, "report", None)
-    return {
-        "run_id": getattr(execution, "run_id", None),
-        "command": _jsonable(getattr(execution, "command", None)),
-        "decision": _jsonable(getattr(execution, "decision", None)),
-        "exit_code": getattr(execution, "exit_code", None),
-        "timed_out": getattr(execution, "timed_out", None),
-        "runtime_seconds": getattr(execution, "runtime_seconds", None),
-        "error_kind": _jsonable(getattr(execution, "error_kind", None)),
-        "error_detail": getattr(execution, "error_detail", None),
-        "reused": getattr(execution, "reused", None),
-        "reused_reason": getattr(execution, "reused_reason", None),
-        "warnings": list(getattr(execution, "warnings", ()) or ()),
-        "verdicts": verdicts,
-        "report_path": _jsonable(getattr(execution, "report_path", None)),
-        "report_sha256": getattr(execution, "report_sha256", None),
-        "report": _jsonable(report),
-        "counts_toward_resolved_rate": getattr(execution, "included_in_resolved_rate", True),
-    }
 
 
 def _official_verdict(harness: Mapping[str, Any]) -> str:

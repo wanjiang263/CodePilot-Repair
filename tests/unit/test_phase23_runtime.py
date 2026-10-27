@@ -431,3 +431,16 @@ def test_frozen_response_archive_disables_cache_without_rejecting_stage(tmp_path
     assert settled_archive_eligible([ledger]) is True
     assert settled_archive_eligible([]) is False
     assert settled_archive_eligible([ledger, ledger]) is False
+
+
+def test_independent_official_import_does_not_load_agent_graph():
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[2]
+    code = "import sys;sys.path.insert(0,'scripts');import l2cal10e_official;from codepilot.eval.candidate import verify_candidate;assert not any(k == 'langgraph' or k.startswith('langgraph.') or k == 'codepilot.graph' or k == 'swebench_smoke' for k in sys.modules)"
+    result = subprocess.run(
+        [sys.executable, "-c", code], cwd=root, capture_output=True, text=True, timeout=30
+    )
+    assert result.returncode == 0, result.stderr

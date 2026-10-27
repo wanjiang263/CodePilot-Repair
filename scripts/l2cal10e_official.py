@@ -1,10 +1,8 @@
-"""Run the official harness only for an already-accepted internal attempt.
+"""Run the official harness for a byte-verified legal candidate.
 
-The gate is not the shell's exit status. It re-reads the internal acceptance,
-requires the delivered patch and the prediction file to carry the same bytes,
-and only then starts the harness. A human recheck is honored only when it is a
-schema-2 receipt that binds the same run, instance, candidate, delivered patch
-and prediction hashes; a bare ``{"accepted": true}`` is not a bypass.
+Candidate receipts bind provenance, instance/base, patch and prediction bytes
+independently of internal acceptance. The historical accepted/recheck path
+remains available for older runs.
 """
 
 from __future__ import annotations
@@ -21,9 +19,11 @@ SCRIPTS = Path(__file__).resolve().parent
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
-import swebench_smoke as smoke  # noqa: E402
-from l2cal10e_acceptance import _root_report, _run_report  # noqa: E402
-from l2cal10e_acceptance import evaluate as evaluate_acceptance  # noqa: E402
+PROJECT = Path(__file__).resolve().parents[1]
+if str(PROJECT / "src") not in sys.path:
+    sys.path.insert(0, str(PROJECT / "src"))
+
+from codepilot.eval.harness_payload import harness_payload  # noqa: E402
 
 _RECHECK_SCHEMA_VERSION = 2
 _RECHECK_CHECKS = frozenset(
@@ -168,6 +168,9 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     if getattr(args, "candidate_receipt", None) is not None:
         return evaluate_legal_candidate(args)
 
+    from l2cal10e_acceptance import _root_report, _run_report
+    from l2cal10e_acceptance import evaluate as evaluate_acceptance
+
     found = _run_report(args.root, instance=args.instance, label=args.label, run_id=args.run_id)
     if found is None:
         raise ValueError(f"no internal run report for {args.instance} label={args.label}")
@@ -236,7 +239,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     )
     runner = harness.OfficialHarnessRunner(config, artifacts=ArtifactStore(args.root, run_id))
     execution = runner.run(dry_run=False)
-    payload = smoke._harness_payload(execution)
+    payload = harness_payload(execution)
     verdict = execution.verdict_for(args.instance).value
     return {
         "schema_version": 2,
@@ -292,7 +295,7 @@ def evaluate_legal_candidate(args: argparse.Namespace) -> dict[str, Any]:
         "candidate_receipt": str(args.candidate_receipt),
         "internal_status": receipt["internal_status"],
         "official_verdict": execution.verdict_for(args.instance).value,
-        "official": smoke._harness_payload(execution),
+        "official": harness_payload(execution),
     }
 
 

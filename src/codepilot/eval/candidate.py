@@ -7,12 +7,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-from codepilot.graph.stop_rules import patch_hash
-from codepilot.patch.diff import generate_git_diff
-from codepilot.patch.validator import PatchValidator, ValidatorConfig
-from codepilot.repo.gitcmd import run_git
-from codepilot.tools.base import WorkspacePathPolicy
-
 
 def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -22,6 +16,12 @@ def prepare_candidate(
     *, project: Path, run: Path, instance: str, base: str, source_ledger: Path, revision: str
 ) -> Path | None:
     """Validate actual workspace bytes; freeze once all inference for this candidate ends."""
+    from codepilot.graph.stop_rules import patch_hash
+    from codepilot.patch.diff import generate_git_diff
+    from codepilot.patch.validator import PatchValidator, ValidatorConfig
+    from codepilot.repo.gitcmd import run_git
+    from codepilot.tools.base import WorkspacePathPolicy
+
     workspace = run / "workspace"
     state_path = run / "state_final.json"
     state = json.loads(state_path.read_text(encoding="utf-8"))
