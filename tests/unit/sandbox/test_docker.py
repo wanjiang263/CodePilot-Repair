@@ -969,3 +969,21 @@ def test_cleanup_failure_is_reported(tmp_path: Path) -> None:
     ]
     with pytest.raises(RuntimeError, match="stale"):
         engine.cleanup(older_than_seconds=3600)
+
+
+def test_desktop_proxy_maps_wsl_drive_binds_without_changing_other_sources(monkeypatch):
+    from codepilot.sandbox.docker import daemon_bind_source
+
+    monkeypatch.setenv(
+        "DOCKER_HOST",
+        "unix:///mnt/wsl/docker-desktop/shared-sockets/guest-services/docker.proxy.sock",
+    )
+    assert (
+        daemon_bind_source("/mnt/d/project/workspace")
+        == "/run/desktop/mnt/host/d/project/workspace"
+    )
+    assert daemon_bind_source("/mnt/d/project/out") == "/run/desktop/mnt/host/d/project/out"
+    assert daemon_bind_source("/home/user/project") == "/home/user/project"
+    assert daemon_bind_source("D:/project") == "D:/project"
+    monkeypatch.setenv("DOCKER_HOST", "unix:///var/run/docker.sock")
+    assert daemon_bind_source("/mnt/d/project") == "/mnt/d/project"

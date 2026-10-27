@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 import shlex
 import tempfile
@@ -58,6 +59,19 @@ _STAGE_MEMORY = "1g"
 
 #: daemon 报的 ISO 时间可能是纳秒精度，``fromisoformat`` 只接受到微秒。
 _FRACTION = re.compile(r"\.(\d+)")
+
+
+def daemon_bind_source(source: str) -> str:
+    """Translate WSL drive mounts when talking directly to Desktop's proxy.
+
+    The SDK sends bind paths verbatim; unlike the Docker CLI it does not map
+    the WSL client's /mnt/d to the Desktop VM's Windows drive mount.
+    """
+    if "docker-desktop/shared-sockets/guest-services/" in os.environ.get("DOCKER_HOST", ""):
+        matched = re.fullmatch(r"/mnt/([a-z])/(.*)", source)
+        if matched:
+            return f"/run/desktop/mnt/host/{matched[1]}/{matched[2]}"
+    return source
 
 
 def environment_cache_key(repository: str, base_commit: str, env_spec: EnvSpec) -> str:
@@ -449,8 +463,14 @@ class DockerSandbox:
                     created.append(name)
             config = execution_container_config(
                 image_ref=environment.image_ref or "",
-                workspace_volume=(str(workspace.resolve()) if self.bind_workspace else volumes[0]),
-                output_volume=str(output_dir.resolve()) if self.bind_workspace else volumes[1],
+                workspace_volume=(
+                    daemon_bind_source(str(workspace.resolve()))
+                    if self.bind_workspace
+                    else volumes[0]
+                ),
+                output_volume=daemon_bind_source(str(output_dir.resolve()))
+                if self.bind_workspace
+                else volumes[1],
                 command=command,
                 environment=environment_values,
                 workspace_target=self.workspace_target,

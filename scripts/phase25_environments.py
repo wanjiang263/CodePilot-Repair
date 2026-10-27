@@ -83,7 +83,7 @@ def main() -> None:
                     container.remove(force=True)
             if index < 5:
                 task = loader.get_inference_task("test", iid)
-                artifacts = ArtifactStore(OUT / "binding" / iid, "probe")
+                artifacts = ArtifactStore(OUT / "binding" / iid, f"probe-{time.time_ns()}")
                 manager = WorkspaceManager(
                     cache_root=OUT / "binding-cache" / iid, default_mode="copy"
                 )
@@ -95,11 +95,7 @@ def main() -> None:
                 if not target.exists():
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copytree(seed / "repo", target)
-                from l2cal10e_internal import _ReusingWorkspaceManager
-
-                workspace = _ReusingWorkspaceManager(
-                    manager, artifacts.run_dir / "workspace"
-                ).create(
+                workspace = manager.create(
                     source=str(task.repository),
                     base_commit=task.base_commit,
                     target=artifacts.run_dir / "workspace",
