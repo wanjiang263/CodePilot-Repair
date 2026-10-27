@@ -64,3 +64,11 @@ class SettledResponseCache:
 
     def close(self) -> None:
         self.inner.close()
+
+
+def settled_archive_eligible(ledgers: list[Path]) -> bool:
+    """Ambiguous/frozen archives disable response reuse, not stage recovery."""
+    if len(ledgers) != 1:
+        return False
+    ledger = json.loads(ledgers[0].read_text(encoding="utf-8"))
+    return not ledger["frozen"] and all(row["status"] == "settled" for row in ledger["requests"])

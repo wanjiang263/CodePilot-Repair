@@ -186,25 +186,31 @@ def main():
         write(segment / "actual-client.json", transport)
         archive = previous / "llm_calls.jsonl"
         if archive.is_file():
-            from codepilot.llm.settled_cache import SettledResponseCache
+            from codepilot.llm.settled_cache import SettledResponseCache, settled_archive_eligible
 
             source_ledgers = list(previous.parent.parent.glob("dispatch-ledger*.json"))
-            if len(source_ledgers) != 1 or any(
-                r["status"] != "settled" for r in read(source_ledgers[0])["requests"]
-            ):
-                raise RuntimeError("only fully settled response archives can be reused")
-            from dataclasses import replace
+            eligible = settled_archive_eligible(source_ledgers)
+            write(
+                segment / "response-cache-policy.json",
+                {
+                    "enabled": eligible,
+                    "source_ledgers": [{"path": str(p), "sha256": sha(p)} for p in source_ledgers],
+                    "reason": "Only fully settled archives may supply cache hits. Frozen source disables response cache; independently verified stage products remain recoverable.",
+                },
+            )
+            if eligible:
+                from dataclasses import replace
 
-            cached_roles = {
-                role: SettledResponseCache(
-                    chain,
-                    archive=archive,
-                    alias=llm.resolve_role(role).alias,
-                    evidence=segment / "settled-cache-hits.jsonl",
-                )
-                for role, chain in providers.roles.items()
-            }
-            providers = replace(providers, roles=cached_roles)
+                cached_roles = {
+                    role: SettledResponseCache(
+                        chain,
+                        archive=archive,
+                        alias=llm.resolve_role(role).alias,
+                        evidence=segment / "settled-cache-hits.jsonl",
+                    )
+                    for role, chain in providers.roles.items()
+                }
+                providers = replace(providers, roles=cached_roles)
 
         if args.preflight:
             artifacts = ArtifactStore(segment, "light")

@@ -410,3 +410,24 @@ def test_source_only_recovery_preserves_agent_source_and_protects_tests(tmp_path
         (deps.artifacts.run_dir / "stage-recovery.json").read_text(encoding="utf8")
     )
     assert receipt["preserved_source_edits"]["excluded_test_paths"] == ["tests/test_core.py"]
+
+
+def test_frozen_response_archive_disables_cache_without_rejecting_stage(tmp_path):
+    from codepilot.llm.settled_cache import settled_archive_eligible
+
+    ledger = tmp_path / "ledger.json"
+    ledger.write_text(
+        json.dumps(
+            {"frozen": True, "requests": [{"status": "settled"}, {"status": "unknown_frozen"}]}
+        ),
+        encoding="utf8",
+    )
+    original = ledger.read_bytes()
+    assert settled_archive_eligible([ledger]) is False
+    assert ledger.read_bytes() == original
+    ledger.write_text(
+        json.dumps({"frozen": False, "requests": [{"status": "settled"}]}), encoding="utf8"
+    )
+    assert settled_archive_eligible([ledger]) is True
+    assert settled_archive_eligible([]) is False
+    assert settled_archive_eligible([ledger, ledger]) is False
