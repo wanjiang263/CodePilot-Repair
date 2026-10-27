@@ -326,7 +326,7 @@ def test_phase22_stop_assigns_all_terminal_states(fixture: Fixture) -> None:
     for entry in summary["instances"][1:]:
         assert entry["status"] == "NOT_DISPATCHED"
         assert entry["stop_reason"] == "BLOCKED_BY_FROZEN_LEDGER"
-    assert all(entry["terminal"] for entry in summary["instances"])
+    assert not any(entry["terminal"] for entry in summary["instances"])
 
 
 def test_phase22_empty_ledger_is_not_dispatched(fixture: Fixture) -> None:
@@ -349,13 +349,13 @@ def test_phase22_batch_lock_blocks_duplicate(fixture: Fixture) -> None:
 
 def test_phase22_existing_eval_is_preserved(fixture: Fixture) -> None:
     calls: list[str] = []
-    batch = fixture.make(_success_internal(calls))
+    batch = fixture.make(_success_internal(calls), _success_official([]))
     sentinel = batch.artifact_root / "instances" / IDS[0] / "eval" / "sentinel"
     sentinel.parent.mkdir(parents=True)
     sentinel.write_text("preserve")
     summary = batch.run()
-    assert not calls
-    assert "refusing overwrite" in summary["stop_reason"]
+    assert calls == IDS[1:]
+    assert "refusing overwrite" in summary["instances"][0]["stop_reason"]
     assert sentinel.read_text() == "preserve"
 
 
@@ -475,8 +475,8 @@ def test_external_official_pauses_and_ingests_without_a_second_paid_attempt(
     fixture.config.write_text(json.dumps(config), encoding="utf-8")
     batch = fixture.make(_success_internal(internal), official)
     summary = batch.run()
-    assert summary["status"] == "stopped"
-    assert internal == [IDS[0]]
+    assert summary["status"] == "incomplete"
+    assert internal == IDS
     assert official_calls == []
     entry = batch.state["instances"][0]
     assert entry["status"] == "OFFICIAL_PENDING"
@@ -495,8 +495,8 @@ def test_external_official_pauses_and_ingests_without_a_second_paid_attempt(
     # The next run continues with the next instance; the already-paid instance
     # is terminal and is never dispatched again.
     summary = batch.run()
-    assert internal == [IDS[0], IDS[1]]
-    assert summary["status"] == "stopped"
+    assert internal == IDS
+    assert summary["status"] == "incomplete"
 
 
 def test_ingest_official_refuses_a_missing_record(fixture: Fixture) -> None:
@@ -505,19 +505,20 @@ def test_ingest_official_refuses_a_missing_record(fixture: Fixture) -> None:
     fixture.config.write_text(json.dumps(config), encoding="utf-8")
     batch = fixture.make(_success_internal([]), lambda _request: 0)
     batch.run()
-    with pytest.raises(m3_batch.BatchStopError, match="official record is missing"):
-        batch.ingest_official()
+    assert batch.ingest_official()["ingested"] == 0
+    assert all(not e["terminal"] for e in batch.state["instances"])
+    assert "official record is missing" in batch.state["instances"][0]["stop_reason"]
 
 
 def test_phase22_missing_official_record_is_error_not_unresolved(fixture: Fixture) -> None:
     calls: list[str] = []
     summary = fixture.make(_success_internal(calls), lambda request: 1).run()
-    assert calls == [IDS[0]]
+    assert calls == IDS
     entry = summary["instances"][0]
     assert entry["internal"] == "ACCEPTED"
     assert entry["official"] == "ERROR"
     assert entry["status"] == "OFFICIAL_ERROR"
-    assert entry["terminal"]
+    assert not entry["terminal"]
 
 
 def test_phase22_inner_sandbox_error_stops_even_when_wrapper_says_no_patch(
@@ -537,8 +538,8 @@ def test_phase22_inner_sandbox_error_stops_even_when_wrapper_says_no_patch(
 
     batch = fixture.make(internal)
     summary = batch.run()
-    assert calls == [IDS[0]]
-    assert summary["status"] == "stopped"
+    assert calls == IDS
+    assert summary["status"] == "incomplete"
     assert summary["instances"][0]["status"] == "ENV_ERROR"
     registry = json.loads(batch.registry_path.read_text())
     assert registry["attempts"][0]["status"] == "stopped"
@@ -559,10 +560,10 @@ def test_phase22_external_invalid_environment_is_terminal(fixture: Fixture) -> N
         },
     )
     result = batch.ingest_official()
-    assert result["summary"]["status"] == "stopped"
+    assert result["summary"]["status"] == "incomplete"
     assert batch.state["instances"][0]["official"] == "INVALID_ENV"
-    assert batch.state["instances"][0]["terminal"]
-    assert calls == [IDS[0]]
+    assert not batch.state["instances"][0]["terminal"]
+    assert calls == IDS
 
 
 def test_repo_cache_seed_uses_the_loader_source_identity(tmp_path: Path) -> None:
@@ -649,8 +650,8 @@ def test_m3_environment_failure_stops_before_official(fixture: Fixture) -> None:
         return 1
 
     summary = fixture.make(internal, _success_official(official)).run()
-    assert summary["status"] == "stopped"
-    assert calls == [IDS[0]]
+    assert summary["status"] == "incomplete"
+    assert calls == IDS
     assert official == []
     assert summary["instances"][0]["status"] == "ENV_ERROR"
 
@@ -701,8 +702,8 @@ def test_m3_registry_failure_stops_before_acceptance_and_next_instance(
 
     monkeypatch.setattr(m3_batch, "record_attempt_from_ledger", fail_record)
     summary = fixture.make(_success_internal(calls), _success_official([])).run()
-    assert summary["status"] == "stopped"
-    assert calls == [IDS[0]]
+    assert summary["status"] == "incomplete"
+    assert calls == IDS
     assert not (fixture.artifact / "instances" / IDS[0] / "acceptance-m3-test.json").exists()
 
 
@@ -717,9 +718,9 @@ def test_m3_run_id_ambiguity_stops_before_official(fixture: Fixture) -> None:
         return 0
 
     summary = fixture.make(internal, _success_official(official)).run()
-    assert summary["status"] == "stopped"
+    assert summary["status"] == "incomplete"
     assert official == []
-    assert "ambiguous" in summary["stop_reason"]
+    assert "ambiguous" in summary["instances"][0]["stop_reason"]
 
 
 def test_m3_prediction_hash_mismatch_stops_before_official(fixture: Fixture) -> None:
@@ -745,9 +746,9 @@ def test_m3_prediction_hash_mismatch_stops_before_official(fixture: Fixture) -> 
         return 0
 
     summary = fixture.make(internal, _success_official(official)).run()
-    assert summary["status"] == "stopped"
+    assert summary["status"] == "incomplete"
     assert official == []
-    assert "prediction patch bytes" in summary["stop_reason"]
+    assert "prediction patch bytes" in summary["instances"][0]["stop_reason"]
 
 
 def test_m3_duplicate_startup_does_not_dispatch_again(fixture: Fixture) -> None:
@@ -762,7 +763,7 @@ def test_m3_duplicate_startup_does_not_dispatch_again(fixture: Fixture) -> None:
 
 
 def test_m3_budget_shortage_stops_before_internal(tmp_path: Path) -> None:
-    fixture = Fixture(tmp_path, per_instance_new_limit_cny=0.01)
+    fixture = Fixture(tmp_path, batch_new_limit_cny=0.01)
     calls = []
     summary = fixture.make(_success_internal(calls), _success_official([])).run()
     assert summary["status"] == "stopped"
@@ -793,9 +794,9 @@ def test_m3_post_dispatch_interruption_refuses_second_paid_attempt(fixture: Fixt
     _ledger(fixture.artifact / "instances" / IDS[0] / "dispatch-ledger-m3-test-r1.json")
     calls = []
     summary = fixture.make(_success_internal(calls), _success_official([])).run()
-    assert summary["status"] == "stopped"
-    assert calls == []
-    assert "second paid attempt" in summary["stop_reason"]
+    assert summary["status"] == "incomplete"
+    assert calls == IDS[1:]
+    assert "second paid attempt" in summary["instances"][0]["stop_reason"]
 
 
 def test_m3_all_unavailable_preflight_stops_without_dispatch(tmp_path: Path) -> None:
@@ -828,3 +829,75 @@ def test_m3_cancellation_stops_before_next_instance(fixture: Fixture) -> None:
     assert summary["status"] == "stopped"
     assert summary["stop_reason"].startswith("cancelled")
     assert calls == [IDS[0]]
+
+
+def test_workspace_error_continues_and_recovers_without_repaying(fixture: Fixture) -> None:
+    calls: list[str] = []
+
+    def internal(request: m3_batch.InternalRequest) -> int:
+        instance = request.instance["instance_id"]
+        if instance == IDS[0]:
+            raise OSError("workspace mount failed")
+        return _success_internal(calls)(request)
+
+    batch = fixture.make(internal, _success_official([]))
+    first = batch.run()
+    assert calls == IDS[1:]
+    assert not first["instances"][0]["terminal"]
+    assert "OSError: workspace mount failed" in first["instances"][0]["errors"][0]
+    recovered = fixture.make(_success_internal(calls), _success_official([])).run()
+    assert recovered["status"] == "completed"
+    assert calls == [*IDS[1:], IDS[0]]
+
+
+def test_harness_error_recovers_same_candidate_without_model_call(fixture: Fixture) -> None:
+    calls: list[str] = []
+
+    def official(request: m3_batch.OfficialRequest) -> int:
+        if request.instance["instance_id"] == IDS[0]:
+            raise OSError("temporary harness failure")
+        return _success_official([])(request)
+
+    batch = fixture.make(_success_internal(calls), official)
+    first = batch.run()
+    assert calls == IDS
+    assert not first["instances"][0]["terminal"]
+    ledger = next((fixture.artifact / "instances" / IDS[0]).glob("dispatch-ledger-*.json"))
+    frozen_bytes = ledger.read_bytes()
+
+    def forbidden(request: Any) -> int:
+        raise AssertionError("recovery repeated paid inference")
+
+    recovered = fixture.make(forbidden, _success_official([])).run()
+    assert recovered["status"] == "completed"
+    assert ledger.read_bytes() == frozen_bytes
+    assert recovered["cost"]["new_settled_cny"] == pytest.approx(0.06)
+
+
+def test_new_segment_reserves_unknown_in_opening(tmp_path: Path) -> None:
+    fixture = Fixture(tmp_path)
+    source = fixture.root / "history/source.json"
+    _ledger(source, unknown=True)
+    old_bytes = source.read_bytes()
+    manifest = build_multi_source_recovery_manifest(
+        [RecoveryLedgerSource(source, "historical__instance-0")],
+        run_id="new-segment",
+        reason="old process stopped",
+        repo_root=fixture.root,
+    )
+    write_recovery_manifest(manifest, fixture.opening)
+    config = json.loads(fixture.config.read_text())
+    config.update(
+        historical_opening_cny=0.8114688,
+        original_authorization_cny=0.82,
+        batch_new_limit_cny=0.0085312,
+        prior_authorization_sources=[
+            {"path": "history/source.json", "sha256": hashlib.sha256(old_bytes).hexdigest()}
+        ],
+    )
+    _write_json(fixture.config, config)
+    calls: list[str] = []
+    result = fixture.make(_success_internal(calls), _success_official([])).run()
+    assert calls == []
+    assert result["cost"]["prior_authorization_upper_bound_cny"] == pytest.approx(0.8114688)
+    assert source.read_bytes() == old_bytes

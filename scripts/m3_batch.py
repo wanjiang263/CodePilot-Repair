@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
+import traceback
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -45,6 +46,10 @@ TERMINAL = {
 
 class BatchStopError(RuntimeError):
     pass
+
+
+class InstanceError(RuntimeError):
+    """A recoverable failure whose scope is one catalog instance."""
 
 
 @dataclass(frozen=True)
@@ -430,12 +435,14 @@ class M3Batch:
         batch_remaining = float(self.config["batch_new_limit_cny"]) - new_upper
         main_remaining = float(self.config["main_batch_limit_cny"]) - new_upper
         instance_remaining = float(self.config["per_instance_new_limit_cny"]) - instance_upper
-        if min(batch_remaining, main_remaining, instance_remaining) < self.reserve:
+        if min(batch_remaining, main_remaining) < self.reserve:
             raise BatchStopError(
                 f"insufficient pre-dispatch reserve {self.reserve:.8f}: "
                 f"batch={batch_remaining:.8f} main={main_remaining:.8f} "
                 f"instance={instance_remaining:.8f}"
             )
+        if instance_remaining < self.reserve:
+            raise InstanceError(f"instance reserve exhausted: {instance_remaining:.8f}")
         return {
             "batch_remaining": batch_remaining,
             "main_remaining": main_remaining,
@@ -509,7 +516,7 @@ class M3Batch:
                 ),
                 settled_cny=costs["settled"],
                 unknown_reserved_cny=costs["unknown"],
-                terminal=True,
+                terminal=False,
             )
         self._save()
 
@@ -565,15 +572,32 @@ class M3Batch:
                     continue
                 try:
                     self._run_instance(instance, entry)
-                except (BatchStopError, OSError, ValueError) as exc:
-                    if entry["status"] == "PENDING":
-                        entry["status"] = "STOPPED"
+                except BatchStopError as exc:
+                    entry.setdefault("errors", []).append(traceback.format_exc())
                     self._stop(f"{instance_id}: {type(exc).__name__}: {exc}")
                     break
+                except (InstanceError, OSError, ValueError, RuntimeError) as exc:
+                    entry.setdefault("errors", []).append(traceback.format_exc())
+                    entry.update(
+                        status=(
+                            "OFFICIAL_ERROR"
+                            if entry["status"] == "OFFICIAL_PENDING"
+                            else entry["status"]
+                            if entry["status"] != "PENDING"
+                            else "ENV_ERROR"
+                        ),
+                        stop_reason=f"{type(exc).__name__}: {exc}",
+                        terminal=False,
+                    )
+                    self._save()
                 if self.state["status"] == "stopped":
                     break
             else:
-                self.state["status"] = "completed"
+                self.state["status"] = (
+                    "completed"
+                    if all(e["terminal"] for e in self.state["instances"])
+                    else "incomplete"
+                )
                 self._save()
         except KeyboardInterrupt:
             self._stop("cancelled; no later instance was dispatched")
@@ -596,7 +620,8 @@ class M3Batch:
             official_path = root / f"official-evaluation-{self.batch_id}.json"
             request_path = root / f"official-request-{self.batch_id}.json"
             if not official_path.is_file():
-                raise BatchStopError(f"{instance_id}: official record is missing: {official_path}")
+                entry["stop_reason"] = f"official record is missing: {official_path}"
+                continue
             official_result = _read_json(official_path)
             request = _read_json(request_path) if request_path.is_file() else {}
             if request:
@@ -609,10 +634,11 @@ class M3Batch:
                 entry.update(
                     official=str(official_result.get("status") or "ERROR"),
                     status="OFFICIAL_ERROR",
-                    terminal=True,
+                    terminal=False,
                 )
-                self._stop(f"{instance_id}: official record has no valid verdict: {verdict}")
-                return {"ingested": ingested, "summary": self._summary()}
+                entry["stop_reason"] = f"official record has no valid verdict: {verdict}"
+                self._save()
+                continue
             entry["official"] = verdict
             entry["status"] = verdict
             entry["terminal"] = True
@@ -711,7 +737,7 @@ class M3Batch:
             return
         seed_value = self.repo_cache_seeds.get(instance["instance_id"])
         if not seed_value:
-            raise BatchStopError(f"no repo cache seed for {instance['instance_id']}")
+            raise InstanceError(f"no repo cache seed for {instance['instance_id']}")
         from codepilot.repo.workspace import WorkspaceManager
 
         # The internal runner loads the task from the frozen dataset and uses
@@ -729,7 +755,7 @@ class M3Batch:
             seed_root = (self.repo_root / seed_value).resolve()
             children = [path for path in seed_root.iterdir() if path.is_dir()]
             if len(children) != 1:
-                raise BatchStopError(f"seed cache must contain one bare repo: {seed_root}")
+                raise InstanceError(f"seed cache must contain one bare repo: {seed_root}")
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copytree(children[0], target, symlinks=True)
         count = subprocess.run(
@@ -739,7 +765,7 @@ class M3Batch:
             check=False,
         )
         if count.returncode != 0 or count.stdout.strip() != "1":
-            raise BatchStopError(
+            raise InstanceError(
                 f"seeded repo cache is not base-only for {instance['instance_id']}: "
                 f"{count.stdout.strip() or count.stderr.strip()}"
             )
@@ -748,8 +774,10 @@ class M3Batch:
         instance_id = instance["instance_id"]
         root = self.artifact_root / "instances" / instance_id
         root.mkdir(parents=True, exist_ok=True)
-        if (root / "eval").exists():
-            raise BatchStopError(
+        if (root / "eval").exists() and not (
+            root / f"official-request-{self.batch_id}.json"
+        ).is_file():
+            raise InstanceError(
                 "existing eval directory requires explicit recovery; refusing overwrite"
             )
         self._seed_repo_cache(instance)
@@ -762,58 +790,70 @@ class M3Batch:
                 self._save()
                 return
             self._verify_preflight_image(instance_id)
-        budget = self._budget(instance_id)
-        ledgers = self._instance_ledgers(instance_id)
-        totals = [_ledger_totals(path) for path in ledgers]
-        if any(item["frozen"] for item in totals):
-            raise BatchStopError("instance ledger is frozen")
-        if any(item["requests"] > 0 for item in totals):
-            raise BatchStopError(
-                "interrupted instance already dispatched; refusing a second paid attempt"
+        found = acceptance._run_report(root, instance=instance_id, label=self.batch_id, run_id=None)
+        if found is None:
+            budget = self._budget(instance_id)
+            ledgers = self._instance_ledgers(instance_id)
+            totals = [_ledger_totals(path) for path in ledgers]
+            if any(item["frozen"] for item in totals):
+                raise InstanceError("instance ledger is frozen")
+            if any(item["requests"] > 0 for item in totals):
+                raise InstanceError(
+                    "interrupted instance already dispatched; refusing a second paid attempt"
+                )
+            resume = bool(totals)
+            sequence = len(totals) + 1
+            ledger = root / f"dispatch-ledger-{self.batch_id}-r{sequence}.json"
+            if ledger.exists():
+                raise InstanceError(f"ledger already exists: {ledger}")
+            opening = instance_opening_cny(
+                self.opening_manifest, instance_id, repo_root=self.repo_root
             )
-        resume = bool(totals)
-        sequence = len(totals) + 1
-        ledger = root / f"dispatch-ledger-{self.batch_id}-r{sequence}.json"
-        if ledger.exists():
-            raise BatchStopError(f"ledger already exists: {ledger}")
-        opening = instance_opening_cny(self.opening_manifest, instance_id, repo_root=self.repo_root)
-        run_code = self.internal_runner(
-            InternalRequest(
-                instance=instance,
-                root=root,
+            run_code = self.internal_runner(
+                InternalRequest(
+                    instance=instance,
+                    root=root,
+                    ledger=ledger,
+                    resume=resume,
+                    budget_limit=budget["allowed"],
+                    instance_opening=opening,
+                    manifest=self.manifest_path,
+                    manifest_sha256=self.manifest_sha256,
+                )
+            )
+            current = _ledger_totals(ledger) if ledger.is_file() else None
+            attempt_status = (
+                "stopped"
+                if current and current["frozen"]
+                else "not_dispatched"
+                if current is None or not current["requests"]
+                else "completed"
+                if run_code == 0
+                else "invalid"
+            )
+            record_attempt_from_ledger(
+                self.registry_path,
+                attempt_label=self.batch_id,
+                instance_id=instance_id,
+                artifact_root=root,
                 ledger=ledger,
-                resume=resume,
-                budget_limit=budget["allowed"],
-                instance_opening=opening,
-                manifest=self.manifest_path,
-                manifest_sha256=self.manifest_sha256,
+                status=attempt_status,
+                repo_root=self.repo_root,
             )
-        )
-        current = _ledger_totals(ledger) if ledger.is_file() else None
-        attempt_status = (
-            "stopped"
-            if current and current["frozen"]
-            else "not_dispatched"
-            if current is None or not current["requests"]
-            else "completed"
-            if run_code == 0
-            else "invalid"
-        )
-        record_attempt_from_ledger(
-            self.registry_path,
-            attempt_label=self.batch_id,
-            instance_id=instance_id,
-            artifact_root=root,
-            ledger=ledger,
-            status=attempt_status,
-            repo_root=self.repo_root,
-        )
-        if current is not None:
-            entry["settled_cny"] = current["settled"]
-            entry["unknown_reserved_cny"] = current["unknown"]
-        if current is not None and current["frozen"]:
-            raise BatchStopError("unknown usage/cost; ledger frozen after registry recording")
-        self._budget(instance_id)
+            if current is not None:
+                entry["settled_cny"] = current["settled"]
+                entry["unknown_reserved_cny"] = current["unknown"]
+            if current is not None and current["frozen"]:
+                raise BatchStopError("unknown usage/cost; ledger frozen after registry recording")
+        else:
+            ledgers = self._instance_ledgers(instance_id)
+            if not ledgers:
+                raise InstanceError("existing run has no source ledger")
+            ledger = ledgers[-1]
+            current = _ledger_totals(ledger)
+            if current["frozen"]:
+                raise InstanceError("existing run source ledger is frozen")
+            run_code = 0
         found = acceptance._run_report(root, instance=instance_id, label=self.batch_id, run_id=None)
         if found is None:
             dispatched = bool(current and current["requests"])
@@ -829,7 +869,7 @@ class M3Batch:
             entry["official"] = "NOT_EVALUATED"
             entry["terminal"] = True
             self._save()
-            raise BatchStopError("internal execution ended without a unique run report")
+            raise InstanceError("internal execution ended without a unique run report")
         _report_path, run = found
         run_id = str(run["run_id"])
         entry["run_id"] = run_id
@@ -851,7 +891,7 @@ class M3Batch:
                 repo_root=self.repo_root,
             )
             self._save()
-            raise BatchStopError(f"infrastructure failure in inner run: {run.get('status')}")
+            raise InstanceError(f"infrastructure failure in inner run: {run.get('status')}")
         budget_report = run
         if not isinstance(run.get("budget"), dict):
             budget_report = acceptance._root_report(root, run_id)
@@ -873,7 +913,7 @@ class M3Batch:
                 entry["status"] = "ENV_ERROR"
                 entry["terminal"] = True
                 self._save()
-                raise BatchStopError(f"infrastructure failure: {root_status}")
+                raise InstanceError(f"infrastructure failure: {root_status}")
             if closure.get("patch_present"):
                 from codepilot.eval.candidate import prepare_candidate
 
@@ -907,7 +947,9 @@ class M3Batch:
                 or (root_report.get("runtime") or {}).get("model_identity")
             )
             if model != self.model:
-                raise BatchStopError("prediction model identity does not match frozen configuration")
+                raise BatchStopError(
+                    "prediction model identity does not match frozen configuration"
+                )
             evidence = result["evidence"]
             official._verify_prediction(
                 root,
@@ -917,41 +959,39 @@ class M3Batch:
                 expected_patch_sha256=str(evidence["delivered_patch_sha256"]),
                 expected_model=str(model),
             )
+        _write_json(
+            root / f"official-request-{self.batch_id}.json",
+            {
+                "schema_version": 1,
+                "batch_id": self.batch_id,
+                "instance_id": instance_id,
+                "run_id": run_id,
+                "prediction_sha256": evidence["prediction_sha256"],
+                "delivered_patch_sha256": evidence["delivered_patch_sha256"],
+                "model": model,
+                "candidate_receipt": (
+                    candidate_receipt.relative_to(self.repo_root).as_posix()
+                    if candidate_receipt is not None
+                    else None
+                ),
+                "status": "PENDING_EXTERNAL_WSL",
+                "created_at": _now(),
+            },
+        )
+        entry["status"] = "OFFICIAL_PENDING"
+        entry["official"] = "NOT_EVALUATED"
+        entry["terminal"] = False
+        self._save()
         if self.config.get("official_mode") == "external":
-            _write_json(
-                root / f"official-request-{self.batch_id}.json",
-                {
-                    "schema_version": 1,
-                    "batch_id": self.batch_id,
-                    "instance_id": instance_id,
-                    "run_id": run_id,
-                    "prediction_sha256": evidence["prediction_sha256"],
-                    "delivered_patch_sha256": evidence["delivered_patch_sha256"],
-                    "model": model,
-                    "candidate_receipt": (
-                        candidate_receipt.relative_to(self.repo_root).as_posix()
-                        if candidate_receipt is not None
-                        else None
-                    ),
-                    "status": "PENDING_EXTERNAL_WSL",
-                    "created_at": _now(),
-                },
-            )
-            entry["status"] = "OFFICIAL_PENDING"
-            entry["official"] = "NOT_EVALUATED"
-            entry["terminal"] = False
-            self._save()
-            raise BatchStopError(
-                "external official harness required; batch paused before any later instance"
-            )
+            return
         official_code = self.official_runner(
             OfficialRequest(instance, root, run_id, candidate_receipt)
         )
         official_path = root / f"official-evaluation-{self.batch_id}.json"
         if not official_path.is_file():
-            entry.update(status="OFFICIAL_ERROR", official="ERROR", terminal=True)
+            entry.update(status="OFFICIAL_ERROR", official="ERROR", terminal=False)
             self._save()
-            raise BatchStopError("official runner returned without an evaluation record")
+            raise InstanceError("official runner returned without an evaluation record")
         official_result = _read_json(official_path)
         verdict = str(official_result.get("official_verdict") or "NOT_EVALUATED")
         entry["official"] = verdict
@@ -959,7 +999,7 @@ class M3Batch:
         entry["terminal"] = True
         self._save()
         if official_code != 0 or verdict not in {"RESOLVED", "UNRESOLVED"}:
-            raise BatchStopError(f"official evaluation did not produce a verdict: {verdict}")
+            raise InstanceError(f"official evaluation did not produce a verdict: {verdict}")
 
     def _internal_command(self, request: InternalRequest) -> tuple[list[str], dict[str, str]]:
         instance = request.instance
