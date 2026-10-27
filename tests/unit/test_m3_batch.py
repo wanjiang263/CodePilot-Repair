@@ -901,3 +901,44 @@ def test_new_segment_reserves_unknown_in_opening(tmp_path: Path) -> None:
     assert calls == []
     assert result["cost"]["prior_authorization_upper_bound_cny"] == pytest.approx(0.8114688)
     assert source.read_bytes() == old_bytes
+
+
+def test_completed_report_with_existing_eval_recovers_and_keeps_instance_cost(
+    fixture: Fixture,
+) -> None:
+    calls: list[str] = []
+    batch = fixture.make(_success_internal(calls), _success_official([]))
+    case = batch.artifact_root / "instances" / IDS[0]
+    _ledger(case / "dispatch-ledger-m3-test-r1.json", cost=0.03)
+    _report(case, fixture.batch, IDS[0])
+    sentinel = case / "eval" / "previous-harness-log"
+    sentinel.parent.mkdir()
+    sentinel.write_text("keep original evidence")
+    result = batch.run()
+    assert calls == IDS[1:]
+    assert result["instances"][0]["official"] == "RESOLVED"
+    assert result["instances"][0]["settled_cny"] == pytest.approx(0.03)
+    assert sentinel.read_text() == "keep original evidence"
+
+
+def test_per_run_image_override_is_frozen_and_forwarded(tmp_path: Path) -> None:
+    images = tmp_path / "images.json"
+    _write_json(images, {"schema_version": 1, "overrides": []})
+    fixture = Fixture(tmp_path, image_overrides=str(images))
+    batch = fixture.make()
+    assert batch.freeze["image_overrides_sha256"] == hashlib.sha256(images.read_bytes()).hexdigest()
+    req = m3_batch.InternalRequest(
+        batch.instances[0],
+        tmp_path / "run",
+        tmp_path / "ledger.json",
+        False,
+        2,
+        0,
+        fixture.opening,
+        "a" * 64,
+    )
+    command, _ = batch._internal_command(req)
+    assert command[command.index("--image-overrides") + 1] == str(images)
+    _write_json(images, {"schema_version": 1, "overrides": [{"changed": True}]})
+    with pytest.raises(m3_batch.BatchStopError, match="image_overrides_sha256"):
+        fixture.make()

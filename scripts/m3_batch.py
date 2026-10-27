@@ -247,6 +247,17 @@ class M3Batch:
                 )
             if self.catalog_runner_kinds and (overrides.kinds() != self.catalog_runner_kinds):
                 raise BatchStopError("catalog runner kinds do not match the frozen overrides")
+        image_value = self.config.get("image_overrides")
+        image_default = self.repo_root / "configs/swebench/instance-image-overrides.json"
+        self.image_overrides_path = (
+            self._absolute(Path(str(image_value)))
+            if image_value
+            else image_default
+            if image_default.is_file()
+            else None
+        )
+        if self.image_overrides_path is not None and not self.image_overrides_path.is_file():
+            raise BatchStopError("image overrides file is missing")
         seeds_value = self.config.get("repo_cache_seeds")
         self.repo_cache_seeds_path = self._absolute(Path(str(seeds_value))) if seeds_value else None
         self.repo_cache_seeds: dict[str, str] = {}
@@ -329,6 +340,9 @@ class M3Batch:
                 str(self.runner_overrides_path) if self.runner_overrides_path else None
             ),
             "runner_overrides_sha256": self.runner_overrides_sha256,
+            "image_overrides_sha256": (
+                _sha256(self.image_overrides_path) if self.image_overrides_path else None
+            ),
             "runner_kinds": self.runner_overrides.kinds() if self.runner_overrides else {},
             "repo_cache_seeds": (
                 str(self.repo_cache_seeds_path) if self.repo_cache_seeds_path else None
@@ -354,6 +368,7 @@ class M3Batch:
                 "limits",
                 "llm_config_sha256",
                 "runner_overrides_sha256",
+                "image_overrides_sha256",
                 "repo_cache_seeds_sha256",
             ):
                 if previous.get(key) != freeze[key]:
@@ -509,7 +524,13 @@ class M3Batch:
                 continue
             costs = self._costs(entry["instance_id"])
             entry.update(
-                status="DISPATCHED_STOPPED" if costs["requests"] else "NOT_DISPATCHED",
+                status=(
+                    entry["status"]
+                    if entry["status"] in {"ENV_ERROR", "OFFICIAL_ERROR"}
+                    else "DISPATCHED_STOPPED"
+                    if costs["requests"]
+                    else "NOT_DISPATCHED"
+                ),
                 internal=("PROVIDER_USAGE_UNCERTAIN" if costs["frozen"] else entry["internal"]),
                 stop_reason=(
                     "BLOCKED_BY_FROZEN_LEDGER" if frozen and not costs["requests"] else reason
@@ -774,9 +795,14 @@ class M3Batch:
         instance_id = instance["instance_id"]
         root = self.artifact_root / "instances" / instance_id
         root.mkdir(parents=True, exist_ok=True)
-        if (root / "eval").exists() and not (
-            root / f"official-request-{self.batch_id}.json"
-        ).is_file():
+        existing = acceptance._run_report(
+            root, instance=instance_id, label=self.batch_id, run_id=None
+        )
+        if (
+            (root / "eval").exists()
+            and existing is None
+            and not (root / f"official-request-{self.batch_id}.json").is_file()
+        ):
             raise InstanceError(
                 "existing eval directory requires explicit recovery; refusing overwrite"
             )
@@ -854,6 +880,8 @@ class M3Batch:
             if current["frozen"]:
                 raise InstanceError("existing run source ledger is frozen")
             run_code = 0
+        costs = self._costs(instance_id)
+        entry.update(settled_cny=costs["settled"], unknown_reserved_cny=costs["unknown"])
         found = acceptance._run_report(root, instance=instance_id, label=self.batch_id, run_id=None)
         if found is None:
             dispatched = bool(current and current["requests"])
@@ -1091,9 +1119,8 @@ class M3Batch:
         ]
         if self.runner_overrides_path is not None:
             command.extend(["--runner-overrides", str(self.runner_overrides_path)])
-        overrides = self.repo_root / "configs/swebench/instance-image-overrides.json"
-        if overrides.is_file():
-            command.extend(["--image-overrides", str(overrides)])
+        if self.image_overrides_path is not None:
+            command.extend(["--image-overrides", str(self.image_overrides_path)])
         if request.resume:
             command.extend(["--resume", "task"])
         return command, env
