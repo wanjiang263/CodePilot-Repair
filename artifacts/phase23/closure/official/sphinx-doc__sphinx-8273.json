@@ -1,0 +1,98 @@
+{
+  "schema_version": 3,
+  "instance_id": "sphinx-doc__sphinx-8273",
+  "run_id": "phase23-sphinx-doc__sphinx-8273-s2",
+  "patch_sha256": "2c6109e54b73f470677a9bd1c4e4ff9289cc1d691ce45b05ffc870bf155abcea",
+  "candidate_receipt": "artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/official-candidate.json",
+  "internal_status": "succeeded",
+  "official_verdict": "UNRESOLVED",
+  "official": {
+    "run_id": "phase23-sphinx-doc__sphinx-8273-s2",
+    "command": {
+      "argv": [
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/.venv-swebench-linux/bin/python",
+        "-m",
+        "swebench.harness.run_evaluation",
+        "-d",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/test.jsonl",
+        "-s",
+        "test",
+        "-i",
+        "sphinx-doc__sphinx-8273",
+        "-p",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/official-prediction.jsonl",
+        "-id",
+        "phase23-sphinx-doc__sphinx-8273-s2",
+        "--max_workers",
+        "1",
+        "-t",
+        "1800",
+        "--report_dir",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/official-report",
+        "-n",
+        "swebench",
+        "--cache_level",
+        "instance"
+      ],
+      "cwd": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/official-report",
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONUTF8": "1"
+      },
+      "expected_report": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/official-report/glm-5.3-flash-main.phase23-sphinx-doc__sphinx-8273-s2.json"
+    },
+    "decision": "EXECUTED",
+    "exit_code": 0,
+    "timed_out": false,
+    "runtime_seconds": 173.2912221759907,
+    "error_kind": null,
+    "error_detail": null,
+    "reused": false,
+    "reused_reason": "报告不存在，执行官方 harness",
+    "warnings": [],
+    "verdicts": [
+      {
+        "instance_id": "sphinx-doc__sphinx-8273",
+        "verdict": "UNRESOLVED",
+        "resolved": false,
+        "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/official-report/glm-5.3-flash-main.phase23-sphinx-doc__sphinx-8273-s2.json",
+        "report_sha256": "485a7c7c0a51e58f978a9d2ecfc4d9b8f984d06c5740b5988d299625d24595b8",
+        "error_kind": null,
+        "error_detail": null,
+        "runtime_seconds": 173.2912221759907
+      }
+    ],
+    "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/official-report/glm-5.3-flash-main.phase23-sphinx-doc__sphinx-8273-s2.json",
+    "report_sha256": "485a7c7c0a51e58f978a9d2ecfc4d9b8f984d06c5740b5988d299625d24595b8",
+    "report": {
+      "schema_version": 2,
+      "total_instances": 1,
+      "submitted_instances": 1,
+      "completed_instances": 1,
+      "resolved_instances": 0,
+      "unresolved_instances": 1,
+      "empty_patch_instances": 0,
+      "error_instances": 0,
+      "completed_ids": [
+        "sphinx-doc__sphinx-8273"
+      ],
+      "incomplete_ids": [],
+      "empty_patch_ids": [],
+      "submitted_ids": [
+        "sphinx-doc__sphinx-8273"
+      ],
+      "resolved_ids": [],
+      "unresolved_ids": [
+        "sphinx-doc__sphinx-8273"
+      ],
+      "error_ids": [],
+      "unstopped_instances": null,
+      "unstopped_containers": [],
+      "unremoved_images": [],
+      "source_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/official-report/glm-5.3-flash-main.phase23-sphinx-doc__sphinx-8273-s2.json",
+      "source_sha256": "485a7c7c0a51e58f978a9d2ecfc4d9b8f984d06c5740b5988d299625d24595b8"
+    },
+    "counts_toward_resolved_rate": true
+  }
+}

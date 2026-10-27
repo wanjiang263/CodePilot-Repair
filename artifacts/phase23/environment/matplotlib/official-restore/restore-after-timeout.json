@@ -1,0 +1,64 @@
+{
+  "expected_image_id": "sha256:5a237c238da682b5203cd965183e00dd6fdbe9a0844c492f503a42f12a25f1ca",
+  "actual_image_id": "sha256:5a237c238da682b5203cd965183e00dd6fdbe9a0844c492f503a42f12a25f1ca",
+  "manifest_and_all_blob_hashes_verified": true,
+  "blobs": [
+    {
+      "mediaType": "application/vnd.oci.image.config.v1+json",
+      "digest": "sha256:c8ba332ecbc176982c4b2df89690be4961199029a5227e8e5122329b1879a1ae",
+      "size": 4211
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:39a945af8df2ad9343f141c82355d3f2c4b576d432eda34c460d630607462b60",
+      "size": 29736517
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:a4d326e88417b9b4a3363dfabc9de79b87be8ce1cba4f09c1893df8147cbe669",
+      "size": 210294821
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:fd7a87c0b95ba9470ab5b292bee0cde8f8f4b91a5c9755052c1b36b06f71c7d3",
+      "size": 420167964
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:d07e7f5cb3eb9bc05af4042e06ff23bc67fd825fe4615d36a7c1cfbe561c80f4",
+      "size": 21559
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:3d473160e8e53b487164b03e8f911a724fd2b97c2c7f5aeaf5ee89adfb8517e4",
+      "size": 163
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:6a99d82d9a891196945ba11ebc320a1bf85bfc1187b4e4d4cfe4154b5644e3de",
+      "size": 4308
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:f9d5bbd2637c045c14d708575de3b6c446c51d5bd20b74d82758d88ead7214a5",
+      "size": 558178370
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:21990763c318543cc4202c07202f969a57d4fdfa70809006edab3dcabee25f97",
+      "size": 189
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:05e2bb8bf1570173e21d797d110c7b46a0ebb9aa7af161a6c898c57936b054f7",
+      "size": 975341636
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+      "size": 32
+    }
+  ],
+  "load_response": "SDK read timed out; independent inspection found the correct tagged image. Runtime usability is verified separately by the recovered Graph.",
+  "model_requests": 0
+}

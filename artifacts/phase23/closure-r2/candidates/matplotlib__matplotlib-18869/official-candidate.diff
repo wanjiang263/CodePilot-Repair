@@ -1,0 +1,39 @@
+diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py
+index b657a35..f9f42df 100644
+--- a/lib/matplotlib/__init__.py
++++ b/lib/matplotlib/__init__.py
+@@ -130,6 +130,10 @@ __bibtex__ = r"""@Article{Hunter:2007,
+ }"""
+ 
+ 
++_version_info = namedtuple(
++    "_version_info", "major minor micro release release_serial")
++
++
+ def __getattr__(name):
+     if name == "__version__":
+         import setuptools_scm
+@@ -148,6 +152,23 @@ def __getattr__(name):
+         else:  # Get the version from the _version.py setuptools_scm file.
+             __version__ = _version.version
+         return __version__
++    elif name == "__version_info__":
++        import re
++        version = __getattr__("__version__")
++        match = re.match(
++            r"(\d+)\.(\d+)(?:\.(\d+))?((?:a|b|rc)\d+)?(?:\+.*)?", version)
++        if match is None:  # e.g. a non-standard or dev version; fall back.
++            return _version_info(0, 0, 0, "unknown", version)
++        major, minor, micro, release = match.groups()
++        micro = micro or 0
++        if release is None:
++            release, release_serial = "final", 0
++        else:
++            release, release_serial = release[:2].strip("0123456789"), release[2:]
++            release = {"a": "alpha", "b": "beta", "rc": "candidate"}[release]
++            release_serial = int(release_serial or 0)
++        return _version_info(int(major), int(minor), int(micro),
++                             release, release_serial)
+     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+ 
+ 

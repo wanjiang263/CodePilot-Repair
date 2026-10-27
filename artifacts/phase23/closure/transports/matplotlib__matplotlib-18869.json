@@ -1,0 +1,92 @@
+[
+  {
+    "role": "localizer",
+    "model": "glm-5.3-flash",
+    "alias": "glm-5.3-flash-main",
+    "temperature": 0.0,
+    "supports_temperature": true,
+    "timeout": {
+      "connect": 10.0,
+      "read": 120.0,
+      "write": 30.0,
+      "pool": 10.0
+    },
+    "trust_env": false,
+    "retries": 0
+  },
+  {
+    "role": "planner",
+    "model": "glm-5.3-flash",
+    "alias": "glm-5.3-flash-main",
+    "temperature": 0.0,
+    "supports_temperature": true,
+    "timeout": {
+      "connect": 10.0,
+      "read": 120.0,
+      "write": 30.0,
+      "pool": 10.0
+    },
+    "trust_env": false,
+    "retries": 0
+  },
+  {
+    "role": "coder",
+    "model": "glm-5.3-flash",
+    "alias": "glm-5.3-flash-main",
+    "temperature": 0.0,
+    "supports_temperature": true,
+    "timeout": {
+      "connect": 10.0,
+      "read": 120.0,
+      "write": 30.0,
+      "pool": 10.0
+    },
+    "trust_env": false,
+    "retries": 0
+  },
+  {
+    "role": "reproducer",
+    "model": "glm-5.3-flash",
+    "alias": "glm-5.3-flash-main",
+    "temperature": 0.0,
+    "supports_temperature": true,
+    "timeout": {
+      "connect": 10.0,
+      "read": 120.0,
+      "write": 30.0,
+      "pool": 10.0
+    },
+    "trust_env": false,
+    "retries": 0
+  },
+  {
+    "role": "diagnoser",
+    "model": "glm-5.3-flash",
+    "alias": "glm-5.3-flash-main",
+    "temperature": 0.0,
+    "supports_temperature": true,
+    "timeout": {
+      "connect": 10.0,
+      "read": 120.0,
+      "write": 30.0,
+      "pool": 10.0
+    },
+    "trust_env": false,
+    "retries": 0
+  },
+  {
+    "role": "reviewer",
+    "model": "glm-5.3-flash",
+    "alias": "glm-5.3-flash-main",
+    "temperature": 0.0,
+    "supports_temperature": true,
+    "timeout": {
+      "connect": 10.0,
+      "read": 120.0,
+      "write": 30.0,
+      "pool": 10.0
+    },
+    "trust_env": false,
+    "retries": 0
+  }
+]

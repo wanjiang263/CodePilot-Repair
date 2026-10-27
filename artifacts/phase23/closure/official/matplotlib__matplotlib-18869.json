@@ -1,0 +1,98 @@
+{
+  "schema_version": 3,
+  "instance_id": "matplotlib__matplotlib-18869",
+  "run_id": "phase23-matplotlib__matplotlib-18869-s1",
+  "patch_sha256": "56177b1f36f7282dcbb8b1588ffa2d9f701a5b7eb75ad97df4bd40ea50adf29e",
+  "candidate_receipt": "artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/official-candidate.json",
+  "internal_status": "succeeded",
+  "official_verdict": "UNRESOLVED",
+  "official": {
+    "run_id": "phase23-matplotlib__matplotlib-18869-s1",
+    "command": {
+      "argv": [
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/.venv-swebench-linux/bin/python",
+        "-m",
+        "swebench.harness.run_evaluation",
+        "-d",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/test.jsonl",
+        "-s",
+        "test",
+        "-i",
+        "matplotlib__matplotlib-18869",
+        "-p",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/official-prediction.jsonl",
+        "-id",
+        "phase23-matplotlib__matplotlib-18869-s1",
+        "--max_workers",
+        "1",
+        "-t",
+        "1800",
+        "--report_dir",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/official-report",
+        "-n",
+        "swebench",
+        "--cache_level",
+        "instance"
+      ],
+      "cwd": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/official-report",
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONUTF8": "1"
+      },
+      "expected_report": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/official-report/glm-5.3-flash-main.phase23-matplotlib__matplotlib-18869-s1.json"
+    },
+    "decision": "EXECUTED",
+    "exit_code": 0,
+    "timed_out": false,
+    "runtime_seconds": 291.42781563200697,
+    "error_kind": null,
+    "error_detail": null,
+    "reused": false,
+    "reused_reason": "报告不存在，执行官方 harness",
+    "warnings": [],
+    "verdicts": [
+      {
+        "instance_id": "matplotlib__matplotlib-18869",
+        "verdict": "UNRESOLVED",
+        "resolved": false,
+        "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/official-report/glm-5.3-flash-main.phase23-matplotlib__matplotlib-18869-s1.json",
+        "report_sha256": "5fd19582270c4ea0096e446c884fd6e6872cdbe71664b8ba7835a2c161451e40",
+        "error_kind": null,
+        "error_detail": null,
+        "runtime_seconds": 291.42781563200697
+      }
+    ],
+    "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/official-report/glm-5.3-flash-main.phase23-matplotlib__matplotlib-18869-s1.json",
+    "report_sha256": "5fd19582270c4ea0096e446c884fd6e6872cdbe71664b8ba7835a2c161451e40",
+    "report": {
+      "schema_version": 2,
+      "total_instances": 1,
+      "submitted_instances": 1,
+      "completed_instances": 1,
+      "resolved_instances": 0,
+      "unresolved_instances": 1,
+      "empty_patch_instances": 0,
+      "error_instances": 0,
+      "completed_ids": [
+        "matplotlib__matplotlib-18869"
+      ],
+      "incomplete_ids": [],
+      "empty_patch_ids": [],
+      "submitted_ids": [
+        "matplotlib__matplotlib-18869"
+      ],
+      "resolved_ids": [],
+      "unresolved_ids": [
+        "matplotlib__matplotlib-18869"
+      ],
+      "error_ids": [],
+      "unstopped_instances": null,
+      "unstopped_containers": [],
+      "unremoved_images": [],
+      "source_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/official-report/glm-5.3-flash-main.phase23-matplotlib__matplotlib-18869-s1.json",
+      "source_sha256": "5fd19582270c4ea0096e446c884fd6e6872cdbe71664b8ba7835a2c161451e40"
+    },
+    "counts_toward_resolved_rate": true
+  }
+}

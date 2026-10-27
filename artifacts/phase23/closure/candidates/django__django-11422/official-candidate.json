@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "instance_id": "django__django-11422",
+  "base_commit": "df46b329e0900e9e4dc1d60816c1dce6dfc1094e",
+  "run_id": "phase23-django__django-11422-s3",
+  "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+  "inference_finished": true,
+  "internal_status": "succeeded",
+  "internal_stop_reason": null,
+  "patch": "artifacts/phase23/instances/django__django-11422/segment-3/runs/phase23-django__django-11422-s3/official-candidate.diff",
+  "patch_sha256": "9cae77deaf9f9cbc42b493f6cd38dd4e36f9c2ea849ce4848ece8b28738cd9d1",
+  "canonical_patch_sha256": "8636c1304452c41cf3cb0fb681fa99751dd887eff18dfb9dc5affb9d5127c4fc",
+  "prediction": "artifacts/phase23/instances/django__django-11422/segment-3/runs/phase23-django__django-11422-s3/official-prediction.jsonl",
+  "prediction_sha256": "db6860767a9d2e31cc34fb5789094d3785f62f2a4fb3f1f43f0a59cd401c1785",
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "path",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "size",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "non_empty",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "test_protection",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "syntax",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "cheat",
+        "passed": true,
+        "reason": null
+      }
+    ],
+    "cheat_findings": [],
+    "warnings": [],
+    "errors": [],
+    "files_changed": 1,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "risk": "low",
+    "evidence": []
+  },
+  "provenance": [
+    {
+      "path": "artifacts/phase23/instances/django__django-11422/segment-3/runs/phase23-django__django-11422-s3/state_final.json",
+      "sha256": "02dd2ef11745be0a6f594ec847d6a1ecb3c7d30f03939afe7627fa2b0b10187a"
+    },
+    {
+      "path": "artifacts/phase23/instances/django__django-11422/segment-3/dispatch-ledger.json",
+      "sha256": "bbba31ad0a5b4e95ddacc0c66f35fb857e24c4f4f0fa0e604134395e2e3d437f"
+    },
+    {
+      "path": "artifacts/phase23/instances/django__django-11422/segment-3/runs/phase23-django__django-11422-s3/stage-recovery.json",
+      "sha256": "2a2d03d80b3ac72774d61f2ee3b5dc678c8af7afea1f9fecd3428e5393533c71"
+    }
+  ]
+}

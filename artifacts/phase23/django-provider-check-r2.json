@@ -1,0 +1,21 @@
+{
+  "time": "2026-10-27T04:02:42.916809+00:00",
+  "checks": [
+    {
+      "method": "HEAD",
+      "path": "/chat/completions",
+      "http_status": 200,
+      "content_type": "application/json; charset=UTF-8",
+      "inference_body_sent": false
+    },
+    {
+      "method": "GET",
+      "path": "/models",
+      "http_status": 200,
+      "content_type": "application/json;charset=UTF-8",
+      "inference_body_sent": false
+    }
+  ],
+  "model_requests": 0,
+  "frozen_request_not_replayed": true
+}

@@ -1,0 +1,78 @@
+{
+  "repository": "swebench/sweb.eval.x86_64.django_1776_django-11422",
+  "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-11422:latest",
+  "expected_image_id": "sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+  "actual_image_id": "sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+  "reuse_image": "phase23/django-11422:repro-pytest701",
+  "reuse_image_id": "sha256:8b5c6876eee65e8d6fda099c1b16f1d59b3d13cff650879675496534b4258a3d",
+  "local_blob_count": 13,
+  "required_blobs": [
+    {
+      "digest": "sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3",
+      "bytes": 856
+    },
+    {
+      "digest": "sha256:d6f7c32ac90b7f77fd424f682d87c2f4a5392135c2cc9ffe46f1b8a3b94e4d16",
+      "bytes": 2199
+    },
+    {
+      "digest": "sha256:315fcde57f6ee1cbfa1ee37d8badb3b4e7e667cc0c95cde690d55a6c26145f36",
+      "bytes": 4213
+    },
+    {
+      "digest": "sha256:39a945af8df2ad9343f141c82355d3f2c4b576d432eda34c460d630607462b60",
+      "bytes": 29736517
+    },
+    {
+      "digest": "sha256:04ee7177d8211022c23e0a3b8a7d2b74f67f43dc4c2694f405ca484a06c40219",
+      "bytes": 210296535
+    },
+    {
+      "digest": "sha256:f03f14b9ae4ba4d73824ab87fea1d0e67aaf7bc9250481afb6273e5bdb8a28f6",
+      "bytes": 420170848
+    },
+    {
+      "digest": "sha256:76b1eeaacb7232e155834bc33491965bd896c5e084ba238d8e18bb401e21e0aa",
+      "bytes": 21563
+    },
+    {
+      "digest": "sha256:ea413da44051f7b039ec7dda8a0f1b61ee9d466883e11ccf2e9c806b3dca6f03",
+      "bytes": 165
+    },
+    {
+      "digest": "sha256:4fe6837cb80793b843948490200f687280383053ba68927cb219687c5402dd0f",
+      "bytes": 4319
+    },
+    {
+      "digest": "sha256:5e63a68ff6439b1581ee5ba0e3757810d61d5ad007e8033b5b5987df410e9537",
+      "bytes": 402244166
+    },
+    {
+      "digest": "sha256:728b7797b7f003f3c0ed4b9335c95cec15e142d6ac40980c73592dd9b2e53c19",
+      "bytes": 191
+    },
+    {
+      "digest": "sha256:1a247112dc54f365c64c93eb8c74f5c5fb18c0cbb1c851251a585f1666a7a61a",
+      "bytes": 90504372
+    },
+    {
+      "digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+      "bytes": 32
+    },
+    {
+      "digest": "sha256:991071544533cfaf3ace15edad4d88e83181b7e5e53338e673c725e836fc4f07",
+      "bytes": 564
+    },
+    {
+      "digest": "sha256:f16118030dee6a82bf2299ac72603990b0e0d160bc7580e1f91297d82ded0fcf",
+      "bytes": 167
+    },
+    {
+      "digest": "sha256:3ac3b45cb50b31692294996c83ef122894328e31f487caf32f3df0c6608cb8f7",
+      "bytes": 1350
+    }
+  ],
+  "archive_sha256": "sha256:67c15b36728aa19ddffa48cc588693f63352c84f52b9bbbdc8d81d79a134951b",
+  "source": "Official Docker Hub only; anonymous registry token never persisted",
+  "model_requests": 0
+}

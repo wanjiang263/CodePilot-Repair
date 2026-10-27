@@ -1,0 +1,98 @@
+{
+  "schema_version": 3,
+  "instance_id": "sympy__sympy-22714",
+  "run_id": "phase23-sympy__sympy-22714-s4",
+  "patch_sha256": "e8b47b687fbe1c43e7fb4ac143afd187467c4fe9f1b18bef73c0179ff797ec5b",
+  "candidate_receipt": "artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/official-candidate.json",
+  "internal_status": "succeeded",
+  "official_verdict": "RESOLVED",
+  "official": {
+    "run_id": "phase23-sympy__sympy-22714-s4",
+    "command": {
+      "argv": [
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/.venv-swebench-linux/bin/python",
+        "-m",
+        "swebench.harness.run_evaluation",
+        "-d",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/test.jsonl",
+        "-s",
+        "test",
+        "-i",
+        "sympy__sympy-22714",
+        "-p",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/official-prediction.jsonl",
+        "-id",
+        "phase23-sympy__sympy-22714-s4",
+        "--max_workers",
+        "1",
+        "-t",
+        "1800",
+        "--report_dir",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/official-report",
+        "-n",
+        "swebench",
+        "--cache_level",
+        "instance"
+      ],
+      "cwd": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/official-report",
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONUTF8": "1"
+      },
+      "expected_report": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/official-report/glm-5.3-flash-main.phase23-sympy__sympy-22714-s4.json"
+    },
+    "decision": "EXECUTED",
+    "exit_code": 0,
+    "timed_out": false,
+    "runtime_seconds": 193.44213402699097,
+    "error_kind": null,
+    "error_detail": null,
+    "reused": false,
+    "reused_reason": "报告不存在，执行官方 harness",
+    "warnings": [],
+    "verdicts": [
+      {
+        "instance_id": "sympy__sympy-22714",
+        "verdict": "RESOLVED",
+        "resolved": true,
+        "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/official-report/glm-5.3-flash-main.phase23-sympy__sympy-22714-s4.json",
+        "report_sha256": "0df57db6ef0ee5df9bb10a02cf3da860ba697db48a229f2ada591c48ef8b9c10",
+        "error_kind": null,
+        "error_detail": null,
+        "runtime_seconds": 193.44213402699097
+      }
+    ],
+    "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/official-report/glm-5.3-flash-main.phase23-sympy__sympy-22714-s4.json",
+    "report_sha256": "0df57db6ef0ee5df9bb10a02cf3da860ba697db48a229f2ada591c48ef8b9c10",
+    "report": {
+      "schema_version": 2,
+      "total_instances": 1,
+      "submitted_instances": 1,
+      "completed_instances": 1,
+      "resolved_instances": 1,
+      "unresolved_instances": 0,
+      "empty_patch_instances": 0,
+      "error_instances": 0,
+      "completed_ids": [
+        "sympy__sympy-22714"
+      ],
+      "incomplete_ids": [],
+      "empty_patch_ids": [],
+      "submitted_ids": [
+        "sympy__sympy-22714"
+      ],
+      "resolved_ids": [
+        "sympy__sympy-22714"
+      ],
+      "unresolved_ids": [],
+      "error_ids": [],
+      "unstopped_instances": null,
+      "unstopped_containers": [],
+      "unremoved_images": [],
+      "source_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/official-report/glm-5.3-flash-main.phase23-sympy__sympy-22714-s4.json",
+      "source_sha256": "0df57db6ef0ee5df9bb10a02cf3da860ba697db48a229f2ada591c48ef8b9c10"
+    },
+    "counts_toward_resolved_rate": true
+  }
+}

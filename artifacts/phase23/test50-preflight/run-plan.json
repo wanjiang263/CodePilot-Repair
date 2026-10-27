@@ -1,0 +1,24 @@
+{
+  "status": "PREPARATION_ONLY_INDEPENDENT_BUDGET_REQUIRED",
+  "catalog_sha256": "3cfa3b13cbbf281aafb216a6942bfbdc4c249c5c082c715218ea786c2cc0c3be",
+  "exclusions_sha256": "34ff8d16ec545e4ae62518d051c2936e7604a0e8214365695f57648f76d8cb26",
+  "environment_preflight_sha256": "6bd2ac58f71978ce0fea7a3b7f6a6b722645b14efae9b84be65f1116f141b80d",
+  "model_alias": "glm-5.3-flash-main",
+  "temperature": 0,
+  "http_retries": 0,
+  "trust_env": false,
+  "funding": "No original30 balance allocated. Obtain separate explicit test50 authorization before any model request.",
+  "proposed_hard_ceiling_cny": 200,
+  "proposed_instance_cap_cny": 4,
+  "recovery": "Typed run config, verified base/index/candidate and all historical ledger hashes; retry only with changed evidence and within one cumulative case cap.",
+  "official_admission": "Every traceable, nonempty, applicable, source-only legal candidate is eligible independently of internal acceptance. Reuse a valid verdict for the same instance and canonical patch hash.",
+  "hidden_evidence": "Only read official verdict after candidate inference ends. Never send hidden official tests/logs or gold patch to model.",
+  "before_dispatch": [
+    "Provision frozen image IDs with bounded downloads and verify disk capacity.",
+    "For each frozen instance, prepare clean base-only workspace and run an issue-derived bounded real test using native Django/SymPy adapters where required.",
+    "Verify generated pytest reproduction support separately from native existing tests.",
+    "Freeze source/config/prices and a separately authorized opening ledger; precharge all unknown upper bounds.",
+    "Serial paid dispatch initially; freeze unknown request and investigate shared service health before any independent continuation."
+  ],
+  "not_claimed": "Registry availability is not a passing runtime environment test. Missing images and base workspaces remain provisioning work before test50 dispatch."
+}

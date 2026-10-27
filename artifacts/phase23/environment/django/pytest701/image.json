@@ -1,0 +1,6 @@
+{
+  "image_ref": "phase23/django-11422:repro-pytest701",
+  "image_id": "sha256:8b5c6876eee65e8d6fda099c1b16f1d59b3d13cff650879675496534b4258a3d",
+  "parent_image_ref": "swebench/sweb.eval.x86_64.django_1776_django-11422:latest",
+  "parent_image_id": "sha256:d8703d50c49fae62753520403c3d4cd8a1048b7e554159aa4f46bb5f778f0ed3"
+}

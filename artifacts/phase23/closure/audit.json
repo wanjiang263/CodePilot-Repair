@@ -1,0 +1,1163 @@
+{
+  "generated_at": "2026-10-27T04:49:15.337748+00:00",
+  "source_head": "a9bf5ea66d34a4051c8736e1714e8e0b79606506",
+  "historical_ledger_hashes_verified": [
+    {
+      "path": "artifacts/phase20/m3-20261024-formal6/instances/matplotlib__matplotlib-18869/dispatch-ledger-m3-20261024-r1.json",
+      "sha256": "14f3e119d8c87945ce70b71982fc5d60974c21b9076057d4365589c63f870cd8"
+    },
+    {
+      "path": "artifacts/phase20/m3-20261024-formal6/instances/sphinx-doc__sphinx-8273/dispatch-ledger-m3-20261024-r1.json",
+      "sha256": "d27b7618f42311648f3ea2c5e4fbf3da52db1d735d7db12c641f3d0688129f85"
+    },
+    {
+      "path": "artifacts/phase21/m3-phase21-recovery-6-r5/instances/django__django-11422/dispatch-ledger-phase21-recovery-6-r1.json",
+      "sha256": "348d46f251f73f22cc207fda8374ca49b40a85d453199d2a6a1318daa439a046"
+    },
+    {
+      "path": "artifacts/phase22/live/instances/sphinx-doc__sphinx-8273/dispatch-ledger-phase22-six-live-r1.json",
+      "sha256": "aae05e2f6799d1acc00087ce916d67452df16cf4b796743a87501a1667e0530d"
+    },
+    {
+      "path": "artifacts/phase22/live-r2-indexed/instances/sympy__sympy-22714/dispatch-ledger-phase22-six-live-r2-r1.json",
+      "sha256": "78a072c2f937328353da7c8202dbe8697755022e5ca8c1f320cff24de428c280"
+    },
+    {
+      "path": "artifacts/phase22/live-r3/instances/matplotlib__matplotlib-18869/dispatch-ledger-phase22-six-live-r3-r1.json",
+      "sha256": "0299513e525b71147d331f8986e5e88449e3dac2053a1c07874c4db3d5aa1d6f"
+    },
+    {
+      "path": "artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/dispatch-ledger-phase22-six-live-r3-r1.json",
+      "sha256": "7011860fb1eccdbcced7ae06abf028f4690770a979af1da62e043401b4fb058d"
+    },
+    {
+      "path": "artifacts/phase22/live-r4/instances/psf__requests-3362/dispatch-ledger-phase22-six-live-r4-r1.json",
+      "sha256": "aeb7ca8b356fca6106366da54da71c6d8068203c21d2a9c761ba84ff5291a12a"
+    },
+    {
+      "path": "artifacts/phase22/live-r5/instances/django__django-11422/dispatch-ledger-phase22-six-live-r5-r1.json",
+      "sha256": "e3757a2b8081e3dd8bad0e8c88958ef76c038098e8ea9658e64f6257796e3984"
+    }
+  ],
+  "new_requests": [
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "request_sha256": "fd64c24dbbb41e5371990621ffcd9fb7692a2bdb1ac05b665be489c4927f1f7e",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0049696,
+      "dispatched_at_unix": 1793024095.8246167,
+      "elapsed_seconds": 7.5310000000026776
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "request_sha256": "ea3e60d18d68ba54cfbed98351855f2e402feff570bb3ac8de9367df30f5188e",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00521,
+      "dispatched_at_unix": 1793024103.4005175,
+      "elapsed_seconds": 3.2809999999881256
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 3,
+      "model": "glm-5.3-flash",
+      "request_sha256": "ca62981b26c0e063591f6834427107d173677c097d16226b6094a6dd5cc36365",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.005112,
+      "dispatched_at_unix": 1793024106.7491736,
+      "elapsed_seconds": 8.0
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 4,
+      "model": "glm-5.3-flash",
+      "request_sha256": "39f1cf1895739fa94d80d6bd2d1f408f1e1aefc53f29cd583d5e01fb5653f67e",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0060912,
+      "dispatched_at_unix": 1793024114.8139908,
+      "elapsed_seconds": 9.328000000008615
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 5,
+      "model": "glm-5.3-flash",
+      "request_sha256": "079e35f803030bac8e7efc0e103be8ffb073073917e691e5c27840b84ae2b482",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.006902,
+      "dispatched_at_unix": 1793024147.712176,
+      "elapsed_seconds": 14.34299999999348
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 6,
+      "model": "glm-5.3-flash",
+      "request_sha256": "e4391187ada4b9f8650320b70f7a7c52bd7873d90d3c053f4c0171132c4f0982",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.008182,
+      "dispatched_at_unix": 1793024162.0723228,
+      "elapsed_seconds": 18.23399999999674
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 7,
+      "model": "glm-5.3-flash",
+      "request_sha256": "8369e7bd215446d6ca290bf8f8d456d461798ec7f3ecef9401578cd578d3f67e",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0051348,
+      "dispatched_at_unix": 1793024208.1201956,
+      "elapsed_seconds": 5.3439999999973224
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 8,
+      "model": "glm-5.3-flash",
+      "request_sha256": "cf8de07c82d3a1b2220e211b7519b4eaa7cf427ad8248f5d50a977946f59fc60",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00591936,
+      "dispatched_at_unix": 1793024213.5512662,
+      "elapsed_seconds": 24.297000000005937
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 9,
+      "model": "glm-5.3-flash",
+      "request_sha256": "1f1e6bb34077cc18c3a3dc910fe25123af54403595f283923fd7691564de1568",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0079632,
+      "dispatched_at_unix": 1793024240.8836353,
+      "elapsed_seconds": 2.860000000000582
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 10,
+      "model": "glm-5.3-flash",
+      "request_sha256": "a452342e5fdfdd2c808e60ffec66bab2f55eb229d6bfadf750f37d0d1fd6159a",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.010073200000000001,
+      "dispatched_at_unix": 1793024243.7809148,
+      "elapsed_seconds": 13.765999999988708
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 11,
+      "model": "glm-5.3-flash",
+      "request_sha256": "aab315813bc179510b64c5af985635e57620969971574df93a9f4bd7405ae187",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00453176,
+      "dispatched_at_unix": 1793024257.8194637,
+      "elapsed_seconds": 6.01600000000326
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 12,
+      "model": "glm-5.3-flash",
+      "request_sha256": "35847105f5367954d1fef0fd76ac4574a9c1ab9edb8238be74d0b66dbc5b4e0b",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0050308,
+      "dispatched_at_unix": 1793024264.8466551,
+      "elapsed_seconds": 6.202999999994063
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 13,
+      "model": "glm-5.3-flash",
+      "request_sha256": "2a570813095eed85656dd832f50d9cd7f9b2c148ea0177b3756c9f9db5b2710f",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0046507200000000005,
+      "dispatched_at_unix": 1793024271.1015372,
+      "elapsed_seconds": 17.89100000000326
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 14,
+      "model": "glm-5.3-flash",
+      "request_sha256": "8eb5eaf390715a0f23641277829689da3c191a255a726739cb4f0d16bd8dc877",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00291496,
+      "dispatched_at_unix": 1793024289.043699,
+      "elapsed_seconds": 7.437000000005355
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 15,
+      "model": "glm-5.3-flash",
+      "request_sha256": "1aa2a700a5c79e5dc2c8fdc7b5b1e10406c9b5e9eb3a42d5d743151ecdc4738a",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0025287200000000004,
+      "dispatched_at_unix": 1793024296.5695927,
+      "elapsed_seconds": 4.76600000000326
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 16,
+      "model": "glm-5.3-flash",
+      "request_sha256": "40b9c3a8425f60bd14506e48cb6dab52bed7b09fb7c1aadc2275907f11426e65",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00238024,
+      "dispatched_at_unix": 1793024301.4166987,
+      "elapsed_seconds": 4.875
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-1",
+      "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+      "seq": 17,
+      "model": "glm-5.3-flash",
+      "request_sha256": "d6b5278c7de11ab9220a6a4d63530570e2af0134c33f7e49bcec6f4b2e57136e",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00607168,
+      "dispatched_at_unix": 1793024316.2185667,
+      "elapsed_seconds": 13.73399999999674
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "segment": "segment-2",
+      "ledger_sha256": "5cec7146d53948d0899e567c5ec5e57ea2eb26d6412827c1b3cfa7795059ba7e",
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "request_sha256": "d7478cdbed6b9ade4b5ded82367caca1a2c29e5e0dfc6c173f2a58115eb1c519",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0061728,
+      "dispatched_at_unix": 1793025542.0191164,
+      "elapsed_seconds": 8.468999999997322
+    },
+    {
+      "instance_id": "sympy__sympy-22714",
+      "segment": "segment-2",
+      "ledger_sha256": "07a84d09fad6092cdc9cb4899ff768298a26095e1c68fd86dc1942bdbc096eb0",
+      "seq": 1,
+      "model": "deepseek-flash",
+      "request_sha256": "dc0369488c7cb88fc54fe69da1c112cf5dd9bf13c07ad08e9688aa6b321e0839",
+      "status": "settled",
+      "reserved_cny": 2.032768,
+      "cost_cny": 0.022352,
+      "dispatched_at_unix": 1793021326.0280075,
+      "elapsed_seconds": 2.687999999994645
+    },
+    {
+      "instance_id": "sympy__sympy-22714",
+      "segment": "segment-4",
+      "ledger_sha256": "e611fc71c48bf57a4da130d08944989509d34eab620efde146bb1b5c79d30413",
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "request_sha256": "11007e8ecede88eecf56fabbb82ed4b694023ca4c73cf45047a1c010a0b6936e",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0061628,
+      "dispatched_at_unix": 1793022839.2756243,
+      "elapsed_seconds": 5.4689999999973224
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-18869",
+      "segment": "segment-1",
+      "ledger_sha256": "813d12473035b2f828040054f4ecae8511fdb689ce9ac2529e5adca3a2bcb4d9",
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "request_sha256": "be4cd45e8fedf0533e52a0b1c7d7511da8edd28db9a871c53dc9fb4882b3223e",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.009006400000000001,
+      "dispatched_at_unix": 1793038262.6131625,
+      "elapsed_seconds": 15.797000000005937
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "request_sha256": "6702b086631b4ff92a56375c101c7f8cc4ca6a36b01af2f8d1811f9db0944888",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0064816000000000006,
+      "dispatched_at_unix": 1793037087.4469311,
+      "elapsed_seconds": 13.656000000002678
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "request_sha256": "d980e68980409fa4735bc1b0a16442878733d041ec31336739ef4faa5826450e",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.007918399999999999,
+      "dispatched_at_unix": 1793037101.112245,
+      "elapsed_seconds": 16.25
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 3,
+      "model": "glm-5.3-flash",
+      "request_sha256": "224af68457ed28a3acab770ff5f0ae275b5d16e22ebcdae80b9ac7b335fcaac0",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.005300399999999999,
+      "dispatched_at_unix": 1793037117.3878398,
+      "elapsed_seconds": 6.532000000006519
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 4,
+      "model": "glm-5.3-flash",
+      "request_sha256": "16e127f5f9c09cca7cda4b0e3510e48ee53efea66b65977806397ae23b6809c4",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0056872,
+      "dispatched_at_unix": 1793037123.9227288,
+      "elapsed_seconds": 3.937999999994645
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 5,
+      "model": "glm-5.3-flash",
+      "request_sha256": "4bcd0a6fe0a09fb65cf1db22fd8aad9a9b24d04dc34188371dc635a980d803a0",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0068268,
+      "dispatched_at_unix": 1793037127.8890796,
+      "elapsed_seconds": 15.828000000008615
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 6,
+      "model": "glm-5.3-flash",
+      "request_sha256": "bc616a1934f4aba9d4c78fd6ac54578d330ee970fe05cd8023c8dc09565fe149",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.007095200000000001,
+      "dispatched_at_unix": 1793037143.7252054,
+      "elapsed_seconds": 11.23399999999674
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 7,
+      "model": "glm-5.3-flash",
+      "request_sha256": "6613bffa782b58a0be45b0aadc7ca57fa24afc1a627cee652c112f52288d301a",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0075976,
+      "dispatched_at_unix": 1793037164.687737,
+      "elapsed_seconds": 4.9689999999973224
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 8,
+      "model": "glm-5.3-flash",
+      "request_sha256": "d511ffd1fdc5a5664bb1b9a3436d6f4c808317d0cc1f74bfec8ebdec8aa381aa",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00342808,
+      "dispatched_at_unix": 1793037169.695418,
+      "elapsed_seconds": 3.139999999999418
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 9,
+      "model": "glm-5.3-flash",
+      "request_sha256": "635760ace5f39cf176e3f4e793a081262b7cf8650f0ebf0811dd8c7d640be69f",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.007145520000000001,
+      "dispatched_at_unix": 1793037172.8483198,
+      "elapsed_seconds": 18.0
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 10,
+      "model": "glm-5.3-flash",
+      "request_sha256": "d92d014c4cfe5d4e048b4139d44c7fbc6054c3e519b7710eed197eaeb16b39cd",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.012757600000000001,
+      "dispatched_at_unix": 1793037190.9024115,
+      "elapsed_seconds": 8.781000000002678
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 11,
+      "model": "glm-5.3-flash",
+      "request_sha256": "50c86abf417f6bc5faaf63c35f933d4aebeec90b5f5e7b6d9fa8bafdd39fe64c",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.005882,
+      "dispatched_at_unix": 1793037199.7328866,
+      "elapsed_seconds": 9.046999999991385
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 12,
+      "model": "glm-5.3-flash",
+      "request_sha256": "911e2e84a9f7d66b6404a67eb2930aa28f24ed5a69d2b24c10fee8850eeb374e",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.005343200000000001,
+      "dispatched_at_unix": 1793037210.7469862,
+      "elapsed_seconds": 5.312000000005355
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 13,
+      "model": "glm-5.3-flash",
+      "request_sha256": "2ef75ea1fada0edb23d73fa59d373a4c6b62411c91ba5b5a55660c9ce100df63",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00343192,
+      "dispatched_at_unix": 1793037216.06966,
+      "elapsed_seconds": 8.25
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 14,
+      "model": "glm-5.3-flash",
+      "request_sha256": "4e2ac23d8a9f342526036d8b913252ef894c513990e4c383ac9533e80f0f3f77",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0021412,
+      "dispatched_at_unix": 1793037224.3320212,
+      "elapsed_seconds": 4.3289999999979045
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 15,
+      "model": "glm-5.3-flash",
+      "request_sha256": "5c082c4343ea171a1d39ef2999b3d8729552d34d3ff230f995e550f22ae3c309",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0020796800000000004,
+      "dispatched_at_unix": 1793037228.9555311,
+      "elapsed_seconds": 4.375
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 16,
+      "model": "glm-5.3-flash",
+      "request_sha256": "50b8782c67e247a220326335def52a1b6734c4cb961884d1af2498c6b9095e4e",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0022447200000000004,
+      "dispatched_at_unix": 1793037233.3726814,
+      "elapsed_seconds": 4.562000000005355
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 17,
+      "model": "glm-5.3-flash",
+      "request_sha256": "f35c51e936304611e44fc20da562d629cb4ba1a73023576d812a1ed317a56706",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00222,
+      "dispatched_at_unix": 1793037237.9641979,
+      "elapsed_seconds": 4.687999999994645
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 18,
+      "model": "glm-5.3-flash",
+      "request_sha256": "6d37c6213644546fa8725815e74eb4012858565bb29ddcf0f81e1dd3fb034c1c",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00416512,
+      "dispatched_at_unix": 1793037245.2818227,
+      "elapsed_seconds": 7.014999999999418
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 19,
+      "model": "glm-5.3-flash",
+      "request_sha256": "127e71c5a567d823ecd51c8ba5a29b3d77072cafd252a39753998e04c585abfa",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.015442800000000001,
+      "dispatched_at_unix": 1793037256.4926775,
+      "elapsed_seconds": 8.75
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 20,
+      "model": "glm-5.3-flash",
+      "request_sha256": "6994d8870b705c43bb0b5e1aa7e33ca07c9aed77b6ffea896e3010dc895f0842",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.005380800000000001,
+      "dispatched_at_unix": 1793037265.8032172,
+      "elapsed_seconds": 4.7810000000026776
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 21,
+      "model": "glm-5.3-flash",
+      "request_sha256": "1ea86968001361b4fa96fa0a3d513a83a2b689a2f96fcce3bbbd92c523993d87",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00780744,
+      "dispatched_at_unix": 1793037270.5915601,
+      "elapsed_seconds": 5.171999999991385
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 22,
+      "model": "glm-5.3-flash",
+      "request_sha256": "0b48cca9fa71f67dd291f878ba148455cf441bc2fd8bb4525112690cc3faa571",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0032398400000000003,
+      "dispatched_at_unix": 1793037275.7848554,
+      "elapsed_seconds": 7.0
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 23,
+      "model": "glm-5.3-flash",
+      "request_sha256": "b7ce4e8e4c9c96cf45f76456adf8f582619437602a879ed93de6b9039d3c8691",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0033408,
+      "dispatched_at_unix": 1793037283.137707,
+      "elapsed_seconds": 4.953000000008615
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 24,
+      "model": "glm-5.3-flash",
+      "request_sha256": "066bd37f472f4736f2bfa231eb516800b23ef0beef04c3a6bcd70588270d33a9",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0053972000000000004,
+      "dispatched_at_unix": 1793037290.8152504,
+      "elapsed_seconds": 10.125
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-1",
+      "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+      "seq": 25,
+      "model": "glm-5.3-flash",
+      "request_sha256": "1200bf0f8ea33a7da37b16784871110120c470346992f4afb349372b56dc52fd",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0148216,
+      "dispatched_at_unix": 1793037302.4325325,
+      "elapsed_seconds": 5.235000000000582
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "segment": "segment-2",
+      "ledger_sha256": "02895dca507e0e8b2b99a6d324f70e6f138c669e77381723fcfba7adefd17237",
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "request_sha256": "30d269728832cd39ce23b856df1c1f482d2a5225bc98e6d6265796a14f163ffc",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.009505599999999998,
+      "dispatched_at_unix": 1793038482.4976087,
+      "elapsed_seconds": 8.0
+    },
+    {
+      "instance_id": "django__django-11422",
+      "segment": "segment-1",
+      "ledger_sha256": "0479243a3c4900bb8202a142cf500c23b18ed48004487aad459b3c992b5c031f",
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "request_sha256": "8126766c7512f17a6f4edd7a35b3c1da23552b0bb42b6e2a0a6c3be7346bdfcd",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.008911200000000001,
+      "dispatched_at_unix": 1793039219.6006215,
+      "elapsed_seconds": 5.938000000009197
+    },
+    {
+      "instance_id": "django__django-11422",
+      "segment": "segment-1",
+      "ledger_sha256": "0479243a3c4900bb8202a142cf500c23b18ed48004487aad459b3c992b5c031f",
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "request_sha256": "a9b348641a5ea7c4656a2d14b672fb8b9d504a4baf5b41678b0a077fd495503c",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00384848,
+      "dispatched_at_unix": 1793039225.5815556,
+      "elapsed_seconds": 4.5
+    },
+    {
+      "instance_id": "django__django-11422",
+      "segment": "segment-1",
+      "ledger_sha256": "0479243a3c4900bb8202a142cf500c23b18ed48004487aad459b3c992b5c031f",
+      "seq": 3,
+      "model": "glm-5.3-flash",
+      "request_sha256": "dff1bc407bb1f97c39255c01080ba75a5077043445f97b7bf38163bfcc4e7e65",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.00846896,
+      "dispatched_at_unix": 1793039230.1220584,
+      "elapsed_seconds": 39.42200000000594
+    },
+    {
+      "instance_id": "django__django-11422",
+      "segment": "segment-1",
+      "ledger_sha256": "0479243a3c4900bb8202a142cf500c23b18ed48004487aad459b3c992b5c031f",
+      "seq": 4,
+      "model": "glm-5.3-flash",
+      "request_sha256": "a8b196637701605bedcc5785873bd46c1720c52d5beb9d676f65ff1ed39f2bd4",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.013398,
+      "dispatched_at_unix": 1793039280.3784332,
+      "elapsed_seconds": 8.531000000002678
+    },
+    {
+      "instance_id": "django__django-11422",
+      "segment": "segment-1",
+      "ledger_sha256": "0479243a3c4900bb8202a142cf500c23b18ed48004487aad459b3c992b5c031f",
+      "seq": 5,
+      "model": "glm-5.3-flash",
+      "request_sha256": "3a6b684cea583c3823fc2dbb09edf3c244d7d65402c845bce2b59df94079aa9e",
+      "status": "unknown_frozen",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": null,
+      "dispatched_at_unix": 1793039295.5329368,
+      "elapsed_seconds": 120.07799999999406
+    },
+    {
+      "instance_id": "django__django-11422",
+      "segment": "segment-3",
+      "ledger_sha256": "bbba31ad0a5b4e95ddacc0c66f35fb857e24c4f4f0fa0e604134395e2e3d437f",
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "request_sha256": "efe1395f778e6638fc7cba4a5e7892ba94e099c4666dc54380ad1fb67d6af25c",
+      "status": "settled",
+      "reserved_cny": 0.8114688000000001,
+      "cost_cny": 0.0069972,
+      "dispatched_at_unix": 1793074212.9619937,
+      "elapsed_seconds": 4.5
+    }
+  ],
+  "phase23_new_cost_upper_cny": 1.1531352000000001,
+  "phase23_settled_cny": 0.34166640000000004,
+  "original30_used_upper_cny": 3.18873592,
+  "original30_remaining_cny": 26.81126408,
+  "phase23_cap_remaining_cny": 22.8468648,
+  "new_unknown_cny": 0.8114688000000001,
+  "cases": [
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "phase23_cost_upper_cny": 0.09983904,
+      "requests": 18,
+      "unknown_cny": 0.0,
+      "source_run": "artifacts/phase22/live/instances/sphinx-doc__sphinx-8273/runs/swebench-smoke-phase22-six-live-sphinx-doc__sphinx-8273-s0-3cdd4e70",
+      "legacy_source_runtime_seconds": null,
+      "segments": [
+        {
+          "segment": "segment-1",
+          "process": {
+            "pid": 74540,
+            "status": "exited",
+            "code_sha": "372a0d6e39c2992f55cc85c8adc58df5b1f8ce4f",
+            "elapsed_seconds": 881.1410000000033
+          },
+          "cost_upper_cny": 0.09366624,
+          "unknown_cny": 0.0,
+          "ledger_sha256": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+          "stage_wall_seconds": {
+            "analyze_impact": 0.264335,
+            "build_env": 561.595227,
+            "reproduce": 111.442634,
+            "plan": 30.029044,
+            "generate_patch": 65.724611,
+            "validate_patch": 0.461461,
+            "run_target_tests": 8.974963,
+            "run_regression": 40.296003,
+            "finalize": 3.572394
+          },
+          "model_wait_seconds_by_stage": {
+            "reproduce": 60.904999999999994,
+            "plan": 52.434,
+            "generate_patch": 55.012
+          }
+        },
+        {
+          "segment": "segment-2",
+          "process": {
+            "pid": 74072,
+            "status": "exited",
+            "code_sha": "907ceb3c6ae89cda46cac9380fbab94632709760",
+            "elapsed_seconds": 312.10899999999674
+          },
+          "cost_upper_cny": 0.0061728,
+          "unknown_cny": 0.0,
+          "ledger_sha256": "5cec7146d53948d0899e567c5ec5e57ea2eb26d6412827c1b3cfa7795059ba7e",
+          "stage_wall_seconds": {
+            "run_regression": 257.016903,
+            "review": 9.187739,
+            "finalize": 1.154689
+          },
+          "model_wait_seconds_by_stage": {
+            "review": 8.483
+          }
+        }
+      ],
+      "candidates": [
+        {
+          "canonical_patch_sha256": "65ad38c88f656b9267b9f40c4838024d03311ab43c6892ea75ffd77e880a0819",
+          "patch_sha256": "2c6109e54b73f470677a9bd1c4e4ff9289cc1d691ce45b05ffc870bf155abcea",
+          "receipt": "artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/official-candidate.json",
+          "internal_status": "succeeded",
+          "internal_stop_reason": null
+        }
+      ],
+      "official_results": [
+        {
+          "path": "artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/official-evaluation.json",
+          "sha256": "73afcb4c5133937ee779325aa9c32224d3db1ba4d73610acbd49436a0fb8f508",
+          "patch_sha256": "2c6109e54b73f470677a9bd1c4e4ff9289cc1d691ce45b05ffc870bf155abcea",
+          "verdict": "UNRESOLVED",
+          "report_sha256": "485a7c7c0a51e58f978a9d2ecfc4d9b8f984d06c5740b5988d299625d24595b8",
+          "valid": true
+        }
+      ],
+      "final_status": "OFFICIAL_UNRESOLVED"
+    },
+    {
+      "instance_id": "sympy__sympy-22714",
+      "phase23_cost_upper_cny": 0.0285148,
+      "requests": 2,
+      "unknown_cny": 0.0,
+      "source_run": "artifacts/phase22/live-r2-indexed/instances/sympy__sympy-22714/runs/swebench-smoke-phase22-six-live-r2-sympy__sympy-22714-s0-e2006a67",
+      "legacy_source_runtime_seconds": 1463.080334,
+      "segments": [
+        {
+          "segment": "segment-1",
+          "process": {
+            "pid": 73516,
+            "status": "error",
+            "code_sha": "89aa46250c859da14d857a3aa732761f9fe95743",
+            "error_type": "FrozenInstanceError",
+            "error": "cannot assign to field 'roles'",
+            "elapsed_seconds": 1.0779999999940628
+          },
+          "cost_upper_cny": 0,
+          "model_requests": 0,
+          "reason": "Local failure before any HTTP ledger dispatch"
+        },
+        {
+          "segment": "segment-2",
+          "process": {
+            "pid": 71504,
+            "status": "error",
+            "code_sha": "fcc02fe9fb42a22c1bab688e6ce64f6fa55e1f0f",
+            "error_type": "AttributeError",
+            "error": "'DispatchBudget' object has no attribute 'requests'",
+            "elapsed_seconds": 251.9380000000092
+          },
+          "cost_upper_cny": 0.022352,
+          "unknown_cny": 0.0,
+          "ledger_sha256": "07a84d09fad6092cdc9cb4899ff768298a26095e1c68fd86dc1942bdbc096eb0",
+          "stage_wall_seconds": {
+            "review": 5.630929,
+            "finalize": 17.047383
+          },
+          "model_wait_seconds_by_stage": {
+            "review": 2.717
+          }
+        },
+        {
+          "segment": "segment-3",
+          "process": {
+            "pid": 61880,
+            "status": "running",
+            "code_sha": "d4be3cef7e885b6a426a57354d850eafb1b6a02c"
+          },
+          "cost_upper_cny": 0.0,
+          "unknown_cny": 0.0,
+          "ledger_sha256": "3b7dd1172df8e5734d57e1c77ab3c2e7627037514c2b8f7b37e94cf4650f5269",
+          "stage_wall_seconds": {},
+          "model_wait_seconds_by_stage": {}
+        },
+        {
+          "segment": "segment-4",
+          "process": {
+            "pid": 57812,
+            "status": "exited",
+            "code_sha": "7d48740650095b8c30b99c8ecbd24526f63b7bb4",
+            "elapsed_seconds": 335.98399999999674
+          },
+          "cost_upper_cny": 0.0061628,
+          "unknown_cny": 0.0,
+          "ledger_sha256": "e611fc71c48bf57a4da130d08944989509d34eab620efde146bb1b5c79d30413",
+          "stage_wall_seconds": {
+            "review": 6.372694,
+            "finalize": 0.673898
+          },
+          "model_wait_seconds_by_stage": {
+            "review": 5.5
+          }
+        }
+      ],
+      "candidates": [
+        {
+          "canonical_patch_sha256": "30fecf235bd0c33accba2c69b1d09ed0ec832e6951a06a679f5343fc8274bddc",
+          "patch_sha256": "e8b47b687fbe1c43e7fb4ac143afd187467c4fe9f1b18bef73c0179ff797ec5b",
+          "receipt": "artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/official-candidate.json",
+          "internal_status": "succeeded",
+          "internal_stop_reason": null
+        }
+      ],
+      "official_results": [
+        {
+          "path": "artifacts/phase23/instances/sympy__sympy-22714/segment-4/official-evaluation.json",
+          "sha256": "008df07562d0eaeede221a2fc69b838760e8a3d7904b96e51c3343241dcd7b63",
+          "patch_sha256": "e8b47b687fbe1c43e7fb4ac143afd187467c4fe9f1b18bef73c0179ff797ec5b",
+          "verdict": "RESOLVED",
+          "report_sha256": "0df57db6ef0ee5df9bb10a02cf3da860ba697db48a229f2ada591c48ef8b9c10",
+          "valid": true
+        }
+      ],
+      "final_status": "OFFICIAL_RESOLVED"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-18869",
+      "phase23_cost_upper_cny": 0.009006400000000001,
+      "requests": 1,
+      "unknown_cny": 0.0,
+      "source_run": "artifacts/phase22/live-r3/instances/matplotlib__matplotlib-18869/runs/swebench-smoke-phase22-six-live-r3-matplotlib__matplotlib-18869-s0-759408fe",
+      "legacy_source_runtime_seconds": 1021.641406,
+      "segments": [
+        {
+          "segment": "segment-1",
+          "process": {
+            "pid": 76916,
+            "status": "exited",
+            "code_sha": "50913b41be3930eeb4fc120655cc1024dcd95c87",
+            "elapsed_seconds": 324.71800000000803
+          },
+          "cost_upper_cny": 0.009006400000000001,
+          "unknown_cny": 0.0,
+          "ledger_sha256": "813d12473035b2f828040054f4ecae8511fdb689ce9ac2529e5adca3a2bcb4d9",
+          "stage_wall_seconds": {
+            "validate_patch": 0.914074,
+            "run_target_tests": 150.966483,
+            "run_regression": 27.125018,
+            "review": 16.996382,
+            "finalize": 5.663373
+          },
+          "model_wait_seconds_by_stage": {
+            "review": 15.843
+          }
+        }
+      ],
+      "candidates": [
+        {
+          "canonical_patch_sha256": "ca33eff72a9fe11f313f970b7fff0996afb4300402ff20f18fda12f538efad61",
+          "patch_sha256": "56177b1f36f7282dcbb8b1588ffa2d9f701a5b7eb75ad97df4bd40ea50adf29e",
+          "receipt": "artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/official-candidate.json",
+          "internal_status": "succeeded",
+          "internal_stop_reason": null
+        }
+      ],
+      "official_results": [
+        {
+          "path": "artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/official-evaluation.json",
+          "sha256": "ae8240ed9e3b3973b6737398ea24ebb222358621faeb922526f462888888c1af",
+          "patch_sha256": "56177b1f36f7282dcbb8b1588ffa2d9f701a5b7eb75ad97df4bd40ea50adf29e",
+          "verdict": "UNRESOLVED",
+          "report_sha256": "5fd19582270c4ea0096e446c884fd6e6872cdbe71664b8ba7835a2c161451e40",
+          "valid": true
+        }
+      ],
+      "final_status": "OFFICIAL_UNRESOLVED"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "phase23_cost_upper_cny": 0,
+      "requests": 0,
+      "unknown_cny": 0,
+      "source_run": "artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/runs/swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f",
+      "legacy_source_runtime_seconds": 307.214198,
+      "segments": [],
+      "candidates": [],
+      "official_results": [
+        {
+          "reused": true,
+          "path": "artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/official-evaluation-phase22-six-live-r3.json",
+          "sha256": "50a8a02a03a57f48999d253b264e5df709a463f2f8f2121311ab6abc8ed6a9e7",
+          "patch_sha256": "48d96261554d791b5ea10b7bcae56a7d221dbd38ad15cb2302e24b1d524c0df7",
+          "prediction_sha256": "8a5e360c11eaab5cd5a03671d1063821b821c6b4efcd254f9a95f4224d315aed",
+          "verdict": "RESOLVED"
+        }
+      ],
+      "final_status": "OFFICIAL_RESOLVED"
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "phase23_cost_upper_cny": 0.16268232000000002,
+      "requests": 26,
+      "unknown_cny": 0.0,
+      "source_run": "artifacts/phase22/live-r4/instances/psf__requests-3362/runs/swebench-smoke-phase22-six-live-r4-psf__requests-3362-s0-d24f57e7",
+      "legacy_source_runtime_seconds": 168.800155,
+      "segments": [
+        {
+          "segment": "segment-1",
+          "process": {
+            "pid": 79480,
+            "status": "exited",
+            "code_sha": "50913b41be3930eeb4fc120655cc1024dcd95c87",
+            "elapsed_seconds": 239.98399999999674
+          },
+          "cost_upper_cny": 0.15317672000000002,
+          "unknown_cny": 0.0,
+          "ledger_sha256": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+          "stage_wall_seconds": {
+            "reproduce": 85.952877,
+            "plan": 26.200246,
+            "generate_patch": 41.83642,
+            "validate_patch": 0.829198,
+            "run_target_tests": 3.148024,
+            "diagnose": 14.725601000000001,
+            "check_budget": 0.0,
+            "repair_patch": 0.021149,
+            "finalize": 0.692898
+          },
+          "model_wait_seconds_by_stage": {
+            "reproduce": 67.498,
+            "plan": 44.028,
+            "generate_patch": 38.608,
+            "diagnose": 14.0,
+            "repair_patch": 32.09
+          }
+        },
+        {
+          "segment": "segment-2",
+          "process": {
+            "pid": 60148,
+            "status": "exited",
+            "code_sha": "0f2a3d1ae48ba4b817a0302e88084b82c466c4c3",
+            "elapsed_seconds": 162.04700000000594
+          },
+          "cost_upper_cny": 0.009505599999999998,
+          "unknown_cny": 0.0,
+          "ledger_sha256": "02895dca507e0e8b2b99a6d324f70e6f138c669e77381723fcfba7adefd17237",
+          "stage_wall_seconds": {
+            "validate_patch": 1.321255,
+            "run_target_tests": 18.316045,
+            "run_regression": 112.19076,
+            "review": 9.082275,
+            "finalize": 3.09396
+          },
+          "model_wait_seconds_by_stage": {
+            "review": 8.078
+          }
+        }
+      ],
+      "candidates": [
+        {
+          "canonical_patch_sha256": "2bb5b9c5583e4174264d12aeac04238ba6d877e7908d5ae9d601e72a9c1b34df",
+          "patch_sha256": "29f17936d67feced725f05fd9f5ed558a4c281ae1e7f551f5ba5fde087af694b",
+          "receipt": "artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/official-candidate.json",
+          "internal_status": "succeeded",
+          "internal_stop_reason": null
+        }
+      ],
+      "official_results": [
+        {
+          "path": "artifacts/phase23/instances/psf__requests-3362/segment-2/official-evaluation.json",
+          "sha256": "76e85d9ad1090cab81ee36422d2571b436d0b7b189c2f2c672460f898613ee1e",
+          "patch_sha256": "29f17936d67feced725f05fd9f5ed558a4c281ae1e7f551f5ba5fde087af694b",
+          "verdict": "UNRESOLVED",
+          "report_sha256": "ec11deb2b49a28389adbda854954596630f4755d5f5204fdce5171f7cd6a6320",
+          "valid": true
+        }
+      ],
+      "final_status": "OFFICIAL_UNRESOLVED"
+    },
+    {
+      "instance_id": "django__django-11422",
+      "phase23_cost_upper_cny": 0.8530926400000002,
+      "requests": 6,
+      "unknown_cny": 0.8114688000000001,
+      "source_run": "artifacts/phase22/live-r5/instances/django__django-11422/runs/swebench-smoke-phase22-six-live-r5-django__django-11422-s0-f137c0d5",
+      "legacy_source_runtime_seconds": 1621.666894,
+      "segments": [
+        {
+          "segment": "segment-1",
+          "process": {
+            "pid": 81516,
+            "status": "exited",
+            "code_sha": "35c504306d104a942b286ceceb3e243620a8d0c4",
+            "elapsed_seconds": 425.67200000000594
+          },
+          "cost_upper_cny": 0.8460954400000001,
+          "unknown_cny": 0.8114688000000001,
+          "ledger_sha256": "0479243a3c4900bb8202a142cf500c23b18ed48004487aad459b3c992b5c031f",
+          "stage_wall_seconds": {
+            "plan": 50.044911,
+            "generate_patch": 120.16774,
+            "finalize": 24.662063
+          },
+          "model_wait_seconds_by_stage": {
+            "plan": 58.482,
+            "generate_patch": 120.156
+          }
+        },
+        {
+          "segment": "segment-2",
+          "process": {
+            "pid": 75848,
+            "status": "error",
+            "code_sha": "35c504306d104a942b286ceceb3e243620a8d0c4",
+            "error_type": "RuntimeError",
+            "error": "only fully settled response archives can be reused",
+            "elapsed_seconds": 1.375
+          },
+          "cost_upper_cny": 0,
+          "model_requests": 0,
+          "reason": "Local failure before any HTTP ledger dispatch"
+        },
+        {
+          "segment": "segment-3",
+          "process": {
+            "pid": 26928,
+            "status": "exited",
+            "code_sha": "0efcc92d87354c4e436cc1484876a0eb17ff2eb5",
+            "elapsed_seconds": 673.875
+          },
+          "cost_upper_cny": 0.0069972,
+          "unknown_cny": 0.0,
+          "ledger_sha256": "bbba31ad0a5b4e95ddacc0c66f35fb857e24c4f4f0fa0e604134395e2e3d437f",
+          "stage_wall_seconds": {
+            "validate_patch": -0.655382,
+            "run_target_tests": 216.492743,
+            "run_regression": 167.201099,
+            "review": 12.65641,
+            "finalize": 38.136128
+          },
+          "model_wait_seconds_by_stage": {
+            "review": 4.561
+          }
+        }
+      ],
+      "candidates": [
+        {
+          "canonical_patch_sha256": "8636c1304452c41cf3cb0fb681fa99751dd887eff18dfb9dc5affb9d5127c4fc",
+          "patch_sha256": "9cae77deaf9f9cbc42b493f6cd38dd4e36f9c2ea849ce4848ece8b28738cd9d1",
+          "receipt": "artifacts/phase23/instances/django__django-11422/segment-3/runs/phase23-django__django-11422-s3/official-candidate.json",
+          "internal_status": "succeeded",
+          "internal_stop_reason": null
+        }
+      ],
+      "official_results": [
+        {
+          "path": "artifacts/phase23/instances/django__django-11422/segment-3/official-evaluation-r3.json",
+          "sha256": "73c2a394b6e046f74a92b549a124cf3b26208c1288720c760f0cf15a0a4bc7f7",
+          "patch_sha256": "9cae77deaf9f9cbc42b493f6cd38dd4e36f9c2ea849ce4848ece8b28738cd9d1",
+          "verdict": "RESOLVED",
+          "report_sha256": "8a6deb8fa31b59ef39c3dd0e4bedb523505c7e064574522013c8d4d8ba2d7bbb",
+          "valid": true
+        }
+      ],
+      "final_status": "OFFICIAL_RESOLVED"
+    }
+  ],
+  "system_blockers_cleared": 6,
+  "official_resolved": 3,
+  "official_unresolved": 3,
+  "model_no_patch": 0,
+  "blocked": 0
+}

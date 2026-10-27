@@ -1,0 +1,98 @@
+{
+  "schema_version": 3,
+  "instance_id": "django__django-11422",
+  "run_id": "phase23-django__django-11422-s3",
+  "patch_sha256": "9cae77deaf9f9cbc42b493f6cd38dd4e36f9c2ea849ce4848ece8b28738cd9d1",
+  "candidate_receipt": "artifacts/phase23/instances/django__django-11422/segment-3/runs/phase23-django__django-11422-s3/official-candidate.json",
+  "internal_status": "succeeded",
+  "official_verdict": "RESOLVED",
+  "official": {
+    "run_id": "phase23-django__django-11422-s3",
+    "command": {
+      "argv": [
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/.venv-swebench-linux/bin/python",
+        "-m",
+        "swebench.harness.run_evaluation",
+        "-d",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/test.jsonl",
+        "-s",
+        "test",
+        "-i",
+        "django__django-11422",
+        "-p",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/django__django-11422/segment-3/runs/phase23-django__django-11422-s3/official-prediction.jsonl",
+        "-id",
+        "phase23-django__django-11422-s3",
+        "--max_workers",
+        "1",
+        "-t",
+        "1800",
+        "--report_dir",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/django__django-11422/segment-3/official-r3/runs/phase23-django__django-11422-s3/official-report",
+        "-n",
+        "swebench",
+        "--cache_level",
+        "instance"
+      ],
+      "cwd": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/django__django-11422/segment-3/official-r3/runs/phase23-django__django-11422-s3/official-report",
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONUTF8": "1"
+      },
+      "expected_report": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/django__django-11422/segment-3/official-r3/runs/phase23-django__django-11422-s3/official-report/glm-5.3-flash-main.phase23-django__django-11422-s3.json"
+    },
+    "decision": "EXECUTED",
+    "exit_code": 0,
+    "timed_out": false,
+    "runtime_seconds": 140.69564438999987,
+    "error_kind": null,
+    "error_detail": null,
+    "reused": false,
+    "reused_reason": "报告不存在，执行官方 harness",
+    "warnings": [],
+    "verdicts": [
+      {
+        "instance_id": "django__django-11422",
+        "verdict": "RESOLVED",
+        "resolved": true,
+        "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/django__django-11422/segment-3/official-r3/runs/phase23-django__django-11422-s3/official-report/glm-5.3-flash-main.phase23-django__django-11422-s3.json",
+        "report_sha256": "8a6deb8fa31b59ef39c3dd0e4bedb523505c7e064574522013c8d4d8ba2d7bbb",
+        "error_kind": null,
+        "error_detail": null,
+        "runtime_seconds": 140.69564438999987
+      }
+    ],
+    "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/django__django-11422/segment-3/official-r3/runs/phase23-django__django-11422-s3/official-report/glm-5.3-flash-main.phase23-django__django-11422-s3.json",
+    "report_sha256": "8a6deb8fa31b59ef39c3dd0e4bedb523505c7e064574522013c8d4d8ba2d7bbb",
+    "report": {
+      "schema_version": 2,
+      "total_instances": 1,
+      "submitted_instances": 1,
+      "completed_instances": 1,
+      "resolved_instances": 1,
+      "unresolved_instances": 0,
+      "empty_patch_instances": 0,
+      "error_instances": 0,
+      "completed_ids": [
+        "django__django-11422"
+      ],
+      "incomplete_ids": [],
+      "empty_patch_ids": [],
+      "submitted_ids": [
+        "django__django-11422"
+      ],
+      "resolved_ids": [
+        "django__django-11422"
+      ],
+      "unresolved_ids": [],
+      "error_ids": [],
+      "unstopped_instances": null,
+      "unstopped_containers": [],
+      "unremoved_images": [],
+      "source_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/django__django-11422/segment-3/official-r3/runs/phase23-django__django-11422-s3/official-report/glm-5.3-flash-main.phase23-django__django-11422-s3.json",
+      "source_sha256": "8a6deb8fa31b59ef39c3dd0e4bedb523505c7e064574522013c8d4d8ba2d7bbb"
+    },
+    "counts_toward_resolved_rate": true
+  }
+}

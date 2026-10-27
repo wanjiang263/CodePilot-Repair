@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "instance_id": "sympy__sympy-22714",
+  "base_commit": "3ff4717b6aef6086e78f01cdfa06f64ae23aed7e",
+  "run_id": "phase23-sympy__sympy-22714-s4",
+  "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+  "inference_finished": true,
+  "internal_status": "succeeded",
+  "internal_stop_reason": null,
+  "patch": "artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/official-candidate.diff",
+  "patch_sha256": "e8b47b687fbe1c43e7fb4ac143afd187467c4fe9f1b18bef73c0179ff797ec5b",
+  "prediction": "artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/official-prediction.jsonl",
+  "prediction_sha256": "a962308295c6cb622c9cdba4178c4452aac180923285a3eac6473d8f4e30e43c",
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "path",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "size",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "non_empty",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "test_protection",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "syntax",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "cheat",
+        "passed": true,
+        "reason": null
+      }
+    ],
+    "cheat_findings": [],
+    "warnings": [],
+    "errors": [],
+    "files_changed": 1,
+    "lines_added": 1,
+    "lines_deleted": 1,
+    "risk": "low",
+    "evidence": []
+  },
+  "provenance": [
+    {
+      "path": "artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/state_final.json",
+      "sha256": "e57fba28ad3789a11f76fc2e0fe48778e9239f0f03275a3eaf0840d797f62751"
+    },
+    {
+      "path": "artifacts/phase23/instances/sympy__sympy-22714/segment-4/dispatch-ledger.json",
+      "sha256": "e611fc71c48bf57a4da130d08944989509d34eab620efde146bb1b5c79d30413"
+    },
+    {
+      "path": "artifacts/phase23/instances/sympy__sympy-22714/segment-4/runs/phase23-sympy__sympy-22714-s4/stage-recovery.json",
+      "sha256": "8092697c112238660d21bdfa95cb8d0c1eb47234faf23521cc16ae37d2c292e7"
+    }
+  ]
+}

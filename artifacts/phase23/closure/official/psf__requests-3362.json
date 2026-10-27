@@ -1,0 +1,98 @@
+{
+  "schema_version": 3,
+  "instance_id": "psf__requests-3362",
+  "run_id": "phase23-psf__requests-3362-s2",
+  "patch_sha256": "29f17936d67feced725f05fd9f5ed558a4c281ae1e7f551f5ba5fde087af694b",
+  "candidate_receipt": "artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/official-candidate.json",
+  "internal_status": "succeeded",
+  "official_verdict": "UNRESOLVED",
+  "official": {
+    "run_id": "phase23-psf__requests-3362-s2",
+    "command": {
+      "argv": [
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/.venv-swebench-linux/bin/python",
+        "-m",
+        "swebench.harness.run_evaluation",
+        "-d",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/test.jsonl",
+        "-s",
+        "test",
+        "-i",
+        "psf__requests-3362",
+        "-p",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/official-prediction.jsonl",
+        "-id",
+        "phase23-psf__requests-3362-s2",
+        "--max_workers",
+        "1",
+        "-t",
+        "1800",
+        "--report_dir",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/official-report",
+        "-n",
+        "swebench",
+        "--cache_level",
+        "instance"
+      ],
+      "cwd": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/official-report",
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONUTF8": "1"
+      },
+      "expected_report": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/official-report/glm-5.3-flash-main.phase23-psf__requests-3362-s2.json"
+    },
+    "decision": "EXECUTED",
+    "exit_code": 0,
+    "timed_out": false,
+    "runtime_seconds": 215.70156600998598,
+    "error_kind": null,
+    "error_detail": null,
+    "reused": false,
+    "reused_reason": "报告不存在，执行官方 harness",
+    "warnings": [],
+    "verdicts": [
+      {
+        "instance_id": "psf__requests-3362",
+        "verdict": "UNRESOLVED",
+        "resolved": false,
+        "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/official-report/glm-5.3-flash-main.phase23-psf__requests-3362-s2.json",
+        "report_sha256": "ec11deb2b49a28389adbda854954596630f4755d5f5204fdce5171f7cd6a6320",
+        "error_kind": null,
+        "error_detail": null,
+        "runtime_seconds": 215.70156600998598
+      }
+    ],
+    "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/official-report/glm-5.3-flash-main.phase23-psf__requests-3362-s2.json",
+    "report_sha256": "ec11deb2b49a28389adbda854954596630f4755d5f5204fdce5171f7cd6a6320",
+    "report": {
+      "schema_version": 2,
+      "total_instances": 1,
+      "submitted_instances": 1,
+      "completed_instances": 1,
+      "resolved_instances": 0,
+      "unresolved_instances": 1,
+      "empty_patch_instances": 0,
+      "error_instances": 0,
+      "completed_ids": [
+        "psf__requests-3362"
+      ],
+      "incomplete_ids": [],
+      "empty_patch_ids": [],
+      "submitted_ids": [
+        "psf__requests-3362"
+      ],
+      "resolved_ids": [],
+      "unresolved_ids": [
+        "psf__requests-3362"
+      ],
+      "error_ids": [],
+      "unstopped_instances": null,
+      "unstopped_containers": [],
+      "unremoved_images": [],
+      "source_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/official-report/glm-5.3-flash-main.phase23-psf__requests-3362-s2.json",
+      "source_sha256": "ec11deb2b49a28389adbda854954596630f4755d5f5204fdce5171f7cd6a6320"
+    },
+    "counts_toward_resolved_rate": true
+  }
+}

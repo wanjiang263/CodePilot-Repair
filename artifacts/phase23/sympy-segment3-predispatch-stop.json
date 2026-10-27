@@ -1,0 +1,9 @@
+{
+  "reason": "Stopped before first HTTP to enforce explicit temperature=0 request contract",
+  "ledger_sha256": "3b7dd1172df8e5734d57e1c77ab3c2e7627037514c2b8f7b37e94cf4650f5269",
+  "requests_after_stop": 0,
+  "lock": {
+    "pid": 61880,
+    "instance": "sympy__sympy-22714"
+  }
+}

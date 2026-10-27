@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "instance_id": "psf__requests-3362",
+  "base_commit": "36453b95b13079296776d11b09cab2567ea3e703",
+  "run_id": "phase23-psf__requests-3362-s2",
+  "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+  "inference_finished": true,
+  "internal_status": "succeeded",
+  "internal_stop_reason": null,
+  "patch": "artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/official-candidate.diff",
+  "patch_sha256": "29f17936d67feced725f05fd9f5ed558a4c281ae1e7f551f5ba5fde087af694b",
+  "canonical_patch_sha256": "2bb5b9c5583e4174264d12aeac04238ba6d877e7908d5ae9d601e72a9c1b34df",
+  "prediction": "artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/official-prediction.jsonl",
+  "prediction_sha256": "13d3554cb66a8458c6e9d640d3bf37784a76341b24efbf7ea5dfb4cd181a68a8",
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "path",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "size",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "non_empty",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "test_protection",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "syntax",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "cheat",
+        "passed": true,
+        "reason": null
+      }
+    ],
+    "cheat_findings": [],
+    "warnings": [],
+    "errors": [],
+    "files_changed": 1,
+    "lines_added": 22,
+    "lines_deleted": 1,
+    "risk": "low",
+    "evidence": []
+  },
+  "provenance": [
+    {
+      "path": "artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/state_final.json",
+      "sha256": "79568528a0e5d74f6eaec81289dfe7965dcfd9946b0ba6f78b8841878ee0f1f1"
+    },
+    {
+      "path": "artifacts/phase23/instances/psf__requests-3362/segment-2/dispatch-ledger.json",
+      "sha256": "02895dca507e0e8b2b99a6d324f70e6f138c669e77381723fcfba7adefd17237"
+    },
+    {
+      "path": "artifacts/phase23/instances/psf__requests-3362/segment-2/runs/phase23-psf__requests-3362-s2/stage-recovery.json",
+      "sha256": "8872ae1106fdb1da72e8231b05a5fcd64a891ef253bd1125bf389b8651ddfe83"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "instance_id": "matplotlib__matplotlib-18869",
+  "base_commit": "b7d05919865fc0c37a0164cf467d5d5513bd0ede",
+  "run_id": "phase23-matplotlib__matplotlib-18869-s1",
+  "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+  "inference_finished": true,
+  "internal_status": "succeeded",
+  "internal_stop_reason": null,
+  "patch": "artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/official-candidate.diff",
+  "patch_sha256": "56177b1f36f7282dcbb8b1588ffa2d9f701a5b7eb75ad97df4bd40ea50adf29e",
+  "canonical_patch_sha256": "ca33eff72a9fe11f313f970b7fff0996afb4300402ff20f18fda12f538efad61",
+  "prediction": "artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/official-prediction.jsonl",
+  "prediction_sha256": "1899496b9477c3b64c0e95b570e32560c512847a185b899726f8966beb293921",
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "path",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "size",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "non_empty",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "test_protection",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "syntax",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "cheat",
+        "passed": true,
+        "reason": null
+      }
+    ],
+    "cheat_findings": [],
+    "warnings": [],
+    "errors": [],
+    "files_changed": 1,
+    "lines_added": 21,
+    "lines_deleted": 0,
+    "risk": "low",
+    "evidence": []
+  },
+  "provenance": [
+    {
+      "path": "artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/state_final.json",
+      "sha256": "4b195052dce722f040101a132c5bd53aec85c4d06c42e17282575e24531311dc"
+    },
+    {
+      "path": "artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/dispatch-ledger.json",
+      "sha256": "813d12473035b2f828040054f4ecae8511fdb689ce9ac2529e5adca3a2bcb4d9"
+    },
+    {
+      "path": "artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/runs/phase23-matplotlib__matplotlib-18869-s1/stage-recovery.json",
+      "sha256": "2c6947aa879c5cd7d5d13acb0b2e7adb1d51746efcc48895318506c48e95595a"
+    }
+  ]
+}

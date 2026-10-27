@@ -1,0 +1,54 @@
+diff --git a/sphinx/builders/manpage.py b/sphinx/builders/manpage.py
+index 4166dec..dbf2cd5 100644
+--- a/sphinx/builders/manpage.py
++++ b/sphinx/builders/manpage.py
+@@ -24,7 +24,7 @@ from sphinx.util import logging
+ from sphinx.util import progress_message
+ from sphinx.util.console import darkgreen  # type: ignore
+ from sphinx.util.nodes import inline_all_toctrees
+-from sphinx.util.osutil import make_filename_from_project
++from sphinx.util.osutil import ensuredir, make_filename_from_project
+ from sphinx.writers.manpage import ManualPageWriter, ManualPageTranslator
+ 
+ 
+@@ -47,6 +47,8 @@ class ManualPageBuilder(Builder):
+             logger.warning(__('no "man_pages" config value found; no manual pages '
+                               'will be written'))
+ 
++        self.man_make_section_directory = self.config.man_make_section_directory
++
+     def get_outdated_docs(self) -> Union[str, List[str]]:
+         return 'all manpages'  # for now
+ 
+@@ -81,10 +83,19 @@ class ManualPageBuilder(Builder):
+             docsettings.section = section
+ 
+             targetname = '%s.%s' % (name, section)
+-            logger.info(darkgreen(targetname) + ' { ', nonl=True)
+-            destination = FileOutput(
+-                destination_path=path.join(self.outdir, targetname),
+-                encoding='utf-8')
++
++            if self.man_make_section_directory:
++                mocked_section_dirname = path.join(self.outdir, 'man%s' % section)
++                ensuredir(mocked_section_dirname)
++                logger.info('')  # a blank line to start with
++                destination = FileOutput(
++                    destination_path=path.join(mocked_section_dirname, targetname),
++                    encoding='utf-8')
++            else:
++                logger.info(darkgreen(targetname) + ' { ', nonl=True)
++                destination = FileOutput(
++                    destination_path=path.join(self.outdir, targetname),
++                    encoding='utf-8')
+ 
+             tree = self.env.get_doctree(docname)
+             docnames = set()  # type: Set[str]
+@@ -115,6 +126,7 @@ def setup(app: Sphinx) -> Dict[str, Any]:
+ 
+     app.add_config_value('man_pages', default_man_pages, None)
+     app.add_config_value('man_show_urls', False, None)
++    app.add_config_value('man_make_section_directory', False, None)
+ 
+     return {
+         'version': 'builtin',

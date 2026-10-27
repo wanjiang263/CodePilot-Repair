@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "instance_id": "sphinx-doc__sphinx-8273",
+  "base_commit": "88b81a06eb635a1596617f8971fa97a84c069e93",
+  "run_id": "phase23-sphinx-doc__sphinx-8273-s2",
+  "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+  "inference_finished": true,
+  "internal_status": "succeeded",
+  "internal_stop_reason": null,
+  "patch": "artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/official-candidate.diff",
+  "patch_sha256": "2c6109e54b73f470677a9bd1c4e4ff9289cc1d691ce45b05ffc870bf155abcea",
+  "canonical_patch_sha256": "65ad38c88f656b9267b9f40c4838024d03311ab43c6892ea75ffd77e880a0819",
+  "prediction": "artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/official-prediction.jsonl",
+  "prediction_sha256": "9c6b9e95b36642e22ba4c9866c20d05e274ced2273d5f01b4358e69a30001ca1",
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "path",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "size",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "non_empty",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "test_protection",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "syntax",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "cheat",
+        "passed": true,
+        "reason": null
+      }
+    ],
+    "cheat_findings": [],
+    "warnings": [],
+    "errors": [],
+    "files_changed": 1,
+    "lines_added": 17,
+    "lines_deleted": 5,
+    "risk": "low",
+    "evidence": []
+  },
+  "provenance": [
+    {
+      "path": "artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/state_final.json",
+      "sha256": "417f00457443c0030d5b6a04a2c584e6741e634089ba424b97a3d8c7627a894a"
+    },
+    {
+      "path": "artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/dispatch-ledger.json",
+      "sha256": "5cec7146d53948d0899e567c5ec5e57ea2eb26d6412827c1b3cfa7795059ba7e"
+    },
+    {
+      "path": "artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/runs/phase23-sphinx-doc__sphinx-8273-s2/stage-recovery.json",
+      "sha256": "bc84f9f54f87a47108a12a3e719a358d57f1554b1c98cf1d6d3d9d3a5af44ffb"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "ledger_path": "artifacts\\phase23\\instances\\django__django-11422\\segment-1\\dispatch-ledger.json",
+  "ledger_sha256": "0479243a3c4900bb8202a142cf500c23b18ed48004487aad459b3c992b5c031f",
+  "frozen": true,
+  "unknown_requests": [
+    {
+      "seq": 5,
+      "status": "unknown_frozen",
+      "reserved_cny": 0.8114688000000001,
+      "request_sha256": "3a6b684cea583c3823fc2dbb09edf3c244d7d65402c845bce2b59df94079aa9e",
+      "response_request_id": null,
+      "http_status": null,
+      "elapsed_seconds": 120.07799999999406
+    }
+  ],
+  "settled_cny": 0.03462664,
+  "unknown_upper_cny": 0.8114688000000001,
+  "no_cost_checks": [
+    {
+      "method": "HEAD",
+      "path": "/chat/completions",
+      "http_status": 200,
+      "elapsed_seconds": 1.014999999999418,
+      "inference_body_sent": false
+    },
+    {
+      "method": "GET",
+      "path": "/models",
+      "http_status": 200,
+      "elapsed_seconds": 0.20299999999406282,
+      "inference_body_sent": false
+    }
+  ],
+  "credential_available": true,
+  "new_model_requests": 0,
+  "billing_reconciliation": "No response ID or usage received. Supplier final cost remains unknown; full reserve remains frozen, no balance credit assumed.",
+  "replay_policy": "Never resend request_sha256 shown above. Distinct validation/regression/review of the byte-preserved prior legal Agent source is a new stage, carrying this frozen ledger and hash.",
+  "service_assessment": "Four recent GLM Planner responses settled before one Coder read timeout. No evidence of sustained shared outage; gateway checks do not prove inference health. Any additional uncertainty must freeze its own new segment, without replay."
+}

@@ -1,0 +1,10 @@
+{
+  "status": "REVIEW_INVALID_MODEL_ROUTING",
+  "reason": "Launcher retained default YAML roles; reviewer used deepseek-flash instead of authorized GLM. Do not count this review as the required specified-model review. Existing GLM candidate unchanged; corrective GLM re-review will use a new segment.",
+  "ledger_path": "artifacts\\phase23\\instances\\sympy__sympy-22714\\segment-2\\dispatch-ledger.json",
+  "ledger_sha256": "07a84d09fad6092cdc9cb4899ff768298a26095e1c68fd86dc1942bdbc096eb0",
+  "all_requests_settled": true,
+  "cost_cny": 0.022352,
+  "will_count_in_authorization": true,
+  "no_candidate_regeneration": true
+}

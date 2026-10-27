@@ -1,0 +1,236 @@
+{
+  "root": "D:\\Projects\\Desktop\\CodePilot-Repair",
+  "prior_authorization_sources": {
+    "artifacts/phase20/m3-20261024-formal6/instances/matplotlib__matplotlib-18869/dispatch-ledger-m3-20261024-r1.json": "14f3e119d8c87945ce70b71982fc5d60974c21b9076057d4365589c63f870cd8",
+    "artifacts/phase20/m3-20261024-formal6/instances/sphinx-doc__sphinx-8273/dispatch-ledger-m3-20261024-r1.json": "d27b7618f42311648f3ea2c5e4fbf3da52db1d735d7db12c641f3d0688129f85",
+    "artifacts/phase21/m3-phase21-recovery-6-r5/instances/django__django-11422/dispatch-ledger-phase21-recovery-6-r1.json": "348d46f251f73f22cc207fda8374ca49b40a85d453199d2a6a1318daa439a046",
+    "artifacts/phase22/live/instances/sphinx-doc__sphinx-8273/dispatch-ledger-phase22-six-live-r1.json": "aae05e2f6799d1acc00087ce916d67452df16cf4b796743a87501a1667e0530d",
+    "artifacts/phase22/live-r2-indexed/instances/sympy__sympy-22714/dispatch-ledger-phase22-six-live-r2-r1.json": "78a072c2f937328353da7c8202dbe8697755022e5ca8c1f320cff24de428c280",
+    "artifacts/phase22/live-r3/instances/matplotlib__matplotlib-18869/dispatch-ledger-phase22-six-live-r3-r1.json": "0299513e525b71147d331f8986e5e88449e3dac2053a1c07874c4db3d5aa1d6f",
+    "artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/dispatch-ledger-phase22-six-live-r3-r1.json": "7011860fb1eccdbcced7ae06abf028f4690770a979af1da62e043401b4fb058d",
+    "artifacts/phase22/live-r4/instances/psf__requests-3362/dispatch-ledger-phase22-six-live-r4-r1.json": "aeb7ca8b356fca6106366da54da71c6d8068203c21d2a9c761ba84ff5291a12a",
+    "artifacts/phase22/live-r5/instances/django__django-11422/dispatch-ledger-phase22-six-live-r5-r1.json": "e3757a2b8081e3dd8bad0e8c88958ef76c038098e8ea9658e64f6257796e3984"
+  },
+  "original30_used_upper_cny": 2.03560072,
+  "original30_remaining_cny": 27.96439928,
+  "phase23_cap_cny": 24,
+  "per_unfinished_instance_cap_cny": 4,
+  "opening_sha256": "4793a46a824e567f3b7b4cfa0a5f5f2b2770e2dd4c5028d17f05573129763e61",
+  "instances": [
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "source_run": "artifacts/phase22/live/instances/sphinx-doc__sphinx-8273/runs/swebench-smoke-phase22-six-live-sphinx-doc__sphinx-8273-s0-3cdd4e70",
+      "state_exists": false,
+      "state_sha256": null,
+      "base_commit": null,
+      "patch_bytes": 0,
+      "runtime_seconds": 0,
+      "attempts": 0,
+      "plan": null,
+      "has_baseline": false,
+      "has_reproduction": false,
+      "status": null,
+      "stop_reason": null
+    },
+    {
+      "instance_id": "sympy__sympy-22714",
+      "source_run": "artifacts/phase22/live-r2-indexed/instances/sympy__sympy-22714/runs/swebench-smoke-phase22-six-live-r2-sympy__sympy-22714-s0-e2006a67",
+      "state_exists": true,
+      "state_sha256": "ef2e40f913cf2dc4ac2fb69adab5f3deaee687084ca2a1cd9e88f42787cc08b5",
+      "base_commit": "3ff4717b6aef6086e78f01cdfa06f64ae23aed7e",
+      "patch_bytes": 699,
+      "runtime_seconds": 1463.080334,
+      "attempts": 1,
+      "plan": {
+        "root_cause_hypothesis": "在 `evaluate(False)` 上下文中，`sympy.core.parameters.global_parameters.evaluate` 为 False，因此当 `Point.__new__` (sympy/geometry/point.py) 运行其虚部防护逻辑 `if any(a.is_number and im(a) for a in coords)`（第 155 行）时，`im(Integer(1))` 被构建为一个未求值的 `im` 应用，而不是立即化为 0。这个未求值的对象是 truthy 的，因此代码错误地判定实数整数坐标为虚数，并抛出了 'Imaginary coordinates are not permitted.'。因此，`sympify`/`parse_expr` 内部机制本身是正确的；该 Bug 在于几何模块中的虚部检查与未求值表达式不兼容。修复方案：加强检查，使其仅在明确检测到非零虚部时才报错（例如 `im(a).is_zero is False`），这样即使 `im(a)` 保持未求值（其 `is_zero` 为 None）的状态下，点也可以被构建。",
+        "evidence": [
+          "回溯信息：异常出现在 sympy/geometry/point.py:153 在 Point2D.__new__ -> Point(*args, **kwargs) 内部，仅在 `with evaluate(False)` 路径下触发。",
+          "sympy/geometry/point.py:155-156 (通过搜索及 read_file 验证): `if any(a.is_number and im(a) for a in coords): raise ValueError('Imaginary coordinates are not permitted.')` —— 这是一个通过调用 `im(a)` 获得的 truthiness 检查，当全局求值关闭时，它不会自动化为 0。",
+          "sympy/geometry/point.py:110: `evaluate = kwargs.get('evaluate', global_parameters.evaluate)` —— Point.__new__ 遵循来自 `evaluate(False)` 上下文管理器的全局参数，将未求值的构建传播到坐标中。",
+          "sympy/geometry/point.py:912-915: Point2D.__new__ 将参数转发给 Point，证实了回溯路径。",
+          "sympy/parsing/sympy_parser.py:1087-1088 和 1103-1108: 当 `evaluate=False` 时，parse_expr 使用 EvaluateFalseTransformer 重新编译代码；转换器 (1115-1206) 仅触及 BinOps 以及一个固定的函数列表 ('Abs','im','re',...)，且 Point2D 不在其中，因此解析步骤本身并非问题根源。",
+          "该问题报告称，不带 `with evaluate(False)` 时，相同的字符串可以工作，这说明该失败是受上下文管理器驱动的，而不是 sympify/parse_expr 代码转换的问题。"
+        ],
+        "changes": [
+          {
+            "file": "sympy/geometry/point.py",
+            "symbol": "sympy.geometry.point.Point.__new__",
+            "action": "modify",
+            "description": "将虚部防护逻辑从 `if any(a.is_number and im(a) for a in coords):` 修改为仅在坐标明确为虚数时报错，例如 `if any(a.is_number and im(a).is_zero is False for a in coords):`。这样，当 `evaluate=False` 时，实数坐标（如 Integer(1), Integer(2)）的未求值 `im(a)` (is_zero=None) 不再触发 ValueError，而真正虚数的坐标（is_zero=False）仍然会被拒绝。"
+          }
+        ],
+        "tests_to_run": [
+          "sympy/geometry/tests/test_point.py::test_Point2D",
+          "sympy/parsing/tests/test_sympy_parser.py::test_function_evaluate_false",
+          "sympy/parsing/tests/test_sympy_parser.py::test_recursive_evaluate_false_10560",
+          "sympy/core/tests/test_expr.py::test_issue_22020"
+        ],
+        "planned_new_tests": [],
+        "risk": "medium",
+        "alternatives": [
+          "改为在解析器中修复：在 parse_expr/evaluateFalse 中防止全局参数导致未求值的构建 —— 已否决，因为回溯和问题报告显示构造函数收到了有效的实数坐标；缺陷在于几何检查，而非转换代码。",
+          "在 Point.__new__ 内部将坐标包装在 `evaluate(True)` 上下文中，以便在进行检查前 `im(a)` 化为 0 —— 范围更广，且会掩盖其他坐标操作中未求值的表达式。",
+          "在检查前将每个坐标与 `sympify`/`radsimp` 进行比较 —— 不必要地复杂且开销大；`im(a).is_zero is False` 直接表达了预期的逻辑。"
+        ]
+      },
+      "has_baseline": true,
+      "has_reproduction": true,
+      "status": "succeeded",
+      "stop_reason": null
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-18869",
+      "source_run": "artifacts/phase22/live-r3/instances/matplotlib__matplotlib-18869/runs/swebench-smoke-phase22-six-live-r3-matplotlib__matplotlib-18869-s0-759408fe",
+      "state_exists": true,
+      "state_sha256": "872c89e8dfbccbd1537f974697388d2191534fe054ccb3cf81da2c402186e58e",
+      "base_commit": "b7d05919865fc0c37a0164cf467d5d5513bd0ede",
+      "patch_bytes": 1554,
+      "runtime_seconds": 1021.641406,
+      "attempts": 1,
+      "plan": {
+        "root_cause_hypothesis": "功能请求：顶层模块仅公开 `__version__`（通过 lib/matplotlib/__init__.py:133-151 中的延迟模块 `__getattr__` 实现，已通过只读读取工具确认），没有机器可比较的版本信息。修复将在该 `__getattr__` 中添加一个 `version_info` 元组分支。然而，确定性定位结果没有返回任何文件，且此运行未授权新的测试文件；没有现有的测试可以验证版本 API，因此计划为空，在验证正确性之前不应执行：任何变更都需要在此只读规划之外，根据本地化结果进行重新确认。",
+        "evidence": [
+          "lib/matplotlib/__init__.py:133-151（只读读取）：`__getattr__` 处理 `__version__`，通过 setuptools_scm/_version.version 进行延迟计算并缓存",
+          "lib/ 中搜索 `version_info`：没有 matplotlib `version_info` 属性；仅存在 cairo.version_info (lib/matplotlib/backends/backend_cairo.py:17) 和 sys.version_info 的用法",
+          "get_related_tests(lib.matplotlib.__getattr__) 未返回任何内容；对 lib/matplotlib/tests/* 中 `__version__` 的搜索仅找到了后端元数据测试 (test_backend_pdf.py, test_backend_pgf.py, test_backend_svg.py)",
+          "lib/matplotlib/tests/test_basic.py 存在并导入了 `matplotlib`，但它未被授权作为 tests_to_run 中的可执行目标，且修改它受到了保护"
+        ],
+        "changes": [],
+        "tests_to_run": [],
+        "planned_new_tests": [],
+        "risk": "low",
+        "alternatives": [
+          "推迟修复，直到确定性定位确认 lib/matplotlib/__init__.py 为目标文件，然后向模块 `__getattr__` 添加延迟 `version_info` 元组分支",
+          "将 LooseVersion/parse_version 对象暴露为顶层 `matplotlib.version` 以实现字符串可比较性；这不太标准，且 LooseVersion 已弃用",
+          "在导入时预先计算 `version_info` 而不是延迟计算；更简单，但增加了导入成本，且与现有的延迟 `__version__` 设计不一致"
+        ]
+      },
+      "has_baseline": true,
+      "has_reproduction": true,
+      "status": "failed",
+      "stop_reason": "tests_failed"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "source_run": "artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/runs/swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f",
+      "state_exists": true,
+      "state_sha256": "55bc063eb2c79140777f3f8454800b088452406ec8d3cebd9111946e72a1d3d4",
+      "base_commit": "b90661d6a46aa3619d3eec94d5281f5888add501",
+      "patch_bytes": 1560,
+      "runtime_seconds": 307.214198,
+      "attempts": 1,
+      "plan": {
+        "root_cause_hypothesis": "RidgeClassifierCV.__init__ (sklearn/linear_model/ridge.py:1335-1340) 未在签名中声明 store_cv_values，也未将其透传给 _BaseRidgeCV.__init__ (ridge.py:1088-1098，已支持该参数)，因此传入 store_cv_values=True 时抛出 TypeError: __init__() got an unexpected keyword argument 'store_cv_values'；而类 docstring (ridge.py:1304-1311) 声称 cv_values_ 属性依赖 store_cv_values=True，造成文档与实现不一致。注意：现有测试均未直接覆盖 RidgeClassifierCV 的 store_cv_values 参数（test_ridgecv_store_cv_values 仅覆盖 RidgeCV），本次运行未获授权新增测试，因此验证依赖既有回归测试确认不破坏行为。",
+        "evidence": [
+          "sklearn/linear_model/ridge.py:1335-1336 RidgeClassifierCV.__init__ 签名为 (alphas, fit_intercept, normalize, scoring, cv, class_weight)，不含 store_cv_values",
+          "sklearn/linear_model/ridge.py:1337-1339 super().__init__ 调用未传递 store_cv_values",
+          "sklearn/linear_model/ridge.py:1088-1098 _BaseRidgeCV.__init__ 已声明并保存 store_cv_values 参数",
+          "sklearn/linear_model/ridge.py:1306-1311 RidgeClassifierCV docstring 声称 cv_values_ 在 store_cv_values=True 且 cv=None 时可用",
+          "sklearn/linear_model/tests/test_ridge.py:577-598 现有 test_ridgecv_store_cv_values 仅覆盖 RidgeCV（第587行使用 RidgeCV），未覆盖 RidgeClassifierCV"
+        ],
+        "changes": [
+          {
+            "file": "sklearn/linear_model/ridge.py",
+            "symbol": "a4e32a0aca57db0b90c38c4d6a864638d94f554b",
+            "action": "modify",
+            "description": "在 __init__ 签名中加入 store_cv_values=False 参数，并在 super().__init__ 调用中透传给 _BaseRidgeCV（alphas=alphas, fit_intercept=..., normalize=..., scoring=scoring, cv=cv, store_cv_values=store_cv_values）"
+          },
+          {
+            "file": "sklearn/linear_model/ridge.py",
+            "symbol": "6cb42033563fa44a9e3372791cad98145e98d1b5",
+            "action": "modify",
+            "description": "在类 docstring 的 Parameters 部分补充 store_cv_values : boolean, optional, default False 的说明，使文档与实现一致"
+          }
+        ],
+        "tests_to_run": [
+          "sklearn/linear_model/tests/test_ridge.py::test_ridgecv_store_cv_values",
+          "sklearn/linear_model/tests/test_ridge.py::test_ridge_cv_sparse_svd",
+          "sklearn/linear_model/tests/test_ridge.py::test_class_weights_cv",
+          "sklearn/linear_model/tests/test_ridge.py::test_ridgecv_sample_weight",
+          "sklearn/linear_model/tests/test_ridge.py::test_class_weight_vs_sample_weight"
+        ],
+        "planned_new_tests": [],
+        "risk": "low",
+        "alternatives": [
+          "在 RidgeClassifierCV.__init__ 中接收 **kwargs 并转发给父类——不推荐，会破坏显式签名和参数文档",
+          "仅修改文档去掉 store_cv_values 的说明——不推荐，违背 issue 要求的功能补全，且 _BaseRidgeCV.fit 已能通过 self.store_cv_values 设置 cv_values_",
+          "在 RidgeClassifierCV.fit 中单独处理 cv_values_ 存储——不必要，父类 _BaseRidgeCV.fit 已实现该逻辑，仅需透传参数"
+        ]
+      },
+      "has_baseline": true,
+      "has_reproduction": true,
+      "status": "succeeded",
+      "stop_reason": null,
+      "official_reused": {
+        "path": "artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/official-evaluation-phase22-six-live-r3.json",
+        "sha256": "50a8a02a03a57f48999d253b264e5df709a463f2f8f2121311ab6abc8ed6a9e7",
+        "patch_sha256": "48d96261554d791b5ea10b7bcae56a7d221dbd38ad15cb2302e24b1d524c0df7",
+        "prediction_sha256": "8a5e360c11eaab5cd5a03671d1063821b821c6b4efcd254f9a95f4224d315aed",
+        "verdict": "RESOLVED"
+      }
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "source_run": "artifacts/phase22/live-r4/instances/psf__requests-3362/runs/swebench-smoke-phase22-six-live-r4-psf__requests-3362-s0-d24f57e7",
+      "state_exists": true,
+      "state_sha256": "52da1bfa7607421249d4e8d519b9b746553cb4a7ba74522c774d12abfa7bac79",
+      "base_commit": "36453b95b13079296776d11b09cab2567ea3e703",
+      "patch_bytes": 0,
+      "runtime_seconds": 168.800155,
+      "attempts": 0,
+      "plan": null,
+      "has_baseline": true,
+      "has_reproduction": true,
+      "status": "sandbox_error",
+      "stop_reason": "sandbox_failure"
+    },
+    {
+      "instance_id": "django__django-11422",
+      "source_run": "artifacts/phase22/live-r5/instances/django__django-11422/runs/swebench-smoke-phase22-six-live-r5-django__django-11422-s0-f137c0d5",
+      "state_exists": true,
+      "state_sha256": "95cc1a057b2dd76cad7afb22704a09438c1368070be30053e8caf5b96633aeaf",
+      "base_commit": "df46b329e0900e9e4dc1d60816c1dce6dfc1094e",
+      "patch_bytes": 1818,
+      "runtime_seconds": 1621.666894,
+      "attempts": 2,
+      "plan": {
+        "root_cause_hypothesis": "在 django/utils/autoreload.py 中，iter_all_python_module_files() 将来自 sys.modules 的所有模块传递给 iter_modules_and_files()，后者会跳过任何 module.__spec__ 为 None 的模块（第 117 行：`if not isinstance(module, ModuleType) or getattr(module, '__spec__', None) is None: continue`）。当通过 `python manage.py runserver` 启动服务器时，`__main__` 模块是 manage.py，在 Python 3.7 之前，通过脚本路径执行的 `__main__` 没有 `__spec__`，因此 manage.py 永远不会进入被监视的文件集合。随后，StatReloader.snapshot_files()（第 345 行，watched_files() → iter_all_python_module_files()）无法看到 manage.py，因此对其 mtime 的更改永远不会触发重载，这与问题报告中提到的“它从未看到 manage.py 本身”相符。修复方案（与上游 Django 对 ticket #30479 的修复一致）：使 iter_modules_and_files() 对 `__main__` 进行特殊处理，通过例如 importlib.util.find_spec('__main__') 或 `__main__.__file__`/`__cached__` 来解析其规范，以便即使脚本本身没有 `__spec__`，入口脚本也能被监视。",
+        "evidence": [
+          "django/utils/autoreload.py 第 109-136 行：iter_modules_and_files() 跳过了 getattr(module, '__spec__', None) 为 None 的模块，排除了作为脚本执行时的 __main__ (manage.py)。",
+          "django/utils/autoreload.py 第 99-106 行：iter_all_python_module_files() 从 sys.modules 构建受监视列表，因此没有规范（spec）的 __main__ 永远不会生成其文件。",
+          "django/utils/autoreload.py 第 239-249 行：BaseReloader.watched_files() 仅生成 iter_all_python_module_files()、extra_files 和 globs —— 没有覆盖 manage.py 的 extra_files 注册。",
+          "django/utils/autoreload.py 第 342-354 行：StatReloader.snapshot_files() 仅对由 watched_files() 生成的文件进行 stat 操作，因此 manage.py 的更改是无法检测的。",
+          "tests/utils_tests/test_autoreload.py 包含 RestartWithReloaderTests.test_manage_py（第 312-317 行）以及现有的针对模块迭代的 IterModulesAndFilesTests 类，可用于验证监视行为。"
+        ],
+        "changes": [
+          {
+            "file": "django/utils/autoreload.py",
+            "symbol": "django.utils.autoreload.iter_modules_and_files",
+            "action": "modify",
+            "description": "处理没有 __spec__ 的 __main__：当模块为 __main__ 且缺少 spec 时，通过 importlib.util.find_spec('__main__')（或回退到 __main__.__file__ / __main__.__cached__）来解析它，并产生其 origin/location 以用于受监视文件集，而不是简单地跳过它。保留对于无位置 spec（例如 zipimport 归档文件）的现有行为。"
+          },
+          {
+            "file": "django/utils/autoreload.py",
+            "symbol": "django.utils.autoreload.iter_all_python_module_files",
+            "action": "modify",
+            "description": "如果需要，确保入口脚本路径（Path(sys.argv[0])，当它解析为 __main__ 且无法通过 spec 找到时）作为额外的受监视文件传递给 iter_modules_and_files()，以便 manage.py 在所有调用路径（StatReloader 和 WatchmanReloader）中都能得到健壮的监视。"
+          }
+        ],
+        "tests_to_run": [
+          "tests/utils_tests/test_autoreload.py"
+        ],
+        "planned_new_tests": [],
+        "risk": "low",
+        "alternatives": [
+          "在 get_child_arguments() / run_with_reloader() 中调用 reloader.watch_file(Path(sys.argv[0]).resolve()) —— 在同一位置监视入口脚本，但这会将受监视文件集与 extra_files 分开，并且对于非 runserver 的调用者没有帮助。",
+          "在 get_child_arguments() 中，通过命令行/环境变量标志将入口脚本传递给子进程，以注册为 extra_files —— 更复杂且没有明显好处。",
+          "通过将 sys.argv[0] 添加到 _error_files 风格的额外集合中，从 manage.py 端进行监视 —— 涉及用户项目代码，作为框架修复是不可接受的。"
+        ]
+      },
+      "has_baseline": true,
+      "has_reproduction": true,
+      "status": "budget_exhausted",
+      "stop_reason": "budget_time"
+    }
+  ]
+}

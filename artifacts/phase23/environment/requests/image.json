@@ -1,0 +1,6 @@
+{
+  "image_ref": "phase23/requests-3362:httpbin2",
+  "image_id": "sha256:7ea718341b9e7b836261ed1a80c62c7d179a61cb519a39842ca7069b4c9a005c",
+  "parent_image_ref": "swebench/sweb.eval.x86_64.psf_1776_requests-3362:latest",
+  "parent_image_id": "sha256:d1c8c15eeb5e12b7eb3815307d1131d68c72d53419fa2f8b89bc46bc0009a61b"
+}

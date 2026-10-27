@@ -1,0 +1,58 @@
+{
+  "final_code_head": "5992831062a5e6a5bcd054cc92ccdf14689d6e7d",
+  "audit_source_head": "a9bf5ea66d34a4051c8736e1714e8e0b79606506",
+  "historical_source_states_verified": [
+    {
+      "instance_id": "sympy__sympy-22714",
+      "source_state_sha256": "ef2e40f913cf2dc4ac2fb69adab5f3deaee687084ca2a1cd9e88f42787cc08b5"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-18869",
+      "source_state_sha256": "872c89e8dfbccbd1537f974697388d2191534fe054ccb3cf81da2c402186e58e"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "source_state_sha256": "55bc063eb2c79140777f3f8454800b088452406ec8d3cebd9111946e72a1d3d4"
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "source_state_sha256": "52da1bfa7607421249d4e8d519b9b746553cb4a7ba74522c774d12abfa7bac79"
+    },
+    {
+      "instance_id": "django__django-11422",
+      "source_state_sha256": "95cc1a057b2dd76cad7afb22704a09438c1368070be30053e8caf5b96633aeaf"
+    }
+  ],
+  "unknown_coder_request_dispatch_count": 1,
+  "test_logs": [
+    {
+      "path": "artifacts\\phase23\\final-related-tests.log",
+      "sha256": "4315495db52818156d9e9aaccb1912b631e45cd509eab2eabbc955e5432cb04f"
+    },
+    {
+      "path": "artifacts\\phase23\\official-light-import-tests.log",
+      "sha256": "94f99d3871df350a8f6f2e90007ad792689b1364f9dd140d06fcf331b4bcb925"
+    },
+    {
+      "path": "artifacts\\phase23\\unified-time-reserve-tests.log",
+      "sha256": "b70c816d2d538c50f69aad4cfa6f380f3fbbfd9c30eada07795f20fcfb360ad5"
+    },
+    {
+      "path": "artifacts\\phase23\\mypy-final.log",
+      "sha256": "15c7df645f636fd0eec89a4ec3120ac4b67aabc576d6b0c5b87754ef8035825f"
+    },
+    {
+      "path": "artifacts\\phase23\\mypy-closure-final.log",
+      "sha256": "15c7df645f636fd0eec89a4ec3120ac4b67aabc576d6b0c5b87754ef8035825f"
+    }
+  ],
+  "timing_note": "Process elapsed_seconds and HTTP elapsed_seconds are monotonic. Node-wall figures are reconstructed from UTC events; negative spans are unknown and are not summed as durations.",
+  "node_clock_anomalies": [
+    {
+      "instance_id": "django__django-11422",
+      "segment": "segment-3",
+      "node": "validate_patch",
+      "wall_delta_seconds": -0.655382
+    }
+  ]
+}

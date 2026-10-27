@@ -1,0 +1,9 @@
+{
+  "time": "2026-10-27T05:11:21.037715+00:00",
+  "method": "GET",
+  "path": "/models",
+  "http_status": 200,
+  "model_requests": 0,
+  "old_unknown_reserved_cny": 0.8114688,
+  "old_frozen_ledger_sha256": "0479243a3c4900bb8202a142cf500c23b18ed48004487aad459b3c992b5c031f"
+}

@@ -1,0 +1,731 @@
+{
+  "generated_at": "2026-10-27T04:43:00.972660+00:00",
+  "catalog_sha256": "3cfa3b13cbbf281aafb216a6942bfbdc4c249c5c082c715218ea786c2cc0c3be",
+  "exclusions_sha256": "34ff8d16ec545e4ae62518d051c2936e7604a0e8214365695f57648f76d8cb26",
+  "snapshot_sha256": "5c7a40b4812a0d3daaffbbd63664fbf1cd8291ed520c80e304aa5c1b7e21ff7a",
+  "coverage": 50,
+  "registry_available": 50,
+  "base_and_runner_cli_verified": 7,
+  "cached": 7,
+  "missing_images": 43,
+  "model_requests": 0,
+  "paid_dispatch_authorized": false,
+  "runtime_tests_claimed": false,
+  "remaining": "No test50 model execution. Complete missing fixed images and per-instance clean workspace, index and issue-derived bounded test before dispatch; separate model funding remains mandatory.",
+  "instances": [
+    {
+      "instance_id": "sphinx-doc__sphinx-8506",
+      "repo": "sphinx-doc/sphinx",
+      "base_commit": "e4bd3bd3ddd42c6642ff779a4f7381f219655c2c",
+      "image_ref": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8506:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:63dfc9e06aecd26d6b76eb4bda169638e26976d4318fb1baf20d6977dc6e1def",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-14999",
+      "repo": "django/django",
+      "base_commit": "a754b82dac511475b6276039471ccd17cc64aeb8",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-14999:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:1ca2b627c38a7299c6d0972837ccb260aa9d81c44a7d95effbac1df17f596748",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "astropy__astropy-14995",
+      "repo": "astropy/astropy",
+      "base_commit": "b16c7d12ccbc7b2d20364b89fb44285bcbfede54",
+      "image_ref": "swebench/sweb.eval.x86_64.astropy_1776_astropy-14995:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:e1c746371f8f7132c29768bea9cc1380871c87f6e4404a2282d8d3c582786874",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "astropy__astropy-6938",
+      "repo": "astropy/astropy",
+      "base_commit": "c76af9ed6bb89bfba45b9f5bc1e635188278e2fa",
+      "image_ref": "swebench/sweb.eval.x86_64.astropy_1776_astropy-6938:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:00cb659e4042696f82d4ab703cf6966e33c7d539689df572e1278d38a7ba7bbb",
+        "size": 856
+      },
+      "actual_image_id": "sha256:00cb659e4042696f82d4ab703cf6966e33c7d539689df572e1278d38a7ba7bbb",
+      "status": "BASE_AND_RUNNER_CLI_VERIFIED",
+      "proof_source": "artifacts\\phase23\\test50-provision-r5\\progress.jsonl",
+      "proof_source_sha256": "d26fbb93e6cf73b883c3a13fd29f06134ec0b2548ff617263fdb5685c76cf887"
+    },
+    {
+      "instance_id": "django__django-16816",
+      "repo": "django/django",
+      "base_commit": "191f6a9a4586b5e5f79f4f42f190e7ad4bbacc84",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-16816:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:45bd3de75747af8b30605aaf8a8db688f4ed5da3eb154a382db060771b8813e5",
+        "size": 856
+      },
+      "actual_image_id": "sha256:45bd3de75747af8b30605aaf8a8db688f4ed5da3eb154a382db060771b8813e5",
+      "status": "BASE_AND_RUNNER_CLI_VERIFIED",
+      "proof_source": "artifacts\\phase23\\test50-provision-r5\\progress.jsonl",
+      "proof_source_sha256": "d26fbb93e6cf73b883c3a13fd29f06134ec0b2548ff617263fdb5685c76cf887"
+    },
+    {
+      "instance_id": "django__django-11630",
+      "repo": "django/django",
+      "base_commit": "65e86948b80262574058a94ccaae3a9b59c3faea",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-11630:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:86c81bee2d2a1c35e37df6a84ee6b929264822d31657bbe87b1aca59c7fde111",
+        "size": 856
+      },
+      "actual_image_id": "sha256:86c81bee2d2a1c35e37df6a84ee6b929264822d31657bbe87b1aca59c7fde111",
+      "status": "BASE_AND_RUNNER_CLI_VERIFIED",
+      "proof_source": "artifacts\\phase23\\test50-provision-r5\\progress.jsonl",
+      "proof_source_sha256": "d26fbb93e6cf73b883c3a13fd29f06134ec0b2548ff617263fdb5685c76cf887"
+    },
+    {
+      "instance_id": "django__django-11999",
+      "repo": "django/django",
+      "base_commit": "84633905273fc916e3d17883810d9969c03f73c2",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-11999:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:3c7e7f035f611b17f2093ee6409364bc28cce8b9bac266b9590db762d197607e",
+        "size": 856
+      },
+      "actual_image_id": "sha256:3c7e7f035f611b17f2093ee6409364bc28cce8b9bac266b9590db762d197607e",
+      "status": "BASE_AND_RUNNER_CLI_VERIFIED",
+      "proof_source": "artifacts\\phase23\\test50-provision-r5\\progress.jsonl",
+      "proof_source_sha256": "d26fbb93e6cf73b883c3a13fd29f06134ec0b2548ff617263fdb5685c76cf887"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8595",
+      "repo": "sphinx-doc/sphinx",
+      "base_commit": "b19bce971e82f2497d67fdacdeca8db08ae0ba56",
+      "image_ref": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8595:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:d24f9894d781546578028592ad7630cb40973b69af4705582b5e274afc573628",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-20639",
+      "repo": "sympy/sympy",
+      "base_commit": "eb926a1d0c1158bf43f01eaf673dc84416b5ebb1",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-20639:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:08d37b0bda210b9a1bc94e0ed0d783937a2d91c3d87a6726352bc3637a55cd4d",
+        "size": 856
+      },
+      "actual_image_id": "sha256:08d37b0bda210b9a1bc94e0ed0d783937a2d91c3d87a6726352bc3637a55cd4d",
+      "status": "BASE_AND_RUNNER_CLI_VERIFIED",
+      "proof_source": "artifacts\\phase23\\test50-provision-r5\\progress.jsonl",
+      "proof_source_sha256": "d26fbb93e6cf73b883c3a13fd29f06134ec0b2548ff617263fdb5685c76cf887"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3190",
+      "repo": "mwaskom/seaborn",
+      "base_commit": "4a9e54962a29c12a8b103d75f838e0e795a6974d",
+      "image_ref": "swebench/sweb.eval.x86_64.mwaskom_1776_seaborn-3190:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:5ce876a52439385a2638f21617febf25a333c24b0db555cb9e37230b4db2cdcc",
+        "size": 856
+      },
+      "actual_image_id": "sha256:5ce876a52439385a2638f21617febf25a333c24b0db555cb9e37230b4db2cdcc",
+      "status": "BASE_AND_RUNNER_CLI_VERIFIED",
+      "proof_source": "artifacts\\phase23\\test50-provision-r5\\progress.jsonl",
+      "proof_source_sha256": "d26fbb93e6cf73b883c3a13fd29f06134ec0b2548ff617263fdb5685c76cf887"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-7114",
+      "repo": "pylint-dev/pylint",
+      "base_commit": "397c1703e8ae6349d33f7b99f45b2ccaf581e666",
+      "image_ref": "swebench/sweb.eval.x86_64.pylint-dev_1776_pylint-7114:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:6bf0ee60d9e1bb2772f3287f54df0875884ec8aa1e24e6fad14beec46aad70b0",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-13971",
+      "repo": "sympy/sympy",
+      "base_commit": "84c125972ad535b2dfb245f8d311d347b45e5b8a",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-13971:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:cc0369f168735cf7b9add74f5d3a50cf3c51a03549b798fa853181633ed2921a",
+        "size": 856
+      },
+      "actual_image_id": "sha256:cc0369f168735cf7b9add74f5d3a50cf3c51a03549b798fa853181633ed2921a",
+      "status": "BASE_AND_RUNNER_CLI_VERIFIED",
+      "proof_source": "artifacts\\phase23\\test50-provision-r5\\progress.jsonl",
+      "proof_source_sha256": "d26fbb93e6cf73b883c3a13fd29f06134ec0b2548ff617263fdb5685c76cf887"
+    },
+    {
+      "instance_id": "django__django-16873",
+      "repo": "django/django",
+      "base_commit": "fce90950bef348803fa7cc3e6bc65f4bce429b82",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-16873:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:645d3646665978560f5f5add4e32b4e90cac9e098b7fdcf5e415cbd7004ecd0b",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-14238",
+      "repo": "django/django",
+      "base_commit": "30e123ed351317b7527f632b3b7dc4e81e850449",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-14238:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:ce30418a2b0599fa84ce4541450586010fab2d23a5da4cfe70770f304d289780",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23563",
+      "repo": "matplotlib/matplotlib",
+      "base_commit": "149a0398b391cfc4eddb5e659f50b3c66f32ea65",
+      "image_ref": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-23563:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:a34e45f320187a07dbf6b21c38a859949cf1dc7f2eb060344ee8aafdb65d46c0",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-13964",
+      "repo": "django/django",
+      "base_commit": "f39634ff229887bf7790c069d0c411b38494ca38",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-13964:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:3bd826784556cee19b7d056d48ca3c7d793a77eac9fb311cdc460455f5d005ef",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5692",
+      "repo": "pytest-dev/pytest",
+      "base_commit": "29e336bd9bf87eaef8e2683196ee1975f1ad4088",
+      "image_ref": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-5692:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:5b0e6b914a49855cc4e4de597800c95e40c7991fb76313862a7b2b4ca6ec9a00",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-13773",
+      "repo": "sympy/sympy",
+      "base_commit": "7121bdf1facdd90d05b6994b4c2e5b2865a4638a",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-13773:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:be304d53edad108e694710cd6605256c905f0255ff97af932f600d1f226ef692",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-22840",
+      "repo": "sympy/sympy",
+      "base_commit": "d822fcba181155b85ff2b29fe525adbafb22b448",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-22840:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:d1f49043c4927485fa02a3ddb2d37963def4b9d53bea9bafd2eeca17eaa7293f",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-13710",
+      "repo": "django/django",
+      "base_commit": "1bd6a7a0acc11e249fca11c017505ad39f15ebf6",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-13710:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:c6a3b9a997b2ff929be10ee355bf28a4ab22de943ab2aa47fe2bb83750c39388",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-14580",
+      "repo": "django/django",
+      "base_commit": "36fa071d6ebd18a61c4d7f1b5c9d17106134bd44",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-14580:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:34f0b2435968031cc19f39e942843c395128c10b0a73f4107742e06944aeb338",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-15814",
+      "repo": "django/django",
+      "base_commit": "5eb6a2b33d70b9889e1cafa12594ad6f80773d3a",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-15814:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:56da9705f6ffdcd965e4226d8bfaf81fa6f2aac5ed9d2e2b796d1b0f3d200871",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5103",
+      "repo": "pytest-dev/pytest",
+      "base_commit": "10ca84ffc56c2dd2d9dc4bd71b7b898e083500cd",
+      "image_ref": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-5103:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:1648c614485c81d9e08bcf9ec8014fb38cd2f20fad6bea782552d923a35ce714",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-24152",
+      "repo": "sympy/sympy",
+      "base_commit": "b9af885473ad7e34b5b0826cb424dd26d8934670",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-24152:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:93355b3cd26ea77272c3dfbefde63b68a78620dff9376dcba286d614a008a6d1",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-13925",
+      "repo": "django/django",
+      "base_commit": "0c42cdf0d2422f4c080e93594d5d15381d6e955e",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-13925:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:358f31f2359647c4a2bbfa511c40337fe98119364441b5d2c7acaf5422e4e4dc",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-13448",
+      "repo": "django/django",
+      "base_commit": "7b9596b974fb0ad1868b10c8c2174e10b72be403",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-13448:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:2df440d37ad5e6bfa5d0803ab92184c99eddd8ec837115aea458a8183406439a",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7220",
+      "repo": "pytest-dev/pytest",
+      "base_commit": "56bf819c2f4eaf8b36bd8c42c06bb59d5a3bfc0f",
+      "image_ref": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-7220:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:3a9400e85df17442bbeec61d93aa3290b700c3ae26c15c8b069ef994b660a3ed",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-14672",
+      "repo": "django/django",
+      "base_commit": "00ea883ef56fb5e092cbe4a6f7ff2e7470886ac4",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-14672:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:6900fe10a2c481ffb016364ed17041f8f51af554b9ee0f9ac3340e97434362c6",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8627",
+      "repo": "sphinx-doc/sphinx",
+      "base_commit": "332d80ba8433aea41c3709fa52737ede4405072b",
+      "image_ref": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8627:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:04021b2c427e043e32f595a6de6c91e0f575eec3b23fbe50a42fc7c9249f0498",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-12171",
+      "repo": "sympy/sympy",
+      "base_commit": "ca6ef27272be31c9dc3753ede9232c39df9a75d8",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-12171:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:4e20c984fd96241e91cfd507845bb53aac38b2b9cdf4c5a00f8c25ae94e2a2e3",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-20154",
+      "repo": "sympy/sympy",
+      "base_commit": "bdb49c4abfb35554a3c8ce761696ffff3bb837fe",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-20154:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:d05bbd76c08f2d5b444f6f304ed6d4621f7e5a20db97f9fd0c602210068b0f80",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-12284",
+      "repo": "django/django",
+      "base_commit": "c5e373d48cbdd923575956fed477b63d66d9603f",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-12284:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:f6566d6750acadc4315c9bd1150506cc1be2dc1eadb55bff57561e3d6b872fe9",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24970",
+      "repo": "matplotlib/matplotlib",
+      "base_commit": "a3011dfd1aaa2487cce8aa7369475533133ef777",
+      "image_ref": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-24970:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:c5d99048ceeb6b0c3157dde39bb122174e494b557fb7dd3c6d4bd8dba70a1bfa",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-13647",
+      "repo": "sympy/sympy",
+      "base_commit": "67e3c956083d0128a621f65ee86a7dacd4f9f19f",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-13647:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:dfa0b51faf18208c3b9fdb505eafc2db866fed25c158d211617d23606c3539fe",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-11583",
+      "repo": "django/django",
+      "base_commit": "60dc957a825232fdda9138e2f8878b2ca407a7c9",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-11583:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:f2ac03fe870177231ba0e72452b3617ebc54cbe62318deef41c7949397337d2e",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "pydata__xarray-5131",
+      "repo": "pydata/xarray",
+      "base_commit": "e56905889c836c736152b11a7e6117a229715975",
+      "image_ref": "swebench/sweb.eval.x86_64.pydata_1776_xarray-5131:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:7b6dd2169e0c110950f3dd3e7a76ebc35e1f2d9afc83aaef53766785dfb1234d",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-13933",
+      "repo": "django/django",
+      "base_commit": "42e8cf47c7ee2db238bf91197ea398126c546741",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-13933:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:0f3b43fc1c71e443ccaac6c84253a158a37026f8d4bb192e2e81da36f0a3abbc",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-14308",
+      "repo": "sympy/sympy",
+      "base_commit": "fb536869fb7aa28b2695ad7a3b70949926b291c4",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-14308:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:df074e8d710af0dd9b9ebe856211c83ec13759699d0854e390ab794e355494ea",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7168",
+      "repo": "pytest-dev/pytest",
+      "base_commit": "4787fd64a4ca0dba5528b5651bddd254102fe9f3",
+      "image_ref": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-7168:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:9eef4ab057f209925aaf40a4f644f82c2aa3b525e02e341d800a9794225fa68e",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-12236",
+      "repo": "sympy/sympy",
+      "base_commit": "d60497958f6dea7f5e25bc41e9107a6a63694d01",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-12236:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:d767f3ac506efa1e75534b2e16cd6faae0b8b0184d9cf86fe8e3e09ad8609482",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-15738",
+      "repo": "django/django",
+      "base_commit": "6f73eb9d90cfec684529aab48d517e3d6449ba8c",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-15738:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:742ae07ee02b657cac7f3c34d2ad79864de3a2c5627c4d7e84ba7e793f79776d",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5495",
+      "repo": "pytest-dev/pytest",
+      "base_commit": "1aefb24b37c30fba8fd79a744829ca16e252f340",
+      "image_ref": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-5495:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:86b356cf05ac9a623ba8943849e25ce2d0bcebc506753b1361595e5ad488a9b3",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-13315",
+      "repo": "django/django",
+      "base_commit": "36bc47069ce071e80c8129500de3b8664d2058a7",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-13315:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:eee8a0db006bce8a160fd6bda1ac181edd1dedcd95c6a4e040e7aea0aed30bd8",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-18532",
+      "repo": "sympy/sympy",
+      "base_commit": "74227f900b05009d4eed62e34a166228788a32ca",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-18532:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:c2c4bbb1fa8a6b6a18dff5455cfbb57dceb6dbb446c74529c92bde20220d3c32",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-18189",
+      "repo": "sympy/sympy",
+      "base_commit": "1923822ddf8265199dbd9ef9ce09641d3fd042b9",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-18189:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:7f3118533e22d47a19b9784ab86c7b0251cd6fec0acc71f7fe8805809f052724",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-11905",
+      "repo": "django/django",
+      "base_commit": "2f72480fbd27896c986c45193e1603e35c0b19a7",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-11905:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:3df74a2f17ce873f814bb6109f3f3bf0f8191fa2e2ae26be01a676ac62ac5aa1",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sympy__sympy-12454",
+      "repo": "sympy/sympy",
+      "base_commit": "d3fcdb72bfcbb560eb45264ac1c03f359436edef",
+      "image_ref": "swebench/sweb.eval.x86_64.sympy_1776_sympy-12454:latest",
+      "runner": "sympy",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:2eea525d4f7b0399e7b9de20458e0499ab364d4780f51c6a8252d32190716640",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-15996",
+      "repo": "django/django",
+      "base_commit": "b30c0081d4d8a31ab7dc7f72a4c7099af606ef29",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-15996:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:a668a52a07bf8ca7b4f8626ec7295e7d4d224ae59a5c92e5a840d6da1f47561a",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "django__django-11283",
+      "repo": "django/django",
+      "base_commit": "08a4ee06510ae45562c228eefbdcaac84bd38c7a",
+      "image_ref": "swebench/sweb.eval.x86_64.django_1776_django-11283:latest",
+      "runner": "django",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:2ca0c1500292dd3c12c146efef8d1d7d3b25e0553b393b0495b3cf18bd6f4ed0",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8474",
+      "repo": "sphinx-doc/sphinx",
+      "base_commit": "3ea1ec84cc610f7a9f4f6b354e264565254923ff",
+      "image_ref": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8474:latest",
+      "runner": "pytest",
+      "registry_descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:d43c7c58edc9f70a23b5b4d7a039d0cf0bbde72fbf667590b79772f3677f44f4",
+        "size": 856
+      },
+      "status": "IMAGE_NOT_CACHED",
+      "reason": "Docker Hub pulls hit proxy refusal/TLS handshake timeout; no alternate image substituted"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "schema_version": 2,
+  "generated_at": "2026-10-26T05:48:47+00:00",
+  "instance_id": "scikit-learn__scikit-learn-10297",
+  "label": "phase22-six-live-r3",
+  "run_id": "swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f",
+  "run_report": "artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/runs/swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f/report.json",
+  "acceptance_report": "artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/acceptance-phase22-six-live-r3.json",
+  "predictions_path": "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair/artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/predictions/swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f.jsonl",
+  "prediction": {
+    "predictions_sha256": "8a5e360c11eaab5cd5a03671d1063821b821c6b4efcd254f9a95f4224d315aed",
+    "patch_sha256": "48d96261554d791b5ea10b7bcae56a7d221dbd38ad15cb2302e24b1d524c0df7",
+    "bytes": 1710
+  },
+  "official_verdict": "RESOLVED",
+  "official": {
+    "run_id": "swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f",
+    "command": {
+      "argv": [
+        "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair/.venv-swebench-linux/bin/python",
+        "-m",
+        "swebench.harness.run_evaluation",
+        "-d",
+        "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair/cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/test.jsonl",
+        "-s",
+        "test",
+        "-i",
+        "scikit-learn__scikit-learn-10297",
+        "-p",
+        "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair/artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/predictions/swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f.jsonl",
+        "-id",
+        "swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f",
+        "--max_workers",
+        "1",
+        "-t",
+        "1800",
+        "--report_dir",
+        "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair/artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/runs/swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f/official-report",
+        "-n",
+        "swebench",
+        "--cache_level",
+        "instance"
+      ],
+      "cwd": "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair/artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/runs/swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f/official-report",
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONUTF8": "1"
+      },
+      "expected_report": "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair/artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/runs/swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f/official-report/glm-5.3-flash-main.swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f.json"
+    },
+    "decision": "EXECUTED",
+    "exit_code": 0,
+    "timed_out": false,
+    "runtime_seconds": 308.6342906589998,
+    "error_kind": null,
+    "error_detail": null,
+    "reused": false,
+    "reused_reason": "报告不存在，执行官方 harness",
+    "warnings": [],
+    "verdicts": [
+      {
+        "instance_id": "scikit-learn__scikit-learn-10297",
+        "verdict": "RESOLVED",
+        "resolved": true,
+        "report_path": "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair/artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/runs/swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f/official-report/glm-5.3-flash-main.swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f.json",
+        "report_sha256": "ca9a879e9982f7910bdcdf661669bfd54db86cff29e23d1b7441da1e0b9987c3",
+        "error_kind": null,
+        "error_detail": null,
+        "runtime_seconds": 308.6342906589998
+      }
+    ],
+    "report_path": "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair/artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/runs/swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f/official-report/glm-5.3-flash-main.swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f.json",
+    "report_sha256": "ca9a879e9982f7910bdcdf661669bfd54db86cff29e23d1b7441da1e0b9987c3",
+    "report": {
+      "schema_version": 2,
+      "total_instances": 1,
+      "submitted_instances": 1,
+      "completed_instances": 1,
+      "resolved_instances": 1,
+      "unresolved_instances": 0,
+      "empty_patch_instances": 0,
+      "error_instances": 0,
+      "completed_ids": [
+        "scikit-learn__scikit-learn-10297"
+      ],
+      "incomplete_ids": [],
+      "empty_patch_ids": [],
+      "submitted_ids": [
+        "scikit-learn__scikit-learn-10297"
+      ],
+      "resolved_ids": [
+        "scikit-learn__scikit-learn-10297"
+      ],
+      "unresolved_ids": [],
+      "error_ids": [],
+      "unstopped_instances": null,
+      "unstopped_containers": [],
+      "unremoved_images": [],
+      "source_path": "/mnt/c/Users/lenovo/Desktop/CodePilot-Repair/artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/runs/swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f/official-report/glm-5.3-flash-main.swebench-smoke-phase22-six-live-r3-scikit-learn__scikit-learn-10297-s0-f2cbe85f.json",
+      "source_sha256": "ca9a879e9982f7910bdcdf661669bfd54db86cff29e23d1b7441da1e0b9987c3"
+    },
+    "counts_toward_resolved_rate": true
+  }
+}

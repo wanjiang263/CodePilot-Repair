@@ -1,0 +1,437 @@
+{
+  "schema_version": 2,
+  "currency": "CNY",
+  "source_run_id": "phase23-authorized-continuation",
+  "sources": [
+    {
+      "path": "artifacts/phase18/l2-cal10-resume/pylint-dev__pylint-6506/dispatch-ledger-l2cal10d.json",
+      "sha256": "ad42c144162055ed0ff972cc2e0910f7419f4caa132731cd4db768bef1800867",
+      "instance_id": "pylint-dev__pylint-6506",
+      "frozen": true,
+      "settled_cny": 0.12979744,
+      "unknown_reserved_cny": 0.8114688000000001,
+      "total_upper_bound_cny": 0.94126624,
+      "unknown_cost_calls": 1
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/astropy__astropy-12907/dispatch-ledger-l2cal10c.json",
+      "sha256": "d115ca0497af95aa0301401f48dcfce53305c9e1a029b675bec92f33c596bce7",
+      "instance_id": "astropy__astropy-12907",
+      "frozen": false,
+      "settled_cny": 0.14240864,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.14240864,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/django__django-11910/dispatch-ledger-l2cal10c.json",
+      "sha256": "339b4ce8bd37742f2717e476b9cff363c17eb77df065359209f69ca3ab237f38",
+      "instance_id": "django__django-11910",
+      "frozen": false,
+      "settled_cny": 0.18717488000000002,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.18717488000000002,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/matplotlib__matplotlib-23314/dispatch-ledger-l2cal10c.json",
+      "sha256": "d71b12735a6ad7e185f563d4fbfa6f580f5aa1bd07a91c82531809f3329f23ef",
+      "instance_id": "matplotlib__matplotlib-23314",
+      "frozen": false,
+      "settled_cny": 0.12194800000000001,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.12194800000000001,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/mwaskom__seaborn-3010/dispatch-ledger-l2cal10c.json",
+      "sha256": "624ed3800d292ef79150d3601eeae0e622cb4e08fbe2dc0513d4615a78d8db79",
+      "instance_id": "mwaskom__seaborn-3010",
+      "frozen": false,
+      "settled_cny": 0.13423608,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.13423608,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/pallets__flask-4045/dispatch-ledger-l2cal10c.json",
+      "sha256": "ee70b18865c3fa1e76d5e1de01c0b8fa0c93d4b66b288522f0d6395674031909",
+      "instance_id": "pallets__flask-4045",
+      "frozen": false,
+      "settled_cny": 0.24215040000000007,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.24215040000000007,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/psf__requests-2148/dispatch-ledger-l2cal10c.json",
+      "sha256": "6626e3955f1c849f0470d7a1ed48ca7af40d06547c844743937e2dc69b59a141",
+      "instance_id": "psf__requests-2148",
+      "frozen": false,
+      "settled_cny": 0.20903536,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.20903536,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10/pydata__xarray-4493/dispatch-ledger-l2cal10c.json",
+      "sha256": "291026a82dcd006f26c6ed15cb0885cd7bd36db7ba7e450b5088cd42e9696a2a",
+      "instance_id": "pydata__xarray-4493",
+      "frozen": true,
+      "settled_cny": 0.019966,
+      "unknown_reserved_cny": 0.8114688000000001,
+      "total_upper_bound_cny": 0.8314348000000001,
+      "unknown_cost_calls": 1
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a10/dispatch-ledger-l2cal10e-a10.json",
+      "sha256": "08ebe3d52746b47378185acec54dff97695449bb8f856b77ce3bfc9ef20f2050",
+      "instance_id": "pytest-dev__pytest-11148-a10",
+      "frozen": false,
+      "settled_cny": 0.29755552,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.29755552,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a11/dispatch-ledger-l2cal10e-a11.json",
+      "sha256": "a93bd3ed03e7d811b5011e3f4484b01d7f27d2b0c5fbfee48544a23186b33e5c",
+      "instance_id": "pytest-dev__pytest-11148-a11",
+      "frozen": false,
+      "settled_cny": 0.22511431999999998,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.22511431999999998,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a12/dispatch-ledger-l2cal10e-a12.json",
+      "sha256": "544466e5cbb055366d9b2145eff83809de1972a9f71bbb779e9019a7c3988d2c",
+      "instance_id": "pytest-dev__pytest-11148-a12",
+      "frozen": false,
+      "settled_cny": 0.30136504000000003,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.30136504000000003,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a13/dispatch-ledger-l2cal10e-a13.json",
+      "sha256": "cec3e60476a8b34634cdc633f62d9060a948a34f062772e2614963a3abedfd1c",
+      "instance_id": "pytest-dev__pytest-11148-a13",
+      "frozen": true,
+      "settled_cny": 0.22100615999999998,
+      "unknown_reserved_cny": 0.8114688000000001,
+      "total_upper_bound_cny": 1.03247496,
+      "unknown_cost_calls": 1
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a14/dispatch-ledger-l2cal10e-a14.json",
+      "sha256": "df86db4e9f18ecb0f4de311c322c93d4d874160bbc1b6983bf2bb22c2db94eaa",
+      "instance_id": "pytest-dev__pytest-11148-a14",
+      "frozen": false,
+      "settled_cny": 0.46712183999999995,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.46712183999999995,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a15/dispatch-ledger-l2cal10e-a15.json",
+      "sha256": "e1b762f6a31b3d76c80d1e42cc7cf9d7ca77b2f6451e86affcf0b28d1b419e33",
+      "instance_id": "pytest-dev__pytest-11148-a15",
+      "frozen": false,
+      "settled_cny": 0.4738284,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.4738284,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a16/dispatch-ledger-l2cal10e-a16.json",
+      "sha256": "d2c0b254a4e9221d76db21c9e49ce261ead8e3bbcfb8c4c54707acad1b050f4d",
+      "instance_id": "pytest-dev__pytest-11148-a16",
+      "frozen": false,
+      "settled_cny": 0.34517712000000006,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.34517712000000006,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a17/dispatch-ledger-l2cal10e-a17.json",
+      "sha256": "f9d6d45c05c1e51aa8b07839f76f34d40f97d23e82758787d16906f19fb32785",
+      "instance_id": "pytest-dev__pytest-11148-a17",
+      "frozen": false,
+      "settled_cny": 0.029224800000000002,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.029224800000000002,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a18/dispatch-ledger-l2cal10e-a18.json",
+      "sha256": "b40a7916a95068d2d4f5704ecbc44aab86ef5707e840df81f399ebb6f5a5923b",
+      "instance_id": "pytest-dev__pytest-11148-a18",
+      "frozen": false,
+      "settled_cny": 0.31690728,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.31690728,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a19/dispatch-ledger-l2cal10e-a19.json",
+      "sha256": "4be2c3d1b6b2673fee1e79f4aea4275868cd4880c3ebaa9db184d2a621768c02",
+      "instance_id": "pytest-dev__pytest-11148-a19",
+      "frozen": false,
+      "settled_cny": 0.4129599200000001,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.4129599200000001,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a20/dispatch-ledger-l2cal10e-a20.json",
+      "sha256": "86df79fb5f6c7421b70292f9951f0e969daa63793715f43022ce86b7924237c7",
+      "instance_id": "pytest-dev__pytest-11148-a20",
+      "frozen": false,
+      "settled_cny": 0.4081988,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.4081988,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a21/dispatch-ledger-l2cal10e-a21.json",
+      "sha256": "c3d43260522f7358f4a4381eafe261b648d72ede9b5ba63475893cc9230e0a91",
+      "instance_id": "pytest-dev__pytest-11148-a21",
+      "frozen": false,
+      "settled_cny": 0.44591855999999996,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.44591855999999996,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a3/dispatch-ledger-l2cal10e-a3.json",
+      "sha256": "6042a08032d8c9538adb1817c36d6a3054790bf8c701740e0af515a5bd3eac11",
+      "instance_id": "pytest-dev__pytest-11148-a3",
+      "frozen": false,
+      "settled_cny": 0.1493916,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.1493916,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a4/dispatch-ledger-l2cal10e-a4.json",
+      "sha256": "6edddb028b50e224ab8728f3cdf119ccfe43b146ec987eefb06d23c09396082d",
+      "instance_id": "pytest-dev__pytest-11148-a4",
+      "frozen": true,
+      "settled_cny": 0.09083240000000001,
+      "unknown_reserved_cny": 0.8114688000000001,
+      "total_upper_bound_cny": 0.9023012000000001,
+      "unknown_cost_calls": 1
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a5/dispatch-ledger-l2cal10e-a5.json",
+      "sha256": "301c7ee035bef188861dc0e1054e3fa330b188d2d07776a3cf217fbe4ee05953",
+      "instance_id": "pytest-dev__pytest-11148-a5",
+      "frozen": false,
+      "settled_cny": 0.21996400000000002,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.21996400000000002,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a6/dispatch-ledger-l2cal10e-a6.json",
+      "sha256": "27868d2cb1ac8126013c64c2bc24d07c47eb171228c6112de3f0d52583a0e487",
+      "instance_id": "pytest-dev__pytest-11148-a6",
+      "frozen": false,
+      "settled_cny": 0.20097608,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.20097608,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a7/dispatch-ledger-l2cal10e-a7.json",
+      "sha256": "1c3db51ed94e31e3709bc2e6c90172632fac8f4e709b780ce7fd57431d3de805",
+      "instance_id": "pytest-dev__pytest-11148-a7",
+      "frozen": false,
+      "settled_cny": 0.25586424,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.25586424,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a8/dispatch-ledger-l2cal10e-a8.json",
+      "sha256": "f423c31e3db0ef14b28586521ebfe6368b3dd795f78f607f95753d7020e10876",
+      "instance_id": "pytest-dev__pytest-11148-a8",
+      "frozen": false,
+      "settled_cny": 0.39458943999999996,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.39458943999999996,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a9/dispatch-ledger-l2cal10e-a9-resume.json",
+      "sha256": "4753500dddb15fb38c59d56aa25020736f6c4746fd23a184358ee9cf92d0c26d",
+      "instance_id": "pytest-dev__pytest-11148-a9",
+      "frozen": true,
+      "settled_cny": 0.04529904,
+      "unknown_reserved_cny": 0.8114688000000001,
+      "total_upper_bound_cny": 0.8567678400000001,
+      "unknown_cost_calls": 1
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148-a9/dispatch-ledger-l2cal10e-a9.json",
+      "sha256": "94de58a16ac3b7d01025ca6899feb540a1b553e73e773748f0f484911d6cfb2f",
+      "instance_id": "pytest-dev__pytest-11148-a9",
+      "frozen": false,
+      "settled_cny": 0.0111724,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.0111724,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/pytest-dev__pytest-11148/dispatch-ledger-l2cal10e.json",
+      "sha256": "6325ecc5f996a9c55be9b766ca328f785e5aa03f27206e614c6074b82866b977",
+      "instance_id": "pytest-dev__pytest-11148",
+      "frozen": false,
+      "settled_cny": 0.06022280000000001,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.06022280000000001,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a5/dispatch-ledger-l2cal10e-a5.json",
+      "sha256": "49d3471a9e8c143bc6386c7228fa046a58496981fb5908bb7eacdda17a57d28d",
+      "instance_id": "scikit-learn__scikit-learn-12471-a5",
+      "frozen": false,
+      "settled_cny": 0.14510112000000003,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.14510112000000003,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a6/dispatch-ledger-l2cal10e-a6.json",
+      "sha256": "3b3af14b0e8621dc24746437f6b0fe365a20d06a0f3b1c0e730e0f1e4d6caacb",
+      "instance_id": "scikit-learn__scikit-learn-12471-a6",
+      "frozen": false,
+      "settled_cny": 0.16163632000000003,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.16163632000000003,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471-a7/dispatch-ledger-l2cal10e-a7.json",
+      "sha256": "31816c24a9b26de575482eb6b6540d4c21a6cb6086106220e43cbc8fd1b40ac2",
+      "instance_id": "scikit-learn__scikit-learn-12471-a7",
+      "frozen": false,
+      "settled_cny": 0.18305096,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.18305096,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase18/l2-cal10e/scikit-learn__scikit-learn-12471/dispatch-ledger-l2cal10e.json",
+      "sha256": "9e65392ce6d223946ca521b6056faa03dcec256fede2ec5345134707ecf1b410",
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "frozen": false,
+      "settled_cny": 0.13424664000000003,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.13424664000000003,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase20/m3-20261024-formal6/instances/matplotlib__matplotlib-18869/dispatch-ledger-m3-20261024-r1.json",
+      "sha256": "14f3e119d8c87945ce70b71982fc5d60974c21b9076057d4365589c63f870cd8",
+      "instance_id": "matplotlib__matplotlib-18869",
+      "frozen": false,
+      "settled_cny": 0.06550088,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.06550088,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase20/m3-20261024-formal6/instances/sphinx-doc__sphinx-8273/dispatch-ledger-m3-20261024-r1.json",
+      "sha256": "d27b7618f42311648f3ea2c5e4fbf3da52db1d735d7db12c641f3d0688129f85",
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "frozen": false,
+      "settled_cny": 0.18606408000000005,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.18606408000000005,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase21/m3-phase21-recovery-6-r5/instances/django__django-11422/dispatch-ledger-phase21-recovery-6-r1.json",
+      "sha256": "348d46f251f73f22cc207fda8374ca49b40a85d453199d2a6a1318daa439a046",
+      "instance_id": "django__django-11422",
+      "frozen": true,
+      "settled_cny": 0.0475876,
+      "unknown_reserved_cny": 0.8114688000000001,
+      "total_upper_bound_cny": 0.8590564,
+      "unknown_cost_calls": 1
+    },
+    {
+      "path": "artifacts/phase22/live-r2-indexed/instances/sympy__sympy-22714/dispatch-ledger-phase22-six-live-r2-r1.json",
+      "sha256": "78a072c2f937328353da7c8202dbe8697755022e5ca8c1f320cff24de428c280",
+      "instance_id": "sympy__sympy-22714",
+      "frozen": false,
+      "settled_cny": 0.19821447999999997,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.19821447999999997,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase22/live-r3/instances/matplotlib__matplotlib-18869/dispatch-ledger-phase22-six-live-r3-r1.json",
+      "sha256": "0299513e525b71147d331f8986e5e88449e3dac2053a1c07874c4db3d5aa1d6f",
+      "instance_id": "matplotlib__matplotlib-18869",
+      "frozen": false,
+      "settled_cny": 0.12506384,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.12506384,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/dispatch-ledger-phase22-six-live-r3-r1.json",
+      "sha256": "7011860fb1eccdbcced7ae06abf028f4690770a979af1da62e043401b4fb058d",
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "frozen": false,
+      "settled_cny": 0.13205431999999998,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.13205431999999998,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase22/live-r4/instances/psf__requests-3362/dispatch-ledger-phase22-six-live-r4-r1.json",
+      "sha256": "aeb7ca8b356fca6106366da54da71c6d8068203c21d2a9c761ba84ff5291a12a",
+      "instance_id": "psf__requests-3362",
+      "frozen": false,
+      "settled_cny": 0.0473908,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.0473908,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase22/live-r5/instances/django__django-11422/dispatch-ledger-phase22-six-live-r5-r1.json",
+      "sha256": "e3757a2b8081e3dd8bad0e8c88958ef76c038098e8ea9658e64f6257796e3984",
+      "instance_id": "django__django-11422",
+      "frozen": false,
+      "settled_cny": 0.39612991999999997,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.39612991999999997,
+      "unknown_cost_calls": 0
+    },
+    {
+      "path": "artifacts/phase22/live/instances/sphinx-doc__sphinx-8273/dispatch-ledger-phase22-six-live-r1.json",
+      "sha256": "aae05e2f6799d1acc00087ce916d67452df16cf4b796743a87501a1667e0530d",
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "frozen": false,
+      "settled_cny": 0.026126000000000003,
+      "unknown_reserved_cny": 0.0,
+      "total_upper_bound_cny": 0.026126000000000003,
+      "unknown_cost_calls": 0
+    }
+  ],
+  "additional_settled_ledgers": [],
+  "settled_cny": 8.40757352,
+  "unknown_reserved_cny": 4.868812800000001,
+  "total_upper_bound_cny": 13.27638632,
+  "unknown_cost_calls": 6,
+  "actual_usage_unknown_calls": 6,
+  "unreconciled_cost_calls": 0,
+  "reconciliation_complete": true,
+  "reason": "Explicit user authorization: purposeful recovery within original30; retain all unknown reservations",
+  "created_at": "2026-10-26T12:44:38+00:00"
+}
