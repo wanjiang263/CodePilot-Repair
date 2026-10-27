@@ -1,0 +1,2 @@
+PASS: lazy read, body retention, split UTF-8, bytes mode, empty body
+PASS: 10MiB body, bounded first-yield detection, byte retention

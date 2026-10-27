@@ -1,0 +1,7 @@
+-N DOCKER-USER
+-A DOCKER-USER -i eth0 -j ACCEPT
+-A DOCKER-USER -i eth1 -j ACCEPT
+-A DOCKER-USER ! -i eth0 -o services1 -p tcp -m tcp --dport 3128 -j ACCEPT
+-A DOCKER-USER ! -i eth0 -o services1 -p tcp -m tcp --dport 5555 -j ACCEPT
+-A DOCKER-USER ! -i eth0 -o services1 -p tcp -m tcp --dport 53 -j ACCEPT
+-A DOCKER-USER ! -i eth0 -o services1 -p tcp -j REJECT --reject-with icmp-port-unreachable

@@ -1,0 +1,21 @@
+[2026-10-27 15:04:54,104] WARNING in core: flasgger is not installed; serving the static landing page at / and skipping the Swagger UI and /spec.json.
+============================= test session starts ==============================
+platform linux -- Python 3.9.20, pytest-7.4.4, pluggy-1.0.0
+rootdir: /testbed
+plugins: httpbin-2.0.0
+collected 2 items
+
+tests/test_requests.py ..                                                [100%]
+
+=============================== warnings summary ===============================
+requests/packages/urllib3/_collections.py:2
+requests/packages/urllib3/_collections.py:2
+  /testbed/requests/packages/urllib3/_collections.py:2: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working
+    from collections import Mapping, MutableMapping
+
+tests/test_requests.py::TestTimeout::test_connect_timeout
+  /testbed/requests/models.py:170: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working
+    if isinstance(hook, collections.Callable):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 2 passed, 3 warnings in 0.22s =========================

@@ -1,0 +1,67 @@
+diff --git a/requests/models.py b/requests/models.py
+index fbb3c7e6..3a59cfa2 100644
+--- a/requests/models.py
++++ b/requests/models.py
+@@ -8,6 +8,7 @@ This module contains the primary objects that power Requests.
+ """
+ 
+ import collections
++import codecs
+ import datetime
+ 
+ from io import BytesIO, UnsupportedOperation
+@@ -695,10 +696,53 @@ class Response(object):
+         chunks = reused_chunks if self._content_consumed else stream_chunks
+ 
+         if decode_unicode:
+-            chunks = stream_decode_response_unicode(chunks, self)
++            if self.encoding is None:
++                chunks = self._decode_chunks_with_detected_encoding(chunks)
++            else:
++                chunks = stream_decode_response_unicode(chunks, self)
+ 
+         return chunks
+ 
++    def _decode_chunks_with_detected_encoding(self, chunks):
++        """Detect encoding while retaining the bytes already read from the stream."""
++        from .packages.chardet.universaldetector import UniversalDetector
++
++        detector = UniversalDetector()
++        pending = []
++        sampled = 0
++        # Bound detection latency and retained bytes to 64 KiB plus one chunk.
++        for chunk in chunks:
++            pending.append(chunk)
++            sample = chunk[:max(0, 65536 - sampled)]
++            detector.feed(sample)
++            sampled += len(sample)
++            if detector.done or sampled >= 65536:
++                break
++        detector.close()
++        encoding = detector.result['encoding'] or 'utf-8'
++        if encoding.lower() == 'ascii':
++            encoding = 'utf-8'
++        def buffered_chunks():
++            for chunk in pending:
++                yield chunk
++            for chunk in chunks:
++                yield chunk
++        for decoded in self._decode_chunks(buffered_chunks(), encoding):
++            yield decoded
++
++    def _decode_chunks(self, chunks, encoding):
++        """Incrementally decode chunks of the response body using the given
++        encoding, mirroring the behavior of :attr:`text` when the response
++        encoding falls back to :attr:`apparent_encoding`."""
++        decoder = codecs.getincrementaldecoder(encoding)(errors='replace')
++        for chunk in chunks:
++            rv = decoder.decode(chunk)
++            if rv:
++                yield rv
++        rv = decoder.decode(b'', final=True)
++        if rv:
++            yield rv
++
+     def iter_lines(self, chunk_size=ITER_CHUNK_SIZE, decode_unicode=None, delimiter=None):
+         """Iterates over the response data, one line at a time.  When
+         stream=True is set on the request, this avoids reading the
