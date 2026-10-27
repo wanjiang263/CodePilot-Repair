@@ -631,7 +631,9 @@ class BudgetManager:
                 seconds=0.0,
             )
         calls = pending_review_calls
-        seconds = calls * REVIEW_TIME_RESERVE_SECONDS
+        # Scripted/Fake providers perform no remote wait. Preserve the real
+        # review reserve for every live provider, including zero-priced models.
+        seconds = 0.0 if simulated_provider else calls * REVIEW_TIME_RESERVE_SECONDS
         per_call = float(REVIEW_CONTEXT_TOKENS + REVIEW_OUTPUT_TOKENS)
         usage = state.usage
         if usage.llm_calls > 0 and usage.total_tokens > 0:

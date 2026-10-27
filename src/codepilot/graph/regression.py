@@ -6,7 +6,7 @@ import math
 import random
 from pathlib import PurePosixPath
 
-from codepilot.graph.budget import REVIEW_TIME_RESERVE_SECONDS, Activity
+from codepilot.graph.budget import Activity
 from codepilot.graph.deps import Deps
 from codepilot.graph.operations import digest, execute_once
 from codepilot.graph.routing import pending_review_calls
@@ -157,10 +157,17 @@ class RegressionRunner:
                         patch_hash(state.current_patch) if state.current_patch else ""
                     ),
                 )
+                reserve = deps.budget.closure_reservation(
+                    live,
+                    reviewer_available=deps.reviewer is not None,
+                    pending_review_calls=pending,
+                    reviewer_config=deps.llm_config,
+                    simulated_provider=deps.simulated_llm,
+                )
                 remaining = (
                     state.budget.max_runtime_seconds
                     - deps.budget.elapsed_seconds(state)
-                    - pending * REVIEW_TIME_RESERVE_SECONDS
+                    - reserve.seconds
                 )
                 if stop or remaining < 1:
                     return ExecutionResult(

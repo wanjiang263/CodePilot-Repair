@@ -254,3 +254,19 @@ def test_evaluation_reports_every_exhausted_category_not_only_the_first() -> Non
     assert set(evaluation.exhausted) == {StopReason.BUDGET_TOKENS, StopReason.BUDGET_TIME}
     assert evaluation.primary in evaluation.exhausted
     assert evaluation.summary()["tokens"].endswith("/10")
+
+
+def test_simulated_review_reserve_does_not_consume_short_run_time():
+    state = _state(budget=RepairBudget(max_runtime_seconds=120))
+    manager = BudgetManager()
+    for used in (0, 1):
+        state.usage = Usage(llm_calls=used, input_tokens=used * 20)
+        simulated = manager.closure_reservation(
+            state, reviewer_available=True, pending_review_calls=2, simulated_provider=True
+        )
+        live = manager.closure_reservation(
+            state, reviewer_available=True, pending_review_calls=2, simulated_provider=False
+        )
+        assert simulated.seconds == 0
+        assert live.seconds == 240
+        assert state.budget.max_runtime_seconds == 120

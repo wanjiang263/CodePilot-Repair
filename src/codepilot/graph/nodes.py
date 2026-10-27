@@ -31,7 +31,6 @@ from codepilot.failure.compressor import compress_failures
 from codepilot.failure.signature import execution_signatures
 from codepilot.graph.budget import (
     RESERVATION_BEARING_ACTIVITIES,
-    REVIEW_TIME_RESERVE_SECONDS,
     Activity,
     ClosureReservation,
     ClosureTestPlan,
@@ -491,11 +490,7 @@ def _test_time_remaining(state: RepairState, deps: Deps) -> float:
     the last regression run is allowed to consume all of it, the Reviewer is
     stopped by its own time gate even when all its token/cost budget is intact.
     """
-    pending = pending_review_calls(
-        state,
-        candidate_digest=patch_hash(state.current_patch) if state.current_patch else "",
-    )
-    reserve = pending * REVIEW_TIME_RESERVE_SECONDS
+    reserve = _closure_reservation(state, deps).seconds
     return max(
         state.budget.max_runtime_seconds - deps.budget.elapsed_seconds(state) - reserve,
         0.0,
