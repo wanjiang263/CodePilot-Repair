@@ -20,6 +20,7 @@ from typing import Any
 from codepilot.graph.routing import reproduction_target_tests
 from codepilot.patch.files import PatchValidationError, patch_files
 from codepilot.schemas.enums import TestOutcome
+from codepilot.schemas.impact import ImpactAnalysis, ImpactedTest
 from codepilot.schemas.execution import TestBaseline
 from codepilot.schemas.state import RepairState
 from codepilot.tools.base import PathAccessError, WorkspacePathPolicy, is_test_path
@@ -327,10 +328,10 @@ def _node_exists(policy: WorkspacePathPolicy, target: str) -> bool:
     return True
 
 
-def impact_from_verified_patch(patch: str, index: Any, targets: list[str], previous: Any = None):
+def impact_from_verified_patch(
+    patch: str, index: Any, targets: list[str], previous: ImpactAnalysis | None = None
+) -> ImpactAnalysis:
     """Rebuild missing impact from real diff hunks and already-authorized tests."""
-    from codepilot.schemas.impact import ImpactAnalysis, ImpactedTest
-
     ranges: dict[str, list[tuple[int, int]]] = {}
     current = None
     for line in patch.splitlines():
