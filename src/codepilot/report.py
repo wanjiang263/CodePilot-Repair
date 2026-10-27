@@ -368,9 +368,7 @@ class RunReport(BaseModel):
             modified_files=modified_files,
             git_diff=git_diff,
             patch_hash=hashlib.sha256(git_diff.encode()).hexdigest(),
-            delivered_patch_identity_sha256=(
-                delivered_patch_hash(git_diff) if git_diff else ""
-            ),
+            delivered_patch_identity_sha256=(delivered_patch_hash(git_diff) if git_diff else ""),
             patch_validation=validation,
             test_execution=execution,
             usage=state.usage,
