@@ -453,3 +453,42 @@ def test_workspace_manager_provider_uses_an_independent_base_workspace(tmp_path:
     assert run_git(["status", "--porcelain"], cwd=repo.path).stdout == before_status
     assert repo.git("rev-parse", "HEAD").strip() == before_head
     assert (repo.path / "src/pkg/core.py").read_text(encoding="utf-8") == "def f():\n    return 1\n"
+
+
+@pytest.mark.parametrize(
+    "outcome,expected",
+    [
+        (TestOutcome.FAILED, ReproductionFailureKind.VALID_ASSERTION),
+        (TestOutcome.PASSED, ReproductionFailureKind.INVALID_PASS),
+        (TestOutcome.ERROR, ReproductionFailureKind.INVALID_FIXTURE_ERROR),
+    ],
+)
+def test_parameterized_reproduction_function_preserves_outcome_validation(outcome, expected):
+    case = _case(
+        outcome,
+        node_id=NODE + "[bracketed-option]",
+        failure_type="AssertionError" if outcome is TestOutcome.FAILED else None,
+    )
+    check = _classify(
+        ExecutionStatus.FAIL if outcome is not TestOutcome.PASSED else ExecutionStatus.PASS,
+        [case],
+        exit_code=1 if outcome is not TestOutcome.PASSED else 0,
+    )
+    assert check.kind is expected
+
+
+def test_parameterized_selector_requires_exact_child_and_every_declared_function():
+    execution = scripted_result(
+        ExecutionStatus.FAIL,
+        tests=[_case(TestOutcome.FAILED, node_id=NODE + "[a]", failure_type="AssertionError")],
+        exit_code=1,
+    )
+    for requested in [(NODE + "[b]",), (NODE, REPRO + "::test_missing")]:
+        check = classify_base_execution(execution=execution, test_path=REPRO, node_ids=requested)
+        assert check.kind is ReproductionFailureKind.INVALID_NOT_EXECUTED
+    wrong_name = _classify(
+        ExecutionStatus.FAIL,
+        [_case(TestOutcome.FAILED, node_id=NODE + "_other[a]", failure_type="AssertionError")],
+        exit_code=1,
+    )
+    assert wrong_name.kind is ReproductionFailureKind.INVALID_NOT_EXECUTED

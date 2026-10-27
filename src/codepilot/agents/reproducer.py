@@ -558,8 +558,17 @@ def classify_base_execution(
         )
 
     selected = [case for case in execution.tests if case.node_id.startswith(f"{test_path}::")]
-    if not selected or any(not any(case.node_id == node for case in selected) for node in node_ids):
-        missing = [node for node in node_ids if not any(case.node_id == node for case in selected)]
+    # A function selector executes all of its parameterized children. An
+    # explicitly parameterized selector still requires that exact child.
+    missing = [
+        node
+        for node in node_ids
+        if not any(
+            case.node_id == node or ("[" not in node and case.node_id.startswith(f"{node}["))
+            for case in selected
+        )
+    ]
+    if not selected or missing:
         return BaseReproductionCheck(
             kind=ReproductionFailureKind.INVALID_NOT_EXECUTED,
             detail=_detail("NOT_EXECUTED", f"指定的 pytest NodeID 没有执行记录: {missing[:3]}"),

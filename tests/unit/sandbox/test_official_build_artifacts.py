@@ -188,10 +188,17 @@ def test_astropy_overlay_restores_extensions_and_version_without_overwriting_sou
         }
     )
     version = _tar({"_version.py": b"version = '5.2'\n"})
+    wrapper = _tar({"core.py": b"generated_erfa_wrapper = True\n"})
 
     class Container:
         def get_archive(self, path: str) -> tuple[list[bytes], dict[str, int]]:
-            payload = version if path.endswith("_version.py") else package
+            payload = (
+                wrapper
+                if path.endswith("_erfa/core.py")
+                else version
+                if path.endswith(("_version.py", "cython_version.py"))
+                else package
+            )
             return [payload], {"size": len(payload)}
 
         def remove(self, *, force: bool) -> None:
@@ -215,5 +222,6 @@ def test_astropy_overlay_restores_extensions_and_version_without_overwriting_sou
         workspace / "astropy/utils/_compiler.cpython-39-x86_64-linux-gnu.so"
     ).read_bytes() == b"binary"
     assert (workspace / "astropy/_version.py").read_bytes() == b"version = '5.2'\n"
+    assert (workspace / "astropy/_erfa/core.py").read_bytes() == b"generated_erfa_wrapper = True\n"
     assert (workspace / "astropy/__init__.py").read_bytes() == b"base source"
     assert (workspace / "astropy/version.py").read_bytes() == b"base version wrapper"

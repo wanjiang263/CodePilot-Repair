@@ -376,7 +376,7 @@ class OfficialInstanceSandbox(DockerSandbox):
                     version_archive, workspace / "lib/matplotlib/_version.py"
                 )
             if self.instance_id.startswith("astropy__astropy-"):
-                for filename in ("version.py", "_version.py"):
+                for filename in ("version.py", "_version.py", "_erfa/core.py", "cython_version.py"):
                     if (workspace / "astropy" / filename).is_file():
                         continue
                     try:
