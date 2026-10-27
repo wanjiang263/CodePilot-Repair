@@ -328,6 +328,8 @@ def parse_django(
         "requested_missing": list(missing),
         "requested_extra_observed": extra[:20],
     }
+    if timed_out:
+        return NativeParse(kept, ExecutionStatus.TIMEOUT, "EXECUTION_TIMEOUT", diagnostics)
     if not tests:
         return NativeParse([], ExecutionStatus.COLLECTION_ERROR, "NO_TESTS_COLLECTED", diagnostics)
     if missing:
@@ -335,8 +337,6 @@ def parse_django(
             kept, ExecutionStatus.COLLECTION_ERROR, "REQUESTED_TESTS_NOT_COLLECTED", diagnostics
         )
     failing = [test for test in kept if test.outcome in {TestOutcome.FAILED, TestOutcome.ERROR}]
-    if timed_out:
-        return NativeParse(kept, ExecutionStatus.TIMEOUT, "EXECUTION_TIMEOUT", diagnostics)
     if exit_code in {2, 4, 5}:
         return NativeParse(
             kept, ExecutionStatus.COLLECTION_ERROR, "NATIVE_COLLECTION_ERROR", diagnostics
@@ -451,14 +451,14 @@ def parse_sympy(
         "requested_missing": list(missing),
         "requested_extra_observed": extra[:20],
     }
+    if timed_out:
+        return NativeParse(kept, ExecutionStatus.TIMEOUT, "EXECUTION_TIMEOUT", diagnostics)
     if not tests:
         return NativeParse([], ExecutionStatus.COLLECTION_ERROR, "NO_TESTS_COLLECTED", diagnostics)
     if missing:
         return NativeParse(
             kept, ExecutionStatus.COLLECTION_ERROR, "REQUESTED_TESTS_NOT_COLLECTED", diagnostics
         )
-    if timed_out:
-        return NativeParse(kept, ExecutionStatus.TIMEOUT, "EXECUTION_TIMEOUT", diagnostics)
     failing = [test for test in kept if test.outcome in {TestOutcome.FAILED, TestOutcome.ERROR}]
     declared_failed = summary.get("failed", 0) + summary.get("exceptions", 0)
     diagnostics["summary_declares_failures"] = declared_failed

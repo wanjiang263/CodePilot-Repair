@@ -86,6 +86,33 @@ def test_django_requested_scope_must_be_present(tmp_path: Path) -> None:
     assert missing.error_reason == "REQUESTED_TESTS_NOT_COLLECTED"
 
 
+@pytest.mark.parametrize("runner", [parse_django, parse_sympy])
+@pytest.mark.parametrize("partial_output", [False, True])
+def test_native_timeout_preserves_partial_results_and_missing_scope(
+    tmp_path: Path, runner, partial_output: bool
+) -> None:
+    workspace = _workspace(tmp_path)
+    django = runner is parse_django
+    node = (
+        "tests/utils_tests/test_autoreload.py::TestMain::test_ok"
+        if django
+        else "sympy/geometry/tests/test_point.py::test_Point2D"
+    )
+    output = (DJANGO_OUT if django else SYMPY_OUT) if partial_output else ""
+    result = runner(
+        output,
+        "",
+        exit_code=None,
+        workspace=workspace,
+        requested=(node, node + "_missing"),
+        timed_out=True,
+    )
+    assert result.status is ExecutionStatus.TIMEOUT
+    assert result.error_reason == "EXECUTION_TIMEOUT"
+    assert result.diagnostics["requested_missing"]
+    assert [test.node_id for test in result.tests] == ([node] if partial_output else [])
+
+
 def test_django_selector_round_trips_paths_and_native_labels(tmp_path: Path) -> None:
     workspace = _workspace(tmp_path)
     assert (
