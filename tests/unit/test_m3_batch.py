@@ -295,6 +295,26 @@ def fixture(tmp_path: Path) -> Fixture:
     return Fixture(tmp_path)
 
 
+def test_batch_accepts_multiple_instances_from_one_repository(fixture: Fixture) -> None:
+    catalog = json.loads(fixture.catalog.read_text(encoding="utf-8"))
+    item = dict(catalog["instances"][0], instance_id="owner0__repo0-99")
+    catalog["instances"].append(item)
+    _write_json(fixture.catalog, catalog)
+
+    batch = fixture.make()
+    assert len(batch.instances) == 7
+    assert len(batch.state["instances"]) == 7
+
+
+def test_batch_rejects_duplicate_instance_ids(fixture: Fixture) -> None:
+    catalog = json.loads(fixture.catalog.read_text(encoding="utf-8"))
+    catalog["instances"].append(dict(catalog["instances"][0]))
+    _write_json(fixture.catalog, catalog)
+
+    with pytest.raises(m3_batch.BatchStopError, match="unique IDs"):
+        fixture.make()
+
+
 def test_phase22_stop_assigns_all_terminal_states(fixture: Fixture) -> None:
     def internal(request: m3_batch.InternalRequest) -> int:
         _ledger(request.ledger, unknown=True)
@@ -593,8 +613,18 @@ def test_m3_no_patch_skips_official_and_continues(fixture: Fixture) -> None:
     assert official == IDS[1:]
 
 
-def test_m3_internal_rejection_skips_official_and_continues(fixture: Fixture) -> None:
+def test_m3_internal_rejection_scores_legal_candidate(fixture: Fixture, monkeypatch: Any) -> None:
+    import codepilot.eval.candidate as candidate
+
     official = []
+
+    def prepare(**kwargs: Any) -> Path:
+        assert kwargs["model_identity"] == "glm-5.3-flash-main"
+        path = kwargs["run"] / "official-candidate.json"
+        _write_json(path, {"prediction_sha256": "a" * 64, "patch_sha256": "b" * 64})
+        return path
+
+    monkeypatch.setattr(candidate, "prepare_candidate", prepare)
 
     def internal(request: m3_batch.InternalRequest) -> int:
         instance = request.instance["instance_id"]
@@ -606,8 +636,9 @@ def test_m3_internal_rejection_skips_official_and_continues(fixture: Fixture) ->
         return 0
 
     summary = fixture.make(internal, _success_official(official)).run()
-    assert summary["instances"][0]["status"] == "REJECTED"
-    assert official == IDS[1:]
+    assert summary["instances"][0]["internal"] == "REJECTED"
+    assert summary["instances"][0]["official"] == "RESOLVED"
+    assert official == IDS
 
 
 def test_m3_environment_failure_stops_before_official(fixture: Fixture) -> None:

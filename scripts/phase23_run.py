@@ -420,6 +420,7 @@ def main():
             base=task.base_commit,
             source_ledger=segment / "dispatch-ledger.json",
             revision=catalog["dataset_revision"],
+            model_identity=runtime.model_alias,
         )
         print(
             json.dumps(

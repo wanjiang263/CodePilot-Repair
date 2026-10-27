@@ -13,7 +13,14 @@ def digest(path: Path) -> str:
 
 
 def prepare_candidate(
-    *, project: Path, run: Path, instance: str, base: str, source_ledger: Path, revision: str
+    *,
+    project: Path,
+    run: Path,
+    instance: str,
+    base: str,
+    source_ledger: Path,
+    revision: str,
+    model_identity: str,
 ) -> Path | None:
     """Validate actual workspace bytes; freeze once all inference for this candidate ends."""
     from codepilot.graph.stop_rules import patch_hash
@@ -22,6 +29,8 @@ def prepare_candidate(
     from codepilot.repo.gitcmd import run_git
     from codepilot.tools.base import WorkspacePathPolicy
 
+    if not model_identity.strip():
+        raise ValueError("candidate model identity must be nonempty")
     workspace = run / "workspace"
     state_path = run / "state_final.json"
     state = json.loads(state_path.read_text(encoding="utf-8"))
@@ -67,7 +76,7 @@ def prepare_candidate(
         json.dumps(
             {
                 "instance_id": instance,
-                "model_name_or_path": "glm-5.3-flash-main",
+                "model_name_or_path": model_identity,
                 "model_patch": patch,
             }
         )

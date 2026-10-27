@@ -66,12 +66,14 @@ def test_legal_candidate_is_official_eligible_even_with_internal_failure(tmp_pat
         base=repo.head,
         source_ledger=ledger,
         revision="rev",
+        model_identity="configured-model",
     )
     assert receipt
     data = json.loads(receipt.read_text(encoding="utf8"))
     assert data["internal_status"] == "failed"
     prediction, _ = verify_candidate(project, data)
     record = json.loads(prediction.read_text(encoding="utf8"))
+    assert record["model_name_or_path"] == "configured-model"
     record["model_patch"] += "\n"
     prediction.write_text(json.dumps(record), encoding="utf8")
     with pytest.raises(ValueError, match="changed"):
@@ -96,6 +98,7 @@ def test_existing_test_candidate_never_enters_official(tmp_path):
             base=repo.head,
             source_ledger=ledger,
             revision="r",
+            model_identity="configured-model",
         )
         is None
     )

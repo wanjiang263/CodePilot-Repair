@@ -102,6 +102,7 @@ def main():
             base=state["base_commit"],
             source_ledger=segment / "dispatch-ledger.json",
             revision="6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+            model_identity=read(segment / "config.json")["model_alias"],
         )
         export = {
             "source_agent_run": source.relative_to(ROOT).as_posix(),

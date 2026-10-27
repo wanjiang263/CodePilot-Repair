@@ -279,7 +279,7 @@ def evaluate_legal_candidate(args: argparse.Namespace) -> dict[str, Any]:
         instance_ids=(args.instance,),
         harness_python=args.harness_python,
         harness_version="4.1.0",
-        model_name_or_path="glm-5.3-flash-main",
+        model_name_or_path=json.loads(prediction.read_text(encoding="utf-8"))["model_name_or_path"],
         dataset_revision=revision,
         dataset_snapshot=snapshot,
         cache_level="instance",

@@ -64,6 +64,7 @@ class OfficialRequest:
     instance: dict[str, Any]
     root: Path
     run_id: str
+    candidate_receipt: Path | None = None
 
 
 def canonical_repo_source(repo: str) -> Any:
@@ -160,12 +161,12 @@ class M3Batch:
         self.instances = list(self.catalog.get("instances") or [])
         self.catalog_image_ids = dict(self.catalog.get("image_ids") or {})
         self.catalog_runner_kinds = dict(self.catalog.get("runner_kinds") or {})
-        if len(self.instances) != 6:
-            raise BatchStopError("the frozen M3 catalog must contain exactly six instances")
+        if not self.instances:
+            raise BatchStopError("the frozen catalog must contain at least one instance")
         ids = [str(item.get("instance_id") or "") for item in self.instances]
         repos = [str(item.get("repo") or "") for item in self.instances]
-        if len(set(ids)) != 6 or len(set(repos)) != 6:
-            raise BatchStopError("catalog instances and repositories must be unique")
+        if not all(ids) or not all(repos) or len(set(ids)) != len(ids):
+            raise BatchStopError("catalog instances must have unique IDs and nonempty repositories")
         self.registry_path = self.artifact_root / "attempts.json"
         self.manifest_path = self._absolute(Path(str(self.config["opening_manifest"])))
         self.opening_manifest = load_recovery_manifest(self.manifest_path)
@@ -863,6 +864,7 @@ class M3Batch:
         result = acceptance.evaluate(root, instance=instance_id, label=self.batch_id, run_id=run_id)
         _write_json(root / f"acceptance-{self.batch_id}.json", result)
         entry["internal"] = result["verdict"]
+        candidate_receipt = None
         if not result["accepted"]:
             root_report = acceptance._root_report(root, run_id)
             closure = run.get("closure") or {}
@@ -872,26 +874,49 @@ class M3Batch:
                 entry["terminal"] = True
                 self._save()
                 raise BatchStopError(f"infrastructure failure: {root_status}")
-            entry["status"] = "NO_PATCH" if not closure.get("patch_present") else "REJECTED"
-            entry["official"] = "NOT_EVALUATED"
-            entry["terminal"] = True
-            self._save()
-            return
-        root_report = acceptance._root_report(root, run_id)
-        prediction = root_report.get("prediction") or {}
-        manifest = prediction.get("manifest") or {}
-        model = manifest.get("model_name_or_path") or (root_report.get("runtime") or {}).get(
-            "model_identity"
-        )
-        evidence = result["evidence"]
-        official._verify_prediction(
-            root,
-            run_id=run_id,
-            instance=instance_id,
-            prediction=prediction,
-            expected_patch_sha256=str(evidence["delivered_patch_sha256"]),
-            expected_model=str(model),
-        )
+            if closure.get("patch_present"):
+                from codepilot.eval.candidate import prepare_candidate
+
+                candidate_receipt = prepare_candidate(
+                    project=self.repo_root,
+                    run=root / "runs" / run_id,
+                    instance=instance_id,
+                    base=instance["base_commit"],
+                    source_ledger=ledger,
+                    revision=str(self.config["dataset_revision"]),
+                    model_identity=self.model,
+                )
+            if candidate_receipt is None:
+                entry["status"] = "NO_PATCH" if not closure.get("patch_present") else "REJECTED"
+                entry["official"] = "NOT_EVALUATED"
+                entry["terminal"] = True
+                self._save()
+                return
+            receipt = _read_json(candidate_receipt)
+            evidence = {
+                "prediction_sha256": receipt["prediction_sha256"],
+                "delivered_patch_sha256": receipt["patch_sha256"],
+            }
+            model = self.model
+        else:
+            root_report = acceptance._root_report(root, run_id)
+            prediction = root_report.get("prediction") or {}
+            manifest = prediction.get("manifest") or {}
+            model = str(
+                manifest.get("model_name_or_path")
+                or (root_report.get("runtime") or {}).get("model_identity")
+            )
+            if model != self.model:
+                raise BatchStopError("prediction model identity does not match frozen configuration")
+            evidence = result["evidence"]
+            official._verify_prediction(
+                root,
+                run_id=run_id,
+                instance=instance_id,
+                prediction=prediction,
+                expected_patch_sha256=str(evidence["delivered_patch_sha256"]),
+                expected_model=str(model),
+            )
         if self.config.get("official_mode") == "external":
             _write_json(
                 root / f"official-request-{self.batch_id}.json",
@@ -903,6 +928,11 @@ class M3Batch:
                     "prediction_sha256": evidence["prediction_sha256"],
                     "delivered_patch_sha256": evidence["delivered_patch_sha256"],
                     "model": model,
+                    "candidate_receipt": (
+                        candidate_receipt.relative_to(self.repo_root).as_posix()
+                        if candidate_receipt is not None
+                        else None
+                    ),
                     "status": "PENDING_EXTERNAL_WSL",
                     "created_at": _now(),
                 },
@@ -914,7 +944,9 @@ class M3Batch:
             raise BatchStopError(
                 "external official harness required; batch paused before any later instance"
             )
-        official_code = self.official_runner(OfficialRequest(instance, root, run_id))
+        official_code = self.official_runner(
+            OfficialRequest(instance, root, run_id, candidate_receipt)
+        )
         official_path = root / f"official-evaluation-{self.batch_id}.json"
         if not official_path.is_file():
             entry.update(status="OFFICIAL_ERROR", official="ERROR", terminal=True)
@@ -1078,7 +1110,7 @@ class M3Batch:
                 str(self.config["wsl_distro"]),
                 "--",
                 "env",
-                "DOCKER_HOST=unix:///mnt/wsl/docker-desktop/shared-sockets/host-services/docker.proxy.sock",
+                "DOCKER_HOST=unix:///mnt/wsl/docker-desktop/shared-sockets/guest-services/docker.proxy.sock",
                 str(self.config["linux_python"]),
                 f"{linux_root}/scripts/l2cal10e_official.py",
                 "--root",
@@ -1115,6 +1147,11 @@ class M3Batch:
                 "--output",
                 str(output),
             ]
+        if request.candidate_receipt is not None:
+            receipt_path = str(request.candidate_receipt)
+            if self.config.get("official_mode") == "wsl":
+                receipt_path = f"{linux_root}/{request.candidate_receipt.relative_to(self.repo_root).as_posix()}"
+            command.extend(["--candidate-receipt", receipt_path])
         log = request.root / f"official-{self.batch_id}.log"
         with log.open("wb") as handle:
             completed = subprocess.run(
