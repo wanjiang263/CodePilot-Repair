@@ -1,0 +1,6 @@
+﻿order,instance_id,code_sha,requests,settled_cny,unknown_reserved_cny,runtime_seconds,internal_status,stop_reason,legal_candidate,patch_sha256,official
+1,sphinx-doc__sphinx-8506,9ef018d70ecf9346896557ce6c19e5a2f2925f8d,25,0.161778,0.0,668.774664,succeeded,,True,f2476d78b1bd9125768a9c4ee83eb3ece35960e4b1dd212e9f797d847eeae579,UNRESOLVED
+2,django__django-14999,80b453a30a93775f3f51dad96b76042aabcb8995,39,0.2754172,0.0,2289.785508,failed,tests_failed,True,7f2804c7f51f3a07bc17b21bfa3b15133cb26f79ea7d4845373d87b868074e23,RESOLVED
+3,astropy__astropy-14995,45a0e4e9d4d6c5ad99e242e2293c4c44895497d9,20,0.16830208,0.0,405.512203,succeeded,,True,43a1ba2447ed81d505fa94d39739f8b6ab2f76332103118e483cfb030f606ba4,RESOLVED
+4,astropy__astropy-6938,45a0e4e9d4d6c5ad99e242e2293c4c44895497d9,24,0.14407392,0.0,1024.844062,stopped,repeated_patch,True,60aa772f2e125597e620d564173e4210bd68a05d3fba9cbb59c430959dc72186,RESOLVED
+5,django__django-16816,80b453a30a93775f3f51dad96b76042aabcb8995,45,0.30942112,0.0,1038.644643,budget_exhausted,budget_tool_calls,False,,NOT_EVALUATED_NO_PATCH

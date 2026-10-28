@@ -1,0 +1,98 @@
+{
+  "schema_version": 3,
+  "instance_id": "astropy__astropy-6938",
+  "run_id": "swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1",
+  "patch_sha256": "60aa772f2e125597e620d564173e4210bd68a05d3fba9cbb59c430959dc72186",
+  "candidate_receipt": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/runs/swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1/official-candidate.json",
+  "internal_status": "stopped",
+  "official_verdict": "RESOLVED",
+  "official": {
+    "run_id": "swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1",
+    "command": {
+      "argv": [
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/.venv-swebench-linux/bin/python",
+        "-m",
+        "swebench.harness.run_evaluation",
+        "-d",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/test.jsonl",
+        "-s",
+        "test",
+        "-i",
+        "astropy__astropy-6938",
+        "-p",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/runs/swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1/official-prediction.jsonl",
+        "-id",
+        "swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1",
+        "--max_workers",
+        "1",
+        "-t",
+        "1800",
+        "--report_dir",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/runs/swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1/official-report",
+        "-n",
+        "swebench",
+        "--cache_level",
+        "instance"
+      ],
+      "cwd": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/runs/swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1/official-report",
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONUTF8": "1"
+      },
+      "expected_report": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/runs/swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1/official-report/glm-5.3-flash-main.swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1.json"
+    },
+    "decision": "EXECUTED",
+    "exit_code": 0,
+    "timed_out": false,
+    "runtime_seconds": 128.03437363400008,
+    "error_kind": null,
+    "error_detail": null,
+    "reused": false,
+    "reused_reason": "报告不存在，执行官方 harness",
+    "warnings": [],
+    "verdicts": [
+      {
+        "instance_id": "astropy__astropy-6938",
+        "verdict": "RESOLVED",
+        "resolved": true,
+        "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/runs/swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1/official-report/glm-5.3-flash-main.swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1.json",
+        "report_sha256": "45e649e6aa6ea0f7b405cc2ad7100f271f56c38de3f3ad7b73fabbd432eaaaea",
+        "error_kind": null,
+        "error_detail": null,
+        "runtime_seconds": 128.03437363400008
+      }
+    ],
+    "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/runs/swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1/official-report/glm-5.3-flash-main.swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1.json",
+    "report_sha256": "45e649e6aa6ea0f7b405cc2ad7100f271f56c38de3f3ad7b73fabbd432eaaaea",
+    "report": {
+      "schema_version": 2,
+      "total_instances": 1,
+      "submitted_instances": 1,
+      "completed_instances": 1,
+      "resolved_instances": 1,
+      "unresolved_instances": 0,
+      "empty_patch_instances": 0,
+      "error_instances": 0,
+      "completed_ids": [
+        "astropy__astropy-6938"
+      ],
+      "incomplete_ids": [],
+      "empty_patch_ids": [],
+      "submitted_ids": [
+        "astropy__astropy-6938"
+      ],
+      "resolved_ids": [
+        "astropy__astropy-6938"
+      ],
+      "unresolved_ids": [],
+      "error_ids": [],
+      "unstopped_instances": null,
+      "unstopped_containers": [],
+      "unremoved_images": [],
+      "source_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/runs/swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1/official-report/glm-5.3-flash-main.swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1.json",
+      "source_sha256": "45e649e6aa6ea0f7b405cc2ad7100f271f56c38de3f3ad7b73fabbd432eaaaea"
+    },
+    "counts_toward_resolved_rate": true
+  }
+}

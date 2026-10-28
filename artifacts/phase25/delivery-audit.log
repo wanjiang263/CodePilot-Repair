@@ -1,0 +1,51 @@
+{
+  "statistics": {
+    "dispatched": 5,
+    "original_catalog_size": 50,
+    "dispatched_coverage": 0.1,
+    "valid_official": 4,
+    "official_coverage_of_legal_candidates": 1.0,
+    "official_coverage_of_dispatched": 0.8,
+    "official_coverage_of_original_catalog": 0.08,
+    "resolved": 3,
+    "resolved_over_50": 0.06,
+    "resolved_over_first5": 0.6,
+    "resolved_over_valid_official": 0.75,
+    "by_version": {
+      "9ef018d70ecf9346896557ce6c19e5a2f2925f8d": {
+        "dispatched": 1,
+        "official": 1,
+        "resolved": 0
+      },
+      "80b453a30a93775f3f51dad96b76042aabcb8995": {
+        "dispatched": 2,
+        "official": 1,
+        "resolved": 1
+      },
+      "45a0e4e9d4d6c5ad99e242e2293c4c44895497d9": {
+        "dispatched": 2,
+        "official": 2,
+        "resolved": 2
+      }
+    },
+    "no_patch": 1,
+    "final_environment_invalid": 0,
+    "final_system_error": 0
+  },
+  "fees": {
+    "currency": "CNY",
+    "original_authorization": 30,
+    "prior_original30_upper": 3.19763192,
+    "prior_original30_settled": 1.57469432,
+    "prior_original30_unknown_reserved": 1.6229376000000002,
+    "new_settled": 1.05899232,
+    "new_unknown_reserved": 0.0,
+    "original30_upper": 4.25662424,
+    "original30_remaining": 25.74337576,
+    "historical_all_sources_settled": 8.75813592,
+    "historical_all_sources_unknown_reserved": 5.680281600000001,
+    "historical_unknown_calls": 7,
+    "all_sources_upper": 15.497409840000001,
+    "note": "Historical opening totals include older authorizations; do not add that full opening to original30. Each new ledger counted once; replicated opening fields excluded."
+  }
+}

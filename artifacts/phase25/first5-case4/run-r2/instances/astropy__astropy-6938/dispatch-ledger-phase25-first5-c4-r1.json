@@ -1,0 +1,886 @@
+{
+  "currency": "CNY",
+  "limit": 2.0,
+  "accounted_or_reserved": 0.14407392000000008,
+  "frozen": false,
+  "opening_balance": 0.0,
+  "opening_source": {
+    "kind": "per_instance",
+    "instance_id": "astropy__astropy-6938",
+    "instance_opening_cny": 0.0,
+    "repo_root": "D:\\Projects\\Desktop\\CodePilot-Repair",
+    "recovery_manifest": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase25\\segment2\\opening.json",
+    "recovery_manifest_sha256": "67d7e01e9f0c5d0d4ec2bf5d86ec23ad5abea295a56d378d02a53bf702456f00"
+  },
+  "requests": [
+    {
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0138712,
+      "request_sha256": "33fa61454dfc91b7dc4fa07badde2fcb8894019ee7493e8aedfe141bb3eb706f",
+      "dispatched_at_unix": 1793118411.664647,
+      "metadata": {
+        "purpose": "localizer_files",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 46004,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "5f6e7b47-c332-4714-8797-3346b6966e75",
+      "http_status": 200,
+      "input_tokens": 17045,
+      "cached_input_tokens": 0,
+      "output_tokens": 84,
+      "elapsed_seconds": 4.39100000000326
+    },
+    {
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0169696,
+      "request_sha256": "f769deb557e6daf4d9991f47b28d0596e72878bd034357965c37a97cc04085fe",
+      "dispatched_at_unix": 1793118416.1725256,
+      "metadata": {
+        "purpose": "localizer_symbols",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 75751,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "5819bb1e-1994-4ddd-af1d-fbf851f5b346",
+      "http_status": 200,
+      "input_tokens": 20883,
+      "cached_input_tokens": 0,
+      "output_tokens": 94,
+      "elapsed_seconds": 3.562000000005355
+    },
+    {
+      "seq": 3,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0065408,
+      "request_sha256": "343a2a5626797df66b032d7036c88af329cb8621e8b974a50628ecbb225cb95a",
+      "dispatched_at_unix": 1793119043.608903,
+      "metadata": {
+        "purpose": "reproducer",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 12966,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "f98ae057-34ba-4953-a8c4-06872e428223",
+      "http_status": 200,
+      "input_tokens": 5089,
+      "cached_input_tokens": 0,
+      "output_tokens": 882,
+      "elapsed_seconds": 14.703000000001339
+    },
+    {
+      "seq": 4,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0062388,
+      "request_sha256": "a60ad3596f4d8f2380226785699e64c8ebd80c9cfee7c24355f28426458ec58c",
+      "dispatched_at_unix": 1793119058.6274269,
+      "metadata": {
+        "purpose": "reproducer",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 17049,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "ad329650-0fb7-497a-bd45-7a752970273a",
+      "http_status": 200,
+      "input_tokens": 6143,
+      "cached_input_tokens": 0,
+      "output_tokens": 473,
+      "elapsed_seconds": 5.078000000001339
+    },
+    {
+      "seq": 5,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0064308,
+      "request_sha256": "dd8ab65e7c931168fe91c9af9b1da1e275dfe0e6c0d53e9343cb3de5bb41d7b2",
+      "dispatched_at_unix": 1793119063.881466,
+      "metadata": {
+        "purpose": "reproducer",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 13417,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "ddbf128a-cbaf-4f95-99d5-1cb91c50fc48",
+      "http_status": 200,
+      "input_tokens": 5151,
+      "cached_input_tokens": 0,
+      "output_tokens": 825,
+      "elapsed_seconds": 18.06199999999808
+    },
+    {
+      "seq": 6,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0069048,
+      "request_sha256": "81b8d05d41e09ec092544302303eb60e0e47ec5578c60f6ed298ea1661ae32e8",
+      "dispatched_at_unix": 1793119081.9856367,
+      "metadata": {
+        "purpose": "reproducer",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 18639,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "9d1137d8-791e-43fc-8f95-655bc1d9639c",
+      "http_status": 200,
+      "input_tokens": 6440,
+      "cached_input_tokens": 0,
+      "output_tokens": 626,
+      "elapsed_seconds": 7.625
+    },
+    {
+      "seq": 7,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0064352,
+      "request_sha256": "6f5ca29306038597dfc4c9a23e28df3da27af4b76b12190fbaf2c90f0f7e7f38",
+      "dispatched_at_unix": 1793119141.3914921,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 21792,
+        "message_roles": [
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "74ecf6fa-febb-4e5e-ad81-c9460acfac6c",
+      "http_status": 200,
+      "input_tokens": 7918,
+      "cached_input_tokens": 0,
+      "output_tokens": 36,
+      "elapsed_seconds": 5.046999999998661
+    },
+    {
+      "seq": 8,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0030277600000000004,
+      "request_sha256": "3ba1272f137d74588e8ebe4998fc7e97d63b15b50c5f946e85a725200299e9d3",
+      "dispatched_at_unix": 1793119147.3403845,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 25932,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "7a84068f-b545-4b85-8a9d-1b318f712a31",
+      "http_status": 200,
+      "input_tokens": 8977,
+      "cached_input_tokens": 7872,
+      "output_tokens": 119,
+      "elapsed_seconds": 6.327999999994063
+    },
+    {
+      "seq": 9,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0022424000000000003,
+      "request_sha256": "959a2436bdd1d300ef787739e36dc3ebac07194c3cfe12b1e02c25e555c40fc0",
+      "dispatched_at_unix": 1793119154.207908,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 26507,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "454e9f7a-db2d-486e-8f95-1a79720ee16b",
+      "http_status": 200,
+      "input_tokens": 9075,
+      "cached_input_tokens": 8960,
+      "output_tokens": 32,
+      "elapsed_seconds": 4.7189999999973224
+    },
+    {
+      "seq": 10,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0022931200000000005,
+      "request_sha256": "cfe6862b962b125388016a0128d815676907680a0bf9b923be3a1dd7b0ae910a",
+      "dispatched_at_unix": 1793119159.157358,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 27082,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "faec818e-02c4-4fe3-aa02-a122fcb9e550",
+      "http_status": 200,
+      "input_tokens": 9170,
+      "cached_input_tokens": 9024,
+      "output_tokens": 36,
+      "elapsed_seconds": 4.671999999998661
+    },
+    {
+      "seq": 11,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0022937599999999997,
+      "request_sha256": "d1a8b81c29ab5ba51b4a15d489f436f4d1bb5210c40a4468e9f3ab106c015775",
+      "dispatched_at_unix": 1793119164.1890926,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 27672,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "e221e2c9-e3c8-4f94-8b12-42750e60d89e",
+      "http_status": 200,
+      "input_tokens": 9269,
+      "cached_input_tokens": 9152,
+      "output_tokens": 34,
+      "elapsed_seconds": 4.703000000001339
+    },
+    {
+      "seq": 12,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00563888,
+      "request_sha256": "249074cb2031208638535f415b6c4739bacbc4dff2c3d08b8e3b2af0bd7e2bfe",
+      "dispatched_at_unix": 1793119169.1673467,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 28252,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "9b2b99ed-61b5-4f93-9656-a19377d56628",
+      "http_status": 200,
+      "input_tokens": 9366,
+      "cached_input_tokens": 9216,
+      "output_tokens": 1214,
+      "elapsed_seconds": 25.547000000005937
+    },
+    {
+      "seq": 13,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0105728,
+      "request_sha256": "893727ba38681b1a52f244450e6e22481dccdbfebf832d809a8e20fb438612fc",
+      "dispatched_at_unix": 1793119194.7732658,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 38982,
+        "message_roles": [
+          "system",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "3cfc2878-803f-45d8-b58a-46520f02564e",
+      "http_status": 200,
+      "input_tokens": 11221,
+      "cached_input_tokens": 0,
+      "output_tokens": 570,
+      "elapsed_seconds": 6.656999999999243
+    },
+    {
+      "seq": 14,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0052176,
+      "request_sha256": "675406cbe4aca2328b3056a5855d70ee40ec5a010e9f71cc91e30410e0d8f5a1",
+      "dispatched_at_unix": 1793119218.689498,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 44801,
+        "message_roles": [
+          "system",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "4f19b6e7-1197-46ef-a227-2c99598ed3b8",
+      "http_status": 200,
+      "input_tokens": 12171,
+      "cached_input_tokens": 11200,
+      "output_tokens": 666,
+      "elapsed_seconds": 8.093999999997322
+    },
+    {
+      "seq": 15,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0054276,
+      "request_sha256": "75e0db28b607c7e202abcb5ff40110ffd77d0ec00e50daa2b46181b4aa17089f",
+      "dispatched_at_unix": 1793119227.278355,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 50637,
+        "message_roles": [
+          "system",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "4a8ab3a5-1d11-4ce4-8488-873a651e5498",
+      "http_status": 200,
+      "input_tokens": 13135,
+      "cached_input_tokens": 12160,
+      "output_tokens": 661,
+      "elapsed_seconds": 7.015999999995984
+    },
+    {
+      "seq": 16,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0052104000000000004,
+      "request_sha256": "f2308ee4d7c2a2162aa96c2f1bef27ec06061ac593c449e1c0de5e376abf5eb8",
+      "dispatched_at_unix": 1793119236.0127428,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 18458,
+        "message_roles": [
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "03febbf8-2075-426b-aecc-fe0692fd1fc0",
+      "http_status": 200,
+      "input_tokens": 6387,
+      "cached_input_tokens": 0,
+      "output_tokens": 36,
+      "elapsed_seconds": 4.843000000000757
+    },
+    {
+      "seq": 17,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00207288,
+      "request_sha256": "13cd7e5947f931f09700cd96fa5b994e2354d235aa9d40589c0eef4390bbbccb",
+      "dispatched_at_unix": 1793119240.8871186,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 20014,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "8425cfdf-62e3-4528-a2c7-2a413c90149e",
+      "http_status": 200,
+      "input_tokens": 6752,
+      "cached_input_tokens": 6336,
+      "output_tokens": 101,
+      "elapsed_seconds": 5.186999999998079
+    },
+    {
+      "seq": 18,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0017540000000000001,
+      "request_sha256": "02a26654806e7607058f0449704843cdd4df27e0d488eeb1abadfd3f6a0acec4",
+      "dispatched_at_unix": 1793119246.1052706,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 20839,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "5fb0ea00-62e5-4493-8c95-fd344284e15c",
+      "http_status": 200,
+      "input_tokens": 6900,
+      "cached_input_tokens": 6720,
+      "output_tokens": 23,
+      "elapsed_seconds": 4.2039999999979045
+    },
+    {
+      "seq": 19,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.005301040000000001,
+      "request_sha256": "a07cf0b12a00c98094776c760fbc79d53397b666d6693ac40b6b7e186a8738f0",
+      "dispatched_at_unix": 1793119291.3607488,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 34080,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "6922d151-af8c-4fa2-bba7-c95a96b87844",
+      "http_status": 200,
+      "input_tokens": 10676,
+      "cached_input_tokens": 6848,
+      "output_tokens": 237,
+      "elapsed_seconds": 7.703000000001339
+    },
+    {
+      "seq": 20,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0071316,
+      "request_sha256": "5beccf9e203bf5c9fab208f500d339b175d29071d115ac1577a29413ba9dedd3",
+      "dispatched_at_unix": 1793119323.6122131,
+      "metadata": {
+        "purpose": "diagnoser",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 26432,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "dc6d8fae-7e95-48d4-babf-514a92f3bba5",
+      "http_status": 200,
+      "input_tokens": 7021,
+      "cached_input_tokens": 0,
+      "output_tokens": 541,
+      "elapsed_seconds": 8.406000000002678
+    },
+    {
+      "seq": 21,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.005324000000000001,
+      "request_sha256": "d23be62d16b7cfc6a00e6f431271ed36effdd01027610173ff4fc5f0223e7fc6",
+      "dispatched_at_unix": 1793119333.2723963,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 19439,
+        "message_roles": [
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "fe425e39-492b-43bd-b8c0-addfb9c8a623",
+      "http_status": 200,
+      "input_tokens": 6529,
+      "cached_input_tokens": 0,
+      "output_tokens": 36,
+      "elapsed_seconds": 4.375
+    },
+    {
+      "seq": 22,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00447464,
+      "request_sha256": "9220697977bb384d7f65643151125a21e47ee64ba8d6f82d78dd73413cbd2c85",
+      "dispatched_at_unix": 1793119337.67925,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 20953,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "2f94d09d-9f4b-4123-acc4-660fce11b744",
+      "http_status": 200,
+      "input_tokens": 6888,
+      "cached_input_tokens": 2048,
+      "output_tokens": 47,
+      "elapsed_seconds": 4.718000000000757
+    },
+    {
+      "seq": 23,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00556304,
+      "request_sha256": "24e4695b17f8084aefe32f7a423dcab73f12a2472bf7c4079003c8a14ed4ff33",
+      "dispatched_at_unix": 1793119374.4906478,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 34266,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "40883dec-bb43-4f64-bbb3-aed58bc4bc09",
+      "http_status": 200,
+      "input_tokens": 10685,
+      "cached_input_tokens": 6848,
+      "output_tokens": 328,
+      "elapsed_seconds": 8.453000000001339
+    },
+    {
+      "seq": 24,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0071372,
+      "request_sha256": "e8ade96a35c967a3453f84ae0c04a9625312c65e5d4743fd4528bdb7f6d2498d",
+      "dispatched_at_unix": 1793119387.6000218,
+      "metadata": {
+        "purpose": "diagnoser",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 27407,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "ce8dcead-1f97-496a-8bac-84ab1e1bc53a",
+      "http_status": 200,
+      "input_tokens": 7161,
+      "cached_input_tokens": 0,
+      "output_tokens": 503,
+      "elapsed_seconds": 6.781999999999243
+    }
+  ]
+}

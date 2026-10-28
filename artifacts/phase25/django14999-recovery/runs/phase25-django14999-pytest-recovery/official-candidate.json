@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "instance_id": "django__django-14999",
+  "base_commit": "a754b82dac511475b6276039471ccd17cc64aeb8",
+  "run_id": "phase25-django14999-pytest-recovery",
+  "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+  "inference_finished": true,
+  "internal_status": "failed",
+  "internal_stop_reason": "tests_failed",
+  "patch": "artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/official-candidate.diff",
+  "patch_sha256": "7f2804c7f51f3a07bc17b21bfa3b15133cb26f79ea7d4845373d87b868074e23",
+  "canonical_patch_sha256": "a857a93e669579fdbe6ee6305d89df0a551a809a9a5a659f771ad05b446548cb",
+  "prediction": "artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/official-prediction.jsonl",
+  "prediction_sha256": "756eda867283cfae7aa3501ee99b3528a2d6228ef4165c9082211f7979c18e06",
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "path",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "size",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "non_empty",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "test_protection",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "syntax",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "cheat",
+        "passed": true,
+        "reason": null
+      }
+    ],
+    "cheat_findings": [],
+    "warnings": [],
+    "errors": [],
+    "files_changed": 1,
+    "lines_added": 3,
+    "lines_deleted": 0,
+    "risk": "low",
+    "evidence": []
+  },
+  "provenance": [
+    {
+      "path": "artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/state_final.json",
+      "sha256": "872ca3429e14b9ac3fbd79a913bc44cef025975236b1f327bd03bf6959c3aff7"
+    },
+    {
+      "path": "artifacts/phase25/django14999-recovery/dispatch-ledger.json",
+      "sha256": "3d4e1ebb5b8acc4cde14083196976e2e378417a952d20331e36e38a4b1ae5bd1"
+    },
+    {
+      "path": "artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/stage-recovery.json",
+      "sha256": "308baf5a162854a453f6223d36865ead8d1c137f933b1649d8cba8c8108dd763"
+    }
+  ]
+}

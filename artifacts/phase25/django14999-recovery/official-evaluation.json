@@ -1,0 +1,98 @@
+{
+  "schema_version": 3,
+  "instance_id": "django__django-14999",
+  "run_id": "phase25-django14999-pytest-recovery",
+  "patch_sha256": "7f2804c7f51f3a07bc17b21bfa3b15133cb26f79ea7d4845373d87b868074e23",
+  "candidate_receipt": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/official-candidate.json",
+  "internal_status": "failed",
+  "official_verdict": "RESOLVED",
+  "official": {
+    "run_id": "phase25-django14999-pytest-recovery",
+    "command": {
+      "argv": [
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/.venv-swebench-linux/bin/python",
+        "-m",
+        "swebench.harness.run_evaluation",
+        "-d",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/test.jsonl",
+        "-s",
+        "test",
+        "-i",
+        "django__django-14999",
+        "-p",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/official-prediction.jsonl",
+        "-id",
+        "phase25-django14999-pytest-recovery",
+        "--max_workers",
+        "1",
+        "-t",
+        "1800",
+        "--report_dir",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/official-report",
+        "-n",
+        "swebench",
+        "--cache_level",
+        "instance"
+      ],
+      "cwd": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/official-report",
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONUTF8": "1"
+      },
+      "expected_report": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/official-report/glm-5.3-flash-main.phase25-django14999-pytest-recovery.json"
+    },
+    "decision": "EXECUTED",
+    "exit_code": 0,
+    "timed_out": false,
+    "runtime_seconds": 108.90105832399968,
+    "error_kind": null,
+    "error_detail": null,
+    "reused": false,
+    "reused_reason": "报告不存在，执行官方 harness",
+    "warnings": [],
+    "verdicts": [
+      {
+        "instance_id": "django__django-14999",
+        "verdict": "RESOLVED",
+        "resolved": true,
+        "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/official-report/glm-5.3-flash-main.phase25-django14999-pytest-recovery.json",
+        "report_sha256": "9c022de43b1591455bc5e8eb1c7837ae1b12cc6e38ec6e266670c360211e2520",
+        "error_kind": null,
+        "error_detail": null,
+        "runtime_seconds": 108.90105832399968
+      }
+    ],
+    "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/official-report/glm-5.3-flash-main.phase25-django14999-pytest-recovery.json",
+    "report_sha256": "9c022de43b1591455bc5e8eb1c7837ae1b12cc6e38ec6e266670c360211e2520",
+    "report": {
+      "schema_version": 2,
+      "total_instances": 1,
+      "submitted_instances": 1,
+      "completed_instances": 1,
+      "resolved_instances": 1,
+      "unresolved_instances": 0,
+      "empty_patch_instances": 0,
+      "error_instances": 0,
+      "completed_ids": [
+        "django__django-14999"
+      ],
+      "incomplete_ids": [],
+      "empty_patch_ids": [],
+      "submitted_ids": [
+        "django__django-14999"
+      ],
+      "resolved_ids": [
+        "django__django-14999"
+      ],
+      "unresolved_ids": [],
+      "error_ids": [],
+      "unstopped_instances": null,
+      "unstopped_containers": [],
+      "unremoved_images": [],
+      "source_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/official-report/glm-5.3-flash-main.phase25-django14999-pytest-recovery.json",
+      "source_sha256": "9c022de43b1591455bc5e8eb1c7837ae1b12cc6e38ec6e266670c360211e2520"
+    },
+    "counts_toward_resolved_rate": true
+  }
+}

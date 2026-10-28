@@ -1,0 +1,105 @@
+{
+  "schema_version": 2,
+  "generated_at": "2026-10-27T15:49:42+00:00",
+  "instance_id": "sphinx-doc__sphinx-8506",
+  "label": "phase25-test50",
+  "run_id": "swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be",
+  "run_report": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/runs/swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be/report.json",
+  "acceptance_report": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/acceptance-phase25-test50.json",
+  "predictions_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/predictions/swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be.jsonl",
+  "prediction": {
+    "predictions_sha256": "b74fd57083aff0291ce25f24267c9de7407128b1f0b75257666bf4b389737554",
+    "patch_sha256": "f2476d78b1bd9125768a9c4ee83eb3ece35960e4b1dd212e9f797d847eeae579",
+    "bytes": 561
+  },
+  "official_verdict": "UNRESOLVED",
+  "official": {
+    "run_id": "swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be",
+    "command": {
+      "argv": [
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/.venv-swebench-linux/bin/python",
+        "-m",
+        "swebench.harness.run_evaluation",
+        "-d",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/cache/swebench/princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2/test.jsonl",
+        "-s",
+        "test",
+        "-i",
+        "sphinx-doc__sphinx-8506",
+        "-p",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/predictions/swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be.jsonl",
+        "-id",
+        "swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be",
+        "--max_workers",
+        "1",
+        "-t",
+        "1800",
+        "--report_dir",
+        "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/runs/swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be/official-report",
+        "-n",
+        "swebench",
+        "--cache_level",
+        "instance"
+      ],
+      "cwd": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/runs/swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be/official-report",
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONUTF8": "1"
+      },
+      "expected_report": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/runs/swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be/official-report/glm-5.3-flash-main.swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be.json"
+    },
+    "decision": "EXECUTED",
+    "exit_code": 0,
+    "timed_out": false,
+    "runtime_seconds": 194.10811274399975,
+    "error_kind": null,
+    "error_detail": null,
+    "reused": false,
+    "reused_reason": "报告不存在，执行官方 harness",
+    "warnings": [],
+    "verdicts": [
+      {
+        "instance_id": "sphinx-doc__sphinx-8506",
+        "verdict": "UNRESOLVED",
+        "resolved": false,
+        "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/runs/swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be/official-report/glm-5.3-flash-main.swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be.json",
+        "report_sha256": "31be334ced3d88cb02570cd5cc81447be4e7a9331d632b73bbbfce8ce077792d",
+        "error_kind": null,
+        "error_detail": null,
+        "runtime_seconds": 194.10811274399975
+      }
+    ],
+    "report_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/runs/swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be/official-report/glm-5.3-flash-main.swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be.json",
+    "report_sha256": "31be334ced3d88cb02570cd5cc81447be4e7a9331d632b73bbbfce8ce077792d",
+    "report": {
+      "schema_version": 2,
+      "total_instances": 1,
+      "submitted_instances": 1,
+      "completed_instances": 1,
+      "resolved_instances": 0,
+      "unresolved_instances": 1,
+      "empty_patch_instances": 0,
+      "error_instances": 0,
+      "completed_ids": [
+        "sphinx-doc__sphinx-8506"
+      ],
+      "incomplete_ids": [],
+      "empty_patch_ids": [],
+      "submitted_ids": [
+        "sphinx-doc__sphinx-8506"
+      ],
+      "resolved_ids": [],
+      "unresolved_ids": [
+        "sphinx-doc__sphinx-8506"
+      ],
+      "error_ids": [],
+      "unstopped_instances": null,
+      "unstopped_containers": [],
+      "unremoved_images": [],
+      "source_path": "/mnt/d/Projects/Desktop/CodePilot-Repair/artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/runs/swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be/official-report/glm-5.3-flash-main.swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be.json",
+      "source_sha256": "31be334ced3d88cb02570cd5cc81447be4e7a9331d632b73bbbfce8ce077792d"
+    },
+    "counts_toward_resolved_rate": true
+  }
+}

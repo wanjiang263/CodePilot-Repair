@@ -1,0 +1,215 @@
+{
+  "currency": "CNY",
+  "limit": 2.0,
+  "accounted_or_reserved": 0.05772800000000011,
+  "frozen": false,
+  "opening_balance": 0.0,
+  "opening_source": {
+    "kind": "per_instance",
+    "instance_id": "django__django-14999",
+    "instance_opening_cny": 0.0,
+    "repo_root": "D:\\Projects\\Desktop\\CodePilot-Repair",
+    "recovery_manifest": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase25\\segment2\\opening.json",
+    "recovery_manifest_sha256": "67d7e01e9f0c5d0d4ec2bf5d86ec23ad5abea295a56d378d02a53bf702456f00"
+  },
+  "requests": [
+    {
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0121064,
+      "request_sha256": "917ec4df248cf7de0aa9f53be5117a99b56ff367722b914bd70a39541c0bfc0a",
+      "dispatched_at_unix": 1793117578.2808802,
+      "metadata": {
+        "purpose": "localizer_files",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 45592,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "86d1a039-583c-4875-84e0-31c59fe3933b",
+      "http_status": 200,
+      "input_tokens": 14580,
+      "cached_input_tokens": 0,
+      "output_tokens": 158,
+      "elapsed_seconds": 4.688000000001921
+    },
+    {
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.016174400000000002,
+      "request_sha256": "ecb60adf2a8af51cbfd5b23c41e3bbc69d0c6aaa6cab93920f2668c0857ee057",
+      "dispatched_at_unix": 1793117583.1124542,
+      "metadata": {
+        "purpose": "localizer_symbols",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 62986,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "795621b2-ed78-4a19-8662-5bbd6662f694",
+      "http_status": 200,
+      "input_tokens": 19336,
+      "cached_input_tokens": 0,
+      "output_tokens": 252,
+      "elapsed_seconds": 5.7189999999973224
+    },
+    {
+      "seq": 3,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0073292,
+      "request_sha256": "48eb0b063bba8e404c3a5561c7902ccade68fc1ee487e5fd51ee1d3a9a95202c",
+      "dispatched_at_unix": 1793117956.1437988,
+      "metadata": {
+        "purpose": "reproducer",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 13642,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "5263a07f-c918-4b99-b618-e9adb8c40e4b",
+      "http_status": 200,
+      "input_tokens": 5154,
+      "cached_input_tokens": 0,
+      "output_tokens": 1145,
+      "elapsed_seconds": 23.375
+    },
+    {
+      "seq": 4,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0066928000000000005,
+      "request_sha256": "80f66674c53082fc58f306c9aede11511f5c722e9e398e4d446234b9b22bdbd5",
+      "dispatched_at_unix": 1793117979.5675929,
+      "metadata": {
+        "purpose": "reproducer",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 18806,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "77ba2eab-4771-41a8-9f4a-8561d3c6cf76",
+      "http_status": 200,
+      "input_tokens": 6308,
+      "cached_input_tokens": 0,
+      "output_tokens": 588,
+      "elapsed_seconds": 14.14100000000326
+    },
+    {
+      "seq": 5,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0076908,
+      "request_sha256": "beee006092c61e0adfc9b88cccbb514ca102f09ccf142090cb8190a5564976cd",
+      "dispatched_at_unix": 1793117993.7744977,
+      "metadata": {
+        "purpose": "reproducer",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 13937,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "8347c205-6729-4b27-9ca9-32e179ae45af",
+      "http_status": 200,
+      "input_tokens": 5193,
+      "cached_input_tokens": 0,
+      "output_tokens": 1263,
+      "elapsed_seconds": 25.985000000000582
+    },
+    {
+      "seq": 6,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0077344,
+      "request_sha256": "55dad56928177115c345f709fb5c3e1f95c7bca6a576f9b4d77b9512558129c0",
+      "dispatched_at_unix": 1793118019.7881756,
+      "metadata": {
+        "purpose": "reproducer",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": 0.0,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 20448,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "4b3045aa-58c8-4b3b-a7b3-e8679be7f953",
+      "http_status": 200,
+      "input_tokens": 6637,
+      "cached_input_tokens": 0,
+      "output_tokens": 866,
+      "elapsed_seconds": 10.422000000005937
+    }
+  ]
+}

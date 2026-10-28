@@ -1,0 +1,41 @@
+aegis-acceptance-agent-worker-1
+aegis-acceptance-ingest-worker-1
+aegis-acceptance-rag-api-2
+aegis-acceptance-outbox-dispatcher-1
+aegis-acceptance-rag-api-1
+aegis-acceptance-node-api-2
+aegis-acceptance-node-api-1
+aegis-acceptance-edge-lb-1
+aegis-acceptance-rag-lb-1
+aegis-acceptance-model-server-1
+aegis-acceptance-llm-gateway-stub-1
+aegis-acceptance-alertmanager-1
+aegis-acceptance-postgres-1
+aegis-acceptance-tempo-1
+aegis-acceptance-prometheus-1
+aegis-flow-qdrant-1
+aegis-acceptance-grafana-1
+aegis-acceptance-otel-collector-1
+aegis-acceptance-redis-1
+aegis-acceptance-qdrant-1
+aegis-triage Up 9 minutes (Paused)
+aegis-acceptance-agent-worker-1 Up About an hour (Paused)
+aegis-acceptance-ingest-worker-1 Up About an hour (Paused)
+aegis-acceptance-rag-api-2 Up 55 minutes (Paused)
+aegis-acceptance-outbox-dispatcher-1 Up About an hour (Paused)
+aegis-acceptance-rag-api-1 Up 55 minutes (Paused)
+aegis-acceptance-node-api-2 Up About an hour (Paused)
+aegis-acceptance-node-api-1 Up About an hour (Paused)
+aegis-acceptance-edge-lb-1 Up About an hour (Paused)
+aegis-acceptance-rag-lb-1 Up About an hour (Paused)
+aegis-acceptance-model-server-1 Up About an hour (Paused)
+aegis-acceptance-llm-gateway-stub-1 Up About an hour (Paused)
+aegis-acceptance-alertmanager-1 Up About an hour (Paused)
+aegis-acceptance-postgres-1 Up 2 hours (Paused)
+aegis-acceptance-tempo-1 Up About an hour (Paused)
+aegis-acceptance-prometheus-1 Up About an hour (Paused)
+aegis-flow-qdrant-1 Up About an hour (Paused)
+aegis-acceptance-grafana-1 Up About an hour (Paused)
+aegis-acceptance-otel-collector-1 Up About an hour (Paused)
+aegis-acceptance-redis-1 Up About an hour (Paused)
+aegis-acceptance-qdrant-1 Up About an hour (Paused)

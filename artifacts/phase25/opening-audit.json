@@ -1,0 +1,27 @@
+{
+  "authorized_upper_cny": 3.19763192,
+  "remaining_cny": 26.80236808,
+  "sources": {
+    "artifacts/phase20/m3-20261024-formal6/instances/matplotlib__matplotlib-18869/dispatch-ledger-m3-20261024-r1.json": "14f3e119d8c87945ce70b71982fc5d60974c21b9076057d4365589c63f870cd8",
+    "artifacts/phase20/m3-20261024-formal6/instances/sphinx-doc__sphinx-8273/dispatch-ledger-m3-20261024-r1.json": "d27b7618f42311648f3ea2c5e4fbf3da52db1d735d7db12c641f3d0688129f85",
+    "artifacts/phase21/m3-phase21-recovery-6-r5/instances/django__django-11422/dispatch-ledger-phase21-recovery-6-r1.json": "348d46f251f73f22cc207fda8374ca49b40a85d453199d2a6a1318daa439a046",
+    "artifacts/phase22/live/instances/sphinx-doc__sphinx-8273/dispatch-ledger-phase22-six-live-r1.json": "aae05e2f6799d1acc00087ce916d67452df16cf4b796743a87501a1667e0530d",
+    "artifacts/phase22/live-r2-indexed/instances/sympy__sympy-22714/dispatch-ledger-phase22-six-live-r2-r1.json": "78a072c2f937328353da7c8202dbe8697755022e5ca8c1f320cff24de428c280",
+    "artifacts/phase22/live-r3/instances/matplotlib__matplotlib-18869/dispatch-ledger-phase22-six-live-r3-r1.json": "0299513e525b71147d331f8986e5e88449e3dac2053a1c07874c4db3d5aa1d6f",
+    "artifacts/phase22/live-r3/instances/scikit-learn__scikit-learn-10297/dispatch-ledger-phase22-six-live-r3-r1.json": "7011860fb1eccdbcced7ae06abf028f4690770a979af1da62e043401b4fb058d",
+    "artifacts/phase22/live-r4/instances/psf__requests-3362/dispatch-ledger-phase22-six-live-r4-r1.json": "aeb7ca8b356fca6106366da54da71c6d8068203c21d2a9c761ba84ff5291a12a",
+    "artifacts/phase22/live-r5/instances/django__django-11422/dispatch-ledger-phase22-six-live-r5-r1.json": "e3757a2b8081e3dd8bad0e8c88958ef76c038098e8ea9658e64f6257796e3984",
+    "artifacts/phase23/instances/django__django-11422/segment-1/dispatch-ledger.json": "0479243a3c4900bb8202a142cf500c23b18ed48004487aad459b3c992b5c031f",
+    "artifacts/phase23/instances/django__django-11422/segment-3/dispatch-ledger.json": "bbba31ad0a5b4e95ddacc0c66f35fb857e24c4f4f0fa0e604134395e2e3d437f",
+    "artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-1/dispatch-ledger.json": "813d12473035b2f828040054f4ecae8511fdb689ce9ac2529e5adca3a2bcb4d9",
+    "artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-2/dispatch-ledger.json": "79705d8413148a76e36cb9dd1be58237342484529906b02dfd364991db84a6b5",
+    "artifacts/phase23/instances/matplotlib__matplotlib-18869/segment-3/dispatch-ledger.json": "235ecd2ba3925c933fae4242a67f68b3cbf7cd3832f98ae5bc706a3b2d7cb27c",
+    "artifacts/phase23/instances/psf__requests-3362/segment-1/dispatch-ledger.json": "4df78bf28fdcbf7000a9a68f08659f72a7e1dc3dde1090e009ac4f9e02261a15",
+    "artifacts/phase23/instances/psf__requests-3362/segment-2/dispatch-ledger.json": "02895dca507e0e8b2b99a6d324f70e6f138c669e77381723fcfba7adefd17237",
+    "artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-1/dispatch-ledger.json": "67d366eb2e0bb7b772cb3f0af9c8478297591dbcd10863a2762fa2dff6937ea8",
+    "artifacts/phase23/instances/sphinx-doc__sphinx-8273/segment-2/dispatch-ledger.json": "5cec7146d53948d0899e567c5ec5e57ea2eb26d6412827c1b3cfa7795059ba7e",
+    "artifacts/phase23/instances/sympy__sympy-22714/segment-2/dispatch-ledger.json": "07a84d09fad6092cdc9cb4899ff768298a26095e1c68fd86dc1942bdbc096eb0",
+    "artifacts/phase23/instances/sympy__sympy-22714/segment-3/dispatch-ledger.json": "3b7dd1172df8e5734d57e1c77ab3c2e7627037514c2b8f7b37e94cf4650f5269",
+    "artifacts/phase23/instances/sympy__sympy-22714/segment-4/dispatch-ledger.json": "e611fc71c48bf57a4da130d08944989509d34eab620efde146bb1b5c79d30413"
+  }
+}

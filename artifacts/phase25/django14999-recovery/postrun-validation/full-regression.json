@@ -1,0 +1,4951 @@
+{
+  "candidate_unchanged": true,
+  "git_diff_sha256": "7f2804c7f51f3a07bc17b21bfa3b15133cb26f79ea7d4845373d87b868074e23",
+  "requested": 614,
+  "execution": {
+    "status": "PASS",
+    "exit_code": 0,
+    "duration_seconds": 144.68163132667542,
+    "tests": [
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_alter_order_with_respect_to",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_blank_textfield_and_charfield",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_constraints",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_date_fields_with_auto_now_add_asking_for_default",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_date_fields_with_auto_now_add_not_asking_for_null_addition",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_date_fields_with_auto_now_not_asking_for_default",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_field_and_foo_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_field_with_default",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_foo_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_indexes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_many_to_many",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_model_order_with_respect_to",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_model_order_with_respect_to_index_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_model_order_with_respect_to_index_foo_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_model_with_field_removed_from_base_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_non_blank_textfield_and_charfield",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_db_table_add",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_db_table_change",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_db_table_no_changes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_db_table_remove",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_db_table_with_model_change",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_field_and_foo_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_field_to_fk_dependency_other_app",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_field_to_not_null_oneoff_default",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_field_to_not_null_with_default",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_field_to_not_null_without_default",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_fk_before_model_deletion",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_many_to_many",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_model_managers",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_model_options",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_model_options_proxy",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_arrange_for_graph",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_arrange_for_graph_with_multiple_initial",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_bases_first",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_bases_first_mixed_case_app_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_circular_dependency_mixed_addcreate",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_circular_dependency_swappable",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_circular_dependency_swappable2",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_circular_dependency_swappable_self",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_circular_fk_dependency",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_concrete_field_changed_to_many_to_many",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_create_model_and_unique_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_create_model_with_check_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_create_model_with_indexes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_create_with_through_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_custom_deconstructible",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_custom_migration_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_deconstruct_field_kwarg",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_deconstruct_type",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_deconstructible_dict",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_deconstructible_list",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_deconstructible_tuple",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_default_related_name_option",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_different_regex_does_alter",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_empty_foo_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_first_dependency",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_fk_dependency",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_fk_dependency_other_app",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_foo_together_no_changes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_foo_together_ordering",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_foo_together_remove_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_foreign_key_removed_before_target_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_identical_regex_doesnt_alter",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_keep_db_table_with_model_change",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_last_dependency",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_m2m_w_through_multistep_remove",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_managed_to_unmanaged",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_many_to_many_changed_to_concrete_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_many_to_many_removed_before_through_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_many_to_many_removed_before_through_model_2",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_mti_inheritance_model_removal",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_multiple_bases",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_nested_deconstructible_objects",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_new_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_non_circular_foreignkey_dependency_removal",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_old_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_order_fields_indexes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_parse_number",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_partly_alter_foo_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_pk_fk_included",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy_bases_first",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy_custom_pk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy_fk_dependency",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy_to_mti_with_fk_to_proxy",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy_to_mti_with_fk_to_proxy_proxy",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_remove_alter_order_with_respect_to",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_remove_constraints",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_remove_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_remove_field_and_foo_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_remove_foo_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_remove_indexes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_field_and_foo_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_field_foreign_key_to_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_field_preserved_db_column",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_foreign_object_fields",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_m2m_through_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_model_case",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_model_reverse_relation_dependencies",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_model_with_fks_in_different_position",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_model_with_renamed_rel_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_referenced_primary_key",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_related_field_preserved_db_column",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_renamed_referenced_m2m_model_case",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_replace_string_with_foreignkey",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_same_app_circular_fk_dependency",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_same_app_circular_fk_dependency_with_unique_together_and_indexes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_same_app_no_fk_dependency",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_set_alter_order_with_respect_to",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_set_alter_order_with_respect_to_index_constraint_foo_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_supports_functools_partial",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_swappable",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_swappable_changed",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_swappable_circular_multi_mti",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_swappable_first_inheritance",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_swappable_first_setting",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_trim_apps",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_unmanaged_create",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_unmanaged_custom_pk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_unmanaged_delete",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_unmanaged_to_managed",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_auto",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_many_operations_suffix",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_no_operations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_no_operations_initial",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_none_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_none_name_with_initial_true",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_operation_with_no_suggested_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_single_operation",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_single_operation_long_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_two_create_models",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_two_create_models_with_initial_true",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_two_operations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::AppLabelErrorTests::test_makemigrations_app_name_specified_as_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::AppLabelErrorTests::test_makemigrations_nonexistent_app_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::AppLabelErrorTests::test_migrate_app_name_specified_as_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::AppLabelErrorTests::test_migrate_nonexistent_app_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::AppLabelErrorTests::test_showmigrations_app_name_specified_as_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::AppLabelErrorTests::test_showmigrations_nonexistent_app_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::AppLabelErrorTests::test_sqlmigrate_app_name_specified_as_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::AppLabelErrorTests::test_sqlmigrate_nonexistent_app_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::AppLabelErrorTests::test_squashmigrations_app_name_specified_as_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::AppLabelErrorTests::test_squashmigrations_nonexistent_app_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_failing_migration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_files_content",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigration_merge_dry_run",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigration_merge_dry_run_verbosity_3",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_auto_merge_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_auto_now_add_interactive",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_auto_now_add_interactive_quit",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_check",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_conflict_exit",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_consistency_checks_respect_routers",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_continues_number_sequence_after_squash",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_default_merge_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_disabled_migrations_for_app",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_dry_run",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_dry_run_verbosity_3",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_empty_connections",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_empty_migration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_empty_no_app_specified",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_handle_merge",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_inconsistent_history",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_inconsistent_history_db_failure",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_interactive_accept",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_interactive_by_default",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_interactive_not_null_addition",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_interactive_not_null_alteration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_interactive_reject",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_interactive_unique_callable_default_addition",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_merge_dont_output_dependency_operations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_merge_no_conflict",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_migration_path_output",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_migration_path_output_valueerror",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_migrations_announce",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_migrations_modules_nonexistent_toplevel_package",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_migrations_modules_path_not_exist",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_no_apps_initial",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_no_changes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_no_changes_no_apps",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_no_common_ancestor",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_no_init",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_non_interactive_auto_now_add_addition",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_non_interactive_no_field_rename",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_non_interactive_no_model_rename",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_non_interactive_not_null_addition",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_non_interactive_not_null_alteration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_non_interactive_unique_callable_default_addition",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_order",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_unspecified_app_with_conflict_merge",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_unspecified_app_with_conflict_no_merge",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_with_custom_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MakeMigrationsTests::test_makemigrations_with_invalid_custom_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_ambiguous_prefix",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_app_without_migrations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_backward_to_squashed_migration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_check",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_check_plan",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_conflict_exit",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_fake_initial",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_fake_initial_case_insensitive",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_fake_split_initial",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_inconsistent_history",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_initial_false",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_not_reflected_changes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_partially_applied_squashed_migration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_plan",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_record_replaced",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_record_squashed",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_syncdb_app_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_syncdb_app_with_migrations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_syncdb_deferred_sql_executed_with_schemaeditor",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrate_with_system_checks",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_migrations_no_operations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_regression_22823_unmigrated_fk_to_migrated_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_showmigrations_list",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_showmigrations_list_squashed",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_showmigrations_no_migrations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_showmigrations_plan",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_showmigrations_plan_app_label_no_migrations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_showmigrations_plan_multiple_app_labels",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_showmigrations_plan_no_migrations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_showmigrations_plan_single_app_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_showmigrations_plan_squashed",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_showmigrations_unmigrated_app",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_sqlmigrate_ambiguous_prefix_squashed_migrations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_sqlmigrate_backwards",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_sqlmigrate_for_non_atomic_migration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_sqlmigrate_for_non_transactional_databases",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_sqlmigrate_forwards",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_sqlmigrate_replaced_migration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_sqlmigrate_squashed_migration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::MigrateTests::test_unknown_prefix",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::SquashMigrationsTests::test_squashed_name_with_start_migration_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::SquashMigrationsTests::test_squashed_name_without_start_migration_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::SquashMigrationsTests::test_squashmigrations_initial_attribute",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::SquashMigrationsTests::test_squashmigrations_invalid_start",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::SquashMigrationsTests::test_squashmigrations_optimizes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::SquashMigrationsTests::test_squashmigrations_squashes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::SquashMigrationsTests::test_squashmigrations_valid_start",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_commands.py::SquashMigrationsTests::test_ticket_23799_squashmigrations_no_optimize",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_deprecated_fields.py::Tests::test_migrate",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_exceptions.py::ExceptionTests::test_node_not_found_error_repr",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_alter_id_type_with_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_apply_all_replaced_marks_replacement_as_applied",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_atomic_operation_in_non_atomic_migration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_custom_user",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_detect_soft_applied_add_field_manytomanyfield",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_empty_plan",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_migrate_backward_to_squashed_migration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_migrate_marks_replacement_applied_even_if_it_did_nothing",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_migrate_marks_replacement_unapplied",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_migrations_applied_and_recorded_atomically",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_migrations_not_applied_on_deferred_sql_failure",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_mixed_plan_not_supported",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_non_atomic_migration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_process_callback",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_run",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_run_with_squashed",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_soft_apply",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_unrelated_applied_migrations_mutate_state",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_unrelated_model_lookups_backwards",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorTests::test_unrelated_model_lookups_forwards",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorUnitTests::test_backwards_nothing_to_do",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorUnitTests::test_minimize_rollbacks",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_executor.py::ExecutorUnitTests::test_minimize_rollbacks_branchy",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_circular_graph",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_circular_graph_2",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_complex_graph",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_infinite_loop",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_iterative_dfs",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_iterative_dfs_complexity",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_missing_child_nodes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_missing_parent_nodes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_plan_invalid_node",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_remove_replaced_nodes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_remove_replacement_node",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_simple_graph",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_stringify",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_validate_consistency_dummy",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_validate_consistency_missing_child",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_validate_consistency_missing_parent",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::GraphTests::test_validate_consistency_no_error",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::NodeTests::test_dummynode_repr",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_graph.py::NodeTests::test_node_repr",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_check_consistent_history",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_check_consistent_history_squashed",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_explicit_missing_module",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_first",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_ignore_files",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_load",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_load_empty_dir",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_load_import_error",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_load_module_file",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_load_unmigrated_dependency",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_loading_namespace_package",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_loading_package_without__file__",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_loading_squashed",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_loading_squashed_complex",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_loading_squashed_complex_multi_apps",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_loading_squashed_complex_multi_apps_partially_applied",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_loading_squashed_erroneous",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_loading_squashed_ref_squashed",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_marked_as_migrated",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_marked_as_unmigrated",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_name_match",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_plan_handles_repeated_migrations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::LoaderTests::test_run_before",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::PycLoaderTests::test_invalid",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::PycLoaderTests::test_valid",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_loader.py::RecorderTests::test_apply",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_multidb.py::MultiDBOperationTests::test_create_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_multidb.py::MultiDBOperationTests::test_create_model2",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_multidb.py::MultiDBOperationTests::test_create_model3",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_multidb.py::MultiDBOperationTests::test_create_model4",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_multidb.py::MultiDBOperationTests::test_run_python_migrate_foo_router_with_hints",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_multidb.py::MultiDBOperationTests::test_run_python_migrate_foo_router_without_hints",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_multidb.py::MultiDBOperationTests::test_run_python_migrate_nothing_router",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_multidb.py::MultiDBOperationTests::test_run_sql_migrate_foo_router_with_hints",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_multidb.py::MultiDBOperationTests::test_run_sql_migrate_foo_router_without_hints",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_multidb.py::MultiDBOperationTests::test_run_sql_migrate_nothing_router",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::FieldOperationTests::test_reference_field_by_through_fields",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::FieldOperationTests::test_references_field_by_from_fields",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::FieldOperationTests::test_references_field_by_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::FieldOperationTests::test_references_field_by_remote_field_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::FieldOperationTests::test_references_field_by_through",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::FieldOperationTests::test_references_field_by_to_fields",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::FieldOperationTests::test_references_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_binaryfield",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_charfield",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_constraint_combinable",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_constraint_percent_escaping",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_covering_unique_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_deferred_unique_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_field_m2m",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_field_preserve_default",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_func_index",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_func_unique_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_index",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_index_state_forwards",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_or_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_partial_unique_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_add_textfield",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field_add_db_column_noop",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field_m2m",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field_pk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field_pk_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field_pk_mti_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field_reloads_state_on_fk_target_changes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field_reloads_state_on_fk_with_to_field_related_name_target_type_change",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field_reloads_state_on_fk_with_to_field_target_changes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field_reloads_state_on_fk_with_to_field_target_type_change",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field_with_func_index",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field_with_func_unique_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_field_with_index",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_fk_non_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_index_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_index_together_remove",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_index_together_remove_with_unique_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_model_managers",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_model_managers_emptying",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_model_options",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_model_options_emptying",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_model_table",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_model_table_m2m",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_model_table_none",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_model_table_noop",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_order_with_respect_to",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_unique_together",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_alter_unique_together_remove",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_autofield__bigautofield_foreignfield_growth",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_column_name_quoting",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_model_inheritance",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_model_m2m",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_model_managers",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_model_with_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_model_with_covering_unique_constraint",
+        "outcome": "skipped",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_model_with_deferred_unique_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_model_with_duplicate_base",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_model_with_duplicate_field_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_model_with_duplicate_manager_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_model_with_partial_unique_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_model_with_unique_after",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_proxy_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_create_unmanaged_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_delete_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_delete_mti_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_delete_proxy_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_model_with_bigautofield",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_remove_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_remove_covering_unique_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_remove_deferred_unique_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_remove_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_remove_field_m2m",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_remove_field_m2m_with_through",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_remove_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_remove_func_index",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_remove_func_unique_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_remove_index",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_remove_index_state_forwards",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_remove_partial_unique_constraint",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_field_case",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_field_reloads_state_on_fk_target_changes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_field_with_db_column",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_m2m_model_after_rename_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_m2m_target_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_m2m_through_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_missing_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_model_state_forwards",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_model_with_m2m",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_model_with_self_referential_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_model_with_self_referential_m2m",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_model_with_superclass_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_rename_referenced_field_state_forward",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_repoint_field_m2m",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_run_python",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_run_python_atomic",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_run_python_noop",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_run_python_related_assignment",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_run_sql",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_run_sql_add_missing_semicolon_on_collect_sql",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_run_sql_noop",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_run_sql_params",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_run_sql_params_invalid",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_separate_database_and_state",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_separate_database_and_state2",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_smallfield_autofield_foreignfield_growth",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::OperationTests::test_smallfield_bigautofield_foreignfield_growth",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::SwappableOperationTests::test_add_field_ignore_swapped",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::SwappableOperationTests::test_create_ignore_swapped",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::SwappableOperationTests::test_delete_ignore_swapped",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::SwappableOperationTests::test_indexes_ignore_swapped",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_operations.py::TestCreateModel::test_references_model_mixin",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_add_field_alter_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_add_field_delete_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_add_field_rename_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_alter_alter_index_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_alter_alter_owrt_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_alter_alter_table_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_alter_alter_unique_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_alter_field_delete_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_alter_field_rename_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_alter_index_delete_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_alter_index_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_alter_model_options",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_alter_owrt_delete_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_alter_owrt_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_alter_unique_delete_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_alter_unique_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_delete_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_model_add_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_model_add_field_not_through_m2m_through",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_model_alter_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_model_and_remove_model_options",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_model_no_reordering_for_unrelated_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_model_no_reordering_of_inherited_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_model_remove_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_model_rename_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_model_reordering",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_model_reordering_circular_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_create_rename_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_none_app_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_optimize_elidable_operation",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_optimize_through_create",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_optimize_through_fields",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_rename_model_self",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_single",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_optimizer.py::OptimizerTests::test_swapping_fields_names",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_questioner.py::QuestionerTests::test_ask_initial_with_disabled_migrations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_questioner.py::QuestionerTests::test_ask_not_null_alteration_not_provided",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_questioner.py::QuestionerTests::test_timedelta_default",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_abstract_model_children_inherit_indexes",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_bound_field_sanity_check",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_create_swappable",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_create_swappable_from_abstract",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_custom_manager_swappable",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_custom_model_base",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_explicit_index_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_fields_immutability",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_fields_ordering_equality",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_from_model_constraints",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_order_with_respect_to_private_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_repr",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_sanity_check_through",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_sanity_check_to",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::ModelStateTests::test_sanity_index_name",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_abstract_base",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_base",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_base_to_base_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_base_to_subclass_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_circle",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_direct_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_direct_hidden_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_direct_m2m",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_direct_m2m_self",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_fk_through_proxy",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_generic_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_intermediate_m2m",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_intermediate_m2m_base",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_intermediate_m2m_extern_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_intermediate_m2m_self",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_multiple_bases",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_multiple_mixed_bases",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_multiple_nested_bases",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_nested_abstract_base",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_nested_base",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_nested_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_nested_proxy_base",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_proxy_base",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_two_sided",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::RelatedModelsTests::test_unrelated",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_add_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_add_field_m2m_with_through",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_add_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_add_model_no_relations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_add_model_other_app",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_alter_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_alter_field_m2m_to_fk",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_many_relations_to_same_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_relations_population",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_remove_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_remove_field_no_relations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_remove_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_rename_field",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_rename_field_no_relations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_rename_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateRelationsTests::test_rename_model_no_relations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_add_relations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_apps_bulk_update",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_choices_iterator",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_create",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_custom_base_manager",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_custom_default_manager",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_custom_default_manager_added_to_the_model_state",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_custom_default_manager_named_objects_with_false_migration_flag",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_dangling_references_throw_error",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_equality",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_ignore_order_wrt",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_manager_refer_correct_model_version",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_no_duplicate_managers",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_real_apps",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_real_apps_non_set",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_reference_mixed_case_app_label",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_reload_model_relationship_consistency",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_reload_related_model_on_non_relational_fields",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_remove_relations",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_render",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_render_model_inheritance",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_render_model_with_multiple_inheritance",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_render_project_dependencies",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_render_unique_app_labels",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_state.py::StateTests::test_self_relation",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::OperationWriterTests::test_args_kwargs_signature",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::OperationWriterTests::test_args_signature",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::OperationWriterTests::test_empty_signature",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::OperationWriterTests::test_expand_args_signature",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::OperationWriterTests::test_kwargs_signature",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::OperationWriterTests::test_multiline_args_signature",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::OperationWriterTests::test_nested_args_signature",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::OperationWriterTests::test_nested_operation_expand_args_signature",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_custom_operation",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_deconstruct_class_arguments",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_migration_file_header_comments",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_migration_path",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_models_import_omitted",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_register_non_serializer",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_register_serializer",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_builtin_types",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_builtins",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_choices",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_class_based_validators",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_collections",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_compiled_regex",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_constants",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_datetime",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_empty_nonempty_tuple",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_enums",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_fields",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_frozensets",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_functions",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_functools_partial",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_functools_partialmethod",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_iterators",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_lazy_objects",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_local_function_reference",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_managers",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_multiline_strings",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_nested_class",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_numbers",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_path_like",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_pathlib",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_range",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_set",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_settings",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_strings",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_timedelta",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_type_model",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_type_none",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_unbound_method_reference",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_serialize_uuid",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_simple_migration",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/migrations/test_writer.py::WriterTests::test_sorted_imports",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      }
+    ],
+    "tests_passed": 613,
+    "tests_failed": 0,
+    "stdout_tail": "Testing against Django installed in '/testbed/django'\nImporting application migrations\nFound 614 test(s).\nOperations to perform:\n  Synchronize unmigrated apps: auth, contenttypes, messages, migrations, sessions, staticfiles\n  Apply all migrations: admin, sites\nSynchronizing apps without migrations:\n  Creating tables...\n    Creating table django_content_type\n    Creating table auth_permission\n    Creating table auth_group\n    Creating table auth_user\n    Creating table django_session\n    Creating table migrations_modelwithcustombase\n    Creating table migrations_unmigratedmodel\n    Running deferred SQL...\nRunning migrations:\n  Applying admin.0001_initial... OK\n  Applying admin.0002_logentry_remove_auto_add... OK\n  Applying admin.0003_logentry_add_action_flag_choices... OK\n  Applying sites.0001_initial... OK\n  Applying sites.0002_alter_domain_unique... OK\nOperations to perform:\n  Synchronize unmigrated apps: auth, contenttypes, messages, migrations, sessions, staticfiles\n  Apply all migrations: admin, sites\nSynchronizing apps without migrations:\n  Creating tables...\n    Creating table django_content_type\n    Creating table auth_permission\n    Creating table auth_group\n    Creating table auth_user\n    Creating table django_session\n    Creating table migrations_modelwithcustombase\n    Creating table migrations_unmigratedmodel\n    Running deferred SQL...\nRunning migrations:\n  Applying admin.0001_initial... OK\n  Applying admin.0002_logentry_remove_auto_add... OK\n  Applying admin.0003_logentry_add_action_flag_choices... OK\n  Applying sites.0001_initial... OK\n  Applying sites.0002_alter_domain_unique... OK\nSystem check identified no issues (0 silenced).\n",
+    "stderr_tail": "eignfield_growth (migrations.test_operations.OperationTests)\nA field may be migrated from SmallAutoField to BigAutoField. ... ok\ntest_add_field_ignore_swapped (migrations.test_operations.SwappableOperationTests)\nTests the AddField operation. ... ok\ntest_create_ignore_swapped (migrations.test_operations.SwappableOperationTests)\nThe CreateTable operation ignores swapped models. ... ok\ntest_delete_ignore_swapped (migrations.test_operations.SwappableOperationTests)\nTests the DeleteModel operation ignores swapped models. ... ok\ntest_indexes_ignore_swapped (migrations.test_operations.SwappableOperationTests)\nAdd/RemoveIndex operations ignore swapped models. ... ok\ntest_references_model_mixin (migrations.test_operations.TestCreateModel) ... ok\ntest_add_field_alter_field (migrations.test_optimizer.OptimizerTests)\nAlterField should optimize into AddField. ... ok\ntest_add_field_delete_field (migrations.test_optimizer.OptimizerTests)\nRemoveField should cancel AddField ... ok\ntest_add_field_rename_field (migrations.test_optimizer.OptimizerTests)\nRenameField should optimize into AddField ... ok\ntest_alter_alter_index_model (migrations.test_optimizer.OptimizerTests) ... ok\ntest_alter_alter_owrt_model (migrations.test_optimizer.OptimizerTests) ... ok\ntest_alter_alter_table_model (migrations.test_optimizer.OptimizerTests) ... ok\ntest_alter_alter_unique_model (migrations.test_optimizer.OptimizerTests) ... ok\ntest_alter_field_delete_field (migrations.test_optimizer.OptimizerTests)\nRemoveField should absorb AlterField ... ok\ntest_alter_field_rename_field (migrations.test_optimizer.OptimizerTests)\nRenameField should optimize to the other side of AlterField, ... ok\ntest_create_alter_index_delete_model (migrations.test_optimizer.OptimizerTests) ... ok\ntest_create_alter_index_field (migrations.test_optimizer.OptimizerTests) ... ok\ntest_create_alter_model_options (migrations.test_optimizer.OptimizerTests) ... ok\ntest_create_alter_owrt_delete_model (migrations.test_optimizer.OptimizerTests) ... ok\ntest_create_alter_owrt_field (migrations.test_optimizer.OptimizerTests) ... ok\ntest_create_alter_unique_delete_model (migrations.test_optimizer.OptimizerTests) ... ok\ntest_create_alter_unique_field (migrations.test_optimizer.OptimizerTests) ... ok\ntest_create_delete_model (migrations.test_optimizer.OptimizerTests)\nCreateModel and DeleteModel should collapse into nothing. ... ok\ntest_create_model_add_field (migrations.test_optimizer.OptimizerTests)\nAddField should optimize into CreateModel. ... ok\ntest_create_model_add_field_not_through_m2m_through (migrations.test_optimizer.OptimizerTests)\nAddField should NOT optimize into CreateModel if it's an M2M using a ... ok\ntest_create_model_alter_field (migrations.test_optimizer.OptimizerTests)\nAlterField should optimize into CreateModel. ... ok\ntest_create_model_and_remove_model_options (migrations.test_optimizer.OptimizerTests) ... ok\ntest_create_model_no_reordering_for_unrelated_fk (migrations.test_optimizer.OptimizerTests)\nCreateModel order remains unchanged if the later AddField operation ... ok\ntest_create_model_no_reordering_of_inherited_model (migrations.test_optimizer.OptimizerTests)\nA CreateModel that inherits from another isn't reordered to avoid ... ok\ntest_create_model_remove_field (migrations.test_optimizer.OptimizerTests)\nRemoveField should optimize into CreateModel. ... ok\ntest_create_model_rename_field (migrations.test_optimizer.OptimizerTests)\nRenameField should optimize into CreateModel. ... ok\ntest_create_model_reordering (migrations.test_optimizer.OptimizerTests)\nAddField optimizes into CreateModel if it's a FK to a model that's ... ok\ntest_create_model_reordering_circular_fk (migrations.test_optimizer.OptimizerTests)\nCreateModel reordering behavior doesn't result in an infinite loop if ... ok\ntest_create_rename_model (migrations.test_optimizer.OptimizerTests)\nCreateModel should absorb RenameModels. ... ok\ntest_none_app_label (migrations.test_optimizer.OptimizerTests) ... ok\ntest_optimize_elidable_operation (migrations.test_optimizer.OptimizerTests) ... ok\ntest_optimize_through_create (migrations.test_optimizer.OptimizerTests)\nWe should be able to optimize away create/delete through a create or delete ... ok\ntest_optimize_through_fields (migrations.test_optimizer.OptimizerTests)\nfield-level through checking is working. This should manage to collapse ... ok\ntest_rename_model_self (migrations.test_optimizer.OptimizerTests)\nRenameModels should absorb themselves. ... ok\ntest_single (migrations.test_optimizer.OptimizerTests)\nThe optimizer does nothing on a single operation, ... ok\ntest_swapping_fields_names (migrations.test_optimizer.OptimizerTests) ... ok\ntest_ask_initial_with_disabled_migrations (migrations.test_questioner.QuestionerTests) ... ok\ntest_ask_not_null_alteration_not_provided (migrations.test_questioner.QuestionerTests) ... ok\ntest_timedelta_default (migrations.test_questioner.QuestionerTests) ... ok\ntest_abstract_model_children_inherit_indexes (migrations.test_state.ModelStateTests) ... ok\ntest_bound_field_sanity_check (migrations.test_state.ModelStateTests) ... ok\ntest_create_swappable (migrations.test_state.ModelStateTests)\nTests making a ProjectState from an Apps with a swappable model ... ok\ntest_create_swappable_from_abstract (migrations.test_state.ModelStateTests)\nA swappable model inheriting from a hierarchy: ... ok\ntest_custom_manager_swappable (migrations.test_state.ModelStateTests)\nTests making a ProjectState from unused models with custom managers ... ok\ntest_custom_model_base (migrations.test_state.ModelStateTests) ... ok\ntest_explicit_index_name (migrations.test_state.ModelStateTests) ... ok\ntest_fields_immutability (migrations.test_state.ModelStateTests)\nRendering a model state doesn't alter its internal fields. ... ok\ntest_fields_ordering_equality (migrations.test_state.ModelStateTests) ... ok\ntest_from_model_constraints (migrations.test_state.ModelStateTests) ... ok\ntest_order_with_respect_to_private_field (migrations.test_state.ModelStateTests) ... ok\ntest_repr (migrations.test_state.ModelStateTests) ... ok\ntest_sanity_check_through (migrations.test_state.ModelStateTests) ... ok\ntest_sanity_check_to (migrations.test_state.ModelStateTests) ... ok\ntest_sanity_index_name (migrations.test_state.ModelStateTests) ... ok\ntest_abstract_base (migrations.test_state.RelatedModelsTests) ... ok\ntest_base (migrations.test_state.RelatedModelsTests) ... ok\ntest_base_to_base_fk (migrations.test_state.RelatedModelsTests) ... ok\ntest_base_to_subclass_fk (migrations.test_state.RelatedModelsTests) ... ok\ntest_circle (migrations.test_state.RelatedModelsTests) ... ok\ntest_direct_fk (migrations.test_state.RelatedModelsTests) ... ok\ntest_direct_hidden_fk (migrations.test_state.RelatedModelsTests) ... ok\ntest_direct_m2m (migrations.test_state.RelatedModelsTests) ... ok\ntest_direct_m2m_self (migrations.test_state.RelatedModelsTests) ... ok\ntest_fk_through_proxy (migrations.test_state.RelatedModelsTests) ... ok\ntest_generic_fk (migrations.test_state.RelatedModelsTests) ... ok\ntest_intermediate_m2m (migrations.test_state.RelatedModelsTests) ... ok\ntest_intermediate_m2m_base (migrations.test_state.RelatedModelsTests) ... ok\ntest_intermediate_m2m_extern_fk (migrations.test_state.RelatedModelsTests) ... ok\ntest_intermediate_m2m_self (migrations.test_state.RelatedModelsTests) ... ok\ntest_multiple_bases (migrations.test_state.RelatedModelsTests) ... ok\ntest_multiple_mixed_bases (migrations.test_state.RelatedModelsTests) ... ok\ntest_multiple_nested_bases (migrations.test_state.RelatedModelsTests) ... ok\ntest_nested_abstract_base (migrations.test_state.RelatedModelsTests) ... ok\ntest_nested_base (migrations.test_state.RelatedModelsTests) ... ok\ntest_nested_fk (migrations.test_state.RelatedModelsTests) ... ok\ntest_nested_proxy_base (migrations.test_state.RelatedModelsTests) ... ok\ntest_proxy_base (migrations.test_state.RelatedModelsTests) ... ok\ntest_two_sided (migrations.test_state.RelatedModelsTests) ... ok\ntest_unrelated (migrations.test_state.RelatedModelsTests) ... ok\ntest_add_field (migrations.test_state.StateRelationsTests) ... ok\ntest_add_field_m2m_with_through (migrations.test_state.StateRelationsTests) ... ok\ntest_add_model (migrations.test_state.StateRelationsTests) ... ok\ntest_add_model_no_relations (migrations.test_state.StateRelationsTests) ... ok\ntest_add_model_other_app (migrations.test_state.StateRelationsTests) ... ok\ntest_alter_field (migrations.test_state.StateRelationsTests) ... ok\ntest_alter_field_m2m_to_fk (migrations.test_state.StateRelationsTests) ... ok\ntest_many_relations_to_same_model (migrations.test_state.StateRelationsTests) ... ok\ntest_relations_population (migrations.test_state.StateRelationsTests) ... ok\ntest_remove_field (migrations.test_state.StateRelationsTests) ... ok\ntest_remove_field_no_relations (migrations.test_state.StateRelationsTests) ... ok\ntest_remove_model (migrations.test_state.StateRelationsTests) ... ok\ntest_rename_field (migrations.test_state.StateRelationsTests) ... ok\ntest_rename_field_no_relations (migrations.test_state.StateRelationsTests) ... ok\ntest_rename_model (migrations.test_state.StateRelationsTests) ... ok\ntest_rename_model_no_relations (migrations.test_state.StateRelationsTests) ... ok\ntest_add_relations (migrations.test_state.StateTests)\n#24573 - Adding relations to existing models should reload the ... ok\ntest_apps_bulk_update (migrations.test_state.StateTests)\nStateApps.bulk_update() should update apps.ready to False and reset ... ok\ntest_choices_iterator (migrations.test_state.StateTests)\n#24483 - ProjectState.from_apps should not destructively consume ... ok\ntest_create (migrations.test_state.StateTests)\nTests making a ProjectState from an Apps ... ok\ntest_custom_base_manager (migrations.test_state.StateTests) ... ok\ntest_custom_default_manager (migrations.test_state.StateTests) ... ok\ntest_custom_default_manager_added_to_the_model_state (migrations.test_state.StateTests)\nWhen the default manager of the model is a custom manager, ... ok\ntest_custom_default_manager_named_objects_with_false_migration_flag (migrations.test_state.StateTests)\nWhen a manager is added with a name of 'objects' but it does not ... ok\ntest_dangling_references_throw_error (migrations.test_state.StateTests) ... ok\ntest_equality (migrations.test_state.StateTests)\n== and != are implemented correctly. ... ok\ntest_ignore_order_wrt (migrations.test_state.StateTests)\nMakes sure ProjectState doesn't include OrderWrt fields when ... ok\ntest_manager_refer_correct_model_version (migrations.test_state.StateTests)\n#24147 - Managers refer to the correct version of a ... ok\ntest_no_duplicate_managers (migrations.test_state.StateTests)\nWhen a manager is added with `use_in_migrations = True` and a parent ... ok\ntest_real_apps (migrations.test_state.StateTests)\nIncluding real apps can resolve dangling FK errors. ... ok\ntest_real_apps_non_set (migrations.test_state.StateTests) ... ok\ntest_reference_mixed_case_app_label (migrations.test_state.StateTests) ... ok\ntest_reload_model_relationship_consistency (migrations.test_state.StateTests) ... ok\ntest_reload_related_model_on_non_relational_fields (migrations.test_state.StateTests)\nThe model is reloaded even on changes that are not involved in ... ok\ntest_remove_relations (migrations.test_state.StateTests)\n#24225 - Relations between models are updated while ... ok\ntest_render (migrations.test_state.StateTests)\nTests rendering a ProjectState into an Apps. ... ok\ntest_render_model_inheritance (migrations.test_state.StateTests) ... ok\ntest_render_model_with_multiple_inheritance (migrations.test_state.StateTests) ... ok\ntest_render_project_dependencies (migrations.test_state.StateTests)\nThe ProjectState render method correctly renders models ... ok\ntest_render_unique_app_labels (migrations.test_state.StateTests)\nThe ProjectState render method doesn't raise an ... ok\ntest_self_relation (migrations.test_state.StateTests)\n#24513 - Modifying an object pointing to itself would cause it to be ... ok\ntest_args_kwargs_signature (migrations.test_writer.OperationWriterTests) ... ok\ntest_args_signature (migrations.test_writer.OperationWriterTests) ... ok\ntest_empty_signature (migrations.test_writer.OperationWriterTests) ... ok\ntest_expand_args_signature (migrations.test_writer.OperationWriterTests) ... ok\ntest_kwargs_signature (migrations.test_writer.OperationWriterTests) ... ok\ntest_multiline_args_signature (migrations.test_writer.OperationWriterTests) ... ok\ntest_nested_args_signature (migrations.test_writer.OperationWriterTests) ... ok\ntest_nested_operation_expand_args_signature (migrations.test_writer.OperationWriterTests) ... ok\ntest_custom_operation (migrations.test_writer.WriterTests) ... ok\ntest_deconstruct_class_arguments (migrations.test_writer.WriterTests) ... ok\ntest_migration_file_header_comments (migrations.test_writer.WriterTests)\nTest comments at top of file. ... ok\ntest_migration_path (migrations.test_writer.WriterTests) ... ok\ntest_models_import_omitted (migrations.test_writer.WriterTests)\ndjango.db.models shouldn't be imported if unused. ... ok\ntest_register_non_serializer (migrations.test_writer.WriterTests) ... ok\ntest_register_serializer (migrations.test_writer.WriterTests) ... ok\ntest_serialize_builtin_types (migrations.test_writer.WriterTests) ... ok\ntest_serialize_builtins (migrations.test_writer.WriterTests) ... ok\ntest_serialize_choices (migrations.test_writer.WriterTests) ... ok\ntest_serialize_class_based_validators (migrations.test_writer.WriterTests)\nTicket #22943: Test serialization of class-based validators, including ... ok\ntest_serialize_collections (migrations.test_writer.WriterTests) ... ok\ntest_serialize_compiled_regex (migrations.test_writer.WriterTests)\nMake sure compiled regex can be serialized. ... ok\ntest_serialize_constants (migrations.test_writer.WriterTests) ... ok\ntest_serialize_datetime (migrations.test_writer.WriterTests) ... ok\ntest_serialize_empty_nonempty_tuple (migrations.test_writer.WriterTests)\nTicket #22679: makemigrations generates invalid code for (an empty ... ok\ntest_serialize_enums (migrations.test_writer.WriterTests) ... ok\ntest_serialize_fields (migrations.test_writer.WriterTests) ... ok\ntest_serialize_frozensets (migrations.test_writer.WriterTests) ... ok\ntest_serialize_functions (migrations.test_writer.WriterTests) ... ok\ntest_serialize_functools_partial (migrations.test_writer.WriterTests) ... ok\ntest_serialize_functools_partialmethod (migrations.test_writer.WriterTests) ... ok\ntest_serialize_iterators (migrations.test_writer.WriterTests) ... ok\ntest_serialize_lazy_objects (migrations.test_writer.WriterTests) ... ok\ntest_serialize_local_function_reference (migrations.test_writer.WriterTests)\nA reference in a local scope can't be serialized. ... ok\ntest_serialize_managers (migrations.test_writer.WriterTests) ... ok\ntest_serialize_multiline_strings (migrations.test_writer.WriterTests) ... ok\ntest_serialize_nested_class (migrations.test_writer.WriterTests) ... ok\ntest_serialize_numbers (migrations.test_writer.WriterTests) ... ok\ntest_serialize_path_like (migrations.test_writer.WriterTests) ... ok\ntest_serialize_pathlib (migrations.test_writer.WriterTests) ... ok\ntest_serialize_range (migrations.test_writer.WriterTests) ... ok\ntest_serialize_set (migrations.test_writer.WriterTests) ... ok\ntest_serialize_settings (migrations.test_writer.WriterTests) ... ok\ntest_serialize_strings (migrations.test_writer.WriterTests) ... ok\ntest_serialize_timedelta (migrations.test_writer.WriterTests) ... ok\ntest_serialize_type_model (migrations.test_writer.WriterTests) ... ok\ntest_serialize_type_none (migrations.test_writer.WriterTests) ... ok\ntest_serialize_unbound_method_reference (migrations.test_writer.WriterTests)\nAn unbound method used within a class body can be serialized. ... ok\ntest_serialize_uuid (migrations.test_writer.WriterTests) ... ok\ntest_simple_migration (migrations.test_writer.WriterTests)\nTests serializing a simple migration. ... ok\ntest_sorted_imports (migrations.test_writer.WriterTests)\n#24155 - Tests ordering of imports. ... ok\n\n----------------------------------------------------------------------\nRan 614 tests in 105.492s\n\nOK (skipped=1)\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\nDestroying test database for alias 'other' ('file:memorydb_other?mode=memory&cache=shared')...\n",
+    "artifact_dir": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase25\\django14999-recovery\\postrun-validation\\runs\\same-candidate-full-regression\\attempts\\01",
+    "error_reason": null,
+    "diagnostics": {
+      "runner": "django",
+      "parse_counts": {
+        "ran": 614,
+        "parsed": 614,
+        "wanted": 614,
+        "missing": 0,
+        "extra_observed": 0
+      },
+      "requested_missing": [],
+      "requested_extra_observed": [],
+      "execution_backend": "docker",
+      "container_verified": true,
+      "network_mode": "none",
+      "oom_killed": false,
+      "cleanup_error": null,
+      "junit_error": null,
+      "runner_kind": "django"
+    }
+  },
+  "model_requests": 0,
+  "original_internal_status_preserved": true
+}

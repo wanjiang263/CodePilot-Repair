@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "instance_id": "astropy__astropy-6938",
+  "base_commit": "c76af9ed6bb89bfba45b9f5bc1e635188278e2fa",
+  "run_id": "swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1",
+  "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+  "inference_finished": true,
+  "internal_status": "stopped",
+  "internal_stop_reason": "repeated_patch",
+  "patch": "artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/runs/swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1/official-candidate.diff",
+  "patch_sha256": "60aa772f2e125597e620d564173e4210bd68a05d3fba9cbb59c430959dc72186",
+  "canonical_patch_sha256": "424c2a5c6c55dbc6486e27ef0efc2406e9e9d5590a2ce72ed7684b1a112c891b",
+  "prediction": "artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/runs/swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1/official-prediction.jsonl",
+  "prediction_sha256": "d9113b92f8338f1135f70cf6e714cde8f2d08897e19f1cca49a948db2d4bb58d",
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "path",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "size",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "non_empty",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "test_protection",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "syntax",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "cheat",
+        "passed": true,
+        "reason": null
+      }
+    ],
+    "cheat_findings": [],
+    "warnings": [],
+    "errors": [],
+    "files_changed": 1,
+    "lines_added": 2,
+    "lines_deleted": 1,
+    "risk": "low",
+    "evidence": [
+      "reproduction files excluded from the delivered patch: tests/_codepilot_repro/test_fitsrec_d_exponent.py"
+    ]
+  },
+  "provenance": [
+    {
+      "path": "artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/runs/swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1/state_final.json",
+      "sha256": "b642fda8e09084248969078f257da02923e7472785ea2908902c25cd6ecbc7f5"
+    },
+    {
+      "path": "artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/dispatch-ledger-phase25-first5-c4-r1.json",
+      "sha256": "1b0b10871e24a40a122909051f3ac87e6093da812623e230003840a142185f66"
+    }
+  ]
+}

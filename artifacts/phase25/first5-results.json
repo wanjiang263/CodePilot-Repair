@@ -1,0 +1,383 @@
+{
+  "generated_at": "2026-10-28T01:52:18.187722+00:00",
+  "scope": "User narrowed to fixed first5, then evaluate remaining45; no additional dispatch authorized by this audit",
+  "catalog": "artifacts/phase22/next-stage/catalog.json",
+  "catalog_sha256": "3cfa3b13cbbf281aafb216a6942bfbdc4c249c5c082c715218ea786c2cc0c3be",
+  "first5": [
+    {
+      "order": 1,
+      "instance_id": "sphinx-doc__sphinx-8506",
+      "dispatched": true,
+      "model": "bigmodel/glm-5.3-flash",
+      "code_sha": "9ef018d70ecf9346896557ce6c19e5a2f2925f8d",
+      "requests": 25,
+      "settled_cny": 0.161778,
+      "unknown_reserved_cny": 0.0,
+      "runtime_seconds": 668.774664,
+      "internal_status": "succeeded",
+      "stop_reason": null,
+      "legal_candidate": true,
+      "patch_sha256": "f2476d78b1bd9125768a9c4ee83eb3ece35960e4b1dd212e9f797d847eeae579",
+      "official": "UNRESOLVED",
+      "report": "artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/runs/swebench-smoke-phase25-test50-sphinx-doc__sphinx-8506-s0-441b13be/report.json",
+      "official_evaluation": "artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/official-evaluation-phase25-test50.json",
+      "ledger_sources": [
+        {
+          "path": "artifacts/phase25/run/instances/sphinx-doc__sphinx-8506/dispatch-ledger-phase25-test50-r1.json",
+          "sha256": "7376a9edfe5f292daa7f069dc2958408be6ab91379b102af74186c2753e25d42",
+          "requests": 25
+        }
+      ],
+      "recovery": []
+    },
+    {
+      "order": 2,
+      "instance_id": "django__django-14999",
+      "dispatched": true,
+      "model": "bigmodel/glm-5.3-flash",
+      "code_sha": "80b453a30a93775f3f51dad96b76042aabcb8995",
+      "requests": 39,
+      "settled_cny": 0.2754172,
+      "unknown_reserved_cny": 0.0,
+      "runtime_seconds": 2289.785508,
+      "internal_status": "failed",
+      "stop_reason": "tests_failed",
+      "legal_candidate": true,
+      "patch_sha256": "7f2804c7f51f3a07bc17b21bfa3b15133cb26f79ea7d4845373d87b868074e23",
+      "official": "RESOLVED",
+      "report": "artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery/report.json",
+      "official_evaluation": "artifacts/phase25/django14999-recovery/official-evaluation.json",
+      "ledger_sources": [
+        {
+          "path": "artifacts/phase25/django14999-recovery/dispatch-ledger.json",
+          "sha256": "3d4e1ebb5b8acc4cde14083196976e2e378417a952d20331e36e38a4b1ae5bd1",
+          "requests": 33
+        },
+        {
+          "path": "artifacts/phase25/segment2/run/instances/django__django-14999/dispatch-ledger-phase25-test50-r2-r1.json",
+          "sha256": "bf2cdc6438821c6b2ecd2caf28b672602fee5aae162a72a33ed01721cde91983",
+          "requests": 6
+        }
+      ],
+      "recovery": [
+        "pytest absent in official internal image; install pytest7.4.4 in derived image; reuse index/localization; initial paid requests retained"
+      ]
+    },
+    {
+      "order": 3,
+      "instance_id": "astropy__astropy-14995",
+      "dispatched": true,
+      "model": "bigmodel/glm-5.3-flash",
+      "code_sha": "45a0e4e9d4d6c5ad99e242e2293c4c44895497d9",
+      "requests": 20,
+      "settled_cny": 0.16830208,
+      "unknown_reserved_cny": 0.0,
+      "runtime_seconds": 405.512203,
+      "internal_status": "succeeded",
+      "stop_reason": null,
+      "legal_candidate": true,
+      "patch_sha256": "43a1ba2447ed81d505fa94d39739f8b6ab2f76332103118e483cfb030f606ba4",
+      "official": "RESOLVED",
+      "report": "artifacts/phase25/first5-case3/run-r2/instances/astropy__astropy-14995/runs/swebench-smoke-phase25-first5-c3-astropy__astropy-14995-s0-a9c075d6/report.json",
+      "official_evaluation": "artifacts/phase25/first5-case3/run-r2/instances/astropy__astropy-14995/official-evaluation-phase25-first5-c3.json",
+      "ledger_sources": [
+        {
+          "path": "artifacts/phase25/first5-case3/run-r2/instances/astropy__astropy-14995/dispatch-ledger-phase25-first5-c3-r1.json",
+          "sha256": "9d518477a0604ebfc26de4cf859f631a83773f781257a6206f3ea3c3f533ebb6",
+          "requests": 20
+        }
+      ],
+      "recovery": [
+        "unpaid index process stopped under memory pressure; restarted with at most two inference workers"
+      ]
+    },
+    {
+      "order": 4,
+      "instance_id": "astropy__astropy-6938",
+      "dispatched": true,
+      "model": "bigmodel/glm-5.3-flash",
+      "code_sha": "45a0e4e9d4d6c5ad99e242e2293c4c44895497d9",
+      "requests": 24,
+      "settled_cny": 0.14407392,
+      "unknown_reserved_cny": 0.0,
+      "runtime_seconds": 1024.844062,
+      "internal_status": "stopped",
+      "stop_reason": "repeated_patch",
+      "legal_candidate": true,
+      "patch_sha256": "60aa772f2e125597e620d564173e4210bd68a05d3fba9cbb59c430959dc72186",
+      "official": "RESOLVED",
+      "report": "artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/runs/swebench-smoke-phase25-first5-c4-astropy__astropy-6938-s0-21fc7da1/report.json",
+      "official_evaluation": "artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/official-evaluation-phase25-first5-c4.json",
+      "ledger_sources": [
+        {
+          "path": "artifacts/phase25/first5-case4/run-r2/instances/astropy__astropy-6938/dispatch-ledger-phase25-first5-c4-r1.json",
+          "sha256": "1b0b10871e24a40a122909051f3ac87e6093da812623e230003840a142185f66",
+          "requests": 24
+        }
+      ],
+      "recovery": [
+        "unpaid index process stopped under memory pressure; restarted with at most two inference workers"
+      ]
+    },
+    {
+      "order": 5,
+      "instance_id": "django__django-16816",
+      "dispatched": true,
+      "model": "bigmodel/glm-5.3-flash",
+      "code_sha": "80b453a30a93775f3f51dad96b76042aabcb8995",
+      "requests": 45,
+      "settled_cny": 0.30942112,
+      "unknown_reserved_cny": 0.0,
+      "runtime_seconds": 1038.644643,
+      "internal_status": "budget_exhausted",
+      "stop_reason": "budget_tool_calls",
+      "legal_candidate": false,
+      "patch_sha256": null,
+      "official": "NOT_EVALUATED_NO_PATCH",
+      "report": "artifacts/phase25/first5-case5/run-r2/instances/django__django-16816/runs/swebench-smoke-phase25-first5-c5-django__django-16816-s0-3cd000bd/report.json",
+      "official_evaluation": null,
+      "ledger_sources": [
+        {
+          "path": "artifacts/phase25/first5-case5/run-r2/instances/django__django-16816/dispatch-ledger-phase25-first5-c5-r1.json",
+          "sha256": "cffb24ba8dd4a0acd93542c89068c198542b40d37ed6fc5e94f9e6bf420fefe4",
+          "requests": 45
+        }
+      ],
+      "recovery": [
+        "unpaid index process stopped under memory pressure; restarted with at most two inference workers"
+      ],
+      "reason": "NO_PATCH: 30 read-only coder tool calls (29 succeeded, one model JSON argument error) exhausted configured local tool budget; no workspace/code patch generated"
+    }
+  ],
+  "remaining45": [
+    {
+      "instance_id": "django__django-11630",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-11999",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8595",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-20639",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3190",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-7114",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-13971",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-16873",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-14238",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23563",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-13964",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5692",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-13773",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-22840",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-13710",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-14580",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-15814",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5103",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-24152",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-13925",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-13448",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7220",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-14672",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8627",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-12171",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-20154",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-12284",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24970",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-13647",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-11583",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "pydata__xarray-5131",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-13933",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-14308",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7168",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-12236",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-15738",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5495",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-13315",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-18532",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-18189",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-11905",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sympy__sympy-12454",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-15996",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "django__django-11283",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8474",
+      "status": "NOT_RUN_USER_SCOPE_CHANGED"
+    }
+  ],
+  "statistics": {
+    "dispatched": 5,
+    "original_catalog_size": 50,
+    "dispatched_coverage": 0.1,
+    "valid_official": 4,
+    "official_coverage_of_legal_candidates": 1.0,
+    "official_coverage_of_dispatched": 0.8,
+    "official_coverage_of_original_catalog": 0.08,
+    "resolved": 3,
+    "resolved_over_50": 0.06,
+    "resolved_over_first5": 0.6,
+    "resolved_over_valid_official": 0.75,
+    "by_version": {
+      "9ef018d70ecf9346896557ce6c19e5a2f2925f8d": {
+        "dispatched": 1,
+        "official": 1,
+        "resolved": 0
+      },
+      "80b453a30a93775f3f51dad96b76042aabcb8995": {
+        "dispatched": 2,
+        "official": 1,
+        "resolved": 1
+      },
+      "45a0e4e9d4d6c5ad99e242e2293c4c44895497d9": {
+        "dispatched": 2,
+        "official": 2,
+        "resolved": 2
+      }
+    },
+    "no_patch": 1,
+    "final_environment_invalid": 0,
+    "final_system_error": 0
+  },
+  "fees": {
+    "currency": "CNY",
+    "original_authorization": 30,
+    "prior_original30_upper": 3.19763192,
+    "prior_original30_settled": 1.57469432,
+    "prior_original30_unknown_reserved": 1.6229376000000002,
+    "new_settled": 1.05899232,
+    "new_unknown_reserved": 0.0,
+    "original30_upper": 4.25662424,
+    "original30_remaining": 25.74337576,
+    "historical_all_sources_settled": 8.75813592,
+    "historical_all_sources_unknown_reserved": 5.680281600000001,
+    "historical_unknown_calls": 7,
+    "all_sources_upper": 15.497409840000001,
+    "note": "Historical opening totals include older authorizations; do not add that full opening to original30. Each new ledger counted once; replicated opening fields excluded."
+  }
+}
