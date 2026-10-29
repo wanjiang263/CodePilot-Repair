@@ -1,0 +1,111 @@
+{
+  "currency": "CNY",
+  "limit": 1.0,
+  "accounted_or_reserved": 0.00043399999999993444,
+  "frozen": false,
+  "opening_balance": 0.0,
+  "opening_source": null,
+  "requests": [
+    {
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8028672,
+      "status": "settled",
+      "cost_cny": 2.2e-05,
+      "request_sha256": "cd3bc428b2bbdd8ca1113c426d59d49ef37ab56e668bc80eca77d65b9faa901a",
+      "dispatched_at_unix": 1793279177.5951903,
+      "metadata": {
+        "purpose": "phase27_normal",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 1024,
+        "request_body_bytes": 139,
+        "message_roles": [
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "e9f780c5-2cb2-45db-8fdf-258e8c467a16",
+      "http_status": 200,
+      "input_tokens": 17,
+      "cached_input_tokens": 0,
+      "output_tokens": 3,
+      "elapsed_seconds": 2.4689999999973224
+    },
+    {
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8028672,
+      "status": "settled",
+      "cost_cny": 0.0002036,
+      "request_sha256": "0a9b3c598ee75063ceef163320ffb1325f4582c8713f54822ef611c8221fe9db",
+      "dispatched_at_unix": 1793279180.1472092,
+      "metadata": {
+        "purpose": "phase27_tool",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 1024,
+        "request_body_bytes": 524,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "08edd772-33e2-4a1b-a6aa-432398c2ef88",
+      "http_status": 200,
+      "input_tokens": 195,
+      "cached_input_tokens": 0,
+      "output_tokens": 17,
+      "elapsed_seconds": 8.43800000000192
+    },
+    {
+      "seq": 3,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8028672,
+      "status": "settled",
+      "cost_cny": 0.00020840000000000002,
+      "request_sha256": "915c75b623d6fad993d0bf7551967cdb6af47fce4265f4fc4dd6914ecfd74d4b",
+      "dispatched_at_unix": 1793279188.6004853,
+      "metadata": {
+        "purpose": "phase27_tool_result",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 1024,
+        "request_body_bytes": 791,
+        "message_roles": [
+          "system",
+          "user",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "97f155d2-e274-48d2-912a-dc7545887a5b",
+      "http_status": 200,
+      "input_tokens": 222,
+      "cached_input_tokens": 0,
+      "output_tokens": 11,
+      "elapsed_seconds": 4.812999999994645
+    }
+  ],
+  "cancelled_admissions": []
+}

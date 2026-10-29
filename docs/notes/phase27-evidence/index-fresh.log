@@ -1,0 +1,64 @@
+{"event": "preparation_progress", "phase": "scanned", "counts": {"files": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 100, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 200, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 300, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 400, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 500, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 600, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 700, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 800, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 900, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1000, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1100, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1200, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1300, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1400, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1500, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1600, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1700, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1800, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1900, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2000, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2100, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2200, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2300, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2400, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2500, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2600, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2700, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "linking", "counts": {"sources": 2717, "parsed": 2717, "parse_reused": 0, "changed": 5214, "reused": 0, "removed": 0}}
+2026-10-29T15:24:56.393802Z [info     ] repo.index.done                changed=5214 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=104.438 incremental=False removed=0 repository_id=phase27-django-performance reused=0
+{"label": "fresh", "seconds": 104.99888310000006, "files": 5214, "parsed": 2717, "parse_reused": 0, "changed": 5214, "reused": 0, "association_mode": "complete_closure_v2", "association_sources": 2717, "peak_working_set_bytes": 1250627584, "base": "a754b82dac511475b6276039471ccd17cc64aeb8", "pid": 8664}
+{"event": "preparation_progress", "phase": "scanned", "counts": {"files": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 100, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 200, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 300, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 400, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 500, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 600, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 700, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 800, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 900, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1000, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1100, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1200, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1300, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1400, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1500, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1600, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1700, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1800, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1900, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2000, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2100, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2200, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2300, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2400, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2500, "parse_reused": 0, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2589, "parse_reused": 11, "changed": 1}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2589, "parse_reused": 111, "changed": 1}}
+{"event": "preparation_progress", "phase": "linking", "counts": {"sources": 2717, "parsed": 2589, "parse_reused": 128, "changed": 1, "reused": 5213, "removed": 0}}
+2026-10-29T15:27:19.159712Z [info     ] repo.index.done                changed=1 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=142.203 incremental=True removed=0 repository_id=phase27-django-performance reused=5213
+{"label": "same_process_change_from_cold", "seconds": 142.74625850000007, "files": 5214, "parsed": 2589, "parse_reused": 128, "changed": 1, "reused": 5213, "association_mode": "complete_closure_v2", "association_sources": 2717, "peak_working_set_bytes": 1326940160, "base": "a754b82dac511475b6276039471ccd17cc64aeb8", "pid": 8664}

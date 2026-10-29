@@ -1,0 +1,1302 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-29",
+  "status": "completed",
+  "baseline": "748ad2f3c882dbba4caafa19bb3fdb1c2ee7982d",
+  "source_commit": "1e2c4430aebae7d7cea45f245a5482658ca7eb1f",
+  "model": "bigmodel/glm-5.3-flash",
+  "model_alias": "glm-5.3-flash-main",
+  "config": "configs/phase22/llm.yaml",
+  "config_sha256": "1ebe26add3bcd7df83cb8765a3a038cbe099ccfe7ebc2e92063d357f12801a7c",
+  "prices_cny_per_mtok": {
+    "input": 0.8,
+    "cached_input": 0.23,
+    "output": 2.8
+  },
+  "temperature_parameter": "omitted according to supports_temperature=false",
+  "seed_dispatched": false,
+  "http_retries": 0,
+  "requests": [
+    {
+      "segment": "glm-normal",
+      "ledger": "artifacts/phase27/glm-normal/dispatch-ledger.json",
+      "ledger_sha256": "f214bd9e3f85db2258a685459291dbd6939e5cbbedd78c324fb704a1aa15e791",
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8028672,
+      "status": "settled",
+      "cost_cny": 2.2e-05,
+      "request_sha256": "cd3bc428b2bbdd8ca1113c426d59d49ef37ab56e668bc80eca77d65b9faa901a",
+      "dispatched_at_unix": 1793279177.5951903,
+      "metadata": {
+        "purpose": "phase27_normal",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 1024,
+        "request_body_bytes": 139,
+        "message_roles": [
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "e9f780c5-2cb2-45db-8fdf-258e8c467a16",
+      "http_status": 200,
+      "input_tokens": 17,
+      "cached_input_tokens": 0,
+      "output_tokens": 3,
+      "elapsed_seconds": 2.4689999999973224
+    },
+    {
+      "segment": "glm-normal",
+      "ledger": "artifacts/phase27/glm-normal/dispatch-ledger.json",
+      "ledger_sha256": "f214bd9e3f85db2258a685459291dbd6939e5cbbedd78c324fb704a1aa15e791",
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8028672,
+      "status": "settled",
+      "cost_cny": 0.0002036,
+      "request_sha256": "0a9b3c598ee75063ceef163320ffb1325f4582c8713f54822ef611c8221fe9db",
+      "dispatched_at_unix": 1793279180.1472092,
+      "metadata": {
+        "purpose": "phase27_tool",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 1024,
+        "request_body_bytes": 524,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "08edd772-33e2-4a1b-a6aa-432398c2ef88",
+      "http_status": 200,
+      "input_tokens": 195,
+      "cached_input_tokens": 0,
+      "output_tokens": 17,
+      "elapsed_seconds": 8.43800000000192
+    },
+    {
+      "segment": "glm-normal",
+      "ledger": "artifacts/phase27/glm-normal/dispatch-ledger.json",
+      "ledger_sha256": "f214bd9e3f85db2258a685459291dbd6939e5cbbedd78c324fb704a1aa15e791",
+      "seq": 3,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8028672,
+      "status": "settled",
+      "cost_cny": 0.00020840000000000002,
+      "request_sha256": "915c75b623d6fad993d0bf7551967cdb6af47fce4265f4fc4dd6914ecfd74d4b",
+      "dispatched_at_unix": 1793279188.6004853,
+      "metadata": {
+        "purpose": "phase27_tool_result",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 1024,
+        "request_body_bytes": 791,
+        "message_roles": [
+          "system",
+          "user",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "97f155d2-e274-48d2-912a-dc7545887a5b",
+      "http_status": 200,
+      "input_tokens": 222,
+      "cached_input_tokens": 0,
+      "output_tokens": 11,
+      "elapsed_seconds": 4.812999999994645
+    },
+    {
+      "segment": "glm-cancel",
+      "ledger": "artifacts/phase27/glm-cancel/dispatch-ledger.json",
+      "ledger_sha256": "ccd15f14c997b79cea64c5d8768fec15aaf9242b71b1f38af607ceeca2b558c4",
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8028672,
+      "status": "unknown_frozen",
+      "cost_cny": null,
+      "request_sha256": "523b535c97f3f602513d91db97c9ce33e59b59fafcb6088e8af0ea054d2a1c72",
+      "dispatched_at_unix": 1793279265.748425,
+      "metadata": {
+        "purpose": "phase27_cancel",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 1024,
+        "request_body_bytes": 165,
+        "message_roles": [
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "error_type": "RequestCancelled",
+      "exception_chain": [
+        "RequestCancelled"
+      ],
+      "elapsed_seconds": 0.25,
+      "timeout_phase": null
+    },
+    {
+      "segment": "agent-case",
+      "ledger": "artifacts/phase27/agent-case/dispatch-ledger.json",
+      "ledger_sha256": "ca9865bfe4226638917c7e4e5815575c2c37fd8e244ac19c918251a5db1ee187",
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0038008,
+      "request_sha256": "2cd32a3bb0e280d117e2ecdc1fef0b846e597b63c4c9d99a82e8c8bfedc6bc3c",
+      "dispatched_at_unix": 1793286843.394392,
+      "metadata": {
+        "purpose": "localizer_files",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 12849,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "aed65bcc-f935-4c2b-9309-7d5fc8b7864c",
+      "http_status": 200,
+      "response_id": "202610292314021a1f4666f91049b0",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 190,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 4086,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 4276
+      },
+      "input_tokens": 4086,
+      "cached_input_tokens": 0,
+      "output_tokens": 190,
+      "elapsed_seconds": 3.5930000000000177
+    },
+    {
+      "segment": "agent-case",
+      "ledger": "artifacts/phase27/agent-case/dispatch-ledger.json",
+      "ledger_sha256": "ca9865bfe4226638917c7e4e5815575c2c37fd8e244ac19c918251a5db1ee187",
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0048192,
+      "request_sha256": "bb830dcb9dffc2e908d370db279f448024aefe280c3a13adea0643ee1d8d8abb",
+      "dispatched_at_unix": 1793286847.0273933,
+      "metadata": {
+        "purpose": "localizer_symbols",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 16090,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "c9eefa3d-723e-4231-abda-582ac65e930f",
+      "http_status": 200,
+      "response_id": "20261029231405823ce0db66f24a03",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 294,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 4995,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 5289
+      },
+      "input_tokens": 4995,
+      "cached_input_tokens": 0,
+      "output_tokens": 294,
+      "elapsed_seconds": 4.875
+    },
+    {
+      "segment": "agent-case",
+      "ledger": "artifacts/phase27/agent-case/dispatch-ledger.json",
+      "ledger_sha256": "ca9865bfe4226638917c7e4e5815575c2c37fd8e244ac19c918251a5db1ee187",
+      "seq": 3,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.005192000000000001,
+      "request_sha256": "cfaf0c00794bdc416610e293fbc7c0f02d957638882309944ea3c7b7d20b1f88",
+      "dispatched_at_unix": 1793286854.4452996,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 20615,
+        "message_roles": [
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "521e98ab-9a72-44d1-9c88-4583747d6b28",
+      "http_status": 200,
+      "response_id": "20261029231413e2bc5dce61594f44",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 42,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 6343,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 6385
+      },
+      "input_tokens": 6343,
+      "cached_input_tokens": 0,
+      "output_tokens": 42,
+      "elapsed_seconds": 5.968999999999994
+    },
+    {
+      "segment": "agent-case",
+      "ledger": "artifacts/phase27/agent-case/dispatch-ledger.json",
+      "ledger_sha256": "ca9865bfe4226638917c7e4e5815575c2c37fd8e244ac19c918251a5db1ee187",
+      "seq": 4,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.006187280000000001,
+      "request_sha256": "854f6c36e991fdd2bdc29a20dcbf4b62766895c0fd66c728e00fbb606c018d62",
+      "dispatched_at_unix": 1793286860.4725308,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 25595,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "tool",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "88d96761-1ebb-4454-9bc6-700219a55593",
+      "http_status": 200,
+      "response_id": "20261029231419b8e086e88d674dbe",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 1277,
+        "completion_tokens_details": {
+          "reasoning_tokens": 65
+        },
+        "prompt_tokens": 7779,
+        "prompt_tokens_details": {
+          "cached_tokens": 6336
+        },
+        "total_tokens": 9056
+      },
+      "input_tokens": 7779,
+      "cached_input_tokens": 6336,
+      "output_tokens": 1277,
+      "elapsed_seconds": 30.468999999999994
+    },
+    {
+      "segment": "agent-case",
+      "ledger": "artifacts/phase27/agent-case/dispatch-ledger.json",
+      "ledger_sha256": "ca9865bfe4226638917c7e4e5815575c2c37fd8e244ac19c918251a5db1ee187",
+      "seq": 5,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.010792,
+      "request_sha256": "22770cb4c66262d9c073644620faac875f1116468e1f0ddfc477444c75eaff34",
+      "dispatched_at_unix": 1793286890.9611545,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 33929,
+        "message_roles": [
+          "system",
+          "user",
+          "assistant",
+          "tool",
+          "tool",
+          "tool",
+          "assistant",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "de75506c-a002-4a66-b0f7-fc4a09c2d472",
+      "http_status": 200,
+      "response_id": "202610292314492ceb2dddeb08435f",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 1208,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 9262,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 10470
+      },
+      "input_tokens": 9262,
+      "cached_input_tokens": 0,
+      "output_tokens": 1208,
+      "elapsed_seconds": 13.077999999999975
+    },
+    {
+      "segment": "agent-case",
+      "ledger": "artifacts/phase27/agent-case/dispatch-ledger.json",
+      "ledger_sha256": "ca9865bfe4226638917c7e4e5815575c2c37fd8e244ac19c918251a5db1ee187",
+      "seq": 6,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0043648,
+      "request_sha256": "1140efddffe3d3c816975e46d81b951eb119f731a4751972ed233b0899754c61",
+      "dispatched_at_unix": 1793286904.374215,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 20546,
+        "message_roles": [
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "7eef761e-7a30-4c4f-9485-96eec34daa12",
+      "http_status": 200,
+      "response_id": "20261029231503f18744fd81154d7a",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 28,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 5358,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 5386
+      },
+      "input_tokens": 5358,
+      "cached_input_tokens": 0,
+      "output_tokens": 28,
+      "elapsed_seconds": 4.7029999999999745
+    },
+    {
+      "segment": "agent-case",
+      "ledger": "artifacts/phase27/agent-case/dispatch-ledger.json",
+      "ledger_sha256": "ca9865bfe4226638917c7e4e5815575c2c37fd8e244ac19c918251a5db1ee187",
+      "seq": 7,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0029093600000000006,
+      "request_sha256": "bfb468dcfadf2c8fcebbaadab186b325230f2d5bfb909b0f6134d34177219d77",
+      "dispatched_at_unix": 1793286909.1261125,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 25800,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "9e634f7f-c8d3-4007-a284-f2233682d1c4",
+      "http_status": 200,
+      "response_id": "202610292315074fbde2e6cce24b6a",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 161,
+        "completion_tokens_details": {
+          "reasoning_tokens": 15
+        },
+        "prompt_tokens": 6858,
+        "prompt_tokens_details": {
+          "cached_tokens": 5312
+        },
+        "total_tokens": 7019
+      },
+      "input_tokens": 6858,
+      "cached_input_tokens": 5312,
+      "output_tokens": 161,
+      "elapsed_seconds": 7.125
+    },
+    {
+      "segment": "agent-case",
+      "ledger": "artifacts/phase27/agent-case/dispatch-ledger.json",
+      "ledger_sha256": "ca9865bfe4226638917c7e4e5815575c2c37fd8e244ac19c918251a5db1ee187",
+      "seq": 8,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0021730399999999998,
+      "request_sha256": "d62b49ff8be272e8ab15c5d31922cc70cb0ed192ef8a4320a2905b1fb7986400",
+      "dispatched_at_unix": 1793286916.559399,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 27826,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "tool",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "22779c79-0198-45d5-96ef-c319d9369d9e",
+      "http_status": 200,
+      "response_id": "20261029231515160ffeca1ee94eb3",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 73,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 7340,
+        "prompt_tokens_details": {
+          "cached_tokens": 6848
+        },
+        "total_tokens": 7413
+      },
+      "input_tokens": 7340,
+      "cached_input_tokens": 6848,
+      "output_tokens": 73,
+      "elapsed_seconds": 4.764999999999986
+    },
+    {
+      "segment": "agent-case",
+      "ledger": "artifacts/phase27/agent-case/dispatch-ledger.json",
+      "ledger_sha256": "ca9865bfe4226638917c7e4e5815575c2c37fd8e244ac19c918251a5db1ee187",
+      "seq": 9,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00335248,
+      "request_sha256": "ba1bdf1dc71da521fac354fee919c3490b9facd835b18f9ea48cda84e152de83",
+      "dispatched_at_unix": 1793286922.5975256,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 34231,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "5a85b0a9-bd1d-4ca9-8553-f58d54a56e89",
+      "http_status": 200,
+      "response_id": "20261029231521a95a3bd5fc774ebc",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 124,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 8955,
+        "prompt_tokens_details": {
+          "cached_tokens": 7296
+        },
+        "total_tokens": 9079
+      },
+      "input_tokens": 8955,
+      "cached_input_tokens": 7296,
+      "output_tokens": 124,
+      "elapsed_seconds": 7.343999999999994
+    },
+    {
+      "segment": "agent-case",
+      "ledger": "artifacts/phase27/agent-case/dispatch-ledger.json",
+      "ledger_sha256": "ca9865bfe4226638917c7e4e5815575c2c37fd8e244ac19c918251a5db1ee187",
+      "seq": 10,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.005546,
+      "request_sha256": "5b809688c47a89d725b71810eadfcc610a221973cb9101996541dea8d6598716",
+      "dispatched_at_unix": 1793286932.7549465,
+      "metadata": {
+        "purpose": "reviewer",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 23720,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "5a8cc79c-d35f-4bee-87e6-8352e13f8be4",
+      "http_status": 200,
+      "response_id": "2026102923153146754da596724f30",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 203,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 6222,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 6425
+      },
+      "input_tokens": 6222,
+      "cached_input_tokens": 0,
+      "output_tokens": 203,
+      "elapsed_seconds": 3.8590000000000373
+    }
+  ],
+  "fees": {
+    "original_authorization_cny": "30",
+    "round_limit_cny": "3",
+    "opening_remaining_cny": "25.7433757599999997350",
+    "new_settled_cny": "0.04957096",
+    "new_unknown_reserved_cny": "0.8028672",
+    "new_upper_cny": "0.85243816",
+    "original30_remaining_cny": "24.8909375999999997350",
+    "original30_upper_cny": "5.1090624000000002650",
+    "historical_original30_unknown_cny": "1.6229376000000002",
+    "original30_unknown_total_cny": "2.4258048000000002",
+    "historical_all_sources_unknown_cny": 5.680281600000001,
+    "all_sources_unknown_calls": 8,
+    "model_requests": 14,
+    "settled_requests": 13,
+    "unknown_requests": 1,
+    "pricing_boundary": "cost computed from configured prices and provider usage; no account invoice/query API available in this project"
+  },
+  "http": {
+    "status": "passed",
+    "regression": "536 passed in 176.47s",
+    "real_scope": "BigModel GLM only; native Anthropic local socket and native usage tests only",
+    "mechanism": "request-owned AsyncClient/task, 25ms cancellation polling, joined synchronous bridge; phase timeouts retained; response decoded once and framing headers rebuilt",
+    "cancellation": {
+      "records": [
+        {
+          "error_type": "DispatchBudgetStoppedError",
+          "message": "budget_stopped: response/cost uncertain; further dispatch frozen",
+          "dispatched": true,
+          "seconds": 0.25
+        }
+      ],
+      "attempts": 1,
+      "client_closed": false,
+      "http_threads": [],
+      "request_query_supported": false
+    },
+    "limitations": [
+      "offline MockTransport remains synchronous and cannot preempt a blocking mock handler",
+      "custom synchronous transports other than HTTPTransport/MockTransport are rejected",
+      "custom injected sync-client TLS/proxy transport options are not copied to the private AsyncClient; default ProviderSpec network path is the validated scope",
+      "DNS resolver stalls, OS-level cleanup stalls, long-duration connection reuse and real non-GLM providers were not stress-tested",
+      "a fresh request client does not reuse a prior call TLS connection pool",
+      "native Anthropic cache-creation pricing remains unsupported"
+    ]
+  },
+  "provider": {
+    "normal_requests": 3,
+    "returned_models": [
+      "glm-5.3-flash",
+      "glm-5.3-flash",
+      "glm-5.3-flash"
+    ],
+    "tool_call_and_result_followup": true,
+    "normal_configured_timeout_seconds": 120,
+    "normal_elapsed_seconds": [
+      2.5160000000032596,
+      8.453000000001339,
+      4.8439999999973224
+    ],
+    "controlled_cancellations": 1,
+    "cancel_scope_deadline_seconds": 10,
+    "cancel_after_seconds": 0.25,
+    "old_processes_exited": true,
+    "remote_acceptance_of_cancelled_request": "unconfirmed",
+    "request_query_capability": false,
+    "request_ids_captured": 13
+  },
+  "docker": {
+    "model_requests": 0,
+    "identity": {
+      "receipt": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase25\\django14999-recovery\\runs\\phase25-django14999-pytest-recovery\\official-candidate.json",
+      "instance": "django__django-14999",
+      "base": "a754b82dac511475b6276039471ccd17cc64aeb8",
+      "patch_sha256": "7f2804c7f51f3a07bc17b21bfa3b15133cb26f79ea7d4845373d87b868074e23",
+      "prediction_sha256": "756eda867283cfae7aa3501ee99b3528a2d6228ef4165c9082211f7979c18e06",
+      "unchanged": true,
+      "model_requests": 0,
+      "inference_constructed": false,
+      "official_recovery": {
+        "run_id": "phase25-django14999-pytest-recovery",
+        "command": {
+          "argv": [
+            "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+            "-m",
+            "swebench.harness.run_evaluation",
+            "-d",
+            "D:\\Projects\\Desktop\\CodePilot-Repair\\cache\\swebench\\princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2\\test.jsonl",
+            "-s",
+            "test",
+            "-i",
+            "django__django-14999",
+            "-p",
+            "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase25\\django14999-recovery\\runs\\phase25-django14999-pytest-recovery\\official-prediction.jsonl",
+            "-id",
+            "phase25-django14999-pytest-recovery",
+            "--max_workers",
+            "1",
+            "-t",
+            "1800",
+            "--report_dir",
+            "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report",
+            "-n",
+            "swebench",
+            "--cache_level",
+            "instance"
+          ],
+          "cwd": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report",
+          "env": {
+            "PYTHONIOENCODING": "utf-8",
+            "PYTHONUNBUFFERED": "1",
+            "PYTHONUTF8": "1"
+          },
+          "expected_report": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report\\glm-5.3-flash-main.phase25-django14999-pytest-recovery.json"
+        },
+        "decision": "REUSED",
+        "exit_code": null,
+        "timed_out": false,
+        "runtime_seconds": 0.0,
+        "report": {
+          "schema_version": 2,
+          "total_instances": 1,
+          "submitted_instances": 1,
+          "completed_instances": 1,
+          "resolved_instances": 1,
+          "unresolved_instances": 0,
+          "empty_patch_instances": 0,
+          "error_instances": 0,
+          "completed_ids": [
+            "django__django-14999"
+          ],
+          "incomplete_ids": [],
+          "empty_patch_ids": [],
+          "submitted_ids": [
+            "django__django-14999"
+          ],
+          "resolved_ids": [
+            "django__django-14999"
+          ],
+          "unresolved_ids": [],
+          "error_ids": [],
+          "unstopped_instances": null,
+          "unstopped_containers": [],
+          "unremoved_images": [],
+          "source_path": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report\\glm-5.3-flash-main.phase25-django14999-pytest-recovery.json",
+          "source_sha256": "9c022de43b1591455bc5e8eb1c7837ae1b12cc6e38ec6e266670c360211e2520"
+        },
+        "report_path": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report\\glm-5.3-flash-main.phase25-django14999-pytest-recovery.json",
+        "report_sha256": "9c022de43b1591455bc5e8eb1c7837ae1b12cc6e38ec6e266670c360211e2520",
+        "cache_identity": {
+          "run_id": "phase25-django14999-pytest-recovery",
+          "patch_hashes": [
+            [
+              "django__django-14999",
+              "7f2804c7f51f3a07bc17b21bfa3b15133cb26f79ea7d4845373d87b868074e23"
+            ]
+          ],
+          "model_name_or_path": "glm-5.3-flash-main",
+          "dataset_name": "princeton-nlp/SWE-bench_Lite",
+          "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+          "split": "test",
+          "harness_version": "4.1.0",
+          "namespace": "swebench",
+          "image_ids": []
+        },
+        "verdicts": [
+          {
+            "verdict": "RESOLVED",
+            "instance_id": "django__django-14999",
+            "resolved": true,
+            "report_path": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report\\glm-5.3-flash-main.phase25-django14999-pytest-recovery.json",
+            "report_sha256": "9c022de43b1591455bc5e8eb1c7837ae1b12cc6e38ec6e266670c360211e2520",
+            "error_kind": null,
+            "error_detail": null,
+            "runtime_seconds": 0.0,
+            "command": {
+              "argv": [
+                "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+                "-m",
+                "swebench.harness.run_evaluation",
+                "-d",
+                "D:\\Projects\\Desktop\\CodePilot-Repair\\cache\\swebench\\princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2\\test.jsonl",
+                "-s",
+                "test",
+                "-i",
+                "django__django-14999",
+                "-p",
+                "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase25\\django14999-recovery\\runs\\phase25-django14999-pytest-recovery\\official-prediction.jsonl",
+                "-id",
+                "phase25-django14999-pytest-recovery",
+                "--max_workers",
+                "1",
+                "-t",
+                "1800",
+                "--report_dir",
+                "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report",
+                "-n",
+                "swebench",
+                "--cache_level",
+                "instance"
+              ],
+              "cwd": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report",
+              "env": {
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONUNBUFFERED": "1",
+                "PYTHONUTF8": "1"
+              },
+              "expected_report": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report\\glm-5.3-flash-main.phase25-django14999-pytest-recovery.json"
+            },
+            "cache_identity": {
+              "run_id": "phase25-django14999-pytest-recovery",
+              "patch_hashes": [
+                [
+                  "django__django-14999",
+                  "7f2804c7f51f3a07bc17b21bfa3b15133cb26f79ea7d4845373d87b868074e23"
+                ]
+              ],
+              "model_name_or_path": "glm-5.3-flash-main",
+              "dataset_name": "princeton-nlp/SWE-bench_Lite",
+              "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+              "split": "test",
+              "harness_version": "4.1.0",
+              "namespace": "swebench",
+              "image_ids": []
+            }
+          }
+        ],
+        "error_kind": null,
+        "error_detail": null,
+        "reused": true,
+        "reused_reason": "缓存身份一致，复用官方报告",
+        "warnings": [],
+        "control_kind": "PRIMARY",
+        "included_in_resolved_rate": true,
+        "stdout_tail": "",
+        "stderr_tail": "",
+        "stdout_path": null,
+        "stderr_path": null,
+        "evidence_dir": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\runs\\official-recovery\\swebench_harness",
+        "platform": {
+          "system": "Windows",
+          "release": "11",
+          "machine": "AMD64",
+          "has_resource_module": false,
+          "wsl_executable": null,
+          "use_wsl": false
+        }
+      },
+      "historical_full_regression": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase25\\django14999-recovery\\postrun-validation\\full-regression.json"
+    },
+    "runs": [
+      {
+        "configured_timeout": 1,
+        "result": {
+          "status": "TIMEOUT",
+          "exit_code": null,
+          "duration_seconds": 5.161397933959961,
+          "tests": [],
+          "tests_passed": 0,
+          "tests_failed": 0,
+          "stdout_tail": "",
+          "stderr_tail": "",
+          "artifact_dir": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\runs\\docker-recovery\\attempts\\01",
+          "error_reason": "EXECUTION_TIMEOUT",
+          "diagnostics": {
+            "runner": "django",
+            "parse_counts": {
+              "ran": null,
+              "parsed": 0,
+              "wanted": 3,
+              "missing": 3,
+              "extra_observed": 0
+            },
+            "requested_missing": [
+              "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_alter_order_with_respect_to",
+              "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_blank_textfield_and_charfield",
+              "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_constraints"
+            ],
+            "requested_extra_observed": [],
+            "execution_backend": "docker",
+            "container_verified": true,
+            "network_mode": "none",
+            "oom_killed": false,
+            "cleanup_error": null,
+            "junit_error": null,
+            "runner_kind": "django",
+            "effective_timeout_seconds": 1,
+            "timeout_source": "effective EnvSpec after graph budget clamp"
+          }
+        }
+      },
+      {
+        "configured_timeout": 40,
+        "result": {
+          "status": "PASS",
+          "exit_code": 0,
+          "duration_seconds": 16.66696262359619,
+          "tests": [
+            {
+              "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_alter_order_with_respect_to",
+              "outcome": "passed",
+              "duration": 0.0,
+              "message": null,
+              "traceback": null,
+              "failure_type": null
+            },
+            {
+              "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_blank_textfield_and_charfield",
+              "outcome": "passed",
+              "duration": 0.0,
+              "message": null,
+              "traceback": null,
+              "failure_type": null
+            },
+            {
+              "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_constraints",
+              "outcome": "passed",
+              "duration": 0.0,
+              "message": null,
+              "traceback": null,
+              "failure_type": null
+            }
+          ],
+          "tests_passed": 3,
+          "tests_failed": 0,
+          "stdout_tail": "Testing against Django installed in '/testbed/django'\nImporting application migrations\nFound 3 test(s).\nSkipping setup of unused database(s): other.\nOperations to perform:\n  Synchronize unmigrated apps: auth, contenttypes, messages, migrations, sessions, staticfiles\n  Apply all migrations: admin, sites\nSynchronizing apps without migrations:\n  Creating tables...\n    Creating table django_content_type\n    Creating table auth_permission\n    Creating table auth_group\n    Creating table auth_user\n    Creating table django_session\n    Creating table migrations_modelwithcustombase\n    Creating table migrations_unmigratedmodel\n    Running deferred SQL...\nRunning migrations:\n  Applying admin.0001_initial... OK\n  Applying admin.0002_logentry_remove_auto_add... OK\n  Applying admin.0003_logentry_add_action_flag_choices... OK\n  Applying sites.0001_initial... OK\n  Applying sites.0002_alter_domain_unique... OK\nSystem check identified no issues (0 silenced).\n",
+          "stderr_tail": "Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\ntest_add_alter_order_with_respect_to (migrations.test_autodetector.AutodetectorTests)\nSetting order_with_respect_to when adding the FK too does ... ok\ntest_add_blank_textfield_and_charfield (migrations.test_autodetector.AutodetectorTests)\n#23405 - Adding a NOT NULL and blank `CharField` or `TextField` ... ok\ntest_add_constraints (migrations.test_autodetector.AutodetectorTests)\nTest change detection of new constraints. ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.012s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n",
+          "artifact_dir": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\runs\\docker-recovery\\attempts\\02",
+          "error_reason": null,
+          "diagnostics": {
+            "runner": "django",
+            "parse_counts": {
+              "ran": 3,
+              "parsed": 3,
+              "wanted": 3,
+              "missing": 0,
+              "extra_observed": 0
+            },
+            "requested_missing": [],
+            "requested_extra_observed": [],
+            "execution_backend": "docker",
+            "container_verified": true,
+            "network_mode": "none",
+            "oom_killed": false,
+            "cleanup_error": null,
+            "junit_error": null,
+            "runner_kind": "django",
+            "effective_timeout_seconds": 40,
+            "timeout_source": "effective EnvSpec after graph budget clamp"
+          }
+        }
+      }
+    ],
+    "official": "REUSED historical RESOLVED after missing-sidecar rejection",
+    "new_harness_subprocesses": 0,
+    "historical_official_not_counted_as_new_unseen_score": true
+  },
+  "index": {
+    "cold": {
+      "label": "fresh",
+      "seconds": 104.99888310000006,
+      "files": 5214,
+      "parsed": 2717,
+      "parse_reused": 0,
+      "changed": 5214,
+      "reused": 0,
+      "association_mode": "complete_closure_v2",
+      "association_sources": 2717,
+      "peak_working_set_bytes": 1250627584,
+      "base": "a754b82dac511475b6276039471ccd17cc64aeb8",
+      "pid": 8664
+    },
+    "new_process_unchanged": {
+      "label": "warm",
+      "seconds": 8.965219300000001,
+      "files": 5214,
+      "parsed": 0,
+      "parse_reused": 0,
+      "changed": 0,
+      "reused": 5214,
+      "association_mode": "verified_snapshot_v2",
+      "association_sources": 0,
+      "peak_working_set_bytes": 104247296,
+      "base": "a754b82dac511475b6276039471ccd17cc64aeb8",
+      "pid": 12232
+    },
+    "same_process_change": {
+      "label": "same_process_change_from_cold",
+      "seconds": 142.74625850000007,
+      "files": 5214,
+      "parsed": 2589,
+      "parse_reused": 128,
+      "changed": 1,
+      "reused": 5213,
+      "association_mode": "complete_closure_v2",
+      "association_sources": 2717,
+      "peak_working_set_bytes": 1326940160,
+      "base": "a754b82dac511475b6276039471ccd17cc64aeb8",
+      "pid": 8664
+    },
+    "new_process_change": {
+      "label": "changed",
+      "seconds": 150.02445090000003,
+      "files": 5214,
+      "parsed": 2717,
+      "parse_reused": 0,
+      "changed": 1,
+      "reused": 5213,
+      "association_mode": "complete_closure_v2",
+      "association_sources": 2717,
+      "peak_working_set_bytes": 1300992000,
+      "base": "a754b82dac511475b6276039471ccd17cc64aeb8",
+      "pid": 33244
+    },
+    "same_process_change_after_snapshot_only": {
+      "label": "same_process_change",
+      "seconds": 123.67445070000002,
+      "files": 5214,
+      "parsed": 2717,
+      "parse_reused": 0,
+      "changed": 1,
+      "reused": 5213,
+      "association_mode": "complete_closure_v2",
+      "association_sources": 2717,
+      "peak_working_set_bytes": 1302061056,
+      "base": "a754b82dac511475b6276039471ccd17cc64aeb8",
+      "pid": 12232
+    },
+    "query_cache": [
+      {
+        "seconds": 0.013831199999913224,
+        "cache": {
+          "hit": false,
+          "identity_seconds": 0.01599999999996271,
+          "lookup_seconds": 0.0,
+          "search_seconds": 0.0,
+          "identity": "c02cb9199e5a08f372f293246cb047bdf6720b6e646e3f8841a1b36783f53fba",
+          "reason": "first_use",
+          "result_kind": "complete"
+        },
+        "matched_lines": null
+      },
+      {
+        "seconds": 0.00452040000004672,
+        "cache": {
+          "hit": true,
+          "identity_seconds": 0.0,
+          "lookup_seconds": 0.0,
+          "search_seconds": 0.0,
+          "identity": "c02cb9199e5a08f372f293246cb047bdf6720b6e646e3f8841a1b36783f53fba",
+          "reason": "same_content_arguments_permissions_version",
+          "result_kind": "complete"
+        },
+        "matched_lines": null
+      },
+      {
+        "seconds": 0.2819030999999086,
+        "cache": {
+          "hit": false,
+          "identity_seconds": 0.06200000000001182,
+          "lookup_seconds": 0.0,
+          "search_seconds": 0.1570000000000391,
+          "identity": "0f22efc09a12d54bab23021100cd9f55b1062efdff5c0f109344f785bc554d61",
+          "reason": "identity_unavailable_or_scope_limit",
+          "result_kind": "complete"
+        },
+        "matched_lines": null
+      },
+      {
+        "seconds": 0.1629521999999497,
+        "cache": {
+          "hit": false,
+          "identity_seconds": 0.0,
+          "lookup_seconds": 0.0,
+          "search_seconds": 0.09399999999993724,
+          "identity": "0f22efc09a12d54bab23021100cd9f55b1062efdff5c0f109344f785bc554d61",
+          "reason": "identity_unavailable_or_scope_limit",
+          "result_kind": "complete"
+        },
+        "matched_lines": null
+      }
+    ],
+    "limitations": [
+      "complete association closure remains global",
+      "parsed trees are process-local and limited to 128 files / 8 MiB",
+      "single-file update was slower than fresh indexing; different process/system/cache states preclude speedup claims",
+      "first attempt failed with MemoryError; second completed in 148.203s but resource metric collection failed",
+      "fresh repeat provides successful cold time and peak working set; peak working set is not total OS committed memory"
+    ]
+  },
+  "agent": {
+    "status": "succeeded",
+    "verification": "m2_verified",
+    "model_requests": 10,
+    "settled_cny": "0.04913696",
+    "unknown_calls": 0,
+    "assembly_wall_seconds": 95.58754348754883,
+    "graph_report_seconds": 93.817765,
+    "first_effective_edit_seconds": 73.220079,
+    "first_effective_edit_event": 147,
+    "contract_in_coder_request": true,
+    "tools_from_model_responses": {
+      "read_file": 5,
+      "edit_file": 1,
+      "run_tests": 1,
+      "finish": 1
+    },
+    "coder_tools": [
+      "read_file",
+      "read_file",
+      "edit_file",
+      "run_tests",
+      "finish"
+    ],
+    "coder_repeated_queries": 0,
+    "coder_low_yield_feedback": [],
+    "target_passed": 4,
+    "full_regression_passed": 4,
+    "test_runs": 5,
+    "review_approved": true,
+    "changed_files": [
+      "drafts/store.py"
+    ],
+    "patch_sha256": "03d1d1bda0b5b0a8a2f2e401fac433ab2c8b5fa24508f6fe4ee440a7c7627021",
+    "baseline": {
+      "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract": "passed",
+      "tests/test_store.py::test_other_item_and_prefix_compatibility": "passed",
+      "tests/test_store.py::test_render_observes_update_for_every_prefix": "failed",
+      "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached": "passed"
+    },
+    "source": "independent locally authored, visible contract tests",
+    "limitation": "one bounded development case; no baseline improvement or stable solve-rate claim"
+  },
+  "checks": {
+    "pytest": "536 passed",
+    "ruff": "All checks passed!",
+    "format": "16 files already formatted",
+    "mypy": "Success: no issues found in 9 source files",
+    "typescript": "passed",
+    "eslint": "passed",
+    "git_diff_check": "passed",
+    "frontend_tests": "not repeated; no frontend source change",
+    "first_failures": [
+      "pytest sandbox temporary-directory ACL",
+      "pre-reboot regression interrupted",
+      "Django cold MemoryError",
+      "Windows metric handle truncation",
+      "candidate script default GBK read",
+      "candidate result timed_out field mismatch",
+      "3 registry mock seam failures",
+      "stale nine-table assertion",
+      "Ruff import/dict formatting",
+      "mypy union narrowing"
+    ]
+  },
+  "candidate_archive": "configs/harness/candidates/phase27-candidate-v1",
+  "candidate_status": "pending",
+  "active_pointer_created": false,
+  "pushed": false,
+  "pr_created": false,
+  "not_run": [
+    "test50",
+    "test300",
+    "M4",
+    "automatic RSI experiments",
+    "second Agent case",
+    "real Anthropic/Bedrock calls",
+    "new official grading"
+  ],
+  "final_resource_state": {
+    "active_probe_processes": 0,
+    "agent_containers": 0,
+    "candidate_containers": 0,
+    "original_django_seed": {
+      "seed": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase25\\seeds\\django__django-14999\\repo",
+      "is_bare": "true",
+      "head": "a754b82dac511475b6276039471ccd17cc64aeb8",
+      "tree": "274a7e8f81a41df1db0604c82de7a0e31b3124c1",
+      "worktree_status": "not applicable to bare seed; original cache used only as fetch source"
+    }
+  },
+  "runtime_code_provenance": {
+    "starting_head": "748ad2f3c882dbba4caafa19bb3fdb1c2ee7982d",
+    "real_runs_used_incrementally_modified_worktree": true,
+    "normal_probe_precedes_ledger_identity_enhancement": true,
+    "agent_precedes_final_registry_injection_compatibility_fix": true,
+    "final_source_commit": "1e2c4430aebae7d7cea45f245a5482658ca7eb1f",
+    "final_validation": "536 passed; no paid duplicate whole-case rerun",
+    "exact_per_segment_source_byte_snapshot": "not captured; final candidate archive freezes delivered sources"
+  },
+  "archive_integrity": {
+    "new_archive": "passed",
+    "legacy_snapshot_mismatches": [
+      {
+        "version": "phase26-candidate-v2",
+        "file": "snapshot.json",
+        "declared_sha256": "c44a73316d5e89292a8033dbf533a8401c237d6f6804a45fdfb5b12ea6eb8c4f",
+        "actual_sha256": "760037cb3df5a3eafcf845dfbaaae9ca266511e0c2d5c34531178863ba54c6ef",
+        "baseline_git_blob_sha256": "760037cb3df5a3eafcf845dfbaaae9ca266511e0c2d5c34531178863ba54c6ef",
+        "present_before_this_round": true
+      },
+      {
+        "version": "phase26-candidate-v3",
+        "file": "snapshot.json",
+        "declared_sha256": "2d39f7d5c644d23a7e61a8f1ac04c7529eeb338e3cf7cbe27ea941bcaf2f144f",
+        "actual_sha256": "309ced0e14d4bf4e43575a4f89952605cacb36062d93a3a1831d0d836b6dd18e",
+        "baseline_git_blob_sha256": "309ced0e14d4bf4e43575a4f89952605cacb36062d93a3a1831d0d836b6dd18e",
+        "present_before_this_round": true
+      },
+      {
+        "version": "phase26-candidate-v4",
+        "file": "snapshot.json",
+        "declared_sha256": "07545762e8051fc84ed9e67f2053f22222f242373e3b13a7b7cc08c39181e99d",
+        "actual_sha256": "481681fffe1c1f5fcc8f2c0181ec3af0d37df6ac0926bc52cc222feebdba92ac",
+        "baseline_git_blob_sha256": "481681fffe1c1f5fcc8f2c0181ec3af0d37df6ac0926bc52cc222feebdba92ac",
+        "present_before_this_round": true
+      },
+      {
+        "version": "phase26-candidate-v5",
+        "file": "snapshot.json",
+        "declared_sha256": "ecf503d292a5a030514ed7f31926180b6d230b88251e616e026dc15ecfbfd052",
+        "actual_sha256": "69b118a769255548edb2152f5a34994493049fe80eef7f3cbffbd572d3ea5753",
+        "baseline_git_blob_sha256": "69b118a769255548edb2152f5a34994493049fe80eef7f3cbffbd572d3ea5753",
+        "present_before_this_round": true
+      }
+    ],
+    "legacy_files_modified": false
+  }
+}

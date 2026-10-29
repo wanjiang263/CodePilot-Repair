@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "D:\Projects\Desktop\CodePilot-Repair\scripts\phase27_candidate_probe.py", line 93, in <module>
+    main()
+  File "D:\Projects\Desktop\CodePilot-Repair\scripts\phase27_candidate_probe.py", line 56, in main
+    assert runs[0]["result"]["timed_out"]
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'timed_out'

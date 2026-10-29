@@ -1,0 +1,116 @@
+........................................................................ [ 13%]
+........................................................................ [ 27%]
+........................................................................ [ 40%]
+..............................FF..F..................................... [ 54%]
+........................................................................ [ 67%]
+........................................................................ [ 81%]
+..................................................................F..... [ 94%]
+.............................                                            [100%]
+================================== FAILURES ===================================
+_____________ test_live_with_matching_budget_currency_is_allowed ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001D276DB70B0>
+
+    def test_live_with_matching_budget_currency_is_allowed(monkeypatch: pytest.MonkeyPatch) -> None:
+        """��Ԥ����ָĳ� USD �Ͳ���Ҫ���ʣ��������˵�ͬһ�ֻ��ҡ�"""
+        monkeypatch.setenv(GLM_API_KEY_ENV, KEY)
+        script = Script(_chat("�յ�"))
+        _mock_registry_client(monkeypatch, script)
+    
+        report = run_smoke(
+            _config(),
+            alias="glm-5-zai",
+            live=True,
+            max_cost=0.05,
+            stages=[SmokeStage.TEXT],
+            budget_currency="USD",
+        )
+        assert report.refusal is None
+>       assert report.stages[0].status is SmokeStatus.PASS
+E       AssertionError: assert <SmokeStatus.FAIL: 'FAIL'> is <SmokeStatus.PASS: 'PASS'>
+E        +  where <SmokeStatus.FAIL: 'FAIL'> = StageResult(stage='text', status=<SmokeStatus.FAIL: 'FAIL'>, detail='����ʧ��:  | provider=zai | model=glm-5-zai | ���δ֪������... finish_reason=None, model_id=None, notes=('�쳣���� ProviderError', 'status=None', '�ѷ��������δ֪������ 3 �Σ�����˿��������ɲ��Ʒѣ����ð�δ֪����')).status
+E        +  and   <SmokeStatus.PASS: 'PASS'> = SmokeStatus.PASS
+
+C:\Users\lenovo\Desktop\CodePilot-Repair\tests\unit\llm\test_glm_smoke.py:472: AssertionError
+________________ test_budget_exhaustion_stops_remaining_stages ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001D276E8BD10>
+
+    def test_budget_exhaustion_stops_remaining_stages(monkeypatch: pytest.MonkeyPatch) -> None:
+        """���ô��������ɷ������׶Ρ���Ԥ����������ð������Ч������ֻ�ǵ��ε��á�"""
+        monkeypatch.setenv(GLM_API_KEY_ENV, KEY)
+        script = Script(_chat("�յ�", prompt_tokens=1_000_000, completion_tokens=1))
+        _mock_registry_client(monkeypatch, script)
+    
+        config = _config()
+        expensive = config.models["glm-main"].model_copy(
+            update={"price": ModelPrice(currency="CNY", input_per_mtok=900.0, output_per_mtok=1.0)}
+        )
+        config = config.model_copy(update={"models": {**config.models, "glm-main": expensive}})
+    
+        report = run_smoke(
+            config,
+            alias="glm-main",
+            live=True,
+            max_cost=0.001,
+            stages=[SmokeStage.TEXT, SmokeStage.STRUCTURED],
+        )
+>       assert report.stages[0].status is SmokeStatus.PASS
+E       AssertionError: assert <SmokeStatus.FAIL: 'FAIL'> is <SmokeStatus.PASS: 'PASS'>
+E        +  where <SmokeStatus.FAIL: 'FAIL'> = StageResult(stage='text', status=<SmokeStatus.FAIL: 'FAIL'>, detail='����ʧ��:  | provider=bigmodel | model=glm-main | ���δ... finish_reason=None, model_id=None, notes=('�쳣���� ProviderError', 'status=None', '�ѷ��������δ֪������ 5 �Σ�����˿��������ɲ��Ʒѣ����ð�δ֪����')).status
+E        +  and   <SmokeStatus.PASS: 'PASS'> = SmokeStatus.PASS
+
+C:\Users\lenovo\Desktop\CodePilot-Repair\tests\unit\llm\test_glm_smoke.py:495: AssertionError
+______ test_usage_uncertain_is_surfaced_when_requests_are_unacknowledged ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001D276D05670>
+
+    def test_usage_uncertain_is_surfaced_when_requests_are_unacknowledged(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """��ʱ�����˿����Ѿ����ɲ��Ʒѣ�������������±�ɲ�ȷ������������ʵ�ۼơ�"""
+        monkeypatch.setenv(GLM_API_KEY_ENV, KEY)
+        script = Script(httpx.ReadTimeout("timed out"), _chat("�յ�"))
+        _mock_registry_client(monkeypatch, script)
+    
+        report = run_smoke(
+            _config(), alias="glm-main", live=True, max_cost=1.0, stages=[SmokeStage.TEXT]
+        )
+    
+>       assert report.stages[0].status is SmokeStatus.PASS
+E       AssertionError: assert <SmokeStatus.FAIL: 'FAIL'> is <SmokeStatus.PASS: 'PASS'>
+E        +  where <SmokeStatus.FAIL: 'FAIL'> = StageResult(stage='text', status=<SmokeStatus.FAIL: 'FAIL'>, detail='����ʧ��:  | provider=bigmodel | model=glm-main | ���δ... finish_reason=None, model_id=None, notes=('�쳣���� ProviderError', 'status=None', '�ѷ��������δ֪������ 5 �Σ�����˿��������ɲ��Ʒѣ����ð�δ֪����')).status
+E        +  and   <SmokeStatus.PASS: 'PASS'> = SmokeStatus.PASS
+
+C:\Users\lenovo\Desktop\CodePilot-Repair\tests\unit\llm\test_glm_smoke.py:542: AssertionError
+_________________________ test_all_nine_tables_exist __________________________
+
+stores = <codepilot.storage.repository.Stores object at 0x000001D27A8B4D70>
+
+    def test_all_nine_tables_exist(stores: Stores) -> None:
+        from codepilot.storage.models import Base
+    
+>       assert sorted(Base.metadata.tables) == [
+            "attempts",
+            "edges",
+            "evaluations",
+            "events",
+            "files",
+            "repositories",
+            "runs",
+            "symbols",
+            "tasks",
+        ]
+E       AssertionError: assert ['attempts', ...mantics', ...] == ['attempts', ...itories', ...]
+E         
+E         At index 5 diff: 'index_semantics' != 'repositories'
+E         Left contains one more item: 'tasks'
+E         Use -v to get more diff
+
+C:\Users\lenovo\Desktop\CodePilot-Repair\tests\unit\storage\test_repository.py:420: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/unit/llm/test_glm_smoke.py::test_live_with_matching_budget_currency_is_allowed
+FAILED tests/unit/llm/test_glm_smoke.py::test_budget_exhaustion_stops_remaining_stages
+FAILED tests/unit/llm/test_glm_smoke.py::test_usage_uncertain_is_surfaced_when_requests_are_unacknowledged
+FAILED tests/unit/storage/test_repository.py::test_all_nine_tables_exist - As...
+4 failed, 529 passed in 252.93s (0:04:12)

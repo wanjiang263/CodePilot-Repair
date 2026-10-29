@@ -1,0 +1,39 @@
+{
+  "issue": "DraftStore shows stale output after editing an already rendered draft.\nReproduce: put('a', 'old'), render('a'), update('a', 'new'), render('a') still\nreturns 'a: old'. Fix this behavior while retaining the public API and all\ncompatibility behavior in README.md. Multiple prefixes can be rendered for one\nkey. Preserve the other entries, ordering, snapshot independence and exception\ntypes. Run the target tests and regression suite; do not edit existing tests.\n",
+  "base": "0e4db69312b1357851ee57f8b61f5d519c24d771",
+  "source_sha256": {
+    "README.md": "d41636ca62b459d634d427a41e0c40c6c032dd0e7e8289283baac5ea18e89ee2",
+    "drafts/__init__.py": "cddf13044d1fb0c375e0040ddb7ea5857a4be94a54ca4f852241561a16e06ece",
+    "drafts/formatting.py": "9fbedb53694e4dacca44919aff22efa22ec13baa2d3eabb75865b111f931f64f",
+    "drafts/store.py": "7451fac3894c5088741d5dacf900aa9b92983b6c65a8589f513f5e1b2ec6280f",
+    "tests/test_store.py": "c6acfd81af476ae222965f6aeea17fb4766e0e13034636eca05353c142a74e6c"
+  },
+  "env": {
+    "python_version": "3.12",
+    "pre_install": [],
+    "install": [],
+    "test_command": "/opt/miniconda3/envs/testbed/bin/python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml",
+    "env": {
+      "PYTHONPATH": "/workspace"
+    },
+    "timeout_seconds": 40
+  },
+  "image": "phase25/django-14999:pytest744",
+  "image_id": "sha256:5820136e8a0f2981e36049ebacba1ff1b80b8b7fbfa06ddb1763a1d1486df326",
+  "budget": {
+    "max_iterations": 2,
+    "max_test_runs": 12,
+    "max_files_changed": 5,
+    "max_lines_changed": 150,
+    "max_tool_calls_per_iteration": 16,
+    "max_review_calls": 2,
+    "max_runtime_seconds": 900,
+    "max_total_tokens": 1000000,
+    "max_cost": 2.1966988,
+    "budget_currency": "CNY"
+  },
+  "prior_round_upper": 0.8033012,
+  "segment_limit": 2.1966988,
+  "model": "bigmodel/glm-5.3-flash",
+  "config_sha256": "1ebe26add3bcd7df83cb8765a3a038cbe099ccfe7ebc2e92063d357f12801a7c"
+}

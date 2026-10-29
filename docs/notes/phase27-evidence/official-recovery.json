@@ -1,0 +1,180 @@
+{
+  "receipt": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase25\\django14999-recovery\\runs\\phase25-django14999-pytest-recovery\\official-candidate.json",
+  "instance": "django__django-14999",
+  "base": "a754b82dac511475b6276039471ccd17cc64aeb8",
+  "patch_sha256": "7f2804c7f51f3a07bc17b21bfa3b15133cb26f79ea7d4845373d87b868074e23",
+  "prediction_sha256": "756eda867283cfae7aa3501ee99b3528a2d6228ef4165c9082211f7979c18e06",
+  "unchanged": true,
+  "model_requests": 0,
+  "inference_constructed": false,
+  "official_recovery": {
+    "run_id": "phase25-django14999-pytest-recovery",
+    "command": {
+      "argv": [
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+        "-m",
+        "swebench.harness.run_evaluation",
+        "-d",
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\cache\\swebench\\princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2\\test.jsonl",
+        "-s",
+        "test",
+        "-i",
+        "django__django-14999",
+        "-p",
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase25\\django14999-recovery\\runs\\phase25-django14999-pytest-recovery\\official-prediction.jsonl",
+        "-id",
+        "phase25-django14999-pytest-recovery",
+        "--max_workers",
+        "1",
+        "-t",
+        "1800",
+        "--report_dir",
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report",
+        "-n",
+        "swebench",
+        "--cache_level",
+        "instance"
+      ],
+      "cwd": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report",
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONUTF8": "1"
+      },
+      "expected_report": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report\\glm-5.3-flash-main.phase25-django14999-pytest-recovery.json"
+    },
+    "decision": "REUSED",
+    "exit_code": null,
+    "timed_out": false,
+    "runtime_seconds": 0.0,
+    "report": {
+      "schema_version": 2,
+      "total_instances": 1,
+      "submitted_instances": 1,
+      "completed_instances": 1,
+      "resolved_instances": 1,
+      "unresolved_instances": 0,
+      "empty_patch_instances": 0,
+      "error_instances": 0,
+      "completed_ids": [
+        "django__django-14999"
+      ],
+      "incomplete_ids": [],
+      "empty_patch_ids": [],
+      "submitted_ids": [
+        "django__django-14999"
+      ],
+      "resolved_ids": [
+        "django__django-14999"
+      ],
+      "unresolved_ids": [],
+      "error_ids": [],
+      "unstopped_instances": null,
+      "unstopped_containers": [],
+      "unremoved_images": [],
+      "source_path": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report\\glm-5.3-flash-main.phase25-django14999-pytest-recovery.json",
+      "source_sha256": "9c022de43b1591455bc5e8eb1c7837ae1b12cc6e38ec6e266670c360211e2520"
+    },
+    "report_path": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report\\glm-5.3-flash-main.phase25-django14999-pytest-recovery.json",
+    "report_sha256": "9c022de43b1591455bc5e8eb1c7837ae1b12cc6e38ec6e266670c360211e2520",
+    "cache_identity": {
+      "run_id": "phase25-django14999-pytest-recovery",
+      "patch_hashes": [
+        [
+          "django__django-14999",
+          "7f2804c7f51f3a07bc17b21bfa3b15133cb26f79ea7d4845373d87b868074e23"
+        ]
+      ],
+      "model_name_or_path": "glm-5.3-flash-main",
+      "dataset_name": "princeton-nlp/SWE-bench_Lite",
+      "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+      "split": "test",
+      "harness_version": "4.1.0",
+      "namespace": "swebench",
+      "image_ids": []
+    },
+    "verdicts": [
+      {
+        "verdict": "RESOLVED",
+        "instance_id": "django__django-14999",
+        "resolved": true,
+        "report_path": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report\\glm-5.3-flash-main.phase25-django14999-pytest-recovery.json",
+        "report_sha256": "9c022de43b1591455bc5e8eb1c7837ae1b12cc6e38ec6e266670c360211e2520",
+        "error_kind": null,
+        "error_detail": null,
+        "runtime_seconds": 0.0,
+        "command": {
+          "argv": [
+            "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+            "-m",
+            "swebench.harness.run_evaluation",
+            "-d",
+            "D:\\Projects\\Desktop\\CodePilot-Repair\\cache\\swebench\\princeton-nlp__SWE-bench_Lite__6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2\\test.jsonl",
+            "-s",
+            "test",
+            "-i",
+            "django__django-14999",
+            "-p",
+            "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase25\\django14999-recovery\\runs\\phase25-django14999-pytest-recovery\\official-prediction.jsonl",
+            "-id",
+            "phase25-django14999-pytest-recovery",
+            "--max_workers",
+            "1",
+            "-t",
+            "1800",
+            "--report_dir",
+            "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report",
+            "-n",
+            "swebench",
+            "--cache_level",
+            "instance"
+          ],
+          "cwd": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report",
+          "env": {
+            "PYTHONIOENCODING": "utf-8",
+            "PYTHONUNBUFFERED": "1",
+            "PYTHONUTF8": "1"
+          },
+          "expected_report": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\official-report\\glm-5.3-flash-main.phase25-django14999-pytest-recovery.json"
+        },
+        "cache_identity": {
+          "run_id": "phase25-django14999-pytest-recovery",
+          "patch_hashes": [
+            [
+              "django__django-14999",
+              "7f2804c7f51f3a07bc17b21bfa3b15133cb26f79ea7d4845373d87b868074e23"
+            ]
+          ],
+          "model_name_or_path": "glm-5.3-flash-main",
+          "dataset_name": "princeton-nlp/SWE-bench_Lite",
+          "dataset_revision": "6ec7bb89b9342f664a54a6e0a6ea6501d3437cc2",
+          "split": "test",
+          "harness_version": "4.1.0",
+          "namespace": "swebench",
+          "image_ids": []
+        }
+      }
+    ],
+    "error_kind": null,
+    "error_detail": null,
+    "reused": true,
+    "reused_reason": "\u7f13\u5b58\u8eab\u4efd\u4e00\u81f4\uff0c\u590d\u7528\u5b98\u65b9\u62a5\u544a",
+    "warnings": [],
+    "control_kind": "PRIMARY",
+    "included_in_resolved_rate": true,
+    "stdout_tail": "",
+    "stderr_tail": "",
+    "stdout_path": null,
+    "stderr_path": null,
+    "evidence_dir": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\runs\\official-recovery\\swebench_harness",
+    "platform": {
+      "system": "Windows",
+      "release": "11",
+      "machine": "AMD64",
+      "has_resource_module": false,
+      "wsl_executable": null,
+      "use_wsl": false
+    }
+  },
+  "historical_full_regression": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase25\\django14999-recovery\\postrun-validation\\full-regression.json"
+}

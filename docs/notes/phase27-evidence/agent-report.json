@@ -1,0 +1,1984 @@
+{
+  "baseline": {
+    "base_commit": "0e4db69312b1357851ee57f8b61f5d519c24d771",
+    "outcomes": {
+      "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract": "passed",
+      "tests/test_store.py::test_other_item_and_prefix_compatibility": "passed",
+      "tests/test_store.py::test_render_observes_update_for_every_prefix": "failed",
+      "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached": "passed"
+    },
+    "flaky": [],
+    "run_outcomes": [
+      {
+        "tests/test_store.py::test_render_observes_update_for_every_prefix": "failed",
+        "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached": "passed",
+        "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract": "passed",
+        "tests/test_store.py::test_other_item_and_prefix_compatibility": "passed"
+      },
+      {
+        "tests/test_store.py::test_render_observes_update_for_every_prefix": "failed",
+        "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached": "passed",
+        "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract": "passed",
+        "tests/test_store.py::test_other_item_and_prefix_compatibility": "passed"
+      }
+    ],
+    "status_differences": {},
+    "evidence": [
+      "run=1 status=FAIL artifact=D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\runs\\phase27-draftstore\\attempts\\01",
+      "run=2 status=FAIL artifact=D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\runs\\phase27-draftstore\\attempts\\02",
+      "scope=1 explicit test targets"
+    ],
+    "complete": true,
+    "duration_seconds": 1.574392318725586
+  },
+  "reproduction": {
+    "status": "skipped",
+    "test_path": null,
+    "fail_reason": null,
+    "attempts": 0,
+    "kind": null,
+    "history": []
+  },
+  "attempts": [
+    {
+      "iteration": 1,
+      "patch_diff": "diff --git a/drafts/store.py b/drafts/store.py\nindex 745b9bf..f1fd720 100644\n--- a/drafts/store.py\n+++ b/drafts/store.py\n@@ -15,6 +15,8 @@ class DraftStore:\n         if key not in self._items:\n             raise KeyError(key)\n         self._items[key] = text\n+        for identity in [k for k in self._rendered if k[0] == key]:\n+            del self._rendered[identity]\n \n     def render(self, key, prefix=''):\n         identity = (key, prefix)\n",
+      "patch_hash": "b8bf661470b5086db279fe870562741946262fbcdf2a9d1d63bcb2b0489780af",
+      "validation": {
+        "passed": true,
+        "checks": [
+          {
+            "name": "path",
+            "passed": true,
+            "reason": null
+          },
+          {
+            "name": "size",
+            "passed": true,
+            "reason": null
+          },
+          {
+            "name": "non_empty",
+            "passed": true,
+            "reason": null
+          },
+          {
+            "name": "test_protection",
+            "passed": true,
+            "reason": null
+          },
+          {
+            "name": "syntax",
+            "passed": true,
+            "reason": null
+          },
+          {
+            "name": "cheat",
+            "passed": true,
+            "reason": null
+          }
+        ],
+        "cheat_findings": [],
+        "warnings": [],
+        "errors": [],
+        "files_changed": 1,
+        "lines_added": 2,
+        "lines_deleted": 0,
+        "risk": "medium",
+        "evidence": [
+          "target includes a public class method"
+        ]
+      },
+      "execution": {
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_seconds": 0.8245844841003418,
+        "tests": [
+          {
+            "node_id": "tests/test_store.py::test_render_observes_update_for_every_prefix",
+            "outcome": "passed",
+            "duration": 0.0,
+            "message": null,
+            "traceback": null,
+            "failure_type": null
+          },
+          {
+            "node_id": "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+            "outcome": "passed",
+            "duration": 0.0,
+            "message": null,
+            "traceback": null,
+            "failure_type": null
+          },
+          {
+            "node_id": "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+            "outcome": "passed",
+            "duration": 0.0,
+            "message": null,
+            "traceback": null,
+            "failure_type": null
+          },
+          {
+            "node_id": "tests/test_store.py::test_other_item_and_prefix_compatibility",
+            "outcome": "passed",
+            "duration": 0.0,
+            "message": null,
+            "traceback": null,
+            "failure_type": null
+          }
+        ],
+        "tests_passed": 4,
+        "tests_failed": 0,
+        "stdout_tail": "============================= test session starts ==============================\nplatform linux -- Python 3.9.20, pytest-7.4.4, pluggy-1.6.0\nrootdir: /workspace\ncollected 4 items\n\ntests/test_store.py ....                                                 [100%]\n\n---------------------- generated xml file: /out/junit.xml ----------------------\n============================== 4 passed in 0.17s ===============================\n",
+        "stderr_tail": "",
+        "artifact_dir": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\runs\\phase27-draftstore\\attempts\\01",
+        "error_reason": null,
+        "diagnostics": {
+          "execution_backend": "docker",
+          "container_verified": true,
+          "network_mode": "none",
+          "oom_killed": false,
+          "cleanup_error": null,
+          "junit_error": null,
+          "runner_kind": "pytest",
+          "effective_timeout_seconds": 7,
+          "timeout_source": "effective EnvSpec after graph budget clamp",
+          "time_allocation": {
+            "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+            "rejected_samples": 0,
+            "source": "exact_ordered_scope",
+            "confidence": "low",
+            "suggested_seconds": 7,
+            "runner_limit_seconds": 40,
+            "complete_samples": 1,
+            "timeout_samples": 0,
+            "aggregate_samples": 0,
+            "observed_complete_seconds": [
+              1.25
+            ],
+            "timeout_lower_bounds_seconds": [],
+            "historical_fastest_complete_seconds": 1.25,
+            "startup_seconds": null,
+            "startup_note": "included in observed total; not separately measured",
+            "coverage_reduced": false,
+            "final_timeout_seconds": 7,
+            "deadline_available_seconds": 40,
+            "estimate_fits": true,
+            "remaining_seconds": 812.695375,
+            "reserve_seconds": 240.0,
+            "margin_insufficient": false
+          },
+          "timing_fact": {
+            "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+            "repository": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\source",
+            "base_commit": "0e4db69312b1357851ee57f8b61f5d519c24d771",
+            "selectors": [
+              "tests/test_store.py::test_render_observes_update_for_every_prefix",
+              "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+              "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+              "tests/test_store.py::test_other_item_and_prefix_compatibility"
+            ],
+            "collected_order": [
+              "tests/test_store.py::test_render_observes_update_for_every_prefix",
+              "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+              "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+              "tests/test_store.py::test_other_item_and_prefix_compatibility"
+            ],
+            "seconds": 0.8120000000000118,
+            "status": "pass",
+            "complete": true,
+            "process_completed": true,
+            "scope_note": "only explicit node-set equality establishes complete scope; file/full runs remain aggregate",
+            "environment_cache_key": "phase27-frozen-existing-image",
+            "image_id": "sha256:5820136e8a0f2981e36049ebacba1ff1b80b8b7fbfa06ddb1763a1d1486df326",
+            "runner": "/opt/miniconda3/envs/testbed/bin/python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml",
+            "estimate": {
+              "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+              "rejected_samples": 0,
+              "source": "exact_ordered_scope",
+              "confidence": "low",
+              "suggested_seconds": 7,
+              "runner_limit_seconds": 40,
+              "complete_samples": 1,
+              "timeout_samples": 0,
+              "aggregate_samples": 0,
+              "observed_complete_seconds": [
+                1.25
+              ],
+              "timeout_lower_bounds_seconds": [],
+              "historical_fastest_complete_seconds": 1.25,
+              "startup_seconds": null,
+              "startup_note": "included in observed total; not separately measured",
+              "coverage_reduced": false,
+              "final_timeout_seconds": 7,
+              "deadline_available_seconds": 40,
+              "estimate_fits": true,
+              "remaining_seconds": 812.695375,
+              "reserve_seconds": 240.0,
+              "margin_insufficient": false
+            },
+            "cold_environment": false,
+            "preparation_seconds": 0.0
+          },
+          "environment_image_id": "sha256:5820136e8a0f2981e36049ebacba1ff1b80b8b7fbfa06ddb1763a1d1486df326"
+        }
+      },
+      "failure_signatures": [],
+      "target_test_source": "planner",
+      "target_tests": [
+        "tests/test_store.py::test_render_observes_update_for_every_prefix",
+        "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+        "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+        "tests/test_store.py::test_other_item_and_prefix_compatibility"
+      ],
+      "target_test_baseline_failures": [],
+      "regression": {
+        "complete": true,
+        "status_changes": {
+          "tests/test_store.py::test_render_observes_update_for_every_prefix": [
+            "failed",
+            "passed"
+          ]
+        },
+        "baseline_commit": "0e4db69312b1357851ee57f8b61f5d519c24d771",
+        "baseline_hash": "703068c93ed6560fc62708df45d1cb58f0e9f550a6a8886520886090343018ce",
+        "status": "completed",
+        "executed_tests": [
+          "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+          "tests/test_store.py::test_other_item_and_prefix_compatibility",
+          "tests/test_store.py::test_render_observes_update_for_every_prefix",
+          "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached"
+        ],
+        "unexecuted_tests": [],
+        "existing_failures": [],
+        "executions": {
+          "L1": {
+            "status": "PASS",
+            "exit_code": 0,
+            "duration_seconds": 0.8245844841003418,
+            "tests": [
+              {
+                "node_id": "tests/test_store.py::test_render_observes_update_for_every_prefix",
+                "outcome": "passed",
+                "duration": 0.0,
+                "message": null,
+                "traceback": null,
+                "failure_type": null
+              },
+              {
+                "node_id": "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+                "outcome": "passed",
+                "duration": 0.0,
+                "message": null,
+                "traceback": null,
+                "failure_type": null
+              },
+              {
+                "node_id": "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+                "outcome": "passed",
+                "duration": 0.0,
+                "message": null,
+                "traceback": null,
+                "failure_type": null
+              },
+              {
+                "node_id": "tests/test_store.py::test_other_item_and_prefix_compatibility",
+                "outcome": "passed",
+                "duration": 0.0,
+                "message": null,
+                "traceback": null,
+                "failure_type": null
+              }
+            ],
+            "tests_passed": 4,
+            "tests_failed": 0,
+            "stdout_tail": "============================= test session starts ==============================\nplatform linux -- Python 3.9.20, pytest-7.4.4, pluggy-1.6.0\nrootdir: /workspace\ncollected 4 items\n\ntests/test_store.py ....                                                 [100%]\n\n---------------------- generated xml file: /out/junit.xml ----------------------\n============================== 4 passed in 0.17s ===============================\n",
+            "stderr_tail": "",
+            "artifact_dir": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\runs\\phase27-draftstore\\attempts\\01",
+            "error_reason": null,
+            "diagnostics": {
+              "execution_backend": "docker",
+              "container_verified": true,
+              "network_mode": "none",
+              "oom_killed": false,
+              "cleanup_error": null,
+              "junit_error": null,
+              "runner_kind": "pytest",
+              "effective_timeout_seconds": 7,
+              "timeout_source": "effective EnvSpec after graph budget clamp",
+              "time_allocation": {
+                "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+                "rejected_samples": 0,
+                "source": "exact_ordered_scope",
+                "confidence": "low",
+                "suggested_seconds": 7,
+                "runner_limit_seconds": 40,
+                "complete_samples": 1,
+                "timeout_samples": 0,
+                "aggregate_samples": 0,
+                "observed_complete_seconds": [
+                  1.25
+                ],
+                "timeout_lower_bounds_seconds": [],
+                "historical_fastest_complete_seconds": 1.25,
+                "startup_seconds": null,
+                "startup_note": "included in observed total; not separately measured",
+                "coverage_reduced": false,
+                "final_timeout_seconds": 7,
+                "deadline_available_seconds": 40,
+                "estimate_fits": true,
+                "remaining_seconds": 812.695375,
+                "reserve_seconds": 240.0,
+                "margin_insufficient": false
+              },
+              "timing_fact": {
+                "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+                "repository": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\source",
+                "base_commit": "0e4db69312b1357851ee57f8b61f5d519c24d771",
+                "selectors": [
+                  "tests/test_store.py::test_render_observes_update_for_every_prefix",
+                  "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+                  "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+                  "tests/test_store.py::test_other_item_and_prefix_compatibility"
+                ],
+                "collected_order": [
+                  "tests/test_store.py::test_render_observes_update_for_every_prefix",
+                  "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+                  "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+                  "tests/test_store.py::test_other_item_and_prefix_compatibility"
+                ],
+                "seconds": 0.8120000000000118,
+                "status": "pass",
+                "complete": true,
+                "process_completed": true,
+                "scope_note": "only explicit node-set equality establishes complete scope; file/full runs remain aggregate",
+                "environment_cache_key": "phase27-frozen-existing-image",
+                "image_id": "sha256:5820136e8a0f2981e36049ebacba1ff1b80b8b7fbfa06ddb1763a1d1486df326",
+                "runner": "/opt/miniconda3/envs/testbed/bin/python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml",
+                "estimate": {
+                  "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+                  "rejected_samples": 0,
+                  "source": "exact_ordered_scope",
+                  "confidence": "low",
+                  "suggested_seconds": 7,
+                  "runner_limit_seconds": 40,
+                  "complete_samples": 1,
+                  "timeout_samples": 0,
+                  "aggregate_samples": 0,
+                  "observed_complete_seconds": [
+                    1.25
+                  ],
+                  "timeout_lower_bounds_seconds": [],
+                  "historical_fastest_complete_seconds": 1.25,
+                  "startup_seconds": null,
+                  "startup_note": "included in observed total; not separately measured",
+                  "coverage_reduced": false,
+                  "final_timeout_seconds": 7,
+                  "deadline_available_seconds": 40,
+                  "estimate_fits": true,
+                  "remaining_seconds": 812.695375,
+                  "reserve_seconds": 240.0,
+                  "margin_insufficient": false
+                },
+                "cold_environment": false,
+                "preparation_seconds": 0.0
+              },
+              "environment_image_id": "sha256:5820136e8a0f2981e36049ebacba1ff1b80b8b7fbfa06ddb1763a1d1486df326"
+            }
+          },
+          "L2": {
+            "status": "PASS",
+            "exit_code": 0,
+            "duration_seconds": 0.903724193572998,
+            "tests": [
+              {
+                "node_id": "tests/test_store.py::test_render_observes_update_for_every_prefix",
+                "outcome": "passed",
+                "duration": 0.001,
+                "message": null,
+                "traceback": null,
+                "failure_type": null
+              },
+              {
+                "node_id": "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+                "outcome": "passed",
+                "duration": 0.001,
+                "message": null,
+                "traceback": null,
+                "failure_type": null
+              },
+              {
+                "node_id": "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+                "outcome": "passed",
+                "duration": 0.001,
+                "message": null,
+                "traceback": null,
+                "failure_type": null
+              },
+              {
+                "node_id": "tests/test_store.py::test_other_item_and_prefix_compatibility",
+                "outcome": "passed",
+                "duration": 0.001,
+                "message": null,
+                "traceback": null,
+                "failure_type": null
+              }
+            ],
+            "tests_passed": 4,
+            "tests_failed": 0,
+            "stdout_tail": "============================= test session starts ==============================\nplatform linux -- Python 3.9.20, pytest-7.4.4, pluggy-1.6.0\nrootdir: /workspace\ncollected 4 items\n\ntests/test_store.py ....                                                 [100%]\n\n---------------------- generated xml file: /out/junit.xml ----------------------\n============================== 4 passed in 0.19s ===============================\n",
+            "stderr_tail": "",
+            "artifact_dir": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\runs\\phase27-draftstore\\attempts\\1004",
+            "error_reason": null,
+            "diagnostics": {
+              "authorized_node_count": 4,
+              "cleanup_error": null,
+              "container_verified": true,
+              "effective_timeout_seconds": 7,
+              "execution_backend": "docker",
+              "junit_error": null,
+              "network_mode": "none",
+              "oom_killed": false,
+              "regression_dispatch": "nodes",
+              "regression_dispatch_targets": [
+                "tests/test_store.py::test_render_observes_update_for_every_prefix",
+                "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+                "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+                "tests/test_store.py::test_other_item_and_prefix_compatibility"
+              ],
+              "runner_kind": "pytest",
+              "time_allocation": {
+                "aggregate_samples": 0,
+                "complete_samples": 2,
+                "confidence": "low",
+                "coverage_reduced": false,
+                "deadline_available_seconds": 40,
+                "estimate_fits": true,
+                "final_timeout_seconds": 7,
+                "historical_fastest_complete_seconds": 0.8120000000000118,
+                "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+                "margin_insufficient": false,
+                "observed_complete_seconds": [
+                  1.25,
+                  0.8120000000000118
+                ],
+                "rejected_samples": 0,
+                "remaining_seconds": 811.5553749999999,
+                "reserve_seconds": 240.0,
+                "runner_limit_seconds": 40,
+                "source": "exact_ordered_scope",
+                "startup_note": "included in observed total; not separately measured",
+                "startup_seconds": null,
+                "suggested_seconds": 7,
+                "timeout_lower_bounds_seconds": [],
+                "timeout_samples": 0
+              },
+              "timeout_source": "effective EnvSpec after graph budget clamp",
+              "timing_fact": {
+                "base_commit": "0e4db69312b1357851ee57f8b61f5d519c24d771",
+                "cold_environment": false,
+                "collected_order": [
+                  "tests/test_store.py::test_render_observes_update_for_every_prefix",
+                  "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+                  "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+                  "tests/test_store.py::test_other_item_and_prefix_compatibility"
+                ],
+                "complete": true,
+                "environment_cache_key": "phase27-frozen-existing-image",
+                "estimate": {
+                  "aggregate_samples": 0,
+                  "complete_samples": 2,
+                  "confidence": "low",
+                  "coverage_reduced": false,
+                  "deadline_available_seconds": 40,
+                  "estimate_fits": true,
+                  "final_timeout_seconds": 7,
+                  "historical_fastest_complete_seconds": 0.8120000000000118,
+                  "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+                  "margin_insufficient": false,
+                  "observed_complete_seconds": [
+                    1.25,
+                    0.8120000000000118
+                  ],
+                  "rejected_samples": 0,
+                  "remaining_seconds": 811.5553749999999,
+                  "reserve_seconds": 240.0,
+                  "runner_limit_seconds": 40,
+                  "source": "exact_ordered_scope",
+                  "startup_note": "included in observed total; not separately measured",
+                  "startup_seconds": null,
+                  "suggested_seconds": 7,
+                  "timeout_lower_bounds_seconds": [],
+                  "timeout_samples": 0
+                },
+                "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+                "image_id": "sha256:5820136e8a0f2981e36049ebacba1ff1b80b8b7fbfa06ddb1763a1d1486df326",
+                "preparation_seconds": 0.0,
+                "process_completed": true,
+                "repository": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\source",
+                "runner": "/opt/miniconda3/envs/testbed/bin/python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml",
+                "scope_note": "only explicit node-set equality establishes complete scope; file/full runs remain aggregate",
+                "seconds": 0.9069999999999823,
+                "selectors": [
+                  "tests/test_store.py::test_render_observes_update_for_every_prefix",
+                  "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+                  "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+                  "tests/test_store.py::test_other_item_and_prefix_compatibility"
+                ],
+                "status": "pass"
+              }
+            }
+          }
+        },
+        "retries": {},
+        "retry_notes": [],
+        "seed": null,
+        "failure_reason": null,
+        "new_failures": [],
+        "fixed_tests": [
+          "tests/test_store.py::test_render_observes_update_for_every_prefix"
+        ],
+        "flaky": [],
+        "mode": "full",
+        "sampled_ratio": null,
+        "levels_run": [
+          "L1_target",
+          "L2_impact",
+          "L3_full"
+        ]
+      },
+      "review": {
+        "usage_known": true,
+        "approved": true,
+        "risk": "low",
+        "issues": [
+          {
+            "severity": "low",
+            "file": "drafts/store.py",
+            "line": 18,
+            "description": "Cache invalidation iterates over a copied list of identities—correct and safe. Public API, exception types, snapshot ordering/independence and multi-prefix rendering are preserved (tests/test_store.py:5-43)."
+          }
+        ],
+        "summary": "Patch invalidates per-key rendered cache entries in DraftStore.update, so render after update recomputes via render_text for all prefixes. All four contract tests pass (L1 PASS, full regression no new failures); existing tests unmodified.",
+        "reviewed_patch_hash": "b8bf661470b5086db279fe870562741946262fbcdf2a9d1d63bcb2b0489780af",
+        "reviewed_iteration": 1
+      },
+      "diagnosis": null,
+      "progress": {
+        "target_failed": 0,
+        "regression_new_failures": 0,
+        "signatures": [],
+        "regression_measured": false
+      }
+    }
+  ],
+  "regression": {
+    "complete": true,
+    "status_changes": {
+      "tests/test_store.py::test_render_observes_update_for_every_prefix": [
+        "failed",
+        "passed"
+      ]
+    },
+    "baseline_commit": "0e4db69312b1357851ee57f8b61f5d519c24d771",
+    "baseline_hash": "703068c93ed6560fc62708df45d1cb58f0e9f550a6a8886520886090343018ce",
+    "status": "completed",
+    "executed_tests": [
+      "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+      "tests/test_store.py::test_other_item_and_prefix_compatibility",
+      "tests/test_store.py::test_render_observes_update_for_every_prefix",
+      "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached"
+    ],
+    "unexecuted_tests": [],
+    "existing_failures": [],
+    "executions": {
+      "L1": {
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_seconds": 0.8245844841003418,
+        "tests": [
+          {
+            "node_id": "tests/test_store.py::test_render_observes_update_for_every_prefix",
+            "outcome": "passed",
+            "duration": 0.0,
+            "message": null,
+            "traceback": null,
+            "failure_type": null
+          },
+          {
+            "node_id": "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+            "outcome": "passed",
+            "duration": 0.0,
+            "message": null,
+            "traceback": null,
+            "failure_type": null
+          },
+          {
+            "node_id": "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+            "outcome": "passed",
+            "duration": 0.0,
+            "message": null,
+            "traceback": null,
+            "failure_type": null
+          },
+          {
+            "node_id": "tests/test_store.py::test_other_item_and_prefix_compatibility",
+            "outcome": "passed",
+            "duration": 0.0,
+            "message": null,
+            "traceback": null,
+            "failure_type": null
+          }
+        ],
+        "tests_passed": 4,
+        "tests_failed": 0,
+        "stdout_tail": "============================= test session starts ==============================\nplatform linux -- Python 3.9.20, pytest-7.4.4, pluggy-1.6.0\nrootdir: /workspace\ncollected 4 items\n\ntests/test_store.py ....                                                 [100%]\n\n---------------------- generated xml file: /out/junit.xml ----------------------\n============================== 4 passed in 0.17s ===============================\n",
+        "stderr_tail": "",
+        "artifact_dir": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\runs\\phase27-draftstore\\attempts\\01",
+        "error_reason": null,
+        "diagnostics": {
+          "execution_backend": "docker",
+          "container_verified": true,
+          "network_mode": "none",
+          "oom_killed": false,
+          "cleanup_error": null,
+          "junit_error": null,
+          "runner_kind": "pytest",
+          "effective_timeout_seconds": 7,
+          "timeout_source": "effective EnvSpec after graph budget clamp",
+          "time_allocation": {
+            "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+            "rejected_samples": 0,
+            "source": "exact_ordered_scope",
+            "confidence": "low",
+            "suggested_seconds": 7,
+            "runner_limit_seconds": 40,
+            "complete_samples": 1,
+            "timeout_samples": 0,
+            "aggregate_samples": 0,
+            "observed_complete_seconds": [
+              1.25
+            ],
+            "timeout_lower_bounds_seconds": [],
+            "historical_fastest_complete_seconds": 1.25,
+            "startup_seconds": null,
+            "startup_note": "included in observed total; not separately measured",
+            "coverage_reduced": false,
+            "final_timeout_seconds": 7,
+            "deadline_available_seconds": 40,
+            "estimate_fits": true,
+            "remaining_seconds": 812.695375,
+            "reserve_seconds": 240.0,
+            "margin_insufficient": false
+          },
+          "timing_fact": {
+            "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+            "repository": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\source",
+            "base_commit": "0e4db69312b1357851ee57f8b61f5d519c24d771",
+            "selectors": [
+              "tests/test_store.py::test_render_observes_update_for_every_prefix",
+              "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+              "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+              "tests/test_store.py::test_other_item_and_prefix_compatibility"
+            ],
+            "collected_order": [
+              "tests/test_store.py::test_render_observes_update_for_every_prefix",
+              "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+              "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+              "tests/test_store.py::test_other_item_and_prefix_compatibility"
+            ],
+            "seconds": 0.8120000000000118,
+            "status": "pass",
+            "complete": true,
+            "process_completed": true,
+            "scope_note": "only explicit node-set equality establishes complete scope; file/full runs remain aggregate",
+            "environment_cache_key": "phase27-frozen-existing-image",
+            "image_id": "sha256:5820136e8a0f2981e36049ebacba1ff1b80b8b7fbfa06ddb1763a1d1486df326",
+            "runner": "/opt/miniconda3/envs/testbed/bin/python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml",
+            "estimate": {
+              "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+              "rejected_samples": 0,
+              "source": "exact_ordered_scope",
+              "confidence": "low",
+              "suggested_seconds": 7,
+              "runner_limit_seconds": 40,
+              "complete_samples": 1,
+              "timeout_samples": 0,
+              "aggregate_samples": 0,
+              "observed_complete_seconds": [
+                1.25
+              ],
+              "timeout_lower_bounds_seconds": [],
+              "historical_fastest_complete_seconds": 1.25,
+              "startup_seconds": null,
+              "startup_note": "included in observed total; not separately measured",
+              "coverage_reduced": false,
+              "final_timeout_seconds": 7,
+              "deadline_available_seconds": 40,
+              "estimate_fits": true,
+              "remaining_seconds": 812.695375,
+              "reserve_seconds": 240.0,
+              "margin_insufficient": false
+            },
+            "cold_environment": false,
+            "preparation_seconds": 0.0
+          },
+          "environment_image_id": "sha256:5820136e8a0f2981e36049ebacba1ff1b80b8b7fbfa06ddb1763a1d1486df326"
+        }
+      },
+      "L2": {
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_seconds": 0.903724193572998,
+        "tests": [
+          {
+            "node_id": "tests/test_store.py::test_render_observes_update_for_every_prefix",
+            "outcome": "passed",
+            "duration": 0.001,
+            "message": null,
+            "traceback": null,
+            "failure_type": null
+          },
+          {
+            "node_id": "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+            "outcome": "passed",
+            "duration": 0.001,
+            "message": null,
+            "traceback": null,
+            "failure_type": null
+          },
+          {
+            "node_id": "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+            "outcome": "passed",
+            "duration": 0.001,
+            "message": null,
+            "traceback": null,
+            "failure_type": null
+          },
+          {
+            "node_id": "tests/test_store.py::test_other_item_and_prefix_compatibility",
+            "outcome": "passed",
+            "duration": 0.001,
+            "message": null,
+            "traceback": null,
+            "failure_type": null
+          }
+        ],
+        "tests_passed": 4,
+        "tests_failed": 0,
+        "stdout_tail": "============================= test session starts ==============================\nplatform linux -- Python 3.9.20, pytest-7.4.4, pluggy-1.6.0\nrootdir: /workspace\ncollected 4 items\n\ntests/test_store.py ....                                                 [100%]\n\n---------------------- generated xml file: /out/junit.xml ----------------------\n============================== 4 passed in 0.19s ===============================\n",
+        "stderr_tail": "",
+        "artifact_dir": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\runs\\phase27-draftstore\\attempts\\1004",
+        "error_reason": null,
+        "diagnostics": {
+          "authorized_node_count": 4,
+          "cleanup_error": null,
+          "container_verified": true,
+          "effective_timeout_seconds": 7,
+          "execution_backend": "docker",
+          "junit_error": null,
+          "network_mode": "none",
+          "oom_killed": false,
+          "regression_dispatch": "nodes",
+          "regression_dispatch_targets": [
+            "tests/test_store.py::test_render_observes_update_for_every_prefix",
+            "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+            "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+            "tests/test_store.py::test_other_item_and_prefix_compatibility"
+          ],
+          "runner_kind": "pytest",
+          "time_allocation": {
+            "aggregate_samples": 0,
+            "complete_samples": 2,
+            "confidence": "low",
+            "coverage_reduced": false,
+            "deadline_available_seconds": 40,
+            "estimate_fits": true,
+            "final_timeout_seconds": 7,
+            "historical_fastest_complete_seconds": 0.8120000000000118,
+            "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+            "margin_insufficient": false,
+            "observed_complete_seconds": [
+              1.25,
+              0.8120000000000118
+            ],
+            "rejected_samples": 0,
+            "remaining_seconds": 811.5553749999999,
+            "reserve_seconds": 240.0,
+            "runner_limit_seconds": 40,
+            "source": "exact_ordered_scope",
+            "startup_note": "included in observed total; not separately measured",
+            "startup_seconds": null,
+            "suggested_seconds": 7,
+            "timeout_lower_bounds_seconds": [],
+            "timeout_samples": 0
+          },
+          "timeout_source": "effective EnvSpec after graph budget clamp",
+          "timing_fact": {
+            "base_commit": "0e4db69312b1357851ee57f8b61f5d519c24d771",
+            "cold_environment": false,
+            "collected_order": [
+              "tests/test_store.py::test_render_observes_update_for_every_prefix",
+              "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+              "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+              "tests/test_store.py::test_other_item_and_prefix_compatibility"
+            ],
+            "complete": true,
+            "environment_cache_key": "phase27-frozen-existing-image",
+            "estimate": {
+              "aggregate_samples": 0,
+              "complete_samples": 2,
+              "confidence": "low",
+              "coverage_reduced": false,
+              "deadline_available_seconds": 40,
+              "estimate_fits": true,
+              "final_timeout_seconds": 7,
+              "historical_fastest_complete_seconds": 0.8120000000000118,
+              "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+              "margin_insufficient": false,
+              "observed_complete_seconds": [
+                1.25,
+                0.8120000000000118
+              ],
+              "rejected_samples": 0,
+              "remaining_seconds": 811.5553749999999,
+              "reserve_seconds": 240.0,
+              "runner_limit_seconds": 40,
+              "source": "exact_ordered_scope",
+              "startup_note": "included in observed total; not separately measured",
+              "startup_seconds": null,
+              "suggested_seconds": 7,
+              "timeout_lower_bounds_seconds": [],
+              "timeout_samples": 0
+            },
+            "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+            "image_id": "sha256:5820136e8a0f2981e36049ebacba1ff1b80b8b7fbfa06ddb1763a1d1486df326",
+            "preparation_seconds": 0.0,
+            "process_completed": true,
+            "repository": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\source",
+            "runner": "/opt/miniconda3/envs/testbed/bin/python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml",
+            "scope_note": "only explicit node-set equality establishes complete scope; file/full runs remain aggregate",
+            "seconds": 0.9069999999999823,
+            "selectors": [
+              "tests/test_store.py::test_render_observes_update_for_every_prefix",
+              "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+              "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+              "tests/test_store.py::test_other_item_and_prefix_compatibility"
+            ],
+            "status": "pass"
+          }
+        }
+      }
+    },
+    "retries": {},
+    "retry_notes": [],
+    "seed": null,
+    "failure_reason": null,
+    "new_failures": [],
+    "fixed_tests": [
+      "tests/test_store.py::test_render_observes_update_for_every_prefix"
+    ],
+    "flaky": [],
+    "mode": "full",
+    "sampled_ratio": null,
+    "levels_run": [
+      "L1_target",
+      "L2_impact",
+      "L3_full"
+    ]
+  },
+  "review": {
+    "usage_known": true,
+    "approved": true,
+    "risk": "low",
+    "issues": [
+      {
+        "severity": "low",
+        "file": "drafts/store.py",
+        "line": 18,
+        "description": "Cache invalidation iterates over a copied list of identities—correct and safe. Public API, exception types, snapshot ordering/independence and multi-prefix rendering are preserved (tests/test_store.py:5-43)."
+      }
+    ],
+    "summary": "Patch invalidates per-key rendered cache entries in DraftStore.update, so render after update recomputes via render_text for all prefixes. All four contract tests pass (L1 PASS, full regression no new failures); existing tests unmodified.",
+    "reviewed_patch_hash": "b8bf661470b5086db279fe870562741946262fbcdf2a9d1d63bcb2b0489780af",
+    "reviewed_iteration": 1
+  },
+  "verification_level": "m2_verified",
+  "closure": {
+    "patch_present": true,
+    "candidate_patch_sha256": "b8bf661470b5086db279fe870562741946262fbcdf2a9d1d63bcb2b0489780af",
+    "frozen_by_coding_stage": true,
+    "coding_stop_reason": null,
+    "validator_executed": true,
+    "validator_passed": true,
+    "target_tests_executed": true,
+    "target_tests_status": "PASS",
+    "target_test_sha256": "b8bf661470b5086db279fe870562741946262fbcdf2a9d1d63bcb2b0489780af",
+    "target_test_source": "planner",
+    "target_tests": [
+      "tests/test_store.py::test_render_observes_update_for_every_prefix",
+      "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+      "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+      "tests/test_store.py::test_other_item_and_prefix_compatibility"
+    ],
+    "target_test_baseline_failures": [],
+    "regression_executed": true,
+    "regression_complete": true,
+    "regression_mode": "full",
+    "regression_levels": [
+      "L1_target",
+      "L2_impact",
+      "L3_full"
+    ],
+    "regression_new_failures": 0,
+    "regression_fixed_tests": [
+      "tests/test_store.py::test_render_observes_update_for_every_prefix"
+    ],
+    "regression_unexecuted_tests": 0,
+    "review_executed": true,
+    "review_approved": true,
+    "review_high_issues": 0,
+    "review_high_issues_known": true,
+    "review_bound_to_candidate": true,
+    "post_review_repair": false,
+    "review_calls": 1,
+    "unexecuted_stages": [],
+    "closure_admission": {
+      "feasible": true,
+      "runs_spent": 2,
+      "allowance": 12,
+      "required": 3,
+      "retry_reserve": 2,
+      "target_runs": 1,
+      "impact_runs": 1,
+      "full_runs": 1,
+      "coder_share": 5,
+      "trigger": "generation",
+      "detail": "test runs: 2 spent of 12, 10 left; closure requires 3 (patch validation needs 0 container run(s), target tests need 1, regression L2 needs 1, regression L3 needs 1) → a repair round can complete its closure (coding stage capped at 5 self-triggered run(s), 2 kept for flaky re-runs)"
+    },
+    "budget_usage": {
+      "iterations": "0/2",
+      "test_runs": "5/12",
+      "tool_calls": "5/16",
+      "review_calls": "1/2",
+      "tokens": "70798/1e+06",
+      "cost": "0.049137/2.1967",
+      "time": "93.8178/900"
+    },
+    "cost_hard_cap": 2.1966988,
+    "cost_hard_cap_hit": false
+  },
+  "runtime_seconds": 93.817765,
+  "usage_uncertain": false,
+  "regression_mode": "full",
+  "added_tests": {},
+  "excluded_tests": [],
+  "run_id": "phase27-draftstore",
+  "task_id": "phase27-draftstore",
+  "repository": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\source",
+  "base_commit": "0e4db69312b1357851ee57f8b61f5d519c24d771",
+  "issue_summary": "DraftStore shows stale output after editing an already rendered draft. Reproduce: put('a', 'old'), render('a'), update('a', 'new'), render('a') still",
+  "issue_analysis": {
+    "issue_type": "regression",
+    "summary": "DraftStore shows stale output after editing an already rendered draft. Reproduce: put('a', 'old'), render('a'), update('a', 'new'), render('a') still",
+    "expected_behavior": null,
+    "observed_behavior": null,
+    "reproduction_steps": [],
+    "mentioned_files": [],
+    "mentioned_symbols": [
+      "DraftStore",
+      "Reproduce",
+      "Fix",
+      "README.md",
+      "Multiple",
+      "Preserve",
+      "Run"
+    ],
+    "error_messages": [
+      "a",
+      "old",
+      "new",
+      "a: old"
+    ],
+    "traceback_frames": [],
+    "keywords": [
+      "draftstore",
+      "draft",
+      "store",
+      "shows",
+      "stale",
+      "output",
+      "editing",
+      "already",
+      "rendered",
+      "reproduce",
+      "put",
+      "old",
+      "render",
+      "update",
+      "new",
+      "still",
+      "returns",
+      "fix",
+      "behavior",
+      "while",
+      "retaining",
+      "public",
+      "api",
+      "all",
+      "compatibility",
+      "readme.md",
+      "readme",
+      "md",
+      "multiple",
+      "prefixes",
+      "one",
+      "key",
+      "preserve",
+      "other",
+      "entries",
+      "ordering",
+      "snapshot",
+      "independence",
+      "exception",
+      "types",
+      "run",
+      "target",
+      "tests",
+      "regression",
+      "suite",
+      "edit",
+      "existing"
+    ]
+  },
+  "localization": {
+    "files": [
+      {
+        "path": "drafts/store.py",
+        "score": 0.3671419714592682,
+        "top_symbols": [
+          "8c41f651d49822b9a12a119ad472cfccf136490d",
+          "aed35c6190b4a17403af7b0bcc07f93c2bf20fa4",
+          "774b9d2a9d63e1deb876d56358d15e83802170c3",
+          "0ae5df4d07ed1f9409e88b99b600a97744e8da59"
+        ],
+        "reason": "max=0.304226298587 + 0.1 * (0.284588500003 + 0.224624794199 + 0.119943434518); unique symbols=7",
+        "pinned": false
+      },
+      {
+        "path": "tests/test_store.py",
+        "score": 1.2028784179710885,
+        "top_symbols": [
+          "fa1a98d88843c5c2f2bf0f2d06c951cde696e36b",
+          "0a96a3f85ed606f0f44b36bc9863f600dfb01b88",
+          "6bd16da64e58ef88c2df36ad7465ec9a8d5039c9",
+          "5466aa0e2c183e77357f6252e9506dd51a62b972"
+        ],
+        "reason": "max=1 + 0.1 * (0.78821619416 + 0.722128723777 + 0.518439261774); unique symbols=5",
+        "pinned": false
+      },
+      {
+        "path": "drafts/formatting.py",
+        "score": 0.012273000094190405,
+        "top_symbols": [
+          "29fa6968b3a5e15502b8f58450d70df345317466",
+          "896b97ba9f00fbc3182d62dff9a41f69ae453dc5"
+        ],
+        "reason": "max=0.0122730000942 + 0.1 * (0); unique symbols=2",
+        "pinned": false
+      }
+    ],
+    "symbols": [
+      {
+        "symbol_id": "774b9d2a9d63e1deb876d56358d15e83802170c3",
+        "qualified_name": "drafts.store.DraftStore.render",
+        "file": "drafts/store.py",
+        "score": 0.2246247941988503,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 3.0319689207306615,
+            "normalized": 0.2246247941988503
+          }
+        ],
+        "pinned": false,
+        "start_line": 19,
+        "end_line": 23,
+        "reason": "weighted fusion: bm25 raw=3.03196892073 normalized=0.224624794199 rank=8 weight=1"
+      },
+      {
+        "symbol_id": "b1808b9e9881a55fbf10cb1f5e29ce5d7c1d554b",
+        "qualified_name": "drafts.store.DraftStore.update",
+        "file": "drafts/store.py",
+        "score": 0.0730970933237953,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.4361294697104299,
+            "normalized": 0.0730970933237953
+          }
+        ],
+        "pinned": false,
+        "start_line": 14,
+        "end_line": 17,
+        "reason": "weighted fusion: bm25 raw=1.43612946971 normalized=0.0730970933238 rank=11 weight=1"
+      },
+      {
+        "symbol_id": "7f4052305ef1f1ccb8d17cb4fdf1adc2411a78b6",
+        "qualified_name": "drafts.store.DraftStore.__init__",
+        "file": "drafts/store.py",
+        "score": 0.11670784354765908,
+        "kind": "method",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 1.895423415925701,
+            "normalized": 0.11670784354765908
+          }
+        ],
+        "pinned": false,
+        "start_line": 5,
+        "end_line": 7,
+        "reason": "weighted fusion: bm25 raw=1.89542341593 normalized=0.116707843548 rank=10 weight=1"
+      },
+      {
+        "symbol_id": "8c41f651d49822b9a12a119ad472cfccf136490d",
+        "qualified_name": "drafts.store.DraftStore",
+        "file": "drafts/store.py",
+        "score": 0.30422629858723255,
+        "kind": "class",
+        "channel_scores": [
+          {
+            "channel": "bm25",
+            "raw": 3.870305543869202,
+            "normalized": 0.30422629858723255
+          }
+        ],
+        "pinned": false,
+        "start_line": 4,
+        "end_line": 26,
+        "reason": "weighted fusion: bm25 raw=3.87030554387 normalized=0.304226298587 rank=6 weight=1"
+      }
+    ],
+    "file_decisions": [
+      {
+        "stage": "files",
+        "candidate_id": "e5745659d56ff17d38fbf6e5e06f0b723ac4cc71",
+        "path": "drafts/store.py",
+        "reason": "DraftStore 的 update/render 可能缓存了已渲染文本或未刷新标记，是 stale output 行为最可能的实现位置"
+      },
+      {
+        "stage": "files",
+        "candidate_id": "df339cdeee52f09f882ac070832259a8112150e6",
+        "path": "tests/test_store.py",
+        "reason": "包含 test_render_observes_update_for_every_prefix 等目标测试与兼容性/异常契约测试，用于验证修复且不可改动"
+      },
+      {
+        "stage": "files",
+        "candidate_id": "252972a9e7ff177c6356bbe391a5b6c8918bbb46",
+        "path": "drafts/formatting.py",
+        "reason": "render_text 是实际格式化函数，可能是前缀渲染或缓存判断的逻辑所在"
+      }
+    ],
+    "symbol_decisions": [
+      {
+        "stage": "symbols",
+        "symbol_id": "774b9d2a9d63e1deb876d56358d15e83802170c3",
+        "file": "drafts/store.py",
+        "start_line": 19,
+        "end_line": 23,
+        "file_line_count": 26,
+        "reason": "render 使用 _rendered 缓存，update 后仍返回旧渲染结果，与 issue 的 stale 输出最相关"
+      },
+      {
+        "stage": "symbols",
+        "symbol_id": "b1808b9e9881a55fbf10cb1f5e29ce5d7c1d554b",
+        "file": "drafts/store.py",
+        "start_line": 14,
+        "end_line": 17,
+        "file_line_count": 26,
+        "reason": "update 修改文本后未使相关缓存失效，可能与 render 协同修复"
+      },
+      {
+        "stage": "symbols",
+        "symbol_id": "7f4052305ef1f1ccb8d17cb4fdf1adc2411a78b6",
+        "file": "drafts/store.py",
+        "start_line": 5,
+        "end_line": 7,
+        "file_line_count": 26,
+        "reason": "_rendered 缓存结构在此初始化，修复策略可能涉及该状态"
+      },
+      {
+        "stage": "symbols",
+        "symbol_id": "8c41f651d49822b9a12a119ad472cfccf136490d",
+        "file": "drafts/store.py",
+        "start_line": 4,
+        "end_line": 26,
+        "file_line_count": 26,
+        "reason": "类整体范围，覆盖 put/update/render 交互与 snapshot 独立性约束"
+      }
+    ],
+    "retrieval_snapshot_id": "retrieval-sha256-359de116ac5985a0515217aaea69782c7c5c922d44a662add150016cae1ab458"
+  },
+  "retrieval_snapshot_id": "retrieval-sha256-359de116ac5985a0515217aaea69782c7c5c922d44a662add150016cae1ab458",
+  "impact": {
+    "changed_symbols": [
+      "774b9d2a9d63e1deb876d56358d15e83802170c3",
+      "b1808b9e9881a55fbf10cb1f5e29ce5d7c1d554b",
+      "7f4052305ef1f1ccb8d17cb4fdf1adc2411a78b6",
+      "8c41f651d49822b9a12a119ad472cfccf136490d"
+    ],
+    "callers": [
+      {
+        "symbol_id": "5466aa0e2c183e77357f6252e9506dd51a62b972",
+        "qualified_name": "tests.test_store.test_duplicate_and_missing_keys_keep_exception_contract",
+        "file": "tests/test_store.py",
+        "relation": "caller",
+        "distance": 1,
+        "edge_kind": "CALL",
+        "confidence": "medium",
+        "evidence": "CALL edge at source line 26"
+      },
+      {
+        "symbol_id": "0a96a3f85ed606f0f44b36bc9863f600dfb01b88",
+        "qualified_name": "tests.test_store.test_other_item_and_prefix_compatibility",
+        "file": "tests/test_store.py",
+        "relation": "caller",
+        "distance": 1,
+        "edge_kind": "CALL",
+        "confidence": "medium",
+        "evidence": "CALL edge at source line 37"
+      },
+      {
+        "symbol_id": "6bd16da64e58ef88c2df36ad7465ec9a8d5039c9",
+        "qualified_name": "tests.test_store.test_render_observes_update_for_every_prefix",
+        "file": "tests/test_store.py",
+        "relation": "caller",
+        "distance": 1,
+        "edge_kind": "CALL",
+        "confidence": "medium",
+        "evidence": "CALL edge at source line 6"
+      },
+      {
+        "symbol_id": "940494acea02e62ca1d9339edbe553557506220c",
+        "qualified_name": "tests.test_store.test_update_preserves_order_and_snapshot_is_detached",
+        "file": "tests/test_store.py",
+        "relation": "caller",
+        "distance": 1,
+        "edge_kind": "CALL",
+        "confidence": "medium",
+        "evidence": "CALL edge at source line 16"
+      }
+    ],
+    "callees": [
+      {
+        "symbol_id": "29fa6968b3a5e15502b8f58450d70df345317466",
+        "qualified_name": "drafts.formatting.render_text",
+        "file": "drafts/formatting.py",
+        "relation": "callee",
+        "distance": 1,
+        "edge_kind": "CALL",
+        "confidence": "high",
+        "evidence": "CALL edge at source line 22"
+      }
+    ],
+    "subclasses": [],
+    "related_tests": [
+      "tests/test_store.py"
+    ],
+    "related_test_evidence": [
+      {
+        "path": "tests/test_store.py",
+        "symbol_id": "5466aa0e2c183e77357f6252e9506dd51a62b972",
+        "qualified_name": "tests.test_store.test_duplicate_and_missing_keys_keep_exception_contract",
+        "confidence": "low",
+        "source": "TEST_edge",
+        "evidence": "TEST edge at source line 33"
+      }
+    ],
+    "risk": "medium",
+    "risk_reasons": [
+      "target includes a public class method"
+    ],
+    "risk_estimated": true,
+    "missing_symbols": []
+  },
+  "repair_plan": {
+    "contract": {
+      "change": {
+        "text": "After put('a', 'old'), render('a'), update('a', 'new'), a subsequent render('a') must return 'a: new' (and render with any prefix must reflect the new text). Render must observe updates for every prefix.",
+        "source": [
+          "issue_text: \"update('a', 'new'), render('a') still returns 'a: old'. Fix this behavior\"",
+          "tests/test_store.py:10-12 (test_render_observes_update_for_every_prefix)"
+        ],
+        "confidence": "explicit"
+      },
+      "preserve": {
+        "text": "Preserve public API (put/update/render/snapshot signatures), duplicate put raises ValueError, update/render of missing keys raise KeyError, other entries and their rendered outputs unaffected by an update, snapshot ordering and independence, multiple prefixes renderable per key. README.md compatibility behavior retained.",
+        "source": [
+          "issue_text: \"retaining the public API and all compatibility behavior in README.md ... Preserve the other entries, ordering, snapshot independence and exception types\"",
+          "tests/test_store.py:25-33",
+          "tests/test_store.py:36-43"
+        ],
+        "confidence": "explicit"
+      },
+      "interface": {
+        "text": "DraftStore.put(key, text), update(key, text), render(key, prefix=''), snapshot() -> list of (key, text); render output format produced by drafts.formatting.render_text (f'{prefix}{key}: {text}').",
+        "source": [
+          "drafts/store.py:9-26",
+          "drafts/formatting.py:1-2",
+          "tests/test_store.py:8-12,40-43"
+        ],
+        "confidence": "explicit"
+      },
+      "discriminator": {
+        "text": "Wrong behavior: second render after update returns the cached stale string ('a: old'). Correct behavior (base comparison, from the existing target test at tests/test_store.py:5-12): after put('a','old'), render('a')=='a: old', render('a','>')=='>a: old'; after update('a','new'), render('a')=='a: new' and render('a',prefix='>')=='>a: new'. The fix is discriminated by these assertions failing before and passing after, while test_duplicate_and_missing_keys_keep_exception_contract and test_other_item_and_prefix_compatibility keep passing.",
+        "source": [
+          "tests/test_store.py:5-12",
+          "tests/test_store.py:25-33",
+          "tests/test_store.py:36-43"
+        ],
+        "confidence": "explicit"
+      }
+    },
+    "root_cause_hypothesis": "DraftStore.render caches rendered output in self._rendered keyed by (key, prefix) (drafts/store.py:19-23), and DraftStore.update replaces self._items[key] (drafts/store.py:14-17) without invalidating the cache. Hence render returns the stale cached string after an update. Fix: invalidate cached entries for the updated key (or all keys) inside update — e.g. pop every identity whose key matches — so render recomputes via render_text. put does not need invalidation since keys cannot be re-put (ValueError). Snapshot independence is unaffected because _rendered is derived state not exposed by snapshot.",
+    "evidence": [
+      "drafts/store.py:19-23 — render returns self._rendered[(key, prefix)] if present, computed once via render_text",
+      "drafts/store.py:14-17 — update assigns self._items[key] = text with no cache invalidation",
+      "drafts/store.py:5-7 — _rendered initialized in __init__, per-instance cache",
+      "drafts/store.py:9-11 — put raises ValueError on duplicate keys, so put cannot re-introduce a key with a stale cache entry",
+      "tests/test_store.py:5-12 — existing target test exactly encodes the required update-visibility behavior for default and '>' prefixes",
+      "tests/test_store.py:36-43 — rendering other keys/entries must be unaffected by updating a different key",
+      "issue_text traceback: render('a') returns 'a: old' after update to 'new'"
+    ],
+    "changes": [
+      {
+        "file": "drafts/store.py",
+        "symbol": "drafts.store.DraftStore.update",
+        "action": "modify",
+        "description": "After assigning self._items[key] = text, invalidate cached render identities for that key: remove all entries (k, p) from self._rendered where k == key, so subsequent render calls recompute from the new text."
+      }
+    ],
+    "tests_to_run": [
+      "tests/test_store.py::test_render_observes_update_for_every_prefix",
+      "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+      "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+      "tests/test_store.py::test_other_item_and_prefix_compatibility"
+    ],
+    "planned_new_tests": [],
+    "risk": "medium",
+    "alternatives": [
+      "Remove the _rendered cache entirely and have render always call render_text directly — simplest and cannot go stale, but changes performance characteristics of repeated renders (cache is private state, no public contract observed); invalidation in update is the minimal change.",
+      "Version the cache: store a per-key version number incremented on update and include it in the render identity tuple — more invasive than needed for the observed contract.",
+      "Have render_text recompute every call and drop only the (key, prefix) entry being re-rendered — insufficient, because a cached entry for a different prefix of the same key would remain stale."
+    ]
+  },
+  "modified_files": [
+    "drafts/store.py"
+  ],
+  "git_diff": "diff --git a/drafts/store.py b/drafts/store.py\nindex 745b9bf..f1fd720 100644\n--- a/drafts/store.py\n+++ b/drafts/store.py\n@@ -15,6 +15,8 @@ class DraftStore:\n         if key not in self._items:\n             raise KeyError(key)\n         self._items[key] = text\n+        for identity in [k for k in self._rendered if k[0] == key]:\n+            del self._rendered[identity]\n \n     def render(self, key, prefix=''):\n         identity = (key, prefix)\n",
+  "patch_hash": "03d1d1bda0b5b0a8a2f2e401fac433ab2c8b5fa24508f6fe4ee440a7c7627021",
+  "delivered_patch_identity_sha256": "b8bf661470b5086db279fe870562741946262fbcdf2a9d1d63bcb2b0489780af",
+  "patch_validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "path",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "size",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "non_empty",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "test_protection",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "syntax",
+        "passed": true,
+        "reason": null
+      },
+      {
+        "name": "cheat",
+        "passed": true,
+        "reason": null
+      }
+    ],
+    "cheat_findings": [],
+    "warnings": [],
+    "errors": [],
+    "files_changed": 1,
+    "lines_added": 2,
+    "lines_deleted": 0,
+    "risk": "medium",
+    "evidence": [
+      "target includes a public class method"
+    ]
+  },
+  "test_execution": {
+    "status": "PASS",
+    "exit_code": 0,
+    "duration_seconds": 0.8245844841003418,
+    "tests": [
+      {
+        "node_id": "tests/test_store.py::test_render_observes_update_for_every_prefix",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      },
+      {
+        "node_id": "tests/test_store.py::test_other_item_and_prefix_compatibility",
+        "outcome": "passed",
+        "duration": 0.0,
+        "message": null,
+        "traceback": null,
+        "failure_type": null
+      }
+    ],
+    "tests_passed": 4,
+    "tests_failed": 0,
+    "stdout_tail": "============================= test session starts ==============================\nplatform linux -- Python 3.9.20, pytest-7.4.4, pluggy-1.6.0\nrootdir: /workspace\ncollected 4 items\n\ntests/test_store.py ....                                                 [100%]\n\n---------------------- generated xml file: /out/junit.xml ----------------------\n============================== 4 passed in 0.17s ===============================\n",
+    "stderr_tail": "",
+    "artifact_dir": "attempts/01",
+    "error_reason": null,
+    "diagnostics": {
+      "execution_backend": "docker",
+      "container_verified": true,
+      "network_mode": "none",
+      "oom_killed": false,
+      "cleanup_error": null,
+      "junit_error": null,
+      "runner_kind": "pytest",
+      "effective_timeout_seconds": 7,
+      "timeout_source": "effective EnvSpec after graph budget clamp",
+      "time_allocation": {
+        "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+        "rejected_samples": 0,
+        "source": "exact_ordered_scope",
+        "confidence": "low",
+        "suggested_seconds": 7,
+        "runner_limit_seconds": 40,
+        "complete_samples": 1,
+        "timeout_samples": 0,
+        "aggregate_samples": 0,
+        "observed_complete_seconds": [
+          1.25
+        ],
+        "timeout_lower_bounds_seconds": [],
+        "historical_fastest_complete_seconds": 1.25,
+        "startup_seconds": null,
+        "startup_note": "included in observed total; not separately measured",
+        "coverage_reduced": false,
+        "final_timeout_seconds": 7,
+        "deadline_available_seconds": 40,
+        "estimate_fits": true,
+        "remaining_seconds": 812.695375,
+        "reserve_seconds": 240.0,
+        "margin_insufficient": false
+      },
+      "timing_fact": {
+        "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+        "repository": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\source",
+        "base_commit": "0e4db69312b1357851ee57f8b61f5d519c24d771",
+        "selectors": [
+          "tests/test_store.py::test_render_observes_update_for_every_prefix",
+          "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+          "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+          "tests/test_store.py::test_other_item_and_prefix_compatibility"
+        ],
+        "collected_order": [
+          "tests/test_store.py::test_render_observes_update_for_every_prefix",
+          "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+          "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+          "tests/test_store.py::test_other_item_and_prefix_compatibility"
+        ],
+        "seconds": 0.8120000000000118,
+        "status": "pass",
+        "complete": true,
+        "process_completed": true,
+        "scope_note": "only explicit node-set equality establishes complete scope; file/full runs remain aggregate",
+        "environment_cache_key": "phase27-frozen-existing-image",
+        "image_id": "sha256:5820136e8a0f2981e36049ebacba1ff1b80b8b7fbfa06ddb1763a1d1486df326",
+        "runner": "/opt/miniconda3/envs/testbed/bin/python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml",
+        "estimate": {
+          "identity": "af1358bca52ee8c05ee39e328d38fde9bdacd50e899ebdd2aa07de3f1386afb4",
+          "rejected_samples": 0,
+          "source": "exact_ordered_scope",
+          "confidence": "low",
+          "suggested_seconds": 7,
+          "runner_limit_seconds": 40,
+          "complete_samples": 1,
+          "timeout_samples": 0,
+          "aggregate_samples": 0,
+          "observed_complete_seconds": [
+            1.25
+          ],
+          "timeout_lower_bounds_seconds": [],
+          "historical_fastest_complete_seconds": 1.25,
+          "startup_seconds": null,
+          "startup_note": "included in observed total; not separately measured",
+          "coverage_reduced": false,
+          "final_timeout_seconds": 7,
+          "deadline_available_seconds": 40,
+          "estimate_fits": true,
+          "remaining_seconds": 812.695375,
+          "reserve_seconds": 240.0,
+          "margin_insufficient": false
+        },
+        "cold_environment": false,
+        "preparation_seconds": 0.0
+      },
+      "environment_image_id": "sha256:5820136e8a0f2981e36049ebacba1ff1b80b8b7fbfa06ddb1763a1d1486df326"
+    }
+  },
+  "usage": {
+    "input_tokens": 67198,
+    "output_tokens": 3600,
+    "cached_input_tokens": 25792,
+    "cost": 0.04913696,
+    "llm_calls": 10,
+    "cost_unknown_calls": 0,
+    "currency": "CNY",
+    "by_model": {
+      "glm-5.3-flash-main": {
+        "alias": "glm-5.3-flash-main",
+        "input_tokens": 67198,
+        "output_tokens": 3600,
+        "cached_input_tokens": 25792,
+        "cost": 0.04913696,
+        "llm_calls": 10,
+        "cost_unknown_calls": 0
+      }
+    },
+    "by_role": {
+      "localizer": {
+        "alias": "localizer",
+        "input_tokens": 9081,
+        "output_tokens": 484,
+        "cached_input_tokens": 0,
+        "cost": 0.00862,
+        "llm_calls": 2,
+        "cost_unknown_calls": 0
+      },
+      "planner": {
+        "alias": "planner",
+        "input_tokens": 23384,
+        "output_tokens": 2527,
+        "cached_input_tokens": 6336,
+        "cost": 0.02217128,
+        "llm_calls": 3,
+        "cost_unknown_calls": 0
+      },
+      "coder": {
+        "alias": "coder",
+        "input_tokens": 28511,
+        "output_tokens": 386,
+        "cached_input_tokens": 19456,
+        "cost": 0.01279968,
+        "llm_calls": 4,
+        "cost_unknown_calls": 0
+      },
+      "reviewer": {
+        "alias": "reviewer",
+        "input_tokens": 6222,
+        "output_tokens": 203,
+        "cached_input_tokens": 0,
+        "cost": 0.005546,
+        "llm_calls": 1,
+        "cost_unknown_calls": 0
+      }
+    }
+  },
+  "test_runs": 5,
+  "status": "succeeded",
+  "stop_reason": null,
+  "failure_reasons": [],
+  "error_class": null,
+  "error_origin": null,
+  "plan_corrections": 1,
+  "plan_semantic_rejections": 1,
+  "plan_schema_rejections": 0,
+  "plan_tool_audit": {
+    "role": "planner",
+    "iteration": 0,
+    "records_present": true,
+    "requested": 3,
+    "succeeded": 3,
+    "failed": 0,
+    "denied": 0
+  },
+  "llm_requests": {},
+  "artifacts": {
+    "harness_evidence": "harness/evidence.json",
+    "policy_snapshot": "harness/snapshot.json",
+    "patch:1": "attempts/01/patch.diff",
+    "validation:1": "attempts/01/validation.json",
+    "execution:1": "attempts/01/execution.json",
+    "final_patch": "patch_final.diff",
+    "state": "state_final.json"
+  },
+  "evidence": [
+    {
+      "type": "tool_call",
+      "sequence": 1,
+      "call_id": "call_-7121738058092771141",
+      "name": "read_file",
+      "arguments_summary": {
+        "path": "drafts/store.py"
+      },
+      "ok": true,
+      "duration_ms": 14,
+      "error_code": null,
+      "result_summary": {
+        "path": "drafts/store.py",
+        "artifact_ref": "tool-results/69fb04d8b8a887f76927f76eebb101c7547dde826759e678eea13a50bd53be10.json",
+        "exploration": {
+          "known_evidence": [
+            "drafts/store.py"
+          ],
+          "missing_facts": [
+            "state a cause tied to the public contract"
+          ],
+          "next_options": [
+            "read the missing planned source",
+            "query callers or adjacent module with a stated gap",
+            "make a minimal change if contract and cause are supported"
+          ],
+          "repeated_query": false,
+          "new_relevant_evidence": 1,
+          "relevance_basis": "planned_file_overlap",
+          "hypothesis_changed": false,
+          "hypothesis": "",
+          "has_modification": false,
+          "low_yield_streak": 0,
+          "feedback": ""
+        },
+        "cache": {
+          "hit": false,
+          "identity_seconds": 0.014999999999986358,
+          "lookup_seconds": 0.0,
+          "search_seconds": 0.0,
+          "identity": "203e31aad20f14c07d4a1c120b834a1be6031e889a8e8d71426e2360d8306dfe",
+          "reason": "first_use",
+          "result_kind": "complete"
+        }
+      }
+    },
+    {
+      "type": "tool_call",
+      "sequence": 2,
+      "call_id": "call_-7121738058092771140",
+      "name": "read_file",
+      "arguments_summary": {
+        "path": "tests/test_store.py"
+      },
+      "ok": true,
+      "duration_ms": 16,
+      "error_code": null,
+      "result_summary": {
+        "path": "tests/test_store.py",
+        "artifact_ref": "tool-results/cbf724f7e17acc0abb52d13a8046100855823d72705b6742f1f13dd17fe70fef.json",
+        "exploration": {
+          "known_evidence": [
+            "drafts/store.py"
+          ],
+          "missing_facts": [
+            "state a cause tied to the public contract"
+          ],
+          "next_options": [
+            "read the missing planned source",
+            "query callers or adjacent module with a stated gap",
+            "make a minimal change if contract and cause are supported"
+          ],
+          "repeated_query": false,
+          "new_relevant_evidence": 0,
+          "relevance_basis": "planned_file_overlap",
+          "hypothesis_changed": false,
+          "hypothesis": "",
+          "has_modification": false,
+          "low_yield_streak": 1,
+          "feedback": ""
+        },
+        "cache": {
+          "hit": false,
+          "identity_seconds": 0.016000000000019554,
+          "lookup_seconds": 0.0,
+          "search_seconds": 0.0,
+          "identity": "8860519a1b7a25b1e1d2c35fba1245c30f20e95e6de75ce116301d0cb21dc85f",
+          "reason": "first_use",
+          "result_kind": "complete"
+        }
+      }
+    },
+    {
+      "type": "tool_call",
+      "sequence": 3,
+      "call_id": "call_-7121738436049893379",
+      "name": "edit_file",
+      "arguments_summary": {
+        "path": "drafts/store.py",
+        "search": "        if key not in self._items:\n            raise KeyError(key)\n        self._items[key] = text",
+        "replace": "        if key not in self._items:\n            raise KeyError(key)\n        self._items[key] = text\n        for identity in [k for k in self._rendered if k[0] == key]:\n            del self._rendered[identity]"
+      },
+      "ok": true,
+      "duration_ms": 15,
+      "error_code": null,
+      "result_summary": {
+        "path": "drafts/store.py",
+        "match_status": "applied_exact",
+        "artifact_ref": "tool-results/bddf9b31d92c481b06f121a3a760f9910c490cf350f29be275781fb16b2f8fbc.json",
+        "exploration": {
+          "known_evidence": [
+            "drafts/store.py"
+          ],
+          "missing_facts": [
+            "identify an observation that distinguishes the current hypothesis from alternatives"
+          ],
+          "next_options": [
+            "read the missing planned source",
+            "query callers or adjacent module with a stated gap",
+            "make a minimal change if contract and cause are supported"
+          ],
+          "repeated_query": false,
+          "new_relevant_evidence": 0,
+          "relevance_basis": "planned_file_overlap",
+          "hypothesis_changed": true,
+          "hypothesis": "`update` replaces the text but never invalidates the `_rendered` cache keyed by `(key, prefix)`, so subsequent `render` calls return the stale cached string for any prefix of that key.",
+          "has_modification": true,
+          "low_yield_streak": 0,
+          "feedback": "",
+          "modification_basis": "workspace_diff_content",
+          "candidate_changed": true,
+          "candidate_hash": "b8bf661470b5086db279fe870562741946262fbcdf2a9d1d63bcb2b0489780af",
+          "previous_candidate_hash": ""
+        },
+        "cache": {}
+      }
+    },
+    {
+      "type": "tool_call",
+      "sequence": 4,
+      "call_id": "call_-7121555298644388817",
+      "name": "run_tests",
+      "arguments_summary": {
+        "test_ids": [
+          "tests/test_store.py::test_render_observes_update_for_every_prefix",
+          "tests/test_store.py::test_update_preserves_order_and_snapshot_is_detached",
+          "tests/test_store.py::test_duplicate_and_missing_keys_keep_exception_contract",
+          "tests/test_store.py::test_other_item_and_prefix_compatibility"
+        ]
+      },
+      "ok": true,
+      "duration_ms": 1266,
+      "error_code": null,
+      "result_summary": {
+        "test_run": 1,
+        "artifact_ref": "tool-results/f32715cf7ada202d8a88770552511c1d40dfdc9bf25205bfaec4f7c559645465.json",
+        "execution": {
+          "status": "PASS",
+          "exit_code": 0,
+          "tests_passed": 4,
+          "tests_failed": 0,
+          "error_reason": null
+        },
+        "exploration": {
+          "known_evidence": [
+            "drafts/store.py"
+          ],
+          "missing_facts": [
+            "identify an observation that distinguishes the current hypothesis from alternatives"
+          ],
+          "next_options": [
+            "read the missing planned source",
+            "query callers or adjacent module with a stated gap",
+            "make a minimal change if contract and cause are supported"
+          ],
+          "repeated_query": false,
+          "new_relevant_evidence": 0,
+          "relevance_basis": "planned_file_overlap",
+          "hypothesis_changed": false,
+          "hypothesis": "`update` replaces the text but never invalidates the `_rendered` cache keyed by `(key, prefix)`, so subsequent `render` calls return the stale cached string for any prefix of that key.",
+          "has_modification": true,
+          "low_yield_streak": 0,
+          "feedback": ""
+        },
+        "cache": {}
+      }
+    },
+    {
+      "type": "tool_call",
+      "sequence": 5,
+      "call_id": "call_-7121736408825326678",
+      "name": "finish",
+      "arguments_summary": {
+        "summary": "Hypothesis: DraftStore.update replaced self._items[key] without invalidating the _rendered cache keyed by (key, prefix), so render returned stale cached output for every prefix of the updated key. Fix: update now removes all cached render entries whose key matches, forcing render_text to recompute. Public API, exception contract (ValueError on duplicate put, KeyError on missing update/render), ordering, snapshot independence, and other entries' outputs are unchanged. All 4 tests in tests/test_st...[68 chars omitted]"
+      },
+      "ok": true,
+      "duration_ms": 14,
+      "error_code": null,
+      "result_summary": {
+        "summary": "Hypothesis: DraftStore.update replaced self._items[key] without invalidating the _rendered cache keyed by (key, prefix), so render returned stale cached output for every prefix of the updated key. Fix: update now removes all cached render entries whose key matches, forcing render_text to recompute. Public API, exception contract (ValueError on duplicate put, KeyError on missing update/render), ordering, snapshot independence, and other entries' outputs are unchanged. All 4 tests in tests/test_store.py pass, including test_render_observes_update_for_every_prefix.",
+        "requested": true,
+        "artifact_ref": "tool-results/ca8b76abdcb456b07c06a9468e26c3c275725fbbeb32c1bcf8632a59c5a32788.json",
+        "exploration": {
+          "known_evidence": [
+            "drafts/store.py"
+          ],
+          "missing_facts": [
+            "identify an observation that distinguishes the current hypothesis from alternatives"
+          ],
+          "next_options": [
+            "read the missing planned source",
+            "query callers or adjacent module with a stated gap",
+            "make a minimal change if contract and cause are supported"
+          ],
+          "repeated_query": false,
+          "new_relevant_evidence": 0,
+          "relevance_basis": "planned_file_overlap",
+          "hypothesis_changed": false,
+          "hypothesis": "`update` replaces the text but never invalidates the `_rendered` cache keyed by `(key, prefix)`, so subsequent `render` calls return the stale cached string for any prefix of that key.",
+          "has_modification": true,
+          "low_yield_streak": 0,
+          "feedback": ""
+        },
+        "cache": {}
+      }
+    },
+    {
+      "type": "planner_tool_audit",
+      "role": "planner",
+      "iteration": 0,
+      "records_present": true,
+      "requested": 3,
+      "succeeded": 3,
+      "failed": 0,
+      "denied": 0
+    },
+    {
+      "type": "event",
+      "seq": 1,
+      "node": "understand_issue",
+      "status": "ok",
+      "error": null
+    },
+    {
+      "type": "event",
+      "seq": 2,
+      "node": "retrieve",
+      "status": "ok",
+      "error": null,
+      "extra": "[('candidates', 15)]"
+    },
+    {
+      "type": "event",
+      "seq": 3,
+      "node": "localize",
+      "status": "ok",
+      "error": null,
+      "extra": "[('files', 3), ('symbols', 4)]"
+    },
+    {
+      "type": "event",
+      "seq": 4,
+      "node": "analyze_impact",
+      "status": "ok",
+      "error": null,
+      "extra": "[('impacted', 4)]"
+    },
+    {
+      "type": "event",
+      "seq": 5,
+      "node": "build_env",
+      "status": "ok",
+      "error": null,
+      "extra": "[('complete', True), ('flaky', 0), ('scope', 1), ('tests', 4)]"
+    },
+    {
+      "type": "event",
+      "seq": 6,
+      "node": "reproduce",
+      "status": "skipped:no-reproducer",
+      "error": null
+    },
+    {
+      "type": "event",
+      "seq": 7,
+      "node": "plan",
+      "status": "ok",
+      "error": null,
+      "extra": "[('changes', 1), ('plan_corrections', 1), ('plan_schema_rejections', 0), ('plan_semantic_rejections', 1), ('planned_new_tests', 0), ('tests', 4), ('tool_audit', {'role': 'planner', 'iteration': 0, 'records_present': True, 'requested': 3, 'succeeded': 3, 'failed': 0, 'denied': 0})]"
+    },
+    {
+      "type": "event",
+      "seq": 8,
+      "node": "generate_patch",
+      "status": "finish",
+      "error": null,
+      "extra": "[('tool_call_count', 5)]"
+    },
+    {
+      "type": "event",
+      "seq": 9,
+      "node": "validate_patch",
+      "status": "passed",
+      "error": null,
+      "extra": "[('errors', 0), ('iteration', 1)]"
+    },
+    {
+      "type": "event",
+      "seq": 10,
+      "node": "run_target_tests",
+      "status": "PASS",
+      "error": null,
+      "extra": "[('failed', 0), ('iteration', 1), ('target_test_source', 'planner')]"
+    },
+    {
+      "type": "event",
+      "seq": 11,
+      "node": "run_regression",
+      "status": "ok",
+      "error": null,
+      "extra": "[('new_failures', 0)]"
+    },
+    {
+      "type": "event",
+      "seq": 12,
+      "node": "review",
+      "status": "approved",
+      "error": null,
+      "extra": "[('reviewed_patch_hash', 'b8bf661470b5')]"
+    }
+  ],
+  "simulated_llm": false,
+  "simulated_sandbox": false,
+  "verification_boundary": "provisionally_verified means only that one validator-approved patch passed the selected authorized tests. It does not establish full regression safety or final issue resolution. m2_verified covers the authorized baseline suite with review and no confirmed new failures; existing failures and flaky tests remain disclosed. sampled_verified covers only the listed sample and impact tests. Neither level establishes external issue resolution or real-model quality."
+}

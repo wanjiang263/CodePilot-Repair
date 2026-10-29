@@ -1,0 +1,1 @@
+[2026-10-29T13:13:03.792263600Z][com.docker.backend.exe.socketforwarder][E] running socket forwarder: running forwarding dials: allocating mux: vpnkit-bridge handshake failed: unmarshalling handshake: read '<nil>': not a connection to a mulitplexer; received bad magic string '��的网络名不再可用。 

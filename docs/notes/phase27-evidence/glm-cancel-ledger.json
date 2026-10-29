@@ -1,0 +1,43 @@
+{
+  "currency": "CNY",
+  "limit": 1.0,
+  "accounted_or_reserved": 0.8028672,
+  "frozen": true,
+  "opening_balance": 0.0,
+  "opening_source": null,
+  "requests": [
+    {
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8028672,
+      "status": "unknown_frozen",
+      "cost_cny": null,
+      "request_sha256": "523b535c97f3f602513d91db97c9ce33e59b59fafcb6088e8af0ea054d2a1c72",
+      "dispatched_at_unix": 1793279265.748425,
+      "metadata": {
+        "purpose": "phase27_cancel",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 1024,
+        "request_body_bytes": 165,
+        "message_roles": [
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "error_type": "RequestCancelled",
+      "exception_chain": [
+        "RequestCancelled"
+      ],
+      "elapsed_seconds": 0.25,
+      "timeout_phase": null
+    }
+  ],
+  "cancelled_admissions": []
+}

@@ -1,0 +1,5 @@
+npm warn Unknown user config "disturl". This will stop working in the next major version of npm.
+
+> codepilot-dashboard@0.1.0 typecheck
+> tsc -b --pretty false
+

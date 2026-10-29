@@ -1,0 +1,17 @@
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'drafts/__init__.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'drafts/formatting.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'drafts/store.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/test_store.py', LF will be replaced by CRLF the next time Git touches it
+2026-10-29T15:14:02.980035Z [info     ] repo.index.done                changed=5 dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.156 incremental=False removed=0 repository_id=repo_8d42690a32a516ce reused=0
+HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+succeeded None

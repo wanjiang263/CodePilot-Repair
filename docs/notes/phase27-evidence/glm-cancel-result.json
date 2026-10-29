@@ -1,0 +1,14 @@
+{
+  "records": [
+    {
+      "error_type": "DispatchBudgetStoppedError",
+      "message": "budget_stopped: response/cost uncertain; further dispatch frozen",
+      "dispatched": true,
+      "seconds": 0.25
+    }
+  ],
+  "attempts": 1,
+  "client_closed": false,
+  "http_threads": [],
+  "request_query_supported": false
+}

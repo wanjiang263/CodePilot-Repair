@@ -1,0 +1,43 @@
+{"event": "preparation_progress", "phase": "scanned", "counts": {"files": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 100, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 200, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 300, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 400, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 500, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 600, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 700, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 800, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 900, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1000, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1100, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1200, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1300, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1400, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1500, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1600, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1700, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1800, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 1900, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2000, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2100, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2200, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2300, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2400, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2500, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2600, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "parsing", "counts": {"parsed": 2700, "parse_reused": 0, "changed": 5214}}
+{"event": "preparation_progress", "phase": "linking", "counts": {"sources": 2717, "parsed": 2717, "parse_reused": 0, "changed": 5214, "reused": 0, "removed": 0}}
+Traceback (most recent call last):
+  File "D:\Projects\Desktop\CodePilot-Repair\scripts\phase27_index_probe.py", line 100, in <module>
+    main()
+  File "D:\Projects\Desktop\CodePilot-Repair\scripts\phase27_index_probe.py", line 78, in main
+    run(args.mode)
+  File "D:\Projects\Desktop\CodePilot-Repair\scripts\phase27_index_probe.py", line 62, in run
+    stats = indexer.index(stores, workspace)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Desktop\CodePilot-Repair\src\codepilot\repo\index.py", line 305, in index
+    _merge_test_edges(
+  File "D:\Projects\Desktop\CodePilot-Repair\src\codepilot\repo\index.py", line 484, in _merge_test_edges
+    {
+MemoryError

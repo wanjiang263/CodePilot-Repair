@@ -1,0 +1,18 @@
+[
+  "scripts/phase27_agent_case.py",
+  "scripts/phase27_candidate_probe.py",
+  "scripts/phase27_glm_probe.py",
+  "scripts/phase27_index_probe.py",
+  "src/codepilot/llm/anthropic_messages.py",
+  "src/codepilot/llm/dispatch_budget.py",
+  "src/codepilot/llm/http_lifecycle.py",
+  "src/codepilot/llm/openai_compatible.py",
+  "src/codepilot/llm/registry.py",
+  "src/codepilot/llm/retry.py",
+  "src/codepilot/observability/dispatch.py",
+  "src/codepilot/repo/index.py",
+  "src/codepilot/storage/repository.py",
+  "tests/unit/llm/test_http_total_deadline.py",
+  "tests/unit/repo/test_index.py",
+  "tests/unit/storage/test_repository.py"
+]

@@ -1,0 +1,103 @@
+[
+  {
+    "configured_timeout": 1,
+    "result": {
+      "status": "TIMEOUT",
+      "exit_code": null,
+      "duration_seconds": 5.161397933959961,
+      "tests": [],
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "stdout_tail": "",
+      "stderr_tail": "",
+      "artifact_dir": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\runs\\docker-recovery\\attempts\\01",
+      "error_reason": "EXECUTION_TIMEOUT",
+      "diagnostics": {
+        "runner": "django",
+        "parse_counts": {
+          "ran": null,
+          "parsed": 0,
+          "wanted": 3,
+          "missing": 3,
+          "extra_observed": 0
+        },
+        "requested_missing": [
+          "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_alter_order_with_respect_to",
+          "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_blank_textfield_and_charfield",
+          "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_constraints"
+        ],
+        "requested_extra_observed": [],
+        "execution_backend": "docker",
+        "container_verified": true,
+        "network_mode": "none",
+        "oom_killed": false,
+        "cleanup_error": null,
+        "junit_error": null,
+        "runner_kind": "django",
+        "effective_timeout_seconds": 1,
+        "timeout_source": "effective EnvSpec after graph budget clamp"
+      }
+    }
+  },
+  {
+    "configured_timeout": 40,
+    "result": {
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_seconds": 16.66696262359619,
+      "tests": [
+        {
+          "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_alter_order_with_respect_to",
+          "outcome": "passed",
+          "duration": 0.0,
+          "message": null,
+          "traceback": null,
+          "failure_type": null
+        },
+        {
+          "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_blank_textfield_and_charfield",
+          "outcome": "passed",
+          "duration": 0.0,
+          "message": null,
+          "traceback": null,
+          "failure_type": null
+        },
+        {
+          "node_id": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_constraints",
+          "outcome": "passed",
+          "duration": 0.0,
+          "message": null,
+          "traceback": null,
+          "failure_type": null
+        }
+      ],
+      "tests_passed": 3,
+      "tests_failed": 0,
+      "stdout_tail": "Testing against Django installed in '/testbed/django'\nImporting application migrations\nFound 3 test(s).\nSkipping setup of unused database(s): other.\nOperations to perform:\n  Synchronize unmigrated apps: auth, contenttypes, messages, migrations, sessions, staticfiles\n  Apply all migrations: admin, sites\nSynchronizing apps without migrations:\n  Creating tables...\n    Creating table django_content_type\n    Creating table auth_permission\n    Creating table auth_group\n    Creating table auth_user\n    Creating table django_session\n    Creating table migrations_modelwithcustombase\n    Creating table migrations_unmigratedmodel\n    Running deferred SQL...\nRunning migrations:\n  Applying admin.0001_initial... OK\n  Applying admin.0002_logentry_remove_auto_add... OK\n  Applying admin.0003_logentry_add_action_flag_choices... OK\n  Applying sites.0001_initial... OK\n  Applying sites.0002_alter_domain_unique... OK\nSystem check identified no issues (0 silenced).\n",
+      "stderr_tail": "Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\ntest_add_alter_order_with_respect_to (migrations.test_autodetector.AutodetectorTests)\nSetting order_with_respect_to when adding the FK too does ... ok\ntest_add_blank_textfield_and_charfield (migrations.test_autodetector.AutodetectorTests)\n#23405 - Adding a NOT NULL and blank `CharField` or `TextField` ... ok\ntest_add_constraints (migrations.test_autodetector.AutodetectorTests)\nTest change detection of new constraints. ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.012s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n",
+      "artifact_dir": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\candidate\\runs\\docker-recovery\\attempts\\02",
+      "error_reason": null,
+      "diagnostics": {
+        "runner": "django",
+        "parse_counts": {
+          "ran": 3,
+          "parsed": 3,
+          "wanted": 3,
+          "missing": 0,
+          "extra_observed": 0
+        },
+        "requested_missing": [],
+        "requested_extra_observed": [],
+        "execution_backend": "docker",
+        "container_verified": true,
+        "network_mode": "none",
+        "oom_killed": false,
+        "cleanup_error": null,
+        "junit_error": null,
+        "runner_kind": "django",
+        "effective_timeout_seconds": 40,
+        "timeout_source": "effective EnvSpec after graph budget clamp"
+      }
+    }
+  }
+]

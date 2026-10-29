@@ -1,0 +1,133 @@
+{
+  "cold": {
+    "label": "fresh",
+    "seconds": 104.99888310000006,
+    "files": 5214,
+    "parsed": 2717,
+    "parse_reused": 0,
+    "changed": 5214,
+    "reused": 0,
+    "association_mode": "complete_closure_v2",
+    "association_sources": 2717,
+    "peak_working_set_bytes": 1250627584,
+    "base": "a754b82dac511475b6276039471ccd17cc64aeb8",
+    "pid": 8664
+  },
+  "new_process_unchanged": {
+    "label": "warm",
+    "seconds": 8.965219300000001,
+    "files": 5214,
+    "parsed": 0,
+    "parse_reused": 0,
+    "changed": 0,
+    "reused": 5214,
+    "association_mode": "verified_snapshot_v2",
+    "association_sources": 0,
+    "peak_working_set_bytes": 104247296,
+    "base": "a754b82dac511475b6276039471ccd17cc64aeb8",
+    "pid": 12232
+  },
+  "same_process_change": {
+    "label": "same_process_change_from_cold",
+    "seconds": 142.74625850000007,
+    "files": 5214,
+    "parsed": 2589,
+    "parse_reused": 128,
+    "changed": 1,
+    "reused": 5213,
+    "association_mode": "complete_closure_v2",
+    "association_sources": 2717,
+    "peak_working_set_bytes": 1326940160,
+    "base": "a754b82dac511475b6276039471ccd17cc64aeb8",
+    "pid": 8664
+  },
+  "new_process_change": {
+    "label": "changed",
+    "seconds": 150.02445090000003,
+    "files": 5214,
+    "parsed": 2717,
+    "parse_reused": 0,
+    "changed": 1,
+    "reused": 5213,
+    "association_mode": "complete_closure_v2",
+    "association_sources": 2717,
+    "peak_working_set_bytes": 1300992000,
+    "base": "a754b82dac511475b6276039471ccd17cc64aeb8",
+    "pid": 33244
+  },
+  "same_process_change_after_snapshot_only": {
+    "label": "same_process_change",
+    "seconds": 123.67445070000002,
+    "files": 5214,
+    "parsed": 2717,
+    "parse_reused": 0,
+    "changed": 1,
+    "reused": 5213,
+    "association_mode": "complete_closure_v2",
+    "association_sources": 2717,
+    "peak_working_set_bytes": 1302061056,
+    "base": "a754b82dac511475b6276039471ccd17cc64aeb8",
+    "pid": 12232
+  },
+  "query_cache": [
+    {
+      "seconds": 0.013831199999913224,
+      "cache": {
+        "hit": false,
+        "identity_seconds": 0.01599999999996271,
+        "lookup_seconds": 0.0,
+        "search_seconds": 0.0,
+        "identity": "c02cb9199e5a08f372f293246cb047bdf6720b6e646e3f8841a1b36783f53fba",
+        "reason": "first_use",
+        "result_kind": "complete"
+      },
+      "matched_lines": null
+    },
+    {
+      "seconds": 0.00452040000004672,
+      "cache": {
+        "hit": true,
+        "identity_seconds": 0.0,
+        "lookup_seconds": 0.0,
+        "search_seconds": 0.0,
+        "identity": "c02cb9199e5a08f372f293246cb047bdf6720b6e646e3f8841a1b36783f53fba",
+        "reason": "same_content_arguments_permissions_version",
+        "result_kind": "complete"
+      },
+      "matched_lines": null
+    },
+    {
+      "seconds": 0.2819030999999086,
+      "cache": {
+        "hit": false,
+        "identity_seconds": 0.06200000000001182,
+        "lookup_seconds": 0.0,
+        "search_seconds": 0.1570000000000391,
+        "identity": "0f22efc09a12d54bab23021100cd9f55b1062efdff5c0f109344f785bc554d61",
+        "reason": "identity_unavailable_or_scope_limit",
+        "result_kind": "complete"
+      },
+      "matched_lines": null
+    },
+    {
+      "seconds": 0.1629521999999497,
+      "cache": {
+        "hit": false,
+        "identity_seconds": 0.0,
+        "lookup_seconds": 0.0,
+        "search_seconds": 0.09399999999993724,
+        "identity": "0f22efc09a12d54bab23021100cd9f55b1062efdff5c0f109344f785bc554d61",
+        "reason": "identity_unavailable_or_scope_limit",
+        "result_kind": "complete"
+      },
+      "matched_lines": null
+    }
+  ],
+  "limitations": [
+    "complete association closure remains global",
+    "parsed trees are process-local and limited to 128 files / 8 MiB",
+    "single-file update was slower than fresh indexing; different process/system/cache states preclude speedup claims",
+    "first attempt failed with MemoryError; second completed in 148.203s but resource metric collection failed",
+    "fresh repeat provides successful cold time and peak working set; peak working set is not total OS committed memory"
+  ]
+}

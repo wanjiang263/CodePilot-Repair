@@ -1,0 +1,112 @@
+{
+  "run_id": "phase27-draftstore",
+  "task_id": "phase27-draftstore",
+  "seq": 147,
+  "node": "generate_patch",
+  "type": "lifecycle",
+  "timestamp": "2026-10-29T15:15:16.265247Z",
+  "duration_ms": null,
+  "usage": null,
+  "tool_calls": [],
+  "status": "after_tool",
+  "error": null,
+  "summary": "after_tool",
+  "extra": {
+    "hook": "after_tool",
+    "policy_hash": "a0479822adda7bc5f5150393cf63c38033f0374fdb079f2ce2aefb11b3732787",
+    "facts": {
+      "name": "edit_file",
+      "ok": true,
+      "cache": {}
+    },
+    "suggestions": [],
+    "runtime_projection": {
+      "run_id": "phase27-draftstore",
+      "resource": "workspace_write",
+      "stage": "generate_patch",
+      "stage_started_at": "2026-10-29T15:15:04.082666+00:00",
+      "stage_elapsed_seconds": 0.0,
+      "activity": "executing",
+      "revision": 8,
+      "event_seq": 147,
+      "resource_queued_seconds": 0.03099999999994907,
+      "preparation_progress": {
+        "phase": "index_ready",
+        "counts": {
+          "files": 5
+        },
+        "source": "built"
+      },
+      "policy_snapshot": {
+        "version": "builtin-phase26-v1",
+        "sha256": "a0479822adda7bc5f5150393cf63c38033f0374fdb079f2ce2aefb11b3732787",
+        "artifact": "harness/snapshot.json",
+        "status": "pending"
+      },
+      "last_completed_at": "2026-10-29T15:15:04.073777+00:00",
+      "stage_seconds": {
+        "understand_issue": 0.016,
+        "retrieve": 0.016,
+        "localize": 8.578,
+        "analyze_impact": 0.016,
+        "build_env": 2.453,
+        "reproduce": 0.016,
+        "plan": 49.64
+      },
+      "external_wait_seconds": 58.031,
+      "executing_seconds": 2.689,
+      "has_modification": false,
+      "cache": {
+        "hits": 0,
+        "misses": 3
+      },
+      "last_cache": {
+        "hit": false,
+        "identity_seconds": 0.016000000000019554,
+        "lookup_seconds": 0.0,
+        "search_seconds": 0.0,
+        "identity": "8860519a1b7a25b1e1d2c35fba1245c30f20e95e6de75ce116301d0cb21dc85f",
+        "reason": "first_use",
+        "result_kind": "complete"
+      },
+      "contract": {
+        "change": {
+          "text": "After put('a', 'old'), render('a'), update('a', 'new'), a subsequent render('a') must return 'a: new' (and render with any prefix must reflect the new text). Render must observe updates for every prefix.",
+          "source": [
+            "issue_text: \"update('a', 'new'), render('a') still returns 'a: old'. Fix this behavior\"",
+            "tests/test_store.py:10-12 (test_render_observes_update_for_every_prefix)"
+          ],
+          "confidence": "explicit"
+        },
+        "preserve": {
+          "text": "Preserve public API (put/update/render/snapshot signatures), duplicate put raises ValueError, update/render of missing keys raise KeyError, other entries and their rendered outputs unaffected by an update, snapshot ordering and independence, multiple prefixes renderable per key. README.md compatibility behavior retained.",
+          "source": [
+            "issue_text: \"retaining the public API and all compatibility behavior in README.md ... Preserve the other entries, ordering, snapshot independence and exception types\"",
+            "tests/test_store.py:25-33",
+            "tests/test_store.py:36-43"
+          ],
+          "confidence": "explicit"
+        },
+        "interface": {
+          "text": "DraftStore.put(key, text), update(key, text), render(key, prefix=''), snapshot() -> list of (key, text); render output format produced by drafts.formatting.render_text (f'{prefix}{key}: {text}').",
+          "source": [
+            "drafts/store.py:9-26",
+            "drafts/formatting.py:1-2",
+            "tests/test_store.py:8-12,40-43"
+          ],
+          "confidence": "explicit"
+        },
+        "discriminator": {
+          "text": "Wrong behavior: second render after update returns the cached stale string ('a: old'). Correct behavior (base comparison, from the existing target test at tests/test_store.py:5-12): after put('a','old'), render('a')=='a: old', render('a','>')=='>a: old'; after update('a','new'), render('a')=='a: new' and render('a',prefix='>')=='>a: new'. The fix is discriminated by these assertions failing before and passing after, while test_duplicate_and_missing_keys_keep_exception_contract and test_other_item_and_prefix_compatibility keep passing.",
+          "source": [
+            "tests/test_store.py:5-12",
+            "tests/test_store.py:25-33",
+            "tests/test_store.py:36-43"
+          ],
+          "confidence": "explicit"
+        }
+      },
+      "last_effective_progress": "2026-10-29T15:15:09.106810Z"
+    }
+  }
+}

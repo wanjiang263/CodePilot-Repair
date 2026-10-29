@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "D:\Projects\Desktop\CodePilot-Repair\scripts\phase27_candidate_probe.py", line 87, in <module>
+    main()
+  File "D:\Projects\Desktop\CodePilot-Repair\scripts\phase27_candidate_probe.py", line 33, in main
+    report = json.loads((old/"report.json").read_text())
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Anaconda\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+UnicodeDecodeError: 'gbk' codec can't decode byte 0x80 in position 193706: illegal multibyte sequence

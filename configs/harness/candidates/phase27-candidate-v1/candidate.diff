@@ -1,0 +1,1712 @@
+diff --git a/scripts/phase27_agent_case.py b/scripts/phase27_agent_case.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..2a984334ecc0d01a9f4622469d6c9b31f30f696f
+--- /dev/null
++++ b/scripts/phase27_agent_case.py
+@@ -0,0 +1,255 @@
++"""One frozen independent development case, run by the existing full Agent graph."""
++
++from __future__ import annotations
++
++import hashlib
++import json
++import subprocess
++from dataclasses import asdict
++from pathlib import Path
++from types import SimpleNamespace
++
++from dotenv import load_dotenv
++
++from codepilot.eval.assembly import InferenceAssembly, ProviderBundle
++from codepilot.llm.config import load_llm_config
++from codepilot.llm.dispatch_budget import DispatchBudget, configure_dispatch_budget
++from codepilot.repo.workspace import WorkspaceManager
++from codepilot.sandbox.base import EnvironmentBuildResult
++from codepilot.sandbox.docker import DockerSandbox
++from codepilot.sandbox.env_spec import EnvSpec
++from codepilot.schemas.budget import RepairBudget
++from codepilot.schemas.enums import ExecutionStatus
++
++FILES = {
++    "README.md": """# DraftStore
++An in-memory draft catalogue used by a command-line report.
++
++Public contract: put(key, text) adds a new item and rejects duplicate keys with
++ValueError. update(key, text) replaces an existing item and raises KeyError for
++missing keys. Replacement retains insertion order. render(key, prefix='') must
++show the latest text. Both positional and keyword prefix calls are supported.
++snapshot() returns an independent ordered list of (key, text) pairs.
++""",
++    "drafts/__init__.py": "from .store import DraftStore\n",
++    "drafts/formatting.py": "def render_text(key, text, prefix=''):\n    return f'{prefix}{key}: {text}'\n",
++    "drafts/store.py": """from .formatting import render_text
++
++
++class DraftStore:
++    def __init__(self):
++        self._items = {}
++        self._rendered = {}
++
++    def put(self, key, text):
++        if key in self._items:
++            raise ValueError(key)
++        self._items[key] = text
++
++    def update(self, key, text):
++        if key not in self._items:
++            raise KeyError(key)
++        self._items[key] = text
++
++    def render(self, key, prefix=''):
++        identity = (key, prefix)
++        if identity not in self._rendered:
++            self._rendered[identity] = render_text(key, self._items[key], prefix)
++        return self._rendered[identity]
++
++    def snapshot(self):
++        return list(self._items.items())
++""",
++    "tests/test_store.py": """import pytest
++from drafts import DraftStore
++
++
++def test_render_observes_update_for_every_prefix():
++    store = DraftStore()
++    store.put('a', 'old')
++    assert store.render('a') == 'a: old'
++    assert store.render('a', '>') == '>a: old'
++    store.update('a', 'new')
++    assert store.render('a') == 'a: new'
++    assert store.render('a', prefix='>') == '>a: new'
++
++
++def test_update_preserves_order_and_snapshot_is_detached():
++    store = DraftStore()
++    store.put('a', 'one')
++    store.put('b', 'two')
++    snapshot = store.snapshot()
++    store.update('a', 'three')
++    assert store.snapshot() == [('a', 'three'), ('b', 'two')]
++    assert snapshot == [('a', 'one'), ('b', 'two')]
++
++
++def test_duplicate_and_missing_keys_keep_exception_contract():
++    store = DraftStore()
++    store.put('a', 'one')
++    with pytest.raises(ValueError):
++        store.put('a', 'two')
++    with pytest.raises(KeyError):
++        store.update('b', 'two')
++    with pytest.raises(KeyError):
++        store.render('missing')
++
++
++def test_other_item_and_prefix_compatibility():
++    store = DraftStore()
++    store.put('a', 'one')
++    store.put('b', 'two')
++    assert store.render('b', '#') == '#b: two'
++    store.update('a', 'three')
++    assert store.render('b', prefix='#') == '#b: two'
++    assert store.render('a', '') == 'a: three'
++""",
++}
++ISSUE = """DraftStore shows stale output after editing an already rendered draft.
++Reproduce: put('a', 'old'), render('a'), update('a', 'new'), render('a') still
++returns 'a: old'. Fix this behavior while retaining the public API and all
++compatibility behavior in README.md. Multiple prefixes can be rendered for one
++key. Preserve the other entries, ordering, snapshot independence and exception
++types. Run the target tests and regression suite; do not edit existing tests.
++"""
++
++
++def main() -> None:
++    root = Path(__file__).resolve().parents[1]
++    out = root / "artifacts/phase27/agent-case"
++    out.mkdir(exist_ok=True)
++    source = out / "source"
++    source.mkdir(exist_ok=False)
++    for relative, content in FILES.items():
++        path = source / relative
++        path.parent.mkdir(parents=True, exist_ok=True)
++        path.write_text(content, encoding="utf8", newline="\n")
++
++    def git(*args: str) -> str:
++        return subprocess.check_output(["git", "-C", str(source), *args], text=True).strip()
++
++    git("init")
++    git("add", ".")
++    git(
++        "-c",
++        "user.name=CodePilot Validation",
++        "-c",
++        "user.email=validation@example.invalid",
++        "commit",
++        "-m",
++        "Freeze independent DraftStore development case",
++    )
++    base = git("rev-parse", "HEAD")
++    load_dotenv(root / ".env")
++    config = load_llm_config(root / "configs/phase22/llm.yaml").for_model("glm-5.3-flash-main")
++    assert set(config.roles.values()) == {"glm-5.3-flash-main"}
++    assert config.providers["bigmodel"].max_retries == 0
++    # Reconcile all prior round records, including the frozen cancellation.
++    prior = 0.0
++    for name in ("glm-normal", "glm-cancel"):
++        ledger = json.loads((out.parent / name / "dispatch-ledger.json").read_text())
++        prior += sum(
++            float(r["cost_cny"] if r["status"] == "settled" else r["reserved_cny"])
++            for r in ledger["requests"]
++        )
++    limit = (
++        min(
++            3.0, float(json.loads((out.parent / "opening-audit.json").read_text())["remaining_cny"])
++        )
++        - prior
++    )
++    budget = RepairBudget(
++        max_iterations=2,
++        max_test_runs=12,
++        max_tool_calls_per_iteration=16,
++        max_review_calls=2,
++        max_runtime_seconds=900,
++        max_cost=limit,
++    )
++    image = "phase25/django-14999:pytest744"
++    import docker
++
++    client = docker.from_env()
++    image_id = client.images.get(image).id
++    env = EnvSpec(
++        timeout_seconds=40,
++        test_command=(
++            "/opt/miniconda3/envs/testbed/bin/python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml"
++        ),
++        env={"PYTHONPATH": "/workspace"},
++    )
++    frozen = {
++        "issue": ISSUE,
++        "base": base,
++        "source_sha256": {
++            name: hashlib.sha256((source / name).read_bytes()).hexdigest() for name in FILES
++        },
++        "env": env.model_dump(mode="json"),
++        "image": image,
++        "image_id": image_id,
++        "budget": budget.model_dump(mode="json"),
++        "prior_round_upper": prior,
++        "segment_limit": limit,
++        "model": "bigmodel/glm-5.3-flash",
++        "config_sha256": hashlib.sha256(
++            (root / "configs/phase22/llm.yaml").read_bytes()
++        ).hexdigest(),
++    }
++    (out / "frozen-case.json").write_text(json.dumps(frozen, indent=2) + "\n", encoding="utf8")
++
++    class CaseSandbox(DockerSandbox):
++        def build_env(self, **_kwargs):
++            assert self.client.images.get(image).id == image_id
++            return EnvironmentBuildResult(
++                status=ExecutionStatus.PASS,
++                image_ref=image,
++                image_id=image_id,
++                cache_key="phase27-frozen-existing-image",
++                from_cache=True,
++            )
++
++    configure_dispatch_budget(
++        DispatchBudget(
++            limit,
++            out / "dispatch-ledger.json",
++            opening_source={
++                "round_cap": 3,
++                "prior_round_upper": prior,
++                "frozen_case": str(out / "frozen-case.json"),
++            },
++        )
++    )
++    bundle = ProviderBundle.live(config, record_llm=True)
++    try:
++        assembly = InferenceAssembly(
++            task=SimpleNamespace(
++                task_id="phase27-draftstore",
++                issue=ISSUE,
++                base_commit=base,
++                repository=source,
++                env_spec=env,
++                mode="user",
++            ),
++            workspace_manager=WorkspaceManager(cache_root=out / "cache"),
++            work_root=out,
++            sandbox_factory=lambda artifacts: CaseSandbox(
++                artifacts=artifacts, allowed_workspace_root=out, client=client, bind_workspace=True
++            ),
++            provider_bundle=bundle,
++            budget=budget,
++            record_llm=True,
++            checkpoint=True,
++            allow_build_network=False,
++        )
++        outcome = assembly.run(run_id="phase27-draftstore", seed=0)
++        (out / "outcome.json").write_text(
++            json.dumps(asdict(outcome), indent=2, default=str) + "\n", encoding="utf8"
++        )
++        print(outcome.status, outcome.stop_reason, flush=True)
++    finally:
++        bundle.close()
++        client.close()
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/scripts/phase27_candidate_probe.py b/scripts/phase27_candidate_probe.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..d27e8e8927bcb4579973c2362831bcf4348abb5f
+--- /dev/null
++++ b/scripts/phase27_candidate_probe.py
+@@ -0,0 +1,137 @@
++"""Real bounded Docker recovery and identity-checked official result recovery."""
++
++from __future__ import annotations
++
++import hashlib
++import json
++import shutil
++import subprocess
++import sys
++from pathlib import Path
++
++from codepilot.artifacts import ArtifactStore
++from codepilot.eval.candidate import verify_candidate
++from codepilot.eval.swebench_harness import HarnessCacheError, HarnessConfig, OfficialHarnessRunner
++from codepilot.repo.workspace import WorkspaceManager
++from codepilot.sandbox.env_spec import EnvSpec
++from codepilot.sandbox.official import OfficialInstanceSandbox
++from codepilot.sandbox.runners import RunnerOverrides
++from codepilot.sandbox.swebench_env import SWEBenchInstanceImageResolver
++
++
++def main() -> None:
++    root = Path(__file__).resolve().parents[1]
++    out = root / "artifacts/phase27/candidate"
++    out.mkdir(exist_ok=True)
++    old = root / "artifacts/phase25/django14999-recovery/runs/phase25-django14999-pytest-recovery"
++    receipt = json.loads((old / "official-candidate.json").read_text(encoding="utf8"))
++    prediction, patch_sha = verify_candidate(root, receipt)
++    if not (out / "workspace").exists():
++        workspace = WorkspaceManager(cache_root=out / "cache").create(
++            source=str(root / "artifacts/phase25/seeds/django__django-14999/repo"),
++            base_commit=receipt["base_commit"],
++            target=out / "workspace",
++        )
++        subprocess.run(
++            ["git", "-C", str(workspace.path), "apply", str(root / receipt["patch"])], check=True
++        )
++    else:
++        from types import SimpleNamespace
++
++        workspace = SimpleNamespace(path=out / "workspace")
++    before = subprocess.check_output(["git", "-C", str(workspace.path), "diff", "--binary", "HEAD"])
++    from codepilot.graph.stop_rules import patch_hash
++
++    assert patch_hash(before.decode()) == receipt["canonical_patch_sha256"]
++    report = json.loads((old / "report.json").read_text(encoding="utf8"))
++    tests = list(report["baseline"]["outcomes"])[:3]
++    backend = OfficialInstanceSandbox(
++        artifacts=ArtifactStore(out, "docker-recovery"),
++        allowed_workspace_root=out,
++        instance_id=receipt["instance_id"],
++        images=SWEBenchInstanceImageResolver.load(
++            root / "artifacts/phase25/django14999-image-overrides.json"
++        ),
++        runners=RunnerOverrides.load(root / "artifacts/phase25/segment2/runners.json"),
++        bind_workspace=True,
++    )
++    env = EnvSpec(timeout_seconds=1)
++    built = backend.build_env(
++        repository="", base_commit=receipt["base_commit"], workspace=workspace.path, env_spec=env
++    )
++    results_path = out / "docker-results.json"
++    if results_path.exists():
++        runs = json.loads(results_path.read_text(encoding="utf8"))
++    else:
++        runs = []
++        for iteration, seconds in enumerate((1, 40), start=1):
++            result = backend.run_tests(
++                workspace=workspace.path,
++                environment=built,
++                env_spec=env.model_copy(update={"timeout_seconds": seconds}),
++                tests=tests,
++                artifact_iteration=iteration,
++            )
++            runs.append({"configured_timeout": seconds, "result": result.model_dump(mode="json")})
++            results_path.write_text(json.dumps(runs, indent=2) + "\n", encoding="utf8")
++    after = subprocess.check_output(["git", "-C", str(workspace.path), "diff", "--binary", "HEAD"])
++    assert before == after
++    assert runs[0]["result"]["status"] == "TIMEOUT"
++    assert runs[1]["result"]["exit_code"] == 0 and len(runs[1]["result"]["tests"]) == len(tests)
++    assert not runs[1]["result"]["tests_failed"]
++    # Reuse the trusted official report; never re-evaluate just to create a row.
++    # A missing identity sidecar is the controlled recovery failure.
++    report_dir = out / "official-report"
++    report_dir.mkdir()
++    name = "glm-5.3-flash-main.phase25-django14999-pytest-recovery.json"
++    shutil.copy2(old / "official-report" / name, report_dir / name)
++    config = HarnessConfig(
++        predictions_path=prediction,
++        run_id=receipt["run_id"],
++        report_dir=report_dir,
++        max_workers=1,
++        timeout_seconds=1800,
++        instance_ids=(receipt["instance_id"],),
++        harness_python=Path(sys.executable),
++        harness_version="4.1.0",
++        model_name_or_path="glm-5.3-flash-main",
++        dataset_revision=receipt["dataset_revision"],
++        dataset_snapshot=root
++        / f"cache/swebench/princeton-nlp__SWE-bench_Lite__{receipt['dataset_revision']}/test.jsonl",
++        cache_level="instance",
++    )
++    runner = OfficialHarnessRunner(config, artifacts=ArtifactStore(out, "official-recovery"))
++    failure = None
++    try:
++        runner.run()
++    except HarnessCacheError as exc:
++        failure = {"type": type(exc).__name__, "message": str(exc)}
++    assert failure is not None, "missing cache identity must fail closed"
++    (out / "official-first-failure.json").write_text(
++        json.dumps(failure, indent=2) + "\n", encoding="utf8"
++    )
++    shutil.copy2(
++        old / "official-report" / (name + ".identity.json"), report_dir / (name + ".identity.json")
++    )
++    recovered = runner.run()
++    assert recovered.reused
++    result = {
++        "receipt": str(old / "official-candidate.json"),
++        "instance": receipt["instance_id"],
++        "base": receipt["base_commit"],
++        "patch_sha256": patch_sha,
++        "prediction_sha256": hashlib.sha256(prediction.read_bytes()).hexdigest(),
++        "unchanged": True,
++        "model_requests": 0,
++        "inference_constructed": False,
++        "official_recovery": recovered.model_dump(mode="json"),
++        "historical_full_regression": str(
++            root / "artifacts/phase25/django14999-recovery/postrun-validation/full-regression.json"
++        ),
++    }
++    (out / "summary.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf8")
++    print("Docker timeout recovered; official", recovered.decision, flush=True)
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/scripts/phase27_glm_probe.py b/scripts/phase27_glm_probe.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..ef866040edb4c76ed9b6c3b7a559b278b5a28cd2
+--- /dev/null
++++ b/scripts/phase27_glm_probe.py
+@@ -0,0 +1,140 @@
++"""Authorized, single-attempt GLM protocol and cancellation evidence."""
++
++from __future__ import annotations
++
++import argparse
++import json
++import threading
++import time
++from pathlib import Path
++
++from dotenv import load_dotenv
++
++from codepilot.llm.config import load_llm_config
++from codepilot.llm.dispatch_budget import DispatchBudget, configure_dispatch_budget
++from codepilot.llm.openai_compatible import OpenAICompatibleProvider
++from codepilot.llm.retry import RetryPolicy
++from codepilot.llm.types import LLMRequest, Message, Role, ToolSpec
++from codepilot.observability.dispatch import Deadline, DispatchScope, dispatch_scope
++
++
++def main() -> None:
++    parser = argparse.ArgumentParser()
++    parser.add_argument("mode", choices=["normal", "cancel"])
++    args = parser.parse_args()
++    root = Path(__file__).resolve().parents[1]
++    out = root / "artifacts/phase27" / f"glm-{args.mode}"
++    out.mkdir(exist_ok=False)
++    load_dotenv(root / ".env")
++    config = load_llm_config(root / "configs/phase22/llm.yaml")
++    spec = config.models["glm-5.3-flash-main"]
++    provider = config.providers[spec.provider]
++    assert provider.name == "bigmodel" and spec.model == "glm-5.3-flash"
++    assert provider.base_url == "https://open.bigmodel.cn/api/paas/v4"
++    assert provider.max_retries == 0 and not provider.trust_env
++    key = provider.api_key()
++    assert key, "GLM credential unavailable"
++    # Each probe segment can reserve <= 1 CNY, with <= 2 CNY across both.
++    # The remaining round budget is passed separately to the Agent process.
++    configure_dispatch_budget(DispatchBudget(1.0, out / "dispatch-ledger.json"))
++    model = OpenAICompatibleProvider(
++        spec=spec, provider=provider, api_key=key, policy=RetryPolicy(max_attempts=1)
++    )
++    records: list[dict[str, object]] = []
++
++    def call(messages: list[Message], purpose: str, tools: list[ToolSpec] | None = None):
++        start = time.monotonic()
++        request = LLMRequest(
++            messages=messages, tools=tools, purpose=purpose, max_output_tokens=1024
++        )
++        result = model.complete(request)
++        records.append(
++            {
++                "purpose": purpose,
++                "seconds": time.monotonic() - start,
++                "request": request.model_dump(mode="json"),
++                "response": result.model_dump(mode="json"),
++            }
++        )
++        (out / "responses.json").write_text(json.dumps(records, indent=2) + "\n", encoding="utf8")
++        assert result.raw and result.raw.get("model") == spec.model
++        return result
++
++    try:
++        if args.mode == "normal":
++            call([Message.user("Reply with only OK.")], "phase27_normal")
++            messages = [
++                Message.system("Call add exactly once for 17+25. Use its returned value."),
++                Message.user("Use the add tool to calculate 17+25."),
++            ]
++            tools = [
++                ToolSpec(
++                    name="add",
++                    description="Add two integers",
++                    parameters={
++                        "type": "object",
++                        "properties": {"a": {"type": "integer"}, "b": {"type": "integer"}},
++                        "required": ["a", "b"],
++                        "additionalProperties": False,
++                    },
++                )
++            ]
++            response = call(messages, "phase27_tool", tools)
++            assert len(response.tool_calls) == 1 and response.tool_calls[0].is_valid
++            tool = response.tool_calls[0]
++            assert tool.name == "add" and tool.arguments == {"a": 17, "b": 25}
++            messages += [
++                Message(
++                    role=Role.ASSISTANT, content=response.content, tool_calls=response.tool_calls
++                ),
++                Message.tool_result(tool.id, json.dumps({"sum": 42})),
++            ]
++            final = call(messages, "phase27_tool_result", tools)
++            assert not final.tool_calls and "42" in (final.content or "")
++        else:
++            cancelled = threading.Event()
++            timer = threading.Timer(0.25, cancelled.set)
++            start = time.monotonic()
++            timer.start()
++            try:
++                with dispatch_scope(
++                    DispatchScope(Deadline(time.monotonic() + 10), cancel=cancelled.is_set)
++                ):
++                    call(
++                        [Message.user("Explain binary search carefully in 400 words.")],
++                        "phase27_cancel",
++                    )
++            except Exception as exc:
++                records.append(
++                    {
++                        "error_type": type(exc).__name__,
++                        "message": str(exc),
++                        "dispatched": getattr(exc, "dispatched", None),
++                        "seconds": time.monotonic() - start,
++                    }
++                )
++            finally:
++                timer.cancel()
++                timer.join()
++            (out / "cancel-result.json").write_text(
++                json.dumps(
++                    {
++                        "records": records,
++                        "attempts": model.attempts,
++                        "client_closed": model._client.is_closed,
++                        "http_threads": [
++                            t.name for t in threading.enumerate() if t.name == "codepilot-http"
++                        ],
++                        "request_query_supported": False,
++                    },
++                    indent=2,
++                )
++                + "\n",
++                encoding="utf8",
++            )
++    finally:
++        model.close()
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/scripts/phase27_index_probe.py b/scripts/phase27_index_probe.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..35b531f8cb2c57ba9303ab760181799e2ed00e0f
+--- /dev/null
++++ b/scripts/phase27_index_probe.py
+@@ -0,0 +1,134 @@
++"""Large cached repository observations; no task/answer fields are loaded."""
++
++from __future__ import annotations
++
++import argparse
++import ctypes
++import json
++import os
++import subprocess
++import time
++from pathlib import Path
++
++from codepilot.repo.index import Indexer
++from codepilot.repo.workspace import Workspace, normalize_source
++from codepilot.storage.db import create_engine_from_url, create_session_factory, init_db
++from codepilot.storage.repository import Stores
++from codepilot.tools.base import WorkspacePathPolicy
++from codepilot.tools.query_cache import QueryCache
++from codepilot.tools.read_tools import read_file_tool, search_code_tool
++
++
++def peak_bytes() -> int:
++    if os.name != "nt":
++        import resource
++
++        return int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024)
++
++    class Counters(ctypes.Structure):
++        _fields_ = [("cb", ctypes.c_ulong), ("PageFaultCount", ctypes.c_ulong)] + [
++            (name, ctypes.c_size_t)
++            for name in (
++                "PeakWorkingSetSize",
++                "WorkingSetSize",
++                "QuotaPeakPagedPoolUsage",
++                "QuotaPagedPoolUsage",
++                "QuotaPeakNonPagedPoolUsage",
++                "QuotaNonPagedPoolUsage",
++                "PagefileUsage",
++                "PeakPagefileUsage",
++            )
++        ]
++
++    counters = Counters()
++    counters.cb = ctypes.sizeof(counters)
++    handle = ctypes.c_void_p(-1)  # pseudo handle; do not truncate it to a 32-bit int
++    assert ctypes.windll.psapi.GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb)
++    return int(counters.PeakWorkingSetSize)
++
++
++def main() -> None:
++    parser = argparse.ArgumentParser()
++    parser.add_argument("mode", choices=["cold", "warm", "changed", "fresh"])
++    args = parser.parse_args()
++    root = Path(__file__).resolve().parents[1]
++    out = root / "artifacts/phase27/index"
++    out.mkdir(parents=True, exist_ok=True)
++    repo = out / "workspace"
++    seed = root / "artifacts/phase25/seeds/django__django-14999/repo"
++    base = subprocess.check_output(["git", "-C", str(seed), "rev-parse", "HEAD"], text=True).strip()
++    if not repo.exists():
++        from codepilot.repo.workspace import WorkspaceManager
++
++        WorkspaceManager(cache_root=out / "cache").create(
++            source=str(seed), base_commit=base, target=repo
++        )
++    workspace = Workspace(repo, normalize_source(str(seed)), base, "phase27-django-performance")
++    database = out / ("index-fresh.sqlite" if args.mode == "fresh" else "index.sqlite")
++    engine = create_engine_from_url("sqlite:///" + database.as_posix())
++    init_db(engine)
++    session = create_session_factory(engine)()
++    stores = Stores(session)
++    progress: list[dict[str, object]] = []
++
++    def observe(event: str, **fields: object) -> None:
++        progress.append(dict(event=event, **fields))
++        print(json.dumps(progress[-1]), flush=True)
++
++    indexer = Indexer(progress=observe)
++
++    def run(label: str) -> None:
++        start = time.perf_counter()
++        stats = indexer.index(stores, workspace)
++        session.commit()
++        result = {
++            "label": label,
++            "seconds": time.perf_counter() - start,
++            "files": stats.files,
++            "parsed": len(stats.parsed_paths),
++            "parse_reused": len(stats.parse_reused_paths),
++            "changed": len(stats.changed_paths),
++            "reused": len(stats.reused_paths),
++            "association_mode": stats.association_mode,
++            "association_sources": next(
++                (x["counts"]["sources"] for x in reversed(progress) if x.get("phase") == "linking"),
++                0,
++            ),
++            "peak_working_set_bytes": peak_bytes(),
++            "base": base,
++            "pid": os.getpid(),
++        }
++        (out / f"{label}.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf8")
++        print(json.dumps(result), flush=True)
++        progress.clear()
++
++    target = repo / "django/utils/text.py"
++    if args.mode == "changed":
++        with target.open("a", encoding="utf8") as handle:
++            handle.write("\n# phase27 independent process index observation\n")
++    run(args.mode)
++    if args.mode in ("cold", "warm", "fresh"):
++        with target.open("a", encoding="utf8") as handle:
++            handle.write("\n# phase27 same process index observation\n")
++        run("same_process_change_from_cold" if args.mode == "fresh" else "same_process_change")
++    if args.mode == "warm":
++        cache = QueryCache(WorkspacePathPolicy(repo))
++        results = []
++        for tool, params in [
++            (read_file_tool(cache.policy), {"path": "django/utils/text.py"}),
++            (
++                search_code_tool(cache.policy),
++                {"pattern": "def slugify", "path_glob": "django/utils/*.py"},
++            ),
++        ]:
++            for _ in range(2):
++                start = time.perf_counter()
++                result = cache.execute(tool, params, "all")
++                results.append({"seconds": time.perf_counter() - start, "data": result.data})
++        (out / "query-cache.json").write_text(json.dumps(results, indent=2) + "\n", encoding="utf8")
++    session.close()
++    engine.dispose()
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/src/codepilot/llm/anthropic_messages.py b/src/codepilot/llm/anthropic_messages.py
+index e64b789c1e9af9b9e29f6b872dfabf3490827e49..b5371f94a3224911f31828f016c8f5a445380e37 100644
+--- a/src/codepilot/llm/anthropic_messages.py
++++ b/src/codepilot/llm/anthropic_messages.py
+@@ -17,13 +17,14 @@ import httpx
+ from codepilot.llm.capabilities import prepare_messages
+ from codepilot.llm.config import ModelSpec, ProviderSpec
+ from codepilot.llm.cost import compute_cost
+-from codepilot.llm.dispatch_budget import guarded_send
++from codepilot.llm.dispatch_budget import DispatchBudgetStoppedError, guarded_send
+ from codepilot.llm.errors import (
+     ContextTooLongError,
+     ProviderError,
+     ProviderNotAllowedError,
+     RateLimitError,
+ )
++from codepilot.llm.http_lifecycle import send_request
+ from codepilot.llm.openai_compatible import looks_like_context_overflow
+ from codepilot.llm.retry import ConcurrencyLimiter, RetryPolicy, call_with_retry
+ from codepilot.llm.types import LLMRequest, LLMResponse, Message, Role, ToolCall
+@@ -84,19 +85,28 @@ class AnthropicMessagesProvider:
+         self._owns_client = client is None
+         self._client = client or build_http_client(
+             base_url=provider.base_url,
+-            timeout=provider.timeout_seconds,
++            timeout=httpx.Timeout(
++                provider.timeout_seconds,
++                connect=provider.connect_timeout_seconds or provider.timeout_seconds,
++                write=provider.write_timeout_seconds or provider.timeout_seconds,
++                pool=provider.pool_timeout_seconds or provider.timeout_seconds,
++            ),
++            trust_env=provider.trust_env,
+         )
+         self.attempts = 0
+         self.unacknowledged = 0
+ 
+     def complete(self, request: LLMRequest) -> LLMResponse:
+         body = build_messages_body(request, self.spec)
+-        with self.limiter:
++        from codepilot.observability.dispatch import check_dispatch, model_request_scope
++
++        with model_request_scope(self.provider.timeout_seconds), self.limiter:
+             response = call_with_retry(
+                 lambda: self._post(body, request.purpose),
+                 policy=self.policy,
+                 sleep=self.sleep,
+                 on_retry=self.on_retry,
++                before_retry=lambda: check_dispatch("model"),
+             )
+         return self._parse(response)
+ 
+@@ -134,8 +144,14 @@ class AnthropicMessagesProvider:
+ 
+             mark_model_dispatch()
+             self.attempts += 1
+-            return self._client.post(
+-                self._messages_path, json=body, headers=headers, timeout=timeout
++            return send_request(
++                self._client,
++                self._messages_path,
++                body=body,
++                headers=headers,
++                timeout=timeout,
++                deadline=time.monotonic() + remaining,
++                trust_env=self.provider.trust_env,
+             )
+ 
+         try:
+@@ -144,6 +160,10 @@ class AnthropicMessagesProvider:
+                 body,
+                 send_http,
+             )
++        except DispatchBudgetStoppedError as exc:
++            if exc.dispatched:
++                self.unacknowledged += 1
++            raise
+         except httpx.TimeoutException as exc:
+             self.unacknowledged += 1
+             raise ProviderError(
+diff --git a/src/codepilot/llm/dispatch_budget.py b/src/codepilot/llm/dispatch_budget.py
+index e122769a7f5b4e97c5d418c2ec4700f08185a813..084c213c87ce0426414272c14608610311e58909 100644
+--- a/src/codepilot/llm/dispatch_budget.py
++++ b/src/codepilot/llm/dispatch_budget.py
+@@ -190,9 +190,21 @@ class DispatchBudget:
+             record["response_request_id"] = response.headers.get("x-request-id")
+             record["http_status"] = response.status_code
+             response.raise_for_status()
+-            usage = response.json()["usage"]
+-            prompt, output = usage["prompt_tokens"], usage["completion_tokens"]
+-            cached = (usage.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
++            payload = response.json()
++            record["response_id"] = payload.get("id")
++            record["response_model"] = payload.get("model")
++            usage = payload["usage"]
++            record["response_usage"] = usage
++            if "prompt_tokens" in usage:
++                prompt, output = usage["prompt_tokens"], usage["completion_tokens"]
++                cached = (usage.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
++            else:
++                # Native Messages uses input/output token names. Cache creation
++                # has separate pricing and is deliberately unsupported here.
++                if usage.get("cache_creation_input_tokens", 0):
++                    raise ValueError("native cache creation pricing is not configured")
++                cached = usage.get("cache_read_input_tokens", 0)
++                prompt, output = usage["input_tokens"] + cached, usage["output_tokens"]
+             if (
+                 any(type(v) is not int or v < 0 for v in (prompt, output, cached))
+                 or cached > prompt
+diff --git a/src/codepilot/llm/http_lifecycle.py b/src/codepilot/llm/http_lifecycle.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..5052a952afe21524f48b350cb03c9f7e6c16f744
+--- /dev/null
++++ b/src/codepilot/llm/http_lifecycle.py
+@@ -0,0 +1,114 @@
++"""Request-owned cancellable HTTP I/O behind the synchronous provider API.
++
++The bridge thread is always joined. It runs an event loop, not an abandoned
++blocking request; cancellation awaits transport cleanup before returning.
++"""
++
++from __future__ import annotations
++
++import asyncio
++import contextvars
++import threading
++import time
++from collections.abc import Callable
++from typing import Any
++
++import httpx
++
++from codepilot.net import sanitized_proxy_environment
++from codepilot.observability.dispatch import current_dispatch_scope
++
++
++class RequestCancelled(httpx.TransportError):
++    """Cancellation after dispatch: usage may still be billed remotely."""
++
++
++def send_request(
++    client: httpx.Client,
++    path: str,
++    *,
++    body: dict[str, Any],
++    headers: dict[str, str],
++    timeout: httpx.Timeout,
++    deadline: float,
++    trust_env: bool,
++) -> httpx.Response:
++    request = client.build_request("POST", path, json=body, headers=headers, timeout=timeout)
++    scope = current_dispatch_scope()
++    cancel = scope.cancel if scope else None
++    if scope:
++        deadline = min(deadline, time.monotonic() + scope.deadline.remaining(scope.reserve))
++    # Keep the documented synchronous transport injection seam for offline
++    # tests. Arbitrary blocking custom transports cannot promise cancellation.
++    transport = client._transport
++    if isinstance(transport, httpx.MockTransport):
++        response = client.send(request)
++        if cancel and cancel():
++            raise RequestCancelled("cancelled after model dispatch", request=request)
++        if time.monotonic() >= deadline:
++            raise httpx.ReadTimeout("request total deadline exhausted", request=request)
++        return response
++    if not isinstance(transport, httpx.HTTPTransport):
++        raise TypeError("Cancellable HTTP requires HTTPTransport or offline MockTransport")
++
++    async def exchange() -> httpx.Response:
++        with sanitized_proxy_environment():
++            owned = httpx.AsyncClient(timeout=timeout, trust_env=trust_env)
++        async with (
++            owned,
++            owned.stream(
++                request.method, request.url, content=request.content, headers=request.headers
++            ) as response,
++        ):
++            content = await response.aread()
++            # aread decodes content. Rebuilding must not decode it twice or
++            # advertise the wire body's framing/length as the decoded size.
++            clean = response.headers.copy()
++            for key in ("content-encoding", "content-length", "transfer-encoding"):
++                clean.pop(key, None)
++            return httpx.Response(
++                response.status_code, headers=clean, content=content, request=request
++            )
++
++    async def bounded() -> httpx.Response:
++        task = asyncio.create_task(exchange())
++        try:
++            while True:
++                if cancel and cancel():
++                    raise RequestCancelled("cancelled after model dispatch", request=request)
++                remaining = deadline - time.monotonic()
++                if remaining <= 0:
++                    raise httpx.ReadTimeout("request total deadline exhausted", request=request)
++                done, _ = await asyncio.wait({task}, timeout=min(0.025, remaining))
++                if done:
++                    return task.result()
++        finally:
++            if not task.done():
++                task.cancel()
++            await asyncio.gather(task, return_exceptions=True)
++
++    return _run_joined(lambda: asyncio.run(bounded()))
++
++
++def _run_joined(call: Callable[[], httpx.Response]) -> httpx.Response:
++    # complete() can be called inside a node's already-running event loop.
++    # Copy dispatch attribution into a private loop and join on EVERY outcome.
++    context = contextvars.copy_context()
++    result: list[httpx.Response] = []
++    errors: list[BaseException] = []
++
++    def run() -> None:
++        try:
++            result.append(context.run(call))
++        except BaseException as exc:
++            errors.append(exc)
++
++    worker = threading.Thread(target=run, name="codepilot-http")
++    worker.start()
++    try:
++        worker.join()
++    finally:
++        worker.join()
++    if errors:
++        raise errors[0]
++    return result[0]
+diff --git a/src/codepilot/llm/openai_compatible.py b/src/codepilot/llm/openai_compatible.py
+index 9aae5c7af11525c6e1bdebf364b6d13677ee47c4..2b67b870e7052f616f6c83ac3f3c9e441e17f2ef 100644
+--- a/src/codepilot/llm/openai_compatible.py
++++ b/src/codepilot/llm/openai_compatible.py
+@@ -21,13 +21,14 @@ import httpx
+ from codepilot.llm.capabilities import build_request_body, parse_tool_protocol, prepare_messages
+ from codepilot.llm.config import ModelSpec, ProviderSpec
+ from codepilot.llm.cost import compute_cost
+-from codepilot.llm.dispatch_budget import guarded_send
++from codepilot.llm.dispatch_budget import DispatchBudgetStoppedError, guarded_send
+ from codepilot.llm.errors import (
+     ContextTooLongError,
+     ProviderError,
+     ProviderNotAllowedError,
+     RateLimitError,
+ )
++from codepilot.llm.http_lifecycle import send_request
+ from codepilot.llm.retry import ConcurrencyLimiter, RetryPolicy, call_with_retry
+ from codepilot.llm.types import LLMRequest, LLMResponse, ToolCall
+ from codepilot.net import build_http_client
+@@ -140,9 +141,9 @@ class OpenAICompatibleProvider:
+         messages = prepare_messages(request, self.spec)
+         body = build_request_body(request, self.spec, messages)
+ 
+-        from codepilot.observability.dispatch import check_dispatch
++        from codepilot.observability.dispatch import check_dispatch, model_request_scope
+ 
+-        with self.limiter:
++        with model_request_scope(self.provider.timeout_seconds), self.limiter:
+             response = call_with_retry(
+                 lambda: self._post(body, request.purpose),
+                 policy=self.policy,
+@@ -200,7 +201,7 @@ class OpenAICompatibleProvider:
+             mark_model_dispatch()
+             self.attempts += 1
+             return self._send_before_deadline(
+-                body=body, headers=headers, timeout=timeout, deadline=deadline, total=remaining
++                body=body, headers=headers, timeout=timeout, deadline=deadline
+             )
+ 
+         try:
+@@ -219,6 +220,10 @@ class OpenAICompatibleProvider:
+                     "trust_env": self._client.trust_env,
+                 },
+             )
++        except DispatchBudgetStoppedError as exc:
++            if exc.dispatched:
++                self.unacknowledged += 1
++            raise
+         except httpx.TimeoutException as exc:
+             # 请求已经离开本机：服务端可能已经生成并计费，也可能没有。
+             self.unacknowledged += 1
+@@ -257,43 +262,17 @@ class OpenAICompatibleProvider:
+         headers: dict[str, str],
+         timeout: httpx.Timeout,
+         deadline: float,
+-        total: int,
+     ) -> httpx.Response:
+-        """在一个**绝对**总 deadline 内读完整个响应。
+-
+-        httpx 的 read timeout 只约束单次 socket 读：服务端只要不停挤字节，
+-        每次读都不超时，单个请求就能无限拖长。因此这里用流式读取，对每个
+-        到达的分块比对派发前记下的单调时钟 deadline；持续慢速响应无法靠
+-        “每个分块重新计时”绕过总时限。
+-
+-        各阶段 timeout 仍然保留（connect/read/write/pool 各自被总剩余量
+-        clamp），但它们只是单阶段上限，不承担总时长。
+-
+-        超时直接抛 httpx.ReadTimeout，由调用方翻译成“结果未知”；with 退出时
+-        关闭该响应，httpx 会丢弃未读完的连接——不关闭共享 client，也不把请求
+-        留在后台继续跑。
+-        """
+-        with self._client.stream(
+-            "POST",
++        """Read and close one request under an interruptible absolute deadline."""
++        return send_request(
++            self._client,
+             CHAT_COMPLETIONS_PATH,
+-            json=body,
++            body=body,
+             headers=headers,
+             timeout=timeout,
+-        ) as response:
+-            chunks: list[bytes] = []
+-            for chunk in response.iter_bytes():
+-                chunks.append(chunk)
+-                if time.monotonic() > deadline:
+-                    raise httpx.ReadTimeout(
+-                        f"请求总时限 {total}s 已耗尽：持续响应超过 deadline",
+-                        request=response.request,
+-                    )
+-            return httpx.Response(
+-                status_code=response.status_code,
+-                headers=response.headers,
+-                content=b"".join(chunks),
+-                request=response.request,
+-            )
++            deadline=deadline,
++            trust_env=self.provider.trust_env,
++        )
+ 
+     def _raise_for_status(self, response: httpx.Response) -> None:
+         text = self._scrub(response.text)
+diff --git a/src/codepilot/llm/registry.py b/src/codepilot/llm/registry.py
+index 30451f3419022cdc51f93e5f29f64e4c97442acc..805eda12fda9868839a6ab7cb158be0781aa7113 100644
+--- a/src/codepilot/llm/registry.py
++++ b/src/codepilot/llm/registry.py
+@@ -256,6 +256,14 @@ class LLMRegistry:
+                         allowed_providers=self.config.allowed_providers,
+                     )
+ 
++            if (
++                isinstance(inner, (AnthropicMessagesProvider, OpenAICompatibleProvider))
++                and self._client_factory is None
++            ):
++                # This client was created by this registry, not borrowed from
++                # another task. Closing the provider must release it as well.
++                inner._owns_client = True
++
+             if self.mode == LLMMode.RECORD:
+                 inner = RecordingLLM(inner, self._calls_path_or_pending())
+ 
+diff --git a/src/codepilot/llm/retry.py b/src/codepilot/llm/retry.py
+index da11a88fd29b1a4fe8b30a397b861b5c9e9fc628..eb09c1227403ffb439fe4a9ff5c05213c34b2421 100644
+--- a/src/codepilot/llm/retry.py
++++ b/src/codepilot/llm/retry.py
+@@ -150,7 +150,20 @@ def call_with_retry[T](
+                     before_retry()
+                 except Exception as stop:
+                     raise exc from stop
+-            sleep(delay)
++            if sleep is time.sleep:
++                # Real backoff is part of the provider lifecycle, too. Keep
++                # injected sleeps deterministic for protocol/retry unit tests.
++                from codepilot.observability.dispatch import check_dispatch
++
++                until = time.monotonic() + delay
++                while time.monotonic() < until:
++                    try:
++                        check_dispatch("model")
++                    except Exception as stop:
++                        raise exc from stop
++                    sleep(min(0.05, max(0.0, until - time.monotonic())))
++            else:
++                sleep(delay)
+ 
+     # 循环体要么 return 要么 raise，走到这里只可能是 max_attempts <= 0。
+     assert last_exc is not None
+diff --git a/src/codepilot/observability/dispatch.py b/src/codepilot/observability/dispatch.py
+index a459307c5788058470a38346718b434e16cc1668..ebf89dc7f2c03201d84d0c25bac7dcf6b408458d 100644
+--- a/src/codepilot/observability/dispatch.py
++++ b/src/codepilot/observability/dispatch.py
+@@ -1,102 +1,138 @@
+-"""Task-local dispatch deadline; wall-clock recovery anchors once, waits are monotonic."""
+-
+-from __future__ import annotations
+-
+-import time
+-from collections.abc import Callable, Iterator
+-from contextlib import contextmanager
+-from contextvars import ContextVar
+-from dataclasses import dataclass
+-from typing import Any
+-
+-
+-class DispatchStoppedError(RuntimeError):
+-    """No operation dispatched: budget/deadline exhausted."""
+-
+-
+-@dataclass
+-class Deadline:
+-    expires: float
+-    clock: Callable[[], float] = time.monotonic
+-
+-    def remaining(self, reserve: float = 0) -> float:
+-        return max(0.0, self.expires - self.clock() - reserve)
+-
+-    def timeout(self, limit: float, reserve: float = 0) -> int:
+-        value = int(min(limit, self.remaining(reserve)))
+-        if value < 1:
+-            raise DispatchStoppedError("budget_time: deadline before dispatch")
+-        return value
+-
+-
+-@dataclass
+-class DispatchScope:
+-    deadline: Deadline
+-    reserve: float = 0
+-    cancel: Callable[[], bool] | None = None
+-    observe: Callable[..., Any] | None = None
+-    admit: Callable[[str], None] | None = None
+-    synchronous_worker: bool = False
+-    worker_task_id: int | None = None
+-    model_dispatches: int = 0
+-
+-
+-_current: ContextVar[DispatchScope | None] = ContextVar("dispatch_scope", default=None)
+-
+-
+-@contextmanager
+-def dispatch_scope(scope: DispatchScope) -> Iterator[None]:
+-    token = _current.set(scope)
+-    try:
+-        yield
+-    finally:
+-        _current.reset(token)
+-
+-
+-def check_dispatch(resource: str = "operation") -> None:
+-    scope = _current.get()
+-    if scope is None:
+-        return
+-    if scope.cancel and scope.cancel():
+-        from codepilot.observability.resources import ResourceCancelledError
+-
+-        raise ResourceCancelledError(f"cancelled before {resource} dispatch")
+-    scope.deadline.timeout(float("inf"), scope.reserve)
+-    if scope.admit:
+-        scope.admit(resource)
+-
+-
+-def dispatch_timeout(limit: float) -> int:
+-    check_dispatch()
+-    scope = _current.get()
+-    return scope.deadline.timeout(limit, scope.reserve) if scope else max(1, int(limit))
+-
+-
+-def observe_dispatch(event: str, **fields: Any) -> None:
+-    scope = _current.get()
+-    if scope and scope.observe:
+-        try:
+-            scope.observe(event, **fields)
+-        except Exception:
+-            from codepilot.observability.logging import get_logger
+-
+-            get_logger(__name__).exception("dispatch.observer_unavailable")
+-
+-
+-def model_dispatch_count() -> int:
+-    scope = _current.get()
+-    return scope.model_dispatches if scope else 0
+-
+-
+-def mark_model_dispatch() -> None:
+-    scope = _current.get()
+-    if scope:
+-        scope.model_dispatches += 1
+-
+-
+-def deadline_diagnostics() -> dict[str, float | None]:
+-    scope = _current.get()
+-    return {
+-        "remaining_seconds": scope.deadline.remaining() if scope else None,
+-        "reserve_seconds": scope.reserve if scope else 0.0,
+-    }
++"""Task-local dispatch deadline; wall-clock recovery anchors once, waits are monotonic."""
++
++from __future__ import annotations
++
++import math
++import time
++from collections.abc import Callable, Iterator
++from contextlib import contextmanager
++from contextvars import ContextVar
++from dataclasses import dataclass
++from typing import Any
++
++
++class DispatchStoppedError(RuntimeError):
++    """No operation dispatched: budget/deadline exhausted."""
++
++
++@dataclass
++class Deadline:
++    expires: float
++    clock: Callable[[], float] = time.monotonic
++
++    def remaining(self, reserve: float = 0) -> float:
++        return max(0.0, self.expires - self.clock() - reserve)
++
++    def timeout(self, limit: float, reserve: float = 0) -> int:
++        value = int(min(limit, self.remaining(reserve)))
++        if value < 1:
++            raise DispatchStoppedError("budget_time: deadline before dispatch")
++        return value
++
++
++class _ProviderDeadline(Deadline):
++    def timeout(self, limit: float, reserve: float = 0) -> int:
++        value = min(limit, self.remaining(reserve))
++        if value <= 0:
++            raise DispatchStoppedError("budget_time: provider deadline before dispatch")
++        # The transport uses the precise expiry; rounding this phase cap up
++        # permits short configured timeouts without rejecting them at entry.
++        return math.ceil(value)
++
++
++@dataclass
++class DispatchScope:
++    deadline: Deadline
++    reserve: float = 0
++    cancel: Callable[[], bool] | None = None
++    observe: Callable[..., Any] | None = None
++    admit: Callable[[str], None] | None = None
++    synchronous_worker: bool = False
++    worker_task_id: int | None = None
++    model_dispatches: int = 0
++
++
++_current: ContextVar[DispatchScope | None] = ContextVar("dispatch_scope", default=None)
++
++
++def current_dispatch_scope() -> DispatchScope | None:
++    return _current.get()
++
++
++@contextmanager
++def model_request_scope(limit: float) -> Iterator[None]:
++    """Bound provider admission, queueing, retries and HTTP with one deadline."""
++    from dataclasses import replace
++
++    parent = _current.get()
++    scope = (
++        replace(parent) if parent else DispatchScope(_ProviderDeadline(time.monotonic() + limit))
++    )
++    expires = time.monotonic() + limit + scope.reserve
++    if parent is None or expires < scope.deadline.expires:
++        scope.deadline = _ProviderDeadline(expires)
++    before = scope.model_dispatches
++    try:
++        with dispatch_scope(scope):
++            yield
++    finally:
++        if parent:
++            parent.model_dispatches += scope.model_dispatches - before
++
++
++@contextmanager
++def dispatch_scope(scope: DispatchScope) -> Iterator[None]:
++    token = _current.set(scope)
++    try:
++        yield
++    finally:
++        _current.reset(token)
++
++
++def check_dispatch(resource: str = "operation") -> None:
++    scope = _current.get()
++    if scope is None:
++        return
++    if scope.cancel and scope.cancel():
++        from codepilot.observability.resources import ResourceCancelledError
++
++        raise ResourceCancelledError(f"cancelled before {resource} dispatch")
++    scope.deadline.timeout(float("inf"), scope.reserve)
++    if scope.admit:
++        scope.admit(resource)
++
++
++def dispatch_timeout(limit: float) -> int:
++    check_dispatch()
++    scope = _current.get()
++    return scope.deadline.timeout(limit, scope.reserve) if scope else max(1, int(limit))
++
++
++def observe_dispatch(event: str, **fields: Any) -> None:
++    scope = _current.get()
++    if scope and scope.observe:
++        try:
++            scope.observe(event, **fields)
++        except Exception:
++            from codepilot.observability.logging import get_logger
++
++            get_logger(__name__).exception("dispatch.observer_unavailable")
++
++
++def model_dispatch_count() -> int:
++    scope = _current.get()
++    return scope.model_dispatches if scope else 0
++
++
++def mark_model_dispatch() -> None:
++    scope = _current.get()
++    if scope:
++        scope.model_dispatches += 1
++
++
++def deadline_diagnostics() -> dict[str, float | None]:
++    scope = _current.get()
++    return {
++        "remaining_seconds": scope.deadline.remaining() if scope else None,
++        "reserve_seconds": scope.reserve if scope else 0.0,
++    }
+diff --git a/src/codepilot/repo/index.py b/src/codepilot/repo/index.py
+index a77f7ab1f4c23cb19776e35a0512c969f0718fc8..8c0ecfa15452b5ac69a52d277462588b3e30cc6e 100644
+--- a/src/codepilot/repo/index.py
++++ b/src/codepilot/repo/index.py
+@@ -203,14 +203,16 @@ class Indexer:
+         parse_reused: list[str] = []
+         # Complete associations are the safe closure when unresolved bindings
+         # cannot be recovered from old edges. Cache is instance-local, bounded.
++        cached_at_start = dict(self._parsed)
+         for scanned_file in scan.files:
+             if not scanned_file.path.endswith(".py"):
+                 continue
+             key = (str(root.resolve()), scanned_file.path, scanned_file.sha256)
+-            cached = self._parsed.get(key)
++            cached = cached_at_start.get(key)
+             if cached is not None:
+                 parsed = cached[0]
+-                self._parsed.move_to_end(key)
++                if key in self._parsed:
++                    self._parsed.move_to_end(key)
+                 parse_reused.append(scanned_file.path)
+             else:
+                 raw = (root / scanned_file.path).read_bytes()
+@@ -296,15 +298,15 @@ class Indexer:
+         )
+         stores.files.upsert_many(file_rows)
+         stores.symbols.replace_for_files(affected_file_ids, symbol_rows)
++        del symbol_rows, file_rows
+         stores.edges.replace_for_sources(
+             repository_id, sorted(old_symbol_ids | new_symbol_ids), edge_rows
+         )
++        del edge_rows, all_edges
+         if removed_paths:
+             stores.files.delete_by_paths(repository_id, removed_paths)
+         dangling_deleted, dangling_unresolved = _resolve_dangling(stores, repository_id)
+-        _merge_test_edges(
+-            stores, repository_id, computed_test_edges, old_symbol_ids | new_symbol_ids
+-        )
++        _replace_test_edges(stores, repository_id, computed_test_edges)
+ 
+         stores.repositories.set_index_semantics(repository_id, fingerprint)
+         stats = finish(reparsed, parse_reused, parse_errors, "complete_closure_v2")
+@@ -447,53 +449,36 @@ def _resolve_dangling(stores: Stores, repository_id: str) -> tuple[int, int]:
+     return deleted, len(synthesized)
+ 
+ 
+-def _merge_test_edges(
++def _replace_test_edges(
+     stores: Stores,
+     repository_id: str,
+     computed: tuple[GraphEdge, ...],
+-    changed_source_ids: set[str],
+ ) -> None:
+-    """合并重建 TEST 边集合（规则见模块 docstring 的"TEST 边是例外"）。
++    """Complete closure already contains unique test/target pairs at full strength.
+ 
+-    ``computed`` 是本次提取的全部 TEST 边：变化源的是全强度（含调用证据的
+-    high），未变化源的只有 low（medium 需要未解析文件的 import 绑定，见
+-    docstring 边界）。与既有边按键合并，取最强 confidence、并列取最早行号，
+-    然后整体替换 TEST 集合——保证幂等，也让变化源被降级的边真正降下去。
++    Do not materialize the old graph, a second merge map and all row dictionaries
++    at once. EdgeStore consumes this iterator in bounded transaction-local batches.
+     """
+-    merged: dict[tuple[str, str, str], tuple[float, int]] = {}
+-    for row in stores.edges.list_by_repo(repository_id):
+-        if row.kind != "TEST" or row.source_id in changed_source_ids:
+-            continue
+-        assert row.target_id is not None  # TEST 边由提取器产出时必有目标
+-        merged[(row.source_id, row.target_id, row.target_name or "")] = (
+-            row.confidence,
+-            row.line,
+-        )
+-    for edge in computed:
+-        if edge.source_id not in changed_source_ids and edge.target_id not in changed_source_ids:
+-            continue
+-        assert edge.target_id is not None
+-        key = (edge.source_id, edge.target_id, edge.target_name)
+-        score = confidence_to_score(edge.confidence)
+-        previous = merged.get(key)
+-        if previous is None or (score, -edge.line) > (previous[0], -previous[1]):
+-            merged[key] = (score, edge.line)
+-
+     stores.edges.delete_by_kind(repository_id, "TEST")
+-    rows = [
+-        {
+-            "id": _edge_id(repository_id, source_id, target_id, target_name, "TEST"),
+-            "repository_id": repository_id,
+-            "source_id": source_id,
+-            "target_id": target_id,
+-            "target_name": target_name,
+-            "kind": "TEST",
+-            "confidence": score,
+-            "line": line,
+-        }
+-        for (source_id, target_id, target_name), (score, line) in sorted(merged.items())
+-    ]
+-    stores.edges.replace_for_sources(repository_id, [], rows)
++    stores.edges.replace_for_sources(
++        repository_id,
++        [],
++        (
++            {
++                "id": _edge_id(
++                    repository_id, edge.source_id, edge.target_id, edge.target_name, "TEST"
++                ),
++                "repository_id": repository_id,
++                "source_id": edge.source_id,
++                "target_id": edge.target_id,
++                "target_name": edge.target_name,
++                "kind": "TEST",
++                "confidence": confidence_to_score(edge.confidence),
++                "line": edge.line,
++            }
++            for edge in computed
++        ),
++    )
+ 
+ 
+ def _extract_all_edges(context: AnalysisContext) -> tuple[GraphEdge, ...]:
+diff --git a/src/codepilot/storage/repository.py b/src/codepilot/storage/repository.py
+index e53acac86e68344d95d6963eb11af872f1f63984..e5b29b7a43f7d57ff4c311e19da4008afe5fbe17 100644
+--- a/src/codepilot/storage/repository.py
++++ b/src/codepilot/storage/repository.py
+@@ -234,9 +234,10 @@ class EdgeStore:
+                     GraphEdge.source_id.in_(source_ids),
+                 )
+             )
+-        materialized = list(rows)
+-        if materialized:
+-            self._s.execute(insert(GraphEdge), materialized)
++        from itertools import batched
++
++        for batch in batched(rows, 1000):
++            self._s.execute(insert(GraphEdge), list(batch))
+         self._s.flush()
+ 
+     def list_by_repo(self, repository_id: str) -> list[GraphEdge]:
+diff --git a/tests/unit/llm/test_http_total_deadline.py b/tests/unit/llm/test_http_total_deadline.py
+index 82239cad6fcc6bd7c3d650b78442441ad91b8721..f312b984e1b48c09870675894a33b2f09b79e021 100644
+--- a/tests/unit/llm/test_http_total_deadline.py
++++ b/tests/unit/llm/test_http_total_deadline.py
+@@ -7,6 +7,7 @@
+ 
+ from __future__ import annotations
+ 
++import gzip
+ import json
+ import threading
+ import time
+@@ -16,6 +17,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+ from pathlib import Path
+ from typing import Any
+ 
++import httpx
+ import pytest
+ 
+ from codepilot.llm.config import ModelPrice, ModelSpec, ProviderSpec
+@@ -43,6 +45,7 @@ BODY = json.dumps(
+             {"message": {"content": "ok"}, "finish_reason": "stop"},
+         ],
+         "usage": {"prompt_tokens": 10, "completion_tokens": 5},
++        "content": [{"type": "text", "text": "ok"}],
+     }
+ ).encode()
+ 
+@@ -78,7 +81,29 @@ class _Handler(BaseHTTPRequestHandler):
+             if behavior == "slow_headers":
+                 # 客户端总时限 2s：头还没到就应被判超时，随后写头会因对端已断开而失败。
+                 time.sleep(2.6)
+-            if behavior == "ok" or behavior == "slow_headers":
++            if behavior in ("gzip", "gzip_drip"):
++                compressed = gzip.compress(BODY)
++                self.send_response(200)
++                self.send_header("Content-Encoding", "gzip")
++                self.send_header("Content-Length", str(len(compressed)))
++                self.end_headers()
++                if behavior == "gzip":
++                    self.wfile.write(compressed)
++                    self.wfile.flush()
++                else:
++                    for byte in compressed:
++                        self.wfile.write(bytes([byte]))
++                        self.wfile.flush()
++                        time.sleep(0.1)
++            elif behavior == "header_then_stall":
++                time.sleep(1.6)
++                self.send_response(200)
++                self.send_header("Content-Length", str(len(BODY)))
++                self.end_headers()
++                time.sleep(2.5)
++                self.wfile.write(BODY)
++                self.wfile.flush()
++            elif behavior == "ok" or behavior == "slow_headers":
+                 self._send_all(BODY)
+             elif behavior == "drip":
+                 self.send_response(200)
+@@ -398,3 +423,157 @@ def test_cancelled_after_reservation_before_http_is_refunded(
+     assert admission["dispatch_status"] == "not_dispatched"
+     assert admission["reserved_cny"] == 0.0
+     assert payload["accounted_or_reserved"] == 0.0
++
++
++@pytest.mark.parametrize("protocol", ["openai", "anthropic"])
++@pytest.mark.parametrize("behavior", ["header_then_stall", "gzip_drip", "gzip"])
++def test_real_socket_lifecycle_and_compression(protocol: str, behavior: str) -> None:
++    from codepilot.llm.anthropic_messages import AnthropicMessagesProvider
++
++    with fake_server(behavior) as server:
++        provider = provider_for(server.base_url, policy=RetryPolicy(max_attempts=1))
++        if protocol == "anthropic":
++            provider.close()
++            provider = AnthropicMessagesProvider(  # type: ignore[assignment]
++                spec=model_spec(),
++                provider=provider.provider,
++                api_key="fake",
++                policy=RetryPolicy(max_attempts=1),
++            )
++        started = time.monotonic()
++        try:
++            with deadline_scope():
++                if behavior == "gzip":
++                    assert provider.complete(request()).content == "ok"
++                else:
++                    with pytest.raises(ProviderError):
++                        provider.complete(request())
++                    assert time.monotonic() - started < 3.0
++            assert server.state.requests == 1
++            assert not any(t.name == "codepilot-http" for t in threading.enumerate())
++        finally:
++            provider.close()
++
++
++@pytest.mark.parametrize("protocol", ["openai", "anthropic"])
++def test_inflight_cancel_freezes_usage_and_keeps_shared_client(
++    protocol: str,
++    tmp_path: Path,
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    from codepilot.llm.anthropic_messages import AnthropicMessagesProvider
++
++    ledger = _ledger(tmp_path, monkeypatch)
++    cancel = threading.Event()
++    with fake_server("gzip_drip", by_purpose={"fast": "ok"}) as server:
++        provider = provider_for(server.base_url, policy=RetryPolicy(max_attempts=1))
++        if protocol == "anthropic":
++            provider.close()
++            provider = AnthropicMessagesProvider(  # type: ignore[assignment]
++                spec=model_spec(),
++                provider=provider.provider,
++                api_key="fake",
++                policy=RetryPolicy(max_attempts=1),
++            )
++        template = provider._client
++        timer = threading.Thread(target=lambda: (server.state.started.wait(2), cancel.set()))
++        timer.start()
++        started = time.monotonic()
++        with (
++            pytest.raises(DispatchBudgetStoppedError) as caught,
++            deadline_scope(cancel=cancel.is_set),
++        ):
++            provider.complete(request())
++        timer.join()
++        assert caught.value.dispatched
++        assert provider.unacknowledged == 1
++        assert time.monotonic() - started < 1.5
++        assert not template.is_closed
++        assert not any(t.name == "codepilot-http" for t in threading.enumerate())
++        assert server.state.finished.wait(2)
++        payload = json.loads(ledger.read_text())
++        assert payload["frozen"] and payload["requests"][0]["status"] == "unknown_frozen"
++        assert payload["requests"][0]["cost_cny"] is None
++        assert not payload["cancelled_admissions"]
++        provider.close()
++
++
++def test_provider_deadline_includes_limiter_wait() -> None:
++    with fake_server() as server:
++        provider = provider_for(server.base_url)
++        provider.provider = provider.provider.model_copy(update={"timeout_seconds": 2})
++        assert provider.limiter._semaphore.acquire()
++        assert provider.limiter._semaphore.acquire()
++        started = time.monotonic()
++        try:
++            with pytest.raises(DispatchStoppedError):
++                provider.complete(request())
++            assert 1.8 < time.monotonic() - started < 2.3
++            assert provider.attempts == 0 and server.state.requests == 0
++        finally:
++            provider.limiter._semaphore.release()
++            provider.limiter._semaphore.release()
++            provider.close()
++
++
++def test_decoded_response_has_decoded_length_and_no_wire_encoding() -> None:
++    with fake_server("gzip") as server:
++        provider = provider_for(server.base_url, policy=RetryPolicy(max_attempts=1))
++        try:
++            with deadline_scope():
++                response = provider._post({"model": "fake"})
++            assert response.content == BODY
++            assert "content-encoding" not in response.headers
++            assert "transfer-encoding" not in response.headers
++            assert int(response.headers["content-length"]) == len(BODY)
++        finally:
++            provider.close()
++
++
++def test_native_messages_usage_is_settled_without_openai_field_names(tmp_path: Path) -> None:
++    from codepilot.llm.dispatch_budget import DispatchBudget
++
++    path = tmp_path / "native-ledger.json"
++    budget = DispatchBudget(20, path)
++    response = httpx.Response(
++        200,
++        request=httpx.Request("POST", "https://fake.test/v1/messages"),
++        json={
++            "id": "native-id",
++            "model": "fake-model-id",
++            "usage": {"input_tokens": 10, "output_tokens": 5},
++        },
++    )
++    budget.send(model_spec(), {"max_tokens": 512}, lambda: response)
++    payload = json.loads(path.read_text(encoding="utf8"))
++    record = payload["requests"][0]
++    assert record["status"] == "settled" and not payload["frozen"]
++    assert record["input_tokens"] == 10 and record["output_tokens"] == 5
++    assert record["cost_cny"] == pytest.approx(0.000020)
++    assert record["response_id"] == "native-id"
++
++
++def test_cancel_one_request_while_another_is_inflight() -> None:
++    with fake_server("gzip_drip", by_purpose={"fast": "ok"}) as server:
++        provider = provider_for(server.base_url, policy=RetryPolicy(max_attempts=1))
++        cancel = threading.Event()
++        errors: list[BaseException] = []
++
++        def slow() -> None:
++            try:
++                with deadline_scope(cancel=cancel.is_set):
++                    provider.complete(request())
++            except BaseException as exc:
++                errors.append(exc)
++
++        worker = threading.Thread(target=slow)
++        worker.start()
++        assert server.state.started.wait(2)
++        cancel.set()
++        assert provider.complete(request("fast")).content == "ok"
++        worker.join(3)
++        assert not worker.is_alive()
++        assert len(errors) == 1 and isinstance(errors[0], ProviderError)
++        assert provider.complete(request("fast")).content == "ok"
++        assert server.state.requests == 3
++        provider.close()
+diff --git a/tests/unit/repo/test_index.py b/tests/unit/repo/test_index.py
+index e14fcf449f24e03978c02b19c76e399cac4f1228..7bd794939dd3ff717203924858d5624d6e08d881 100644
+--- a/tests/unit/repo/test_index.py
++++ b/tests/unit/repo/test_index.py
+@@ -54,6 +54,21 @@ def _copy_fixture(tmp_path: Path, name: str = "mini_auth") -> Path:
+     return target
+ 
+ 
++def test_scan_does_not_evict_every_initial_cache_hit(stores: Stores, tmp_path: Path) -> None:
++    root = tmp_path / "large-enough-for-lru"
++    root.mkdir()
++    for i in range(130):
++        (root / f"mod{i:03}.py").write_text("def value():\n    return 1\n", encoding="utf8")
++    parser = CountingParser()
++    indexer = Indexer(parser=parser)
++    indexer.index(stores, _ws(root))
++    (root / "mod000.py").write_text("def value():\n    return 2\n", encoding="utf8")
++    stats = indexer.index(stores, _ws(root))
++    assert len(stats.parsed_paths) == 2
++    assert len(stats.parse_reused_paths) == 128
++    assert stats.association_mode == "complete_closure_v2"
++
++
+ @pytest.fixture
+ def fresh_stores() -> Stores:
+     """第二个内存库：给"全新全量索引"做对照。"""
+diff --git a/tests/unit/storage/test_repository.py b/tests/unit/storage/test_repository.py
+index d00d246a919679fc8dea8cbd7931b40a7f6da3dc..f709cf48c9900fc98a25464f067c9946aa32562a 100644
+--- a/tests/unit/storage/test_repository.py
++++ b/tests/unit/storage/test_repository.py
+@@ -414,7 +414,7 @@ def test_foreign_keys_are_actually_enforced(
+     assert value == 1
+ 
+ 
+-def test_all_nine_tables_exist(stores: Stores) -> None:
++def test_all_ten_tables_exist(stores: Stores) -> None:
+     from codepilot.storage.models import Base
+ 
+     assert sorted(Base.metadata.tables) == [
+@@ -423,6 +423,7 @@ def test_all_nine_tables_exist(stores: Stores) -> None:
+         "evaluations",
+         "events",
+         "files",
++        "index_semantics",
+         "repositories",
+         "runs",
+         "symbols",

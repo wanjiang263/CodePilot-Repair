@@ -1,0 +1,300 @@
+[
+  {
+    "purpose": "phase27_normal",
+    "seconds": 2.5160000000032596,
+    "request": {
+      "messages": [
+        {
+          "role": "user",
+          "content": "Reply with only OK.",
+          "tool_calls": [],
+          "tool_call_id": null,
+          "name": null
+        }
+      ],
+      "tools": null,
+      "response_schema": null,
+      "temperature": 0.0,
+      "max_output_tokens": 1024,
+      "purpose": "phase27_normal",
+      "attempt": 1,
+      "correction": false
+    },
+    "response": {
+      "content": "OK",
+      "tool_calls": [],
+      "parsed": null,
+      "input_tokens": 17,
+      "output_tokens": 3,
+      "cached_input_tokens": 0,
+      "cost": 2.2e-05,
+      "cost_known": true,
+      "model_alias": "glm-5.3-flash-main",
+      "latency_ms": 0,
+      "call_id": null,
+      "finish_reason": "stop",
+      "reasoning_content": null,
+      "raw": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "OK",
+              "role": "assistant"
+            }
+          }
+        ],
+        "created": 1793279178,
+        "id": "2026102921061759649b974ec44b55",
+        "model": "glm-5.3-flash",
+        "object": "chat.completion",
+        "request_id": "2026102921061759649b974ec44b55",
+        "usage": {
+          "completion_tokens": 3,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 17,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "total_tokens": 20
+        }
+      }
+    }
+  },
+  {
+    "purpose": "phase27_tool",
+    "seconds": 8.453000000001339,
+    "request": {
+      "messages": [
+        {
+          "role": "system",
+          "content": "Call add exactly once for 17+25. Use its returned value.",
+          "tool_calls": [],
+          "tool_call_id": null,
+          "name": null
+        },
+        {
+          "role": "user",
+          "content": "Use the add tool to calculate 17+25.",
+          "tool_calls": [],
+          "tool_call_id": null,
+          "name": null
+        }
+      ],
+      "tools": [
+        {
+          "name": "add",
+          "description": "Add two integers",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "a": {
+                "type": "integer"
+              },
+              "b": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "a",
+              "b"
+            ],
+            "additionalProperties": false
+          }
+        }
+      ],
+      "response_schema": null,
+      "temperature": 0.0,
+      "max_output_tokens": 1024,
+      "purpose": "phase27_tool",
+      "attempt": 1,
+      "correction": false
+    },
+    "response": {
+      "content": "",
+      "tool_calls": [
+        {
+          "id": "call_-7121743693089860475",
+          "name": "add",
+          "arguments": {
+            "a": 17,
+            "b": 25
+          },
+          "raw_arguments": "{\"a\":17,\"b\":25}",
+          "arguments_error": null
+        }
+      ],
+      "parsed": null,
+      "input_tokens": 195,
+      "output_tokens": 17,
+      "cached_input_tokens": 0,
+      "cost": 0.0002036,
+      "cost_known": true,
+      "model_alias": "glm-5.3-flash-main",
+      "latency_ms": 0,
+      "call_id": null,
+      "finish_reason": "tool_calls",
+      "reasoning_content": null,
+      "raw": {
+        "choices": [
+          {
+            "finish_reason": "tool_calls",
+            "index": 0,
+            "message": {
+              "content": "",
+              "role": "assistant",
+              "tool_calls": [
+                {
+                  "function": {
+                    "arguments": "{\"a\":17,\"b\":25}",
+                    "name": "add"
+                  },
+                  "id": "call_-7121743693089860475",
+                  "index": 0,
+                  "type": "function"
+                }
+              ]
+            }
+          }
+        ],
+        "created": 1793279187,
+        "id": "2026102921061988cd11085fde4099",
+        "model": "glm-5.3-flash",
+        "object": "chat.completion",
+        "request_id": "2026102921061988cd11085fde4099",
+        "usage": {
+          "completion_tokens": 17,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 195,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "total_tokens": 212
+        }
+      }
+    }
+  },
+  {
+    "purpose": "phase27_tool_result",
+    "seconds": 4.8439999999973224,
+    "request": {
+      "messages": [
+        {
+          "role": "system",
+          "content": "Call add exactly once for 17+25. Use its returned value.",
+          "tool_calls": [],
+          "tool_call_id": null,
+          "name": null
+        },
+        {
+          "role": "user",
+          "content": "Use the add tool to calculate 17+25.",
+          "tool_calls": [],
+          "tool_call_id": null,
+          "name": null
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "id": "call_-7121743693089860475",
+              "name": "add",
+              "arguments": {
+                "a": 17,
+                "b": 25
+              },
+              "raw_arguments": "{\"a\":17,\"b\":25}",
+              "arguments_error": null
+            }
+          ],
+          "tool_call_id": null,
+          "name": null
+        },
+        {
+          "role": "tool",
+          "content": "{\"sum\": 42}",
+          "tool_calls": [],
+          "tool_call_id": "call_-7121743693089860475",
+          "name": null
+        }
+      ],
+      "tools": [
+        {
+          "name": "add",
+          "description": "Add two integers",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "a": {
+                "type": "integer"
+              },
+              "b": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "a",
+              "b"
+            ],
+            "additionalProperties": false
+          }
+        }
+      ],
+      "response_schema": null,
+      "temperature": 0.0,
+      "max_output_tokens": 1024,
+      "purpose": "phase27_tool_result",
+      "attempt": 1,
+      "correction": false
+    },
+    "response": {
+      "content": "17 + 25 = **42**.",
+      "tool_calls": [],
+      "parsed": null,
+      "input_tokens": 222,
+      "output_tokens": 11,
+      "cached_input_tokens": 0,
+      "cost": 0.00020840000000000002,
+      "cost_known": true,
+      "model_alias": "glm-5.3-flash-main",
+      "latency_ms": 0,
+      "call_id": null,
+      "finish_reason": "stop",
+      "reasoning_content": null,
+      "raw": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "17 + 25 = **42**.",
+              "role": "assistant"
+            }
+          }
+        ],
+        "created": 1793279192,
+        "id": "2026102921062727f4b63108484024",
+        "model": "glm-5.3-flash",
+        "object": "chat.completion",
+        "request_id": "2026102921062727f4b63108484024",
+        "usage": {
+          "completion_tokens": 11,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 222,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "total_tokens": 233
+        }
+      }
+    }
+  }
+]

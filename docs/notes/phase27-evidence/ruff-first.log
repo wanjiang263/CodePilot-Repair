@@ -1,0 +1,348 @@
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> scripts\phase27_agent_case.py:152:14
+    |
+150 |           "/opt/miniconda3/envs/testbed/bin/python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml"
+151 |       ), env={"PYTHONPATH": "/workspace"})
+152 |       frozen = dict(issue=ISSUE, base=base, source_sha256={name: hashlib.sha256((source/name).read_bytes()).hexdigest()
+    |  ______________^
+153 | |                   for name in FILES}, env=env.model_dump(mode="json"), image=image, image_id=image_id,
+154 | |                   budget=budget.model_dump(mode="json"), prior_round_upper=prior, segment_limit=limit,
+155 | |                   model="bigmodel/glm-5.3-flash", config_sha256=hashlib.sha256((root/"configs/phase22/llm.yaml").read_bytes()).hexdigest())
+    | |___________________________________________________________________________________________________________________________________________^
+156 |       (out/"frozen-case.json").write_text(json.dumps(frozen, indent=2)+"\n", encoding="utf8")
+    |
+help: Rewrite as a literal
+
+ARG002 Unused method argument: `kwargs`
+   --> scripts\phase27_agent_case.py:159:31
+    |
+158 |     class CaseSandbox(DockerSandbox):
+159 |         def build_env(self, **kwargs):
+    |                               ^^^^^^
+160 |             assert self.client.images.get(image).id == image_id
+161 |             return EnvironmentBuildResult(status=ExecutionStatus.PASS, image_ref=image,
+    |
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> scripts\phase27_candidate_probe.py:52:21
+   |
+50 |         result = backend.run_tests(workspace=workspace.path, environment=built,
+51 |             env_spec=env.model_copy(update={"timeout_seconds": seconds}), tests=tests, artifact_iteration=iteration)
+52 |         runs.append(dict(configured_timeout=seconds, result=result.model_dump(mode="json")))
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+53 |         (out/"docker-results.json").write_text(json.dumps(runs, indent=2)+"\n", encoding="utf8")
+54 |     after = subprocess.check_output(["git", "-C", str(workspace.path), "diff", "--binary", "HEAD"])
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> scripts\phase27_candidate_probe.py:76:19
+   |
+74 |         runner.run()
+75 |     except HarnessCacheError as exc:
+76 |         failure = dict(type=type(exc).__name__, message=str(exc))
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+77 |     assert failure is not None, "missing cache identity must fail closed"
+78 |     (out/"official-first-failure.json").write_text(json.dumps(failure, indent=2)+"\n", encoding="utf8")
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> scripts\phase27_candidate_probe.py:82:14
+   |
+80 |       recovered = runner.run()
+81 |       assert recovered.reused
+82 |       result = dict(receipt=str(old/"official-candidate.json"), instance=receipt["instance_id"],
+   |  ______________^
+83 | |         base=receipt["base_commit"], patch_sha256=patch_sha,
+84 | |         prediction_sha256=hashlib.sha256(prediction.read_bytes()).hexdigest(),
+85 | |         unchanged=True, model_requests=0, inference_constructed=False,
+86 | |         official_recovery=recovered.model_dump(mode="json"),
+87 | |         historical_full_regression=str(root/"artifacts/phase25/django14999-recovery/postrun-validation/full-regression.json"))
+   | |______________________________________________________________________________________________________________________________^
+88 |       (out/"summary.json").write_text(json.dumps(result, indent=2)+"\n", encoding="utf8")
+89 |       print("Docker timeout recovered; official", recovered.decision, flush=True)
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> scripts\phase27_glm_probe.py:49:24
+   |
+47 |           request = LLMRequest(messages=messages, tools=tools, purpose=purpose, max_output_tokens=1024)
+48 |           result = model.complete(request)
+49 |           records.append(dict(purpose=purpose, seconds=time.monotonic()-start,
+   |  ________________________^
+50 | |                             request=request.model_dump(mode="json"),
+51 | |                             response=result.model_dump(mode="json")))
+   | |____________________________________________________________________^
+52 |           (out / "responses.json").write_text(json.dumps(records, indent=2)+"\n", encoding="utf8")
+53 |           assert result.raw and result.raw.get("model") == spec.model
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> scripts\phase27_glm_probe.py:82:32
+   |
+80 |                       call([Message.user("Explain binary search carefully in 400 words.")], "phase27_cancel")
+81 |               except Exception as exc:
+82 |                   records.append(dict(error_type=type(exc).__name__, message=str(exc),
+   |  ________________________________^
+83 | |                                     dispatched=getattr(exc, "dispatched", None), seconds=time.monotonic()-start))
+   | |________________________________________________________________________________________________________________^
+84 |               finally:
+85 |                   timer.cancel()
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> scripts\phase27_glm_probe.py:87:64
+   |
+85 |                   timer.cancel()
+86 |                   timer.join()
+87 |               (out / "cancel-result.json").write_text(json.dumps(dict(
+   |  ________________________________________________________________^
+88 | |                 records=records, attempts=model.attempts, client_closed=model._client.is_closed,
+89 | |                 http_threads=[t.name for t in threading.enumerate() if t.name == "codepilot-http"],
+90 | |                 request_query_supported=False,
+91 | |             ), indent=2)+"\n", encoding="utf8")
+   | |_____________^
+92 |       finally:
+93 |           model.close()
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> scripts\phase27_index_probe.py:64:18
+   |
+62 |           stats = indexer.index(stores, workspace)
+63 |           session.commit()
+64 |           result = dict(label=label, seconds=time.perf_counter()-start, files=stats.files,
+   |  __________________^
+65 | |                       parsed=len(stats.parsed_paths), parse_reused=len(stats.parse_reused_paths),
+66 | |                       changed=len(stats.changed_paths), reused=len(stats.reused_paths),
+67 | |                       association_mode=stats.association_mode,
+68 | |                       association_sources=next((x["counts"]["sources"] for x in reversed(progress)
+69 | |                                                 if x.get("phase")=="linking"), 0),
+70 | |                       peak_working_set_bytes=peak_bytes(), base=base, pid=os.getpid())
+   | |______________________________________________________________________________________^
+71 |           (out / f"{label}.json").write_text(json.dumps(result, indent=2)+"\n", encoding="utf8")
+72 |           print(json.dumps(result), flush=True)
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> scripts\phase27_index_probe.py:93:32
+   |
+91 |                 start = time.perf_counter()
+92 |                 result = cache.execute(tool, params, "all")
+93 |                 results.append(dict(seconds=time.perf_counter()-start, data=result.data))
+   |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+94 |         (out/"query-cache.json").write_text(json.dumps(results, indent=2)+"\n", encoding="utf8")
+95 |     session.close()
+   |
+help: Rewrite as a literal
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> src\codepilot\llm\anthropic_messages.py:8:1
+   |
+ 6 |   """
+ 7 |
+ 8 | / from __future__ import annotations
+ 9 | |
+10 | | import json
+11 | | import time
+12 | | from collections.abc import Callable
+13 | | from typing import Any, TypedDict
+14 | |
+15 | | import httpx
+16 | |
+17 | | from codepilot.llm.capabilities import prepare_messages
+18 | | from codepilot.llm.config import ModelSpec, ProviderSpec
+19 | | from codepilot.llm.cost import compute_cost
+20 | | from codepilot.llm.dispatch_budget import DispatchBudgetStoppedError, guarded_send
+21 | | from codepilot.llm.http_lifecycle import send_request
+22 | | from codepilot.llm.errors import (
+23 | |     ContextTooLongError,
+24 | |     ProviderError,
+25 | |     ProviderNotAllowedError,
+26 | |     RateLimitError,
+27 | | )
+28 | | from codepilot.llm.openai_compatible import looks_like_context_overflow
+29 | | from codepilot.llm.retry import ConcurrencyLimiter, RetryPolicy, call_with_retry
+30 | | from codepilot.llm.types import LLMRequest, LLMResponse, Message, Role, ToolCall
+31 | | from codepilot.net import build_http_client
+32 | | from codepilot.observability.redaction import REDACTED
+   | |______________________________________________________^
+33 |
+34 |   __all__ = ["AnthropicMessagesProvider"]
+   |
+help: Organize imports
+   |
+20 | from codepilot.llm.dispatch_budget import DispatchBudgetStoppedError, guarded_send
+   - from codepilot.llm.http_lifecycle import send_request
+21 | from codepilot.llm.errors import (
+--------------------------------------------------------------------------------
+26 | )
+27 + from codepilot.llm.http_lifecycle import send_request
+28 | from codepilot.llm.openai_compatible import looks_like_context_overflow
+   |
+
+SIM117 [*] Use a single `with` statement with multiple contexts instead of nested `with` statements
+  --> src\codepilot\llm\http_lifecycle.py:57:9
+   |
+55 |           with sanitized_proxy_environment():
+56 |               owned = httpx.AsyncClient(timeout=timeout, trust_env=trust_env)
+57 | /         async with owned:
+58 | |             async with owned.stream(
+59 | |                 request.method, request.url, content=request.content, headers=request.headers
+60 | |             ) as response:
+   | |__________________________^
+61 |                   content = await response.aread()
+62 |                   # aread decodes content. Rebuilding must not decode it twice or
+   |
+help: Combine `with` statements
+   |
+56 |             owned = httpx.AsyncClient(timeout=timeout, trust_env=trust_env)
+   -         async with owned:
+   -             async with owned.stream(
+   -                 request.method, request.url, content=request.content, headers=request.headers
+   -             ) as response:
+   -                 content = await response.aread()
+   -                 # aread decodes content. Rebuilding must not decode it twice or
+   -                 # advertise the wire body's framing/length as the decoded size.
+   -                 clean = response.headers.copy()
+   -                 for key in ("content-encoding", "content-length", "transfer-encoding"):
+   -                     clean.pop(key, None)
+   -                 return httpx.Response(
+   -                     response.status_code, headers=clean, content=content, request=request
+   -                 )
+57 +         async with owned, owned.stream(
+58 +             request.method, request.url, content=request.content, headers=request.headers
+59 +         ) as response:
+60 +             content = await response.aread()
+61 +             # aread decodes content. Rebuilding must not decode it twice or
+62 +             # advertise the wire body's framing/length as the decoded size.
+63 +             clean = response.headers.copy()
+64 +             for key in ("content-encoding", "content-length", "transfer-encoding"):
+65 +                 clean.pop(key, None)
+66 +             return httpx.Response(
+67 +                 response.status_code, headers=clean, content=content, request=request
+68 +             )
+69 |
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> src\codepilot\llm\openai_compatible.py:12:1
+   |
+10 |   """
+11 |
+12 | / from __future__ import annotations
+13 | |
+14 | | import json
+15 | | import time
+16 | | from collections.abc import Callable
+17 | | from typing import Any, TypedDict
+18 | |
+19 | | import httpx
+20 | |
+21 | | from codepilot.llm.capabilities import build_request_body, parse_tool_protocol, prepare_messages
+22 | | from codepilot.llm.config import ModelSpec, ProviderSpec
+23 | | from codepilot.llm.cost import compute_cost
+24 | | from codepilot.llm.dispatch_budget import DispatchBudgetStoppedError, guarded_send
+25 | | from codepilot.llm.http_lifecycle import send_request
+26 | | from codepilot.llm.errors import (
+27 | |     ContextTooLongError,
+28 | |     ProviderError,
+29 | |     ProviderNotAllowedError,
+30 | |     RateLimitError,
+31 | | )
+32 | | from codepilot.llm.retry import ConcurrencyLimiter, RetryPolicy, call_with_retry
+33 | | from codepilot.llm.types import LLMRequest, LLMResponse, ToolCall
+34 | | from codepilot.net import build_http_client
+35 | | from codepilot.observability.redaction import REDACTED
+   | |______________________________________________________^
+36 |
+37 |   __all__ = ["CONTEXT_OVERFLOW_MARKERS", "OpenAICompatibleProvider", "looks_like_context_overflow"]
+   |
+help: Organize imports
+   |
+24 | from codepilot.llm.dispatch_budget import DispatchBudgetStoppedError, guarded_send
+   - from codepilot.llm.http_lifecycle import send_request
+25 | from codepilot.llm.errors import (
+--------------------------------------------------------------------------------
+30 | )
+31 + from codepilot.llm.http_lifecycle import send_request
+32 | from codepilot.llm.retry import ConcurrencyLimiter, RetryPolicy, call_with_retry
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> src\codepilot\observability\dispatch.py:3:1
+   |
+ 1 |   """Task-local dispatch deadline; wall-clock recovery anchors once, waits are monotonic."""
+ 2 |
+ 3 | / from __future__ import annotations
+ 4 | |
+ 5 | | import time
+ 6 | | import math
+ 7 | | from collections.abc import Callable, Iterator
+ 8 | | from contextlib import contextmanager
+ 9 | | from contextvars import ContextVar
+10 | | from dataclasses import dataclass
+11 | | from typing import Any
+   | |______________________^
+help: Organize imports
+  |
+4 |
+5 + import math
+6 | import time
+  - import math
+7 | from collections.abc import Callable, Iterator
+  |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\unit\llm\test_http_total_deadline.py:8:1
+   |
+ 6 |   """
+ 7 |
+ 8 | / from __future__ import annotations
+ 9 | |
+10 | | import json
+11 | | import gzip
+12 | | import threading
+13 | | import time
+14 | | from collections.abc import Iterator
+15 | | from contextlib import contextmanager
+16 | | from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+17 | | from pathlib import Path
+18 | | from typing import Any
+19 | |
+20 | | import pytest
+21 | |
+22 | | from codepilot.llm.config import ModelPrice, ModelSpec, ProviderSpec
+23 | | from codepilot.llm.dispatch_budget import DispatchBudgetStoppedError
+24 | | from codepilot.llm.errors import ProviderError
+25 | | from codepilot.llm.openai_compatible import OpenAICompatibleProvider
+26 | | from codepilot.llm.retry import RetryPolicy
+27 | | from codepilot.llm.types import LLMRequest, Message
+28 | | from codepilot.observability.dispatch import (
+29 | |     Deadline,
+30 | |     DispatchScope,
+31 | |     DispatchStoppedError,
+32 | |     dispatch_scope,
+33 | | )
+34 | | from codepilot.observability.resources import ResourceCancelledError
+   | |____________________________________________________________________^
+35 |
+36 |   #: dispatch_timeout 取整数秒；比目标总时限略大，确保 min() 后正好是目标值。
+   |
+help: Organize imports
+   |
+9  |
+10 + import gzip
+11 | import json
+   - import gzip
+12 | import threading
+   |
+
+Found 15 errors.
+[*] 5 fixable with the `--fix` option (9 hidden fixes can be enabled with the `--unsafe-fixes` option).

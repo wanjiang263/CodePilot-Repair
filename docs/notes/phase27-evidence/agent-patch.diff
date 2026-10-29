@@ -1,0 +1,13 @@
+diff --git a/drafts/store.py b/drafts/store.py
+index 745b9bf..f1fd720 100644
+--- a/drafts/store.py
++++ b/drafts/store.py
+@@ -15,6 +15,8 @@ class DraftStore:
+         if key not in self._items:
+             raise KeyError(key)
+         self._items[key] = text
++        for identity in [k for k in self._rendered if k[0] == key]:
++            del self._rendered[identity]
+ 
+     def render(self, key, prefix=''):
+         identity = (key, prefix)

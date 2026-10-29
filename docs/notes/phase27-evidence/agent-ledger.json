@@ -1,0 +1,494 @@
+{
+  "currency": "CNY",
+  "limit": 2.1966988,
+  "accounted_or_reserved": 0.04913696000000001,
+  "frozen": false,
+  "opening_balance": 0.0,
+  "opening_source": {
+    "round_cap": 3,
+    "prior_round_upper": 0.8033012,
+    "frozen_case": "D:\\Projects\\Desktop\\CodePilot-Repair\\artifacts\\phase27\\agent-case\\frozen-case.json"
+  },
+  "requests": [
+    {
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0038008,
+      "request_sha256": "2cd32a3bb0e280d117e2ecdc1fef0b846e597b63c4c9d99a82e8c8bfedc6bc3c",
+      "dispatched_at_unix": 1793286843.394392,
+      "metadata": {
+        "purpose": "localizer_files",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 12849,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "aed65bcc-f935-4c2b-9309-7d5fc8b7864c",
+      "http_status": 200,
+      "response_id": "202610292314021a1f4666f91049b0",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 190,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 4086,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 4276
+      },
+      "input_tokens": 4086,
+      "cached_input_tokens": 0,
+      "output_tokens": 190,
+      "elapsed_seconds": 3.5930000000000177
+    },
+    {
+      "seq": 2,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0048192,
+      "request_sha256": "bb830dcb9dffc2e908d370db279f448024aefe280c3a13adea0643ee1d8d8abb",
+      "dispatched_at_unix": 1793286847.0273933,
+      "metadata": {
+        "purpose": "localizer_symbols",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 16090,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "c9eefa3d-723e-4231-abda-582ac65e930f",
+      "http_status": 200,
+      "response_id": "20261029231405823ce0db66f24a03",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 294,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 4995,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 5289
+      },
+      "input_tokens": 4995,
+      "cached_input_tokens": 0,
+      "output_tokens": 294,
+      "elapsed_seconds": 4.875
+    },
+    {
+      "seq": 3,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.005192000000000001,
+      "request_sha256": "cfaf0c00794bdc416610e293fbc7c0f02d957638882309944ea3c7b7d20b1f88",
+      "dispatched_at_unix": 1793286854.4452996,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 20615,
+        "message_roles": [
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "521e98ab-9a72-44d1-9c88-4583747d6b28",
+      "http_status": 200,
+      "response_id": "20261029231413e2bc5dce61594f44",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 42,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 6343,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 6385
+      },
+      "input_tokens": 6343,
+      "cached_input_tokens": 0,
+      "output_tokens": 42,
+      "elapsed_seconds": 5.968999999999994
+    },
+    {
+      "seq": 4,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.006187280000000001,
+      "request_sha256": "854f6c36e991fdd2bdc29a20dcbf4b62766895c0fd66c728e00fbb606c018d62",
+      "dispatched_at_unix": 1793286860.4725308,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 25595,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "tool",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "88d96761-1ebb-4454-9bc6-700219a55593",
+      "http_status": 200,
+      "response_id": "20261029231419b8e086e88d674dbe",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 1277,
+        "completion_tokens_details": {
+          "reasoning_tokens": 65
+        },
+        "prompt_tokens": 7779,
+        "prompt_tokens_details": {
+          "cached_tokens": 6336
+        },
+        "total_tokens": 9056
+      },
+      "input_tokens": 7779,
+      "cached_input_tokens": 6336,
+      "output_tokens": 1277,
+      "elapsed_seconds": 30.468999999999994
+    },
+    {
+      "seq": 5,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.010792,
+      "request_sha256": "22770cb4c66262d9c073644620faac875f1116468e1f0ddfc477444c75eaff34",
+      "dispatched_at_unix": 1793286890.9611545,
+      "metadata": {
+        "purpose": "planner",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 33929,
+        "message_roles": [
+          "system",
+          "user",
+          "assistant",
+          "tool",
+          "tool",
+          "tool",
+          "assistant",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "de75506c-a002-4a66-b0f7-fc4a09c2d472",
+      "http_status": 200,
+      "response_id": "202610292314492ceb2dddeb08435f",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 1208,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 9262,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 10470
+      },
+      "input_tokens": 9262,
+      "cached_input_tokens": 0,
+      "output_tokens": 1208,
+      "elapsed_seconds": 13.077999999999975
+    },
+    {
+      "seq": 6,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0043648,
+      "request_sha256": "1140efddffe3d3c816975e46d81b951eb119f731a4751972ed233b0899754c61",
+      "dispatched_at_unix": 1793286904.374215,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 20546,
+        "message_roles": [
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "7eef761e-7a30-4c4f-9485-96eec34daa12",
+      "http_status": 200,
+      "response_id": "20261029231503f18744fd81154d7a",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 28,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 5358,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 5386
+      },
+      "input_tokens": 5358,
+      "cached_input_tokens": 0,
+      "output_tokens": 28,
+      "elapsed_seconds": 4.7029999999999745
+    },
+    {
+      "seq": 7,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0029093600000000006,
+      "request_sha256": "bfb468dcfadf2c8fcebbaadab186b325230f2d5bfb909b0f6134d34177219d77",
+      "dispatched_at_unix": 1793286909.1261125,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 25800,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "9e634f7f-c8d3-4007-a284-f2233682d1c4",
+      "http_status": 200,
+      "response_id": "202610292315074fbde2e6cce24b6a",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 161,
+        "completion_tokens_details": {
+          "reasoning_tokens": 15
+        },
+        "prompt_tokens": 6858,
+        "prompt_tokens_details": {
+          "cached_tokens": 5312
+        },
+        "total_tokens": 7019
+      },
+      "input_tokens": 6858,
+      "cached_input_tokens": 5312,
+      "output_tokens": 161,
+      "elapsed_seconds": 7.125
+    },
+    {
+      "seq": 8,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.0021730399999999998,
+      "request_sha256": "d62b49ff8be272e8ab15c5d31922cc70cb0ed192ef8a4320a2905b1fb7986400",
+      "dispatched_at_unix": 1793286916.559399,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 27826,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "tool",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "22779c79-0198-45d5-96ef-c319d9369d9e",
+      "http_status": 200,
+      "response_id": "20261029231515160ffeca1ee94eb3",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 73,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 7340,
+        "prompt_tokens_details": {
+          "cached_tokens": 6848
+        },
+        "total_tokens": 7413
+      },
+      "input_tokens": 7340,
+      "cached_input_tokens": 6848,
+      "output_tokens": 73,
+      "elapsed_seconds": 4.764999999999986
+    },
+    {
+      "seq": 9,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.00335248,
+      "request_sha256": "ba1bdf1dc71da521fac354fee919c3490b9facd835b18f9ea48cda84e152de83",
+      "dispatched_at_unix": 1793286922.5975256,
+      "metadata": {
+        "purpose": "coder",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 34231,
+        "message_roles": [
+          "user",
+          "assistant",
+          "tool",
+          "tool",
+          "assistant",
+          "tool",
+          "assistant",
+          "tool"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "5a85b0a9-bd1d-4ca9-8553-f58d54a56e89",
+      "http_status": 200,
+      "response_id": "20261029231521a95a3bd5fc774ebc",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 124,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 8955,
+        "prompt_tokens_details": {
+          "cached_tokens": 7296
+        },
+        "total_tokens": 9079
+      },
+      "input_tokens": 8955,
+      "cached_input_tokens": 7296,
+      "output_tokens": 124,
+      "elapsed_seconds": 7.343999999999994
+    },
+    {
+      "seq": 10,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8114688000000001,
+      "status": "settled",
+      "cost_cny": 0.005546,
+      "request_sha256": "5b809688c47a89d725b71810eadfcc610a221973cb9101996541dea8d6598716",
+      "dispatched_at_unix": 1793286932.7549465,
+      "metadata": {
+        "purpose": "reviewer",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 4096,
+        "request_body_bytes": 23720,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 120.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "5a8cc79c-d35f-4bee-87e6-8352e13f8be4",
+      "http_status": 200,
+      "response_id": "2026102923153146754da596724f30",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "completion_tokens": 203,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 6222,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 6425
+      },
+      "input_tokens": 6222,
+      "cached_input_tokens": 0,
+      "output_tokens": 203,
+      "elapsed_seconds": 3.8590000000000373
+    }
+  ],
+  "cancelled_admissions": []
+}

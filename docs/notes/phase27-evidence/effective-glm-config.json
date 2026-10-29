@@ -1,0 +1,54 @@
+{
+  "provider": {
+    "name": "bigmodel",
+    "base_url": "https://open.bigmodel.cn/api/paas/v4",
+    "api_key_env": "GLM_API_KEY",
+    "api_key_env_fallback": "ZHIPU_API_KEY",
+    "protocol": "openai_compatible",
+    "region": null,
+    "aws_profile": null,
+    "max_concurrency": 4,
+    "timeout_seconds": 120.0,
+    "connect_timeout_seconds": 10.0,
+    "write_timeout_seconds": 30.0,
+    "pool_timeout_seconds": 10.0,
+    "trust_env": false,
+    "max_retries": 0,
+    "extra_headers": {}
+  },
+  "model": {
+    "alias": "glm-5.3-flash-main",
+    "provider": "bigmodel",
+    "model": "glm-5.3-flash",
+    "context_window": 1000000,
+    "supports_tools": true,
+    "supports_json_mode": true,
+    "supports_temperature": false,
+    "supports_thinking": true,
+    "max_output_tokens": 4096,
+    "price": {
+      "currency": "CNY",
+      "input_per_mtok": 0.8,
+      "output_per_mtok": 2.8,
+      "cached_input_per_mtok": 0.23
+    },
+    "extra_body": {
+      "reasoning_effort": "low"
+    }
+  },
+  "effective_roles": {
+    "issue_analyzer": "glm-5.3-flash-main",
+    "localizer": "glm-5.3-flash-main",
+    "planner": "glm-5.3-flash-main",
+    "coder": "glm-5.3-flash-main",
+    "reproducer": "glm-5.3-flash-main",
+    "diagnoser": "glm-5.3-flash-main",
+    "reviewer": "glm-5.3-flash-main",
+    "failure_classifier": "glm-5.3-flash-main"
+  },
+  "credentials": "loaded from existing .env/environment; values excluded",
+  "http_retries": 0,
+  "request_seed": null,
+  "round_limit_cny": 3,
+  "config_sha256": "1ebe26add3bcd7df83cb8765a3a038cbe099ccfe7ebc2e92063d357f12801a7c"
+}

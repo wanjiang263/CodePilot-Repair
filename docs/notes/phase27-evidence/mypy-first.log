@@ -1,0 +1,6 @@
+src\codepilot\llm\registry.py:265: error: Item "BedrockConverseProvider" of
+"BedrockConverseProvider | AnthropicMessagesProvider | OpenAICompatibleProvider"
+has no attribute "_owns_client"  [union-attr]
+                    inner._owns_client = True
+                    ^~~~~~~~~~~~~~~~~~
+Found 1 error in 1 file (checked 9 source files)

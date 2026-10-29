@@ -1,0 +1,1 @@
+Not applicable: the original Django seed is bare; see original-django-identity.json.
