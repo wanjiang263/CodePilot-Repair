@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import json
+import threading
 from collections.abc import Callable
 from datetime import datetime
 from enum import StrEnum
@@ -62,6 +63,7 @@ class EventType(StrEnum):
     SANDBOX_RUN = "sandbox_run"
     BUDGET_CHECK = "budget_check"
     STOP = "stop"
+    LIFECYCLE = "lifecycle"
 
 
 class EventUsage(BaseModel):
@@ -129,7 +131,12 @@ class EventSink:
         self._path = jsonl_path
         self._store = store
         self._clock = clock
+        # seq 分配、JSONL 追加、数据库镜像和 runtime 投影必须是一个原子动作：
+        # 主循环写 NODE_START、节点工作线程写 NODE_END 和节点内 lifecycle 事件，
+        # 两条线程同时进来会拿到重复 seq，或让 JSONL 的写顺序和 seq 顺序相反。
+        self._lock = threading.RLock()
         self._closed = False
+        self._runtime_projection: dict[str, Any] = {}
 
         # 中断恢复时新进程要接着已有事件的序号写，从 1 重新开始会直接撞上
         # events 表的 (run_id, seq) 唯一约束。默认值取自数据库而不是写死 0，
@@ -147,7 +154,8 @@ class EventSink:
 
     @property
     def last_seq(self) -> int:
-        return self._seq
+        with self._lock:
+            return self._seq
 
     def emit(
         self,
@@ -162,47 +170,61 @@ class EventSink:
         summary: str | None = None,
         **extra: Any,
     ) -> EventRecord:
-        """写入一条事件并返回它。"""
-        if self._closed:
-            raise RuntimeError("EventSink 已关闭，不能再写事件")
+        """写入一条事件并返回它。
 
-        self._seq += 1
-        record = EventRecord(
-            run_id=self._run_id,
-            task_id=self._task_id,
-            seq=self._seq,
-            node=node,
-            type=type,
-            timestamp=self._clock(),
-            duration_ms=duration_ms,
-            usage=usage,
-            tool_calls=list(tool_calls or []),
-            status=status,
-            error=error,
-            summary=summary,
-            extra=extra,
-        )
+        线程安全：``seq`` 分配、JSONL 追加、``events`` 表镜像和 runtime 投影在同一把
+        锁里完成。跨线程调用（主循环的 NODE_START 与节点工作线程的 NODE_END）既不会
+        拿到重复序号，也不会出现文件里后写的行序号反而更小。
+        """
+        with self._lock:
+            if self._closed:
+                raise RuntimeError("EventSink 已关闭，不能再写事件")
 
-        payload = redact(record.model_dump(mode="json"))
-        self._handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
-        self._handle.flush()
-
-        if self._store is not None:
-            self._store.append(
+            self._seq += 1
+            record = EventRecord(
                 run_id=self._run_id,
-                node=node,
-                type=type.value,
-                payload=payload,
+                task_id=self._task_id,
                 seq=self._seq,
-                timestamp=record.timestamp,
+                node=node,
+                type=type,
+                timestamp=self._clock(),
+                duration_ms=duration_ms,
+                usage=usage,
+                tool_calls=list(tool_calls or []),
+                status=status,
+                error=error,
+                summary=summary,
+                extra=extra,
             )
 
-        return record
+            if type is EventType.LIFECYCLE:
+                from codepilot.observability.runtime import project_event
+
+                self._runtime_projection = project_event(
+                    self._runtime_projection, record.model_dump(mode="json")
+                )
+                record.extra["runtime_projection"] = dict(self._runtime_projection)
+            payload = redact(record.model_dump(mode="json"))
+            self._handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
+            self._handle.flush()
+
+            if self._store is not None:
+                self._store.append(
+                    run_id=self._run_id,
+                    node=node,
+                    type=type.value,
+                    payload=payload,
+                    seq=self._seq,
+                    timestamp=record.timestamp,
+                )
+
+            return record
 
     def close(self) -> None:
-        if not self._closed:
-            self._closed = True
-            self._handle.close()
+        with self._lock:
+            if not self._closed:
+                self._closed = True
+                self._handle.close()
 
     def __enter__(self) -> EventSink:
         return self

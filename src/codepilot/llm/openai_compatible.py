@@ -140,12 +140,15 @@ class OpenAICompatibleProvider:
         messages = prepare_messages(request, self.spec)
         body = build_request_body(request, self.spec, messages)
 
+        from codepilot.observability.dispatch import check_dispatch
+
         with self.limiter:
             response = call_with_retry(
                 lambda: self._post(body, request.purpose),
                 policy=self.policy,
                 sleep=self.sleep,
                 on_retry=self.on_retry,
+                before_retry=lambda: check_dispatch("model"),
             )
 
         return self._parse(response, request)
@@ -177,13 +180,34 @@ class OpenAICompatibleProvider:
 
     def _post(self, body: dict[str, Any], purpose: str = "generic") -> httpx.Response:
         """发一次请求，把 HTTP 层的失败翻译成本层的异常类型。"""
-        self.attempts += 1
+        from codepilot.observability.dispatch import check_dispatch, dispatch_timeout
+
+        check_dispatch("model")
         headers = {**self._request_headers, "X-CodePilot-Purpose": purpose}
+
+        def send_http() -> httpx.Response:
+            remaining = dispatch_timeout(self.provider.timeout_seconds)
+            deadline = time.monotonic() + remaining
+            timeout = httpx.Timeout(
+                remaining,
+                **{
+                    key: min(value, remaining) if value is not None else remaining
+                    for key, value in self._client.timeout.as_dict().items()
+                },
+            )
+            from codepilot.observability.dispatch import mark_model_dispatch
+
+            mark_model_dispatch()
+            self.attempts += 1
+            return self._send_before_deadline(
+                body=body, headers=headers, timeout=timeout, deadline=deadline, total=remaining
+            )
+
         try:
             response = guarded_send(
                 self.spec,
                 body,
-                lambda: self._client.post(CHAT_COMPLETIONS_PATH, json=body, headers=headers),
+                send_http,
                 metadata={
                     "purpose": purpose,
                     "request_model": body.get("model"),
@@ -225,6 +249,51 @@ class OpenAICompatibleProvider:
         raise ProviderError(  # pragma: no cover
             "unreachable", provider=self.provider.name, model_alias=self.spec.alias
         )
+
+    def _send_before_deadline(
+        self,
+        *,
+        body: dict[str, Any],
+        headers: dict[str, str],
+        timeout: httpx.Timeout,
+        deadline: float,
+        total: int,
+    ) -> httpx.Response:
+        """在一个**绝对**总 deadline 内读完整个响应。
+
+        httpx 的 read timeout 只约束单次 socket 读：服务端只要不停挤字节，
+        每次读都不超时，单个请求就能无限拖长。因此这里用流式读取，对每个
+        到达的分块比对派发前记下的单调时钟 deadline；持续慢速响应无法靠
+        “每个分块重新计时”绕过总时限。
+
+        各阶段 timeout 仍然保留（connect/read/write/pool 各自被总剩余量
+        clamp），但它们只是单阶段上限，不承担总时长。
+
+        超时直接抛 httpx.ReadTimeout，由调用方翻译成“结果未知”；with 退出时
+        关闭该响应，httpx 会丢弃未读完的连接——不关闭共享 client，也不把请求
+        留在后台继续跑。
+        """
+        with self._client.stream(
+            "POST",
+            CHAT_COMPLETIONS_PATH,
+            json=body,
+            headers=headers,
+            timeout=timeout,
+        ) as response:
+            chunks: list[bytes] = []
+            for chunk in response.iter_bytes():
+                chunks.append(chunk)
+                if time.monotonic() > deadline:
+                    raise httpx.ReadTimeout(
+                        f"请求总时限 {total}s 已耗尽：持续响应超过 deadline",
+                        request=response.request,
+                    )
+            return httpx.Response(
+                status_code=response.status_code,
+                headers=response.headers,
+                content=b"".join(chunks),
+                request=response.request,
+            )
 
     def _raise_for_status(self, response: httpx.Response) -> None:
         text = self._scrub(response.text)

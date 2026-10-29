@@ -4,14 +4,18 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Callable
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from codepilot.agents.exploration import ExplorationProgress
 from codepilot.context.builder import ContextBuilder
 from codepilot.llm.base import LLMProvider
 from codepilot.llm.types import LLMRequest, LLMResponse, Message
+from codepilot.observability.dispatch import DispatchStoppedError
 from codepilot.observability.redaction import redact
+from codepilot.observability.resources import ResourceCancelledError
 from codepilot.schemas.issue import IssueAnalysis
 from codepilot.schemas.plan import RepairPlan
 from codepilot.schemas.retrieval import RetrievalResult
@@ -45,7 +49,10 @@ class CodingResult(BaseModel):
         "tool_limit",
         "token_budget",
         "cost_budget",
+        "cancelled",
+        "dispatch_stopped",
     ]
+    dispatch_reason: str | None = None
     finished: bool = False
     tool_calls: list[ToolCallAudit] = Field(default_factory=list)
     llm_calls: int = 0
@@ -72,6 +79,13 @@ class CodingAgent:
         self.max_total_tokens = max_total_tokens
         self._blocked_paths: set[str] = set()
         self.execution_feedback = ""
+        self.failure_feedback = ""
+        self.experience_feedback = ""
+        self.system_prompt = _SYSTEM
+        self.cancel_check: Callable[[], bool] | None = None
+        self.candidate_identity: Callable[[], str] | None = None
+        self.handoff_text = ""
+        self.candidate_present: Callable[[], bool] | None = None
 
     def run(
         self,
@@ -108,8 +122,16 @@ class CodingAgent:
             issue_analysis,
             retrieval,
             issue_text=issue_text,
-            plan_text=plan.model_dump_json(indent=2),
-            system_prompt=_SYSTEM,
+            plan_text=json.dumps(
+                {
+                    "stage_handoff": self.handoff_text or plan.model_dump_json(indent=2),
+                    "failure": self.failure_feedback,
+                    "experience_advice": self.experience_feedback,
+                    "recovery_observations": self.execution_feedback,
+                },
+                ensure_ascii=False,
+            ),
+            system_prompt=self.system_prompt,
             budget=48_000,
         )
         source_candidates = [
@@ -123,18 +145,27 @@ class CodingAgent:
                 + json.dumps(source_candidates)
                 + ". Previously rejected paths: "
                 + json.dumps(sorted(self._blocked_paths))
-                + "\nVerified recovery observations: "
-                + self.execution_feedback
+                + "\nCheck all four plan.contract dimensions. Unknown is not a verified requirement. "
+                + "State changed repair hypotheses as Hypothesis: <cause>; expected outputs must "
+                + "come from the public contract, never from the candidate implementation."
             )
         ]
         specs = self.registry.specs(ToolRole.CODER)
         audits: list[ToolCallAudit] = []
+        progress = ExplorationProgress(
+            relevant_files=set(source_candidates),
+            modified=self.candidate_present() if self.candidate_present else False,
+        )
+        if self.candidate_identity:
+            progress.observe_candidate(self.candidate_identity())
+        redirected = False
         llm_calls = 0
         test_runs_this_round = 0
         force_readonly = False
         relocalizations = 0
         readonly_names = {
             "read_file",
+            "read_evidence",
             "search_code",
             "find_symbol",
             "get_callers",
@@ -142,6 +173,8 @@ class CodingAgent:
             "get_related_tests",
         }
         while True:
+            if self.cancel_check is not None and self.cancel_check():
+                return CodingResult(stop_reason="cancelled", tool_calls=audits, llm_calls=llm_calls)
             if self.usage.total_tokens >= token_limit:
                 return CodingResult(
                     stop_reason="token_budget", tool_calls=audits, llm_calls=llm_calls
@@ -155,13 +188,23 @@ class CodingAgent:
             available = (
                 [spec for spec in specs if spec.name in readonly_names] if diagnosing else specs
             )
-            response = self.provider.complete(
-                LLMRequest(
-                    messages=messages,
-                    tools=available,
-                    purpose="coder_relocalize" if diagnosing else "coder",
+            try:
+                response = self.provider.complete(
+                    LLMRequest(
+                        messages=messages,
+                        tools=available,
+                        purpose="coder_relocalize" if diagnosing else "coder",
+                    )
                 )
-            )
+            except DispatchStoppedError as exc:
+                return CodingResult(
+                    stop_reason="dispatch_stopped",
+                    dispatch_reason=str(exc),
+                    tool_calls=audits,
+                    llm_calls=llm_calls,
+                )
+            except ResourceCancelledError:
+                return CodingResult(stop_reason="cancelled", tool_calls=audits, llm_calls=llm_calls)
             llm_calls += 1
             self._record_usage(response)
             if not response.tool_calls and diagnosing:
@@ -188,6 +231,11 @@ class CodingAgent:
                 Message(role="assistant", content=response.content, tool_calls=response.tool_calls)
             )
             for call in response.tool_calls:
+                result: dict[str, Any]
+                if self.cancel_check is not None and self.cancel_check():
+                    return CodingResult(
+                        stop_reason="cancelled", tool_calls=audits, llm_calls=llm_calls
+                    )
                 if len(audits) >= self.max_tool_calls:
                     return CodingResult(
                         stop_reason="tool_limit", tool_calls=audits, llm_calls=llm_calls
@@ -230,6 +278,17 @@ class CodingAgent:
                         response_result = self.registry.execute(
                             call.name, call.arguments, role=ToolRole.CODER
                         )
+                    except DispatchStoppedError as exc:
+                        return CodingResult(
+                            stop_reason="dispatch_stopped",
+                            dispatch_reason=str(exc),
+                            tool_calls=audits,
+                            llm_calls=llm_calls,
+                        )
+                    except ResourceCancelledError:
+                        return CodingResult(
+                            stop_reason="cancelled", tool_calls=audits, llm_calls=llm_calls
+                        )
                     except UnregisteredToolError as exc:
                         result = {
                             "ok": False,
@@ -240,6 +299,33 @@ class CodingAgent:
                         if call.name == "run_tests" and bool(result.get("ok")):
                             test_runs_this_round += 1
                 elapsed = int((time.monotonic() - started) * 1000)
+                exploration = progress.observe(
+                    call.name, call.arguments, result, response.content or ""
+                )
+                if self.candidate_present is not None and call.name in {
+                    "edit_file",
+                    "create_file",
+                    "get_git_diff",
+                }:
+                    progress.modified = self.candidate_present()
+                    exploration["has_modification"] = progress.modified
+                    exploration["modification_basis"] = "workspace_diff"
+                if self.candidate_identity and call.name in {
+                    "edit_file",
+                    "create_file",
+                    "get_git_diff",
+                }:
+                    exploration.update(progress.observe_candidate(self.candidate_identity()))
+                if progress.low_yield >= 6 and not redirected:
+                    force_readonly = True
+                    redirected = True
+                    exploration["redirect"] = "coder_relocalize_once"
+                    exploration["feedback"] += (
+                        " Next turn uses the existing read-only diagnosis route, then returns to coding within unchanged budgets."
+                    )
+                result["exploration"] = exploration
+                if self.registry.observe:
+                    self.registry.observe("exploration", **exploration)
                 error = result.get("error")
                 if isinstance(error, dict) and "test is read-only" in str(error.get("message", "")):
                     path = str(call.arguments.get("path", ""))
@@ -266,7 +352,11 @@ class CodingAgent:
                     ok=bool(result.get("ok")),
                     duration_ms=elapsed,
                     error_code=str(error_code) if error_code else None,
-                    result_summary=_summarize_result(result),
+                    result_summary={
+                        **_summarize_result(result),
+                        "exploration": exploration,
+                        "cache": (result.get("data") or {}).get("cache", {}),
+                    },
                 )
                 audits.append(audit)
                 messages.append(
@@ -323,6 +413,7 @@ def _summarize_result(result: dict[str, Any]) -> dict[str, Any]:
             "requested",
             "files",
             "base_commit",
+            "artifact_ref",
         }
     }
     execution = data.get("execution")

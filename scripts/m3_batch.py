@@ -542,6 +542,9 @@ class M3Batch:
         self._save()
 
     def run(self) -> dict[str, Any]:
+        return self._with_batch_lock(self._run_locked)
+
+    def _with_batch_lock(self, action: Callable[[], dict[str, Any]]) -> dict[str, Any]:
         self.artifact_root.mkdir(parents=True, exist_ok=True)
         lock = self.artifact_root / "batch.lock"
         try:
@@ -550,10 +553,70 @@ class M3Batch:
             raise BatchStopError("batch lock exists; inspect recorded PID before recovery") from exc
         try:
             os.write(descriptor, json.dumps({"pid": os.getpid(), "started_at": _now()}).encode())
-            return self._run_locked()
+            return action()
         finally:
             os.close(descriptor)
             lock.unlink()
+
+    def resume_official(self) -> dict[str, Any]:
+        """Explicit official-only recovery; this path cannot call internal_runner."""
+        return self._with_batch_lock(self._resume_official_locked)
+
+    def _resume_official_locked(self) -> dict[str, Any]:
+        if not self.live:
+            return {**self._summary(), "status": "dry_run"}
+        for entry in self.state["instances"]:
+            if entry["status"] not in {"OFFICIAL_PENDING", "OFFICIAL_ERROR"}:
+                continue
+            root = self.artifact_root / "instances" / entry["instance_id"]
+            try:
+                saved = _read_json(root / f"official-request-{self.batch_id}.json")
+                if saved.get("instance_id") != entry["instance_id"] or saved.get(
+                    "run_id"
+                ) != entry.get("run_id"):
+                    raise InstanceError("official recovery request identity mismatch")
+                receipt = (
+                    self.repo_root / saved["candidate_receipt"]
+                    if saved.get("candidate_receipt")
+                    else None
+                )
+                if receipt is not None:
+                    from codepilot.eval.candidate import verify_candidate
+
+                    if not receipt.resolve().is_relative_to(self.repo_root.resolve()):
+                        raise InstanceError("candidate receipt escapes project")
+                    _, digest = verify_candidate(self.repo_root, _read_json(receipt))
+                    if digest != saved.get("delivered_patch_sha256"):
+                        raise InstanceError("official recovery candidate changed")
+                else:
+                    report = acceptance._root_report(root, str(entry["run_id"]))
+                    official._verify_prediction(
+                        root,
+                        run_id=str(entry["run_id"]),
+                        instance=entry["instance_id"],
+                        prediction=report.get("prediction") or {},
+                        expected_patch_sha256=saved["delivered_patch_sha256"],
+                        expected_model=saved["model"],
+                    )
+                instance = next(
+                    i for i in self.instances if i["instance_id"] == entry["instance_id"]
+                )
+                self._evaluate_official(
+                    OfficialRequest(instance, root, str(entry["run_id"]), receipt), entry
+                )
+            except (OSError, ValueError, RuntimeError, KeyError, TypeError) as exc:
+                entry.update(
+                    status="OFFICIAL_ERROR",
+                    official="ERROR",
+                    terminal=False,
+                    stop_reason=f"{type(exc).__name__}: {exc}",
+                )
+                entry.setdefault("errors", []).append(traceback.format_exc())
+                self._save()
+        if all(item["terminal"] for item in self.state["instances"]):
+            self.state["status"] = "completed"
+        self._save()
+        return self._summary()
 
     def _run_locked(self) -> dict[str, Any]:
         if not self.live:
@@ -634,7 +697,7 @@ class M3Batch:
         """
         ingested = 0
         for entry in self.state["instances"]:
-            if entry.get("status") != "OFFICIAL_PENDING":
+            if entry.get("status") not in {"OFFICIAL_PENDING", "OFFICIAL_ERROR"}:
                 continue
             instance_id = entry["instance_id"]
             root = self.artifact_root / "instances" / instance_id
@@ -643,17 +706,29 @@ class M3Batch:
             if not official_path.is_file():
                 entry["stop_reason"] = f"official record is missing: {official_path}"
                 continue
-            official_result = _read_json(official_path)
-            request = _read_json(request_path) if request_path.is_file() else {}
+            try:
+                official_result = _read_json(official_path)
+                request = _read_json(request_path) if request_path.is_file() else {}
+            except (OSError, ValueError, BatchStopError) as exc:
+                entry.update(
+                    official="ERROR",
+                    status="OFFICIAL_ERROR",
+                    terminal=False,
+                    stop_reason=f"invalid official record: {type(exc).__name__}: {exc}",
+                )
+                self._save()
+                continue
             if request:
                 if str(official_result.get("instance_id") or instance_id) != instance_id:
                     raise BatchStopError(f"{instance_id}: official instance identity mismatch")
                 if str(official_result.get("run_id") or entry.get("run_id")) != entry.get("run_id"):
                     raise BatchStopError(f"{instance_id}: official run_id mismatch")
-            verdict = str(official_result.get("official_verdict") or "NOT_EVALUATED")
+            verdict = self._official_verdict(entry, official_result, request)
             if verdict not in {"RESOLVED", "UNRESOLVED"}:
                 entry.update(
-                    official=str(official_result.get("status") or "ERROR"),
+                    official=(
+                        "INVALID_ENV" if official_result.get("status") == "INVALID_ENV" else "ERROR"
+                    ),
                     status="OFFICIAL_ERROR",
                     terminal=False,
                 )
@@ -1012,22 +1087,75 @@ class M3Batch:
         self._save()
         if self.config.get("official_mode") == "external":
             return
-        official_code = self.official_runner(
-            OfficialRequest(instance, root, run_id, candidate_receipt)
-        )
+        self._evaluate_official(OfficialRequest(instance, root, run_id, candidate_receipt), entry)
+
+    def _evaluate_official(self, evaluation: OfficialRequest, entry: dict[str, Any]) -> None:
+        root = evaluation.root
+        request = _read_json(root / f"official-request-{self.batch_id}.json")
         official_path = root / f"official-evaluation-{self.batch_id}.json"
+        if official_path.is_file():
+            try:
+                existing = _read_json(official_path)
+            except (ValueError, BatchStopError):
+                existing = {}
+            verdict = self._official_verdict(entry, existing, request)
+            if verdict in {"RESOLVED", "UNRESOLVED"}:
+                entry.update(official=verdict, status=verdict, terminal=True)
+                self._save()
+                return
+            # Preserve failed process evidence before the existing runner writes
+            # its current-result pointers. No historical verdict/cost is edited.
+            for path in (official_path, root / f"official-{self.batch_id}.log"):
+                if path.is_file():
+                    content = path.read_bytes()
+                    history = (
+                        root
+                        / "official-history"
+                        / f"{path.stem}-{hashlib.sha256(content).hexdigest()}{path.suffix}"
+                    )
+                    history.parent.mkdir(parents=True, exist_ok=True)
+                    if not history.exists():
+                        history.write_bytes(content)
+        official_code = self.official_runner(evaluation)
         if not official_path.is_file():
             entry.update(status="OFFICIAL_ERROR", official="ERROR", terminal=False)
             self._save()
             raise InstanceError("official runner returned without an evaluation record")
         official_result = _read_json(official_path)
-        verdict = str(official_result.get("official_verdict") or "NOT_EVALUATED")
+        verdict = self._official_verdict(entry, official_result, request)
         entry["official"] = verdict
         entry["status"] = verdict if verdict in {"RESOLVED", "UNRESOLVED"} else "OFFICIAL_ERROR"
-        entry["terminal"] = True
+        entry["terminal"] = verdict in {"RESOLVED", "UNRESOLVED"}
+        if official_code != 0:
+            entry["official_process_anomaly"] = f"exit_code={official_code}"
         self._save()
-        if official_code != 0 or verdict not in {"RESOLVED", "UNRESOLVED"}:
+        if not entry["terminal"]:
             raise InstanceError(f"official evaluation did not produce a verdict: {verdict}")
+
+    @staticmethod
+    def _official_verdict(
+        entry: dict[str, Any], result: dict[str, Any], request: dict[str, Any]
+    ) -> str:
+        """Accept only a final verdict bound to this requested candidate.
+
+        Older records omit byte hashes; their explicit run/instance identity is
+        still required. If hashes are present they must agree with the request.
+        """
+        if result.get("instance_id") != entry["instance_id"]:
+            return "ERROR"
+        if result.get("run_id") != entry.get("run_id"):
+            return "ERROR"
+        prediction = result.get("prediction") or {}
+        if not isinstance(prediction, dict):
+            return "ERROR"
+        patch = result.get("patch_sha256") or prediction.get("patch_sha256")
+        if patch and patch != request.get("delivered_patch_sha256"):
+            return "ERROR"
+        digest = prediction.get("predictions_sha256")
+        if digest and digest != request.get("prediction_sha256"):
+            return "ERROR"
+        verdict = str(result.get("official_verdict") or "ERROR")
+        return verdict if verdict in {"RESOLVED", "UNRESOLVED"} else "ERROR"
 
     def _internal_command(self, request: InternalRequest) -> tuple[list[str], dict[str, str]]:
         instance = request.instance
@@ -1237,7 +1365,9 @@ def main() -> int:
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--artifact-root", type=Path, required=True)
     parser.add_argument("--live", action="store_true")
-    parser.add_argument("--ingest-official", action="store_true")
+    official_mode = parser.add_mutually_exclusive_group()
+    official_mode.add_argument("--ingest-official", action="store_true")
+    official_mode.add_argument("--resume-official", action="store_true")
     args = parser.parse_args()
     try:
         batch = M3Batch(
@@ -1247,12 +1377,19 @@ def main() -> int:
             artifact_root=args.artifact_root,
             live=args.live,
         )
-        summary = batch.ingest_official() if args.ingest_official else batch.run()
+        summary = (
+            batch.ingest_official()
+            if args.ingest_official
+            else batch.resume_official()
+            if args.resume_official
+            else batch.run()
+        )
     except (BatchStopError, OSError, ValueError) as exc:
         print(f"STOP {type(exc).__name__}: {exc}", file=sys.stderr)
         return 2
     print(json.dumps(summary, ensure_ascii=False, indent=2))
-    return 0 if summary["status"] in {"dry_run", "completed"} else 1
+    view = summary.get("summary", summary)
+    return 0 if view["status"] in {"dry_run", "completed"} else 1
 
 
 if __name__ == "__main__":

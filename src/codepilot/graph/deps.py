@@ -23,7 +23,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from codepilot.agents.coder import CodingAgent
 from codepilot.agents.diagnoser import DiagnosisAgent
@@ -42,7 +42,9 @@ from codepilot.graph.stop_rules import StopRules
 from codepilot.llm.calls import LLMRunContext
 from codepilot.llm.config import LLMConfig
 from codepilot.llm.registry import LLMRegistry
+from codepilot.observability.dispatch import Deadline
 from codepilot.observability.events import EventSink
+from codepilot.observability.lifecycle import Lifecycle
 from codepilot.patch.validator import PatchValidator
 from codepilot.repo.graph import RepoGraph
 from codepilot.repo.index import RepositoryIndex
@@ -96,6 +98,11 @@ class AccountingSandbox:
     """记录 ``run_tests`` 调用次数的薄包装。"""
 
     inner: Sandbox
+    cancel_check: Callable[[], bool] | None = None
+    observe: Callable[..., Any] | None = None
+    repository: str = ""
+    base_commit: str = ""
+    timing_facts: list[dict[str, Any]] = field(default_factory=list)
     runs: int = 0
     run_log: list[tuple[str, int]] = field(default_factory=list)
 
@@ -108,13 +115,21 @@ class AccountingSandbox:
         env_spec: EnvSpec,
         allow_network: bool = False,
     ) -> EnvironmentBuildResult:
-        return self.inner.build_env(
-            repository=repository,
-            base_commit=base_commit,
-            workspace=workspace,
-            env_spec=env_spec,
-            allow_network=allow_network,
-        )
+        from codepilot.observability.resources import resource_slot
+
+        with (
+            resource_slot("heavy", cancel=self.cancel_check, observe=self.observe),
+            resource_slot(
+                "workspace", workspace=workspace, cancel=self.cancel_check, observe=self.observe
+            ),
+        ):
+            return self.inner.build_env(
+                repository=repository,
+                base_commit=base_commit,
+                workspace=workspace,
+                env_spec=env_spec,
+                allow_network=allow_network,
+            )
 
     def run_tests(
         self,
@@ -125,15 +140,99 @@ class AccountingSandbox:
         tests: Sequence[str] = (),
         artifact_iteration: int = 1,
     ) -> ExecutionResult:
-        self.runs += 1
-        self.run_log.append((str(Path(workspace)), len(tuple(tests))))
-        return self.inner.run_tests(
-            workspace=workspace,
-            environment=environment,
-            env_spec=env_spec,
-            tests=tests,
-            artifact_iteration=artifact_iteration,
-        )
+        from codepilot.observability.resources import resource_slot
+
+        with (
+            resource_slot("test", cancel=self.cancel_check, observe=self.observe),
+            resource_slot(
+                "workspace", workspace=workspace, cancel=self.cancel_check, observe=self.observe
+            ),
+        ):
+            import json
+            import time
+
+            from codepilot.graph.validation_time import estimate_timeout, timing_identity
+            from codepilot.observability.dispatch import (
+                check_dispatch,
+                deadline_diagnostics,
+                dispatch_timeout,
+            )
+
+            identity = timing_identity(
+                self.repository,
+                self.base_commit,
+                {
+                    **environment.model_dump(mode="json"),
+                    "runner_identity": type(self.inner).__module__
+                    + "."
+                    + type(self.inner).__qualname__
+                    + ":"
+                    + str(getattr(getattr(self.inner, "runner_adapter", None), "kind", "pytest")),
+                },
+                env_spec.model_dump(mode="json"),
+                list(tests),
+            )
+            estimate = estimate_timeout(identity, self.timing_facts, env_spec.timeout_seconds)
+            final_timeout = dispatch_timeout(
+                min(env_spec.timeout_seconds, estimate["suggested_seconds"])
+            )
+            estimate["final_timeout_seconds"] = final_timeout
+            estimate["deadline_available_seconds"] = dispatch_timeout(env_spec.timeout_seconds)
+            estimate["estimate_fits"] = final_timeout >= estimate["suggested_seconds"]
+            estimate.update(deadline_diagnostics())
+            estimate["margin_insufficient"] = not estimate["estimate_fits"]
+            # Historical durations describe previous executions, not a lower bound
+            # on a changed candidate. Keep them as diagnostics and let the runner
+            # enforce the actual remaining window.
+            env_spec = env_spec.model_copy(update={"timeout_seconds": final_timeout})
+            check_dispatch("test")
+            self.runs += 1
+            started = time.monotonic()
+            self.run_log.append((str(Path(workspace)), len(tuple(tests))))
+            result = self.inner.run_tests(
+                workspace=workspace,
+                environment=environment,
+                env_spec=env_spec,
+                tests=tests,
+                artifact_iteration=artifact_iteration,
+            )
+            fact = {
+                "identity": identity,
+                "repository": self.repository,
+                "base_commit": self.base_commit,
+                "selectors": list(tests),
+                "collected_order": [t.node_id for t in result.tests],
+                "seconds": time.monotonic() - started,
+                "status": result.status.value.lower(),
+                "complete": result.status.value in {"PASS", "FAIL"}
+                and bool(tests)
+                and all("::" in selector for selector in tests)
+                and {t.node_id for t in result.tests} == set(tests),
+                "process_completed": result.status.value in {"PASS", "FAIL"},
+                "scope_note": "only explicit node-set equality establishes complete scope; file/full runs remain aggregate",
+                "environment_cache_key": environment.cache_key,
+                "image_id": environment.image_id,
+                "runner": env_spec.test_command,
+                "estimate": estimate,
+                "cold_environment": not environment.from_cache,
+                "preparation_seconds": environment.duration_seconds,
+            }
+            self.timing_facts.append(fact)
+            self.timing_facts[:] = self.timing_facts[-256:]
+            result.diagnostics["time_allocation"] = estimate
+            result.diagnostics["timing_fact"] = fact
+            if result.artifact_dir:
+                try:
+                    path = Path(result.artifact_dir) / "dispatch-timing.json"
+                    # Existing execution artifact owns this fact; never rewrite historical facts.
+                    with path.open("x", encoding="utf-8") as handle:
+                        json.dump(fact, handle, ensure_ascii=False, indent=2)
+                except OSError:
+                    if self.observe:
+                        self.observe(
+                            "timing_evidence_unavailable", artifact_dir=result.artifact_dir
+                        )
+            return result
 
     def cleanup(self, *, older_than_seconds: int = 3600) -> list[str]:
         return self.inner.cleanup(older_than_seconds=older_than_seconds)
@@ -237,8 +336,23 @@ class Deps:
     #: 逐请求 LLM 记录里的"当前在哪个节点、第几轮"。装配时绑定 run/task 身份，
     #: 节点进入时由 :func:`codepilot.graph.builder._guard` 更新。
     llm_context: LLMRunContext = field(default_factory=LLMRunContext, init=False, repr=False)
+    lifecycle: Lifecycle = field(init=False)
+    experience_snapshot: list[dict[str, object]] = field(default_factory=list, init=False)
+    fixed_selection: dict[str, Any] = field(default_factory=dict, init=False)
+    harness_started: bool = field(default=False, init=False)
 
     def __post_init__(self) -> None:
+        self.lifecycle = Lifecycle(self.events)
+        self.tools.observe = self.lifecycle.emit
+        self.tools.archive_result = self._archive_tool_result
+        if "read_evidence" not in self.tools.names() and self.tools.query_cache is not None:
+            from codepilot.tools.read_tools import read_evidence_tool
+
+            self.tools.register(
+                read_evidence_tool(self.artifacts.run_dir, self.tools.query_cache.policy)
+            )
+        self.llm_context.before_model = self.lifecycle.emit
+        self.coder.cancel_check = self.cancel_check
         if self.patch_reviewer is not None:
             self.reviewer = self.patch_reviewer
         if not self.run_id:
@@ -252,10 +366,41 @@ class Deps:
         else:
             self.accounting = AccountingSandbox(self.sandbox)
             self.sandbox = self.accounting
+        self.accounting.repository = self.repository
+        self.accounting.base_commit = self.base_commit
+        import json
+
+        for path in sorted(self.artifacts.run_dir.glob("**/dispatch-timing.json"))[-256:]:
+            try:
+                if path.stat().st_size <= 1024 * 1024:
+                    fact = json.loads(path.read_text(encoding="utf-8"))
+                    if isinstance(fact, dict):
+                        self.accounting.timing_facts.append(fact)
+            except (OSError, ValueError):
+                self.lifecycle.emit("timing_evidence_unavailable", reference=str(path))
+        self.accounting.cancel_check = self.cancel_check
+        self.accounting.observe = self.lifecycle.emit
+        self.tools.cancel_check = self.cancel_check
+        self.llm_context.cancel_check = self.cancel_check
         if self.budget_manager is not None:
             self._budget = self.budget_manager
         if self.stop_rules is not None:
             self._stop_rules = self.stop_rules
+
+    def _archive_tool_result(
+        self, name: str, arguments: dict[str, Any], result: dict[str, Any]
+    ) -> str | None:
+        from codepilot.graph.harness import write_projection
+        from codepilot.observability.lifecycle import snapshot_hash
+        from codepilot.observability.redaction import redact
+
+        payload = redact({"tool": name, "arguments": arguments, "result": result})
+        reference = f"tool-results/{snapshot_hash(payload)}.json"
+        if (self.artifacts.run_dir / reference).exists() or write_projection(
+            self, reference, payload
+        ):
+            return reference
+        return None
 
     @property
     def budget(self) -> BudgetManager:
@@ -282,6 +427,21 @@ class Deps:
         return self._stop_rules
 
     # ------------------------------------------------------------------ 身份
+
+    _dispatch_deadline: Deadline | None = field(default=None, init=False, repr=False)
+
+    def dispatch_deadline(self, state: RepairState) -> Deadline:
+        import time
+
+        from codepilot.observability.dispatch import Deadline
+
+        remaining = max(0.0, state.budget.max_runtime_seconds - self.budget.elapsed_seconds(state))
+        expires = time.monotonic() + remaining
+        if self._dispatch_deadline is None:
+            self._dispatch_deadline = Deadline(expires)
+        else:
+            self._dispatch_deadline.expires = min(self._dispatch_deadline.expires, expires)
+        return self._dispatch_deadline
 
     def bind(self, state: RepairState) -> None:
         """把外部副作用计数器对齐到 ``state``（中断恢复的必经入口）。

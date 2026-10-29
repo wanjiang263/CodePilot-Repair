@@ -1,0 +1,51 @@
+{
+  "note": "small synthetic repo; do not extrapolate",
+  "index": {
+    "files": 81,
+    "symbols": 580,
+    "edges": 694,
+    "cold_seconds": 0.923,
+    "warm_seconds_median": 0.1931,
+    "warm_parsed_paths": 0,
+    "single_change_seconds": 0.4496,
+    "single_change_parsed_paths": 1,
+    "single_change_changed_paths": 1,
+    "single_change_reused_paths": 80,
+    "edges_before": 694,
+    "edges_after": 694
+  },
+  "query_cache": {
+    "read_miss_seconds": 0.01485,
+    "read_hit_seconds": 0.00582,
+    "read_hit": true,
+    "read_miss": false,
+    "scoped_search_miss_seconds": 0.27579,
+    "scoped_search_hit_seconds": 0.13672,
+    "scoped_search_hit": false,
+    "global_search_seconds": 0.28644,
+    "global_search_cache": {
+      "hit": false,
+      "identity_seconds": 0.0,
+      "lookup_seconds": 0.0,
+      "search_seconds": 0.21900000000096043,
+      "identity": "ccda5aac1d177bd0ba01b7ce7d2577a5d5a71a090de0a53eb24ab728b82bbf78",
+      "reason": "identity_unavailable_or_scope_limit",
+      "result_kind": "complete"
+    },
+    "hits": 1,
+    "misses": 4,
+    "bypassed_scopes": 1
+  },
+  "resources": {
+    "two_tasks_same_workspace_seconds": 0.511,
+    "two_tasks_disjoint_workspaces_seconds": 0.205,
+    "same_key_serialized": true,
+    "disjoint_keys_parallel": true
+  },
+  "environment": {
+    "python": "3.12.7",
+    "cpu": 20,
+    "repo_files": 81,
+    "workdir": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\phase26-perf-7dehrwsm"
+  }
+}

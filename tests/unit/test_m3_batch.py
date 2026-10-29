@@ -442,7 +442,7 @@ def _success_official(calls: list[str], verdict: str = "RESOLVED") -> Any:
         calls.append(instance)
         _write_json(
             request.root / "official-evaluation-m3-test.json",
-            {"official_verdict": verdict},
+            {"official_verdict": verdict, "instance_id": instance, "run_id": request.run_id},
         )
         return 0
 
@@ -872,6 +872,98 @@ def test_harness_error_recovers_same_candidate_without_model_call(fixture: Fixtu
     assert recovered["status"] == "completed"
     assert ledger.read_bytes() == frozen_bytes
     assert recovered["cost"]["new_settled_cny"] == pytest.approx(0.06)
+
+
+@pytest.mark.parametrize("verdict", ["ERROR", "NOT_EVALUATED", "garbage"])
+def test_invalid_official_record_recovers_without_paid_dispatch(
+    fixture: Fixture, verdict: str
+) -> None:
+    calls: list[str] = []
+    batch = fixture.make(_success_internal(calls), _success_official([], verdict))
+    result = batch.run()
+    assert calls == IDS
+    assert all(not item["terminal"] for item in result["instances"])
+    ledgers = {
+        p: p.read_bytes() for p in fixture.artifact.glob("instances/*/dispatch-ledger-*.json")
+    }
+
+    def forbidden(request: Any) -> int:
+        raise AssertionError("official recovery must not request another model response")
+
+    recovered = fixture.make(forbidden, _success_official([])).run()
+    assert recovered["status"] == "completed"
+    assert all(p.read_bytes() == content for p, content in ledgers.items())
+
+
+def test_nonzero_official_exit_keeps_trusted_verdict(fixture: Fixture) -> None:
+    def official(request: m3_batch.OfficialRequest) -> int:
+        _success_official([])(request)
+        return 7
+
+    result = fixture.make(_success_internal([]), official).run()
+    assert result["status"] == "completed"
+    assert all(item["terminal"] and item["official"] == "RESOLVED" for item in result["instances"])
+    assert all(item["official_process_anomaly"] == "exit_code=7" for item in result["instances"])
+
+
+@pytest.mark.parametrize(
+    "changed", [{"instance_id": "wrong"}, {"run_id": "wrong"}, {"patch_sha256": "wrong"}, {}]
+)
+def test_official_verdict_requires_identity(changed: dict[str, Any]) -> None:
+    entry = {"instance_id": "owner__repo-1", "run_id": "run-1"}
+    request = {"delivered_patch_sha256": "patch-1"}
+    result = (
+        {**entry, "official_verdict": "RESOLVED", **changed}
+        if changed
+        else {"official_verdict": "RESOLVED"}
+    )
+    assert m3_batch.M3Batch._official_verdict(entry, result, request) == "ERROR"
+
+
+def test_official_only_resume_skips_pending_inference_and_preserves_bad_record(
+    fixture: Fixture,
+) -> None:
+    config = json.loads(fixture.config.read_text(encoding="utf-8"))
+    config["official_mode"] = "external"
+    _write_json(fixture.config, config)
+    batch = fixture.make(_success_internal([]), _success_official([]))
+    batch.run()
+    batch.state["instances"][-1].update(status="PENDING", terminal=False)
+    batch._save()
+    root = fixture.artifact / "instances" / IDS[0]
+    record = root / "official-evaluation-m3-test.json"
+    record.write_text("{malformed", encoding="utf-8")
+    official_calls: list[str] = []
+
+    def forbidden(request: Any) -> int:
+        raise AssertionError("official-only entry dispatched a model")
+
+    resumed = fixture.make(forbidden, _success_official(official_calls)).resume_official()
+    assert official_calls == IDS[:-1]
+    assert resumed["instances"][-1]["status"] == "PENDING"
+    assert (
+        next((root / "official-history").glob("*.json")).read_text(encoding="utf-8") == "{malformed"
+    )
+
+
+def test_official_only_resume_reuses_trusted_record_without_rerunning_harness(
+    fixture: Fixture,
+) -> None:
+    config = json.loads(fixture.config.read_text(encoding="utf-8"))
+    config["official_mode"] = "external"
+    _write_json(fixture.config, config)
+    batch = fixture.make(_success_internal([]), _success_official([]))
+    batch.run()
+    root = fixture.artifact / "instances" / IDS[0]
+    entry = batch.state["instances"][0]
+    _write_json(
+        root / "official-evaluation-m3-test.json",
+        {"instance_id": IDS[0], "run_id": entry["run_id"], "official_verdict": "RESOLVED"},
+    )
+    calls: list[str] = []
+    result = fixture.make(_success_internal([]), _success_official(calls)).resume_official()
+    assert calls == IDS[1:]
+    assert result["status"] == "completed"
 
 
 def test_new_segment_reserves_unknown_in_opening(tmp_path: Path) -> None:

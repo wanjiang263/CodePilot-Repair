@@ -101,6 +101,8 @@ class BudgetView(BaseModel):
 
 
 class TaskView(BaseModel):
+    runtime: dict[str, Any] = Field(default_factory=dict)
+    cancellation_state: str = "not_requested"
     task_id: str
     run_id: str
     repository: str
@@ -270,6 +272,7 @@ class HistoryView(BaseModel):
 
 
 class ReportView(BaseModel):
+    harness: dict[str, Any] = Field(default_factory=dict)
     run_id: str
     task_id: str
     status: str

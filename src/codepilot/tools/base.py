@@ -165,7 +165,7 @@ class WorkspacePathPolicy:
 
         # A missing leaf may still have a symlink parent; resolve(strict=False) above
         # follows it. Recheck the existing parent identity immediately before use.
-        parent_candidate = candidate.parent
+        parent_candidate = self.root if candidate == self.root else candidate.parent
         while not parent_candidate.exists() and parent_candidate != self.root:
             parent_candidate = parent_candidate.parent
         parent = parent_candidate.resolve(strict=True)
@@ -198,6 +198,32 @@ class WorkspacePathPolicy:
             raise PathAccessError("not_file", f"path is not a file: {normalized}")
         if not must_exist and candidate.exists():
             raise PathAccessError("already_exists", f"path already exists: {normalized}")
+        return resolved
+
+    def resolve_directory(self, relative: str) -> Path:
+        resolved = self.resolve(relative, must_exist=True, expect_file=False)
+        if not resolved.is_dir():
+            raise PathAccessError("not_directory", "search prefix is not a directory")
+        lexical = self.root / relative
+        for part in (lexical, *lexical.parents):
+            if part == self.root:
+                break
+            if part.is_symlink():
+                raise PathAccessError(
+                    "symlink_directory", "search never follows directory symlinks"
+                )
+        self._check_denylist(PurePosixPath(resolved.relative_to(self.root).as_posix()))
+        return resolved
+
+    def check_historical_read(self, relative: str) -> Path:
+        """Authorize a historical source path regardless of current existence.
+
+        Creation semantics of resolve(must_exist=False) remain unchanged. Both
+        lexical and resolved scopes are checked, including missing symlink leaves.
+        """
+        candidate = self.root / relative
+        resolved = self.resolve(relative, must_exist=candidate.exists())
+        self._check_denylist(PurePosixPath(resolved.relative_to(self.root).as_posix()))
         return resolved
 
     def relative(self, path: Path) -> str:

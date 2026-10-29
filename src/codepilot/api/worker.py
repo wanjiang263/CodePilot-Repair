@@ -41,6 +41,7 @@ from codepilot.artifacts import ArtifactStore
 from codepilot.config import Settings
 from codepilot.eval.assembly import InferenceAssembly, ProviderBundle
 from codepilot.observability.redaction import redact_text
+from codepilot.observability.resources import ResourceCancelledError
 from codepilot.repo.gitcmd import GitError, run_git
 from codepilot.repo.workspace import (
     Workspace,
@@ -152,6 +153,26 @@ class ApiWorker:
                 if source.base_commit:
                     self.database.mark_resolved_base(run_id, source.base_commit)
                 outcome = self._assemble_and_run(row, source)
+            except ResourceCancelledError as exc:
+                self.database.append_event(
+                    run_id=row.run_id,
+                    task_id=row.task_id,
+                    type="cancelled",
+                    node="preparation",
+                    status="cancelled",
+                    summary=str(exc),
+                )
+                self.database.finish_task(
+                    row.run_id,
+                    status="cancelled",
+                    stop_reason="cancelled",
+                    usage=row.usage,
+                    summary={**row.summary, "cancelled_while_waiting": True},
+                    verification_level=row.verification_level or "cancelled",
+                    patch_sha256=row.patch_sha256,
+                    patch_available=bool(row.patch_available),
+                    report_available=bool(row.report_available),
+                )
             except RepositorySecurityError as exc:
                 self._fail(row, "repository_rejected", str(exc), uncertain=False)
             except WorkerError as exc:

@@ -7,6 +7,7 @@ import type { SessionData } from "../../hooks/useSessionData";
 import { formatCost, formatNumber, percent } from "../../lib/format";
 import { stopReasonKey, verificationKey } from "../../lib/status";
 import { EmptyState } from "../ui/EmptyState";
+import { HarnessStatus } from "./HarnessStatus";
 
 function ratio(value: string | undefined): { used: number; limit: number | null; raw: string } | null {
   if (!value) return null;
@@ -97,6 +98,7 @@ export function RunPanel({ session }: { session: SessionData }) {
 
   return (
     <div className="pb-4">
+      <HarnessStatus session={session} />
       <div className="border-b px-3 py-3">
         <div className="mb-2 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-subtle">
           <Gauge size={12} /> {t("panels.budgetUsage")}

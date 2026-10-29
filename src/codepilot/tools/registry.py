@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from codepilot.llm.types import ToolSpec
 from codepilot.tools.base import Tool, ToolPermission, ToolResponse
+from codepilot.tools.query_cache import QueryCache
 
 __all__ = ["ToolRegistry", "ToolRole", "UnregisteredToolError", "build_tool_registry"]
 
@@ -34,6 +35,7 @@ class ToolRegistry:
     PLANNER_NAMES = frozenset(
         {
             "read_file",
+            "read_evidence",
             "search_code",
             "find_symbol",
             "get_callers",
@@ -54,6 +56,11 @@ class ToolRegistry:
 
     def __init__(self, tools: Iterable[Tool] = ()) -> None:
         self._tools: dict[str, Tool] = {}
+        self.query_cache: QueryCache | None = None
+        self.test_budget: TestRunBudget | None = None
+        self.archive_result: Callable[..., str | None] | None = None
+        self.cancel_check: Callable[[], bool] | None = None
+        self.observe: Callable[..., Any] | None = None
         for tool in tools:
             self.register(tool)
 
@@ -81,7 +88,38 @@ class ToolRegistry:
             raise UnregisteredToolError(
                 f"tool is not registered for {role or 'this registry'}: {name}"
             )
-        return tool.execute(arguments)
+        if self.observe:
+            self.observe("before_tool", name=name, permission=tool.permission.value)
+        if self.query_cache is not None and name in {"read_file", "search_code"}:
+            try:
+                result = self.query_cache.execute(tool, arguments, str(role or "all"))
+            except Exception:
+                # Cache/normalization failures cannot suppress original validation,
+                # search fallback or path permissions. Never retry side effects.
+                result = tool.execute(arguments)
+                result.data["cache"] = {"hit": False, "reason": "cache_error_bypassed"}
+        else:
+            from codepilot.observability.resources import resource_slot
+
+            if tool.permission is ToolPermission.WRITE and self.query_cache is not None:
+                with resource_slot(
+                    "workspace",
+                    workspace=self.query_cache.policy.root,
+                    cancel=self.cancel_check,
+                    observe=self.observe,
+                ):
+                    result = tool.execute(arguments)
+            else:
+                result = tool.execute(arguments)
+        if self.query_cache is not None and tool.permission is not ToolPermission.READ:
+            self.query_cache.invalidate(reason=f"workspace_side_effect:{name}")
+        if self.archive_result is not None and name != "read_evidence":
+            reference = self.archive_result(name, arguments, result.model_dump(mode="json"))
+            if reference:
+                result.data["artifact_ref"] = reference
+        if self.observe:
+            self.observe("after_tool", name=name, ok=result.ok, cache=result.data.get("cache", {}))
+        return result
 
     def permission(self, name: str) -> ToolPermission:
         try:
@@ -116,7 +154,7 @@ def build_tool_registry(
     from codepilot.tools.read_tools import find_symbol_tool, read_file_tool, search_code_tool
     from codepilot.tools.write_tools import finish_tool, get_git_diff_tool, run_tests_tool
 
-    return ToolRegistry(
+    registry = ToolRegistry(
         [
             read_file_tool(policy),
             search_code_tool(policy),
@@ -136,3 +174,6 @@ def build_tool_registry(
             finish_tool(),
         ]
     )
+    registry.query_cache = QueryCache(policy)
+    registry.test_budget = test_budget
+    return registry

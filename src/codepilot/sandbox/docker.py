@@ -643,6 +643,8 @@ class DockerSandbox:
             }
         )
         diagnostics["runner_kind"] = adapter.kind if adapter is not None else "pytest"
+        diagnostics["effective_timeout_seconds"] = env_spec.timeout_seconds
+        diagnostics["timeout_source"] = "effective EnvSpec after graph budget clamp"
         return ExecutionResult(
             status=status,
             exit_code=exit_code,

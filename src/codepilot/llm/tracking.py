@@ -62,14 +62,42 @@ class UsageTrackingProvider:
         self._monotonic = monotonic
 
     def complete(self, request: LLMRequest) -> LLMResponse:
+        from codepilot.observability.dispatch import check_dispatch
+
+        check_dispatch("model")
+        context = self._recorder.context if self._recorder else None
+        if context and context.cancel_check and context.cancel_check():
+            from codepilot.observability.resources import ResourceCancelledError
+
+            raise ResourceCancelledError("cancelled before model dispatch")
+        return self._complete(request)
+
+    def _complete(self, request: LLMRequest) -> LLMResponse:
+        if self._recorder is not None and self._recorder.context.before_model is not None:
+            self._recorder.context.before_model("before_model", purpose=request.purpose)
         started = self._monotonic()
         # call_id 与是否配置了 recorder 无关：Agent 侧的审计要用它把工具调用对回到
         # 具体那次模型请求。
         call_id = f"llm-{uuid.uuid4().hex[:12]}"
         role = self._role or _PURPOSE_ROLES.get(request.purpose, request.purpose)
+        from codepilot.observability.dispatch import model_dispatch_count
+
+        dispatches_before = model_dispatch_count()
         try:
             response = self._inner.complete(request)
         except Exception as exc:
+            from codepilot.llm.dispatch_budget import DispatchBudgetStoppedError
+            from codepilot.observability.dispatch import DispatchStoppedError
+            from codepilot.observability.resources import ResourceCancelledError
+
+            if (
+                isinstance(
+                    exc, (DispatchStoppedError, ResourceCancelledError, DispatchBudgetStoppedError)
+                )
+                and model_dispatch_count() == dispatches_before
+                and not getattr(exc, "dispatched", False)
+            ):
+                raise
             # 失败也要计数：token 已经消耗掉了，装作没发生会让预算失控。
             self._usage.add_call(
                 alias=request.purpose,
@@ -98,6 +126,13 @@ class UsageTrackingProvider:
                 error=exc,
             )
             raise
+        finally:
+            if self._recorder is not None and self._recorder.context.before_model is not None:
+                self._recorder.context.before_model(
+                    "after_model",
+                    purpose=request.purpose,
+                    duration_seconds=max(0.0, self._monotonic() - started),
+                )
 
         self._usage.add_call(
             alias=response.model_alias or request.purpose,

@@ -208,10 +208,19 @@ def test_an_uncertain_response_is_a_legitimate_difference_and_says_so(
     def explode() -> httpx.Response:
         raise httpx.ConnectError("connection reset")
 
-    with pytest.raises(DispatchBudgetStoppedError):
-        guard.send(spec, {"max_tokens": OUTPUT_LIMIT}, explode)
-    # 统计层对同一次失败调用记 0 token、``cost_known=False``（与 tracking 的异常分支一致）。
-    provider = UsageTrackingProvider(_chain(spec, guard), usage=usage, role="reviewer")
+    class _Exploding:
+        """模拟"请求已发出、结果未知"：异常发生在预留已经落盘之后。"""
+
+        def complete(self, request: LLMRequest) -> LLMResponse:
+            del request
+            return guard.send(spec, {"max_tokens": OUTPUT_LIMIT}, explode)
+
+        def close(self) -> None:
+            return None
+
+    # 统计层对同一次失败调用记 0 token、``cost_known=False``：钱可能已经花了，
+    # 只是拿不到可信的 usage，不能装作没发生。
+    provider = UsageTrackingProvider(_Exploding(), usage=usage, role="reviewer")
     with pytest.raises(DispatchBudgetStoppedError):
         provider.complete(_request())
 
@@ -223,8 +232,11 @@ def test_an_uncertain_response_is_a_legitimate_difference_and_says_so(
     assert usage.cost_unknown_calls == 1
     assert usage.cost_is_lower_bound
     assert usage.cost == 0.0
-    # 冻结之后连派发都不允许再发生：行数不会继续增长，两侧仍然对得上。
+    # 冻结之后连派发都不允许再发生：既不加账本行，也不加统计调用。
+    # 这一类"预扣之前就被拒"的调用没有花掉任何钱，记账会凭空放大花费。
     before = len(guard.records)
+    calls_before = usage.llm_calls
     with pytest.raises(DispatchBudgetStoppedError):
         provider.complete(_request())
     assert len(guard.records) == before
+    assert usage.llm_calls == calls_before

@@ -205,7 +205,10 @@ async def open_checkpointer(path: Path, run_id: str) -> CheckpointHandle:
     """
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
-    connection = aiosqlite.connect(str(target))
+    # aiosqlite.connect() 返回的是尚未启动的连接；必须在这里 await 一次，
+    # 否则 CheckpointHandle.close() 里的 commit 会抛 ValueError("no active
+    # connection")，把身份校验拒绝恢复这类真正原因盖掉。
+    connection = await aiosqlite.connect(str(target))
     saver = AsyncSqliteSaver(connection, serde=_serde())
     return CheckpointHandle(saver=saver, connection=connection, path=target, run_id=run_id)
 
@@ -444,7 +447,15 @@ async def _ainvoke_checkpointed(
         result = await graph.ainvoke(payload, config, durability="sync")
     except GraphRecursionError as exc:
         return await _report_recursion_overflow(anchor, deps, config, exc, graph=graph)
-    return RepairState.model_validate(result)
+    completed = RepairState.model_validate(result)
+    deps.lifecycle.emit(
+        "checkpoint_saved",
+        revision=completed.runtime.get("revision"),
+        candidate_hash=completed.frozen_patch_hash,
+        checkpoint=str(handle.path),
+        scope="completed synchronous graph invocation",
+    )
+    return completed
 
 
 def _anchor(deps: Deps) -> RepairState:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 
@@ -39,6 +40,7 @@ class FinishInput(BaseModel):
 class TestRunBudget:
     maximum: int
     used: int = 0
+    before_run: Callable[[], EnvSpec | None] | None = None
 
 
 def get_git_diff_tool(policy: WorkspacePathPolicy, base_commit: str) -> Tool:
@@ -79,11 +81,16 @@ def run_tests_tool(
                     "run_tests", "unauthorized_test", f"test is not authorized: {target}"
                 )
             normalized.append(checked)
+        effective = budget.before_run() if budget.before_run is not None else env_spec
+        if effective is None:
+            return ToolResponse.failure(
+                "run_tests", "budget_time", "no execution time remains after closure reservation"
+            )
         budget.used += 1
         result = sandbox.run_tests(
             workspace=policy.root,
             environment=environment,
-            env_spec=env_spec,
+            env_spec=effective,
             tests=normalized,
             artifact_iteration=budget.used,
         )

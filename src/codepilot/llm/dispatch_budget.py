@@ -26,6 +26,8 @@ from codepilot.llm.cost import compute_cost
 class DispatchBudgetStoppedError(RuntimeError):
     """No further HTTP dispatch is safe (deliberately not retryable)."""
 
+    dispatched: bool = False
+
 
 def _validate_per_instance_opening(opening: float, source: dict[str, Any] | None) -> None:
     """Reject an instance opening that is not the validated manifest share.
@@ -94,6 +96,7 @@ class DispatchBudget:
         self.total = opening_balance
         self.frozen = False
         self.records: list[dict[str, Any]] = []
+        self.cancelled_admissions: list[dict[str, Any]] = []
         self.lock = threading.Lock()
         path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("x", encoding="utf-8") as handle:
@@ -109,6 +112,7 @@ class DispatchBudget:
             "opening_balance": self.opening_balance,
             "opening_source": self.opening_source,
             "requests": self.records,
+            "cancelled_admissions": self.cancelled_admissions,
         }
         staging = self.path.with_suffix(".tmp")
         staging.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -131,95 +135,132 @@ class DispatchBudget:
         *,
         metadata: dict[str, Any] | None = None,
     ) -> httpx.Response:
-        with self.lock:
-            price = spec.price
-            output_limit = body.get("max_tokens", body.get("max_completion_tokens"))
+        from codepilot.observability.dispatch import check_dispatch
+
+        while not self.lock.acquire(timeout=0.1):
+            check_dispatch("model")
+        try:
+            check_dispatch("model")
+            return self._send_locked(spec, body, send, metadata=metadata)
+        finally:
+            self.lock.release()
+
+    def _send_locked(
+        self,
+        spec: ModelSpec,
+        body: dict[str, Any],
+        send: Callable[[], httpx.Response],
+        *,
+        metadata: dict[str, Any] | None = None,
+    ) -> httpx.Response:
+        price = spec.price
+        output_limit = body.get("max_tokens", body.get("max_completion_tokens"))
+        if (
+            self.frozen
+            or price is None
+            or not price.is_complete
+            or price.currency != "CNY"
+            or not isinstance(output_limit, int)
+            or output_limit <= 0
+        ):
+            raise DispatchBudgetStoppedError("budget_stopped: unknown cost or frozen ledger")
+        reserve = compute_cost(
+            price=price, input_tokens=spec.context_window, output_tokens=output_limit
+        ).amount
+        if not math.isfinite(reserve) or reserve <= 0 or self.total + reserve > self.limit:
+            raise DispatchBudgetStoppedError("budget_stopped: insufficient pre-dispatch reserve")
+        self.total += reserve
+        record: dict[str, Any] = {
+            "seq": len(self.records) + 1,
+            "model": spec.model,
+            "reserved_cny": reserve,
+            "status": "reserved",
+            "cost_cny": None,
+            "request_sha256": hashlib.sha256(
+                json.dumps(body, sort_keys=True, ensure_ascii=False).encode("utf-8")
+            ).hexdigest(),
+            "dispatched_at_unix": time.time(),
+            "metadata": metadata or {},
+        }
+        self.records.append(record)
+        self._save()  # must persist before network dispatch
+        started = time.monotonic()
+        try:
+            response = send()
+            record["response_request_id"] = response.headers.get("x-request-id")
+            record["http_status"] = response.status_code
+            response.raise_for_status()
+            usage = response.json()["usage"]
+            prompt, output = usage["prompt_tokens"], usage["completion_tokens"]
+            cached = (usage.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
             if (
-                self.frozen
-                or price is None
-                or not price.is_complete
-                or price.currency != "CNY"
-                or not isinstance(output_limit, int)
-                or output_limit <= 0
+                any(type(v) is not int or v < 0 for v in (prompt, output, cached))
+                or cached > prompt
+                or prompt > spec.context_window
+                or output > output_limit
             ):
-                raise DispatchBudgetStoppedError("budget_stopped: unknown cost or frozen ledger")
-            reserve = compute_cost(
-                price=price, input_tokens=spec.context_window, output_tokens=output_limit
-            ).amount
-            if not math.isfinite(reserve) or reserve <= 0 or self.total + reserve > self.limit:
-                raise DispatchBudgetStoppedError(
-                    "budget_stopped: insufficient pre-dispatch reserve"
-                )
-            self.total += reserve
-            record: dict[str, Any] = {
-                "seq": len(self.records) + 1,
-                "model": spec.model,
-                "reserved_cny": reserve,
-                "status": "reserved",
-                "cost_cny": None,
-                "request_sha256": hashlib.sha256(
-                    json.dumps(body, sort_keys=True, ensure_ascii=False).encode("utf-8")
-                ).hexdigest(),
-                "dispatched_at_unix": time.time(),
-                "metadata": metadata or {},
-            }
-            self.records.append(record)
-            self._save()  # must persist before network dispatch
-            started = time.monotonic()
-            try:
-                response = send()
-                record["response_request_id"] = response.headers.get("x-request-id")
-                record["http_status"] = response.status_code
-                response.raise_for_status()
-                usage = response.json()["usage"]
-                prompt, output = usage["prompt_tokens"], usage["completion_tokens"]
-                cached = (usage.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
-                if (
-                    any(type(v) is not int or v < 0 for v in (prompt, output, cached))
-                    or cached > prompt
-                    or prompt > spec.context_window
-                    or output > output_limit
-                ):
-                    raise ValueError("usage outside reserved bounds")
-                amount = compute_cost(
-                    price=price,
-                    input_tokens=prompt,
-                    output_tokens=output,
-                    cached_input_tokens=cached,
-                ).amount
-                if not math.isfinite(amount) or not 0 <= amount <= reserve:
-                    raise ValueError("cost outside reservation")
-            except BaseException as exc:
-                self.frozen = True
-                chain: list[str] = []
-                cause: BaseException | None = exc
-                while cause is not None and len(chain) < 10:
-                    chain.append(type(cause).__name__)
-                    cause = cause.__cause__ or cause.__context__
-                record.update(
-                    status="unknown_frozen",
-                    error_type=type(exc).__name__,
-                    exception_chain=chain,
-                    elapsed_seconds=time.monotonic() - started,
-                    timeout_phase=(
-                        type(exc).__name__ if isinstance(exc, httpx.TimeoutException) else None
-                    ),
-                )
-                self._save()
-                raise DispatchBudgetStoppedError(
-                    "budget_stopped: response/cost uncertain; further dispatch frozen"
-                ) from exc
-            self.total += amount - reserve
-            record.update(
-                status="settled",
-                cost_cny=amount,
+                raise ValueError("usage outside reserved bounds")
+            amount = compute_cost(
+                price=price,
                 input_tokens=prompt,
-                cached_input_tokens=cached,
                 output_tokens=output,
+                cached_input_tokens=cached,
+            ).amount
+            if not math.isfinite(amount) or not 0 <= amount <= reserve:
+                raise ValueError("cost outside reservation")
+        except BaseException as exc:
+            from codepilot.observability.dispatch import DispatchStoppedError
+            from codepilot.observability.resources import ResourceCancelledError
+
+            if isinstance(exc, (DispatchStoppedError, ResourceCancelledError)):
+                self.total -= reserve
+                record.update(
+                    status="settled",
+                    dispatch_status="not_dispatched",
+                    reserved_cny=0.0,
+                    cost_cny=0.0,
+                    input_tokens=0,
+                    output_tokens=0,
+                    cached_input_tokens=0,
+                )
+                # This newly reserved attempt never reached HTTP. Preserve its
+                # admission audit separately; request counts and reservations stay unchanged.
+                assert self.records[-1] is record
+                self.cancelled_admissions.append(self.records.pop())
+                self._save()
+                raise
+            self.frozen = True
+            chain: list[str] = []
+            cause: BaseException | None = exc
+            while cause is not None and len(chain) < 10:
+                chain.append(type(cause).__name__)
+                cause = cause.__cause__ or cause.__context__
+            record.update(
+                status="unknown_frozen",
+                error_type=type(exc).__name__,
+                exception_chain=chain,
                 elapsed_seconds=time.monotonic() - started,
+                timeout_phase=(
+                    type(exc).__name__ if isinstance(exc, httpx.TimeoutException) else None
+                ),
             )
             self._save()
-            return response
+            error = DispatchBudgetStoppedError(
+                "budget_stopped: response/cost uncertain; further dispatch frozen"
+            )
+            error.dispatched = True
+            raise error from exc
+        self.total += amount - reserve
+        record.update(
+            status="settled",
+            cost_cny=amount,
+            input_tokens=prompt,
+            cached_input_tokens=cached,
+            output_tokens=output,
+            elapsed_seconds=time.monotonic() - started,
+        )
+        self._save()
+        return response
 
     def outstanding(self) -> float:
         """Reserved but not yet settled: in-flight requests and frozen outcomes.
@@ -264,6 +305,9 @@ def guarded_send(
     *,
     metadata: dict[str, Any] | None = None,
 ) -> httpx.Response:
+    from codepilot.observability.dispatch import check_dispatch
+
+    check_dispatch("model")
     global _guard
     limit = os.environ.get("CODEPILOT_DISPATCH_BUDGET_CNY")
     if limit is None and _guard is None:

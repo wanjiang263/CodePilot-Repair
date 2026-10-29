@@ -71,16 +71,39 @@ def _now() -> datetime:
 
 
 def task_view(context: ApiContext, row: TaskRow) -> TaskView:
+    from codepilot.api.runtime_view import activity_view
+    from codepilot.rsi import selection_view
+
     summary = context.scrubber.payload(row.summary)
     usage = row.usage
     frozen = _frozen_config(row)
     started = parse_iso(row.started_at)
     finished = parse_iso(row.finished_at)
+    created = parse_iso(row.created_at)
     duration: float | None = None
     if started is not None:
         end = finished or (_now() if not row.terminal else started)
         duration = max(0.0, (end - started).total_seconds())
+    runtime = activity_view(
+        context.database.events_after(
+            row.run_id, max(0, context.database.event_count(row.run_id) - 300)
+        ),
+        now=_now(),
+        terminal=row.terminal,
+    )
+    runtime["policy_configuration"] = selection_view(runtime.get("policy_snapshot", {}))
     return TaskView(
+        runtime={
+            **runtime,
+            "queued_seconds": max(0.0, ((started or _now()) - created).total_seconds())
+            if created
+            else None,
+        },
+        cancellation_state="confirmed"
+        if row.status == "cancelled"
+        else "requested"
+        if row.cancel_requested_at
+        else "not_requested",
         task_id=row.task_id,
         run_id=row.run_id,
         repository=row.repository_label,

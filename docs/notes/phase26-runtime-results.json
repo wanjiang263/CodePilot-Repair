@@ -1,0 +1,211 @@
+{
+ "schema_version": 2,
+ "status": "passed",
+ "date": "2026-10-29",
+ "head": "07625a83f7d39db3f88ddde4ebd5005851978afa",
+ "candidate_version": "phase26-candidate-v5",
+ "parent_version": "phase26-candidate-v4",
+ "real_model_requests": 0,
+ "new_model_cost": 0,
+ "environment": {
+  "platform": "Windows",
+  "python": "3.12.7",
+  "pytest_launcher": ".codex-pytest-tmp/phase26-runtime/isolated_pytest.py (strips credential-like env vars, blocks non-loopback sockets, appends -m 'not docker and not llm')",
+  "http_validation": "127.0.0.1 loopback HTTP servers only",
+  "page_e2e": "127.0.0.1:54250 FastAPI app + FakeLLM provider + fake sandbox + real Chrome headless",
+  "web_build": "web npm run build (tsc -b && vite build) before E2E; web/dist is gitignored"
+ },
+ "groups": [
+  {
+   "name": "A_phase26_mechanisms",
+   "files": [
+    "tests/unit/test_phase26_estimation.py",
+    "tests/graph/test_phase26_ownership.py",
+    "tests/unit/llm/test_http_total_deadline.py",
+    "tests/unit/test_phase26_closeout.py",
+    "tests/unit/test_phase26_final.py",
+    "tests/unit/test_phase26_harness.py",
+    "tests/api/test_phase13_cancel.py",
+    "tests/unit/graph/test_deps.py",
+    "tests/unit/observability/test_events.py",
+    "tests/unit/llm/test_dispatch_ledger_reconciliation.py"
+   ],
+   "result": "113 passed",
+   "duration_seconds": 71.91,
+   "log": ".codex-pytest-tmp/phase26-runtime/final-A-group.log"
+  },
+  {
+   "name": "B_checkpoint_index_batch",
+   "files": [
+    "tests/graph/test_resume.py",
+    "tests/unit/repo/test_index.py",
+    "tests/unit/test_m3_batch.py"
+   ],
+   "result": "85 passed",
+   "duration_seconds": 179.96,
+   "log": ".codex-pytest-tmp/phase26-runtime/final-B-group.log"
+  },
+  {
+   "name": "C_llm_suite",
+   "files": [
+    "tests/unit/llm"
+   ],
+   "result": "439 passed",
+   "duration_seconds": 41.36,
+   "log": ".codex-pytest-tmp/phase26-runtime/final-C-llm.log",
+   "overlap": "includes tests/unit/llm/test_http_total_deadline.py and test_dispatch_ledger_reconciliation.py, which also run in group A"
+  },
+  {
+   "name": "D_frontend_vitest",
+   "files": [
+    "web/src"
+   ],
+   "result": "14 files / 50 tests passed",
+   "log": ".codex-pytest-tmp/phase26-runtime/final-D-vitest.log"
+  }
+ ],
+ "groups_note": "A and C overlap; no unique coverage total is claimed. Earlier intermediate runs were on non-final sources and are superseded by these groups.",
+ "http_total_deadline": {
+  "status": "passed",
+  "implementation": [
+   "src/codepilot/llm/openai_compatible.py: _send_before_deadline streams the response and checks time.monotonic() against one request-total deadline after every chunk; exceeding it raises httpx.ReadTimeout('请求总时限 %ss 已耗尽：持续响应超过 deadline').",
+   "The response is rebuilt from buffered chunks only after the full body arrives; leaving the context closes that response without closing the shared httpx client.",
+   "src/codepilot/llm/retry.py: call_with_retry invokes a before_retry callback after on_retry and before sleeping; openai_compatible.complete passes lambda: check_dispatch('model') so a post-timeout re-dispatch cannot overwrite the unknown-billing outcome.",
+   "Per-phase connect/read/write/pool timeouts remain; they are no longer treated as a request total."
+  ],
+  "tests": "tests/unit/llm/test_http_total_deadline.py: 10 passed in 19.20s",
+  "covered": [
+   "test_total_deadline_bounds_a_continuous_slow_body",
+   "test_total_deadline_bounds_delayed_headers",
+   "test_total_deadline_bounds_staged_response",
+   "test_complete_response_under_the_deadline_succeeds",
+   "test_no_hidden_retry_after_the_deadline_expires",
+   "test_one_request_timeout_does_not_affect_another",
+   "test_cancel_before_dispatch_sends_nothing_and_is_not_unknown",
+   "test_settled_admission_uses_trusted_complete_usage",
+   "test_timeout_after_dispatch_is_unknown_and_frozen",
+   "test_cancelled_after_reservation_before_http_is_refunded"
+  ],
+  "evidence": "loopback-only fake HTTP servers; no provider request. Admission outcomes observed: settled with trusted usage, unknown+frozen after dispatch timeout, cancelled+refund before HTTP."
+ },
+ "ownership": {
+  "status": "passed",
+  "decisions": [
+   "Node bodies stay synchronous I/O inside a private loop per node, executed via asyncio.to_thread; the task-level asyncio loop owns graph/checkpoint orchestration only.",
+   "src/codepilot/observability/events.py: EventSink uses threading.RLock around the whole emit path so seq allocation, JSONL append, API mirror and runtime projection stay atomic; close() and last_seq also take the lock.",
+   "src/codepilot/graph/checkpoint.py: open_checkpointer awaits aiosqlite.connect; without the await, __aexit__ raised ValueError('no active connection') and masked CheckpointIdentityError.",
+   "SQLAlchemy sessions are never used concurrently: one task graph executes nodes sequentially and each node completes before the next starts; no pool sharing across tasks.",
+   "No async object bound to the task loop is reused inside a node loop; the shared httpx client is synchronous and only reached through its thread-safe connection pool.",
+   "contextvars, dispatch deadline, cancellation event and source attribution are established at the node boundary; asyncio.shield keeps node result delivery, and CancelledError waits for the worker thread instead of abandoning live side effects."
+  ],
+  "tests": "tests/graph/test_phase26_ownership.py: 5 passed; tests/graph/test_resume.py: 16 passed; batch suite: 46 passed",
+  "covered": [
+   "test_event_sink_keeps_one_sequence_across_threads (8 threads x 25 emits -> seq 1..200)",
+   "test_consecutive_nodes_share_the_index_and_emit_ordered_events",
+   "test_two_independent_tasks_run_in_parallel_without_sharing_state",
+   "test_cancel_during_a_model_wait_stops_at_the_node_boundary",
+   "test_checkpoint_after_cancel_is_readable_and_resume_does_not_replay_calls"
+  ],
+  "evidence": "cancel observed CANCELLED + StopReason.CANCELLED with usage.llm_calls retained; checkpoint state read back as CANCELLED; resume_run did not replay a completed fake call; no leaked threads after cancellation."
+ },
+ "estimation_and_recovery": {
+  "status": "passed",
+  "implementation": [
+   "src/codepilot/graph/validation_time.py: estimate_timeout only considers samples whose candidate identity matches; historical 250s / suggested 320s / runner cap 300s no longer refuses dispatch for insufficient margin.",
+   "src/codepilot/graph/deps.py AccountingSandbox.run_tests: resource slot -> identity -> estimate -> final_timeout = dispatch_timeout(min(env.timeout_seconds, suggested)) -> check_dispatch('test') -> runs += 1 -> inner run -> timing facts. Remaining deadline is rechecked after the slot is acquired; a run stopped before dispatch neither counts nor records.",
+   "Closure reservation is deducted once from the remaining window; aggregate/file-level evidence never promotes an incomplete scope to complete."
+  ],
+  "tests": "tests/unit/test_phase26_estimation.py: 5 passed",
+  "covered": [
+   "test_a_changed_candidate_ignores_old_slow_samples_and_still_dispatches",
+   "test_insufficient_margin_dispatches_with_the_runner_cap_not_a_refusal",
+   "test_a_run_stopped_before_dispatch_does_not_count_or_record",
+   "test_incomplete_scope_is_recorded_as_aggregate_evidence_only",
+   "test_closure_reservation_is_deducted_once_from_the_remaining_window"
+  ],
+  "recovery": "checkpoint after cancel is readable and resume continues from the valid checkpoint; completed fake calls are not replayed; official-only recovery uses a fake runner and does not call internal inference; invalid results remain recoverable and ledger/history is not rewritten."
+ },
+ "page_e2e": {
+  "status": "passed",
+  "results": "docs/notes/phase26-page-e2e-results.json",
+  "scenarios": [
+   "queued_cancel: UI Cancel -> confirm dialog -> status=cancelled, cancellation_state=confirmed, stop_reason=cancelled",
+   "completed_run: demo/mini_calc task succeeded, verification_level=m2_verified, 174 events, target tests PASS, simulated provider/sandbox",
+   "running_cancel: requested observed 2ms after click while running; final cancelled + stop_reason=cancelled",
+   "sse_reconnect: page reload during run; 175 replayed events strictly increasing, no duplicates, ends with stream_end; after_seq filtering verified",
+   "run_switch: completed and cancelled runs keep isolated outcomes"
+  ],
+  "console_errors": 0,
+  "real_model_requests": 0,
+  "screenshots": ".codex-pytest-tmp/phase26-runtime/page-e2e/out/shots/ (00-connected, 01-queued-cancelled, 02-completed, 03-cancel-requested, 04-cancel-confirmed, 05-reconnected-completed, 06-switched-back-completed)",
+  "first_failures": [
+   "First attempt waited for 'Final outcome' but CSS text-transform renders 'FINAL OUTCOME'; evidence kept at .codex-pytest-tmp/phase26-runtime/page-e2e/first-attempt/.",
+   "Clicking header 'Run details' showed the report view; HarnessStatus only mounts in DetailPanel tab 'run', so the script clicks that tab first.",
+   "SSE frames from sse-starlette use CRLF; the parser now splits on /\\r?\\n\\r?\\n/ and /\\r?\\n/."
+  ]
+ },
+ "performance": {
+  "results": "docs/notes/phase26-performance-results.json",
+  "repo": "81 files / 580 symbols / 694 edges, local synthetic repository",
+  "observations": {
+   "cold_index_seconds": 0.923,
+   "warm_index_seconds": 0.1931,
+   "warm_parsed_paths": 0,
+   "single_change_seconds": 0.4496,
+   "single_change_parsed_paths": 1,
+   "single_change_reused_paths": 80,
+   "read_file_miss_seconds": 0.01485,
+   "read_file_hit_seconds": 0.00582,
+   "scoped_search_first_seconds": 0.27579,
+   "scoped_search_second_seconds": 0.13672,
+   "query_cache": "1 hit / 4 misses / 1 bypassed scope",
+   "two_tasks_same_workspace_seconds": 0.511,
+   "two_tasks_disjoint_workspaces_seconds": 0.205
+  },
+  "limitations": "Small synthetic repository; numbers cannot be extrapolated to large repositories. Search cache bypasses scopes without a trusted revision by design."
+ },
+ "static_checks": {
+  "results": "docs/notes/phase26-static-checks.json",
+  "ast": "50 Python files, 0 failures",
+  "ruff_check": "All checks passed",
+  "ruff_format": "50 files already formatted",
+  "mypy": "Success: no issues found in 42 source files",
+  "typescript": "tsc --noEmit passed",
+  "eslint": "5 TS/TSX files, --max-warnings=0 passed",
+  "git_whitespace": "git -c core.whitespace=cr-at-eol diff --check passed",
+  "locale_json": "2 locale JSON files parsed"
+ },
+ "archive": {
+  "candidate": "phase26-candidate-v5",
+  "parent": "phase26-candidate-v4",
+  "status": "pending",
+  "sources": 57,
+  "diff_bytes": 345172,
+  "diff_sha256": "b2d0cbfd8c9a8b88459bd36b6a16fea3fd55ac5dbe9839095a1c1614f6c69a52",
+  "snapshot_sha256": "ecf503d292a5a030514ed7f31926180b6d230b88251e616e026dc15ecfbfd052",
+  "integrity": "docs/notes/phase26-final-archive-integrity.json",
+  "active_pointer_created": false,
+  "verified": "source hashes, raw hashes, snapshot hash, diff hash and reverse-apply all matched; 57 diff paths equal 57 source paths"
+ },
+ "first_failures_fixed": [
+  "tests/unit/graph/test_deps.py fixtures used SimpleNamespace missing names()/query_cache/model_dump; replaced with ToolRegistry() and EnvironmentBuildResult(status=PASS, ...).",
+  "tests/api/test_phase13_cancel.py guards lacked lifecycle/dispatch_deadline/budget; added a full _guard_deps fixture.",
+  "tests/unit/llm/test_dispatch_ledger_reconciliation.py raised ConnectError before the reservation was written; the fake now fails after the durable reservation.",
+  "git diff --check flags CR on CRLF files; used -c core.whitespace=cr-at-eol instead of rewriting line endings."
+ ],
+ "unresolved": [],
+ "not_executed": [
+  "test50/test300/M4 budgets",
+  "Docker, image downloads, official Harness",
+  "real model/provider calls and any paid request",
+  "RSI effect experiments or automatic policy promotion",
+  "push/PR/release and active-pointer creation"
+ ],
+ "limitations": [
+  "Real-provider behavior, streaming latency and billing reconciliation were not exercised; loopback fakes only.",
+  "Performance was measured on an 81-file synthetic repository and is not transferable to large repositories.",
+  "Index cold updates may reparse all Python sources when bindings are not persisted.",
+  "Page E2E used a fake provider and fake sandbox; Docker/official sandbox behavior remains unverified.",
+  "Candidate v5 stays pending with no active pointer; prompt/experience rollback is not source-code rollback."
+ ]
+}

@@ -63,6 +63,15 @@ def read_file_tool(policy: WorkspacePathPolicy) -> Tool:
         path = policy.resolve(args.path, must_exist=True)
         policy.verify_identity(path)
         lines = path.read_text(encoding="utf-8").splitlines()
+        if not lines and args.start_line == 1:
+            return ToolResponse.success(
+                "read_file",
+                path=policy.relative(path),
+                start_line=1,
+                end_line=0,
+                total_lines=0,
+                content="",
+            )
         end = args.end_line if args.end_line is not None else min(len(lines), args.start_line + 399)
         if end < args.start_line:
             return ToolResponse.failure(
@@ -114,11 +123,24 @@ def _is_denied_directory(relative: str, policy: WorkspacePathPolicy) -> bool:
     return any(rule in candidates for rule in policy.deny_directories)
 
 
+def _search_root(policy: WorkspacePathPolicy, path_glob: str | None) -> Path:
+    prefix = re.split(r"[?*\[]", path_glob or "", maxsplit=1)[0]
+    directory = prefix.rsplit("/", 1)[0] if "/" in prefix else ""
+    if directory:
+        try:
+            path = policy.resolve_directory(directory)
+            if path.is_dir() and not (policy.root / directory).is_symlink():
+                return path
+        except (OSError, ValueError):
+            pass
+    return policy.root
+
+
 def _iter_search_files(
     policy: WorkspacePathPolicy, path_glob: str | None
 ) -> Iterator[tuple[str, Path]]:
     """按确定顺序遍历 workspace 内可搜索文件（不跟随符号链接）。"""
-    for dirpath, dirnames, filenames in os.walk(policy.root, followlinks=False):
+    for dirpath, dirnames, filenames in os.walk(_search_root(policy, path_glob), followlinks=False):
         base = Path(dirpath)
         relative_dir = base.relative_to(policy.root).as_posix()
         kept: list[str] = []
@@ -189,7 +211,13 @@ def _search_with_python(
             if column == 0:
                 continue
             matches.append(
-                {"path": relative, "line": line_no, "column": column, "text": line[:1000]}
+                {
+                    "path": relative,
+                    "line": line_no,
+                    "column": column,
+                    "text": line[:1000],
+                    "text_truncated": len(line) > 1000,
+                }
             )
             if len(matches) > _MAX_SEARCH_MATCHES:
                 truncated = True
@@ -222,6 +250,9 @@ def _search_with_ripgrep(
         "--column",
         "--no-heading",
         "--color=never",
+        "--no-ignore-parent",
+        "--no-ignore-global",
+        "--no-config",
     ]
     if not args.regex:
         command.append("--fixed-strings")
@@ -229,7 +260,8 @@ def _search_with_ripgrep(
         command.extend(["--glob", args.path_glob])
     for denied in sorted(policy.deny_directories):
         command.extend(["--glob", f"!{denied}/**"])
-    command.extend(["--", args.pattern, "."])
+    scope = _search_root(policy, args.path_glob).relative_to(policy.root).as_posix()
+    command.extend(["--", args.pattern, scope])
     started = time.perf_counter()
     try:
         completed = subprocess.run(
@@ -275,6 +307,7 @@ def _search_with_ripgrep(
                 "line": int(line_no),
                 "column": int(column),
                 "text": text[:1000],
+                "text_truncated": len(text) > 1000,
             }
         )
     matches.sort(key=lambda item: (str(item["path"]), int(item["line"]), int(item["column"])))
@@ -356,5 +389,54 @@ def find_symbol_tool(index: RepositoryIndex) -> Tool:
         description="Find indexed symbols by exact or substring match.",
         permission=ToolPermission.READ,
         input_model=FindSymbolInput,
+        handler=handle,
+    )
+
+
+class ReadEvidenceInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    reference: str = Field(pattern=r"^tool-results/[a-f0-9]{64}\.json$")
+    offset: int = Field(default=0, ge=0)
+    length: int = Field(default=8000, ge=1, le=12000)
+
+
+def read_evidence_tool(root: Path, policy: WorkspacePathPolicy) -> Tool:
+    """Read immutable task-local result pages, never arbitrary artifact paths."""
+
+    def handle(raw: BaseModel) -> ToolResponse:
+        import json
+
+        from codepilot.observability.lifecycle import snapshot_hash
+
+        args = ReadEvidenceInput.model_validate(raw)
+        path = (root / args.reference).resolve(strict=True)
+        if not path.is_relative_to(root.resolve()) or path.stat().st_size > 16 * 1024 * 1024:
+            raise ValueError("evidence reference is outside this task or too large")
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if snapshot_hash(payload) != path.stem:
+            raise ValueError("evidence content identity mismatch")
+        if payload.get("tool") not in {"read_file", "search_code"}:
+            raise ValueError("only archived source queries are readable through this tool")
+        data = payload.get("result", {}).get("data", {})
+        paths = [data["path"]] if data.get("path") else []
+        paths += [match["path"] for match in data.get("matches", [])]
+        for relative in paths:
+            policy.check_historical_read(relative)
+        content = json.dumps(payload, ensure_ascii=False, indent=2)
+        end = args.offset + args.length
+        return ToolResponse.success(
+            "read_evidence",
+            content=content[args.offset : end],
+            historical=True,
+            reference=args.reference,
+            next_offset=end if end < len(content) else None,
+            truncated=end < len(content),
+        )
+
+    return Tool(
+        name="read_evidence",
+        description="Read a page of a previously returned task-local source evidence reference. Historical content is not current workspace state.",
+        input_model=ReadEvidenceInput,
+        permission=ToolPermission.READ,
         handler=handle,
     )

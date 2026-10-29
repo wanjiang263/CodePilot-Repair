@@ -141,6 +141,11 @@ class RepairState(BaseModel):
     plan_tools: PlannerToolAudit | None = None
     """Planner 的只读工具调用审计。``None`` = 没采集到，**不等于**"模型没调用工具"。"""
 
+    failure_summary: dict[str, Any] = Field(default_factory=dict)
+    runtime: dict[str, Any] = Field(default_factory=dict)
+    policy_snapshot: dict[str, Any] = Field(default_factory=dict)
+    experience_refs: list[str] = Field(default_factory=list)
+
     error_class: str | None = None
     """终态归因大类，取值见 :class:`codepilot.errors.FailureClass`。"""
 

@@ -23,6 +23,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
 
@@ -56,6 +57,7 @@ from codepilot.graph.target_tests import changed_files, select_target_tests
 from codepilot.observability.events import EventType
 from codepilot.observability.redaction import redact_text
 from codepilot.patch.diff import generate_git_diff
+from codepilot.sandbox.env_spec import EnvSpec
 from codepilot.schemas.enums import (
     ExecutionStatus,
     RepairStrategy,
@@ -491,15 +493,11 @@ def _test_time_remaining(state: RepairState, deps: Deps) -> float:
     stopped by its own time gate even when all its token/cost budget is intact.
     """
     reserve = _closure_reservation(state, deps).seconds
-    return max(
-        state.budget.max_runtime_seconds - deps.budget.elapsed_seconds(state) - reserve,
-        0.0,
-    )
+    return deps.dispatch_deadline(state).remaining(reserve)
 
 
 def _build_baseline(deps: Deps, state: RepairState, scope: tuple[str, ...]) -> TestBaseline:
     from codepilot.sandbox.baseline import build_test_baseline
-    from codepilot.sandbox.env_spec import EnvSpec
 
     def before_run() -> EnvSpec | ExecutionResult:
         live = state.model_copy(update={"test_runs": deps.test_runs, "usage": deps.usage})
@@ -765,6 +763,38 @@ def _run_coder(
     """
     if state.issue_analysis is None:
         raise ValueError(f"{node} requires an issue analysis")
+    from codepilot.graph.evidence import failure_summary, task_experience
+    from codepilot.graph.harness import write_projection
+
+    memory = task_experience(state)
+    write_projection(deps, "harness/l0.json", memory)
+    deps.coder.failure_feedback = json.dumps(
+        {"L0": memory, "failure": failure_summary(state)}, ensure_ascii=False
+    )
+    deps.coder.candidate_present = lambda: bool(_workspace_patch(deps, state))
+
+    def current_candidate_identity() -> str:
+        current = _workspace_patch(deps, state)
+        return patch_hash(current) if current else ""
+
+    deps.coder.candidate_identity = current_candidate_identity
+    from codepilot.graph.evidence import stage_handoff
+
+    handoff = stage_handoff(state, round_plan)
+    deps.coder.handoff_text = json.dumps(handoff, ensure_ascii=False)
+    write_projection(deps, f"harness/handoff-{node}-{state.iteration}.json", handoff)
+    tool_budget = getattr(deps.tools, "test_budget", None)
+    if tool_budget is not None:
+
+        def tool_env_spec() -> EnvSpec | None:
+            remaining = _test_time_remaining(state, deps)
+            if remaining < 1:
+                return None
+            return deps.env_spec.model_copy(
+                update={"timeout_seconds": min(deps.env_spec.timeout_seconds, int(remaining))}
+            )
+
+        tool_budget.before_run = tool_env_spec
     result = deps.coder.run(
         issue_text=state.issue,
         issue_analysis=state.issue_analysis,
@@ -778,6 +808,7 @@ def _run_coder(
     digest = patch_hash(patch)
     calls = [item.model_dump(mode="json") for item in result.tool_calls]
     local = _LOCAL_CODING_STOPS.get(result.stop_reason)
+    write_projection(deps, f"exploration/{state.iteration + 1}.json", calls)
     update: dict[str, Any] = {
         "current_patch": patch,
         # 冻结「这一轮编码交出去的补丁版本」；空补丁没有可验证身份，写空串。
@@ -790,6 +821,27 @@ def _run_coder(
         "test_runs": deps.test_runs,
         "events": _emit(state, deps, node, result.stop_reason, tool_call_count=len(calls)),
     }
+    if result.stop_reason == "dispatch_stopped":
+        reason = next(
+            (r for r in StopReason if r.value == result.dispatch_reason), StopReason.BUDGET_TIME
+        )
+        deps.lifecycle.emit(
+            "dispatch_blocked",
+            reason=result.dispatch_reason,
+            candidate_hash=digest,
+            dispatched=False,
+        )
+        return {
+            **update,
+            "status": RunStatus.BUDGET_EXHAUSTED,
+            "stop_reason": reason,
+            "failure_reasons": [*state.failure_reasons, result.dispatch_reason or "budget_time"],
+        }
+    if result.stop_reason == "cancelled":
+        deps.lifecycle.emit(
+            "cancel", requested=True, confirmed=True, boundary="coder_tool", candidate_hash=digest
+        )
+        return {**update, "status": RunStatus.CANCELLED, "stop_reason": StopReason.CANCELLED}
     if local is None:
         if not patch and any(not item.ok and item.name != "finish" for item in result.tool_calls):
             return {
@@ -1793,7 +1845,15 @@ def _revert_workspace(deps: Deps) -> tuple[bool, str | None]:
     if deps.workspace_manager is None:
         return False, "no WorkspaceManager injected; refusing to guess how to revert"
     try:
-        deps.workspace_manager.reset(deps.require_workspace())
+        from codepilot.observability.resources import resource_slot
+
+        with resource_slot(
+            "workspace",
+            workspace=deps.require_workspace(),
+            cancel=deps.cancel_check,
+            observe=deps.lifecycle.emit,
+        ):
+            deps.workspace_manager.reset(deps.require_workspace())
     except Exception as exc:
         return False, f"{type(exc).__name__}: {exc}"
     return True, None
@@ -1956,12 +2016,29 @@ async def finalize(state: RepairState, deps: Deps) -> dict[str, Any]:
     ``provisionally_verified``；回归与复审未执行时写进报告的边界说明不可省略，
     本轮绝不宣称 M2 完成。
     """
+    from codepilot.graph.evidence import verification_view
+    from codepilot.graph.harness import write_projection
     from codepilot.report import RunReport, write_run_report
+
+    write_projection(
+        deps,
+        "harness/evidence.json",
+        {
+            "contract": state.plan.contract.model_dump(mode="json") if state.plan else None,
+            "failure_summary": state.failure_summary,
+            "verification": verification_view(state),
+            "runtime": state.runtime,
+            "policy_snapshot": state.policy_snapshot,
+            "experience_refs": state.experience_refs,
+        },
+    )
 
     # 先继承前序节点写入的引用（含 run_regression / review 的 DEFERRED 标记）。
     # 不继承的话，finalize 返回的 report_artifacts 会整体覆盖 state 里的那份，
     # "回归与复审未执行"这条边界信息就在报告里消失了。
     paths: dict[str, str] = dict(state.report_artifacts)
+    paths["harness_evidence"] = "harness/evidence.json"
+    paths["policy_snapshot"] = "harness/snapshot.json"
     for record in state.attempts:
         paths[f"patch:{record.iteration}"] = deps.artifacts.attempt_relpath(
             record.iteration, PATCH_DIFF
@@ -2055,6 +2132,12 @@ async def finalize(state: RepairState, deps: Deps) -> dict[str, Any]:
 
     interim = state.model_copy(
         update={"status": status, "stop_reason": stop_reason, "failure_reasons": reasons}
+    )
+    deps.lifecycle.emit(
+        "task_end",
+        execution_status=interim.status.value,
+        verification=verification_view(interim),
+        runtime=interim.runtime,
     )
     patch = generate_git_diff(
         deps.require_workspace(),

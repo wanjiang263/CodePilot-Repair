@@ -1,0 +1,16 @@
+{
+ "status": "passed",
+ "versions": 6,
+ "archived_source_hashes_verified": 259,
+ "current_source_files": 57,
+ "normalized_current_matches": true,
+ "raw_current_matches": true,
+ "diff_sha256": "b2d0cbfd8c9a8b88459bd36b6a16fea3fd55ac5dbe9839095a1c1614f6c69a52",
+ "diff_bytes": 345172,
+ "snapshot_sha256": "ecf503d292a5a030514ed7f31926180b6d230b88251e616e026dc15ecfbfd052",
+ "active_pointer_created": false,
+ "snapshot_hash_rule": "SHA256(json.dumps(snapshot, sort_keys=True, ensure_ascii=False).encode())",
+ "version_checked": "phase26-candidate-v5",
+ "parent": "phase26-candidate-v4",
+ "checked_at": "2026-10-29"
+}

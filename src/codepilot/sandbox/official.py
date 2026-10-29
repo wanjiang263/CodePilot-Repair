@@ -21,6 +21,7 @@ from docker.errors import DockerException, ImageNotFound, NotFound
 from codepilot.repo.gitcmd import run_git
 from codepilot.sandbox.base import EnvironmentBuildResult
 from codepilot.sandbox.docker import DockerSandbox
+from codepilot.sandbox.env_spec import EnvSpec
 from codepilot.sandbox.runners import (
     PYTEST_REQUESTS_COMPAT,
     RunnerOverrides,
@@ -239,6 +240,29 @@ class OfficialInstanceSandbox(DockerSandbox):
         )
         self.last_image: dict[str, Any] | None = None
         self._prepared_workspaces: set[tuple[str, str]] = set()
+
+    def effective_env_spec(self, spec: EnvSpec) -> EnvSpec:
+        """Resolve runner defaults before graph budget clamps are applied."""
+        config = self.runner.config if self.runner else None
+        timeout = (
+            config.timeout_seconds
+            if config and config.timeout_seconds is not None
+            else spec.timeout_seconds
+        )
+        source = "runner_override" if config and config.timeout_seconds is not None else "env_spec"
+        self.artifacts.write_json(
+            "runner-effective-config.json",
+            {
+                "instance_id": self.instance_id,
+                "timeout_seconds": timeout,
+                "timeout_source": source,
+                "env_spec_timeout_seconds": spec.timeout_seconds,
+                "runner_overrides_sha256": self.runners.sha256 if self.runners else None,
+                "runner": config.model_dump(mode="json") if config else None,
+                "execution_clamp": "min(configured timeout, remaining task/closure budget)",
+            },
+        )
+        return spec.model_copy(update={"timeout_seconds": timeout})
 
     def build_env(
         self,

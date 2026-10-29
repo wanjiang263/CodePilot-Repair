@@ -116,13 +116,33 @@ class AnthropicMessagesProvider:
         return text
 
     def _post(self, body: dict[str, Any], purpose: str = "generic") -> httpx.Response:
-        self.attempts += 1
+        from codepilot.observability.dispatch import check_dispatch, dispatch_timeout
+
+        check_dispatch("model")
         headers = {**self._request_headers, "X-CodePilot-Purpose": purpose}
+
+        def send_http() -> httpx.Response:
+            remaining = dispatch_timeout(self.provider.timeout_seconds)
+            timeout = httpx.Timeout(
+                remaining,
+                **{
+                    key: min(value, remaining) if value is not None else remaining
+                    for key, value in self._client.timeout.as_dict().items()
+                },
+            )
+            from codepilot.observability.dispatch import mark_model_dispatch
+
+            mark_model_dispatch()
+            self.attempts += 1
+            return self._client.post(
+                self._messages_path, json=body, headers=headers, timeout=timeout
+            )
+
         try:
             response = guarded_send(
                 self.spec,
                 body,
-                lambda: self._client.post(self._messages_path, json=body, headers=headers),
+                send_http,
             )
         except httpx.TimeoutException as exc:
             self.unacknowledged += 1

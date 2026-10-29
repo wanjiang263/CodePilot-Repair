@@ -32,6 +32,8 @@ export interface Budget {
 }
 
 export interface Task {
+  runtime?: Record<string, any>;
+  cancellation_state?: "not_requested" | "requested" | "confirmed";
   task_id: string;
   run_id: string;
   repository: string;
@@ -165,6 +167,7 @@ export interface ReviewIssue {
 }
 
 export interface Report {
+  harness?: Record<string, any>;
   run_id: string;
   task_id: string;
   status: string;

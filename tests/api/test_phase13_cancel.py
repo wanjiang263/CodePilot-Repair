@@ -15,12 +15,45 @@ from fastapi.testclient import TestClient
 from codepilot.api.database import ApiDatabase
 from codepilot.api.demo import DeterministicSandbox
 from codepilot.api.worker import ApiWorker
+from codepilot.graph.budget import ClosureReservation
 from codepilot.graph.builder import _guard
 from codepilot.graph.routing import Node
+from codepilot.observability.dispatch import Deadline
 from codepilot.observability.events import EventSink
+from codepilot.observability.lifecycle import Lifecycle
 from codepilot.schemas.enums import RunStatus, StopReason
 from codepilot.schemas.state import RepairState
 from codepilot.schemas.usage import Usage
+
+
+def _guard_deps(
+    sink: EventSink,
+    *,
+    cancel_check: Any,
+    usage: Usage | None = None,
+    test_runs: int = 0,
+) -> Any:
+    """_guard 现在需要完整的 Deps 派发面（lifecycle/deadline/budget 预留）。"""
+    return SimpleNamespace(
+        events=sink,
+        bind_llm_context=lambda *_args: None,
+        usage=usage if usage is not None else Usage(),
+        test_runs=test_runs,
+        cancel_check=cancel_check,
+        lifecycle=Lifecycle(sink),
+        dispatch_deadline=lambda state: Deadline(time.monotonic() + 120),
+        budget=SimpleNamespace(
+            closure_reservation=lambda *_a, **_k: ClosureReservation(
+                tokens=0, cost=0.0, review_calls=0, estimated=True, basis="no-reviewer"
+            ),
+            check=lambda *_a, **_k: None,
+        ),
+        reviewer=None,
+        llm_config=None,
+        simulated_llm=False,
+        clock=lambda: datetime(2026, 1, 1, tzinfo=UTC),
+        harness_started=True,
+    )
 
 
 def create_demo(client: TestClient) -> dict[str, Any]:
@@ -161,13 +194,7 @@ def test_guard_cancels_at_a_node_boundary_and_keeps_partial_updates(tmp_path: Pa
         flag[0] = True
         return {"test_runs": 4, "usage": deps.usage}
 
-    deps = SimpleNamespace(
-        events=sink,
-        bind_llm_context=lambda *_args: None,
-        usage=Usage(),
-        test_runs=3,
-        cancel_check=lambda: flag[0],
-    )
+    deps = _guard_deps(sink, cancel_check=lambda: flag[0], test_runs=3)
     state = RepairState(
         task_id="task_guard",
         run_id="run_guard",
@@ -201,13 +228,7 @@ def test_guard_checks_cancellation_before_dispatching(tmp_path: Path) -> None:
         called = True
         return {}
 
-    deps = SimpleNamespace(
-        events=sink,
-        bind_llm_context=lambda *_args: None,
-        usage=Usage(),
-        test_runs=0,
-        cancel_check=lambda: True,
-    )
+    deps = _guard_deps(sink, cancel_check=lambda: True)
     state = RepairState(
         task_id="task_guard_before",
         run_id="run_guard_before",

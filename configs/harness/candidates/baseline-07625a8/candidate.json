@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "version": "baseline-07625a8",
+  "parent": null,
+  "status": "pending",
+  "code_revision": "07625a83f7d39db3f88ddde4ebd5005851978afa",
+  "code_snapshot": {
+    "base_commit": "07625a83f7d39db3f88ddde4ebd5005851978afa",
+    "sources_ref": "sources.json",
+    "source_hashes": {
+      "scripts/m3_batch.py": "f670f621f049699aa2469a7a204895f0418f6e2cd7e1bbcb49d483253d5f4b8f",
+      "src/codepilot/agents/coder.py": "35132593641193bb30a42040d83f4fd34720bcff77cf80e5eed319df10405a34",
+      "src/codepilot/agents/planner.py": "67bae8384bfed6e31ce9660185acc178c60a7412f969b06dac98c77d8f905e56",
+      "src/codepilot/agents/reviewer.py": "19b06fe20591a5e1984de39e801cec6b1f16e45e70d492af8fadcea7ffe89304",
+      "src/codepilot/api/reporting.py": "e5bb83f92d264fddf63bfb3a5db8a83b72bdaf1547dd7fada46344b9a3d4eace",
+      "src/codepilot/api/routes.py": "2a5571c3b7fec355a2a0baa55465bdcea89c6ea82c3809c5a9428ad7932cadeb",
+      "src/codepilot/api/schemas.py": "a1f7fadf73b5c58164b7c2fae7ea108b5e21a6d79efa0064232c7a5e4969a1f8",
+      "src/codepilot/eval/assembly.py": "5e327934dcc9bd4e55a1b4f05db9fd6c7b56a6767ba8164e28aa134b567ba80b",
+      "src/codepilot/graph/builder.py": "a57c16eaa96c0aeff241dfdf4e04e31fe26cce82d07cce66f0b00f3d54b4f14c",
+      "src/codepilot/graph/deps.py": "7dfc71f131827d7caaa0703cea7ac2afc6db39f81495d2f17f02fcf40d97df9e",
+      "src/codepilot/graph/nodes.py": "0b707960470f7c4f5542da06083858fff3ef6771fe91e8aedb5edcb99ab18e9c",
+      "src/codepilot/llm/calls.py": "14a55285d9ab46d287e723ae3f2f4ab89ac7d2f0bce55833c9c35734d3dc0d06",
+      "src/codepilot/llm/tracking.py": "83af7c000aee4b0ba5f53af4184abe1972a7c273640319230b03b85d35748e5f",
+      "src/codepilot/observability/events.py": "375221cc436e6741ebdb64aba320072d15b0a8262998b6c3384511b996d056b1",
+      "src/codepilot/sandbox/docker.py": "b66c57100ef1e9f6bdd10a9fe6afe5c677f24216ed9c270a35437f9c832711a2",
+      "src/codepilot/sandbox/official.py": "9bde3503c61a8cc586d14091f810aad891a237470abe5790bdfecf8d2f05b62f",
+      "src/codepilot/schemas/plan.py": "b827f2191917edf25d0f567ec17285e35f41844041acee078c0c3de2643bc61d",
+      "src/codepilot/schemas/state.py": "c152ad23785703b2111d92fe3b83f7e287d78fb6d09264540acbfeb9c466ba5d",
+      "src/codepilot/tools/read_tools.py": "1c5dbc24f06ec1891c465cc0eaa020f06c81fc266fb2fab675f6abfda8f32087",
+      "src/codepilot/tools/registry.py": "c78713a27cee5d1771ce19e92a34fddce3aede0adb18daf2430b408942fb14b4",
+      "src/codepilot/tools/write_tools.py": "af6b4744d9c52212c7b7e94ed35cd408302c6da0f6f9f78fe18a34c913dd7d05",
+      "tests/unit/test_m3_batch.py": "3e2ae52f3d3a62a6857ff6ed09a364d8208f8579d87f304dfcb53ccdde79e80e",
+      "web/src/api/types.ts": "dc2b9fb3a13b92c2aa7e2ff315a768a966c7755519013d917d33e603429430fa",
+      "web/src/components/panels/RunPanel.tsx": "1a00b7a7220097841090d25854f3eb8dc675a9c6b5171b780f64d4aeeffce62c",
+      "web/src/locales/en-US/index.json": "583f0c6d83c62baf99a30e5b1d3c309a91466222779dd164c2738bcb80396a0a",
+      "web/src/locales/zh-CN/index.json": "31251848b5ba3e9668646b8e0762610af20d58271c00c1fef8afc9cf9b991d06"
+    },
+    "normalization": "UTF-8 source text; Python reads normalize CRLF"
+  },
+  "snapshot_ref": "snapshot.json",
+  "plugin_snapshot": {
+    "resource-classification": "not present at baseline"
+  },
+  "hypothesis": "Historical source parent, preserved for explicit prompt/experience rollback; no new effect claims.",
+  "input_evidence": [
+    "docs/notes/phase25-first5-completion.md",
+    "docs/notes/phase26-harness-performance-capability-and-rsi-plan.md"
+  ],
+  "candidate_changes": "Historical Git HEAD source snapshot",
+  "configuration_sources": {
+    "plan": "docs/notes/phase26-harness-performance-capability-and-rsi-plan.md",
+    "runtime": "No runtime launched; model/provider/budget configuration unchanged"
+  },
+  "static_results_ref": "../../../../docs/notes/phase26-static-checks.json",
+  "future_metrics": [
+    "cold/warm preparation time",
+    "first effective edit time",
+    "duplicate query rate",
+    "public contract correctness",
+    "regression completeness/new failures",
+    "recovery model calls and side effects",
+    "wall time and CNY with existing ledger provenance"
+  ],
+  "effect_validation": "NOT_RUN",
+  "auto_promote": false,
+  "comparison_refs": [],
+  "L3": [],
+  "limitations": [
+    "This is a multi-part engineering candidate; do not assign separate causal gains without controlled comparisons.",
+    "Selecting this snapshot changes future prompts/advice/experience only. Python source rollback requires its matching checkout and the existing worker/checkpoint process."
+  ]
+}

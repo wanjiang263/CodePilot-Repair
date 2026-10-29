@@ -473,6 +473,32 @@ class InferenceAssembly:
     # ------------------------------------------------------------------ 入口
 
     def run(self, *, run_id: str, seed: int) -> InferenceOutcome:
+        from codepilot.observability.lifecycle import Lifecycle
+
+        artifacts = ArtifactStore(self._work_root, run_id)
+        path = artifacts.run_dir / "events.jsonl"
+        last_seq = 0
+        if self._event_store is None and path.exists():
+            with path.open(encoding="utf-8") as handle:
+                for line in handle:
+                    try:
+                        last_seq = max(last_seq, int(json.loads(line).get("seq", 0)))
+                    except (ValueError, TypeError):
+                        continue
+        self._run_events = EventSink(
+            run_id=run_id,
+            task_id=self._task.task_id,
+            jsonl_path=path,
+            store=self._event_store,
+            start_seq=None if self._event_store else last_seq,
+        )
+        self._preparation = Lifecycle(self._run_events)
+        try:
+            return self._run(run_id=run_id, seed=seed)
+        finally:
+            self._run_events.close()
+
+    def _run(self, *, run_id: str, seed: int) -> InferenceOutcome:
         """跑一次完整图。
 
         workspace 与 artifact 留在 run 目录下，**不**在这里删除：中断恢复要面对的是
@@ -488,21 +514,24 @@ class InferenceAssembly:
         artifacts = ArtifactStore(self._work_root, run_id)
         checkpoint_path = artifacts.run_dir / "checkpoints.sqlite"
         resuming = self._checkpoint and checkpoint_path.exists()
-        if resuming:
-            # 节点级续跑：现场必须原样接着用。``WorkspaceManager.create`` 拒绝写入
-            # 非空目录，正是为了拦住"把旧现场当成新现场"，所以这里显式地承认它是旧的。
-            workspace = self._reopen(artifacts)
-        else:
-            workspace = (
-                self._workspace_factory(artifacts)
-                if self._workspace_factory is not None
-                else self._manager.create(
-                    source=str(self._task.repository),
-                    base_commit=self._task.base_commit,
-                    target=artifacts.run_dir / "workspace",
+        from codepilot.observability.resources import preparation_stage
+
+        with preparation_stage("clone_or_reopen", self._preparation, self._cancel_check):
+            if resuming:
+                # 节点级续跑：现场必须原样接着用。``WorkspaceManager.create`` 拒绝写入
+                # 非空目录，正是为了拦住"把旧现场当成新现场"，所以这里显式地承认它是旧的。
+                workspace = self._reopen(artifacts)
+            else:
+                workspace = (
+                    self._workspace_factory(artifacts)
+                    if self._workspace_factory is not None
+                    else self._manager.create(
+                        source=str(self._task.repository),
+                        base_commit=self._task.base_commit,
+                        target=artifacts.run_dir / "workspace",
+                    )
                 )
-            )
-            self._record_identity(artifacts, workspace)
+                self._record_identity(artifacts, workspace)
         if self._enforce_base_only:
             self._assert_isolated(workspace)
         env_spec = self._resolve_env_spec(workspace.path)
@@ -531,6 +560,7 @@ class InferenceAssembly:
             deny_existing_test_edits=deny_existing,
         )
         database = artifacts.run_dir / "index.sqlite3"
+        index_started = time.monotonic()
         reused_snapshot = False
         seed_raw = (
             self._runtime_config.index_snapshot.model_dump_json()
@@ -541,7 +571,8 @@ class InferenceAssembly:
             from codepilot.repo.index_snapshot import reuse_index
 
             index_seed = json.loads(seed_raw)
-            reuse_index(Path(index_seed["path"]), database, workspace, index_seed["sha256"])
+            with preparation_stage("index_reuse", self._preparation, self._cancel_check):
+                reuse_index(Path(index_seed["path"]), database, workspace, index_seed["sha256"])
             artifacts.write_json("index-reuse.json", index_seed)
             reused_snapshot = True
         # The index DB is rebuildable. A Django-sized edge set otherwise creates
@@ -554,14 +585,44 @@ class InferenceAssembly:
         init_db(engine)
         factory = create_session_factory(engine)
         try:
-            if not reused_snapshot and not (resuming and database.exists()):
-                # 索引必须在跑图**之前**提交。和图共用一个 session 时，进程被硬杀
-                # （真实中断就是这么死的）会让索引库停留在未提交状态，恢复进程拿到一个
-                # 空索引，症状是"计划里的 symbol 不在索引里"——看起来像模型乱写。
-                with session_scope(factory) as session:
-                    Indexer().index(Stores(session), workspace)
+            # v2 closure invalidates old association semantics, including seed DBs.
+            # 索引必须在跑图**之前**提交。和图共用一个 session 时，进程被硬杀
+            # （真实中断就是这么死的）会让索引库停留在未提交状态，恢复进程拿到一个
+            # 空索引，症状是"计划里的 symbol 不在索引里"——看起来像模型乱写。
+            with (
+                preparation_stage("index", self._preparation, self._cancel_check),
+                session_scope(factory) as session,
+            ):
+                index_stats = Indexer(progress=self._preparation.emit).index(
+                    Stores(session), workspace
+                )
             with session_scope(factory) as session:
                 index = RepositoryIndex(Stores(session), workspace.repository_id)
+                self._preparation.emit(
+                    "preparation_progress",
+                    phase="index_ready",
+                    counts={"files": len(index.files())},
+                    source="seed_snapshot"
+                    if reused_snapshot
+                    else "checkpoint_index"
+                    if resuming
+                    else "built",
+                )
+                artifacts.write_json(
+                    "harness/preparation.json",
+                    {
+                        "index_seconds": round(time.monotonic() - index_started, 3),
+                        "association_mode": index_stats.association_mode,
+                        "parsed_files": len(index_stats.parsed_paths),
+                        "parse_reused_files": len(index_stats.parse_reused_paths),
+                        "index_reuse": "seed_snapshot"
+                        if reused_snapshot
+                        else "checkpoint_index"
+                        if resuming
+                        else "built",
+                        "identity_source": "existing index snapshot/workspace recovery checks",
+                    },
+                )
                 state = self._execute(
                     run_id=run_id,
                     workspace=workspace,
@@ -681,12 +742,7 @@ class InferenceAssembly:
         symbols = list(index.symbol_objects())
         files = list(index.files())
         provider = self._providers.roles
-        events = EventSink(
-            run_id=run_id,
-            task_id=task.task_id,
-            jsonl_path=artifacts.run_dir / "events.jsonl",
-            store=self._event_store,
-        )
+        events = self._run_events
         # 逐请求观测要在**任何模型调用之前**接好：装配期没有 run_id，只有现在能绑。
         # 首次真实 GLM 运行没做这一步，于是 events.jsonl 的 usage 全为 null、
         # by_model 只有一个聚合项、llm_calls.jsonl 根本不存在。
@@ -702,17 +758,37 @@ class InferenceAssembly:
             calls_path=(artifacts.run_dir / "llm_calls.jsonl" if self._record_llm else None),
         )
         raw_sandbox = self._sandbox_factory(artifacts)
+        configure_env = getattr(raw_sandbox, "effective_env_spec", None)
+        if configure_env is not None:
+            env_spec = configure_env(env_spec)
         sandbox = (
             raw_sandbox
             if isinstance(raw_sandbox, AccountingSandbox)
             else AccountingSandbox(raw_sandbox)
         )
-        environment = sandbox.build_env(
-            repository=str(task.repository),
-            base_commit=workspace.base_commit,
-            workspace=workspace.path,
-            env_spec=env_spec,
-            allow_network=self._allow_build_network,
+        sandbox.cancel_check = self._cancel_check
+        sandbox.observe = self._preparation.emit
+        environment_started = time.monotonic()
+        from codepilot.observability.resources import preparation_stage
+
+        with preparation_stage("environment", self._preparation, self._cancel_check, gate=False):
+            environment = sandbox.build_env(
+                repository=str(task.repository),
+                base_commit=workspace.base_commit,
+                workspace=workspace.path,
+                env_spec=env_spec,
+                allow_network=self._allow_build_network,
+            )
+        artifacts.write_json(
+            "harness/environment.json",
+            {
+                "elapsed_seconds": round(time.monotonic() - environment_started, 3),
+                "from_cache": environment.from_cache,
+                "cache_key": environment.cache_key,
+                "image_id": environment.image_id,
+                "effective_timeout_seconds": env_spec.timeout_seconds,
+                "identity_source": "existing sandbox environment cache; runner-effective-config.json when official",
+            },
         )
         tools = build_tool_registry(
             policy=policy,
@@ -822,6 +898,8 @@ class InferenceAssembly:
             ),
         )
         deps.llm_context = context
+        context.before_model = deps.lifecycle.emit
+        context.cancel_check = self._cancel_check
         initial = RepairState(
             task_id=task.task_id,
             run_id=run_id,

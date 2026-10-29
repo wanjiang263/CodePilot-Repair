@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "version": "phase26-candidate-v1",
+  "parent": "baseline-07625a8",
+  "status": "pending",
+  "code_revision": "07625a83f7d39db3f88ddde4ebd5005851978afa",
+  "code_snapshot": {
+    "base_commit": "07625a83f7d39db3f88ddde4ebd5005851978afa",
+    "sources_ref": "sources.json",
+    "source_hashes": {
+      "scripts/m3_batch.py": "e5aa68b9d738482e2e7757e210ff238e30634c41dc8cf071b7c277dca67b9b8a",
+      "src/codepilot/agents/coder.py": "aaec82f7f34c0b1260ac1e6597a75f320840fffa8bb9347dc65f917a723f504d",
+      "src/codepilot/agents/exploration.py": "3c17b10679f8e32e2f2a8c7ab8fa739ac0a2bfa0ae7a85d94c6a66bb1705d414",
+      "src/codepilot/agents/planner.py": "ffd13911179361f03ab166a6942337402fbbd7c5c89e50da0f7cb07b550c2e38",
+      "src/codepilot/agents/reviewer.py": "afb20c395868d19747219052a9e7507e4592b554a1d346c255895493429e7314",
+      "src/codepilot/api/reporting.py": "8899d1e27fdd38a5fefb16bcc05db0abb7528f49fc331c34105ae9f52c5a7772",
+      "src/codepilot/api/routes.py": "fc5c7f33c51ceeaf6dad3cc538de0fc7ed18ba474d4637de93695eb787d1c41c",
+      "src/codepilot/api/runtime_view.py": "f51310b1abbf4739e9b4171927fe1c94be4a6902d9da5738409fa7f6ae5f973c",
+      "src/codepilot/api/schemas.py": "b1d284978e8450c0b4692581f64a540e22700ea5458fcc0dbda4c01e672fea0d",
+      "src/codepilot/eval/assembly.py": "c7a11bc949bf8902e41ed5b51207e29c3510fbaa7c948664583aed5512bf5128",
+      "src/codepilot/graph/builder.py": "de976072b8f5e16dd13aba406fd91025db3f4ac3ef048a78e9800f49a07437e6",
+      "src/codepilot/graph/deps.py": "16456d758d0c01f330050d0ccd7b770ff00bfc50ec0364bc83220243947fc021",
+      "src/codepilot/graph/evidence.py": "85ac4aeb074bf2a5eee6aead3b91873e6159dd96b5b1d82b9f351b8a4d44b70a",
+      "src/codepilot/graph/harness.py": "d77703c28e7fbcacff8de4478eecfede3153041c2c529317e928cd89c1c397e5",
+      "src/codepilot/graph/nodes.py": "fad3f8a9161d5048698bdd98d915c72afad145ed22c29e8e598ee80f8dc6871b",
+      "src/codepilot/llm/calls.py": "c284d4faeb9258791d995ade964645eb6450dedbe6d92d7aae10cd2fa10eea3f",
+      "src/codepilot/llm/tracking.py": "6d2cb5d7d747fd0edb7a0ac7ff897aa2e6a9de3ab85bd8eaf9a66985af217261",
+      "src/codepilot/observability/events.py": "68dfa46dd3da386d7699c3acf0a53b369716f4e7345e9f5f99d27a968a3296d9",
+      "src/codepilot/observability/lifecycle.py": "210e9648187194dc7ca758d82dad4938da6f052f61d69d8a4ff2542933b632ec",
+      "src/codepilot/rsi.py": "e64cee7382676208d728db9779418791369a2202eafea389c8de4ca71e25d303",
+      "src/codepilot/sandbox/docker.py": "8da559c95f285fea343488482944239079d20c752f3e86268ba0788a36241f8d",
+      "src/codepilot/sandbox/official.py": "b45990c92f3edc550025fb4cfc57b25cac2431b124f776f2cb8f658a11aa32b9",
+      "src/codepilot/schemas/plan.py": "5200316667f662900cc736f693edc54fdbce252d3a869785dc00c48db6326713",
+      "src/codepilot/schemas/state.py": "9983d40178bf4e0c516d66c427c9f3f7fece9dc43e83478b7a75d4ced0f014e6",
+      "src/codepilot/tools/query_cache.py": "bd61f66ba5d8f12fd66e0907ae63df428cf5ce578e79cf4403f7a1592adf60df",
+      "src/codepilot/tools/read_tools.py": "616e4e966d1766ac986f9bbace0dc5b35c3c68281cd0b2dc2a82a2983f4ba092",
+      "src/codepilot/tools/registry.py": "20e6d461ad30a4d613cc265eb5bc3d91747054d816dd6f58dd534de38d95a5f5",
+      "src/codepilot/tools/write_tools.py": "73699d611a95d36b074224b79011f5f1d99a637b8053ccbb90a9b75a4d79b374",
+      "tests/unit/test_m3_batch.py": "10980c187e50035d83bf0b66711828c09d11b3ee4dbad307a9b78f1245ebaa6d",
+      "tests/unit/test_phase26_harness.py": "c658f79a388bc82efd017e7678b3e56dab809b61f2e72a76e63fd6c14dcb2137",
+      "web/src/api/types.ts": "5361e2d7eda20c74b631eaeb710ee3f4f483ba9446951fa607371888c47fd60b",
+      "web/src/components/panels/HarnessStatus.test.tsx": "24bc34330dd141fc89ea9ee258b18ba4ca482950f7e935f9e7c2903f9cc4a15b",
+      "web/src/components/panels/HarnessStatus.tsx": "6b040cb8f582c21335b9ddaf472e526febc07f9efc6e04ebda8f09ddf6f2ce74",
+      "web/src/components/panels/RunPanel.tsx": "3651e2d616ae25d4cd50d6217c18a04ae4fd9663d932566bef2b3d43787f108e",
+      "web/src/locales/en-US/index.json": "cc00ea5cf4afa12c7fe07e2ec49d7787b35d230bc1fa5f9304566f287f1a04a0",
+      "web/src/locales/zh-CN/index.json": "e3fcdd3b9593a66ad49a6cbd15bb53780bded64791bb43a53801e91319792e42"
+    },
+    "normalization": "UTF-8 source text; Python reads normalize CRLF",
+    "diff_sha256": "a56ee924385b4f60bc4e8e6a7e9ff57f3505e569afdde41cc660cb261c31b820"
+  },
+  "snapshot_ref": "snapshot.json",
+  "plugin_snapshot": {
+    "resource-classification": "1"
+  },
+  "hypothesis": "Explicit public contracts and bounded reuse/feedback may reduce repeated work without weakening repair closure.",
+  "input_evidence": [
+    "docs/notes/phase25-first5-completion.md",
+    "docs/notes/phase26-harness-performance-capability-and-rsi-plan.md"
+  ],
+  "candidate_changes": "candidate.diff",
+  "configuration_sources": {
+    "plan": "docs/notes/phase26-harness-performance-capability-and-rsi-plan.md",
+    "runtime": "No runtime launched; model/provider/budget configuration unchanged"
+  },
+  "static_results_ref": "../../../../docs/notes/phase26-static-checks.json",
+  "future_metrics": [
+    "cold/warm preparation time",
+    "first effective edit time",
+    "duplicate query rate",
+    "public contract correctness",
+    "regression completeness/new failures",
+    "recovery model calls and side effects",
+    "wall time and CNY with existing ledger provenance"
+  ],
+  "effect_validation": "NOT_RUN",
+  "auto_promote": false,
+  "comparison_refs": [],
+  "L3": [],
+  "limitations": [
+    "This is a multi-part engineering candidate; do not assign separate causal gains without controlled comparisons.",
+    "Selecting this snapshot changes future prompts/advice/experience only. Python source rollback requires its matching checkout and the existing worker/checkpoint process."
+  ]
+}

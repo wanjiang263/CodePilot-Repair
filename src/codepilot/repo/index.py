@@ -1,51 +1,21 @@
-"""Repository Index：扫描 → 解析 → 提取 → 持久化（R-15）与增量重建（R-16）。
+"""Content-incremental parsing with conservative complete association closure.
 
-这一层把 R-04…R-12 的内存静态分析接到 F-12/F-13 的存储层上。关键语义：
-
-**变化判定**（02 §7.7）：以 ``(repository_id, path, sha256)`` 为准。文件内容不变
-就只更新扫描计数，**不重新解析**——R-16 的验收断言依赖这一点，解析器调用
-次数是可观测的。
-
-**边的重建范围**：提取只覆盖本次解析的文件（变化集）。持久化时：
-
-1. 变化集与已删除文件的**旧 symbol 的出边**全部删除，用新提取的边替换；
-2. 指向已不存在 symbol 的边（无论源在哪个文件）按种类收敛：
-   IMPORT / CALL 改写为"未解析"形态（``target_id=None``、confidence=low），
-   INHERIT / REFERENCE / TEST 删除。这不是折中，而是**与全量重索引收敛**：
-   全新解析一个引用了已删除名字的源文件时，IMPORT/CALL 提取器总是产出一条
-   未解析边（名字仍在源码里），而 INHERIT/REFERENCE/TEST 只在能解析到仓库内
-   目标时才产出边。已知边界：一条 import 曾解析到**多个**同名目标、其中一部分
-   被删时，剩余边的 confidence 不会重算（全量重索引会因目标数变化而调整档位）
-   ——同名重复定义部分删除是罕见情形，漂移随该源文件下一次变化自愈；
-3. 未变化文件的出边**不重建**——它们的源文件没被重新解析，而目标 symbol id
-   是 ``sha1(repository_id + qualified_name + kind)``，目标没改名/换 kind 时
-   依然有效。这是"只重新解析变化的文件"（04 Phase 1 验收）的必然边界：
-   未变化文件指向**新出现** symbol 的边要等它自己变化时才会补上。
-
-**TEST 边是例外**：它按"源在变化集 **或** 目标在变化集"合并重建——既有边与
-新提取边按键取最强 confidence。否则一个生产文件改名函数后，全量索引会给
-未变化测试文件补上的 low（文件名约定）关联在增量结果里持续缺失，而 TEST 边
-是回归测试选择（related_tests）的输入，缺失是静默的漏检。已知边界：未变化
-测试文件对新 symbol 的 **medium** 关联（import + 测试名包含 symbol 名）在该
-测试文件自身变化前不会出现——medium 需要该文件的 import 绑定，而增量不重
-新解析它；low（文件名约定）会立即补上。
-
-**边的去重**：``uq_edge_identity`` 不含行号，而同一 ``(source, target, name,
-kind)`` 在源文件里可以出现多次（两处调用同一个函数）。持久化保留最强
-confidence 中最早的一处；内存中的完整边集合不去重（golden test 比对的就是
-内存结果）。
-
-**解析失败的文件不中断索引**（R-05）：记 ``parse_error``，仍贡献可识别的
-symbol——这是 R-05 已经定下的语义，这里原样承接。
+The database stores files/symbols/edges but no complete unresolved import bindings.
+Therefore every update rebuilds all associations (including aliases, cycles and
+previously unresolved imports). Warm parse trees are reused by content; a cold
+indexer reparses unchanged sources to reconstruct bindings. No stale edge is kept
+merely to claim locality. All database changes share the caller's transaction.
 """
 
 from __future__ import annotations
 
 import hashlib
 import time
+from collections import OrderedDict
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 from codepilot.clock import utcnow
 from codepilot.observability.logging import get_logger
@@ -91,12 +61,14 @@ class IndexStats:
     tests: int
     scan: dict[str, int]
     parsed_paths: tuple[str, ...]
-    """本次真正调用过解析器的 ``.py`` 文件。R-16 验收断言它就是变化集。"""
+    """本次实际解析路径；冷启动或缓存逐出会包含未变化文件。"""
     changed_paths: tuple[str, ...]
     removed_paths: tuple[str, ...]
     reused_paths: tuple[str, ...]
     parse_errors: tuple[str, ...]
     duration_seconds: float
+    association_mode: str = "complete_closure_v2"
+    parse_reused_paths: tuple[str, ...] = ()
 
 
 class Indexer:
@@ -106,9 +78,19 @@ class Indexer:
         self,
         parser: PythonParser | None = None,
         scanner: RepositoryScanner | None = None,
+        progress: Callable[..., Any] | None = None,
     ) -> None:
+        self._parsed: OrderedDict[tuple[str, str, str], tuple[ParsedFile, int]] = OrderedDict()
+        self.progress = progress
         self.parser = parser or default_parser()
         self.scanner = scanner or RepositoryScanner()
+
+    def _progress(self, phase: str, **counts: int) -> None:
+        if self.progress is not None:
+            try:
+                self.progress("preparation_progress", phase=phase, counts=counts)
+            except Exception:
+                log.exception("index.progress_unavailable")
 
     def index(self, stores: Stores, workspace: Workspace) -> IndexStats:
         """索引 ``workspace``，幂等：重复运行不产生重复记录。
@@ -121,6 +103,11 @@ class Indexer:
         root = Path(workspace.path)
 
         scan = self.scanner.scan(root)
+        self._progress("scanned", files=len(scan.files))
+        if scan.unreadable:
+            raise OSError(
+                "index scan incomplete; retain previous committed index: " + repr(scan.unreadable)
+            )
         stored_files = {f.path: f for f in stores.files.list_by_repo(repository_id)}
         incremental = bool(stored_files)
 
@@ -133,37 +120,137 @@ class Indexer:
             else:
                 changed.append(scanned_file)
         scanned_paths = {f.path for f in scan.files}
-        hidden_paths = {
-            path
-            for path in stored_files
-            if path not in scanned_paths
-            and any(
-                blocked == "." or path == blocked or path.startswith(blocked.rstrip("/") + "/")
-                for blocked in scan.unreadable
+        removed_paths = sorted(set(stored_files) - scanned_paths)
+
+        import importlib.metadata
+
+        fingerprint_input = (
+            type(self.parser).__module__
+            + type(self.parser).__qualname__
+            + type(self.scanner).__module__
+            + type(self.scanner).__qualname__
+        ).encode()
+        for filename in (
+            "index.py",
+            "parser.py",
+            "context.py",
+            "symbols.py",
+            "imports.py",
+            "calls.py",
+            "edges.py",
+            "test_links.py",
+            "scanner.py",
+        ):
+            fingerprint_input += Path(__file__).with_name(filename).read_bytes()
+        for package in ("tree-sitter", "tree-sitter-python"):
+            try:
+                fingerprint_input += importlib.metadata.version(package).encode()
+            except importlib.metadata.PackageNotFoundError:
+                fingerprint_input += b"unavailable"
+        fingerprint = hashlib.sha256(fingerprint_input).hexdigest()
+
+        def finish(
+            reparsed: list[str], parse_reused: list[str], parse_errors: list[str], mode: str
+        ) -> IndexStats:
+            return IndexStats(
+                association_mode=mode,
+                repository_id=repository_id,
+                base_commit=workspace.base_commit,
+                incremental=incremental,
+                files=len(stores.files.list_by_repo(repository_id)),
+                symbols_by_kind=stores.symbols.count_by_kind(repository_id),
+                edges_by_kind_confidence={
+                    (kind, score_to_confidence(score)): count
+                    for (kind, score), count in stores.edges.count_by_kind_confidence(
+                        repository_id
+                    ).items()
+                },
+                tests=sum(
+                    count
+                    for kind, count in stores.symbols.count_by_kind(repository_id).items()
+                    if kind in _TEST_KINDS
+                ),
+                scan=scan.counts(),
+                parsed_paths=tuple(sorted(reparsed)),
+                parse_reused_paths=tuple(sorted(parse_reused)),
+                changed_paths=tuple(f.path for f in changed),
+                removed_paths=tuple(removed_paths),
+                reused_paths=tuple(f.path for f in reused),
+                parse_errors=tuple(sorted(parse_errors)),
+                duration_seconds=time.monotonic() - started,
             )
-        }
-        removed_paths = sorted(set(stored_files) - scanned_paths - hidden_paths)
+
+        if (
+            not changed
+            and not removed_paths
+            and stores.repositories.index_semantics(repository_id) == fingerprint
+        ):
+            self._progress("index_verified_reuse", files=len(scan.files))
+            return finish(
+                [],
+                [],
+                [
+                    f"{row.path}: {row.parse_error}"
+                    for row in stored_files.values()
+                    if row.parse_error
+                ],
+                "verified_snapshot_v2",
+            )
 
         parsed_files: dict[str, ParsedFile] = {}
         parse_errors: list[str] = []
-        for scanned_file in changed:
+        reparsed: list[str] = []
+        parse_reused: list[str] = []
+        # Complete associations are the safe closure when unresolved bindings
+        # cannot be recovered from old edges. Cache is instance-local, bounded.
+        for scanned_file in scan.files:
             if not scanned_file.path.endswith(".py"):
                 continue
-            raw = (root / scanned_file.path).read_bytes()
-            parsed = self.parser.parse(raw, path=scanned_file.path)
+            key = (str(root.resolve()), scanned_file.path, scanned_file.sha256)
+            cached = self._parsed.get(key)
+            if cached is not None:
+                parsed = cached[0]
+                self._parsed.move_to_end(key)
+                parse_reused.append(scanned_file.path)
+            else:
+                raw = (root / scanned_file.path).read_bytes()
+                if hashlib.sha256(raw).hexdigest() != scanned_file.sha256:
+                    raise OSError("workspace changed during index scan")
+                parsed = self.parser.parse(raw, path=scanned_file.path)
+                reparsed.append(scanned_file.path)
+                if len(raw) <= 1024 * 1024:
+                    self._parsed[key] = (parsed, len(raw))
+                    while (
+                        len(self._parsed) > 128
+                        or sum(v[1] for v in self._parsed.values()) > 8 * 1024 * 1024
+                    ):
+                        self._parsed.popitem(last=False)
             parsed_files[scanned_file.path] = parsed
+            if len(parsed_files) == 1 or len(parsed_files) % 100 == 0:
+                self._progress(
+                    "parsing",
+                    parsed=len(reparsed),
+                    parse_reused=len(parse_reused),
+                    changed=len(changed),
+                )
             if parsed.parse_error:
                 parse_errors.append(f"{scanned_file.path}: {parsed.parse_error}")
 
-        known = self._load_reused_symbols(
-            stores, repository_id, [*[f.path for f in reused], *sorted(hidden_paths)]
+        self._progress(
+            "linking",
+            sources=len(parsed_files),
+            parsed=len(reparsed),
+            parse_reused=len(parse_reused),
+            changed=len(changed),
+            reused=len(reused),
+            removed=len(removed_paths),
         )
-        context = AnalysisContext(repository_id, parsed_files, known_symbols=known)
+        context = AnalysisContext(repository_id, parsed_files)
 
         new_symbol_ids: set[str] = set()
         file_rows: list[dict[str, object]] = []
         symbol_rows: list[dict[str, object]] = []
-        for scanned_file in changed:
+        for scanned_file in scan.files:
             module = module_name(scanned_file.path) if scanned_file.path.endswith(".py") else None
             maybe_parsed = parsed_files.get(scanned_file.path)
             file_rows.append(
@@ -192,10 +279,12 @@ class Indexer:
         )
         computed_test_edges = tuple(edge for edge in all_edges if edge.kind == "TEST")
 
-        changed_file_ids = [file_id(repository_id, f.path) for f in changed]
         removed_file_ids = [file_id(repository_id, path) for path in removed_paths]
-        affected_file_ids = [*changed_file_ids, *removed_file_ids]
-        old_symbol_ids = set(stores.symbols.list_ids_for_files(affected_file_ids))
+        affected_file_ids = [
+            *[file_id(repository_id, f.path) for f in scan.files],
+            *removed_file_ids,
+        ]
+        old_symbol_ids = {row.id for row in stores.symbols.list_by_repo(repository_id)}
 
         # repositories 必须先写：files/symbols/edges 都有指向它的外键，
         # 而本方法可能运行在启用外键的 SQLite 上（F-11 默认开启）。
@@ -217,31 +306,8 @@ class Indexer:
             stores, repository_id, computed_test_edges, old_symbol_ids | new_symbol_ids
         )
 
-        stats = IndexStats(
-            repository_id=repository_id,
-            base_commit=workspace.base_commit,
-            incremental=incremental,
-            files=len(stores.files.list_by_repo(repository_id)),
-            symbols_by_kind=stores.symbols.count_by_kind(repository_id),
-            edges_by_kind_confidence={
-                (kind, score_to_confidence(score)): count
-                for (kind, score), count in stores.edges.count_by_kind_confidence(
-                    repository_id
-                ).items()
-            },
-            tests=sum(
-                count
-                for kind, count in stores.symbols.count_by_kind(repository_id).items()
-                if kind in _TEST_KINDS
-            ),
-            scan=scan.counts(),
-            parsed_paths=tuple(sorted(parsed_files)),
-            changed_paths=tuple(f.path for f in changed),
-            removed_paths=tuple(removed_paths),
-            reused_paths=tuple(f.path for f in reused),
-            parse_errors=tuple(sorted(parse_errors)),
-            duration_seconds=time.monotonic() - started,
-        )
+        stores.repositories.set_index_semantics(repository_id, fingerprint)
+        stats = finish(reparsed, parse_reused, parse_errors, "complete_closure_v2")
         log.info(
             "repo.index.done",
             repository_id=repository_id,
@@ -254,27 +320,6 @@ class Indexer:
             duration_seconds=round(stats.duration_seconds, 3),
         )
         return stats
-
-    def _load_reused_symbols(
-        self, stores: Stores, repository_id: str, reused_paths: list[str]
-    ) -> list[Symbol]:
-        """未变化文件的 symbol 从持久化结果读回，作为无解析树的 known 符号。
-
-        增量上下文用它们做跨文件名称解析（变化文件 import 未变化模块），
-        提取器不会遍历它们（没有树）。
-        """
-        if not reused_paths:
-            return []
-        file_rows = stores.files.list_by_repo(repository_id)
-        path_by_file_id = {row.id: row.path for row in file_rows}
-        reused_file_ids = {file_id(repository_id, path) for path in reused_paths}
-        known: list[Symbol] = []
-        for row in stores.symbols.list_by_repo(repository_id):
-            if row.file_id not in reused_file_ids:
-                continue
-            known.append(_symbol_object(row, path_by_file_id[row.file_id]))
-        known.sort(key=lambda s: (s.path, s.start_line, s.qualified_name))
-        return known
 
 
 class RepositoryIndex:

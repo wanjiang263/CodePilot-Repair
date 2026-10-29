@@ -24,7 +24,9 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import inspect
+import time
 from collections.abc import Awaitable, Callable
 from typing import Any
 
@@ -104,13 +106,103 @@ def _guard(
     """
 
     async def runner(state: RepairState) -> dict[str, Any]:
+        from codepilot.graph.harness import begin, complete
+
+        started = time.monotonic()
         if node is not Node.FINALIZE and deps.cancel_check is not None and deps.cancel_check():
             return _cancelled_update(state, deps, node, when="before")
         deps.events.emit(node=node.value, type=EventType.NODE_START, status="started")
         deps.bind_llm_context(node.value, state.iteration)
+        initialized = False
         try:
-            update = await fn(state, deps)
+            state = begin(state, deps, node.value)
+            initialized = True
+            from codepilot.graph.budget import Activity
+            from codepilot.observability.dispatch import (
+                DispatchScope,
+                DispatchStoppedError,
+                dispatch_scope,
+            )
+
+            reservation = nodes._closure_reservation(state, deps)
+
+            def admit(resource: str) -> None:
+                if resource not in {"test", "model"}:
+                    return
+                activity = (
+                    Activity.TEST
+                    if resource == "test"
+                    else (Activity.REVIEW if node is Node.REVIEW else Activity.LLM)
+                )
+                live = state.model_copy(update={"usage": deps.usage, "test_runs": deps.test_runs})
+                stop = deps.budget.check(
+                    live, activity, reservation=None if node is Node.REVIEW else reservation
+                )
+                if stop is not None:
+                    raise DispatchStoppedError(str(stop))
+
+            scope = DispatchScope(
+                deps.dispatch_deadline(state),
+                0 if node is Node.REVIEW else reservation.seconds,
+                deps.cancel_check,
+                deps.lifecycle.emit,
+                admit,
+                synchronous_worker=True,
+            )
+
+            import threading
+
+            interrupted = threading.Event()
+            scope.cancel = lambda: (
+                interrupted.is_set() or bool(deps.cancel_check and deps.cancel_check())
+            )
+
+            async def invoke_node() -> dict[str, Any]:
+                scope.worker_task_id = id(asyncio.current_task())
+                return await fn(state, deps)
+
+            def execute_node() -> dict[str, Any]:
+                with dispatch_scope(scope):
+                    return asyncio.run(invoke_node())
+
+            # Node implementations are synchronous I/O in async wrappers. The
+            # worker thread owns that private loop; gates must not see it as active.
+            execution_task = asyncio.create_task(asyncio.to_thread(execute_node))
+            try:
+                update = await asyncio.shield(execution_task)
+            except asyncio.CancelledError:
+                interrupted.set()
+                # Do not abandon a thread with live external side effects.
+                with contextlib.suppress(Exception):
+                    await execution_task  # original cancellation remains controlling
+                raise
+            _assert_partial(node, update)
         except Exception as exc:
+            from codepilot.observability.dispatch import DispatchStoppedError
+            from codepilot.observability.resources import ResourceCancelledError
+
+            if isinstance(exc, DispatchStoppedError):
+                deps.lifecycle.emit(
+                    "dispatch_blocked", stage=node.value, reason=str(exc), dispatched=False
+                )
+                reason = next(
+                    (r for r in StopReason if r.value == str(exc)), StopReason.BUDGET_TIME
+                )
+                return {
+                    "status": RunStatus.BUDGET_EXHAUSTED,
+                    "runtime": state.runtime,
+                    "policy_snapshot": state.policy_snapshot,
+                    "experience_refs": state.experience_refs,
+                    "stop_reason": reason,
+                    "usage": deps.usage,
+                    "test_runs": deps.test_runs,
+                    "failure_reasons": [*state.failure_reasons, str(exc)],
+                }
+            if isinstance(exc, ResourceCancelledError):
+                return _cancelled_update(state, deps, node, when="resource_wait")
+            deps.lifecycle.emit(
+                "node_error", stage=node.value, error=f"{type(exc).__name__}: {exc}"
+            )
             failure = classify_exception(exc, node=node.value)
             message = failure.reason()
             deps.events.emit(
@@ -125,10 +217,13 @@ def _guard(
             return {
                 **attribution_fields(failure),
                 **terminal_status_for(failure),
-                "usage_uncertain": state.usage_uncertain or node is Node.REVIEW,
+                "usage_uncertain": state.usage_uncertain or (initialized and node is Node.REVIEW),
                 "failure_reasons": [*state.failure_reasons, message],
                 "usage": deps.usage,
                 "test_runs": deps.test_runs,
+                "runtime": state.runtime,
+                "policy_snapshot": state.policy_snapshot,
+                "experience_refs": state.experience_refs,
                 "events": [
                     *state.events,
                     {
@@ -139,7 +234,6 @@ def _guard(
                     },
                 ],
             }
-        _assert_partial(node, update)
         if (
             node is not Node.FINALIZE
             and deps.cancel_check is not None
@@ -166,8 +260,25 @@ def _guard(
                 "events": cancellation["events"],
                 "usage": update.get("usage", cancellation["usage"]),
                 "test_runs": update.get("test_runs", cancellation["test_runs"]),
+                "runtime": {
+                    **state.runtime,
+                    "stage_elapsed_seconds": time.monotonic() - started,
+                    "activity": "idle",
+                    "has_modification": bool(update.get("current_patch", state.current_patch)),
+                },
+                "policy_snapshot": state.policy_snapshot,
+                "experience_refs": state.experience_refs,
             }
-        return update
+        try:
+            return complete(state, update, deps, time.monotonic() - started)
+        except Exception as exc:
+            deps.lifecycle.emit("projection_error", error=f"{type(exc).__name__}: {exc}")
+            return {
+                **update,
+                "runtime": state.runtime,
+                "policy_snapshot": state.policy_snapshot,
+                "experience_refs": state.experience_refs,
+            }
 
     return runner
 
@@ -180,6 +291,7 @@ def _cancelled_update(state: RepairState, deps: Deps, node: Node, *, when: str) 
     in ``state`` and is written by ``finalize`` with ``status=cancelled``.
     """
     message = f"cancelled at a safe node boundary {when} {node.value}"
+    deps.lifecycle.emit("cancel", requested=True, confirmed=True, boundary=when, stage=node.value)
     deps.events.emit(
         node=node.value,
         type=EventType.STOP,
@@ -192,6 +304,9 @@ def _cancelled_update(state: RepairState, deps: Deps, node: Node, *, when: str) 
         "failure_reasons": [*state.failure_reasons, message],
         "usage": deps.usage,
         "test_runs": deps.test_runs,
+        "runtime": state.runtime,
+        "policy_snapshot": state.policy_snapshot,
+        "experience_refs": state.experience_refs,
         "events": [
             *state.events,
             {

@@ -21,6 +21,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
@@ -47,6 +48,8 @@ class LLMRunContext:
     task_id: str = ""
     node: str | None = None
     iteration: int = 0
+    cancel_check: Callable[[], bool] | None = None
+    before_model: Callable[..., Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)

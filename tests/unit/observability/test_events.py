@@ -132,10 +132,10 @@ def test_extra_kwargs_land_in_extra(sink: EventSink) -> None:
     assert record["extra"] == {"container_id": "c0ffee", "exit_code": 1}
 
 
-def test_all_seven_event_types_are_writable(sink: EventSink) -> None:
+def test_all_eight_event_types_are_writable(sink: EventSink) -> None:
     for event_type in EventType:
         sink.emit(node="n", type=event_type)
-    assert sink.last_seq == len(list(EventType)) == 7
+    assert sink.last_seq == len(list(EventType)) == 8
 
 
 def test_jsonl_is_append_mode_across_sinks(stores: Stores, tmp_path: Path) -> None:

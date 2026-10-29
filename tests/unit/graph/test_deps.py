@@ -23,11 +23,13 @@ from codepilot.artifacts import ArtifactStore
 from codepilot.graph.budget import BudgetManager
 from codepilot.graph.deps import AccountingSandbox, Deps, DepsConfigurationError
 from codepilot.observability.events import EventSink
+from codepilot.sandbox.base import EnvironmentBuildResult
 from codepilot.sandbox.env_spec import EnvSpec
 from codepilot.sandbox.fake import FakeSandbox, scripted_result
 from codepilot.schemas.enums import ExecutionStatus
 from codepilot.schemas.state import RepairState
 from codepilot.schemas.usage import Usage
+from codepilot.tools.registry import ToolRegistry
 
 
 class StubSandbox:
@@ -85,10 +87,12 @@ def _deps(tmp_path: Path, **overrides: Any) -> Deps:
         "coder": SimpleNamespace(),
         "diagnoser": SimpleNamespace(),
         "sandbox": StubSandbox(),
-        "environment": SimpleNamespace(succeeded=True),
+        "environment": EnvironmentBuildResult(
+            status=ExecutionStatus.PASS, image_ref="img", image_id="img-id", cache_key="cache-key"
+        ),
         "env_spec": EnvSpec(),
         "validator": SimpleNamespace(),
-        "tools": SimpleNamespace(),
+        "tools": ToolRegistry(),
         "context_builder": SimpleNamespace(),
         "artifacts": artifacts,
         "events": events,
@@ -152,7 +156,7 @@ def test_missing_run_id_is_rejected_at_construction(tmp_path: Path) -> None:
             environment=SimpleNamespace(),
             env_spec=EnvSpec(),
             validator=SimpleNamespace(),
-            tools=SimpleNamespace(),
+            tools=ToolRegistry(),
             context_builder=SimpleNamespace(),
             artifacts=SimpleNamespace(),
             events=SimpleNamespace(),

@@ -65,6 +65,16 @@ class RepositoryRow(Base):
     __table_args__ = (UniqueConstraint("url", "base_commit", name="uq_repo_commit"),)
 
 
+class IndexSemantics(Base):
+    """Rebuildable index semantic identity; absent on legacy indexes until rebuilt."""
+
+    __tablename__ = "index_semantics"
+    repository_id: Mapped[str] = mapped_column(
+        ForeignKey("repositories.id", ondelete="CASCADE"), primary_key=True
+    )
+    fingerprint: Mapped[str] = mapped_column(String(64))
+
+
 class FileNode(Base):
     """索引中的一个文件。``path`` 统一用小写感的 POSIX 分隔符。"""
 

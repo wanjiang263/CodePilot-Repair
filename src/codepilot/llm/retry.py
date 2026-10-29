@@ -16,9 +16,12 @@ import random
 import threading
 import time
 from collections.abc import Callable
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 
 from codepilot.llm.errors import ContextTooLongError, LLMError, ProviderError, RateLimitError
+
+_entries: ContextVar[tuple[tuple[int, float], ...]] = ContextVar("provider_slots", default=())
 
 __all__ = [
     "RETRYABLE_STATUS",
@@ -111,6 +114,7 @@ def call_with_retry[T](
     sleep: Callable[[float], None] = time.sleep,
     rand: Callable[[], float] = random.random,
     on_retry: Callable[[int, BaseException, float], None] | None = None,
+    before_retry: Callable[[], None] | None = None,
 ) -> T:
     """执行 ``fn``，按策略重试。
 
@@ -138,6 +142,14 @@ def call_with_retry[T](
 
             if on_retry is not None:
                 on_retry(attempt, exc, delay)
+            if before_retry is not None:
+                # 总时限可能在两次尝试之间耗尽。此时再发只会在派发前被拦下，
+                # 而且"已派发、结果未知"的原始错误会被"未派发"掩盖——预扣的费用
+                # 会因此被当成未发生而退款。直接抛原始错误并保留停止原因为 cause。
+                try:
+                    before_retry()
+                except Exception as stop:
+                    raise exc from stop
             sleep(delay)
 
     # 循环体要么 return 要么 raise，走到这里只可能是 max_attempts <= 0。
@@ -162,11 +174,40 @@ class ConcurrencyLimiter:
         self._semaphore = threading.Semaphore(self.limit)
 
     def __enter__(self) -> ConcurrencyLimiter:
-        self._semaphore.acquire()
+        from codepilot.observability.dispatch import check_dispatch, observe_dispatch
+
+        started = time.monotonic()
+        observe_dispatch("resource_wait", resource="model")
+        while True:
+            check_dispatch("model")
+            if self._semaphore.acquire(timeout=0.1):
+                break
+        try:
+            check_dispatch("model")
+        except BaseException:
+            self._semaphore.release()
+            raise
+        observe_dispatch(
+            "resource_acquired", resource="model", queued_seconds=time.monotonic() - started
+        )
+        _entries.set((*_entries.get(), (id(self), time.monotonic())))
         return self
 
     def __exit__(self, *exc_info: object) -> None:
+        from codepilot.observability.dispatch import observe_dispatch
+
         self._semaphore.release()
+        entries = list(_entries.get())
+        for index in range(len(entries) - 1, -1, -1):
+            if entries[index][0] == id(self):
+                _, started = entries.pop(index)
+                _entries.set(tuple(entries))
+                observe_dispatch(
+                    "resource_released",
+                    resource="model",
+                    execution_seconds=time.monotonic() - started,
+                )
+                break
 
     @property
     def available(self) -> int:

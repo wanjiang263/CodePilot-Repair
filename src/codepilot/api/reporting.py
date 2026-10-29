@@ -236,7 +236,20 @@ def build_report_view(
     if extra_summary:
         summary.update(extra_summary)
     raw = _trim_raw(report)
+    from codepilot.rsi import selection_view
+
     return ReportView(
+        harness={
+            "policy_configuration": selection_view(_as_dict(state.get("policy_snapshot"))),
+            "preparation": load_json(run_dir / "harness/preparation.json"),
+            "environment": load_json(run_dir / "harness/environment.json"),
+            "runtime": _as_dict(state.get("runtime")),
+            "policy_snapshot": _as_dict(state.get("policy_snapshot")),
+            "experience_refs": state.get("experience_refs", []),
+            "failure_summary": _as_dict(state.get("failure_summary")),
+            "contract": _as_dict(_as_dict(state.get("plan")).get("contract")),
+            "verification": _harness_verification(state, official),
+        },
         run_id=run_id or str(report.get("run_id") or state.get("run_id") or ""),
         task_id=task_id or str(report.get("task_id") or state.get("task_id") or ""),
         status=resolved_status,
@@ -269,6 +282,26 @@ def build_report_view(
         raw=raw,
         readonly=readonly,
     )
+
+
+def _harness_verification(
+    state: dict[str, Any], official: OfficialVerdictView | None
+) -> dict[str, Any]:
+    from codepilot.graph.evidence import verification_view
+    from codepilot.schemas.state import RepairState
+
+    try:
+        view = verification_view(RepairState.model_validate(state))
+    except ValueError:
+        view = {
+            "execution": "NOT_RECORDED",
+            "behavior": "unknown",
+            "regression": "not_measured",
+            "review": "not_recorded",
+            "coverage": {},
+        }
+    view["official"] = official.verdict if official and official.recorded else "NOT_EVALUATED"
+    return view
 
 
 def _with_admission_remaining(closure: dict[str, Any]) -> dict[str, Any]:
@@ -443,6 +476,13 @@ def _artifact_map(run_dir: Path) -> dict[str, Any]:
         "regression.json",
         "review.json",
         "checkpoints.sqlite",
+        "harness/evidence.json",
+        "harness/snapshot.json",
+        "harness/preparation.json",
+        "harness/environment.json",
+        "harness/contract.json",
+        "harness/l0.json",
+        "runner-effective-config.json",
     )
     output: dict[str, Any] = {"run_dir": "<run>"}
     for name in names:

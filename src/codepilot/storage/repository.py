@@ -27,6 +27,7 @@ from codepilot.storage.models import (
     Event,
     FileNode,
     GraphEdge,
+    IndexSemantics,
     RepositoryRow,
     Run,
     SymbolRow,
@@ -77,6 +78,14 @@ class RepositoryStore:
 
     def get(self, repository_id: str) -> RepositoryRow | None:
         return self._s.get(RepositoryRow, repository_id)
+
+    def index_semantics(self, repository_id: str) -> str | None:
+        row = self._s.get(IndexSemantics, repository_id)
+        return row.fingerprint if row is not None else None
+
+    def set_index_semantics(self, repository_id: str, fingerprint: str) -> None:
+        self._s.merge(IndexSemantics(repository_id=repository_id, fingerprint=fingerprint))
+        self._s.flush()
 
     def find_by_url_commit(self, url: str, base_commit: str) -> RepositoryRow | None:
         stmt = select(RepositoryRow).where(

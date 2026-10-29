@@ -304,16 +304,10 @@ def _test_edge_confidence(stores: Stores, repository_id: str, test_qname: str, t
     return None
 
 
-def test_unchanged_test_file_gets_low_but_not_medium_link_to_new_symbol(
+def test_unchanged_test_file_gets_medium_link_to_new_symbol(
     stores: Stores, fresh_stores: Stores, tmp_path: Path
 ) -> None:
-    """钉住遗留边界 #2（index.py 模块 docstring）：
-
-    生产文件新增一个 symbol、而测试文件**未变化**时，增量索引只会补上 low
-    （文件名约定）关联，补不上 medium（import + 测试名包含 symbol 名）——
-    medium 需要该测试文件自己的 import 绑定，而增量不重新解析未变化文件。
-    全量索引会给 medium；等测试文件自己变化后，增量也会自愈到 medium。
-    """
+    """Phase26: complete association closure must agree with fresh indexing; NOT EXECUTED."""
     root = tmp_path / "proj"
     _write(root, "src/lib/__init__.py", "")
     _write(root, "src/lib/tokens.py", _TOKENS_V1)
@@ -330,8 +324,10 @@ def test_unchanged_test_file_gets_low_but_not_medium_link_to_new_symbol(
     stats = indexer.index(stores, workspace)
     assert stats.parsed_paths == ("src/lib/tokens.py",)
 
-    # 增量：只补上 low（文件名约定 tokens == test_tokens 去前缀），medium 缺失。
-    assert _test_edge_confidence(stores, workspace.repository_id, test_qname, mint_qname) == "low"
+    # 未变化测试的解析树复用，绑定和 TEST 关联仍重建。
+    assert (
+        _test_edge_confidence(stores, workspace.repository_id, test_qname, mint_qname) == "medium"
+    )
 
     # 同一状态的全量索引：medium（import lib.tokens + "mint_token" ⊂ "test_mint_token"）。
     Indexer().index(fresh_stores, workspace)
@@ -365,16 +361,10 @@ def _import_edges(
     ]
 
 
-def test_incremental_does_not_rebuild_unchanged_files_outgoing_edges(
+def test_incremental_rebuilds_unchanged_files_outgoing_edges(
     stores: Stores, fresh_stores: Stores, tmp_path: Path
 ) -> None:
-    """钉住遗留边界 #1（index.py 模块 docstring 第 3 条）：
-
-    未变化文件的出边**不重建**。当变化文件新出现一个 symbol、而**引用它的文件本身
-    没变化**时，该引用文件指向新 symbol 的边要等它自己变化才补——增量结果里这条边
-    停留在"未解析、low"形态；对同一状态做**全新全量索引**才会把它解析成 high。
-    这是"只重新解析变化文件"的必然保守边界，本用例只钉当前行为，不改变它。
-    """
+    """Phase26: complete association closure must agree with fresh indexing; NOT EXECUTED."""
     root = tmp_path / "p"
     _write(root, "pkg/__init__.py", "")
     # a.py 从一开始就显式引用 pkg.b.newfn，但首次索引时 b 里还没有 newfn → 解析不到。
@@ -395,10 +385,10 @@ def test_incremental_does_not_rebuild_unchanged_files_outgoing_edges(
 
     Indexer().index(fresh_stores, workspace)  # 同状态全新全量
 
-    # 增量：a.py 的出边没重建，仍停在未解析 low。
+    # 增量：复用解析树并重新绑定 a.py 的出边。
     assert _import_edges(
         RepositoryIndex(stores, workspace.repository_id), "pkg.a", "pkg.b.newfn"
-    ) == [(False, "low")]
+    ) == [(True, "high")]
     # 全量：重解析 a.py 后同一名字解析得到，升级为 high。二者差异正是该保守边界本身。
     assert _import_edges(
         RepositoryIndex(fresh_stores, workspace.repository_id), "pkg.a", "pkg.b.newfn"
@@ -408,17 +398,10 @@ def test_incremental_does_not_rebuild_unchanged_files_outgoing_edges(
 # ----------------------------- 遗留边界 #3：同名多目标部分删除时 confidence 不重算
 
 
-def test_incremental_does_not_recompute_confidence_when_redundant_target_removed(
+def test_incremental_recomputes_confidence_when_redundant_target_removed(
     stores: Stores, fresh_stores: Stores, tmp_path: Path
 ) -> None:
-    """钉住遗留边界 #3（index.py 模块 docstring）：
-
-    一条 import 曾解析到**多个**同名目标（这里 ``from pkg.mod import thing`` 命中
-    ``class thing`` 与 ``def thing`` 两个，kind 不同故 id 不同），按 imports.py 的规则
-    每条 IMPORT 边都是 low（只有恰好 1 个目标才 high）。删掉其中一个同名目标后，
-    引用方 caller **未变化** → 增量不重解析它 → 对存活目标的档位**不重算**（拿不到
-    升级到 high 的结果）；全新全量会因候选数变 1 而升级成 high。本用例只钉当前行为。
-    """
+    """Phase26: complete association closure must agree with fresh indexing; NOT EXECUTED."""
     root = tmp_path / "p"
     _write(root, "pkg/__init__.py", "")
     _write(root, "pkg/mod.py", "class thing:\n    pass\n\n\ndef thing() -> int:\n    return 1\n")
@@ -439,11 +422,12 @@ def test_incremental_does_not_recompute_confidence_when_redundant_target_removed
         RepositoryIndex(fresh_stores, workspace.repository_id), "pkg.caller", "pkg.mod.thing"
     )
     assert (True, "high") in fresh_edges
-    # 增量：caller 没被重解析，存活边不会被升级到 high（档位不重算）——这条不出现。
+    # 增量重算剩余目标的置信档位，必须与全量相同。
     incremental = _import_edges(
         RepositoryIndex(stores, workspace.repository_id), "pkg.caller", "pkg.mod.thing"
     )
-    assert (True, "high") not in incremental
+    assert (True, "high") in incremental
+    assert sorted(incremental) == sorted(fresh_edges)
     assert incremental  # 仍有边（悬挂收敛后的未解析 low），只是没升级
 
 
@@ -510,7 +494,7 @@ def test_incremental_reads_known_symbols_via_full_repo_query(
         stores.symbols.list_by_repo = original
 
     assert stats.incremental
-    assert stats.parsed_paths == ("pkg/b.py",)
+    assert set(stats.parsed_paths) == {"pkg/__init__.py", "pkg/a.py", "pkg/b.py"}
     assert calls["n"] >= 1  # known 符号加载走了一次全量 list_by_repo
 
 
@@ -538,10 +522,55 @@ def test_unreadable_paths_preserve_index_until_confirmed_deleted(stores, tmp_pat
                 unreadable=(blocked,),
             )
 
-    stats = Indexer(scanner=UnreadableScanner()).index(stores, ws)
-    assert stats.removed_paths == ()
+    with pytest.raises(OSError, match="scan incomplete"):
+        Indexer(scanner=UnreadableScanner()).index(stores, ws)
     assert _dump(stores, ws.repository_id) == before
     assert Indexer().index(stores, ws).changed_paths == ()
     (root / "src/miniauth/session.py").unlink()
     stats = Indexer().index(stores, ws)
     assert stats.removed_paths == ("src/miniauth/session.py",)
+
+
+# Phase26 final closure comparisons: AUTHORED, NOT EXECUTED.
+@pytest.mark.parametrize("mutation", ["rename", "new", "delete", "alias", "cycle"])
+def test_phase26_complete_association_closure(stores, fresh_stores, tmp_path, mutation):
+    root = tmp_path / "closure"
+    root.mkdir()
+    (root / "a.py").write_text("from b import target as alias\ndef call(): return alias()\n")
+    (root / "b.py").write_text("def target(): return 1\n")
+    (root / "unrelated.py").write_text("def stable(): return 0\n")
+    (root / "test_b.py").write_text(
+        "from b import target\ndef test_target(): assert target() == 1\n"
+    )
+    parser = CountingParser()
+    indexer = Indexer(parser=parser)
+    indexer.index(stores, _ws(root))
+    parser.paths.clear()
+    if mutation == "rename":
+        (root / "b.py").write_text("def renamed(): return 2\n")
+    elif mutation == "new":
+        (root / "new.py").write_text("from b import target\n")
+        (root / "b.py").write_text("from new import target\n")
+    elif mutation == "delete":
+        (root / "b.py").unlink()
+    elif mutation == "alias":
+        (root / "b.py").write_text("def other(): return 2\ntarget = other\n")
+    else:
+        (root / "b.py").write_text("from a import call\ndef target(): return call()\n")
+    stats = indexer.index(stores, _ws(root))
+    assert "unrelated.py" not in parser.paths
+    assert "unrelated.py" in stats.parse_reused_paths
+    Indexer().index(fresh_stores, _ws(root))
+    assert _dump(stores, _ws(root).repository_id) == _dump(fresh_stores, _ws(root).repository_id)
+
+
+def test_phase26_cold_index_rebuilds_old_semantics(stores, fresh_stores, tmp_path):
+    root = _copy_fixture(tmp_path)
+    Indexer().index(stores, _ws(root))
+    # Old persisted edges do not contain complete raw import bindings.
+    stores.edges.delete_by_kind(_ws(root).repository_id, "IMPORT")
+    stores.repositories.set_index_semantics(_ws(root).repository_id, "legacy-semantics")
+    stats = Indexer().index(stores, _ws(root))
+    Indexer().index(fresh_stores, _ws(root))
+    assert stats.association_mode == "complete_closure_v2" and stats.parsed_paths
+    assert _dump(stores, _ws(root).repository_id) == _dump(fresh_stores, _ws(root).repository_id)

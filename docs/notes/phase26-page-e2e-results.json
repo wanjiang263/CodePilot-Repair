@@ -1,0 +1,78 @@
+{
+  "started_at": "2026-10-29T11:11:16.180Z",
+  "scenarios": {
+    "queued_cancel": {
+      "task_id": "task_e024e145858287e824fe",
+      "status": "cancelled",
+      "ui_status": "cancelled",
+      "cancellation_state": "confirmed",
+      "stop_reason": "cancelled",
+      "screenshot": "01-queued-cancelled.png"
+    },
+    "completed_run": {
+      "task_id": "task_132dbb96f747b1becb90",
+      "run_id": "run_60da069c38d23c278225",
+      "wall_ms": 18007,
+      "duration_seconds": 12.617667,
+      "events_count": 174,
+      "verification_level": "m2_verified",
+      "target_tests": "PASS",
+      "simulated_llm": true,
+      "simulated_sandbox": true,
+      "screenshot": "02-completed.png"
+    },
+    "running_cancel_probe": [
+      {
+        "attempt": 1,
+        "task_id": "task_535f50580df9164cb663",
+        "requested_observed": true,
+        "cancelling_observed": false,
+        "cancel_state_after_click": "not_requested",
+        "status_after_click": "running",
+        "observations": [
+          {
+            "ms": 2,
+            "requested": true,
+            "cancelling": false
+          }
+        ]
+      }
+    ],
+    "running_cancel": {
+      "task_id": "task_535f50580df9164cb663",
+      "run_id": "run_4b6ff25759aeb8bfa7a2",
+      "requested_observed": true,
+      "status": "cancelled",
+      "stop_reason": "cancelled",
+      "attempts": 1,
+      "screenshot_requested": "03-cancel-requested.png",
+      "screenshot_confirmed": "04-cancel-confirmed.png"
+    },
+    "sse_reconnect": {
+      "task_id": "task_dfbd96c0cea4add8f1c6",
+      "reload_at_events": 9,
+      "replayed_events": 175,
+      "unique_monotonic": true,
+      "stream_end": true,
+      "resume_after_seq": 88,
+      "resume_events": 87,
+      "screenshot": "05-reconnected-completed.png"
+    },
+    "run_switch": {
+      "completed_task": "task_132dbb96f747b1becb90",
+      "cancelled_task": "task_535f50580df9164cb663",
+      "outcomes_are_isolated": true
+    }
+  },
+  "console_errors": [],
+  "finished_at": "2026-10-29T11:12:00.845Z",
+  "environment": {
+    "origin": "http://127.0.0.1:57900",
+    "chrome": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "python": "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+    "viewport": "1440x900",
+    "runtime_root": ".codex-pytest-tmp/phase26-runtime/page-e2e/out/runtime",
+    "real_model_requests": 0
+  },
+  "verdict": "pass"
+}

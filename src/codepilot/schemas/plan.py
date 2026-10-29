@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import PurePosixPath, PureWindowsPath
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -30,7 +31,27 @@ class PlannedChange(BaseModel):
         return normalized
 
 
+class ContractItem(BaseModel):
+    text: str = "Not established; inspect public requirements before assuming behavior."
+    source: list[str] = Field(default_factory=list)
+    confidence: Literal["explicit", "inferred", "unknown"] = "unknown"
+
+    @model_validator(mode="after")
+    def _require_source(self) -> ContractItem:
+        if self.confidence != "unknown" and not self.source:
+            raise ValueError("explicit/inferred contract items require public source references")
+        return self
+
+
+class RequirementContract(BaseModel):
+    change: ContractItem = Field(default_factory=ContractItem)
+    preserve: ContractItem = Field(default_factory=ContractItem)
+    interface: ContractItem = Field(default_factory=ContractItem)
+    discriminator: ContractItem = Field(default_factory=ContractItem)
+
+
 class RepairPlan(BaseModel):
+    contract: RequirementContract = Field(default_factory=RequirementContract)
     root_cause_hypothesis: str = Field(min_length=1)
     evidence: list[str] = Field(default_factory=list)
     changes: list[PlannedChange] = Field(default_factory=list)
