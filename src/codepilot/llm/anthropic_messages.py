@@ -17,13 +17,14 @@ import httpx
 from codepilot.llm.capabilities import prepare_messages
 from codepilot.llm.config import ModelSpec, ProviderSpec
 from codepilot.llm.cost import compute_cost
-from codepilot.llm.dispatch_budget import guarded_send
+from codepilot.llm.dispatch_budget import DispatchBudgetStoppedError, guarded_send
 from codepilot.llm.errors import (
     ContextTooLongError,
     ProviderError,
     ProviderNotAllowedError,
     RateLimitError,
 )
+from codepilot.llm.http_lifecycle import send_request
 from codepilot.llm.openai_compatible import looks_like_context_overflow
 from codepilot.llm.retry import ConcurrencyLimiter, RetryPolicy, call_with_retry
 from codepilot.llm.types import LLMRequest, LLMResponse, Message, Role, ToolCall
@@ -84,19 +85,28 @@ class AnthropicMessagesProvider:
         self._owns_client = client is None
         self._client = client or build_http_client(
             base_url=provider.base_url,
-            timeout=provider.timeout_seconds,
+            timeout=httpx.Timeout(
+                provider.timeout_seconds,
+                connect=provider.connect_timeout_seconds or provider.timeout_seconds,
+                write=provider.write_timeout_seconds or provider.timeout_seconds,
+                pool=provider.pool_timeout_seconds or provider.timeout_seconds,
+            ),
+            trust_env=provider.trust_env,
         )
         self.attempts = 0
         self.unacknowledged = 0
 
     def complete(self, request: LLMRequest) -> LLMResponse:
         body = build_messages_body(request, self.spec)
-        with self.limiter:
+        from codepilot.observability.dispatch import check_dispatch, model_request_scope
+
+        with model_request_scope(self.provider.timeout_seconds), self.limiter:
             response = call_with_retry(
                 lambda: self._post(body, request.purpose),
                 policy=self.policy,
                 sleep=self.sleep,
                 on_retry=self.on_retry,
+                before_retry=lambda: check_dispatch("model"),
             )
         return self._parse(response)
 
@@ -134,8 +144,14 @@ class AnthropicMessagesProvider:
 
             mark_model_dispatch()
             self.attempts += 1
-            return self._client.post(
-                self._messages_path, json=body, headers=headers, timeout=timeout
+            return send_request(
+                self._client,
+                self._messages_path,
+                body=body,
+                headers=headers,
+                timeout=timeout,
+                deadline=time.monotonic() + remaining,
+                trust_env=self.provider.trust_env,
             )
 
         try:
@@ -144,6 +160,10 @@ class AnthropicMessagesProvider:
                 body,
                 send_http,
             )
+        except DispatchBudgetStoppedError as exc:
+            if exc.dispatched:
+                self.unacknowledged += 1
+            raise
         except httpx.TimeoutException as exc:
             self.unacknowledged += 1
             raise ProviderError(

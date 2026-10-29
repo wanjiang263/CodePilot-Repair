@@ -21,13 +21,14 @@ import httpx
 from codepilot.llm.capabilities import build_request_body, parse_tool_protocol, prepare_messages
 from codepilot.llm.config import ModelSpec, ProviderSpec
 from codepilot.llm.cost import compute_cost
-from codepilot.llm.dispatch_budget import guarded_send
+from codepilot.llm.dispatch_budget import DispatchBudgetStoppedError, guarded_send
 from codepilot.llm.errors import (
     ContextTooLongError,
     ProviderError,
     ProviderNotAllowedError,
     RateLimitError,
 )
+from codepilot.llm.http_lifecycle import send_request
 from codepilot.llm.retry import ConcurrencyLimiter, RetryPolicy, call_with_retry
 from codepilot.llm.types import LLMRequest, LLMResponse, ToolCall
 from codepilot.net import build_http_client
@@ -140,9 +141,9 @@ class OpenAICompatibleProvider:
         messages = prepare_messages(request, self.spec)
         body = build_request_body(request, self.spec, messages)
 
-        from codepilot.observability.dispatch import check_dispatch
+        from codepilot.observability.dispatch import check_dispatch, model_request_scope
 
-        with self.limiter:
+        with model_request_scope(self.provider.timeout_seconds), self.limiter:
             response = call_with_retry(
                 lambda: self._post(body, request.purpose),
                 policy=self.policy,
@@ -200,7 +201,7 @@ class OpenAICompatibleProvider:
             mark_model_dispatch()
             self.attempts += 1
             return self._send_before_deadline(
-                body=body, headers=headers, timeout=timeout, deadline=deadline, total=remaining
+                body=body, headers=headers, timeout=timeout, deadline=deadline
             )
 
         try:
@@ -219,6 +220,10 @@ class OpenAICompatibleProvider:
                     "trust_env": self._client.trust_env,
                 },
             )
+        except DispatchBudgetStoppedError as exc:
+            if exc.dispatched:
+                self.unacknowledged += 1
+            raise
         except httpx.TimeoutException as exc:
             # 请求已经离开本机：服务端可能已经生成并计费，也可能没有。
             self.unacknowledged += 1
@@ -257,43 +262,17 @@ class OpenAICompatibleProvider:
         headers: dict[str, str],
         timeout: httpx.Timeout,
         deadline: float,
-        total: int,
     ) -> httpx.Response:
-        """在一个**绝对**总 deadline 内读完整个响应。
-
-        httpx 的 read timeout 只约束单次 socket 读：服务端只要不停挤字节，
-        每次读都不超时，单个请求就能无限拖长。因此这里用流式读取，对每个
-        到达的分块比对派发前记下的单调时钟 deadline；持续慢速响应无法靠
-        “每个分块重新计时”绕过总时限。
-
-        各阶段 timeout 仍然保留（connect/read/write/pool 各自被总剩余量
-        clamp），但它们只是单阶段上限，不承担总时长。
-
-        超时直接抛 httpx.ReadTimeout，由调用方翻译成“结果未知”；with 退出时
-        关闭该响应，httpx 会丢弃未读完的连接——不关闭共享 client，也不把请求
-        留在后台继续跑。
-        """
-        with self._client.stream(
-            "POST",
+        """Read and close one request under an interruptible absolute deadline."""
+        return send_request(
+            self._client,
             CHAT_COMPLETIONS_PATH,
-            json=body,
+            body=body,
             headers=headers,
             timeout=timeout,
-        ) as response:
-            chunks: list[bytes] = []
-            for chunk in response.iter_bytes():
-                chunks.append(chunk)
-                if time.monotonic() > deadline:
-                    raise httpx.ReadTimeout(
-                        f"请求总时限 {total}s 已耗尽：持续响应超过 deadline",
-                        request=response.request,
-                    )
-            return httpx.Response(
-                status_code=response.status_code,
-                headers=response.headers,
-                content=b"".join(chunks),
-                request=response.request,
-            )
+            deadline=deadline,
+            trust_env=self.provider.trust_env,
+        )
 
     def _raise_for_status(self, response: httpx.Response) -> None:
         text = self._scrub(response.text)

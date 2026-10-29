@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import gzip
 import json
 import threading
 import time
@@ -16,6 +17,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
+import httpx
 import pytest
 
 from codepilot.llm.config import ModelPrice, ModelSpec, ProviderSpec
@@ -43,6 +45,7 @@ BODY = json.dumps(
             {"message": {"content": "ok"}, "finish_reason": "stop"},
         ],
         "usage": {"prompt_tokens": 10, "completion_tokens": 5},
+        "content": [{"type": "text", "text": "ok"}],
     }
 ).encode()
 
@@ -78,7 +81,29 @@ class _Handler(BaseHTTPRequestHandler):
             if behavior == "slow_headers":
                 # 客户端总时限 2s：头还没到就应被判超时，随后写头会因对端已断开而失败。
                 time.sleep(2.6)
-            if behavior == "ok" or behavior == "slow_headers":
+            if behavior in ("gzip", "gzip_drip"):
+                compressed = gzip.compress(BODY)
+                self.send_response(200)
+                self.send_header("Content-Encoding", "gzip")
+                self.send_header("Content-Length", str(len(compressed)))
+                self.end_headers()
+                if behavior == "gzip":
+                    self.wfile.write(compressed)
+                    self.wfile.flush()
+                else:
+                    for byte in compressed:
+                        self.wfile.write(bytes([byte]))
+                        self.wfile.flush()
+                        time.sleep(0.1)
+            elif behavior == "header_then_stall":
+                time.sleep(1.6)
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(BODY)))
+                self.end_headers()
+                time.sleep(2.5)
+                self.wfile.write(BODY)
+                self.wfile.flush()
+            elif behavior == "ok" or behavior == "slow_headers":
                 self._send_all(BODY)
             elif behavior == "drip":
                 self.send_response(200)
@@ -398,3 +423,157 @@ def test_cancelled_after_reservation_before_http_is_refunded(
     assert admission["dispatch_status"] == "not_dispatched"
     assert admission["reserved_cny"] == 0.0
     assert payload["accounted_or_reserved"] == 0.0
+
+
+@pytest.mark.parametrize("protocol", ["openai", "anthropic"])
+@pytest.mark.parametrize("behavior", ["header_then_stall", "gzip_drip", "gzip"])
+def test_real_socket_lifecycle_and_compression(protocol: str, behavior: str) -> None:
+    from codepilot.llm.anthropic_messages import AnthropicMessagesProvider
+
+    with fake_server(behavior) as server:
+        provider = provider_for(server.base_url, policy=RetryPolicy(max_attempts=1))
+        if protocol == "anthropic":
+            provider.close()
+            provider = AnthropicMessagesProvider(  # type: ignore[assignment]
+                spec=model_spec(),
+                provider=provider.provider,
+                api_key="fake",
+                policy=RetryPolicy(max_attempts=1),
+            )
+        started = time.monotonic()
+        try:
+            with deadline_scope():
+                if behavior == "gzip":
+                    assert provider.complete(request()).content == "ok"
+                else:
+                    with pytest.raises(ProviderError):
+                        provider.complete(request())
+                    assert time.monotonic() - started < 3.0
+            assert server.state.requests == 1
+            assert not any(t.name == "codepilot-http" for t in threading.enumerate())
+        finally:
+            provider.close()
+
+
+@pytest.mark.parametrize("protocol", ["openai", "anthropic"])
+def test_inflight_cancel_freezes_usage_and_keeps_shared_client(
+    protocol: str,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from codepilot.llm.anthropic_messages import AnthropicMessagesProvider
+
+    ledger = _ledger(tmp_path, monkeypatch)
+    cancel = threading.Event()
+    with fake_server("gzip_drip", by_purpose={"fast": "ok"}) as server:
+        provider = provider_for(server.base_url, policy=RetryPolicy(max_attempts=1))
+        if protocol == "anthropic":
+            provider.close()
+            provider = AnthropicMessagesProvider(  # type: ignore[assignment]
+                spec=model_spec(),
+                provider=provider.provider,
+                api_key="fake",
+                policy=RetryPolicy(max_attempts=1),
+            )
+        template = provider._client
+        timer = threading.Thread(target=lambda: (server.state.started.wait(2), cancel.set()))
+        timer.start()
+        started = time.monotonic()
+        with (
+            pytest.raises(DispatchBudgetStoppedError) as caught,
+            deadline_scope(cancel=cancel.is_set),
+        ):
+            provider.complete(request())
+        timer.join()
+        assert caught.value.dispatched
+        assert provider.unacknowledged == 1
+        assert time.monotonic() - started < 1.5
+        assert not template.is_closed
+        assert not any(t.name == "codepilot-http" for t in threading.enumerate())
+        assert server.state.finished.wait(2)
+        payload = json.loads(ledger.read_text())
+        assert payload["frozen"] and payload["requests"][0]["status"] == "unknown_frozen"
+        assert payload["requests"][0]["cost_cny"] is None
+        assert not payload["cancelled_admissions"]
+        provider.close()
+
+
+def test_provider_deadline_includes_limiter_wait() -> None:
+    with fake_server() as server:
+        provider = provider_for(server.base_url)
+        provider.provider = provider.provider.model_copy(update={"timeout_seconds": 2})
+        assert provider.limiter._semaphore.acquire()
+        assert provider.limiter._semaphore.acquire()
+        started = time.monotonic()
+        try:
+            with pytest.raises(DispatchStoppedError):
+                provider.complete(request())
+            assert 1.8 < time.monotonic() - started < 2.3
+            assert provider.attempts == 0 and server.state.requests == 0
+        finally:
+            provider.limiter._semaphore.release()
+            provider.limiter._semaphore.release()
+            provider.close()
+
+
+def test_decoded_response_has_decoded_length_and_no_wire_encoding() -> None:
+    with fake_server("gzip") as server:
+        provider = provider_for(server.base_url, policy=RetryPolicy(max_attempts=1))
+        try:
+            with deadline_scope():
+                response = provider._post({"model": "fake"})
+            assert response.content == BODY
+            assert "content-encoding" not in response.headers
+            assert "transfer-encoding" not in response.headers
+            assert int(response.headers["content-length"]) == len(BODY)
+        finally:
+            provider.close()
+
+
+def test_native_messages_usage_is_settled_without_openai_field_names(tmp_path: Path) -> None:
+    from codepilot.llm.dispatch_budget import DispatchBudget
+
+    path = tmp_path / "native-ledger.json"
+    budget = DispatchBudget(20, path)
+    response = httpx.Response(
+        200,
+        request=httpx.Request("POST", "https://fake.test/v1/messages"),
+        json={
+            "id": "native-id",
+            "model": "fake-model-id",
+            "usage": {"input_tokens": 10, "output_tokens": 5},
+        },
+    )
+    budget.send(model_spec(), {"max_tokens": 512}, lambda: response)
+    payload = json.loads(path.read_text(encoding="utf8"))
+    record = payload["requests"][0]
+    assert record["status"] == "settled" and not payload["frozen"]
+    assert record["input_tokens"] == 10 and record["output_tokens"] == 5
+    assert record["cost_cny"] == pytest.approx(0.000020)
+    assert record["response_id"] == "native-id"
+
+
+def test_cancel_one_request_while_another_is_inflight() -> None:
+    with fake_server("gzip_drip", by_purpose={"fast": "ok"}) as server:
+        provider = provider_for(server.base_url, policy=RetryPolicy(max_attempts=1))
+        cancel = threading.Event()
+        errors: list[BaseException] = []
+
+        def slow() -> None:
+            try:
+                with deadline_scope(cancel=cancel.is_set):
+                    provider.complete(request())
+            except BaseException as exc:
+                errors.append(exc)
+
+        worker = threading.Thread(target=slow)
+        worker.start()
+        assert server.state.started.wait(2)
+        cancel.set()
+        assert provider.complete(request("fast")).content == "ok"
+        worker.join(3)
+        assert not worker.is_alive()
+        assert len(errors) == 1 and isinstance(errors[0], ProviderError)
+        assert provider.complete(request("fast")).content == "ok"
+        assert server.state.requests == 3
+        provider.close()

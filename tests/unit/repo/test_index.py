@@ -54,6 +54,21 @@ def _copy_fixture(tmp_path: Path, name: str = "mini_auth") -> Path:
     return target
 
 
+def test_scan_does_not_evict_every_initial_cache_hit(stores: Stores, tmp_path: Path) -> None:
+    root = tmp_path / "large-enough-for-lru"
+    root.mkdir()
+    for i in range(130):
+        (root / f"mod{i:03}.py").write_text("def value():\n    return 1\n", encoding="utf8")
+    parser = CountingParser()
+    indexer = Indexer(parser=parser)
+    indexer.index(stores, _ws(root))
+    (root / "mod000.py").write_text("def value():\n    return 2\n", encoding="utf8")
+    stats = indexer.index(stores, _ws(root))
+    assert len(stats.parsed_paths) == 2
+    assert len(stats.parse_reused_paths) == 128
+    assert stats.association_mode == "complete_closure_v2"
+
+
 @pytest.fixture
 def fresh_stores() -> Stores:
     """第二个内存库：给"全新全量索引"做对照。"""

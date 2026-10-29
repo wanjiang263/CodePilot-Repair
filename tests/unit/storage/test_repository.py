@@ -414,7 +414,7 @@ def test_foreign_keys_are_actually_enforced(
     assert value == 1
 
 
-def test_all_nine_tables_exist(stores: Stores) -> None:
+def test_all_ten_tables_exist(stores: Stores) -> None:
     from codepilot.storage.models import Base
 
     assert sorted(Base.metadata.tables) == [
@@ -423,6 +423,7 @@ def test_all_nine_tables_exist(stores: Stores) -> None:
         "evaluations",
         "events",
         "files",
+        "index_semantics",
         "repositories",
         "runs",
         "symbols",

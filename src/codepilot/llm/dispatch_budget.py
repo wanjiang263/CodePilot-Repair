@@ -190,9 +190,21 @@ class DispatchBudget:
             record["response_request_id"] = response.headers.get("x-request-id")
             record["http_status"] = response.status_code
             response.raise_for_status()
-            usage = response.json()["usage"]
-            prompt, output = usage["prompt_tokens"], usage["completion_tokens"]
-            cached = (usage.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
+            payload = response.json()
+            record["response_id"] = payload.get("id")
+            record["response_model"] = payload.get("model")
+            usage = payload["usage"]
+            record["response_usage"] = usage
+            if "prompt_tokens" in usage:
+                prompt, output = usage["prompt_tokens"], usage["completion_tokens"]
+                cached = (usage.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
+            else:
+                # Native Messages uses input/output token names. Cache creation
+                # has separate pricing and is deliberately unsupported here.
+                if usage.get("cache_creation_input_tokens", 0):
+                    raise ValueError("native cache creation pricing is not configured")
+                cached = usage.get("cache_read_input_tokens", 0)
+                prompt, output = usage["input_tokens"] + cached, usage["output_tokens"]
             if (
                 any(type(v) is not int or v < 0 for v in (prompt, output, cached))
                 or cached > prompt

@@ -234,9 +234,10 @@ class EdgeStore:
                     GraphEdge.source_id.in_(source_ids),
                 )
             )
-        materialized = list(rows)
-        if materialized:
-            self._s.execute(insert(GraphEdge), materialized)
+        from itertools import batched
+
+        for batch in batched(rows, 1000):
+            self._s.execute(insert(GraphEdge), list(batch))
         self._s.flush()
 
     def list_by_repo(self, repository_id: str) -> list[GraphEdge]:

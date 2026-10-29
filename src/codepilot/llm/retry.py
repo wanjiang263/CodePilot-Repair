@@ -150,7 +150,20 @@ def call_with_retry[T](
                     before_retry()
                 except Exception as stop:
                     raise exc from stop
-            sleep(delay)
+            if sleep is time.sleep:
+                # Real backoff is part of the provider lifecycle, too. Keep
+                # injected sleeps deterministic for protocol/retry unit tests.
+                from codepilot.observability.dispatch import check_dispatch
+
+                until = time.monotonic() + delay
+                while time.monotonic() < until:
+                    try:
+                        check_dispatch("model")
+                    except Exception as stop:
+                        raise exc from stop
+                    sleep(min(0.05, max(0.0, until - time.monotonic())))
+            else:
+                sleep(delay)
 
     # 循环体要么 return 要么 raise，走到这里只可能是 max_attempts <= 0。
     assert last_exc is not None

@@ -256,6 +256,14 @@ class LLMRegistry:
                         allowed_providers=self.config.allowed_providers,
                     )
 
+            if (
+                isinstance(inner, (AnthropicMessagesProvider, OpenAICompatibleProvider))
+                and self._client_factory is None
+            ):
+                # This client was created by this registry, not borrowed from
+                # another task. Closing the provider must release it as well.
+                inner._owns_client = True
+
             if self.mode == LLMMode.RECORD:
                 inner = RecordingLLM(inner, self._calls_path_or_pending())
 

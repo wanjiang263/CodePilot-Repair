@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
@@ -29,6 +30,16 @@ class Deadline:
         return value
 
 
+class _ProviderDeadline(Deadline):
+    def timeout(self, limit: float, reserve: float = 0) -> int:
+        value = min(limit, self.remaining(reserve))
+        if value <= 0:
+            raise DispatchStoppedError("budget_time: provider deadline before dispatch")
+        # The transport uses the precise expiry; rounding this phase cap up
+        # permits short configured timeouts without rejecting them at entry.
+        return math.ceil(value)
+
+
 @dataclass
 class DispatchScope:
     deadline: Deadline
@@ -42,6 +53,31 @@ class DispatchScope:
 
 
 _current: ContextVar[DispatchScope | None] = ContextVar("dispatch_scope", default=None)
+
+
+def current_dispatch_scope() -> DispatchScope | None:
+    return _current.get()
+
+
+@contextmanager
+def model_request_scope(limit: float) -> Iterator[None]:
+    """Bound provider admission, queueing, retries and HTTP with one deadline."""
+    from dataclasses import replace
+
+    parent = _current.get()
+    scope = (
+        replace(parent) if parent else DispatchScope(_ProviderDeadline(time.monotonic() + limit))
+    )
+    expires = time.monotonic() + limit + scope.reserve
+    if parent is None or expires < scope.deadline.expires:
+        scope.deadline = _ProviderDeadline(expires)
+    before = scope.model_dispatches
+    try:
+        with dispatch_scope(scope):
+            yield
+    finally:
+        if parent:
+            parent.model_dispatches += scope.model_dispatches - before
 
 
 @contextmanager

@@ -203,14 +203,16 @@ class Indexer:
         parse_reused: list[str] = []
         # Complete associations are the safe closure when unresolved bindings
         # cannot be recovered from old edges. Cache is instance-local, bounded.
+        cached_at_start = dict(self._parsed)
         for scanned_file in scan.files:
             if not scanned_file.path.endswith(".py"):
                 continue
             key = (str(root.resolve()), scanned_file.path, scanned_file.sha256)
-            cached = self._parsed.get(key)
+            cached = cached_at_start.get(key)
             if cached is not None:
                 parsed = cached[0]
-                self._parsed.move_to_end(key)
+                if key in self._parsed:
+                    self._parsed.move_to_end(key)
                 parse_reused.append(scanned_file.path)
             else:
                 raw = (root / scanned_file.path).read_bytes()
@@ -296,15 +298,15 @@ class Indexer:
         )
         stores.files.upsert_many(file_rows)
         stores.symbols.replace_for_files(affected_file_ids, symbol_rows)
+        del symbol_rows, file_rows
         stores.edges.replace_for_sources(
             repository_id, sorted(old_symbol_ids | new_symbol_ids), edge_rows
         )
+        del edge_rows, all_edges
         if removed_paths:
             stores.files.delete_by_paths(repository_id, removed_paths)
         dangling_deleted, dangling_unresolved = _resolve_dangling(stores, repository_id)
-        _merge_test_edges(
-            stores, repository_id, computed_test_edges, old_symbol_ids | new_symbol_ids
-        )
+        _replace_test_edges(stores, repository_id, computed_test_edges)
 
         stores.repositories.set_index_semantics(repository_id, fingerprint)
         stats = finish(reparsed, parse_reused, parse_errors, "complete_closure_v2")
@@ -447,53 +449,36 @@ def _resolve_dangling(stores: Stores, repository_id: str) -> tuple[int, int]:
     return deleted, len(synthesized)
 
 
-def _merge_test_edges(
+def _replace_test_edges(
     stores: Stores,
     repository_id: str,
     computed: tuple[GraphEdge, ...],
-    changed_source_ids: set[str],
 ) -> None:
-    """合并重建 TEST 边集合（规则见模块 docstring 的"TEST 边是例外"）。
+    """Complete closure already contains unique test/target pairs at full strength.
 
-    ``computed`` 是本次提取的全部 TEST 边：变化源的是全强度（含调用证据的
-    high），未变化源的只有 low（medium 需要未解析文件的 import 绑定，见
-    docstring 边界）。与既有边按键合并，取最强 confidence、并列取最早行号，
-    然后整体替换 TEST 集合——保证幂等，也让变化源被降级的边真正降下去。
+    Do not materialize the old graph, a second merge map and all row dictionaries
+    at once. EdgeStore consumes this iterator in bounded transaction-local batches.
     """
-    merged: dict[tuple[str, str, str], tuple[float, int]] = {}
-    for row in stores.edges.list_by_repo(repository_id):
-        if row.kind != "TEST" or row.source_id in changed_source_ids:
-            continue
-        assert row.target_id is not None  # TEST 边由提取器产出时必有目标
-        merged[(row.source_id, row.target_id, row.target_name or "")] = (
-            row.confidence,
-            row.line,
-        )
-    for edge in computed:
-        if edge.source_id not in changed_source_ids and edge.target_id not in changed_source_ids:
-            continue
-        assert edge.target_id is not None
-        key = (edge.source_id, edge.target_id, edge.target_name)
-        score = confidence_to_score(edge.confidence)
-        previous = merged.get(key)
-        if previous is None or (score, -edge.line) > (previous[0], -previous[1]):
-            merged[key] = (score, edge.line)
-
     stores.edges.delete_by_kind(repository_id, "TEST")
-    rows = [
-        {
-            "id": _edge_id(repository_id, source_id, target_id, target_name, "TEST"),
-            "repository_id": repository_id,
-            "source_id": source_id,
-            "target_id": target_id,
-            "target_name": target_name,
-            "kind": "TEST",
-            "confidence": score,
-            "line": line,
-        }
-        for (source_id, target_id, target_name), (score, line) in sorted(merged.items())
-    ]
-    stores.edges.replace_for_sources(repository_id, [], rows)
+    stores.edges.replace_for_sources(
+        repository_id,
+        [],
+        (
+            {
+                "id": _edge_id(
+                    repository_id, edge.source_id, edge.target_id, edge.target_name, "TEST"
+                ),
+                "repository_id": repository_id,
+                "source_id": edge.source_id,
+                "target_id": edge.target_id,
+                "target_name": edge.target_name,
+                "kind": "TEST",
+                "confidence": confidence_to_score(edge.confidence),
+                "line": edge.line,
+            }
+            for edge in computed
+        ),
+    )
 
 
 def _extract_all_edges(context: AnalysisContext) -> tuple[GraphEdge, ...]:
