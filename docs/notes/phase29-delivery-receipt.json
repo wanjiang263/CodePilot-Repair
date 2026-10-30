@@ -1,0 +1,35 @@
+{
+  "tool": "phase29_delivery_receipt",
+  "generated_at": "2026-10-31",
+  "purpose": "Phase29 交付回执：以独立提交记录全部提交哈希，解决 runtime-results.json 中 final_docs_commit_id 自引用循环（Phase28 遗留 null 问题在本轮的收口机制）",
+  "commits": {
+    "source_commit": "b17019beb817b92b1fbb3da879774a231d69219d",
+    "source_commit_message": "feat: bind candidate archive to git sources and bound incremental edge rebuild",
+    "docs_candidate_commit": "3c57bc13daa09ec34fe2ce1f05551354642c09d0",
+    "docs_candidate_commit_message": "docs: record phase29 validation and archive v3",
+    "receipt_commit": "SELF (见 git log 中本文件所在提交)",
+    "base_before_round": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+    "branch": "codex/phase12-real-issue-pilot",
+    "pushed": false,
+    "pr_created": false
+  },
+  "candidate": {
+    "path": "configs/harness/candidates/phase29-candidate-v3",
+    "schema_version": 3,
+    "parent": "phase28-candidate-v2",
+    "status": "pending",
+    "source_commit": "b17019beb817b92b1fbb3da879774a231d69219d",
+    "diff_base_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+    "diff_sha256": "e3548c09b666d15c04ba1fc4d923bcb835a4d85cda927138735590105b772dd0",
+    "checks_passed": 19
+  },
+  "final_docs_commit_id": "3c57bc13daa09ec34fe2ce1f05551354642c09d0",
+  "guardrails": {
+    "real_model_requests": 0,
+    "new_cost_cny": 0,
+    "active_pointer": false,
+    "pushed": false,
+    "pr_created": false,
+    "docker_run": false
+  }
+}
