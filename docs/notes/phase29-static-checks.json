@@ -1,0 +1,62 @@
+{
+  "tool": "phase29_static_checks",
+  "generated_at": "2026-10-31",
+  "scope_note": "覆盖本轮全部触碰文件；仓库级格式化遗留单独列出（非本轮范围）",
+  "ast_check": {
+    "command": ".venv/Scripts/python.exe scripts/phase29_ast_check.py --json .codex-pytest-tmp/phase29/ast-check.json",
+    "exit_code": 0,
+    "files_checked": 939,
+    "functions": 8070,
+    "classes": 917,
+    "imports": 6710,
+    "exclusions": [
+      "tests/fixtures/failures/sources/syntax/test_case.py",
+      "tests/fixtures/repos/mini_calc/calc/broken.py"
+    ],
+    "exclusion_reason": "故意损坏的测试夹具（索引器/失败收集器错误路径用），必须保持不可解析"
+  },
+  "ruff_check": {
+    "command": ".venv/Scripts/python.exe -m ruff check src/ scripts/ tests/",
+    "exit_code": 0,
+    "note": "本轮触碰文件首跑 51 处违规，逐项修复后仓库全范围 0 违规"
+  },
+  "ruff_format": {
+    "command": ".venv/Scripts/python.exe -m ruff format --check src/ scripts/ tests/",
+    "exit_code": 1,
+    "this_round_files_formatted": true,
+    "pre_existing_unformatted": [
+      "scripts/batch_budget.py",
+      "scripts/recovery_admin.py",
+      "tests/graph/test_phase19_static_reliability.py",
+      "tests/unit/llm/test_phase19_budget_binding.py"
+    ],
+    "note": "6 文件待重排全部为 Phase19/早期遗留（含 2 个文件多处），不属本轮触碰范围，按'不做无关重构'约束保留原样并如实记录"
+  },
+  "mypy": {
+    "command": ".venv/Scripts/python.exe -m mypy src/codepilot/archive.py src/codepilot/rsi.py src/codepilot/repo/index.py src/codepilot/repo/imports.py src/codepilot/repo/calls.py src/codepilot/repo/edges.py src/codepilot/repo/test_links.py src/codepilot/retrieval/runner.py",
+    "exit_code": 0,
+    "files_checked": 8,
+    "coverage_note": "Phase28 范围（archive.py/index.py/runner.py）+ 本轮触碰的 rsi.py 与 4 个提取器模块；修复 2 处 rows 生成器推断类型（显式 Iterator[dict[str, object]] 注解）"
+  },
+  "tsc": {
+    "command": "cd web && npm run typecheck",
+    "exit_code": 0,
+    "log": ".codex-pytest-tmp/phase29/t12-typecheck.log",
+    "trigger": "T12 无 UI 变更路径的前端验证"
+  },
+  "eslint": {
+    "command": "cd web && npm run lint",
+    "exit_code": 0,
+    "log": ".codex-pytest-tmp/phase29/t12-eslint.log"
+  },
+  "git_diff_check": {
+    "command": "git diff --check",
+    "exit_code": 0,
+    "note": "中途发现本轮批量 lint 修复把 18 个触碰文件写成 CRLF（Windows write_text），已全部 LF 归一后复检干净"
+  },
+  "credential_and_debug_scan": {
+    "command": "git diff | grep -iE 'sk-|api_key.*=.*[16-char literal]|password|BEGIN (RSA|OPENSSH)' 与 print(/breakpoint()/pdb 扫描",
+    "findings": "无真实凭据；测试中密钥均为 test-key-not-real 显式假值；无调试残留",
+    "exit_code": 0
+  }
+}

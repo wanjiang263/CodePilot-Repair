@@ -1,0 +1,1505 @@
+{
+  "acceptance": {
+    "sameproc_change_median_s": 5.1318,
+    "t10_target": "single-file change median wall at least 10% below this baseline with identical semantic digest, or an honest 'not achieved' with data"
+  },
+  "environment": {
+    "cpu": "13th Gen Intel(R) Core(TM) i7-13700H",
+    "cpu_count": 20,
+    "disk": {
+      "drive_type": "FIXED",
+      "media_type": "SSD"
+    },
+    "platform": "Windows-11-10.0.22631-SP0",
+    "python_executable": "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+    "python_version": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
+    "sqlalchemy_version": "2.1.4",
+    "total_ram_bytes": 16961822720,
+    "tree_sitter_python_version": "0.25.0",
+    "tree_sitter_version": "0.25.2"
+  },
+  "generated_at": "2026-10-30T19:41:35+00:00",
+  "method": {
+    "aggregation": "median of measured runs",
+    "measured": 3,
+    "reuse": "phase28_index_profile.py machinery (imported, scratch dirs repointed; no Phase28 deliverable touched)",
+    "synthetic_repo": {
+      "boundary": "synthetic small repo; absolute times must not be extrapolated to large real repositories",
+      "seed": 20281030,
+      "source_modules": 360
+    },
+    "warmups": 2
+  },
+  "scenarios": {
+    "cache_128": {
+      "association_mode": "complete_closure_v2",
+      "cache_entries": 128,
+      "cache_evictions": 644,
+      "cache_source_bytes": 97262,
+      "changed": 1,
+      "content_reused": 451,
+      "db_bytes": 6680576,
+      "db_files": 452,
+      "edge_rows": 9581,
+      "exclusive_total_s_median": 1.054,
+      "parse_errors": 0,
+      "parse_reused": 128,
+      "parsed": 322,
+      "peak_working_set_bytes": 116604928,
+      "phases_median": {
+        "context_build": {
+          "calls": 1,
+          "exclusive_s": 0.1404,
+          "inclusive_s": 0.1404,
+          "share_of_wall": 0.1022
+        },
+        "edge_rows_build": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "edges.count_by_kind_confidence": {
+          "calls": 1,
+          "exclusive_s": 0.0065,
+          "inclusive_s": 0.0065,
+          "share_of_wall": 0.0047
+        },
+        "edges.list_dangling_targets": {
+          "calls": 1,
+          "exclusive_s": 0.0087,
+          "inclusive_s": 0.0087,
+          "share_of_wall": 0.0063
+        },
+        "edges.replace_for_sources": {
+          "calls": 2,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0012,
+          "share_of_wall": 0.0009
+        },
+        "edges.replace_for_sources.delete": {
+          "calls": 1,
+          "exclusive_s": 0.0008,
+          "inclusive_s": 0.0008,
+          "share_of_wall": 0.0006
+        },
+        "edges.replace_for_sources.flush": {
+          "calls": 2,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "edges.replace_for_sources.insert": {
+          "calls": 2,
+          "exclusive_s": 0.0003,
+          "inclusive_s": 0.0003,
+          "share_of_wall": 0.0002
+        },
+        "extract_all_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.434,
+          "share_of_wall": 0.3159
+        },
+        "extract_calls": {
+          "calls": 1,
+          "exclusive_s": 0.2088,
+          "inclusive_s": 0.2088,
+          "share_of_wall": 0.152
+        },
+        "extract_edges": {
+          "calls": 1,
+          "exclusive_s": 0.1691,
+          "inclusive_s": 0.1691,
+          "share_of_wall": 0.1231
+        },
+        "extract_test_links": {
+          "calls": 1,
+          "exclusive_s": 0.0418,
+          "inclusive_s": 0.0418,
+          "share_of_wall": 0.0304
+        },
+        "files.list_by_repo": {
+          "calls": 2,
+          "exclusive_s": 0.0052,
+          "inclusive_s": 0.0052,
+          "share_of_wall": 0.0038
+        },
+        "files.upsert_many": {
+          "calls": 1,
+          "exclusive_s": 0.0111,
+          "inclusive_s": 0.0111,
+          "share_of_wall": 0.0081
+        },
+        "imports_resolve": {
+          "calls": 1,
+          "exclusive_s": 0.0002,
+          "inclusive_s": 0.0002,
+          "share_of_wall": 0.0001
+        },
+        "parse": {
+          "calls": 322,
+          "exclusive_s": 0.0426,
+          "inclusive_s": 0.0426,
+          "share_of_wall": 0.031
+        },
+        "replace_test_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "resolve_dangling": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0087,
+          "share_of_wall": 0.0063
+        },
+        "scan": {
+          "calls": 1,
+          "exclusive_s": 0.3051,
+          "inclusive_s": 0.3051,
+          "share_of_wall": 0.2221
+        },
+        "symbols.count_by_kind": {
+          "calls": 2,
+          "exclusive_s": 0.003,
+          "inclusive_s": 0.003,
+          "share_of_wall": 0.0022
+        },
+        "symbols.list_by_repo": {
+          "calls": 1,
+          "exclusive_s": 0.0243,
+          "inclusive_s": 0.0243,
+          "share_of_wall": 0.0177
+        },
+        "symbols.replace_for_files": {
+          "calls": 1,
+          "exclusive_s": 0.0925,
+          "inclusive_s": 0.0925,
+          "share_of_wall": 0.0673
+        }
+      },
+      "removed": 0,
+      "scan_files": 452,
+      "symbol_rows": 3234,
+      "test_edges": 2136,
+      "unaccounted_s": 0.32009,
+      "wall_commit_s": 0.0066,
+      "wall_index_s_median": 1.374,
+      "wall_index_s_runs": [
+        1.4127,
+        1.2935,
+        1.374
+      ]
+    },
+    "cache_512": {
+      "association_mode": "complete_closure_v2",
+      "cache_entries": 451,
+      "cache_evictions": 0,
+      "cache_source_bytes": 300469,
+      "changed": 1,
+      "content_reused": 451,
+      "db_bytes": 6680576,
+      "db_files": 452,
+      "edge_rows": 9581,
+      "exclusive_total_s_median": 1.008,
+      "parse_errors": 0,
+      "parse_reused": 449,
+      "parsed": 1,
+      "peak_working_set_bytes": 118562816,
+      "phases_median": {
+        "context_build": {
+          "calls": 1,
+          "exclusive_s": 0.1372,
+          "inclusive_s": 0.1372,
+          "share_of_wall": 0.1137
+        },
+        "edge_rows_build": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "edges.count_by_kind_confidence": {
+          "calls": 1,
+          "exclusive_s": 0.0068,
+          "inclusive_s": 0.0068,
+          "share_of_wall": 0.0056
+        },
+        "edges.list_dangling_targets": {
+          "calls": 1,
+          "exclusive_s": 0.0085,
+          "inclusive_s": 0.0085,
+          "share_of_wall": 0.007
+        },
+        "edges.replace_for_sources": {
+          "calls": 2,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0012,
+          "share_of_wall": 0.001
+        },
+        "edges.replace_for_sources.delete": {
+          "calls": 1,
+          "exclusive_s": 0.0009,
+          "inclusive_s": 0.0009,
+          "share_of_wall": 0.0007
+        },
+        "edges.replace_for_sources.flush": {
+          "calls": 2,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "edges.replace_for_sources.insert": {
+          "calls": 2,
+          "exclusive_s": 0.0003,
+          "inclusive_s": 0.0003,
+          "share_of_wall": 0.0002
+        },
+        "extract_all_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.3743,
+          "share_of_wall": 0.3103
+        },
+        "extract_calls": {
+          "calls": 1,
+          "exclusive_s": 0.1693,
+          "inclusive_s": 0.1693,
+          "share_of_wall": 0.1404
+        },
+        "extract_edges": {
+          "calls": 1,
+          "exclusive_s": 0.1653,
+          "inclusive_s": 0.1653,
+          "share_of_wall": 0.137
+        },
+        "extract_test_links": {
+          "calls": 1,
+          "exclusive_s": 0.0415,
+          "inclusive_s": 0.0415,
+          "share_of_wall": 0.0344
+        },
+        "files.list_by_repo": {
+          "calls": 2,
+          "exclusive_s": 0.0054,
+          "inclusive_s": 0.0054,
+          "share_of_wall": 0.0045
+        },
+        "files.upsert_many": {
+          "calls": 1,
+          "exclusive_s": 0.0118,
+          "inclusive_s": 0.0118,
+          "share_of_wall": 0.0098
+        },
+        "imports_resolve": {
+          "calls": 1,
+          "exclusive_s": 0.0002,
+          "inclusive_s": 0.0002,
+          "share_of_wall": 0.0002
+        },
+        "parse": {
+          "calls": 1,
+          "exclusive_s": 0.0001,
+          "inclusive_s": 0.0001,
+          "share_of_wall": 0.0001
+        },
+        "replace_test_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "resolve_dangling": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0085,
+          "share_of_wall": 0.007
+        },
+        "scan": {
+          "calls": 1,
+          "exclusive_s": 0.3122,
+          "inclusive_s": 0.3122,
+          "share_of_wall": 0.2588
+        },
+        "symbols.count_by_kind": {
+          "calls": 2,
+          "exclusive_s": 0.0025,
+          "inclusive_s": 0.0025,
+          "share_of_wall": 0.0021
+        },
+        "symbols.list_by_repo": {
+          "calls": 1,
+          "exclusive_s": 0.0531,
+          "inclusive_s": 0.0531,
+          "share_of_wall": 0.044
+        },
+        "symbols.replace_for_files": {
+          "calls": 1,
+          "exclusive_s": 0.0917,
+          "inclusive_s": 0.0917,
+          "share_of_wall": 0.076
+        }
+      },
+      "removed": 0,
+      "scan_files": 452,
+      "symbol_rows": 3234,
+      "test_edges": 2136,
+      "unaccounted_s": 0.2003,
+      "wall_commit_s": 0.0073,
+      "wall_index_s_median": 1.2062,
+      "wall_index_s_runs": [
+        1.1951,
+        1.2062,
+        1.2397
+      ]
+    },
+    "cache_unlimited": {
+      "association_mode": "complete_closure_v2",
+      "cache_entries": 451,
+      "cache_evictions": 0,
+      "cache_source_bytes": 300469,
+      "changed": 1,
+      "content_reused": 451,
+      "db_bytes": 6680576,
+      "db_files": 452,
+      "edge_rows": 9581,
+      "exclusive_total_s_median": 1.0128,
+      "parse_errors": 0,
+      "parse_reused": 449,
+      "parsed": 1,
+      "peak_working_set_bytes": 118566912,
+      "phases_median": {
+        "context_build": {
+          "calls": 1,
+          "exclusive_s": 0.1355,
+          "inclusive_s": 0.1355,
+          "share_of_wall": 0.1118
+        },
+        "edge_rows_build": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "edges.count_by_kind_confidence": {
+          "calls": 1,
+          "exclusive_s": 0.0064,
+          "inclusive_s": 0.0064,
+          "share_of_wall": 0.0053
+        },
+        "edges.list_dangling_targets": {
+          "calls": 1,
+          "exclusive_s": 0.0089,
+          "inclusive_s": 0.0089,
+          "share_of_wall": 0.0073
+        },
+        "edges.replace_for_sources": {
+          "calls": 2,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0012,
+          "share_of_wall": 0.001
+        },
+        "edges.replace_for_sources.delete": {
+          "calls": 1,
+          "exclusive_s": 0.0009,
+          "inclusive_s": 0.0009,
+          "share_of_wall": 0.0007
+        },
+        "edges.replace_for_sources.flush": {
+          "calls": 2,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "edges.replace_for_sources.insert": {
+          "calls": 2,
+          "exclusive_s": 0.0003,
+          "inclusive_s": 0.0003,
+          "share_of_wall": 0.0002
+        },
+        "extract_all_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.3739,
+          "share_of_wall": 0.3084
+        },
+        "extract_calls": {
+          "calls": 1,
+          "exclusive_s": 0.1659,
+          "inclusive_s": 0.1659,
+          "share_of_wall": 0.1368
+        },
+        "extract_edges": {
+          "calls": 1,
+          "exclusive_s": 0.1655,
+          "inclusive_s": 0.1655,
+          "share_of_wall": 0.1365
+        },
+        "extract_test_links": {
+          "calls": 1,
+          "exclusive_s": 0.0412,
+          "inclusive_s": 0.0412,
+          "share_of_wall": 0.034
+        },
+        "files.list_by_repo": {
+          "calls": 2,
+          "exclusive_s": 0.0052,
+          "inclusive_s": 0.0052,
+          "share_of_wall": 0.0043
+        },
+        "files.upsert_many": {
+          "calls": 1,
+          "exclusive_s": 0.0113,
+          "inclusive_s": 0.0113,
+          "share_of_wall": 0.0093
+        },
+        "imports_resolve": {
+          "calls": 1,
+          "exclusive_s": 0.0002,
+          "inclusive_s": 0.0002,
+          "share_of_wall": 0.0002
+        },
+        "parse": {
+          "calls": 1,
+          "exclusive_s": 0.0001,
+          "inclusive_s": 0.0001,
+          "share_of_wall": 0.0001
+        },
+        "replace_test_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "resolve_dangling": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0089,
+          "share_of_wall": 0.0073
+        },
+        "scan": {
+          "calls": 1,
+          "exclusive_s": 0.3214,
+          "inclusive_s": 0.3214,
+          "share_of_wall": 0.2651
+        },
+        "symbols.count_by_kind": {
+          "calls": 2,
+          "exclusive_s": 0.0029,
+          "inclusive_s": 0.0029,
+          "share_of_wall": 0.0024
+        },
+        "symbols.list_by_repo": {
+          "calls": 1,
+          "exclusive_s": 0.0557,
+          "inclusive_s": 0.0557,
+          "share_of_wall": 0.0459
+        },
+        "symbols.replace_for_files": {
+          "calls": 1,
+          "exclusive_s": 0.0931,
+          "inclusive_s": 0.0931,
+          "share_of_wall": 0.0768
+        }
+      },
+      "removed": 0,
+      "scan_files": 452,
+      "symbol_rows": 3234,
+      "test_edges": 2136,
+      "unaccounted_s": 0.19948,
+      "wall_commit_s": 0.0076,
+      "wall_index_s_median": 1.2123,
+      "wall_index_s_runs": [
+        1.2123,
+        1.2203,
+        1.2108
+      ]
+    },
+    "cold": {
+      "association_mode": "complete_closure_v2",
+      "cache_entries": 128,
+      "cache_evictions": 322,
+      "cache_source_bytes": 56599,
+      "changed": 452,
+      "content_reused": 0,
+      "db_bytes": 6680576,
+      "db_files": 452,
+      "edge_rows": 9581,
+      "exclusive_total_s_median": 7.6611,
+      "parse_errors": 0,
+      "parse_reused": 0,
+      "parsed": 450,
+      "peak_working_set_bytes": 118079488,
+      "phases_median": {
+        "context_build": {
+          "calls": 1,
+          "exclusive_s": 0.551,
+          "inclusive_s": 0.551,
+          "share_of_wall": 0.0608
+        },
+        "edge_rows_build": {
+          "calls": 1,
+          "exclusive_s": 0.0591,
+          "inclusive_s": 0.0591,
+          "share_of_wall": 0.0065
+        },
+        "edges.count_by_kind_confidence": {
+          "calls": 1,
+          "exclusive_s": 0.0205,
+          "inclusive_s": 0.0205,
+          "share_of_wall": 0.0023
+        },
+        "edges.delete_by_kind": {
+          "calls": 1,
+          "exclusive_s": 0.0072,
+          "inclusive_s": 0.0072,
+          "share_of_wall": 0.0008
+        },
+        "edges.list_dangling_targets": {
+          "calls": 1,
+          "exclusive_s": 0.0239,
+          "inclusive_s": 0.0239,
+          "share_of_wall": 0.0026
+        },
+        "edges.replace_for_sources": {
+          "calls": 2,
+          "exclusive_s": 0.0002,
+          "inclusive_s": 0.7608,
+          "share_of_wall": 0.084
+        },
+        "edges.replace_for_sources.delete": {
+          "calls": 1,
+          "exclusive_s": 0.0161,
+          "inclusive_s": 0.0161,
+          "share_of_wall": 0.0018
+        },
+        "edges.replace_for_sources.flush": {
+          "calls": 2,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "edges.replace_for_sources.insert": {
+          "calls": 2,
+          "exclusive_s": 0.7446,
+          "inclusive_s": 0.7446,
+          "share_of_wall": 0.0822
+        },
+        "extract_all_edges": {
+          "calls": 1,
+          "exclusive_s": 0.008,
+          "inclusive_s": 4.0341,
+          "share_of_wall": 0.4454
+        },
+        "extract_calls": {
+          "calls": 1,
+          "exclusive_s": 1.1466,
+          "inclusive_s": 1.1466,
+          "share_of_wall": 0.1266
+        },
+        "extract_edges": {
+          "calls": 1,
+          "exclusive_s": 1.7971,
+          "inclusive_s": 1.7971,
+          "share_of_wall": 0.1984
+        },
+        "extract_test_links": {
+          "calls": 1,
+          "exclusive_s": 0.1995,
+          "inclusive_s": 0.1995,
+          "share_of_wall": 0.022
+        },
+        "files.list_by_repo": {
+          "calls": 2,
+          "exclusive_s": 0.0113,
+          "inclusive_s": 0.0113,
+          "share_of_wall": 0.0012
+        },
+        "files.upsert_many": {
+          "calls": 1,
+          "exclusive_s": 0.4579,
+          "inclusive_s": 0.4579,
+          "share_of_wall": 0.0506
+        },
+        "imports_resolve": {
+          "calls": 1,
+          "exclusive_s": 0.8954,
+          "inclusive_s": 0.8954,
+          "share_of_wall": 0.0989
+        },
+        "parse": {
+          "calls": 450,
+          "exclusive_s": 0.154,
+          "inclusive_s": 0.154,
+          "share_of_wall": 0.017
+        },
+        "replace_test_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.1472,
+          "share_of_wall": 0.0163
+        },
+        "resolve_dangling": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0239,
+          "share_of_wall": 0.0026
+        },
+        "scan": {
+          "calls": 1,
+          "exclusive_s": 1.2951,
+          "inclusive_s": 1.2951,
+          "share_of_wall": 0.143
+        },
+        "symbols.count_by_kind": {
+          "calls": 2,
+          "exclusive_s": 0.0142,
+          "inclusive_s": 0.0142,
+          "share_of_wall": 0.0016
+        },
+        "symbols.list_by_repo": {
+          "calls": 1,
+          "exclusive_s": 0.0028,
+          "inclusive_s": 0.0028,
+          "share_of_wall": 0.0003
+        },
+        "symbols.replace_for_files": {
+          "calls": 1,
+          "exclusive_s": 0.284,
+          "inclusive_s": 0.284,
+          "share_of_wall": 0.0314
+        }
+      },
+      "removed": 0,
+      "scan_files": 452,
+      "symbol_rows": 3234,
+      "test_edges": 2136,
+      "unaccounted_s": 1.37952,
+      "wall_commit_s": 0.0724,
+      "wall_index_s_median": 9.0568,
+      "wall_index_s_runs": [
+        8.9645,
+        9.0568,
+        9.3644
+      ]
+    },
+    "newproc_change": {
+      "association_mode": "complete_closure_v2",
+      "cache_entries": 128,
+      "cache_evictions": 322,
+      "cache_source_bytes": 56599,
+      "changed": 1,
+      "content_reused": 451,
+      "db_bytes": 6680576,
+      "db_files": 452,
+      "edge_rows": 9581,
+      "exclusive_total_s_median": 1.1448,
+      "parse_errors": 0,
+      "parse_reused": 0,
+      "parsed": 450,
+      "peak_working_set_bytes": 111775744,
+      "phases_median": {
+        "context_build": {
+          "calls": 1,
+          "exclusive_s": 0.1421,
+          "inclusive_s": 0.1421,
+          "share_of_wall": 0.0947
+        },
+        "edge_rows_build": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "edges.count_by_kind_confidence": {
+          "calls": 1,
+          "exclusive_s": 0.0069,
+          "inclusive_s": 0.0069,
+          "share_of_wall": 0.0046
+        },
+        "edges.list_dangling_targets": {
+          "calls": 1,
+          "exclusive_s": 0.0094,
+          "inclusive_s": 0.0094,
+          "share_of_wall": 0.0063
+        },
+        "edges.replace_for_sources": {
+          "calls": 2,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0018,
+          "share_of_wall": 0.0012
+        },
+        "edges.replace_for_sources.delete": {
+          "calls": 1,
+          "exclusive_s": 0.0011,
+          "inclusive_s": 0.0011,
+          "share_of_wall": 0.0007
+        },
+        "edges.replace_for_sources.flush": {
+          "calls": 2,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "edges.replace_for_sources.insert": {
+          "calls": 2,
+          "exclusive_s": 0.0007,
+          "inclusive_s": 0.0007,
+          "share_of_wall": 0.0005
+        },
+        "extract_all_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.4223,
+          "share_of_wall": 0.2814
+        },
+        "extract_calls": {
+          "calls": 1,
+          "exclusive_s": 0.2113,
+          "inclusive_s": 0.2113,
+          "share_of_wall": 0.1408
+        },
+        "extract_edges": {
+          "calls": 1,
+          "exclusive_s": 0.1699,
+          "inclusive_s": 0.1699,
+          "share_of_wall": 0.1132
+        },
+        "extract_test_links": {
+          "calls": 1,
+          "exclusive_s": 0.0426,
+          "inclusive_s": 0.0426,
+          "share_of_wall": 0.0284
+        },
+        "files.list_by_repo": {
+          "calls": 2,
+          "exclusive_s": 0.0162,
+          "inclusive_s": 0.0162,
+          "share_of_wall": 0.0108
+        },
+        "files.upsert_many": {
+          "calls": 1,
+          "exclusive_s": 0.0117,
+          "inclusive_s": 0.0117,
+          "share_of_wall": 0.0078
+        },
+        "imports_resolve": {
+          "calls": 1,
+          "exclusive_s": 0.0002,
+          "inclusive_s": 0.0002,
+          "share_of_wall": 0.0001
+        },
+        "parse": {
+          "calls": 450,
+          "exclusive_s": 0.0668,
+          "inclusive_s": 0.0668,
+          "share_of_wall": 0.0445
+        },
+        "replace_test_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "resolve_dangling": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0094,
+          "share_of_wall": 0.0063
+        },
+        "scan": {
+          "calls": 1,
+          "exclusive_s": 0.3139,
+          "inclusive_s": 0.3139,
+          "share_of_wall": 0.2092
+        },
+        "symbols.count_by_kind": {
+          "calls": 2,
+          "exclusive_s": 0.0031,
+          "inclusive_s": 0.0031,
+          "share_of_wall": 0.0021
+        },
+        "symbols.list_by_repo": {
+          "calls": 1,
+          "exclusive_s": 0.0459,
+          "inclusive_s": 0.0459,
+          "share_of_wall": 0.0306
+        },
+        "symbols.replace_for_files": {
+          "calls": 1,
+          "exclusive_s": 0.0969,
+          "inclusive_s": 0.0969,
+          "share_of_wall": 0.0646
+        }
+      },
+      "removed": 0,
+      "scan_files": 452,
+      "symbol_rows": 3234,
+      "test_edges": 2136,
+      "unaccounted_s": 0.35704,
+      "wall_commit_s": 0.0067,
+      "wall_index_s_median": 1.5007,
+      "wall_index_s_runs": [
+        1.5007,
+        1.5233,
+        1.4888
+      ]
+    },
+    "sameproc_change": {
+      "association_mode": "complete_closure_v2",
+      "cache_entries": 128,
+      "cache_evictions": 644,
+      "cache_source_bytes": 97262,
+      "changed": 1,
+      "content_reused": 451,
+      "db_bytes": 6680576,
+      "db_files": 452,
+      "edge_rows": 9581,
+      "exclusive_total_s_median": 3.9391,
+      "parse_errors": 0,
+      "parse_reused": 128,
+      "parsed": 322,
+      "peak_working_set_bytes": 120852480,
+      "phases_median": {
+        "context_build": {
+          "calls": 1,
+          "exclusive_s": 0.5775,
+          "inclusive_s": 0.5775,
+          "share_of_wall": 0.1125
+        },
+        "edge_rows_build": {
+          "calls": 1,
+          "exclusive_s": 0.0001,
+          "inclusive_s": 0.0001,
+          "share_of_wall": 0.0
+        },
+        "edges.count_by_kind_confidence": {
+          "calls": 1,
+          "exclusive_s": 0.0228,
+          "inclusive_s": 0.0228,
+          "share_of_wall": 0.0044
+        },
+        "edges.list_dangling_targets": {
+          "calls": 1,
+          "exclusive_s": 0.0261,
+          "inclusive_s": 0.0261,
+          "share_of_wall": 0.0051
+        },
+        "edges.replace_for_sources": {
+          "calls": 2,
+          "exclusive_s": 0.0001,
+          "inclusive_s": 0.0028,
+          "share_of_wall": 0.0005
+        },
+        "edges.replace_for_sources.delete": {
+          "calls": 1,
+          "exclusive_s": 0.0019,
+          "inclusive_s": 0.0019,
+          "share_of_wall": 0.0004
+        },
+        "edges.replace_for_sources.flush": {
+          "calls": 2,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "edges.replace_for_sources.insert": {
+          "calls": 2,
+          "exclusive_s": 0.0008,
+          "inclusive_s": 0.0008,
+          "share_of_wall": 0.0002
+        },
+        "extract_all_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0001,
+          "inclusive_s": 1.4351,
+          "share_of_wall": 0.2796
+        },
+        "extract_calls": {
+          "calls": 1,
+          "exclusive_s": 0.7089,
+          "inclusive_s": 0.7089,
+          "share_of_wall": 0.1381
+        },
+        "extract_edges": {
+          "calls": 1,
+          "exclusive_s": 0.5413,
+          "inclusive_s": 0.5413,
+          "share_of_wall": 0.1055
+        },
+        "extract_test_links": {
+          "calls": 1,
+          "exclusive_s": 0.1938,
+          "inclusive_s": 0.1938,
+          "share_of_wall": 0.0378
+        },
+        "files.list_by_repo": {
+          "calls": 2,
+          "exclusive_s": 0.0163,
+          "inclusive_s": 0.0163,
+          "share_of_wall": 0.0032
+        },
+        "files.upsert_many": {
+          "calls": 1,
+          "exclusive_s": 0.0369,
+          "inclusive_s": 0.0369,
+          "share_of_wall": 0.0072
+        },
+        "imports_resolve": {
+          "calls": 1,
+          "exclusive_s": 0.0006,
+          "inclusive_s": 0.0006,
+          "share_of_wall": 0.0001
+        },
+        "parse": {
+          "calls": 322,
+          "exclusive_s": 0.1155,
+          "inclusive_s": 0.1155,
+          "share_of_wall": 0.0225
+        },
+        "replace_test_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0001,
+          "share_of_wall": 0.0
+        },
+        "resolve_dangling": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0262,
+          "share_of_wall": 0.0051
+        },
+        "scan": {
+          "calls": 1,
+          "exclusive_s": 1.2616,
+          "inclusive_s": 1.2616,
+          "share_of_wall": 0.2458
+        },
+        "symbols.count_by_kind": {
+          "calls": 2,
+          "exclusive_s": 0.0073,
+          "inclusive_s": 0.0073,
+          "share_of_wall": 0.0014
+        },
+        "symbols.list_by_repo": {
+          "calls": 1,
+          "exclusive_s": 0.0821,
+          "inclusive_s": 0.0821,
+          "share_of_wall": 0.016
+        },
+        "symbols.replace_for_files": {
+          "calls": 1,
+          "exclusive_s": 0.3384,
+          "inclusive_s": 0.3384,
+          "share_of_wall": 0.0659
+        }
+      },
+      "removed": 0,
+      "scan_files": 452,
+      "symbol_rows": 3234,
+      "test_edges": 2136,
+      "unaccounted_s": 1.19269,
+      "wall_commit_s": 0.0387,
+      "wall_index_s_median": 5.1318,
+      "wall_index_s_runs": [
+        5.2154,
+        5.0661,
+        5.1318
+      ]
+    },
+    "sameproc_nochange": {
+      "association_mode": "verified_snapshot_v2",
+      "cache_entries": 0,
+      "cache_evictions": 0,
+      "cache_source_bytes": 0,
+      "changed": 0,
+      "content_reused": 452,
+      "db_bytes": 6680576,
+      "db_files": 452,
+      "edge_rows": 9581,
+      "exclusive_total_s_median": 1.3509,
+      "parse_errors": 0,
+      "parse_reused": 0,
+      "parsed": 0,
+      "peak_working_set_bytes": 118226944,
+      "phases_median": {
+        "edges.count_by_kind_confidence": {
+          "calls": 1,
+          "exclusive_s": 0.025,
+          "inclusive_s": 0.025,
+          "share_of_wall": 0.0181
+        },
+        "files.list_by_repo": {
+          "calls": 2,
+          "exclusive_s": 0.0204,
+          "inclusive_s": 0.0204,
+          "share_of_wall": 0.0148
+        },
+        "scan": {
+          "calls": 1,
+          "exclusive_s": 1.2995,
+          "inclusive_s": 1.2995,
+          "share_of_wall": 0.9414
+        },
+        "symbols.count_by_kind": {
+          "calls": 2,
+          "exclusive_s": 0.0145,
+          "inclusive_s": 0.0145,
+          "share_of_wall": 0.0105
+        }
+      },
+      "removed": 0,
+      "scan_files": 452,
+      "symbol_rows": 3234,
+      "test_edges": 2136,
+      "unaccounted_s": 0.02947,
+      "wall_commit_s": 0.0002,
+      "wall_index_s_median": 1.3804,
+      "wall_index_s_runs": [
+        1.3145,
+        1.4216,
+        1.3804
+      ]
+    }
+  },
+  "semantic_digests": {
+    "baseline_full_index": {
+      "bytes": 2384746,
+      "edges": 9581,
+      "files": 452,
+      "sha256": "e04648d890e1be07c40f520ed2f281b04406f213753951a8b2de88d7df999145",
+      "symbols": 3234
+    },
+    "note": "T10 must reproduce both digests byte-identically after optimization (dump_index equivalence)",
+    "variant_full_index": {
+      "bytes": 2384746,
+      "edges": 9581,
+      "files": 452,
+      "sha256": "0cf958ab8e4346a09740f08575f97186aafe7e576e01638c0aa175f68a498907",
+      "symbols": 3234
+    }
+  },
+  "tool": "phase29_index_profile",
+  "trend": {
+    "cold_single_run": {
+      "association_mode": "complete_closure_v2",
+      "cache_entries": 128,
+      "cache_evictions": 2372,
+      "cache_source_bytes": 38784,
+      "changed": 2502,
+      "content_reused": 0,
+      "db_bytes": 36769792,
+      "db_files": 2502,
+      "edge_rows": 53451,
+      "edge_rows_by_kind": {
+        "CALL": 25985,
+        "IMPORT": 11492,
+        "INHERIT": 1999,
+        "REFERENCE": 1999,
+        "TEST": 11976
+      },
+      "indexer_reported_s": 94.297,
+      "parse_errors": 0,
+      "parse_reused": 0,
+      "parsed": 2500,
+      "peak_scope": "process_lifetime",
+      "peak_working_set_bytes": 289341440,
+      "phases": {
+        "by_parent": {
+          "<root> -> context_build": {
+            "calls": 1,
+            "inclusive_s": 3.11619
+          },
+          "<root> -> edge_rows_build": {
+            "calls": 1,
+            "inclusive_s": 0.6184
+          },
+          "<root> -> edges.count_by_kind_confidence": {
+            "calls": 1,
+            "inclusive_s": 0.12621
+          },
+          "<root> -> edges.replace_for_sources": {
+            "calls": 1,
+            "inclusive_s": 4.0705
+          },
+          "<root> -> extract_all_edges": {
+            "calls": 1,
+            "inclusive_s": 31.43442
+          },
+          "<root> -> files.list_by_repo": {
+            "calls": 2,
+            "inclusive_s": 0.03712
+          },
+          "<root> -> files.upsert_many": {
+            "calls": 1,
+            "inclusive_s": 2.54492
+          },
+          "<root> -> parse": {
+            "calls": 2500,
+            "inclusive_s": 0.90214
+          },
+          "<root> -> replace_test_edges": {
+            "calls": 1,
+            "inclusive_s": 1.4441
+          },
+          "<root> -> resolve_dangling": {
+            "calls": 1,
+            "inclusive_s": 0.15913
+          },
+          "<root> -> scan": {
+            "calls": 1,
+            "inclusive_s": 40.58666
+          },
+          "<root> -> symbols.count_by_kind": {
+            "calls": 2,
+            "inclusive_s": 0.0556
+          },
+          "<root> -> symbols.list_by_repo": {
+            "calls": 1,
+            "inclusive_s": 0.00217
+          },
+          "<root> -> symbols.replace_for_files": {
+            "calls": 1,
+            "inclusive_s": 1.64156
+          },
+          "edges.replace_for_sources -> edges.replace_for_sources.delete": {
+            "calls": 1,
+            "inclusive_s": 0.07663
+          },
+          "edges.replace_for_sources -> edges.replace_for_sources.flush": {
+            "calls": 2,
+            "inclusive_s": 2e-05
+          },
+          "edges.replace_for_sources -> edges.replace_for_sources.insert": {
+            "calls": 2,
+            "inclusive_s": 5.40493
+          },
+          "extract_all_edges -> extract_calls": {
+            "calls": 1,
+            "inclusive_s": 6.53709
+          },
+          "extract_all_edges -> extract_edges": {
+            "calls": 1,
+            "inclusive_s": 9.77047
+          },
+          "extract_all_edges -> extract_test_links": {
+            "calls": 1,
+            "inclusive_s": 1.21256
+          },
+          "extract_all_edges -> imports_resolve": {
+            "calls": 1,
+            "inclusive_s": 13.86373
+          },
+          "replace_test_edges -> edges.delete_by_kind": {
+            "calls": 1,
+            "inclusive_s": 0.0327
+          },
+          "replace_test_edges -> edges.replace_for_sources": {
+            "calls": 1,
+            "inclusive_s": 1.41137
+          },
+          "resolve_dangling -> edges.list_dangling_targets": {
+            "calls": 1,
+            "inclusive_s": 0.15911
+          }
+        },
+        "labels": {
+          "context_build": {
+            "calls": 1,
+            "exclusive_s": 3.11619,
+            "inclusive_s": 3.11619
+          },
+          "edge_rows_build": {
+            "calls": 1,
+            "exclusive_s": 0.6184,
+            "inclusive_s": 0.6184
+          },
+          "edges.count_by_kind_confidence": {
+            "calls": 1,
+            "exclusive_s": 0.12621,
+            "inclusive_s": 0.12621
+          },
+          "edges.delete_by_kind": {
+            "calls": 1,
+            "exclusive_s": 0.0327,
+            "inclusive_s": 0.0327
+          },
+          "edges.list_dangling_targets": {
+            "calls": 1,
+            "exclusive_s": 0.15911,
+            "inclusive_s": 0.15911
+          },
+          "edges.replace_for_sources": {
+            "calls": 2,
+            "exclusive_s": 0.0003,
+            "inclusive_s": 5.48188
+          },
+          "edges.replace_for_sources.delete": {
+            "calls": 1,
+            "exclusive_s": 0.07663,
+            "inclusive_s": 0.07663
+          },
+          "edges.replace_for_sources.flush": {
+            "calls": 2,
+            "exclusive_s": 2e-05,
+            "inclusive_s": 2e-05
+          },
+          "edges.replace_for_sources.insert": {
+            "calls": 2,
+            "exclusive_s": 5.40493,
+            "inclusive_s": 5.40493
+          },
+          "extract_all_edges": {
+            "calls": 1,
+            "exclusive_s": 0.05057,
+            "inclusive_s": 31.43442
+          },
+          "extract_calls": {
+            "calls": 1,
+            "exclusive_s": 6.53709,
+            "inclusive_s": 6.53709
+          },
+          "extract_edges": {
+            "calls": 1,
+            "exclusive_s": 9.77047,
+            "inclusive_s": 9.77047
+          },
+          "extract_test_links": {
+            "calls": 1,
+            "exclusive_s": 1.21256,
+            "inclusive_s": 1.21256
+          },
+          "files.list_by_repo": {
+            "calls": 2,
+            "exclusive_s": 0.03712,
+            "inclusive_s": 0.03712
+          },
+          "files.upsert_many": {
+            "calls": 1,
+            "exclusive_s": 2.54492,
+            "inclusive_s": 2.54492
+          },
+          "imports_resolve": {
+            "calls": 1,
+            "exclusive_s": 13.86373,
+            "inclusive_s": 13.86373
+          },
+          "parse": {
+            "calls": 2500,
+            "exclusive_s": 0.90214,
+            "inclusive_s": 0.90214
+          },
+          "replace_test_edges": {
+            "calls": 1,
+            "exclusive_s": 3e-05,
+            "inclusive_s": 1.4441
+          },
+          "resolve_dangling": {
+            "calls": 1,
+            "exclusive_s": 2e-05,
+            "inclusive_s": 0.15913
+          },
+          "scan": {
+            "calls": 1,
+            "exclusive_s": 40.58666,
+            "inclusive_s": 40.58666
+          },
+          "symbols.count_by_kind": {
+            "calls": 2,
+            "exclusive_s": 0.0556,
+            "inclusive_s": 0.0556
+          },
+          "symbols.list_by_repo": {
+            "calls": 1,
+            "exclusive_s": 0.00217,
+            "inclusive_s": 0.00217
+          },
+          "symbols.replace_for_files": {
+            "calls": 1,
+            "exclusive_s": 1.64156,
+            "inclusive_s": 1.64156
+          }
+        }
+      },
+      "progress_events": 0,
+      "removed": 0,
+      "scan_files": 2502,
+      "symbol_rows": 17994,
+      "symbols_by_kind": {
+        "class": 2000,
+        "function": 7998,
+        "method": 3999,
+        "module": 2500,
+        "test_function": 1497
+      },
+      "test_edges": 11976,
+      "unaccounted_s": 7.68227,
+      "wall_commit_s": 0.2817,
+      "wall_index_s": 94.4214
+    },
+    "sameproc_change": {
+      "association_mode": "complete_closure_v2",
+      "cache_entries": 128,
+      "cache_evictions": 4744,
+      "cache_source_bytes": 39345,
+      "changed": 1,
+      "content_reused": 2501,
+      "db_bytes": 36769792,
+      "db_files": 2502,
+      "edge_rows": 53451,
+      "exclusive_total_s_median": 23.6813,
+      "parse_errors": 0,
+      "parse_reused": 128,
+      "parsed": 2372,
+      "peak_working_set_bytes": 299651072,
+      "phases_median": {
+        "context_build": {
+          "calls": 1,
+          "exclusive_s": 3.0894,
+          "inclusive_s": 3.0894,
+          "share_of_wall": 0.0997
+        },
+        "edge_rows_build": {
+          "calls": 1,
+          "exclusive_s": 0.0001,
+          "inclusive_s": 0.0001,
+          "share_of_wall": 0.0
+        },
+        "edges.count_by_kind_confidence": {
+          "calls": 1,
+          "exclusive_s": 0.1256,
+          "inclusive_s": 0.1256,
+          "share_of_wall": 0.0041
+        },
+        "edges.list_dangling_targets": {
+          "calls": 1,
+          "exclusive_s": 0.2003,
+          "inclusive_s": 0.2003,
+          "share_of_wall": 0.0065
+        },
+        "edges.replace_for_sources": {
+          "calls": 2,
+          "exclusive_s": 0.0001,
+          "inclusive_s": 0.0064,
+          "share_of_wall": 0.0002
+        },
+        "edges.replace_for_sources.delete": {
+          "calls": 1,
+          "exclusive_s": 0.0052,
+          "inclusive_s": 0.0052,
+          "share_of_wall": 0.0002
+        },
+        "edges.replace_for_sources.flush": {
+          "calls": 2,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0,
+          "share_of_wall": 0.0
+        },
+        "edges.replace_for_sources.insert": {
+          "calls": 2,
+          "exclusive_s": 0.0011,
+          "inclusive_s": 0.0011,
+          "share_of_wall": 0.0
+        },
+        "extract_all_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0001,
+          "inclusive_s": 8.5117,
+          "share_of_wall": 0.2748
+        },
+        "extract_calls": {
+          "calls": 1,
+          "exclusive_s": 4.4544,
+          "inclusive_s": 4.4544,
+          "share_of_wall": 0.1438
+        },
+        "extract_edges": {
+          "calls": 1,
+          "exclusive_s": 3.0643,
+          "inclusive_s": 3.0643,
+          "share_of_wall": 0.0989
+        },
+        "extract_test_links": {
+          "calls": 1,
+          "exclusive_s": 1.0359,
+          "inclusive_s": 1.0359,
+          "share_of_wall": 0.0334
+        },
+        "files.list_by_repo": {
+          "calls": 2,
+          "exclusive_s": 0.0877,
+          "inclusive_s": 0.0877,
+          "share_of_wall": 0.0028
+        },
+        "files.upsert_many": {
+          "calls": 1,
+          "exclusive_s": 0.4793,
+          "inclusive_s": 0.4793,
+          "share_of_wall": 0.0155
+        },
+        "imports_resolve": {
+          "calls": 1,
+          "exclusive_s": 0.0009,
+          "inclusive_s": 0.0009,
+          "share_of_wall": 0.0
+        },
+        "parse": {
+          "calls": 2372,
+          "exclusive_s": 0.8289,
+          "inclusive_s": 0.8289,
+          "share_of_wall": 0.0268
+        },
+        "replace_test_edges": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.0001,
+          "share_of_wall": 0.0
+        },
+        "resolve_dangling": {
+          "calls": 1,
+          "exclusive_s": 0.0,
+          "inclusive_s": 0.2004,
+          "share_of_wall": 0.0065
+        },
+        "scan": {
+          "calls": 1,
+          "exclusive_s": 6.7695,
+          "inclusive_s": 6.7695,
+          "share_of_wall": 0.2186
+        },
+        "symbols.count_by_kind": {
+          "calls": 2,
+          "exclusive_s": 0.0626,
+          "inclusive_s": 0.0626,
+          "share_of_wall": 0.002
+        },
+        "symbols.list_by_repo": {
+          "calls": 1,
+          "exclusive_s": 0.8594,
+          "inclusive_s": 0.8594,
+          "share_of_wall": 0.0277
+        },
+        "symbols.replace_for_files": {
+          "calls": 1,
+          "exclusive_s": 2.7399,
+          "inclusive_s": 2.7399,
+          "share_of_wall": 0.0885
+        }
+      },
+      "removed": 0,
+      "scan_files": 2502,
+      "symbol_rows": 17994,
+      "test_edges": 11976,
+      "unaccounted_s": 7.29487,
+      "wall_commit_s": 0.0468,
+      "wall_index_s_median": 30.9732,
+      "wall_index_s_runs": [
+        30.9732,
+        31.7684,
+        30.1772
+      ]
+    }
+  }
+}

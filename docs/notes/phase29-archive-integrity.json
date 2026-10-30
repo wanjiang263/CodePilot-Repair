@@ -1,0 +1,94 @@
+{
+  "full_chain": {
+    "exit_code": 0,
+    "new_archive_failures": 0,
+    "new_archive_status": "passed",
+    "new_archives": 2,
+    "old_archives": 7,
+    "old_unexplained_mismatches": 0,
+    "versions_checked": 9
+  },
+  "generated_at": "2026-10-31",
+  "guardrails": {
+    "docker_run": false,
+    "no_active_pointer": true,
+    "old_candidates_preserved": true,
+    "pr_created": false,
+    "pushed": false,
+    "real_model_requests": 0
+  },
+  "historical_baseline_manifest": {
+    "baseline_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
+    "files": 32,
+    "mismatches": 0,
+    "note": "28/32 文件在 9ccc703 即存在且与基线 blob 逐字节一致；4/32 为 phase28-candidate-v2 文件（770c0dc 新增，晚于基线）",
+    "path": "configs/harness/candidates/historical-baseline.json",
+    "zero_change_since_baseline": true
+  },
+  "phase28_candidate_v2": {
+    "drift_reason": "Phase29 对这些文件的合法演进；v2 raw_worktree_hashes 是工作区漂移探测器（--ignore-raw-drift 为文档化放行），diff 反向应用已升级为 source_commit blob 树校验并独立通过",
+    "drifted_files": [
+      "scripts/phase28_archive.py",
+      "scripts/phase28_archive_verify.py",
+      "src/codepilot/archive.py",
+      "src/codepilot/repo/index.py",
+      "src/codepilot/rsi.py",
+      "tests/integration/phase28/test_phase28_archive_verify_loop.py",
+      "tests/unit/test_phase26_closeout.py",
+      "tests/unit/test_phase26_harness.py",
+      "tests/unit/test_phase28_archive.py",
+      "tests/unit/test_phase28_archive_verify.py"
+    ],
+    "ignore_raw_drift_used": true,
+    "status": "ok"
+  },
+  "phase29_candidate_v3": {
+    "active_pointer": false,
+    "candidate_payload_sha256": "2d88b1de5910e914a1b58a1b3d846caaecedb1d28210754485188cfd10e592a4",
+    "check_names": [
+      "base_commit_blob",
+      "candidate_payload_sha256",
+      "diff_forward_apply",
+      "diff_reverse_apply",
+      "diff_sha256",
+      "not_active",
+      "origin_dirty_consistency",
+      "parent_integrity_matches",
+      "snapshot_canonical_sha256",
+      "snapshot_file_sha256",
+      "snapshot_hash_rule_declared",
+      "snapshot_ref_fixed",
+      "source_commit_ancestor",
+      "source_commit_blob",
+      "source_commit_resolves",
+      "source_files_count",
+      "source_hashes",
+      "source_origin_declared",
+      "version_matches_directory"
+    ],
+    "checks_failed": 0,
+    "checks_total": 19,
+    "diff_base_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+    "diff_bytes": 338479,
+    "diff_sha256": "e3548c09b666d15c04ba1fc4d923bcb835a4d85cda927138735590105b772dd0",
+    "directory": "configs/harness/candidates/phase29-candidate-v3",
+    "file_sha256": {
+      "candidate.diff": "e3548c09b666d15c04ba1fc4d923bcb835a4d85cda927138735590105b772dd0",
+      "candidate.json": "237f91b2303480a9595cd3e316821a67db594fb1b2e8661fd20206f11df74a91",
+      "snapshot.json": "ed47993c596a2b2bfedb35af03276c81bbf0befad76a47f7d14f34fe616363ee",
+      "sources.json": "b915871883d06b9415aa518e3b962106b271ce2e91e1a18dae91c88204883faf"
+    },
+    "note": "dirty_worktree=false；生成命令与 --dry-run 输出哈希一致（e3548c09…）",
+    "parent": "phase28-candidate-v2",
+    "schema_version": 3,
+    "snapshot_canonical_sha256": "144147d215b08b6105e1957b94c93ac0a32f6aa82d8c120a6840aec8e613c57f",
+    "snapshot_file_sha256": "ed47993c596a2b2bfedb35af03276c81bbf0befad76a47f7d14f34fe616363ee",
+    "source_commit": "b17019beb817b92b1fbb3da879774a231d69219d",
+    "source_files": 26,
+    "source_origin": "git_commit",
+    "status": "pending",
+    "version": "phase29-candidate-v3"
+  },
+  "tool": "phase29_archive_integrity",
+  "verification_command": ".venv/Scripts/python.exe scripts/phase28_archive_verify.py --all --ignore-raw-drift --json .codex-pytest-tmp/phase29/verify-all.json"
+}

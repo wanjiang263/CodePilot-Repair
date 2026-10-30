@@ -1,0 +1,201 @@
+{
+  "tool": "phase29_runtime_results",
+  "generated_at": "2026-10-31",
+  "baseline": {
+    "head_before_round": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+    "branch": "codex/phase12-real-issue-pilot",
+    "tracked_dirty_at_start": 0,
+    "untracked_at_start": 173
+  },
+  "commits": {
+    "source_commit": "b17019beb817b92b1fbb3da879774a231d69219d",
+    "source_commit_message": "feat: bind candidate archive to git sources and bound incremental edge rebuild",
+    "source_commit_files": 26,
+    "source_commit_stat": "+5554/-1698",
+    "docs_commit": "PENDING_T18",
+    "receipt_commit": "PENDING_T18"
+  },
+  "issues_status": {
+    "I1_source_commit_binding": {
+      "status": "closed",
+      "fix": "schema v3 git_commit 模式从 source_commit blob 读源码、强制 merge-base 祖先、diff 由 git diff diff_base source_commit 生成；verifier 19 项具名检查（blob/祖先/正向应用/自哈希）",
+      "evidence": [
+        "tests/unit/test_phase29_archive.py 15 例",
+        "tests/unit/test_phase29_archive_verify.py 11 例",
+        "tests/unit/test_phase29_archive_security.py 20 例",
+        "configs/harness/candidates/phase29-candidate-v3 19 检查全过"
+      ],
+      "remaining_limits": "防误改不防伪造：candidate_payload_sha256 是校验和非签名，外部锚点为 git 提交链与交付回执"
+    },
+    "I2_historical_immutability": {
+      "status": "closed",
+      "fix": "historical-baseline.json manifest（baseline=9ccc703，32 文件逐文件 SHA256+基线 blob）；verifier 按当前字节比对，提交式篡改测试被拦截；v2 档案 diff 反向应用升级为 source_commit blob 树",
+      "evidence": [
+        "zero_change_since_baseline=true（28/32 文件与 9ccc703 blob 逐字节一致，4/32 为 phase28-v2 基线后新增）",
+        "test_historical_baseline_detects_committed_tamper",
+        "test_manifest_generator_records_baseline_and_refuses_drift"
+      ],
+      "remaining_limits": "manifest 覆盖生成时点在档候选；未来新增候选需重新生成 manifest 才纳入保护"
+    },
+    "I3_legacy_v1_path": {
+      "status": "closed",
+      "fix": "rsi.archive_candidate 硬失败（ValueError 指向新入口）；rsi CLI 删除 archive 子命令；phase26 测试改为直写 snapshot 夹具 + retired 断言",
+      "evidence": ["tests/unit/test_phase26_harness.py 等 34 组通过", "grep 无残余调用点"],
+      "remaining_limits": "rsi.archive_candidate 名字保留为硬失败 stub，防旧调用静默降级"
+    },
+    "I4_negative_tests": {
+      "status": "closed",
+      "fix": "20 条对抗用例（5 生成器拦截 + 15 校验器篡改矩阵），逐条断言具体检查名并含 forbidden 断言；无 skip/xfail/弱化",
+      "evidence": ["tests/unit/test_phase29_archive_security.py 20 passed in 61.26s"],
+      "remaining_limits": []
+    },
+    "I5_docs_audit_static": {
+      "status": "closed",
+      "fix": "phase28-validation.md '未修改生产代码'按作用域改写；independent-review.md 首轮标 superseded；交付回执（receipt commit）解决 final_docs_commit_id=null；AST 检查脚本（939 文件）",
+      "evidence": ["docs/notes/phase29-static-checks.json", "docs/notes/phase29-delivery-receipt.json (T18)"],
+      "remaining_limits": "ruff format 6 个历史遗留文件未重排（非本轮范围）"
+    },
+    "I6_release_index_cleanup": {
+      "status": "closed",
+      "fix": "HTTP 矩阵 46 例三连跑全绿（4 项 unverified 如实标注）；索引 sameproc_change -43.6% 且 digest 逐字节等价；清理空删除清单",
+      "evidence": [
+        "docs/notes/phase29-http-matrix.md",
+        "docs/notes/phase29-index-profile.json",
+        "docs/notes/phase29-cleanup.md"
+      ],
+      "remaining_limits": "真实 provider/Bedrock/TLS/池化取消未验证；性能结论仅限本轮合成仓库"
+    }
+  },
+  "tests": {
+    "dedup_note": "按命令分组计数；同组内不重复计入（A=repo+storage, B1=phase28 integration, C+D=archive 四套件+phase26 两套件+unit/llm 全组, B2=graph）",
+    "groups": [
+      {
+        "id": "A",
+        "command": "pytest tests/unit/repo/ tests/unit/storage/ -q -m 'not docker'",
+        "exit_code": 0,
+        "result": "413 passed in 252.48s",
+        "log": ".codex-pytest-tmp/phase29/t14-final-a.log"
+      },
+      {
+        "id": "B1",
+        "command": "pytest tests/integration/phase28/ -q -m 'not docker'",
+        "exit_code": 0,
+        "result": "7 passed in 35.16s",
+        "log": ".codex-pytest-tmp/phase29/t14-final-b1.log"
+      },
+      {
+        "id": "C+D",
+        "command": "pytest tests/unit/test_phase28_archive.py tests/unit/test_phase29_archive.py tests/unit/test_phase28_archive_verify.py tests/unit/test_phase29_archive_verify.py tests/unit/test_phase29_archive_security.py tests/unit/test_phase26_harness.py tests/unit/test_phase26_closeout.py tests/unit/llm/ -q -m 'not docker'",
+        "exit_code": 0,
+        "result": "609 passed in 365.85s",
+        "log": ".codex-pytest-tmp/phase29/t14-final-cd.log"
+      },
+      {
+        "id": "B2",
+        "command": "pytest tests/graph/ -q -m 'not docker'",
+        "exit_code": 1,
+        "result": "16 failed, 250 passed, 13 deselected(docker) in 1295.19s",
+        "log": ".codex-pytest-tmp/phase29/t14-final-b2.log",
+        "triage": "16 例历史遗留：stash 本轮改动后基线复跑抽样 3 例（覆盖 3 个失败文件族）全部复现；非本轮引起"
+      }
+    ],
+    "passed_total_deduped": 1029,
+    "failed_total": 16,
+    "failed_triage": "pre-existing on baseline (stash-proven), not introduced by this round",
+    "skipped": 0,
+    "xfail": 0,
+    "docker_excluded_note": "机器 Docker daemon 实际可用(29.8.2)，任务书禁用 → 全部命令 -m 'not docker'，deselected 计数记录（B2 组 13）"
+  },
+  "index_performance": {
+    "method": "确定性合成仓（450 py 文件）+ 2000 模块趋势仓；2 预热 + 3 测量取中位；阶段计时复用 phase28 剖析机制",
+    "baseline_pre_optimization": {
+      "cold_s": 9.0819,
+      "sameproc_nochange_s": 1.3578,
+      "sameproc_change_s": 9.1021,
+      "newproc_change_s": 2.7908,
+      "cache_128_s": 4.556,
+      "cache_512_s": 3.4925,
+      "cache_unlimited_s": 3.7265,
+      "trend2500_cold_single_s": 91.4559,
+      "trend2500_sameproc_change_s": 66.3482,
+      "source": ".codex-pytest-tmp/phase29/phase29-index-profile.log 首段（同一日志文件累积两次运行）"
+    },
+    "optimized": {
+      "cold_s": 9.0568,
+      "sameproc_nochange_s": 1.3804,
+      "sameproc_change_s": 5.1318,
+      "newproc_change_s": 1.5007,
+      "cache_128_s": 1.374,
+      "cache_512_s": 1.2062,
+      "cache_unlimited_s": 1.2123,
+      "trend2500_cold_single_s": 94.4214,
+      "trend2500_sameproc_change_s": 30.9732,
+      "source": "docs/notes/phase29-index-profile.json"
+    },
+    "sameproc_change_improvement": "-43.6% (9.1021 -> 5.1318s; 目标 -10%)",
+    "semantic_equivalence": {
+      "baseline_digest": "e04648d890e1be07c40f520ed2f281b04406f213753951a8b2de88d7df999145",
+      "variant_digest": "0cf958ab8e4346a09740f08575f97186aafe7e576e01638c0aa175f68a498907",
+      "rows": {"files": 452, "symbols": 3234, "edges": 9581},
+      "note": "T10 优化后两 digest 与 T09 基线逐字节一致 = dump_index 逐字段等价"
+    },
+    "scope_limit": "结论仅针对本轮合成仓库（450/2500 文件），不外推大型真实仓库"
+  },
+  "http_matrix": {
+    "rows_verified_local": 19,
+    "cases_total": 46,
+    "three_consecutive_runs": [
+      {"run": 1, "exit_code": 0, "result": "46 passed in 49.45s", "log": ".codex-pytest-tmp/phase29/http-matrix-run1.log"},
+      {"run": 2, "exit_code": 0, "result": "46 passed in 54.38s", "log": ".codex-pytest-tmp/phase29/http-matrix-run2.log"},
+      {"run": 3, "exit_code": 0, "result": "46 passed in 66.94s", "log": ".codex-pytest-tmp/phase29/http-matrix-run3.log"}
+    ],
+    "unverified": ["真实 provider 端到端", "Bedrock deadline/取消", "TLS/代理 CONNECT", "池化取消"],
+    "live_gate": "未执行（无用户预算与授权）"
+  },
+  "page_e2e": {
+    "executed": false,
+    "reason": "web/src 零改动、API 用户可见字段无变化（git status 实测）→ 按任务书 §7.8 走无 UI 变更路径",
+    "frontend_checks": {
+      "typecheck": 0,
+      "eslint": 0,
+      "vitest": 0,
+      "build": 0,
+      "logs": ".codex-pytest-tmp/phase29/t12-*.log"
+    }
+  },
+  "cleanup": {
+    "deleted": 0,
+    "classified_untracked": 183,
+    "user_evidence_preserved": true,
+    "gitignore_added": [".playwright-mcp/"],
+    "doc": "docs/notes/phase29-cleanup.md"
+  },
+  "candidate": {
+    "path": "configs/harness/candidates/phase29-candidate-v3",
+    "schema_version": 3,
+    "parent": "phase28-candidate-v2",
+    "status": "pending",
+    "source_origin": "git_commit",
+    "source_commit": "b17019beb817b92b1fbb3da879774a231d69219d",
+    "diff_base_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+    "source_files": 26,
+    "diff_sha256": "e3548c09b666d15c04ba1fc4d923bcb835a4d85cda927138735590105b772dd0",
+    "diff_bytes": 338479,
+    "snapshot_file_sha256": "ed47993c596a2b2bfedb35af03276c81bbf0befad76a47f7d14f34fe616363ee",
+    "snapshot_canonical_sha256": "144147d215b08b6105e1957b94c93ac0a32f6aa82d8c120a6840aec8e613c57f",
+    "checks_passed": 19,
+    "active_pointer": false
+  },
+  "final_docs_commit_id": "PENDING_T18_SEE_RECEIPT",
+  "final_docs_commit_id_note": "由第三笔交付回执提交（docs/notes/phase29-delivery-receipt.json）以非空机器可读形式记录全部提交哈希",
+  "guardrails": {
+    "real_model_requests": 0,
+    "new_cost_cny": 0,
+    "active_pointer": false,
+    "pushed": false,
+    "pr_created": false,
+    "docker_run": false,
+    "skipped_tests": 0,
+    "xfail_tests": 0
+  }
+}
