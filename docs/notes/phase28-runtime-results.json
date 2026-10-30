@@ -1,0 +1,322 @@
+{
+  "task": "phase28-S7/T09 candidate v2 generation and runtime documentation",
+  "date": "2026-10-30",
+  "regenerated": "2026-10-31",
+  "regeneration_note": "source commit amended twice after initial generation: round 1 = T11 static gate (ruff format on 3 files), round 2 = S8 audit finding D1 (prompts silently empty, fixed); candidate regenerated from final bytes each time",
+  "human_report": "docs/notes/phase28-runtime-validation.md",
+  "archive_integrity_report": "docs/notes/phase28-archive-integrity.json",
+  "amendment_record": [
+    "Round 1 (T11 static gate, 2026-10-31): ruff format failures on 3 files (scripts/phase28_index_profile.py, tests/integration/phase28/test_phase28_archive_verify_loop.py, tests/integration/phase28/test_phase28_index_storage_loop.py) -> master reformatted and re-ran 74 tests on final bytes (archive 15 + verify 13 + http_matrix 39 + integration/phase28 7), all green -> source commit amended to 51aae862f5c9cc45c9d467b2f92ae725d7af7be8 (base 9ccc703, same message, 13 files +5150/-18) -> S7 regenerated the candidate and re-ran the verifier (exit 0). Formatting-only amend did not change the dual snapshot hashes.",
+    "Round 2 (S8 audit finding D1, 2026-10-31): substantive defect - the generator's _extract_prompts looked up bare manifest keys agents/{role}.py while actual manifest keys are src/codepilot/agents/{role}.py, so rounds 1-2 of v2 silently lost all three role prompts (snapshot.json prompts:{}; v1 has full prompts). Fix: resolve each role by path suffix (PurePosixPath(key).parts[-2:] == ('agents', f'{role}.py'), shortest key wins on duplicates); new regression test test_prompts_resolved_from_prefixed_agent_manifest_keys (tests/unit/test_phase28_archive.py now 16 tests); static checks (ruff check/format, mypy) and affected tests (archive 16 + integration archive_verify_loop 4 = 20) all green -> master amended to 770c0dce6bbaa383f86917ec2d74fd085296eedb (13 files +5204/-18) -> S7 regenerated the candidate a third time; the dual snapshot hashes changed vs rounds 1-2, which is the evidence the fix took effect; docs/notes/phase28-archive-schema.md prompts section updated to the suffix-resolution description."
+  ],
+  "candidate": {
+    "version": "phase28-candidate-v2",
+    "parent": "phase27-candidate-v1",
+    "status": "pending",
+    "schema_version": 2,
+    "snapshot_hash_rule": "file_bytes_sha256",
+    "snapshot_ref": "snapshot.json",
+    "created_from": "phase28_archive",
+    "archive_root": "configs/harness",
+    "directory": "configs/harness/candidates/phase28-candidate-v2",
+    "file_layout": [
+      "candidate.diff",
+      "candidate.json",
+      "snapshot.json",
+      "sources.json"
+    ],
+    "instruction": "",
+    "prompts": {
+      "roles": ["coder", "planner", "reviewer"],
+      "exactly_three_nonempty_strings": true,
+      "char_lengths": { "coder": 361, "planner": 1823, "reviewer": 496 },
+      "equal_to_v1_snapshot_prompts": true,
+      "note": "rounds 1-2 had prompts:{} due to D1; this round the fix is verified in the artifact itself"
+    },
+    "experiences_inherited_from_parent": {
+      "count": 1,
+      "ids": ["phase26-public-timeout-advice"],
+      "levels": ["L2"],
+      "status_unchanged": "pending",
+      "content_modified": false
+    },
+    "parent_integrity": {
+      "declared_snapshot_sha256": "6c4f26dbbfd6057f621ec35849f4aaa90ee78927df45c76ecf04bee1ffc2991e",
+      "declared_field": "snapshot_sha256",
+      "file_bytes_consistent": true,
+      "canonical_consistent": false,
+      "note": "v1 declared its snapshot hash over file bytes; comparison only, never a verdict"
+    },
+    "dirty_worktree": false,
+    "allow_dirty": false,
+    "code_revision_key_present": false
+  },
+  "commits": {
+    "baseline_head_docs": "9ccc7032ec4feed423b888312630e7b28800b72f",
+    "baseline_head_docs_subject": "docs: deliver phase27 real-runtime evidence and pending candidate",
+    "source_commit": "770c0dce6bbaa383f86917ec2d74fd085296eedb",
+    "source_commit_subject": "feat: add self-verifying candidate archive and phase28 diagnostics",
+    "source_commit_parent": "9ccc7032ec4feed423b888312630e7b28800b72f",
+    "source_commit_amend_chain": [
+      "af0e7723c2168a93f197c2ea7c64de5a5b0642eb",
+      "51aae862f5c9cc45c9d467b2f92ae725d7af7be8",
+      "770c0dce6bbaa383f86917ec2d74fd085296eedb"
+    ],
+    "source_commit_date": "2026-10-31 00:25:39 +0800",
+    "source_commit_diffstat": "13 files changed, 5204 insertions(+), 18 deletions(-)",
+    "diff_base_commit": "1e2c4430aebae7d7cea45f245a5482658ca7eb1f",
+    "diff_base_is_parent_source_commit": true,
+    "new_commits_made_this_round": 0,
+    "final_docs_commit_id": null,
+    "final_docs_commit_id_note": "由聊天交付记录提供，避免文档自引用循环（Phase27 同款处理）"
+  },
+  "hashes": {
+    "snapshot_file_sha256": "d0fd3a5ac133637454c87a153aa78ae917204387c5cece0cd8f5c2f8d6de5155",
+    "snapshot_canonical_sha256": "def0ec454d6c9258feeef1b940680cb717d14edae3a2811ddd0d4e941d3ca67a",
+    "diff_sha256": "f49713553d713fa199230f180f07a27a5f51414a58e2a64e212685db28d45da1",
+    "diff_bytes": 217204,
+    "hash_source": "summary.json from codepilot.archive.create_candidate, identical in candidate.json, independently recomputed by scripts/phase28_archive_verify.py",
+    "history": {
+      "round1_af0e772": {
+        "snapshot_file_sha256": "2e224de65e5b6fb299807233a1535467f7a1b30da9f371ea18441bb2362779b9",
+        "snapshot_canonical_sha256": "b182424af36b912ea09f845fcdf62fb1740744eac49c0e11f4a1952ebf2473e4",
+        "diff_sha256": "0f27a73acc06b490cf44a62de4087b38622aaf007662dbee27dfac384fd6598b",
+        "diff_bytes": 214363,
+        "superseded_because": "T11 static gate reformat (amend to 51aae86); D1 later made this round's prompts:{} obsolete"
+      },
+      "round2_51aae86": {
+        "snapshot_file_sha256": "2e224de65e5b6fb299807233a1535467f7a1b30da9f371ea18441bb2362779b9",
+        "snapshot_canonical_sha256": "b182424af36b912ea09f845fcdf62fb1740744eac49c0e11f4a1952ebf2473e4",
+        "diff_sha256": "6046206d16f603c22f63947c15b11ade9a61bd196e6e1a5c70e1985ea2bf70f3",
+        "diff_bytes": 214987,
+        "superseded_because": "S8 audit finding D1 (prompts silently empty); amend to 770c0dc"
+      },
+      "round3_770c0dc_current": true
+    }
+  },
+  "source_files": {
+    "count": 75,
+    "v1_count": 64,
+    "selection_rule": "v1 code_snapshot.source_hashes (64) union git diff --name-only 1e2c4430..770c0dc restricted to src/, scripts/, tests/, web/ (docs/notes, configs, .codex-* excluded)",
+    "diff_total_paths": 71,
+    "diff_in_scope_paths": 13,
+    "diff_excluded_paths": 58,
+    "membership_unchanged_across_all_three_rounds": true,
+    "added": [
+      "scripts/phase28_archive.py",
+      "scripts/phase28_archive_verify.py",
+      "scripts/phase28_index_profile.py",
+      "src/codepilot/archive.py",
+      "src/codepilot/retrieval/runner.py",
+      "tests/integration/phase28/test_phase28_archive_verify_loop.py",
+      "tests/integration/phase28/test_phase28_index_storage_loop.py",
+      "tests/integration/phase28/test_phase28_registry_loopback.py",
+      "tests/unit/llm/test_phase28_http_matrix.py",
+      "tests/unit/test_phase28_archive.py",
+      "tests/unit/test_phase28_archive_verify.py"
+    ],
+    "changed_vs_v1": [
+      "src/codepilot/repo/index.py",
+      "tests/unit/repo/test_index.py"
+    ],
+    "removed_vs_v1": [],
+    "bytes_changed_by_amend_round1": [
+      "scripts/phase28_index_profile.py",
+      "tests/integration/phase28/test_phase28_archive_verify_loop.py",
+      "tests/integration/phase28/test_phase28_index_storage_loop.py"
+    ],
+    "bytes_changed_by_amend_round2": [
+      "src/codepilot/archive.py",
+      "tests/unit/test_phase28_archive.py"
+    ]
+  },
+  "validation": {
+    "source": "docs/notes/phase28-validation.md",
+    "l1": {
+      "passed": [67, 28],
+      "detail": "67 = 15 archive + 13 archive_verify + 39 http_matrix; 28 includes 2 new cache-parameter regressions; numbers as run at S6 time (archive suite now 16 after D1 regression test)",
+      "logs": [
+        ".codex-pytest-tmp/phase28/s6a-l1-phase28-unit.log",
+        ".codex-pytest-tmp/phase28/s6a-l1-repo-index.log"
+      ]
+    },
+    "l2": {
+      "passed": 7,
+      "note": "tests/integration/phase28/ in one pass, no flaky reruns",
+      "log": ".codex-pytest-tmp/phase28/s6a-l2.log"
+    },
+    "l3": {
+      "llm": 490,
+      "repo": 381,
+      "storage_api": 39,
+      "observability": 53,
+      "integration_first_run": { "passed": 99, "failed": 4 },
+      "integration_after_fix_affected_file_passed": 18,
+      "total_executions": 1066,
+      "overlap_note": "L3 totals overlap L1/L2 directories; not summed across layers",
+      "skips": 0,
+      "xfails": 0,
+      "logs": [
+        ".codex-pytest-tmp/phase28/s6b-l3-llm.log",
+        ".codex-pytest-tmp/phase28/s6b-l3-repo.log",
+        ".codex-pytest-tmp/phase28/s6b-l3-storage-api.log",
+        ".codex-pytest-tmp/phase28/s6b-l3-observability.log",
+        ".codex-pytest-tmp/phase28/s6b-l3-integration.log"
+      ]
+    },
+    "t11_final_rerun": {
+      "source": "docs/notes/phase28-validation.md section 最终回归复跑（T11，提交源码上）与静态检查",
+      "a1_llm": 490,
+      "a2_repo": 381,
+      "a3_storage_api": 39,
+      "a4_observability": 53,
+      "a5_integration": 110,
+      "dedup_total_a1_a5": 1073,
+      "a6_combined_rerun": 74,
+      "a6_breakdown": { "archive": 15, "archive_verify": 13, "http_matrix": 39, "integration_phase28": 7 },
+      "static_checks": "ruff check, mypy (archive.py, index.py, runner.py), web tsc --noEmit, eslint src --max-warnings=0, git diff --check all pass",
+      "ruff_format_gate": "first run exit 1 on 3 files -> reformatted (style only) -> A6-scope 74 all green on final bytes -> amended into source commit (amend round 1)",
+      "logs": "t11-*.log"
+    },
+    "audit_findings": [
+      {
+        "id": "D1",
+        "found_by": "S8 independent audit",
+        "symptom": "rounds 1-2 snapshot.json prompts:{} - generator looked up bare keys agents/{role}.py while manifest keys are src/codepilot/agents/{role}.py; three role prompts silently lost (v1 has full prompts)",
+        "fix": "resolve role by path suffix (PurePosixPath(key).parts[-2:] == ('agents', f'{role}.py'), shortest key wins); new regression test test_prompts_resolved_from_prefixed_agent_manifest_keys (archive suite 15 -> 16)",
+        "verification": "static (ruff check/format, mypy) + affected tests (archive 16 + integration archive_verify_loop 4 = 20) all green; amend 770c0dc; candidate regenerated; artifact-level assertion: prompts exactly 3 non-empty roles, field-by-field equal to v1 snapshot",
+        "evidence": "this candidate's snapshot.json (prompts 361/1823/496 chars) and the changed dual snapshot hashes vs rounds 1-2"
+      }
+    ],
+    "t11_static_gate_rerun_round1": {
+      "trigger": "ruff format failures on 3 files",
+      "rerun_tests": 74,
+      "rerun_breakdown": { "archive": 15, "archive_verify": 13, "http_matrix": 39, "integration_phase28": 7 },
+      "result": "all green on final bytes",
+      "executed_by": "master control",
+      "evidence": "amend 51aae86; no separate log retained by S7"
+    },
+    "first_failures": [
+      {
+        "area": "L3 integration (4 phase26 legacy failures)",
+        "symptom": "expected failure code 'unreadable', got 'index_execution' in tests/integration/test_retrieval_index_failures.py",
+        "root_cause": "phase26 commit 748ad2f: Indexer.index() raised plain OSError on scan.unreadable; runner's generic except wrapped it",
+        "falsification": "git stash of this round's changes still failed on clean HEAD 9ccc703",
+        "fix": "IndexScanIncompleteError(OSError) in src/codepilot/repo/index.py + dedicated catch in src/codepilot/retrieval/runner.py via shared _unreadable_failure helper; no test changed",
+        "after": "affected file 18 passed; retrieval+repo 702 passed / 1 skipped (pre-existing embedding gate); api+storage 39 passed",
+        "evidence": [
+          ".codex-pytest-tmp/phase28/s6b-l3-integration.log",
+          ".codex-pytest-tmp/phase28/fix-unreadable-l3-integration.log",
+          ".codex-pytest-tmp/phase28/fix-unreadable-l2-unit-retrieval-repo.log",
+          ".codex-pytest-tmp/phase28/fix-unreadable-l2-unit-api-storage.log"
+        ]
+      },
+      {
+        "area": "T07 data chain first failure (S3 profiling script, T03 input to T07 decision)",
+        "symptom": "scripts/phase28_index_profile.py --calibrate crashed: TypeError 'tuple' object does not support item assignment at PhaseTimer._record (self._stack[-1][2] += elapsed)",
+        "fix": "timer frame tuple -> list",
+        "evidence": [".codex-pytest-tmp/phase28/first-failure-tuple-frame.log"]
+      },
+      {
+        "area": "S2 first failure (archive verifier unit suite, first run)",
+        "symptom": "12 collected / 5 failed (..F.....FFFFF): tampered-diff test expected diff_reverse_apply to fail on trailer-appended diff (git apply ignores trailing garbage, so it passed); 4 old-archive tests crashed in _write_fake_old_archive writing str to a binary path (TypeError memoryview)",
+        "fix": "tamper method changed to a real hunk body (return 2 -> return 9); helper encodes UTF-8 bytes; final suite 13 passed (within L1-1's 67)",
+        "evidence": [".codex-pytest-tmp/phase28/s2-verify-first-failure.log"]
+      }
+    ]
+  },
+  "index_profile": {
+    "source": "docs/notes/phase28-index-profile.json",
+    "decision": "docs/notes/phase28-index-decision.md",
+    "subset_files": 450,
+    "subset_disclaimer": "synthetic subset, absolute times not extrapolable to Django scale (2717 files, Phase27 frozen numbers only)",
+    "sameproc_change_wall_s_median": 2.6714,
+    "closure_composite_share_approx": 0.67,
+    "closure_composite_basis": "extract_all_edges 45.9% + edge delete/write 12.6% + symbol replace 3.6% + context build 5.5%",
+    "parse_share": 0.0165,
+    "parse_note": "322 parses = 450 files - 128 cache hits; Django analogue 2589 = 2717 - 128",
+    "cache_default_kept": { "entries": 128, "bytes": 8388608 },
+    "cache_params_role": "opt-in experimental channel only; all 4 production call sites use defaults",
+    "decision_option": "4 (bypass + document)",
+    "fast_path": "verified_snapshot_v2 on no change; complete_closure_v2 full closure on change, field-equal to a fresh full index",
+    "speedup_claims": "none"
+  },
+  "http_matrix": {
+    "source": "docs/notes/phase28-http-matrix.md",
+    "tests": 39,
+    "adapters": ["openai_compatible", "anthropic_messages"],
+    "consecutive_passes": 3,
+    "loopback_only": true,
+    "state_counts": {
+      "verified_table_rows": 22,
+      "unverified_list_items": 5,
+      "unsupported_list_items": 3,
+      "counting_note": "verified=22 rows across the main table (21) plus the Bedrock execution-path table (1); unverified/unsupported counted from the doc's own numbered lists"
+    },
+    "connection_reuse_conclusion": "keep request-private client",
+    "connection_reuse_evidence": "row14 loopback observation: 5/5 distinct TCP connections; pooling conflicts with Phase27-frozen per-request cancel semantics; ~15ms median loopback request",
+    "bedrock_deadline_cancel": "unverified",
+    "unsupported_examples": [
+      "custom sync blocking transport (TypeError)",
+      "TLS/proxy settings on injected client not copied to real requests",
+      "no cancel-awareness for non-HTTPTransport"
+    ]
+  },
+  "archive_verification": {
+    "tool": "scripts/phase28_archive_verify.py",
+    "command": ".venv/Scripts/python.exe scripts/phase28_archive_verify.py --all --json docs/notes/phase28-archive-integrity.json",
+    "exit_code": 0,
+    "rerun_after_amend": true,
+    "generations_verified": 3,
+    "versions_checked": 8,
+    "new_archives": 1,
+    "old_archives": 7,
+    "new_archive_failures": 0,
+    "old_unexplained_mismatches": 0,
+    "unknown_entries": 0,
+    "historical_files_modified": false,
+    "new_archive_status": "passed",
+    "v2_checks_passed": 12,
+    "v2_checks_failed": 0,
+    "evidence": ["git status shows no tracked changes under candidates/"]
+  },
+  "assertions": {
+    "candidate_dir_exactly_4_files": true,
+    "status_pending": true,
+    "parent_phase27_candidate_v1": true,
+    "schema_version_2": true,
+    "no_code_revision_key": true,
+    "snapshot_hash_rule_file_bytes_sha256": true,
+    "source_commit_is_770c0dc_full_sha": true,
+    "prompts_exactly_three_nonempty_roles": true,
+    "prompts_field_by_field_equal_to_v1": true,
+    "no_active_json_under_configs_harness": true,
+    "no_active_next_json_under_configs_harness": true,
+    "v1_dir_git_status_clean": true,
+    "experiences_inherited_verbatim": true,
+    "dry_run_before_real_run": true,
+    "diff_reverse_apply_verified": true,
+    "snapshot_hashes_changed_by_prompts_fix_vs_rounds_1_2": true
+  },
+  "guardrails": {
+    "real_model_requests": 0,
+    "new_cost_cny": 0,
+    "active_pointer": false,
+    "pushed": false,
+    "pr_created": false,
+    "published": false,
+    "docker_run": false,
+    "historical_candidates_modified": false,
+    "network_use": "127.0.0.1 loopback only",
+    "temporary_scripts": ".codex-pytest-tmp/phase28/s7/ (not committed)"
+  },
+  "not_run_or_unverified": {
+    "real_providers": "0 requests this round; GLM live link has Phase27 records only (docs/notes/glm-live-hardening.md), not re-run; OpenAI/Anthropic/Bedrock real endpoints unverified",
+    "docker_official_harness": "not run this round (Docker forbidden)",
+    "bedrock_deadline_cancel": "unverified (execution path proven to bypass http_lifecycle; real AWS SDK behavior not exercised)",
+    "web_e2e": "not re-run; zero web/ changes in this round's diff",
+    "django_full_profile": "not re-run; Phase27 frozen numbers cited only (2717 files, 105.0s cold, 142.7s single-file incremental)"
+  },
+  "null_fields_note": "final_docs_commit_id is null by design (provided by chat delivery record, Phase27-style); no other field required a null fallback - every numeric value above comes from the cited files or frozen facts",
+  "boundary_statement": "local loopback validation does not equal real-provider behavior; no resolution-rate or speedup-percentage claims are made anywhere in this phase's documents"
+}
