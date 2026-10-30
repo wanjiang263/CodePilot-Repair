@@ -26,7 +26,7 @@ from codepilot.fsutil import remove_tree
 from codepilot.repo.git_history import FileChurn, GitHistory
 from codepilot.repo.gitcmd import run_git
 from codepilot.repo.graph import RepoGraph
-from codepilot.repo.index import Indexer, RepositoryIndex
+from codepilot.repo.index import Indexer, IndexScanIncompleteError, RepositoryIndex
 from codepilot.repo.models import Symbol
 from codepilot.repo.scanner import RepositoryScanner, ScanResult
 from codepilot.repo.workspace import WorkspaceManager, normalize_source, repository_id
@@ -100,6 +100,27 @@ class IndexingError(OSError):
         self.count = count
         self.paths = paths
         self.scan_counts = scan_counts or {}
+
+
+def _unreadable_failure(paths: tuple[str, ...], scan_counts: dict[str, int]) -> IndexingError:
+    """构造既有的 ``code="unreadable"`` 索引失败 detail（两条触发路径共用）。
+
+    不可读计数控取扫描统计与去重路径数的较大者：scan 统计可能被注入
+    （诊断/测试）而路径为空，反之扫描也可能读到同一文件的多种不可读形态。
+    """
+    unreadable = max(scan_counts.get("unreadable", 0), len(paths))
+    message = f"Repository index incomplete: {unreadable} unreadable path(s)"
+    if paths:
+        message += ": " + ", ".join(paths)
+    return IndexingError(
+        message,
+        code="unreadable",
+        exception_type="IndexingError",
+        category="environment",
+        count=unreadable,
+        paths=paths,
+        scan_counts=dict(sorted(scan_counts.items())),
+    )
 
 
 class _DiagnosticScanner(RepositoryScanner):
@@ -304,22 +325,22 @@ def indexed_repository(task: RetrievalInput, cache_dir: Path) -> Iterator[Indexe
                 )
                 unreadable = max(stats.scan.get("unreadable", 0), len(paths))
                 if unreadable:
-                    message = f"Repository index incomplete: {unreadable} unreadable path(s)"
-                    if paths:
-                        message += ": " + ", ".join(paths)
-                    raise IndexingError(
-                        message,
-                        code="unreadable",
-                        exception_type="IndexingError",
-                        category="environment",
-                        count=unreadable,
-                        paths=paths,
-                        scan_counts=dict(sorted(stats.scan.items())),
-                    )
+                    raise _unreadable_failure(paths, stats.scan)
                 symbols = tuple(RepositoryIndex(stores, workspace.repository_id).symbol_objects())
                 graph = RepoGraph.from_stores(stores, workspace.repository_id)
             except IndexingError:
                 raise
+            except IndexScanIncompleteError as exc:
+                # index() 在写任何库行之前就中止了；异常携带的正是触发中止的
+                # 那次扫描的不可读路径。走既有的 "unreadable" 分类，不落进下面
+                # 的通用执行异常（那里的 code="index_execution" 会掩盖环境原因）。
+                paths = tuple(sorted(set(exc.unreadable)))
+                counts = (
+                    scanner.result.counts()
+                    if scanner.result is not None
+                    else {"unreadable": len(paths)}
+                )
+                raise _unreadable_failure(paths, counts) from exc
             except Exception as exc:
                 # Index/backend exceptions end this task, preserving their type and
                 # cause. This boundary never returns an empty or partial fallback.

@@ -42,7 +42,7 @@ from codepilot.storage.repository import Stores
 
 log = get_logger(__name__)
 
-__all__ = ["IndexStats", "Indexer", "RepositoryIndex"]
+__all__ = ["IndexScanIncompleteError", "IndexStats", "Indexer", "RepositoryIndex"]
 
 _TEST_KINDS = ("test_function", "test_method")
 _CONFIDENCE_RANK: dict[Confidence, int] = {"high": 2, "medium": 1, "low": 0}
@@ -71,6 +71,20 @@ class IndexStats:
     parse_reused_paths: tuple[str, ...] = ()
 
 
+class IndexScanIncompleteError(OSError):
+    """扫描读到不可读路径，索引在写库前中止：既有已提交索引原样保留。
+
+    继承 ``OSError``：这个失败本来就是以普通 ``OSError`` 抛出的，所有按
+    ``except OSError`` 分类/透传的调用方（CLI、eval harness）语义不变。
+    类型化只为给调用方一个可靠判别依据——retrieval runner 据此把它归类为
+    既有的 ``code="unreadable"`` 环境失败，而不是落进通用执行异常。
+    """
+
+    def __init__(self, message: str, *, unreadable: tuple[str, ...]) -> None:
+        super().__init__(message)
+        self.unreadable = unreadable
+
+
 class Indexer:
     """执行一次完整或增量索引。解析器与扫描器可注入（测试计数用）。"""
 
@@ -79,11 +93,17 @@ class Indexer:
         parser: PythonParser | None = None,
         scanner: RepositoryScanner | None = None,
         progress: Callable[..., Any] | None = None,
+        cache_max_entries: int = 128,
+        cache_max_bytes: int = 8 * 1024 * 1024,
     ) -> None:
         self._parsed: OrderedDict[tuple[str, str, str], tuple[ParsedFile, int]] = OrderedDict()
         self.progress = progress
         self.parser = parser or default_parser()
         self.scanner = scanner or RepositoryScanner()
+        # 解析树缓存的容量上界（条数与源字节）。默认值与历史行为完全一致；
+        # 仅 Phase28 剖析脚本用更大的上界观察缓存命中率，不改变默认语义。
+        self._cache_max_entries = cache_max_entries
+        self._cache_max_bytes = cache_max_bytes
 
     def _progress(self, phase: str, **counts: int) -> None:
         if self.progress is not None:
@@ -105,8 +125,9 @@ class Indexer:
         scan = self.scanner.scan(root)
         self._progress("scanned", files=len(scan.files))
         if scan.unreadable:
-            raise OSError(
-                "index scan incomplete; retain previous committed index: " + repr(scan.unreadable)
+            raise IndexScanIncompleteError(
+                "index scan incomplete; retain previous committed index: " + repr(scan.unreadable),
+                unreadable=scan.unreadable,
             )
         stored_files = {f.path: f for f in stores.files.list_by_repo(repository_id)}
         incremental = bool(stored_files)
@@ -223,8 +244,8 @@ class Indexer:
                 if len(raw) <= 1024 * 1024:
                     self._parsed[key] = (parsed, len(raw))
                     while (
-                        len(self._parsed) > 128
-                        or sum(v[1] for v in self._parsed.values()) > 8 * 1024 * 1024
+                        len(self._parsed) > self._cache_max_entries
+                        or sum(v[1] for v in self._parsed.values()) > self._cache_max_bytes
                     ):
                         self._parsed.popitem(last=False)
             parsed_files[scanned_file.path] = parsed

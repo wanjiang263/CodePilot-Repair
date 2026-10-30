@@ -589,3 +589,64 @@ def test_phase26_cold_index_rebuilds_old_semantics(stores, fresh_stores, tmp_pat
     Indexer().index(fresh_stores, _ws(root))
     assert stats.association_mode == "complete_closure_v2" and stats.parsed_paths
     assert _dump(stores, _ws(root).repository_id) == _dump(fresh_stores, _ws(root).repository_id)
+
+
+# ------------------- Phase28 T07：缓存容量参数（opt-in 实验通道）回归钉
+#
+# 决策见 docs/notes/phase28-index-decision.md：cache_max_entries / cache_max_bytes
+# 只作为剖析与实验的 opt-in 通道，默认 128 / 8MiB 不变。这里钉两件事：
+# 两个上界真实生效（复用语义不变——命中仍来自 cached_at_start 快照），以及
+# 默认构造与显式 (128, 8MiB) 行为一致（默认语义未被参数化改动）。
+# 直接读 indexer._parsed 是有意的：上界本身就在这个结构上生效，stats 只能间接反映。
+
+
+def test_cache_capacity_parameters_take_effect(stores: Stores, tmp_path: Path) -> None:
+    root = tmp_path / "tiny-cache"
+    root.mkdir()
+    for i in range(3):
+        (root / f"mod{i}.py").write_text("def value():\n    return 1\n", encoding="utf8")
+
+    indexer = Indexer(cache_max_entries=2, cache_max_bytes=8 * 1024 * 1024)
+    first = indexer.index(stores, _ws(root))
+    assert len(first.parsed_paths) == 3
+    assert len(indexer._parsed) == 2  # 3 棵树只留 2 棵：条数上界生效
+
+    (root / "mod0.py").write_text("def value():\n    return 2\n", encoding="utf8")
+    second = indexer.index(stores, _ws(root))
+    assert second.parsed_paths == ("mod0.py",)
+    assert len(second.parse_reused_paths) == 2  # 快照命中受 2 条上界约束
+
+    tiny = Indexer(cache_max_entries=128, cache_max_bytes=1)
+    # repositories 对 (url, base_commit) 唯一：字节上界检查用独立目录，避免同 URL 复用。
+    tiny_root = tmp_path / "tiny-bytes"
+    tiny_root.mkdir()
+    for i in range(3):
+        (tiny_root / f"mod{i}.py").write_text("def value():\n    return 1\n", encoding="utf8")
+    tiny_first = tiny.index(stores, _ws(tiny_root, "repo_test_tiny_bytes"))
+    assert len(tiny_first.parsed_paths) == 3
+    assert len(tiny._parsed) == 0  # 字节上界生效：1 字节连最小的文件都放不下
+
+
+def test_default_cache_bounds_match_explicit_128(
+    stores: Stores, fresh_stores: Stores, tmp_path: Path
+) -> None:
+    root_default = tmp_path / "bounds-default"
+    root_explicit = tmp_path / "bounds-explicit"
+    for root in (root_default, root_explicit):
+        root.mkdir()
+        for i in range(130):
+            (root / f"mod{i:03}.py").write_text("def value():\n    return 1\n", encoding="utf8")
+
+    default_indexer = Indexer()
+    explicit_indexer = Indexer(cache_max_entries=128, cache_max_bytes=8 * 1024 * 1024)
+    default_first = default_indexer.index(stores, _ws(root_default))
+    explicit_first = explicit_indexer.index(fresh_stores, _ws(root_explicit))
+    assert len(default_first.parsed_paths) == len(explicit_first.parsed_paths) == 130
+    assert len(default_indexer._parsed) == len(explicit_indexer._parsed) == 128
+
+    for root in (root_default, root_explicit):
+        (root / "mod000.py").write_text("def value():\n    return 2\n", encoding="utf8")
+    default_second = default_indexer.index(stores, _ws(root_default))
+    explicit_second = explicit_indexer.index(fresh_stores, _ws(root_explicit))
+    assert len(default_second.parsed_paths) == len(explicit_second.parsed_paths) == 2
+    assert len(default_second.parse_reused_paths) == len(explicit_second.parse_reused_paths) == 128
