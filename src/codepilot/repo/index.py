@@ -5,6 +5,14 @@ Therefore every update rebuilds all associations (including aliases, cycles and
 previously unresolved imports). Warm parse trees are reused by content; a cold
 indexer reparses unchanged sources to reconstruct bindings. No stale edge is kept
 merely to claim locality. All database changes share the caller's transaction.
+
+Phase29 T10 adds one bounded exception to the full rebuild: when a run changes no
+symbol id anywhere (``old_symbol_ids == new_symbol_ids``, content-independent ids),
+edge extraction and edge row replacement are restricted to the changed files —
+for every other source the recomputed rows are provably identical to the stored
+ones, so leaving them untouched is equivalence, not staleness. Any symbol-set
+change falls back to the full rebuild. See the fast-path comment in
+``Indexer.index`` and tests/unit/repo/test_phase29_index_incremental.py.
 """
 
 from __future__ import annotations
@@ -12,7 +20,7 @@ from __future__ import annotations
 import hashlib
 import time
 from collections import OrderedDict
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
@@ -294,12 +302,54 @@ class Indexer:
                 new_symbol_ids.add(symbol.id)
                 symbol_rows.append(_symbol_row(repository_id, symbol))
 
-        all_edges = _extract_all_edges(context)
+        old_symbol_ids = {row.id for row in stores.symbols.list_by_repo(repository_id)}
+        removed_symbol_ids = old_symbol_ids - new_symbol_ids
+        changed_path_set = {f.path for f in changed}
+
+        # Incremental fast path (Phase29 T10): symbol ids are content-independent
+        # (sha1 of repository + qualified_name + kind). When no symbol appeared or
+        # disappeared anywhere, resolutions for unchanged sources are provably
+        # identical to the stored rows — same parse, same qname->id map,
+        # deterministic extractors — so edge *extraction* and edge *row
+        # replacement* can be restricted to the changed files instead of
+        # rebuilding the whole graph. Any symbol-set change (added, removed or
+        # renamed symbol, removed file, new parse error) falls back to the
+        # conservative full rebuild below. The equivalence claim is pinned by
+        # tests/support/indexdump.dump_index comparisons
+        # (tests/unit/repo/test_phase29_index_incremental.py) and by the
+        # semantic digests in docs/notes/phase29-index-profile.json.
+        #
+        # The stored rows only describe the current extractor semantics when the
+        # persisted fingerprint matches: a legacy or stale-semantics index must
+        # take the full rebuild (see the deleted-IMPORT case in
+        # test_phase26_cold_index_rebuilds_old_semantics).
+        fast_mode = (
+            incremental
+            and not removed_paths
+            and old_symbol_ids == new_symbol_ids
+            and stores.repositories.index_semantics(repository_id) == fingerprint
+        )
+        edge_recompute_sources = (
+            {
+                symbol.id
+                for source_file in context.files
+                if source_file.path in changed_path_set
+                for symbol in source_file.symbols
+            }
+            | removed_symbol_ids
+            if fast_mode
+            else old_symbol_ids | new_symbol_ids
+        )
+        only_paths = frozenset(changed_path_set) if fast_mode else None
+
+        all_edges = _extract_all_edges(context, only_paths=only_paths)
         edge_rows = _edge_rows(
             repository_id,
             tuple(edge for edge in all_edges if edge.kind != "TEST"),
-            new_symbol_ids,
+            edge_recompute_sources,
         )
+        # Fast path: the extractors above already restricted output to the
+        # changed files, so these TEST rows replace exactly their own sources.
         computed_test_edges = tuple(edge for edge in all_edges if edge.kind == "TEST")
 
         removed_file_ids = [file_id(repository_id, path) for path in removed_paths]
@@ -307,7 +357,6 @@ class Indexer:
             *[file_id(repository_id, f.path) for f in scan.files],
             *removed_file_ids,
         ]
-        old_symbol_ids = {row.id for row in stores.symbols.list_by_repo(repository_id)}
 
         # repositories 必须先写：files/symbols/edges 都有指向它的外键，
         # 而本方法可能运行在启用外键的 SQLite 上（F-11 默认开启）。
@@ -320,14 +369,17 @@ class Indexer:
         stores.files.upsert_many(file_rows)
         stores.symbols.replace_for_files(affected_file_ids, symbol_rows)
         del symbol_rows, file_rows
-        stores.edges.replace_for_sources(
-            repository_id, sorted(old_symbol_ids | new_symbol_ids), edge_rows
-        )
+        stores.edges.replace_for_sources(repository_id, sorted(edge_recompute_sources), edge_rows)
         del edge_rows, all_edges
         if removed_paths:
             stores.files.delete_by_paths(repository_id, removed_paths)
         dangling_deleted, dangling_unresolved = _resolve_dangling(stores, repository_id)
-        _replace_test_edges(stores, repository_id, computed_test_edges)
+        _replace_test_edges(
+            stores,
+            repository_id,
+            computed_test_edges,
+            full_replace=not fast_mode,
+        )
 
         stores.repositories.set_index_semantics(repository_id, fingerprint)
         stats = finish(reparsed, parse_reused, parse_errors, "complete_closure_v2")
@@ -474,40 +526,50 @@ def _replace_test_edges(
     stores: Stores,
     repository_id: str,
     computed: tuple[GraphEdge, ...],
+    *,
+    full_replace: bool = True,
 ) -> None:
-    """Complete closure already contains unique test/target pairs at full strength.
+    """Write TEST edges. ``full_replace`` rebuilds the whole TEST partition;
+    the incremental fast path instead replaces only the sources present in
+    ``computed`` (already restricted to the changed files) and leaves untouched
+    test files' rows — identical by the same proof as the non-TEST edges.
 
     Do not materialize the old graph, a second merge map and all row dictionaries
     at once. EdgeStore consumes this iterator in bounded transaction-local batches.
     """
-    stores.edges.delete_by_kind(repository_id, "TEST")
-    stores.edges.replace_for_sources(
-        repository_id,
-        [],
-        (
-            {
-                "id": _edge_id(
-                    repository_id, edge.source_id, edge.target_id, edge.target_name, "TEST"
-                ),
-                "repository_id": repository_id,
-                "source_id": edge.source_id,
-                "target_id": edge.target_id,
-                "target_name": edge.target_name,
-                "kind": "TEST",
-                "confidence": confidence_to_score(edge.confidence),
-                "line": edge.line,
-            }
-            for edge in computed
-        ),
+    rows: Iterator[dict[str, object]] = (
+        {
+            "id": _edge_id(repository_id, edge.source_id, edge.target_id, edge.target_name, "TEST"),
+            "repository_id": repository_id,
+            "source_id": edge.source_id,
+            "target_id": edge.target_id,
+            "target_name": edge.target_name,
+            "kind": "TEST",
+            "confidence": confidence_to_score(edge.confidence),
+            "line": edge.line,
+        }
+        for edge in computed
     )
+    if full_replace:
+        stores.edges.delete_by_kind(repository_id, "TEST")
+        stores.edges.replace_for_sources(repository_id, [], rows)
+    else:
+        # Fast path: the main edge replace above already deleted every stored
+        # row (any kind) of the changed sources, so these TEST rows are a pure
+        # insert. Deleting by source_id here again would also wipe the fresh
+        # non-TEST rows of the same sources.
+        stores.edges.replace_for_sources(repository_id, [], rows)
 
 
-def _extract_all_edges(context: AnalysisContext) -> tuple[GraphEdge, ...]:
-    """对本次解析的文件跑全部四类边提取。"""
-    imports = ImportResolver(context)
-    calls = extract_calls(context, imports)
-    structural = extract_edges(context, imports)
-    tests = extract_test_links(context, imports, calls)
+def _extract_all_edges(
+    context: AnalysisContext, only_paths: frozenset[str] | None = None
+) -> tuple[GraphEdge, ...]:
+    """Run all four extractors. ``only_paths`` (incremental fast path) restricts
+    extraction to those files; see the fast-path proof in ``Indexer.index``."""
+    imports = ImportResolver(context, only_paths=only_paths)
+    calls = extract_calls(context, imports, only_paths=only_paths)
+    structural = extract_edges(context, imports, only_paths=only_paths)
+    tests = extract_test_links(context, imports, calls, only_paths=only_paths)
     return (*imports.edges(), *calls, *structural, *tests)
 
 

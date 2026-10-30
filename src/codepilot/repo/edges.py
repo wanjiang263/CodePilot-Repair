@@ -21,7 +21,9 @@ def _mask(node: SyntaxNode | None, excluded: set[NodeKey]) -> None:
 
 
 def extract_edges(
-    context: AnalysisContext, imports: ImportResolver | None = None
+    context: AnalysisContext,
+    imports: ImportResolver | None = None,
+    only_paths: frozenset[str] | None = None,
 ) -> tuple[GraphEdge, ...]:
     """返回 INHERIT 和 REFERENCE；声明、import 及调用目标不重复算引用。
 
@@ -30,7 +32,12 @@ def extract_edges(
     """
     names = NameResolver(context, imports or ImportResolver(context))
     result: list[GraphEdge] = []
-    for file in context.files:
+    files = (
+        context.files
+        if only_paths is None
+        else tuple(file for file in context.files if file.path in only_paths)
+    )
+    for file in files:
         excluded: set[NodeKey] = set()
         nodes = tuple(file.scoped_nodes())
         for node, owner in nodes:

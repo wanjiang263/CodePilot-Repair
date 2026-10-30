@@ -356,16 +356,34 @@ def test_published_runtime_projection_uses_same_api_semantics(tmp_path: Path) ->
 def test_comparison_import_checks_original_evidence_and_conditions(tmp_path: Path) -> None:
     import hashlib
 
-    from codepilot.rsi import _json_hash, archive_candidate, import_comparison, promotion_readiness
+    from codepilot.rsi import (
+        _json_hash,
+        import_comparison,
+        promotion_readiness,
+        validate_snapshot,
+        version_dir,
+    )
 
-    proposal = {
-        "hypothesis": "test only",
-        "input_evidence": ["public"],
-        "candidate_changes": "test only",
-        "code_revision": "base",
-    }
+    # Phase29 (I3): the retired v1 archive entry cannot build these fixtures;
+    # freeze the snapshot files directly instead.
     for version in ("baseline", "candidate"):
-        archive_candidate(tmp_path, version, proposal)
+        snapshot = validate_snapshot(
+            {
+                "schema_version": 1,
+                "version": version,
+                "parent": None,
+                "status": "pending",
+                "instruction": "",
+                "prompts": {},
+                "experiences": [],
+            },
+            tmp_path,
+        )
+        folder = version_dir(tmp_path, version)
+        folder.mkdir(parents=True, exist_ok=False)
+        (folder / "snapshot.json").write_text(
+            json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
     evidence = tmp_path / "evidence.json"
     evidence.write_text('{"fixture": "not a real experiment"}', encoding="utf-8")
     conditions = dict.fromkeys(

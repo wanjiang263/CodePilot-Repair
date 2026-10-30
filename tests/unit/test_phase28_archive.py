@@ -124,11 +124,12 @@ def test_generate_writes_self_verifying_v2_directory(tmp_path: Path) -> None:
     assert not (root / "active.next.json").exists()
 
     candidate = read_json(folder / "candidate.json")
-    assert candidate["schema_version"] == 2
+    assert candidate["schema_version"] == 3
     assert candidate["version"] == "phase28-t-main"
     assert candidate["parent"] is None
     assert candidate["status"] == "pending"
     assert candidate["created_from"] == "phase28_archive"
+    assert candidate["source_origin"] == "git_commit"
     assert candidate["snapshot_ref"] == "snapshot.json"
     assert candidate["snapshot_hash_rule"] == "file_bytes_sha256"
     assert candidate["diff_base_commit"] == base
@@ -140,6 +141,15 @@ def test_generate_writes_self_verifying_v2_directory(tmp_path: Path) -> None:
     assert candidate["parent_integrity"] is None
     assert candidate["dirty_worktree"] is False
     assert "code_revision" not in candidate
+    assert "raw_worktree_hashes" not in candidate
+    assert set(candidate["base_hashes"]) == set(candidate["source_hashes"])
+    sealed = {k: v for k, v in candidate.items() if k != "candidate_payload_sha256"}
+    assert (
+        candidate["candidate_payload_sha256"]
+        == hashlib.sha256(
+            json.dumps(sealed, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        ).hexdigest()
+    )
 
     snapshot = read_json(folder / "snapshot.json")
     assert snapshot["schema_version"] == 1
@@ -227,12 +237,13 @@ def test_hashes_recompute_independently_with_crlf_sources(tmp_path: Path) -> Non
     assert candidate["diff_sha256"] == hashlib.sha256(diff).hexdigest()
 
     for rel in SOURCE_PATHS:
-        raw = (repo / rel).read_bytes()
-        assert candidate["raw_worktree_hashes"][rel] == hashlib.sha256(raw).hexdigest()
-        assert candidate["source_hashes"][rel] == hashlib.sha256(normalize(raw)).hexdigest()
+        blob = git(repo, "cat-file", "blob", f"{head}:{rel}")
+        assert candidate["source_hashes"][rel] == hashlib.sha256(normalize(blob)).hexdigest()
+        base_blob = git(repo, "cat-file", "blob", f"{base}:{rel}")
+        assert candidate["base_hashes"][rel] == hashlib.sha256(normalize(base_blob)).hexdigest()
+        assert (repo / rel).read_bytes() == blob, "clean worktree must equal the source commit"
     assert (
-        candidate["source_hashes"]["src/feature.py"]
-        != candidate["raw_worktree_hashes"]["src/feature.py"]
+        candidate["source_hashes"]["src/feature.py"] != candidate["base_hashes"]["src/feature.py"]
     )
 
 
@@ -272,7 +283,7 @@ def test_missing_source_fails_without_creating_directory(tmp_path: Path) -> None
     assert not (root / "candidates" / "phase28-t-miss").exists()
 
 
-def test_dirty_worktree_rejected_by_default_and_recorded_when_allowed(tmp_path: Path) -> None:
+def test_dirty_worktree_rejected_by_default_and_recorded_in_worktree_mode(tmp_path: Path) -> None:
     repo, base, head = build_repo(tmp_path)
     (repo / "unlisted.txt").write_bytes(b"dirty now\n")
     root = tmp_path / "archive"
@@ -280,12 +291,27 @@ def test_dirty_worktree_rejected_by_default_and_recorded_when_allowed(tmp_path: 
         generate(root, repo, "phase28-t-dirty", base, head)
     assert not (root / "candidates" / "phase28-t-dirty").exists()
 
-    summary = generate(root, repo, "phase28-t-dirty2", base, head, allow_dirty=True)
+    # Phase29: allow_dirty alone can no longer bypass the mode declaration.
+    with pytest.raises(ArchiveError, match="worktree"):
+        generate(root, repo, "phase28-t-dirty-bypass", base, head, allow_dirty=True)
+    assert not (root / "candidates" / "phase28-t-dirty-bypass").exists()
+
+    summary = create_candidate(
+        root,
+        repo,
+        version="phase28-t-dirty2",
+        diff_base_commit=base,
+        source_files=list(SOURCE_PATHS),
+        source_origin="worktree",
+    )
     assert summary["dirty_worktree"] is True
     assert summary["dirty_files"] and any("unlisted.txt" in line for line in summary["dirty_files"])
     candidate = read_json(Path(summary["directory"]) / "candidate.json")
     assert candidate["dirty_worktree"] is True
     assert candidate["dirty_files"] == summary["dirty_files"]
+    assert candidate["source_origin"] == "worktree"
+    assert candidate["source_commit"] is None
+    assert "raw_worktree_hashes" in candidate
     git(repo, "checkout", "--", "unlisted.txt")
 
 
@@ -297,10 +323,10 @@ def test_failed_reverse_apply_removes_partial_directory(
     repo, base, head = build_repo(tmp_path)
     root = tmp_path / "archive"
 
-    def broken(repo_path: Path, diff: bytes) -> None:
+    def broken(*args: Any, **kwargs: Any) -> None:
         raise archive_module.DiffVerificationError("reverse apply refused")
 
-    monkeypatch.setattr(archive_module, "_require_reversible", broken)
+    monkeypatch.setattr(archive_module, "_verify_diff_roundtrip", broken)
     with pytest.raises(DiffVerificationError, match="reverse apply refused"):
         generate(root, repo, "phase28-t-broken", base, head)
     assert not (root / "candidates" / "phase28-t-broken").exists()

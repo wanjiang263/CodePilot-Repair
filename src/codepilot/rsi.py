@@ -309,53 +309,22 @@ def retrieve(
     return chosen
 
 
-def archive_candidate(root: Path, version: str, proposal: dict[str, Any]) -> Path:
-    if not all(
-        proposal.get(k)
-        for k in ("hypothesis", "input_evidence", "candidate_changes", "code_revision")
-    ):
-        raise ValueError(
-            "hypothesis, public evidence, candidate changes and code revision are required"
-        )
-    parent = proposal.get("parent")
-    if parent:
-        read_json(version_dir(root, str(parent)) / "snapshot.json")
-    sources = snapshot_sources()
-    snapshot = validate_snapshot(
-        {
-            "schema_version": 1,
-            "version": version,
-            "parent": parent,
-            "status": "pending",
-            "instruction": proposal.get("instruction", ""),
-            "prompts": proposal.get("prompts", extract_prompts(sources)),
-            "experiences": [{**e, "status": "pending"} for e in proposal.get("experiences", [])],
-        },
-        root,
+def archive_candidate(_root: Path, _version: str, _proposal: dict[str, Any]) -> Path:
+    """Retired (Phase29 I3): the schema-v1 archive path can no longer deliver.
+
+    v1 ``candidate.json`` records carry no snapshot/diff integrity fields and no
+    git source binding, so nothing written here could be verified. Every
+    supported generation entry now goes through the single schema-v3 path in
+    ``codepilot.archive.create_candidate`` (CLI: ``scripts/phase28_archive.py``).
+    This stub keeps the name so stale call sites fail loudly instead of
+    silently producing undeliverable v1 candidates.
+    """
+    raise ValueError(
+        "rsi.archive_candidate is retired: schema v1 candidates are not "
+        "deliverable. Use codepilot.archive.create_candidate (CLI: "
+        "scripts/phase28_archive.py) to generate a schema-v3 candidate with "
+        "source_commit binding and integrity verification"
     )
-    folder = version_dir(root, version)
-    folder.mkdir(parents=True, exist_ok=False)
-    payload = {
-        **proposal,
-        "schema_version": 1,
-        "version": version,
-        "parent": parent,
-        "status": "pending",
-        "snapshot": snapshot,
-        "source_hashes": {p: hashlib.sha256(t.encode()).hexdigest() for p, t in sources.items()},
-        "source_snapshot": sources,
-        "static_results": proposal.get("static_results", ["not checked"]),
-        "future_metrics": proposal.get(
-            "future_metrics", ["quality", "regressions", "time", "cost"]
-        ),
-        "effect_validation": "NOT_RUN",
-        "auto_promote": False,
-    }
-    for name, content in (("snapshot.json", snapshot), ("candidate.json", payload)):
-        (folder / name).write_text(
-            json.dumps(content, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
-    return folder
 
 
 def select(root: Path, version: str, *, allow_pending: bool = False) -> None:
@@ -546,9 +515,6 @@ def main() -> None:
         item.add_argument("version")
         if command != "show":
             item.add_argument("--allow-pending", action="store_true")
-    create = sub.add_parser("archive")
-    create.add_argument("version")
-    create.add_argument("--proposal", type=Path, required=True)
     trace = sub.add_parser("replay")
     trace.add_argument("path", type=Path)
     trace.add_argument("--mode", choices=("trace", "decision"), default="trace")
@@ -563,8 +529,6 @@ def main() -> None:
         result = promotion_readiness(args.root, args.version, args.reference)
     elif args.command == "replay":
         result = replay(args.path, decisions=args.mode == "decision")
-    elif args.command == "archive":
-        result = str(archive_candidate(args.root, args.version, read_json(args.proposal)))
     elif args.command == "show":
         result = read_json(version_dir(args.root, args.version) / "candidate.json")
     else:

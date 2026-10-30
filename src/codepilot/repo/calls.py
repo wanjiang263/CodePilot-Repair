@@ -11,9 +11,21 @@ MAX_METHOD_CANDIDATES = 5
 
 
 class CallResolver:
-    def __init__(self, context: AnalysisContext, imports: ImportResolver | None = None) -> None:
+    def __init__(
+        self,
+        context: AnalysisContext,
+        imports: ImportResolver | None = None,
+        only_paths: frozenset[str] | None = None,
+    ) -> None:
         self.context = context
         self.names = NameResolver(context, imports or ImportResolver(context))
+        # Incremental fast path: only extract call edges for these files
+        # (repo/index.py proves unchanged sources keep byte-identical rows).
+        self._files = (
+            context.files
+            if only_paths is None
+            else tuple(file for file in context.files if file.path in only_paths)
+        )
         # The conservative attribute fallback used to scan every symbol for
         # every unresolved call. Django has enough of both to make indexing
         # quadratic; build the same lookup once.
@@ -25,7 +37,7 @@ class CallResolver:
 
     def extract(self) -> tuple[GraphEdge, ...]:
         result = []
-        for file in self.context.files:
+        for file in self._files:
             for node, owner in file.scoped_nodes():
                 if node.kind != "call":
                     continue
@@ -76,6 +88,8 @@ class CallResolver:
 
 
 def extract_calls(
-    context: AnalysisContext, imports: ImportResolver | None = None
+    context: AnalysisContext,
+    imports: ImportResolver | None = None,
+    only_paths: frozenset[str] | None = None,
 ) -> tuple[GraphEdge, ...]:
-    return CallResolver(context, imports).extract()
+    return CallResolver(context, imports, only_paths=only_paths).extract()

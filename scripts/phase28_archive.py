@@ -1,22 +1,32 @@
-"""Phase28 候选归档 CLI（契约 A，schema v2）。
+"""Phase29 候选归档 CLI（契约 A，schema v3）。
 
-把指定源码提交固化成 v2 候选目录：snapshot.json / candidate.json / sources.json /
-candidate.diff。默认拒绝脏 tracked 工作树（``--allow-dirty`` 显式放行并记录），
-拒绝覆盖已存在版本目录，生成后验证 diff 可反向应用，绝不创建 active 指针。
+把指定来源固化成 v3 候选目录：snapshot.json / candidate.json / sources.json /
+candidate.diff。两种显式来源模式（docs/notes/phase29-archive-schema.md）：
 
-正常用法（最终候选由主控在源码提交之后执行，T02 只保证命令本身可用）::
+- ``git_commit``（默认）：要求 tracked 工作树干净、``--source-commit`` 必填、
+  ``--diff-base`` 必须是其祖先；源码文本从 ``source_commit`` blob 读取，
+  diff 由 ``git diff diff_base source_commit`` 生成，绝不读工作区内容；
+- ``worktree``：唯一容忍脏工作树的模式（``--allow-dirty`` 只能配它）；
+  源码读自工作区，记录 raw_worktree_hashes / dirty_files，不宣称 git 来源
+  （candidate.json 的 source_commit 为 null）。
 
-    python scripts/phase28_archive.py \
-        --version phase28-candidate-v2 \
-        --parent phase27-candidate-v1 \
-        --diff-base <旧源码提交> \
-        --source-commit <本轮源码提交> \
-        --source-list sources.json \
-        [--archive-root <目录>] [--allow-dirty] [--dry-run]
+拒绝覆盖已存在版本目录，生成后验证 diff 正/反向应用（临时目录，不动工作树），
+绝不创建 active 指针。
+
+正常用法（最终候选由主控在源码提交之后执行，T03 只保证命令本身可用）::
+
+    python scripts/phase28_archive.py \\
+        --version phase29-candidate-v3 \\
+        --parent phase28-candidate-v2 \\
+        --diff-base <旧源码提交> \\
+        --source-commit <本轮源码提交> \\
+        --source-list sources.json \\
+        [--archive-root <目录>] [--source-origin git_commit|worktree] \\
+        [--allow-dirty] [--dry-run]
 
 ``--source-list`` 接受一个 JSON 文件（字符串数组，相对路径先按 CWD、再按仓库根解析）
-或逗号分隔的仓库相对路径。``--dry-run`` 完整执行校验与哈希计算（含 diff 反向应用
-检查，``--check`` 不写工作区）但不落盘。
+或逗号分隔的仓库相对路径。``--dry-run`` 完整执行校验与哈希计算（含临时目录内的
+正/反向应用检查，不写工作区）但不落盘。
 """
 
 from __future__ import annotations
@@ -27,7 +37,12 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from codepilot.archive import ArchiveError, create_candidate
+from codepilot.archive import (
+    SOURCE_ORIGIN_GIT,
+    SOURCE_ORIGIN_WORKTREE,
+    ArchiveError,
+    create_candidate,
+)
 from codepilot.rsi import archive_root
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -57,7 +72,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--version", required=True, help="candidate version identifier")
     parser.add_argument("--parent", required=True, help='parent version ("" for a root candidate)')
     parser.add_argument("--diff-base", required=True, help="authoritative diff base commit")
-    parser.add_argument("--source-commit", required=True, help="source commit being archived")
+    parser.add_argument(
+        "--source-commit",
+        default="",
+        help="source commit being archived (required in git_commit mode, forbidden in worktree mode)",
+    )
+    parser.add_argument(
+        "--source-origin",
+        choices=(SOURCE_ORIGIN_GIT, SOURCE_ORIGIN_WORKTREE),
+        default=SOURCE_ORIGIN_GIT,
+        help="source binding mode (default: git_commit)",
+    )
     parser.add_argument(
         "--source-list",
         required=True,
@@ -67,7 +92,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--allow-dirty",
         action="store_true",
-        help="record a dirty tracked worktree instead of refusing",
+        help="tolerate a dirty tracked worktree (only valid with --source-origin worktree)",
     )
     parser.add_argument(
         "--dry-run", action="store_true", help="validate and compute hashes without writing files"
@@ -83,6 +108,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             diff_base_commit=args.diff_base,
             source_commit=args.source_commit,
             source_files=parse_source_list(args.source_list),
+            source_origin=args.source_origin,
             allow_dirty=args.allow_dirty,
             dry_run=args.dry_run,
         )

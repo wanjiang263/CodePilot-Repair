@@ -1,0 +1,204 @@
+{
+  "archive_root": "D:\\Projects\\Desktop\\CodePilot-Repair\\configs\\harness",
+  "baseline_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
+  "baseline_drift": [],
+  "files": [
+    {
+      "baseline_commit_sha256": "5022d5c949b4f8ee98f319ff4a55c473386ada3d4aabb96fd08faa26a29b29ff",
+      "bytes": 4697,
+      "path": "candidates/baseline-07625a8/candidate.json",
+      "sha256": "5022d5c949b4f8ee98f319ff4a55c473386ada3d4aabb96fd08faa26a29b29ff"
+    },
+    {
+      "baseline_commit_sha256": "fb589399e9c1743bf3cc2edca9fa8c0e46d195337f4f1548f42544afcae399cb",
+      "bytes": 2230,
+      "path": "candidates/baseline-07625a8/snapshot.json",
+      "sha256": "fb589399e9c1743bf3cc2edca9fa8c0e46d195337f4f1548f42544afcae399cb"
+    },
+    {
+      "baseline_commit_sha256": "3cf70d924aa104405f397699eab819d997e47579deb1747e930ee3d3e9151670",
+      "bytes": 640300,
+      "path": "candidates/baseline-07625a8/sources.json",
+      "sha256": "3cf70d924aa104405f397699eab819d997e47579deb1747e930ee3d3e9151670"
+    },
+    {
+      "baseline_commit_sha256": "a56ee924385b4f60bc4e8e6a7e9ff57f3505e569afdde41cc660cb261c31b820",
+      "bytes": 129852,
+      "path": "candidates/phase26-candidate-v1/candidate.diff",
+      "sha256": "a56ee924385b4f60bc4e8e6a7e9ff57f3505e569afdde41cc660cb261c31b820"
+    },
+    {
+      "baseline_commit_sha256": "5d261a8e855b6f6c184f5054326fe8165dc096db0088c14440b8a73deabe8a94",
+      "bytes": 5911,
+      "path": "candidates/phase26-candidate-v1/candidate.json",
+      "sha256": "5d261a8e855b6f6c184f5054326fe8165dc096db0088c14440b8a73deabe8a94"
+    },
+    {
+      "baseline_commit_sha256": "33e056f0586c4d4d4db3352a029beddee63eeed1261b40d88ca6926c3a4874bc",
+      "bytes": 6058,
+      "path": "candidates/phase26-candidate-v1/snapshot.json",
+      "sha256": "33e056f0586c4d4d4db3352a029beddee63eeed1261b40d88ca6926c3a4874bc"
+    },
+    {
+      "baseline_commit_sha256": "2c39994b2c005c36204ded1f826b51aabf9fbf2876307f79c7f3f7a860723256",
+      "bytes": 738223,
+      "path": "candidates/phase26-candidate-v1/sources.json",
+      "sha256": "2c39994b2c005c36204ded1f826b51aabf9fbf2876307f79c7f3f7a860723256"
+    },
+    {
+      "baseline_commit_sha256": "71fb63fb44f9be73e95eea7ce541472ca6956e98f918947b9821af9cec536424",
+      "bytes": 1002197,
+      "path": "candidates/phase26-candidate-v2/candidate.diff",
+      "sha256": "71fb63fb44f9be73e95eea7ce541472ca6956e98f918947b9821af9cec536424"
+    },
+    {
+      "baseline_commit_sha256": "f81e739f1325d92d07c6d9c20e5a336ee99755332a98420714ced079cd83a6e6",
+      "bytes": 11610,
+      "path": "candidates/phase26-candidate-v2/candidate.json",
+      "sha256": "f81e739f1325d92d07c6d9c20e5a336ee99755332a98420714ced079cd83a6e6"
+    },
+    {
+      "baseline_commit_sha256": "760037cb3df5a3eafcf845dfbaaae9ca266511e0c2d5c34531178863ba54c6ef",
+      "bytes": 3755,
+      "path": "candidates/phase26-candidate-v2/snapshot.json",
+      "sha256": "760037cb3df5a3eafcf845dfbaaae9ca266511e0c2d5c34531178863ba54c6ef"
+    },
+    {
+      "baseline_commit_sha256": "c5d56d737f50b43165f871dd858076b68f46a006b7bb134107e291112db269f4",
+      "bytes": 885024,
+      "path": "candidates/phase26-candidate-v2/sources.json",
+      "sha256": "c5d56d737f50b43165f871dd858076b68f46a006b7bb134107e291112db269f4"
+    },
+    {
+      "baseline_commit_sha256": "28ba2998a6a79ee8aeaa0b41d8c786b6c576eedd783d3195eea91d6f57c66528",
+      "bytes": 220619,
+      "path": "candidates/phase26-candidate-v3/candidate.diff",
+      "sha256": "28ba2998a6a79ee8aeaa0b41d8c786b6c576eedd783d3195eea91d6f57c66528"
+    },
+    {
+      "baseline_commit_sha256": "9b4f4137d22c77c156567bb3e5c397c4e1a0c660e99fa928414fa07c5445d252",
+      "bytes": 11610,
+      "path": "candidates/phase26-candidate-v3/candidate.json",
+      "sha256": "9b4f4137d22c77c156567bb3e5c397c4e1a0c660e99fa928414fa07c5445d252"
+    },
+    {
+      "baseline_commit_sha256": "309ced0e14d4bf4e43575a4f89952605cacb36062d93a3a1831d0d836b6dd18e",
+      "bytes": 3755,
+      "path": "candidates/phase26-candidate-v3/snapshot.json",
+      "sha256": "309ced0e14d4bf4e43575a4f89952605cacb36062d93a3a1831d0d836b6dd18e"
+    },
+    {
+      "baseline_commit_sha256": "21266345d93340befc2a43ecd85a5e0fd110cd17a9e893438bb1dde50156df74",
+      "bytes": 884718,
+      "path": "candidates/phase26-candidate-v3/sources.json",
+      "sha256": "21266345d93340befc2a43ecd85a5e0fd110cd17a9e893438bb1dde50156df74"
+    },
+    {
+      "baseline_commit_sha256": "5dd09b96288b1a36747027d7fb1cf84d929c1357f394d586ab4a8011ac3d992d",
+      "bytes": 298796,
+      "path": "candidates/phase26-candidate-v4/candidate.diff",
+      "sha256": "5dd09b96288b1a36747027d7fb1cf84d929c1357f394d586ab4a8011ac3d992d"
+    },
+    {
+      "baseline_commit_sha256": "9abc825a1013fbe1a9ee4391c084f350c40ebc33532bf80ea1d6c0144b61ecdd",
+      "bytes": 14179,
+      "path": "candidates/phase26-candidate-v4/candidate.json",
+      "sha256": "9abc825a1013fbe1a9ee4391c084f350c40ebc33532bf80ea1d6c0144b61ecdd"
+    },
+    {
+      "baseline_commit_sha256": "481681fffe1c1f5fcc8f2c0181ec3af0d37df6ac0926bc52cc222feebdba92ac",
+      "bytes": 3719,
+      "path": "candidates/phase26-candidate-v4/snapshot.json",
+      "sha256": "481681fffe1c1f5fcc8f2c0181ec3af0d37df6ac0926bc52cc222feebdba92ac"
+    },
+    {
+      "baseline_commit_sha256": "c8095879639469b615be6c0fa1536c295dbae8b61dbc724d7d8c996fd03ac1fc",
+      "bytes": 1043509,
+      "path": "candidates/phase26-candidate-v4/sources.json",
+      "sha256": "c8095879639469b615be6c0fa1536c295dbae8b61dbc724d7d8c996fd03ac1fc"
+    },
+    {
+      "baseline_commit_sha256": "b2d0cbfd8c9a8b88459bd36b6a16fea3fd55ac5dbe9839095a1c1614f6c69a52",
+      "bytes": 345172,
+      "path": "candidates/phase26-candidate-v5/candidate.diff",
+      "sha256": "b2d0cbfd8c9a8b88459bd36b6a16fea3fd55ac5dbe9839095a1c1614f6c69a52"
+    },
+    {
+      "baseline_commit_sha256": "36c70051c45c52f7526d7b99c59bc20c9c431c7cda24ddfd93fbeaeef21176d5",
+      "bytes": 14994,
+      "path": "candidates/phase26-candidate-v5/candidate.json",
+      "sha256": "36c70051c45c52f7526d7b99c59bc20c9c431c7cda24ddfd93fbeaeef21176d5"
+    },
+    {
+      "baseline_commit_sha256": "69b118a769255548edb2152f5a34994493049fe80eef7f3cbffbd572d3ea5753",
+      "bytes": 3635,
+      "path": "candidates/phase26-candidate-v5/snapshot.json",
+      "sha256": "69b118a769255548edb2152f5a34994493049fe80eef7f3cbffbd572d3ea5753"
+    },
+    {
+      "baseline_commit_sha256": "9701c28eb6203a0b765e9e1241dd614a0343fdcf2155120391c2390f4e8f0356",
+      "bytes": 1081584,
+      "path": "candidates/phase26-candidate-v5/sources.json",
+      "sha256": "9701c28eb6203a0b765e9e1241dd614a0343fdcf2155120391c2390f4e8f0356"
+    },
+    {
+      "baseline_commit_sha256": "59dc61ea0a7fec06eaadb4a15bb7389051979728ef4656ccd8672fb7ddade366",
+      "bytes": 29,
+      "path": "candidates/phase27-candidate-v1/.gitattributes",
+      "sha256": "59dc61ea0a7fec06eaadb4a15bb7389051979728ef4656ccd8672fb7ddade366"
+    },
+    {
+      "baseline_commit_sha256": "f8a35324b8baae39576cc198013827d808ca90c116f149b23fcac6dabf62a559",
+      "bytes": 68862,
+      "path": "candidates/phase27-candidate-v1/candidate.diff",
+      "sha256": "f8a35324b8baae39576cc198013827d808ca90c116f149b23fcac6dabf62a559"
+    },
+    {
+      "baseline_commit_sha256": "ca871a753eeee92dc0f2571a42e9e4ab44612502f49241b12112e1d7cb43cf96",
+      "bytes": 17428,
+      "path": "candidates/phase27-candidate-v1/candidate.json",
+      "sha256": "ca871a753eeee92dc0f2571a42e9e4ab44612502f49241b12112e1d7cb43cf96"
+    },
+    {
+      "baseline_commit_sha256": "6c4f26dbbfd6057f621ec35849f4aaa90ee78927df45c76ecf04bee1ffc2991e",
+      "bytes": 3719,
+      "path": "candidates/phase27-candidate-v1/snapshot.json",
+      "sha256": "6c4f26dbbfd6057f621ec35849f4aaa90ee78927df45c76ecf04bee1ffc2991e"
+    },
+    {
+      "baseline_commit_sha256": "eb835a1e95d7b6e2e710466bbcf6b8cdf0796b03a1d24fa16cbf7b1ae852d890",
+      "bytes": 1155085,
+      "path": "candidates/phase27-candidate-v1/sources.json",
+      "sha256": "eb835a1e95d7b6e2e710466bbcf6b8cdf0796b03a1d24fa16cbf7b1ae852d890"
+    },
+    {
+      "baseline_commit_sha256": null,
+      "bytes": 217204,
+      "path": "candidates/phase28-candidate-v2/candidate.diff",
+      "sha256": "f49713553d713fa199230f180f07a27a5f51414a58e2a64e212685db28d45da1"
+    },
+    {
+      "baseline_commit_sha256": null,
+      "bytes": 17779,
+      "path": "candidates/phase28-candidate-v2/candidate.json",
+      "sha256": "f45a5d4dfa804c3397130301d2c13044e4656bba874c34d09088c605e8c4ef7c"
+    },
+    {
+      "baseline_commit_sha256": null,
+      "bytes": 3719,
+      "path": "candidates/phase28-candidate-v2/snapshot.json",
+      "sha256": "d0fd3a5ac133637454c87a153aa78ae917204387c5cece0cd8f5c2f8d6de5155"
+    },
+    {
+      "baseline_commit_sha256": null,
+      "bytes": 1384822,
+      "path": "candidates/phase28-candidate-v2/sources.json",
+      "sha256": "a5922f26e973f208db2656bdacd368f0d5835c9ccaddbf572450d90f4bda019d"
+    }
+  ],
+  "generated_at_epoch": 1793382509,
+  "manifest_head": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+  "note": "Per-file SHA256 of every candidate file at freeze time; the verifier compares current bytes against this manifest (catches committed tampering that a git log -1 heuristic cannot see).",
+  "tool": "phase29_baseline_manifest",
+  "zero_change_since_baseline": true
+}

@@ -2,7 +2,7 @@
 
 本轮覆盖 L1 单元层与 L2 本地集成层，由 S6a 执行；L3 回归组由 S6b 并行执行、结果见文末占位节。验证对象为工作树中的 Phase28 实现（未提交）：新增 `src/codepilot/archive.py`、`scripts/phase28_archive.py`、`scripts/phase28_archive_verify.py`、`scripts/phase28_index_profile.py`，修改 `src/codepilot/repo/index.py`（`Indexer.__init__` 可选参数 `cache_max_entries=128` / `cache_max_bytes=8MiB`，默认行为不变），以及新单测 15+13+39+2 例。
 
-约束与执行环境：零真实模型请求、零外部网络（仅 127.0.0.1 回环）、零费用、不用 Docker；未修改生产代码，未执行任何 git commit/push，未使用 skip/xfail/放宽断言。机器为 Windows 11（build 10.0.22631，Python platform 报告 `Windows-11-10.0.22631-SP0`）+ Git Bash，Python 3.12.7（`.venv`），pytest 9.1.1，git 2.51.1.windows.1；用户重启后环境干净，无残留进程。本轮所有日志写入 `.codex-pytest-tmp/phase28/s6a-*`，与并行 S6b 的 `s6b-*` 互不覆盖。
+约束与执行环境：零真实模型请求、零外部网络（仅 127.0.0.1 回环）、零费用、不用 Docker；除上文列出的 Phase28 自身实现（新增 archive/verify/profile 三脚本与 archive.py、按需修改 `src/codepilot/repo/index.py`——含 S6a 期间追加的 `IndexScanIncompleteError` 分类修复，见下文"证伪'非本轮引起'"节）外，未修改其他生产代码；未执行任何 git commit/push，未使用 skip/xfail/放宽断言。机器为 Windows 11（build 10.0.22631，Python platform 报告 `Windows-11-10.0.22631-SP0`）+ Git Bash，Python 3.12.7（`.venv`），pytest 9.1.1，git 2.51.1.windows.1；用户重启后环境干净，无残留进程。本轮所有日志写入 `.codex-pytest-tmp/phase28/s6a-*`，与并行 S6b 的 `s6b-*` 互不覆盖。（Phase29 T08 注记：原句"未修改生产代码"未限定作用域，与同文件上文/下文的 index.py 修改记录矛盾，已按实际作用域改写，历史语义见 git 历史。）
 
 ## L1 单元层
 

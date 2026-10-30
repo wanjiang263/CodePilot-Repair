@@ -17,11 +17,16 @@ def extract_test_links(
     context: AnalysisContext,
     imports: ImportResolver | None = None,
     calls: tuple[GraphEdge, ...] | None = None,
+    only_paths: frozenset[str] | None = None,
 ) -> tuple[GraphEdge, ...]:
-    imports = imports or ImportResolver(context)
-    calls = extract_calls(context, imports) if calls is None else calls
+    imports = imports or ImportResolver(context, only_paths=only_paths)
+    calls = extract_calls(context, imports, only_paths=only_paths) if calls is None else calls
     tests = {s.id: s for s in context.symbols if s.kind in {"test_function", "test_method"}}
     production = {s.id: s for s in context.symbols if not is_test_path(s.path)}
+    if only_paths is not None:
+        # Incremental fast path: keep TEST rows of untouched test files as-is.
+        tests = {sid: s for sid, s in tests.items() if s.path in only_paths}
+        calls = tuple(call for call in calls if call.source_id in tests)
     links: dict[tuple[str, str], GraphEdge] = {}
 
     def add(test: Symbol, target: Symbol, confidence: Confidence, line: int) -> None:

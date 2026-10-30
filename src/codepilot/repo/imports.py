@@ -10,9 +10,21 @@ from codepilot.repo.parser import SyntaxNode
 
 
 class ImportResolver:
-    def __init__(self, context: AnalysisContext) -> None:
+    def __init__(self, context: AnalysisContext, only_paths: frozenset[str] | None = None) -> None:
+        """``only_paths`` restricts raw-binding *extraction* to those files.
+
+        Used by the incremental fast path (repo/index.py): a source outside the
+        set keeps its stored edges untouched. Resolution itself still sees the
+        full context, and a changed file's scope only ever consults its own
+        imports, so restricted extraction cannot change any kept row.
+        """
         self.context = context
-        self._raw = tuple(binding for file in context.files for binding in self._extract(file))
+        files = (
+            context.files
+            if only_paths is None
+            else tuple(file for file in context.files if file.path in only_paths)
+        )
+        self._raw = tuple(binding for file in files for binding in self._extract(file))
         self._raw_by_scope_name = _group_by_scope_name(self._raw)
         self.bindings = tuple(
             replace(binding, target_ids=tuple(s.id for s in self.targets(binding)))

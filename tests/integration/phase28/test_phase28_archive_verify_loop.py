@@ -155,7 +155,8 @@ def test_generated_candidates_verify_clean_with_parent_chain(tmp_path: Path) -> 
             "sources.json",
         ]
         record = json.loads((folder / "candidate.json").read_text(encoding="utf-8"))
-        assert record["schema_version"] == 2
+        assert record["schema_version"] == 3
+        assert record["source_origin"] == "git_commit"
         expected_base = commits["head1"] if version == V2 else commits["base"]
         assert record["diff_base_commit"] == expected_base
 
@@ -253,18 +254,20 @@ def test_archive_cli_dry_run_prints_json_and_writes_nothing(
         "",
         "--diff-base",
         "HEAD",
-        "--source-commit",
-        "HEAD",
         "--source-list",
         str(source_list),
         "--archive-root",
         str(archive_root),
+        # Phase29 契约：脏容忍必须显式声明 worktree 来源（dry-run 不落盘）。
+        "--source-origin",
+        "worktree",
         "--allow-dirty",
         "--dry-run",
     )
     assert completed.returncode == 0, completed.stderr.decode("utf-8", errors="replace")
     summary = json.loads(completed.stdout.decode("utf-8"))
     assert summary["dry_run"] is True
+    assert summary["source_origin"] == "worktree"
     assert summary["version"] == "phase28-s6-dryrun"
     assert summary["source_files"] == 1
     assert summary["snapshot_file_sha256"] and summary["diff_sha256"]

@@ -1,6 +1,8 @@
 # Phase28 S8 独立审计报告（对抗式复核，2026-10-31）
 
-审计角色：S8 独立审计员（只读复核，除本文件外未写/改/删任何仓库文件；零 git commit/push、零网络、零模型请求、零 Docker）。审计对象：源码提交 `51aae862f5c9cc45c9d467b2f92ae725d7af7be8`（HEAD，与声明一致）与候选 `configs/harness/candidates/phase28-candidate-v2/`（pending）。哈希复算脚本（一次性、未提交）：`.codex-pytest-tmp/phase28/s8/verify_hashes.py`（仅标准库 + 显式 sys.path 导入 codepilot.rsi；独立实现 LF 规范化与 canonical JSON，不复用生成器代码路径）。
+> **版本状态（Phase29 T08 注记）**：本文件同时承载三轮审计（首轮对象 `51aae862`、二轮 amend 复核、复审 R1 最终哈希 `770c0dc`）。正文中出现的首轮哈希（`51aae86…`、`2e224de6…`、`b182424a…`）与首轮逐节结论仅是历史记录，**一律以标注 `round3_770c0dc_current` 的最终候选为准**；首轮与二轮的差异条目（D1、N1/N2）已按 §R6 复审关闭，本文最终态以复审章节（R1–R6）为准。
+
+审计角色：S8 独立审计员（只读复核，除本文件外未写/改/删任何仓库文件；零 git commit/push、零网络、零模型请求、零 Docker）。审计对象：源码提交 `51aae862f5c9cc45c9d467b2f92ae725d7af7be8`（首轮 HEAD，后经两轮 amend 演进为最终 `770c0dce6bbaa383f86917ec2d74fd085296eedb`，见 §R6）与候选 `configs/harness/candidates/phase28-candidate-v2/`（pending）。哈希复算脚本（一次性、未提交）：`.codex-pytest-tmp/phase28/s8/verify_hashes.py`（仅标准库 + 显式 sys.path 导入 codepilot.rsi；独立实现 LF 规范化与 canonical JSON，不复用生成器代码路径）。
 
 结论速览：8 项审计中 7 项无差异；发现 1 项内容保真差异（D1：v2 snapshot `prompts={}` 与 v1 非空 prompts 不一致，且文档未披露该结果）与 1 项文档口径差异（D2：Windows 10/11 标注矛盾）；另 2 项清单数字（"1073 去重"、"110"）在交付文档中不存在对应声明（N1/N2，非矛盾）。三个声明哈希、75 文件双哈希、diff 反向应用、历史候选未动、active 指针、测试断言真实性、边界措辞均实测通过。
 
@@ -146,7 +148,7 @@ D1 修复后候选第三次重生成，源码提交经第二轮 amend 为 `770c0
 
 ## R6. 复审差异清单
 
-无新差异。首轮 D1 已关闭（数据、代码、测试、文档四层一致）；D2（Windows 10/11 标注）本轮未见修正、维持首轮定性（文档口径问题，不影响哈希/测试/结论）；O1（旧路径日志注记）不变。
+无新差异。首轮 D1 已关闭（数据、代码、测试、文档四层一致）；D2（Windows 10/11 标注）本轮未见修正、维持首轮定性（文档口径问题，不影响哈希/测试/结论）——首轮该表述仅对当时字节有效（见文首版本状态注记），最终以 R1 复核的 `770c0dc` 候选为准；O1（旧路径日志注记）不变。
 
 ## 复审覆盖与限制
 

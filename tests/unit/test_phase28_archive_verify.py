@@ -138,9 +138,11 @@ def failed_checks(entry: dict[str, Any]) -> list[str]:
     return [check["check"] for check in entry["failures"]]
 
 
-def test_generated_v2_archive_passes_every_rule(
+def test_generated_v3_archive_passes_every_rule(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """The single generation path now emits v3; git_commit mode reads the commit,
+    so no raw_worktree_hashes claim exists and later worktree drift is ignored."""
     repo, base, head = build_repo(tmp_path)
     root = tmp_path / "archive"
     generate(root, repo, "phase28-t-ok", base, head)
@@ -152,6 +154,7 @@ def test_generated_v2_archive_passes_every_rule(
     entry = entry_for(report, "phase28-t-ok")
     assert entry["archive_class"] == "new" and entry["ok"] is True
     assert entry["failures"] == [] and entry["raw_drift"] == {}
+    assert entry["schema_version"] == 3
     check_names = {check["check"] for check in entry["checks"]}
     assert check_names >= {
         "version_matches_directory",
@@ -159,18 +162,94 @@ def test_generated_v2_archive_passes_every_rule(
         "snapshot_ref_fixed",
         "snapshot_file_sha256",
         "snapshot_canonical_sha256",
+        "candidate_payload_sha256",
+        "source_origin_declared",
+        "source_commit_resolves",
+        "source_commit_ancestor",
+        "source_commit_blob",
+        "base_commit_blob",
         "diff_sha256",
+        "diff_forward_apply",
         "diff_reverse_apply",
         "source_hashes",
         "source_files_count",
-        "raw_worktree_hashes",
         "not_active",
     }
+    assert "raw_worktree_hashes" not in check_names
     assert report["totals"]["new_archive_failures"] == 0
     assert report["new_archive_status"] == "passed"
     # The verifier is read-only: no active pointer may ever appear.
     assert not (root / "active.json").exists()
     assert not (root / "active.next.json").exists()
+
+
+def test_v2_schema_archive_still_verified(tmp_path: Path) -> None:
+    """Hand-built schema-v2 candidate (the phase28-candidate-v2 shape) must keep
+    passing the preserved v2 rule set: raw worktree hashes checked against the
+    current worktree, no v3 blob/ancestor machinery."""
+    repo, base, head = build_repo(tmp_path)
+    root = tmp_path / "archive"
+    folder = root / "candidates" / "phase28-t-v2hand"
+    folder.mkdir(parents=True)
+    snapshot = {"schema_version": 1, "version": "phase28-t-v2hand", "status": "pending"}
+    (folder / "snapshot.json").write_bytes(
+        (json.dumps(snapshot, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    )
+    sources = {"src/feature.py": FEATURE_V2}
+    (folder / "sources.json").write_bytes(
+        (json.dumps(sources, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    )
+    (folder / "candidate.diff").write_bytes(b"")  # empty diff: reverse apply is trivial
+    candidate = {
+        "schema_version": 2,
+        "version": "phase28-t-v2hand",
+        "parent": None,
+        "status": "pending",
+        "created_from": "phase28_archive",
+        "snapshot_ref": "snapshot.json",
+        "snapshot_hash_rule": "file_bytes_sha256",
+        "snapshot_file_sha256": hashlib.sha256((folder / "snapshot.json").read_bytes()).hexdigest(),
+        "snapshot_canonical_sha256": hashlib.sha256(
+            json.dumps(snapshot, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        ).hexdigest(),
+        "diff_base_commit": base,
+        "source_commit": head,
+        "diff_sha256": hashlib.sha256(b"").hexdigest(),
+        "source_hashes": {"src/feature.py": hashlib.sha256(FEATURE_V2.encode("utf-8")).hexdigest()},
+        "raw_worktree_hashes": {
+            "src/feature.py": hashlib.sha256((repo / "src/feature.py").read_bytes()).hexdigest()
+        },
+        "source_files": 1,
+        "parent_integrity": None,
+        "dirty_worktree": False,
+    }
+    (folder / "candidate.json").write_bytes(
+        (json.dumps(candidate, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    )
+    cli = load_cli_module()
+    exit_code, report = verify(
+        cli, tmp_path, version="phase28-t-v2hand", archive_root=root, repo=repo
+    )
+    assert exit_code == 0, report
+    entry = entry_for(report, "phase28-t-v2hand")
+    assert entry["schema_version"] == 2 and entry["ok"] is True
+    check_names = {check["check"] for check in entry["checks"]}
+    assert "raw_worktree_hashes" in check_names
+    assert "source_commit_blob" not in check_names
+
+    # Worktree drift still fails the v2 raw-hash rule (unlike v3 git_commit mode).
+    write_file(repo, "src/feature.py", "def feature() -> int:\n    return 777\n")
+    exit_code, report = verify(
+        cli,
+        tmp_path,
+        version="phase28-t-v2hand",
+        archive_root=root,
+        repo=repo,
+        json_name="report-drift.json",
+    )
+    assert exit_code == 1
+    assert "raw_worktree_hashes" in failed_checks(entry_for(report, "phase28-t-v2hand"))
+    git(repo, "checkout", "--", "src/feature.py")
 
 
 def test_tampered_snapshot_fails_file_and_canonical_rules(
@@ -223,9 +302,18 @@ def test_tampered_diff_fails_hash_and_reverse_apply(
 def test_worktree_change_breaks_reverse_apply_and_raw_hashes(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    repo, base, head = build_repo(tmp_path)
+    """Worktree-mode candidates bind content to the worktree, so drift after
+    archival must fail both the raw-hash rule and the reverse apply."""
+    repo, base, _head = build_repo(tmp_path)
     root = tmp_path / "archive"
-    generate(root, repo, "phase28-t-work", base, head)
+    create_candidate(
+        root,
+        repo,
+        version="phase28-t-work",
+        diff_base_commit=base,
+        source_files=list(SOURCE_PATHS),
+        source_origin="worktree",
+    )
     write_file(repo, "docs/note.md", NOTE_V2 + "extra line after archival\n")
     cli = load_cli_module()
 
@@ -243,15 +331,23 @@ def test_worktree_change_breaks_reverse_apply_and_raw_hashes(
     assert entry["raw_drift"]["docs/note.md"] != recorded
     assert len(entry["raw_drift"]["docs/note.md"]) == 64
     assert entry["raw_drift_ignored"] is False
+    git(repo, "checkout", "--", "docs/note.md")
 
 
 def test_raw_drift_is_ignorable_only_with_explicit_flag(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    repo, _, head = build_repo(tmp_path)
+    repo, _base, head = build_repo(tmp_path)
     root = tmp_path / "archive"
     # diff_base == worktree state: empty diff, so reverse-apply stays trivially fine.
-    generate(root, repo, "phase28-t-drift", head, head)
+    create_candidate(
+        root,
+        repo,
+        version="phase28-t-drift",
+        diff_base_commit=head,
+        source_files=list(SOURCE_PATHS),
+        source_origin="worktree",
+    )
     write_file(repo, "docs/note.md", "drifted after archival\n")
     cli = load_cli_module()
 
@@ -278,6 +374,7 @@ def test_raw_drift_is_ignorable_only_with_explicit_flag(
     assert "docs/note.md" in entry["raw_drift"]
     assert failed_checks(entry) == []
     assert report["new_archive_status"] == "passed"
+    git(repo, "checkout", "--", "docs/note.md")
 
 
 def test_missing_source_entry_and_worktree_file_fail(
@@ -300,18 +397,26 @@ def test_missing_source_entry_and_worktree_file_fail(
     entry = entry_for(report, "phase28-t-src")
     assert set(failed_checks(entry)) >= {"source_hashes", "source_files_count"}
 
+    # The worktree-drift half now needs an explicit worktree-mode candidate.
+    create_candidate(
+        root,
+        repo,
+        version="phase28-t-src-wt",
+        diff_base_commit=base,
+        source_files=list(SOURCE_PATHS),
+        source_origin="worktree",
+    )
     (repo / "src" / "feature.py").unlink()
     exit_code, report = verify(
         cli,
         tmp_path,
-        version="phase28-t-src",
+        version="phase28-t-src-wt",
         archive_root=root,
         repo=repo,
         json_name="report-deleted.json",
     )
-    capsys.readouterr()
     assert exit_code == 1
-    entry = entry_for(report, "phase28-t-src")
+    entry = entry_for(report, "phase28-t-src-wt")
     assert "raw_worktree_hashes" in failed_checks(entry)
     assert entry["raw_drift"]["src/feature.py"] == "missing from worktree"
 

@@ -15,7 +15,14 @@ from codepilot.agents.exploration import ExplorationProgress
 from codepilot.api.runtime_view import activity_view
 from codepilot.observability.events import EventSink
 from codepilot.observability.lifecycle import Lifecycle
-from codepilot.rsi import archive_candidate, load_selection, replay, select, validate_snapshot
+from codepilot.rsi import (
+    archive_candidate,
+    load_selection,
+    replay,
+    select,
+    validate_snapshot,
+    version_dir,
+)
 from codepilot.sandbox.env_spec import EnvSpec
 from codepilot.schemas.plan import ContractItem, RepairPlan
 from codepilot.tools.base import WorkspacePathPolicy
@@ -148,15 +155,29 @@ def test_observer_cannot_mutate_state_and_failure_does_not_block_next(tmp_path: 
 
 
 def test_offline_candidate_never_promotes_and_selection_is_explicit(tmp_path: Path) -> None:
-    proposal = {
-        "parent": None,
-        "hypothesis": "reduce repeated reads",
-        "input_evidence": ["public-issue"],
-        "candidate_changes": "query dedup",
-        "code_revision": "test-only",
-    }
-    archive_candidate(tmp_path, "parent", proposal)
-    archive_candidate(tmp_path, "child", {**proposal, "parent": "parent"})
+    def freeze(version: str, parent: str | None) -> None:
+        """Phase29 (I3): build the snapshot fixture directly — the v1 archive
+        entry can no longer generate candidates."""
+        snapshot = validate_snapshot(
+            {
+                "schema_version": 1,
+                "version": version,
+                "parent": parent,
+                "status": "pending",
+                "instruction": "",
+                "prompts": {},
+                "experiences": [],
+            },
+            tmp_path,
+        )
+        folder = version_dir(tmp_path, version)
+        folder.mkdir(parents=True, exist_ok=False)
+        (folder / "snapshot.json").write_text(
+            json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+
+    freeze("parent", None)
+    freeze("child", "parent")
     assert not (tmp_path / "active.json").exists()
     with pytest.raises(ValueError, match="allow-pending"):
         select(tmp_path, "child")
@@ -165,8 +186,12 @@ def test_offline_candidate_never_promotes_and_selection_is_explicit(tmp_path: Pa
     assert selected["parent"] == "parent" and selected["status"] == "pending"
     select(tmp_path, selected["parent"], allow_pending=True)
     assert load_selection(tmp_path)["version"] == "parent"
+    # Phase29: the retired v1 entry can neither deliver a candidate nor be used
+    # to test overwrite semantics; duplicates fail at the version directory.
+    with pytest.raises(ValueError, match="retired"):
+        archive_candidate(tmp_path, "parent", {})
     with pytest.raises(FileExistsError):
-        archive_candidate(tmp_path, "parent", proposal)
+        freeze("parent", None)
 
 
 def test_l3_cannot_be_created_without_comparison_or_with_hidden_evidence() -> None:
