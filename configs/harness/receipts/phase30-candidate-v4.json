@@ -11,6 +11,7 @@
     "sources.json": "705b9e57f3ff0e336a4a507a843f02db422d1a70b56bff724670285582c15fdb"
   },
   "candidate_tree_sha256": "8f452b7702fd85eb327e4ccd7131ca1a5decba21692f8d9a3214ab4b126e3f69",
-  "historical_manifest_sha256": "526628dc15eb59b11014ae3ae85725ddd4817c29e16a88777796cba6e28a0b73",
-  "created_at": "2026-10-31T07:24:45+00:00"
+  "historical_manifest_sha256": "5ec24891a9dc02c656c78d0fa7b28b0e0167e23f12b43d1a1313151231d184e2",
+  "created_at": "2026-10-31T07:24:45+00:00",
+  "correction_note": "255f13c pinned the pre-LF-normalization manifest bytes; this commit re-pins the manifest exactly as committed (LF normalized). witness sha changes with it."
 }
