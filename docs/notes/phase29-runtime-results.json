@@ -12,8 +12,8 @@
     "source_commit_message": "feat: bind candidate archive to git sources and bound incremental edge rebuild",
     "source_commit_files": 26,
     "source_commit_stat": "+5554/-1698",
-    "docs_commit": "PENDING_T18",
-    "receipt_commit": "PENDING_T18"
+    "docs_commit": "3c57bc13daa09ec34fe2ce1f05551354642c09d0",
+    "receipt_commit": "6f023fa304d47b71d42c9066cc1b30daff7759fd"
   },
   "issues_status": {
     "I1_source_commit_binding": {
@@ -40,19 +40,27 @@
     "I3_legacy_v1_path": {
       "status": "closed",
       "fix": "rsi.archive_candidate 硬失败（ValueError 指向新入口）；rsi CLI 删除 archive 子命令；phase26 测试改为直写 snapshot 夹具 + retired 断言",
-      "evidence": ["tests/unit/test_phase26_harness.py 等 34 组通过", "grep 无残余调用点"],
+      "evidence": [
+        "tests/unit/test_phase26_harness.py 等 34 组通过",
+        "grep 无残余调用点"
+      ],
       "remaining_limits": "rsi.archive_candidate 名字保留为硬失败 stub，防旧调用静默降级"
     },
     "I4_negative_tests": {
       "status": "closed",
       "fix": "20 条对抗用例（5 生成器拦截 + 15 校验器篡改矩阵），逐条断言具体检查名并含 forbidden 断言；无 skip/xfail/弱化",
-      "evidence": ["tests/unit/test_phase29_archive_security.py 20 passed in 61.26s"],
+      "evidence": [
+        "tests/unit/test_phase29_archive_security.py 20 passed in 61.26s"
+      ],
       "remaining_limits": []
     },
     "I5_docs_audit_static": {
       "status": "closed",
       "fix": "phase28-validation.md '未修改生产代码'按作用域改写；independent-review.md 首轮标 superseded；交付回执（receipt commit）解决 final_docs_commit_id=null；AST 检查脚本（939 文件）",
-      "evidence": ["docs/notes/phase29-static-checks.json", "docs/notes/phase29-delivery-receipt.json (T18)"],
+      "evidence": [
+        "docs/notes/phase29-static-checks.json",
+        "docs/notes/phase29-delivery-receipt.json (T18)"
+      ],
       "remaining_limits": "ruff format 6 个历史遗留文件未重排（非本轮范围）"
     },
     "I6_release_index_cleanup": {
@@ -136,7 +144,11 @@
     "semantic_equivalence": {
       "baseline_digest": "e04648d890e1be07c40f520ed2f281b04406f213753951a8b2de88d7df999145",
       "variant_digest": "0cf958ab8e4346a09740f08575f97186aafe7e576e01638c0aa175f68a498907",
-      "rows": {"files": 452, "symbols": 3234, "edges": 9581},
+      "rows": {
+        "files": 452,
+        "symbols": 3234,
+        "edges": 9581
+      },
       "note": "T10 优化后两 digest 与 T09 基线逐字节一致 = dump_index 逐字段等价"
     },
     "scope_limit": "结论仅针对本轮合成仓库（450/2500 文件），不外推大型真实仓库"
@@ -145,11 +157,31 @@
     "rows_verified_local": 19,
     "cases_total": 46,
     "three_consecutive_runs": [
-      {"run": 1, "exit_code": 0, "result": "46 passed in 49.45s", "log": ".codex-pytest-tmp/phase29/http-matrix-run1.log"},
-      {"run": 2, "exit_code": 0, "result": "46 passed in 54.38s", "log": ".codex-pytest-tmp/phase29/http-matrix-run2.log"},
-      {"run": 3, "exit_code": 0, "result": "46 passed in 66.94s", "log": ".codex-pytest-tmp/phase29/http-matrix-run3.log"}
+      {
+        "run": 1,
+        "exit_code": 0,
+        "result": "46 passed in 49.45s",
+        "log": ".codex-pytest-tmp/phase29/http-matrix-run1.log"
+      },
+      {
+        "run": 2,
+        "exit_code": 0,
+        "result": "46 passed in 54.38s",
+        "log": ".codex-pytest-tmp/phase29/http-matrix-run2.log"
+      },
+      {
+        "run": 3,
+        "exit_code": 0,
+        "result": "46 passed in 66.94s",
+        "log": ".codex-pytest-tmp/phase29/http-matrix-run3.log"
+      }
     ],
-    "unverified": ["真实 provider 端到端", "Bedrock deadline/取消", "TLS/代理 CONNECT", "池化取消"],
+    "unverified": [
+      "真实 provider 端到端",
+      "Bedrock deadline/取消",
+      "TLS/代理 CONNECT",
+      "池化取消"
+    ],
     "live_gate": "未执行（无用户预算与授权）"
   },
   "page_e2e": {
@@ -167,7 +199,9 @@
     "deleted": 0,
     "classified_untracked": 183,
     "user_evidence_preserved": true,
-    "gitignore_added": [".playwright-mcp/"],
+    "gitignore_added": [
+      ".playwright-mcp/"
+    ],
     "doc": "docs/notes/phase29-cleanup.md"
   },
   "candidate": {
@@ -186,7 +220,7 @@
     "checks_passed": 19,
     "active_pointer": false
   },
-  "final_docs_commit_id": "PENDING_T18_SEE_RECEIPT",
+  "final_docs_commit_id": "3c57bc13daa09ec34fe2ce1f05551354642c09d0",
   "final_docs_commit_id_note": "由第三笔交付回执提交（docs/notes/phase29-delivery-receipt.json）以非空机器可读形式记录全部提交哈希",
   "guardrails": {
     "real_model_requests": 0,
@@ -197,5 +231,12 @@
     "docker_run": false,
     "skipped_tests": 0,
     "xfail_tests": 0
+  },
+  "corrected_in_phase30": {
+    "doc": "docs/notes/phase29-corrections.md",
+    "items": [
+      "C2"
+    ],
+    "note": "PENDING_T18 placeholders filled with the real commit hashes on 2026-10-31"
   }
 }

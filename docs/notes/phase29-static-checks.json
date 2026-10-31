@@ -28,9 +28,11 @@
       "scripts/batch_budget.py",
       "scripts/recovery_admin.py",
       "tests/graph/test_phase19_static_reliability.py",
-      "tests/unit/llm/test_phase19_budget_binding.py"
+      "tests/unit/graph/test_phase19_checkpoint_identity.py",
+      "tests/unit/llm/test_phase19_budget_binding.py",
+      "tests/unit/tools/test_phase19_repro_permissions.py"
     ],
-    "note": "6 文件待重排全部为 Phase19/早期遗留（含 2 个文件多处），不属本轮触碰范围，按'不做无关重构'约束保留原样并如实记录"
+    "note": "6 文件待重排全部为 Phase19/早期遗留（原记录漏列 2 个 phase19 测试文件，2026-10-31 复核补全，见 docs/notes/phase29-corrections.md C4）；不属本轮触碰范围，按'不做无关重构'约束保留原样并如实记录"
   },
   "mypy": {
     "command": ".venv/Scripts/python.exe -m mypy src/codepilot/archive.py src/codepilot/rsi.py src/codepilot/repo/index.py src/codepilot/repo/imports.py src/codepilot/repo/calls.py src/codepilot/repo/edges.py src/codepilot/repo/test_links.py src/codepilot/retrieval/runner.py",
@@ -58,5 +60,11 @@
     "command": "git diff | grep -iE 'sk-|api_key.*=.*[16-char literal]|password|BEGIN (RSA|OPENSSH)' 与 print(/breakpoint()/pdb 扫描",
     "findings": "无真实凭据；测试中密钥均为 test-key-not-real 显式假值；无调试残留",
     "exit_code": 0
+  },
+  "corrected_in_phase30": {
+    "doc": "docs/notes/phase29-corrections.md",
+    "items": [
+      "C4"
+    ]
   }
 }

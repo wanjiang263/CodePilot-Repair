@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "candidate": "phase30-candidate-v4",
+  "candidate_commit": "ffa97d983e35618443b6c79d22bccdb6fa96fa79",
+  "source_commit": "8e1f1f47467427b97aa9e02c076e803500d9f102",
+  "diff_base": "b17019beb817b92b1fbb3da879774a231d69219d",
+  "candidate_files": {
+    "candidate.diff": "dbfdc9996999c27af3ff406d2c68b8063917763ef8e839f077cbc47de17efdbd",
+    "candidate.json": "b8465cc5dd1e6030c2a362100ca7ea7994ef3a21c6d4df4e28d02519fa054a61",
+    "snapshot.json": "55afb0baedfb1210d0b1334a84dbaa267e67a20decae2cb4b48259c61e1814ac",
+    "sources.json": "705b9e57f3ff0e336a4a507a843f02db422d1a70b56bff724670285582c15fdb"
+  },
+  "candidate_tree_sha256": "8f452b7702fd85eb327e4ccd7131ca1a5decba21692f8d9a3214ab4b126e3f69",
+  "historical_manifest_sha256": "526628dc15eb59b11014ae3ae85725ddd4817c29e16a88777796cba6e28a0b73",
+  "created_at": "2026-10-31T07:24:45+00:00"
+}

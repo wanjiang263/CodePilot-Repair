@@ -166,3 +166,13 @@ mypy 8 生产文件过；tsc/eslint 过；`git diff --check` 干净（中途修�
 2. 若要验证 4 项 unverified HTTP 边界：需要用户给出 Live Gate 预算与授权（每 provider 最多 1 次最小请求）。
 3. 若要修复 tests/graph 16 例历史失败：需要独立轮次定位（本轮已证明与本轮改动无关）。
 4. 大型真实仓库的性能验证需要 test50/test300 级授权环境（本轮约束禁用）。
+
+## 15. Post-review correction（2026-10-31，Phase30 T09 追加）
+
+Phase30 复核发现本报告及配套交付物存在占位与口径问题，修正见
+[phase29-corrections.md](phase29-corrections.md)。要点：裸 `verify --all` 退出 1
+（需 `--ignore-raw-drift`，§10 未写明）；runtime-results 的 PENDING_T18 已填真实
+哈希；delivery-receipt 的 `receipt_commit="SELF"` 实为 `6f023fa`；未格式化文件
+实际 6 个（原清单漏 2）；v3 空 snapshot/26 文件子集不可激活，由
+phase30-candidate-v4 取代（superseded）；B2 组 16 例历史失败已在 Phase30 全量
+基线复跑并入档 `phase30-known-failures.json`。本节为追加，不改写上文原始结论。
