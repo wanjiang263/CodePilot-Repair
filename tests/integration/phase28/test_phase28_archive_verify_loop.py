@@ -262,6 +262,10 @@ def test_archive_cli_dry_run_prints_json_and_writes_nothing(
         "--source-origin",
         "worktree",
         "--allow-dirty",
+        # 本测试固化的是 v3 记录布局；Phase30 起 CLI 默认生成 v4（其 full
+        # manifest 会拒绝无 agent 源的源集，见下方默认行为测试）。
+        "--schema-version",
+        "3",
         "--dry-run",
     )
     assert completed.returncode == 0, completed.stderr.decode("utf-8", errors="replace")
@@ -273,4 +277,47 @@ def test_archive_cli_dry_run_prints_json_and_writes_nothing(
     assert summary["snapshot_file_sha256"] and summary["diff_sha256"]
     assert summary["directory"] == str(archive_root / "candidates" / "phase28-s6-dryrun")
     # --dry-run 绝不落盘：档案根里连 candidates/ 目录都不该出现。
+    assert not archive_root.exists()
+
+
+def test_archive_cli_defaults_to_v4_and_rejects_incomplete_full_set(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Phase30 默认：CLI 不带 --schema-version 生成 v4；full manifest 拒绝缺
+    agent 源的源集（v3 的"只归档变更文件"缺陷必须被拒绝）。"""
+    import subprocess
+    import sys
+
+    archive_root = tmp_path / "v4-default-archive"
+    source_list = tmp_path / "sources-v4.json"
+    source_list.write_text(json.dumps(["README.md"]), encoding="utf-8")
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(ARCHIVE_SCRIPT),
+            "--version",
+            "phase30-dryrun-v4",
+            "--parent",
+            "",
+            "--diff-base",
+            "HEAD",
+            "--source-list",
+            str(source_list),
+            "--archive-root",
+            str(archive_root),
+            # worktree 模式：与真实仓库的 git 状态解耦（dry-run 本就不落盘）。
+            "--source-origin",
+            "worktree",
+            "--allow-dirty",
+            # 不带 --schema-version：Phase30 起 CLI 默认生成 v4。
+            "--dry-run",
+        ],
+        capture_output=True,
+        check=False,
+    )
+    assert completed.returncode == 1, completed.stderr.decode("utf-8", errors="replace")
+    error = json.loads(completed.stderr.decode("utf-8", errors="replace"))
+    assert error["error_type"] == "IncompleteSourceManifestError"
+    assert "agents/coder.py" in error["error"]
+    # 拒绝路径同样零落盘。
     assert not archive_root.exists()
