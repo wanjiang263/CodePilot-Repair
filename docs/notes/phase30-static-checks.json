@@ -1,0 +1,69 @@
+{
+  "tool": "phase30_static_checks",
+  "generated_at": "2026-10-31",
+  "scope_note": "covers every file touched this round plus repo-wide sweeps where stated",
+  "ast_check": {
+    "command": ".venv/Scripts/python.exe scripts/phase29_ast_check.py --json .codex-pytest-tmp/phase30/ast-check.json",
+    "exit_code": 0,
+    "files_checked": 952,
+    "functions": 8285,
+    "classes": 920,
+    "imports": 6856,
+    "exclusions": [
+      "tests/fixtures/failures/sources/syntax/test_case.py",
+      "tests/fixtures/repos/mini_calc/calc/broken.py"
+    ],
+    "exclusion_reason": "故意损坏的测试夹具（索引器/失败收集器错误路径用），必须保持不可解析"
+  },
+  "ruff_check": {
+    "command": ".venv/Scripts/python.exe -m ruff check src/ scripts/ tests/",
+    "exit_code": 0,
+    "note": "本轮 11 个触碰文件首跑 11 处违规，逐项修复后仓库全范围 0 违规"
+  },
+  "ruff_format": {
+    "command": ".venv/Scripts/python.exe -m ruff format --check <touched files>",
+    "exit_code": 0,
+    "touched_files_formatted": true,
+    "pre_existing_unformatted": [
+      "scripts/batch_budget.py",
+      "scripts/recovery_admin.py",
+      "tests/graph/test_phase19_static_reliability.py",
+      "tests/unit/graph/test_phase19_checkpoint_identity.py",
+      "tests/unit/llm/test_phase19_budget_binding.py",
+      "tests/unit/tools/test_phase19_repro_permissions.py"
+    ],
+    "note": "仓库级遗留 6 文件未重排（清单与 phase29-corrections.md C4 一致；Phase29 原记录漏列 2 个）；本轮触碰文件 0 未格式化；按'不做无关重构'约束保留"
+  },
+  "mypy": {
+    "command": ".venv/Scripts/python.exe -m mypy src/codepilot/archive.py src/codepilot/rsi.py src/codepilot/repo/index.py src/codepilot/repo/imports.py src/codepilot/repo/calls.py src/codepilot/repo/edges.py src/codepilot/repo/test_links.py src/codepilot/retrieval/runner.py src/codepilot/graph/harness.py",
+    "exit_code": 0,
+    "files_checked": 9,
+    "note": "Phase29 的 8 文件集合 + 本轮触碰的 graph/harness.py；修复 2 处 receipt 校验器的 mypy 推断问题"
+  },
+  "frontend": {
+    "typecheck": {"command": "cd web && npm run typecheck", "exit_code": 0},
+    "eslint": {"command": "cd web && npm run lint", "exit_code": 0},
+    "trigger": "web diff 6f023fa..HEAD -- web = 0 files；检查为条件性确认（无 UI 变更），页面 E2E 条件跳过"
+  },
+  "git_diff_check": {
+    "command": "git diff --check",
+    "exit_code": 0,
+    "note": "中途发现 harness.py 及 manifest/回执/修正文档被 Windows 工具写成 CRLF，全部 LF 归一后复检干净；回执因此重钉 manifest 字节（c939cbc，如实在案）"
+  },
+  "crlf_audit": {
+    "command": "byte-level \\r\\n scan over all 17 round-touched files",
+    "result": "all LF"
+  },
+  "credential_and_debug_scan": {
+    "command": "git diff 6f023fa..HEAD | grep -iE 'sk-|api_key=|BEGIN (RSA|OPENSSH|EC) PRIVATE|password=' + print(/breakpoint()/pdb scan",
+    "findings": "唯一命中为字面子串 'sk-specific'（'risk-specific'，位于候选 sources.json 归档的测试夹具内容内），非凭据；无真实凭据；8 处新增 print() 均为 CLI 工具（校验器/剖析脚本）的正常输出；无断点/pdb 残留",
+    "exit_code": 0
+  },
+  "archive_verifier": {
+    "command": ".venv/Scripts/python.exe scripts/phase28_archive_verify.py --all --ignore-raw-drift --receipt configs/harness/receipts/phase30-candidate-v4.json --expect-receipt b9a24285bd0056da5a2aa20c3dab39516ea16a4c6186e16b27f973ed99d02c7d",
+    "exit_code": 0,
+    "witness": "verified",
+    "historical_integrity": "ok",
+    "note": "裸跑（无 --ignore-raw-drift）exit 1：v2 raw_worktree_hashes 工作区漂移 10 文件，与 phase29-corrections.md C1 口径一致"
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "tool": "phase30_known_failures",
+  "generated_at": "2026-10-31",
+  "method": {
+    "baseline": "plain copy of the repo at 38e395a (.codex-pytest-tmp/phase29/baseline-38e395a, PYTHONPATH pinned to its own src)",
+    "head": "working tree at c939cbc (same venv, -p no:cacheprovider, -m 'not docker and not llm')",
+    "result": "identical 16 failures on both sides; none introduced or fixed by Phase30",
+    "counts": "baseline: 16 failed / 13 passed; head: 16 failed / 13 passed (same selection includes passing siblings)"
+  },
+  "failures": [
+    {
+      "nodeid": "tests/graph/test_path_sandbox_error.py::test_collection_error_still_enters_the_diagnosis_path",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: assert 'diagnose' in ['understand_issue', 'retrieve', 'localize', 'analyze_impact', 'build_env', 'reproduce', ...] | +  where 'diagnose' = <Node.DIAGNOSE: 'diagnose'>.value",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase11_closure.py::test_a_crashed_coding_stage_leaves_no_stale_reservation",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: purpose='coder_relocalize' 没有脚本回复了（已调用 purpose 序列=['localizer_files', 'localizer_symbols', 'planner', 'planner', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder_relocalize']）。补足脚本，或让测试显式断言这一步不该发生。",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase11_closure.py::test_a_hard_budget_stop_is_never_masked_by_the_local_tool_cap",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: purpose='coder_relocalize' 没有脚本回复了（已调用 purpose 序列=['localizer_files', 'localizer_symbols', 'planner', 'planner', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder_relocalize']）。补足脚本，或让测试显式断言这一步不该发生。",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase11_closure.py::test_a_patch_in_hand_keeps_the_graph_on_the_verification_path",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: purpose='coder_relocalize' 没有脚本回复了（已调用 purpose 序列=['localizer_files', 'localizer_symbols', 'planner', 'planner', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder_relocalize']）。补足脚本，或让测试显式断言这一步不该发生。",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase11_closure.py::test_a_review_blocked_by_its_own_budget_records_the_stage_as_unexecuted",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "failure section not found in log",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase11_closure.py::test_a_reviewer_behind_a_decorator_is_booked_exactly_once",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: purpose='coder_relocalize' 没有脚本回复了（已调用 purpose 序列=['localizer_files', 'localizer_symbols', 'planner', 'planner', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder_relocalize']）。补足脚本，或让测试显式断言这一步不该发生。 | AssertionError: assert (None is not None)",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase11_closure.py::test_closure_reservation_blocks_the_coding_dispatch_before_any_spend",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: purpose='coder_relocalize' 没有脚本回复了（已调用 purpose 序列=['localizer_files', 'localizer_symbols', 'planner', 'planner', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder_relocalize']）。补足脚本，或让测试显式断言这一步不该发生。",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase11_closure.py::test_coder_tool_cap_with_valid_patch_still_runs_the_whole_closure",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: assert 0 == 30 | +  where 0 = len([])",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase11_closure.py::test_local_tool_exhaustion_does_not_consume_the_review_allowance",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: assert 0 == 30 | +  where 0 = len([])",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase11_closure.py::test_resuming_a_finished_closure_replays_stages_without_rebilling",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: purpose='coder_relocalize' 没有脚本回复了（已调用 purpose 序列=['localizer_files', 'localizer_symbols', 'planner', 'planner', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder_relocalize']）。补足脚本，或让测试显式断言这一步不该发生。",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase11_closure.py::test_the_closure_reservation_is_priced_by_the_reviewers_own_model",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: purpose='coder_relocalize' 没有脚本回复了（已调用 purpose 序列=['localizer_files', 'localizer_symbols', 'planner', 'planner', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder', 'coder_relocalize']）。补足脚本，或让测试显式断言这一步不该发生。",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase12_closure_admission.py::test_a_local_tool_cap_never_overrides_the_global_stop_reason",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: assert 0 == 30 | +  where 0 = len([])",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase8_integration.py::test_validated_reproduction_becomes_the_target_test",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: assert ('tests/test_core.py',) == ('tests/_code...s_the_input',) | At index 0 diff: 'tests/test_core.py' != 'tests/_codepilot_repro/test_repro_normalize.py::test_normalize_returns_the_input'",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase9_resume.py::test_process_resume[after-regression]",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "assert 4 == 5 | assert 4 == 5",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_phase9_resume.py::test_process_resume[after-review]",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "assert 4 == 5 | AssertionError: provisionally_verified",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    },
+    {
+      "nodeid": "tests/graph/test_termination.py::test_no_target_tests_never_claims_a_passing_target",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "failure": "AssertionError: provisionally_verified | assert <RunStatus.PROVISIONALLY_VERIFIED: 'provisionally_verified'> is <RunStatus.FAILED: 'failed'>",
+      "baseline_log": ".codex-pytest-tmp/phase30/b2-baseline-rerun.log",
+      "head_log": ".codex-pytest-tmp/phase30/b2-head-rerun.log",
+      "status": "pre-existing",
+      "blocking": false
+    }
+  ]
+}

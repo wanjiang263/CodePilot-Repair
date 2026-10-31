@@ -1,0 +1,135 @@
+{
+  "tool": "phase30_index_profile",
+  "generated_at": "2026-10-31T07:15:29+00:00",
+  "method": {
+    "reuse": "phase29_index_profile/phase28_index_profile machinery (imported; scratch repointed to .codex-pytest-tmp/phase30; no prior deliverable written)",
+    "timing": "in-process wall time (Phase29 used subprocess isolation; compare trends, not absolute values)",
+    "warmups": 2,
+    "measured": 3,
+    "aggregation": "median of measured runs",
+    "boundary": "deterministic synthetic repos only; absolute times must not be extrapolated"
+  },
+  "environment": {
+    "platform": "Windows-11-10.0.22631-SP0",
+    "cpu": "13th Gen Intel(R) Core(TM) i7-13700H",
+    "cpu_count": 20,
+    "total_ram_bytes": 16961822720,
+    "disk": {
+      "drive_type": "FIXED",
+      "media_type": "SSD"
+    },
+    "python_version": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
+    "python_executable": "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+    "tree_sitter_version": "0.25.2",
+    "tree_sitter_python_version": "0.25.0",
+    "sqlalchemy_version": "2.1.4"
+  },
+  "scenarios": {
+    "cold": {
+      "runs": [
+        {
+          "wall_index_s": 4.0267,
+          "mode": "complete_closure_v2"
+        },
+        {
+          "wall_index_s": 7.9774,
+          "mode": "complete_closure_v2"
+        },
+        {
+          "wall_index_s": 8.4535,
+          "mode": "complete_closure_v2"
+        }
+      ],
+      "wall_index_s_median": 7.9774
+    },
+    "sameproc_nochange": {
+      "runs": [
+        {
+          "wall_index_s": 1.1813,
+          "mode": "verified_snapshot_v2"
+        },
+        {
+          "wall_index_s": 1.2348,
+          "mode": "verified_snapshot_v2"
+        },
+        {
+          "wall_index_s": 1.2834,
+          "mode": "verified_snapshot_v2"
+        }
+      ],
+      "wall_index_s_median": 1.2348
+    },
+    "sameproc_change": {
+      "runs": [
+        {
+          "wall_index_s": 4.8434,
+          "mode": "complete_closure_v2"
+        },
+        {
+          "wall_index_s": 4.9012,
+          "mode": "complete_closure_v2"
+        },
+        {
+          "wall_index_s": 4.7974,
+          "mode": "complete_closure_v2"
+        }
+      ],
+      "wall_index_s_median": 4.8434
+    }
+  },
+  "comparison_to_phase29": {
+    "cold": {
+      "phase30_median_s": 7.9774,
+      "phase29_baseline_s": 9.0568,
+      "delta_s": -1.0794,
+      "delta_percent": -11.9
+    },
+    "sameproc_nochange": {
+      "phase30_median_s": 1.2348,
+      "phase29_baseline_s": 1.3804,
+      "delta_s": -0.1456,
+      "delta_percent": -10.5
+    },
+    "sameproc_change": {
+      "phase30_median_s": 4.8434,
+      "phase29_baseline_s": 5.1318,
+      "delta_s": -0.2884,
+      "delta_percent": -5.6
+    }
+  },
+  "semantic_digests": {
+    "baseline_full_index": {
+      "sha256": "8b8b4bedb350dafe1df7199fda5b708aaf7aabd9e3e79d3fdd7311b3cdf3eb92",
+      "files": 452,
+      "symbols": 3234,
+      "edges": 9581,
+      "bytes": 2384746
+    },
+    "incremental_after_hub_edit": {
+      "sha256": "8b8b4bedb350dafe1df7199fda5b708aaf7aabd9e3e79d3fdd7311b3cdf3eb92",
+      "files": 452,
+      "symbols": 3234,
+      "edges": 9581,
+      "bytes": 2384746
+    },
+    "fresh_full_after_edit": {
+      "sha256": "8b8b4bedb350dafe1df7199fda5b708aaf7aabd9e3e79d3fdd7311b3cdf3eb92",
+      "files": 452,
+      "symbols": 3234,
+      "edges": 9581,
+      "bytes": 2384746
+    },
+    "incremental_equals_fresh_full": true,
+    "last_incremental_mode": "complete_closure_v2"
+  },
+  "reexport_retarget_probes": {
+    "one_hop": {
+      "association_mode": "complete_closure_v2",
+      "incremental_equals_full": true
+    },
+    "two_hop": {
+      "association_mode": "complete_closure_v2",
+      "incremental_equals_full": true
+    }
+  }
+}

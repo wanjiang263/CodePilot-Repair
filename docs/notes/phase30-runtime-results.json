@@ -1,0 +1,110 @@
+{
+  "tool": "phase30_runtime_results",
+  "generated_at": "2026-10-31",
+  "baseline": {
+    "head_before_round": "6f023fa304d47b71d42c9066cc1b30daff7759fd",
+    "branch": "codex/phase12-real-issue-pilot",
+    "tracked_dirty_at_start": 0,
+    "untracked_at_start": 183,
+    "active_pointer_at_start": false,
+    "v3_status_at_start": "pending (prompts empty, 26-file subset; superseded by v4 this round, files untouched)"
+  },
+  "commits": {
+    "source_commit": "8e1f1f47467427b97aa9e02c076e803500d9f102",
+    "source_commit_message": "feat: make candidates activatable and self-verifying, fix re-export stale edges",
+    "candidate_commit": "ffa97d983e35618443b6c79d22bccdb6fa96fa79",
+    "receipt_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+    "receipt_commit_note": "255f13c created the receipt+manifest+corrections commit; c939cbc re-pinned the receipt to the LF-normalized manifest bytes committed in 255f13c",
+    "docstring_commit": "6e466a8296b4271c2c0b6ed4d64588fde212b24a",
+    "test_contract_commit": "67e64286e2a25455510775797eb2a6693ca2521e",
+    "final_docs_commit": "RECORD_IN_DELIVERY_RECEIPT"
+  },
+  "guardrails": {
+    "real_model_requests": 0,
+    "new_cost_cny": 0,
+    "live_gate": "closed this round",
+    "docker_run": false,
+    "pushed": false,
+    "pr_created": false,
+    "active_pointer_created": false,
+    "rsi_auto_experiment": false
+  },
+  "p0_closures": {
+    "candidate_activatable": {
+      "status": "closed",
+      "fix": "schema v4: source_manifest full/delta with ancestor-coverage rule (96 files = 91 inherited v2∪v3 + 11 round changes), parent-chain snapshot inheritance (prompts coder/planner/reviewer non-empty, 1 experience), strict validate_snapshot at generation, harness fail-closed gate",
+      "evidence": [
+        "tests/unit/test_phase30_archive_v4.py 11 passed",
+        "tests/unit/test_phase30_harness_failclosed.py 6 passed",
+        "phase30-candidate-v4 verifier run: 22/22 checks passed (source_manifest_declared, source_manifest_full_coverage, snapshot_strict_roles)"
+      ]
+    },
+    "archive_self_verifying": {
+      "status": "closed",
+      "fix": "external receipt configs/harness/receipts/phase30-candidate-v4.json + --expect-receipt witness + historical_manifest pin; 12 named receipt checks; 7 negative tamper scenarios all exit non-zero with field-specific errors",
+      "evidence": [
+        "tests/unit/test_phase30_archive_receipt.py 8 passed",
+        "verify --all --ignore-raw-drift --receipt ... --expect-receipt b9a24285... -> exit 0, witness=verified, historical_integrity=ok"
+      ]
+    },
+    "index_reexport_correctness": {
+      "status": "closed",
+      "fix": "fast path now compares changed files' resolved IMPORT target sets against stored rows; any retarget falls back to the full rebuild",
+      "evidence": [
+        "tests/unit/repo/test_phase30_index_reexport.py 5 passed (3 of them failed before the fix)",
+        "reexport probe incremental_equals_full True (was False)",
+        "semantic digest incremental == fresh full (452/3234/9581 rows, byte-identical)"
+      ]
+    }
+  },
+  "tests": {
+    "method_note": "counts deduplicated per command; no skip/xfail added to mask failures; the only skips are pre-existing platform limitations (os.mkfifo)",
+    "groups": [
+      {"group": "tests/unit", "command": ".venv/Scripts/python.exe -m pytest tests/unit -q -p no:cacheprovider -m \"not docker and not llm\"", "passed": 3009, "failed": 0, "skipped": 2, "skip_reason": "os.mkfifo unavailable on Windows (tests/unit/sandbox/test_transfer.py, pre-existing)", "log": ".codex-pytest-tmp/phase30/t12-unit.log"},
+      {"group": "tests/integration", "command": ".venv/Scripts/python.exe -m pytest tests/integration -q -p no:cacheprovider -m \"not docker and not llm\"", "passed": 125, "failed": 0, "skipped": 0, "deselected": 1, "note": "1 docker-marked deselected; the one failure found in the first run (archive CLI dry-run, Phase30 scope) was fixed by pinning the v3 contract explicitly and adding a v4-default test (67e6428); loop file rerun 5/5", "log": ".codex-pytest-tmp/phase30/t12-integration.log, t12-loop-rerun2.log"},
+      {"group": "tests/graph", "command": ".venv/Scripts/python.exe -m pytest tests/graph -q -p no:cacheprovider -m \"not docker and not llm\"", "passed": 250, "failed": 16, "skipped": 0, "deselected": 13, "note": "16 failed = the 16 known pre-existing failures, identical nodeids at baseline 38e395a and HEAD; NOT 'all passed'", "log": ".codex-pytest-tmp/phase30/t12-graph.log"}
+    ],
+    "frontend": {
+      "trigger": "web diff 6f023fa..HEAD -- web = 0 files; page E2E conditionally skipped (recorded, not disguised as run)",
+      "typecheck_exit": 0,
+      "eslint_exit": 0,
+      "vitest": "14 files / 50 tests passed",
+      "build_exit": 0,
+      "logs": [".codex-pytest-tmp/phase30/t12-typecheck.log", "t12-eslint.log", "t12-vitest.log", "t12-build.log"]
+    },
+    "b2_known_failures": {
+      "count": 16,
+      "record": "docs/notes/phase30-known-failures.json",
+      "baseline_commit": "38e395ac5373b2029f7171f82bd4f0ad7f932ba5",
+      "head_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+      "baseline_result": "16 failed / 13 passed",
+      "head_result": "16 failed / 13 passed",
+      "conclusion": "pre-existing on both sides; none fixed, none introduced; blocking=false",
+      "logs": [".codex-pytest-tmp/phase30/b2-baseline-rerun.log", ".codex-pytest-tmp/phase30/b2-head-rerun.log"]
+    }
+  },
+  "index": {
+    "digest_equivalence": "incremental == fresh full index, sha256 identical (452 files / 3234 symbols / 9581 edges)",
+    "reexport_probes": {"one_hop": true, "two_hop": true},
+    "performance": {
+      "method": "in-process wall time, 2 warmups + 3 measured, median; Phase29 baseline used subprocess isolation so compare trends only",
+      "cold_s": {"phase30": 7.9774, "phase29_baseline": 9.0568, "delta_percent": -11.9},
+      "sameproc_nochange_s": {"phase30": 1.2348, "phase29_baseline": 1.3804, "delta_percent": -10.5},
+      "sameproc_change_s": {"phase30": 4.8434, "phase29_baseline": 5.1318, "delta_percent": -5.6},
+      "limitation": "synthetic 452-file repo only; the import-binding check adds bounded out_edges queries per changed symbol; no regression observed; large real repos unverified (no test50/test300 authorization)"
+    },
+    "profile": "docs/notes/phase30-index-profile.json"
+  },
+  "cleanup": {
+    "deleted_files": 0,
+    "classification": "174 untracked items reviewed and classified; 0 items safe to delete (all are round evidence or user files); cleanup NOT 'completed' in the deletion sense",
+    "untracked_evidence_preserved": true
+  },
+  "not_run": [
+    {"item": "real provider streaming deadline/usage", "reason": "Live Gate closed: no budget/authorization; 0 requests 0 cost"},
+    {"item": "Bedrock/TLS-CONNECT/pooling cancellation", "reason": "same as above (carried from phase29 unverified list)"},
+    {"item": "Docker / official sandbox / official harness", "reason": "explicitly forbidden this round"},
+    {"item": "test50/test300/M4 large-repo performance", "reason": "no authorization; synthetic repos only"},
+    {"item": "page E2E (Playwright)", "reason": "web/src zero changes in 6f023fa..HEAD; conditional skip recorded"}
+  ]
+}
