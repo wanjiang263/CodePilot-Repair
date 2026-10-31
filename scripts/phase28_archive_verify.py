@@ -48,30 +48,36 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path, PurePosixPath
 from typing import Any
 
 from codepilot.archive import (
+    DEFAULT_REQUIRED_ROLES,
+    MANIFEST_KINDS,
     SNAPSHOT_HASH_RULE,
     _apply_patch_in_temp,
+    _candidate_source_set,
     canonical_sha256,
     lf_text,
 )
-from codepilot.rsi import read_json, version_dir
+from codepilot.rsi import read_json, validate_snapshot, version_dir
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ARCHIVE_ROOT = REPO_ROOT / "configs" / "harness"
 
 FILE_BYTES_RULE = "file_bytes"
 CANONICAL_RULE = "canonical_json_snapshot"
-NEW_SCHEMA_VERSIONS = (2, 3)
+NEW_SCHEMA_VERSIONS = (2, 3, 4)
 SOURCE_ORIGIN_GIT = "git_commit"
 SOURCE_ORIGIN_WORKTREE = "worktree"
 HISTORICAL_MANIFEST_NAME = "historical-baseline.json"
+RECEIPT_SCHEMA_VERSION = 1
+RECEIPT_FILE_NAMES = ("candidate.diff", "candidate.json", "snapshot.json", "sources.json")
 
 _GIT_TIMEOUT_SECONDS = 120.0
 
@@ -407,8 +413,8 @@ def verify_new_archive(
     repo: Path,
     ignore_raw_drift: bool,
 ) -> dict[str, Any]:
-    """Dispatch on schema_version: v3 source binding, or the v2 rule set."""
-    if candidate.get("schema_version") == 3:
+    """Dispatch on schema_version: v3/v4 source binding, or the v2 rule set."""
+    if candidate.get("schema_version") in (3, 4):
         return _verify_v3_archive(
             folder,
             candidate,
@@ -531,6 +537,86 @@ def _lf_blob_sha256(raw: bytes | None) -> str | None:
         return _sha256_bytes(lf_text(raw).encode("utf-8"))
     except UnicodeDecodeError:
         return None
+
+
+def _check_source_manifest(candidate: dict[str, Any], archive_root: Path, record: Any) -> None:
+    """Schema-v4 source manifest rules (kind, parent requirement, full coverage)."""
+    manifest = candidate.get("source_manifest")
+    parent = candidate.get("parent")
+    if not isinstance(manifest, dict):
+        record("source_manifest_declared", False, f"source_manifest missing: {manifest!r}")
+        return
+    kind = manifest.get("kind")
+    problems: list[str] = []
+    if kind not in MANIFEST_KINDS:
+        problems.append(f"kind must be one of {list(MANIFEST_KINDS)}, got {kind!r}")
+    if kind == "delta" and not parent:
+        problems.append("delta manifest requires a parent candidate")
+    roles = manifest.get("required_roles")
+    if not isinstance(roles, list) or not roles:
+        problems.append(f"required_roles must be a non-empty list, got {roles!r}")
+    elif any(role not in DEFAULT_REQUIRED_ROLES for role in roles):
+        problems.append(
+            f"unknown required_roles: {sorted(set(roles) - set(DEFAULT_REQUIRED_ROLES))}"
+        )
+    record(
+        "source_manifest_declared",
+        not problems,
+        "; ".join(problems) if problems else f"kind={kind!r} parent={parent!r} roles={roles!r}",
+    )
+    if problems or kind != "full" or not parent:
+        if kind == "full" and not parent and not problems:
+            record(
+                "source_manifest_full_coverage",
+                True,
+                "root full candidate without parent; nothing to inherit",
+            )
+        return
+    source_hashes = candidate.get("source_hashes")
+    keys = set(source_hashes) if isinstance(source_hashes, dict) else set()
+    inherited_problems: list[str] = []
+    try:
+        inherited = _candidate_source_set(archive_root, str(parent))
+    except Exception as exc:  # ArchiveError from a broken ancestor chain
+        inherited_problems.append(f"ancestor walk failed: {exc}")
+        inherited = set()
+    missing = sorted(inherited - keys)
+    if missing:
+        inherited_problems.append(
+            f"full source set misses {len(missing)} inherited files: {missing[:5]}"
+        )
+    for role in roles if isinstance(roles, list) else []:
+        if not any(
+            PurePosixPath(str(key).replace("\\", "/")).parts[-2:] == ("agents", f"{role}.py")
+            for key in keys
+        ):
+            inherited_problems.append(f"full source set is missing agents/{role}.py")
+    record(
+        "source_manifest_full_coverage",
+        not inherited_problems,
+        "; ".join(inherited_problems)
+        if inherited_problems
+        else f"covers all {len(inherited)} inherited files and required role sources",
+    )
+
+
+def _check_snapshot_strict_roles(folder: Path, record: Any) -> None:
+    """Schema-v4 activation gate: the archived snapshot must be activatable."""
+    snapshot_path = folder / "snapshot.json"
+    if not snapshot_path.is_file():
+        record("snapshot_strict_roles", False, "snapshot.json is missing")
+        return
+    try:
+        snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, ValueError) as exc:
+        record("snapshot_strict_roles", False, f"snapshot.json unreadable: {exc}")
+        return
+    try:
+        validate_snapshot(snapshot, None, strict=True)
+    except ValueError as exc:
+        record("snapshot_strict_roles", False, f"snapshot not activatable: {exc}")
+        return
+    record("snapshot_strict_roles", True, "coder/planner/reviewer prompts present and non-empty")
 
 
 def _verify_v3_archive(
@@ -748,6 +834,10 @@ def _verify_v3_archive(
     if origin == SOURCE_ORIGIN_WORKTREE:
         raw_drift = _check_raw_worktree_hashes(candidate, repo, ignore_raw_drift, record)
 
+    if candidate.get("schema_version") == 4:
+        _check_source_manifest(candidate, archive_root, record)
+        _check_snapshot_strict_roles(folder, record)
+
     _check_parent_integrity(candidate, archive_root, record)
     _check_not_active(version, archive_root, record)
 
@@ -944,6 +1034,379 @@ def verify_historical_baseline(archive_root: Path) -> dict[str, Any]:
     return result
 
 
+def candidate_tree_sha256(file_hashes: Mapping[str, str]) -> str:
+    """Canonical candidate tree hash (Phase30 receipt rule).
+
+    Sort the file paths, concatenate ``path + NUL + file_sha256`` for each, and
+    take the SHA-256 of the whole concatenation. The receipt itself is never an
+    input (it lives outside the candidate directory).
+    """
+    digest = hashlib.sha256()
+    for path in sorted(file_hashes):
+        digest.update(path.encode("utf-8"))
+        digest.update(b"\x00")
+        digest.update(str(file_hashes[path]).encode("ascii"))
+    return digest.hexdigest()
+
+
+def verify_receipt(
+    receipt_path: Path,
+    *,
+    archive_root: Path,
+    repo: Path,
+    expect_receipt: str | None,
+) -> dict[str, Any]:
+    """Verify an external candidate receipt (Phase30 T04).
+
+    The receipt lives outside the candidate directory and binds the archived
+    bytes to a git commit: ``candidate_commit`` must be an ancestor of HEAD,
+    the four candidate files must match the receipt both as blobs at that
+    commit and as the current on-disk bytes, the tree hash must reproduce, the
+    diff must round-trip between ``diff_base`` and ``source_commit``, the
+    snapshot must pass strict validation, the status must be ``pending`` with
+    no active pointer, and the historical manifest blob at ``candidate_commit``
+    must match ``historical_manifest_sha256``. ``expect_receipt`` is the
+    external witness: the SHA-256 of the receipt file itself, held outside the
+    repository.
+    """
+    checks: list[dict[str, Any]] = []
+
+    def record(name: str, ok: bool, detail: str) -> None:
+        checks.append(_pass(name, detail) if ok else _failure(name, detail))
+
+    result: dict[str, Any] = {
+        "check": "receipt",
+        "receipt_path": str(receipt_path),
+        "checks": checks,
+        "failures": [],
+        "witness": "none",
+        "ok": False,
+    }
+    if not receipt_path.is_file():
+        record("receipt_schema", False, f"receipt file is missing: {receipt_path}")
+        result["failures"] = [c for c in checks if not c["ok"]]
+        return result
+    raw = receipt_path.read_bytes()
+    actual_receipt_sha = _sha256_bytes(raw)
+    result["receipt_sha256"] = actual_receipt_sha
+    if expect_receipt is None:
+        result["witness"] = "none"
+        record("receipt_witness", True, "no --expect-receipt provided; witness=none")
+    elif actual_receipt_sha == expect_receipt:
+        result["witness"] = "verified"
+        record("receipt_witness", True, "receipt sha256 matches the external witness")
+    else:
+        result["witness"] = "mismatch"
+        record(
+            "receipt_witness",
+            False,
+            f"receipt sha256 {actual_receipt_sha} does not match the external witness "
+            f"{expect_receipt}",
+        )
+    try:
+        receipt = json.loads(raw.decode("utf-8"))
+        if not isinstance(receipt, dict):
+            raise ValueError("receipt is not a JSON object")
+    except (UnicodeDecodeError, ValueError) as exc:
+        record("receipt_schema", False, f"receipt unreadable: {exc}")
+        result["failures"] = [c for c in checks if not c["ok"]]
+        return result
+
+    required_fields = (
+        "schema_version",
+        "candidate",
+        "candidate_commit",
+        "source_commit",
+        "diff_base",
+        "candidate_files",
+        "candidate_tree_sha256",
+        "historical_manifest_sha256",
+        "created_at",
+    )
+    schema_problems = [field for field in required_fields if field not in receipt]
+    if receipt.get("schema_version") != RECEIPT_SCHEMA_VERSION:
+        schema_problems.append(f"schema_version must be {RECEIPT_SCHEMA_VERSION}")
+    record(
+        "receipt_schema",
+        not schema_problems,
+        "; ".join(schema_problems) if schema_problems else "schema and required fields present",
+    )
+    version = receipt.get("candidate")
+    if not isinstance(version, str) or not version:
+        result["failures"] = [c for c in checks if not c["ok"]]
+        result["ok"] = False
+        return result
+    folder = archive_root / "candidates" / version
+    result["candidate"] = version
+
+    def blob(commit: str, rel: str) -> bytes | None:
+        return _git_bytes(repo, ["cat-file", "blob", f"{commit}:{rel}"])
+
+    # Repo-relative prefix of the candidates directory: the real archive lives
+    # at <repo>/configs/harness/candidates, test archives at any depth.
+    try:
+        candidates_prefix = (
+            (archive_root / "candidates").resolve().relative_to(repo.resolve()).as_posix()
+        )
+    except ValueError:
+        candidates_prefix = None
+    if candidates_prefix is None:
+        record(
+            "receipt_commit_ancestor",
+            False,
+            f"archive root {archive_root} is outside repo {repo}; git blob checks unavailable",
+        )
+        result["failures"] = [c for c in checks if not c["ok"]]
+        result["ok"] = False
+        return result
+
+    candidate_commit = receipt.get("candidate_commit")
+    source_commit = receipt.get("source_commit")
+    diff_base = receipt.get("diff_base")
+
+    # 1. candidate_commit is an ancestor of HEAD (git-anchored, not floating).
+    head = _git_bytes(repo, ["rev-parse", "HEAD"])
+    head_sha = head.decode("ascii", errors="replace").strip() if head else None
+    ancestor_ok = bool(
+        candidate_commit
+        and head_sha
+        and _git_bytes(repo, ["merge-base", "--is-ancestor", str(candidate_commit), head_sha])
+        is not None
+    )
+    record(
+        "receipt_commit_ancestor",
+        ancestor_ok,
+        f"merge-base --is-ancestor {candidate_commit} HEAD({head_sha}) "
+        + ("holds" if ancestor_ok else "does not hold"),
+    )
+
+    # 2. The four candidate files: blobs at candidate_commit and current bytes
+    # must both match the receipt's per-file hashes.
+    declared_files = receipt.get("candidate_files")
+    declared_map: dict[str, Any] = declared_files if isinstance(declared_files, dict) else {}
+    file_problems: list[str] = []
+    blob_bytes: dict[str, bytes | None] = {}
+    for name in RECEIPT_FILE_NAMES:
+        declared = declared_map.get(name)
+        current = folder / name
+        raw_blob = blob(str(candidate_commit), f"{candidates_prefix}/{version}/{name}")
+        blob_bytes[name] = raw_blob
+        if not isinstance(declared, str):
+            file_problems.append(f"{name}: receipt has no sha256")
+            continue
+        if raw_blob is None:
+            file_problems.append(f"{name}: absent from candidate_commit {candidate_commit}")
+            continue
+        if _sha256_bytes(raw_blob) != declared:
+            file_problems.append(f"{name}: blob at candidate_commit differs from receipt")
+        if not current.is_file() or _sha256_bytes(current.read_bytes()) != declared:
+            file_problems.append(f"{name}: current file differs from receipt")
+    record(
+        "receipt_candidate_files",
+        not file_problems,
+        "; ".join(file_problems[:5]) if file_problems else "4 files match receipt at blob and disk",
+    )
+
+    # 3. Tree hash: recomputed from the receipt values and from current disk.
+    tree_self = candidate_tree_sha256({k: str(v) for k, v in declared_map.items()})
+    record(
+        "receipt_candidate_tree_self",
+        tree_self == receipt.get("candidate_tree_sha256"),
+        f"declared={receipt.get('candidate_tree_sha256')!r} recomputed_from_receipt={tree_self}",
+    )
+    current_hashes = {
+        name: _sha256_bytes((folder / name).read_bytes())
+        for name in RECEIPT_FILE_NAMES
+        if (folder / name).is_file()
+    }
+    tree_current = candidate_tree_sha256(current_hashes) if len(current_hashes) == 4 else None
+    record(
+        "receipt_candidate_tree_current",
+        tree_current is not None and tree_current == receipt.get("candidate_tree_sha256"),
+        f"declared={receipt.get('candidate_tree_sha256')!r} recomputed_from_disk={tree_current}",
+    )
+
+    # 4. Commit ancestry: diff_base must precede source_commit, both resolve.
+    ancestry_ok = bool(
+        source_commit
+        and diff_base
+        and _git_bytes(repo, ["rev-parse", "--verify", f"{source_commit}^{{commit}}"]) is not None
+        and _git_bytes(repo, ["rev-parse", "--verify", f"{diff_base}^{{commit}}"]) is not None
+        and _git_bytes(repo, ["merge-base", "--is-ancestor", str(diff_base), str(source_commit)])
+        is not None
+    )
+    record(
+        "receipt_source_ancestry",
+        ancestry_ok,
+        f"diff_base={diff_base} ancestor-of source_commit={source_commit}: "
+        + ("holds" if ancestry_ok else "does not hold"),
+    )
+
+    # 5. Candidate.json blob: parse and bind source hashes to source_commit blobs.
+    candidate_raw = blob_bytes.get("candidate.json")
+    candidate_record: dict[str, Any] | None = None
+    if candidate_raw is None:
+        record("receipt_candidate_record", False, "candidate.json blob unavailable")
+    else:
+        try:
+            parsed = json.loads(candidate_raw.decode("utf-8"))
+            candidate_record = parsed if isinstance(parsed, dict) else None
+        except (UnicodeDecodeError, ValueError) as exc:
+            record("receipt_candidate_record", False, f"candidate.json blob unreadable: {exc}")
+        else:
+            record(
+                "receipt_candidate_record",
+                True,
+                f"version={parsed.get('version')!r} from candidate_commit blob",
+            )
+    if candidate_record is not None:
+        declared_hashes = candidate_record.get("source_hashes")
+        hashes: dict[str, Any] = declared_hashes if isinstance(declared_hashes, dict) else {}
+        hash_problems: list[str] = []
+        if not hashes:
+            hash_problems.append("candidate.json has no source_hashes")
+        for path, declared in sorted(hashes.items()):
+            actual = _lf_blob_sha256(blob(str(source_commit), str(path)))
+            if actual is None:
+                hash_problems.append(f"{path}: absent from source_commit")
+            elif actual != declared:
+                hash_problems.append(f"{path}: LF blob hash differs from source_commit")
+        record(
+            "receipt_source_hashes_blobs",
+            not hash_problems,
+            "; ".join(hash_problems[:5])
+            if hash_problems
+            else f"{len(hashes)} paths match source_commit blobs",
+        )
+
+        status = candidate_record.get("status")
+        record(
+            "receipt_status_pending",
+            status == "pending",
+            f"candidate.json status={status!r} (must be 'pending')",
+        )
+        parent = candidate_record.get("parent")
+        parent_dir = (archive_root / "candidates" / str(parent)) if parent else None
+        record(
+            "receipt_parent_present",
+            bool(parent) and parent_dir is not None and parent_dir.is_dir(),
+            f"parent={parent!r} directory "
+            + ("present" if parent_dir is not None and parent_dir.is_dir() else "missing"),
+        )
+    else:
+        record("receipt_source_hashes_blobs", False, "candidate.json blob unavailable")
+        record("receipt_status_pending", False, "candidate.json blob unavailable")
+        record("receipt_parent_present", False, "candidate.json blob unavailable")
+
+    # 6. Diff round-trip between diff_base and source_commit.
+    diff_raw = blob_bytes.get("candidate.diff")
+    if candidate_record is None or diff_raw is None:
+        record("receipt_diff_roundtrip", False, "candidate.diff or candidate.json unavailable")
+    elif not diff_raw.strip():
+        record("receipt_diff_roundtrip", True, "empty diff is trivially consistent")
+    else:
+        roundtrip_hashes = candidate_record.get("source_hashes")
+        paths = sorted(roundtrip_hashes) if isinstance(roundtrip_hashes, dict) else []
+        base_blobs = {path: blob(str(diff_base), path) for path in paths}
+        source_blobs = {path: blob(str(source_commit), path) for path in paths}
+        try:
+            forward_dir = _apply_patch_in_temp(base_blobs, diff_raw, reverse=False)
+            try:
+                forward_problems = [
+                    path
+                    for path in paths
+                    if not forward_dir.joinpath(*PurePosixPath(path).parts).is_file()
+                ]
+            finally:
+                shutil.rmtree(forward_dir, ignore_errors=True)
+            reverse_dir = _apply_patch_in_temp(source_blobs, diff_raw, reverse=True)
+            try:
+                reverse_problems: list[str] = []
+                for path in paths:
+                    expected_base = base_blobs.get(path)
+                    target = reverse_dir.joinpath(*PurePosixPath(path).parts)
+                    if expected_base is None:
+                        if target.exists():
+                            reverse_problems.append(f"{path} should have been deleted")
+                        continue
+                    if not target.is_file() or lf_text(target.read_bytes()) != lf_text(
+                        expected_base
+                    ):
+                        reverse_problems.append(f"{path} does not match diff_base")
+            finally:
+                shutil.rmtree(reverse_dir, ignore_errors=True)
+            record(
+                "receipt_diff_roundtrip",
+                not forward_problems and not reverse_problems,
+                "; ".join((forward_problems + reverse_problems)[:5])
+                if forward_problems or reverse_problems
+                else "diff_base + diff reproduce source_commit; reverse restores diff_base",
+            )
+        except Exception as exc:
+            record("receipt_diff_roundtrip", False, f"apply failed: {exc}")
+
+    # 7. Snapshot blob must pass strict (activatable) validation.
+    snapshot_raw = blob_bytes.get("snapshot.json")
+    if snapshot_raw is None:
+        record("receipt_snapshot_strict", False, "snapshot.json blob unavailable")
+    else:
+        try:
+            snapshot = json.loads(snapshot_raw.decode("utf-8"))
+        except (UnicodeDecodeError, ValueError) as exc:
+            record("receipt_snapshot_strict", False, f"snapshot.json blob unreadable: {exc}")
+        else:
+            try:
+                validate_snapshot(snapshot, None, strict=True)
+            except ValueError as exc:
+                record("receipt_snapshot_strict", False, f"snapshot not activatable: {exc}")
+            else:
+                record("receipt_snapshot_strict", True, "role prompts present and non-empty")
+
+    # 8. No active pointer may reference the receipt's candidate.
+    active_problems: list[str] = []
+    for pointer_name in ("active.json", "active.next.json"):
+        pointer = archive_root / pointer_name
+        if not pointer.exists():
+            continue
+        try:
+            payload = json.loads(pointer.read_text(encoding="utf-8"))
+            referenced = payload.get("version") if isinstance(payload, dict) else None
+        except (OSError, UnicodeDecodeError, ValueError):
+            active_problems.append(f"{pointer_name} exists but is unreadable")
+            continue
+        if referenced == version:
+            active_problems.append(f"{pointer_name} references {version}")
+    record(
+        "receipt_not_active",
+        not active_problems,
+        "; ".join(active_problems) if active_problems else "no active pointer references it",
+    )
+
+    # 9. Historical manifest: the receipt pins the exact manifest bytes it
+    # vouches for (the manifest committed alongside the receipt). Any later
+    # change — including a "tamper the history and sync the manifest" commit —
+    # breaks this pin, which is the whole point of the external witness.
+    manifest_path = archive_root / "candidates" / HISTORICAL_MANIFEST_NAME
+    declared_manifest = receipt.get("historical_manifest_sha256")
+    if not manifest_path.is_file():
+        record(
+            "receipt_historical_manifest",
+            False,
+            f"{HISTORICAL_MANIFEST_NAME} is missing from the archive",
+        )
+    else:
+        actual_manifest = _sha256_bytes(manifest_path.read_bytes())
+        record(
+            "receipt_historical_manifest",
+            actual_manifest == declared_manifest,
+            f"declared={declared_manifest!r} current_manifest_bytes={actual_manifest}",
+        )
+
+    result["failures"] = [c for c in checks if not c["ok"]]
+    result["ok"] = not result["failures"]
+    return result
+
+
 def verify_versions(
     *,
     archive_root: Path,
@@ -1134,6 +1597,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="record raw_worktree_hashes drift as an annotation instead of a failure",
     )
+    parser.add_argument(
+        "--receipt",
+        type=Path,
+        default=None,
+        help="candidate receipt JSON (Phase30); enables the external witness checks",
+    )
+    parser.add_argument(
+        "--expect-receipt",
+        type=str,
+        default=None,
+        metavar="SHA256",
+        help="external witness: expected sha256 of the receipt file itself; without "
+        "it the run is labeled witness=none and historical_integrity can never be 'ok'",
+    )
     args = parser.parse_args(argv)
     if args.all and args.version:
         return _usage_error("--all and --version are mutually exclusive")
@@ -1162,7 +1639,44 @@ def main(argv: Sequence[str] | None = None) -> int:
         versions=versions,
         ignore_raw_drift=args.ignore_raw_drift,
     )
+    receipt_result: dict[str, Any] | None = None
+    if args.receipt is not None:
+        if args.expect_receipt is not None and not re.fullmatch(
+            r"[a-f0-9]{64}", args.expect_receipt
+        ):
+            return _usage_error("--expect-receipt must be a 64-character sha256")
+        receipt_result = verify_receipt(
+            args.receipt,
+            archive_root=archive_root,
+            repo=args.repo,
+            expect_receipt=args.expect_receipt,
+        )
+        report["receipt"] = receipt_result
+
+    # Phase30 witness semantics: historical integrity is only ever reported as
+    # 'ok' when an external witness (the --expect-receipt sha256, held outside
+    # this repository) verified the receipt. Without it the strongest honest
+    # claim is 'internal-only' — internal consistency, externally unproven.
+    witness = receipt_result["witness"] if receipt_result is not None else "none"
+    historical = report["historical_baseline"]
+    receipt_ok = receipt_result["ok"] if receipt_result is not None else True
+    if witness == "verified" and receipt_ok and historical["ok"] is True:
+        historical_integrity = "ok"
+    elif (receipt_result is not None and not receipt_ok) or historical["ok"] is False:
+        historical_integrity = "failed"
+    elif historical["ok"] is None:
+        historical_integrity = "unverified"
+    else:
+        historical_integrity = "internal-only"
+    report["witness"] = witness
+    report["historical_integrity"] = historical_integrity
+
+    exit_code = int(report["exit_code"])
+    if receipt_result is not None and not receipt_ok:
+        exit_code = 1
+    report["exit_code"] = exit_code
     _print_summary(report)
+    print(f"witness={witness} historical_integrity={historical_integrity}")
     if args.json is not None:
         args.json.parent.mkdir(parents=True, exist_ok=True)
         args.json.write_text(

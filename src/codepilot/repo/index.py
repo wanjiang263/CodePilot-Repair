@@ -329,6 +329,17 @@ class Indexer:
             and old_symbol_ids == new_symbol_ids
             and stores.repositories.index_semantics(repository_id) == fingerprint
         )
+        only_paths = frozenset(changed_path_set) if fast_mode else None
+        all_edges = _extract_all_edges(context, only_paths=only_paths)
+        if fast_mode and _import_bindings_changed(stores, all_edges, changed_path_set, context):
+            # Phase30: a body-only edit can still retarget imports (re-export
+            # swap, alias retarget). The changed file's own IMPORT target set
+            # then differs from the stored one, and every downstream file that
+            # resolved THROUGH the old target (two re-export hops away) now
+            # has stale edges that no bounded replacement can see. Fall back
+            # to the conservative full rebuild.
+            fast_mode = False
+            all_edges = _extract_all_edges(context)
         edge_recompute_sources = (
             {
                 symbol.id
@@ -340,9 +351,6 @@ class Indexer:
             if fast_mode
             else old_symbol_ids | new_symbol_ids
         )
-        only_paths = frozenset(changed_path_set) if fast_mode else None
-
-        all_edges = _extract_all_edges(context, only_paths=only_paths)
         edge_rows = _edge_rows(
             repository_id,
             tuple(edge for edge in all_edges if edge.kind != "TEST"),
@@ -571,6 +579,45 @@ def _extract_all_edges(
     structural = extract_edges(context, imports, only_paths=only_paths)
     tests = extract_test_links(context, imports, calls, only_paths=only_paths)
     return (*imports.edges(), *calls, *structural, *tests)
+
+
+def _import_bindings_changed(
+    stores: Stores,
+    all_edges: tuple[GraphEdge, ...],
+    changed_path_set: set[str],
+    context: AnalysisContext,
+) -> bool:
+    """True when any changed file's resolved IMPORT targets moved (Phase30).
+
+    The Phase29 fast path is sound only while a body-only edit cannot change
+    what anything resolves to. That breaks for re-exports: swapping
+    ``from pkg.a import value`` to ``from pkg.b import value`` keeps every
+    symbol id, but downstream files whose imports resolve THROUGH the changed
+    module now point at a different target. Comparing the freshly extracted
+    IMPORT edges of the changed files against the stored rows for the same
+    sources detects the retarget; any difference falls back to the full
+    rebuild. The query is bounded by the changed files' symbols (out_edges is
+    indexed by source_id), not by graph size.
+    """
+    changed_source_ids = {
+        symbol.id
+        for source_file in context.files
+        if source_file.path in changed_path_set
+        for symbol in source_file.symbols
+    }
+    if not changed_source_ids:
+        return False
+    new_bindings = {
+        (edge.source_id, edge.target_id or "", edge.target_name)
+        for edge in all_edges
+        if edge.kind == "IMPORT" and edge.source_id in changed_source_ids
+    }
+    stored_bindings: set[tuple[str, str, str]] = set()
+    for source_id in changed_source_ids:
+        for row in stores.edges.out_edges(source_id):
+            if row.kind == "IMPORT":
+                stored_bindings.add((row.source_id, row.target_id or "", row.target_name or ""))
+    return new_bindings != stored_bindings
 
 
 def _edge_rows(

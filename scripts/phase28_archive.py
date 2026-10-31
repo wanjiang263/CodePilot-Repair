@@ -38,6 +38,8 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from codepilot.archive import (
+    MANIFEST_KIND_DELTA,
+    MANIFEST_KIND_FULL,
     SOURCE_ORIGIN_GIT,
     SOURCE_ORIGIN_WORKTREE,
     ArchiveError,
@@ -84,6 +86,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="source binding mode (default: git_commit)",
     )
     parser.add_argument(
+        "--schema-version",
+        type=int,
+        choices=(3, 4),
+        default=4,
+        help="candidate record schema (default: 4, Phase30; 3 keeps the Phase29 layout)",
+    )
+    parser.add_argument(
+        "--manifest-kind",
+        choices=(MANIFEST_KIND_FULL, MANIFEST_KIND_DELTA),
+        default=MANIFEST_KIND_FULL,
+        help="source manifest kind (schema 4 only; delta requires a parent)",
+    )
+    parser.add_argument(
+        "--allow-dirty-via-temp-clone",
+        action="store_true",
+        help="git_commit mode on a dirty worktree: read sources from a throwaway "
+        "--shared clone at --source-commit instead of failing (user changes untouched)",
+    )
+    parser.add_argument(
         "--source-list",
         required=True,
         help="JSON file (array of repo-relative paths) or comma-separated paths",
@@ -111,6 +132,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             source_origin=args.source_origin,
             allow_dirty=args.allow_dirty,
             dry_run=args.dry_run,
+            candidate_schema_version=args.schema_version,
+            manifest_kind=args.manifest_kind,
+            allow_dirty_via_temp_clone=args.allow_dirty_via_temp_clone,
         )
     except ArchiveError as exc:
         print(

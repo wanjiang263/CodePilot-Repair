@@ -40,6 +40,7 @@ import contextlib
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -50,8 +51,13 @@ from typing import Any
 from codepilot.rsi import _json_hash, extract_prompts, read_json, validate_snapshot, version_dir
 
 __all__ = [
+    "CANDIDATE_SCHEMA_VERSION",
+    "DEFAULT_REQUIRED_ROLES",
     "DIFF_FLAGS",
     "GENERATOR_ID",
+    "MANIFEST_KINDS",
+    "MANIFEST_KIND_DELTA",
+    "MANIFEST_KIND_FULL",
     "NORMALIZATION_NOTE",
     "SCHEMA_VERSION",
     "SNAPSHOT_HASH_RULE",
@@ -63,6 +69,7 @@ __all__ = [
     "DiffVerificationError",
     "DirtyWorktreeError",
     "GitCommandError",
+    "IncompleteSourceManifestError",
     "MissingSourceError",
     "NonAncestorDiffBaseError",
     "SourceOriginError",
@@ -74,6 +81,17 @@ __all__ = [
 
 GENERATOR_ID = "phase28_archive"
 SCHEMA_VERSION = 3
+#: Phase30 schema v4: source manifest (full/delta) plus parent snapshot
+#: inheritance with strict role-prompt validation. v3 generation stays available
+#: (and byte-reproducible) via ``candidate_schema_version=3``.
+CANDIDATE_SCHEMA_VERSION = 4
+MANIFEST_KIND_FULL = "full"
+MANIFEST_KIND_DELTA = "delta"
+MANIFEST_KINDS = (MANIFEST_KIND_FULL, MANIFEST_KIND_DELTA)
+DEFAULT_REQUIRED_ROLES = ("coder", "planner", "reviewer")
+#: Bound on the ancestor walk for snapshot inheritance; a corrupt archive must
+#: not be able to send the generator into a cycle.
+_MAX_INHERITANCE_HOPS = 8
 SOURCE_ORIGIN_GIT = "git_commit"
 SOURCE_ORIGIN_WORKTREE = "worktree"
 SNAPSHOT_REF = "snapshot.json"
@@ -138,6 +156,10 @@ class SourceOriginError(ArchiveError):
 
 class NonAncestorDiffBaseError(ArchiveError):
     """``diff_base_commit`` is not an ancestor of ``source_commit``."""
+
+
+class IncompleteSourceManifestError(ArchiveError):
+    """The source manifest is structurally invalid or an incomplete full set."""
 
 
 def _spawn_git(
@@ -446,6 +468,176 @@ def _parent_integrity(root: Path, parent: str | None) -> dict[str, Any] | None:
     }
 
 
+def _resolved_commit(repo: Path, field: str, revision: str) -> str:
+    """Resolve ``revision`` to the full 40-hex commit sha it names.
+
+    Schema v4 records commits, never labels: the recorded value is the resolved
+    sha, so a branch name or tag can neither be archived nor drift afterwards.
+    """
+    _require_commit(repo, field, revision)
+    resolved = _git(repo, "rev-parse", "--verify", f"{revision}^{{commit}}")
+    sha = resolved.decode("ascii", errors="replace").strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", sha):
+        raise ArchiveError(f"{field} did not resolve to a full commit sha: {revision!r}")
+    return sha
+
+
+def _read_candidate_record(root: Path, version: str) -> dict[str, Any]:
+    folder = _version_folder(root, version)
+    path = folder / "candidate.json"
+    if not path.is_file():
+        raise ArchiveError(f"candidate has no candidate.json: {version}")
+    try:
+        record = read_json(path)
+    except (OSError, ValueError) as exc:
+        raise ArchiveError(f"candidate.json unreadable: {version} ({exc})") from exc
+    return record
+
+
+def _read_parent_snapshot(root: Path, version: str) -> dict[str, Any]:
+    folder = _version_folder(root, version)
+    path = folder / SNAPSHOT_REF
+    if not path.is_file():
+        raise ArchiveError(f"candidate has no snapshot.json: {version}")
+    try:
+        payload = read_json(path)
+    except (OSError, ValueError) as exc:
+        raise ArchiveError(f"snapshot.json unreadable: {version} ({exc})") from exc
+    return payload
+
+
+def _inherit_parent_snapshot(root: Path, parent: str | None) -> dict[str, Any]:
+    """Walk the parent chain for the effective prompts/instruction/experiences.
+
+    Phase30: v3 archived ``prompts={}`` and no experiences because the v3
+    generator only extracted from its own (changed-files) source set — the
+    defect that made v3 unactivatable. Inheritance therefore walks past an
+    ancestor with empty prompts/experiences instead of propagating the defect:
+    the nearest ancestor that actually declares them wins. This round's sources
+    still override inherited prompts role by role.
+    """
+    inherited: dict[str, Any] = {"prompts": {}, "instruction": "", "experiences": []}
+    chain: list[str] = []
+    seen: set[str] = set()
+    current = parent
+    while current and len(seen) < _MAX_INHERITANCE_HOPS:
+        if current in seen:
+            raise ArchiveError(f"parent candidate chain contains a cycle at {current!r}")
+        seen.add(current)
+        chain.append(current)
+        snapshot = _read_parent_snapshot(root, current)
+        prompts = snapshot.get("prompts")
+        if not inherited["prompts"] and isinstance(prompts, dict) and prompts:
+            inherited["prompts"] = {
+                role: text for role, text in prompts.items() if isinstance(text, str) and text
+            }
+        if not inherited["instruction"]:
+            instruction = snapshot.get("instruction")
+            if isinstance(instruction, str) and instruction:
+                inherited["instruction"] = instruction
+        if not inherited["experiences"]:
+            experiences = snapshot.get("experiences")
+            if isinstance(experiences, list) and experiences:
+                inherited["experiences"] = [
+                    dict(entry) for entry in experiences if isinstance(entry, dict)
+                ]
+        record = _read_candidate_record(root, current)
+        current = record.get("parent") if isinstance(record.get("parent"), str) else None
+    inherited["chain"] = chain
+    return inherited
+
+
+def _candidate_source_set(root: Path, parent: str | None) -> set[str]:
+    """Union of every ancestor candidate's source paths (bounded walk)."""
+    inherited: set[str] = set()
+    seen: set[str] = set()
+    current = parent
+    while current and len(seen) < _MAX_INHERITANCE_HOPS:
+        if current in seen:
+            raise ArchiveError(f"parent candidate chain contains a cycle at {current!r}")
+        seen.add(current)
+        folder = _version_folder(root, current)
+        sources_path = folder / "sources.json"
+        if not sources_path.is_file():
+            raise ArchiveError(f"parent candidate has no sources.json: {current}")
+        try:
+            payload = read_json(sources_path)
+        except (OSError, ValueError) as exc:
+            raise ArchiveError(f"parent sources.json unreadable: {current} ({exc})") from exc
+        inherited |= {str(key) for key in payload}
+        record = _read_candidate_record(root, current)
+        current = record.get("parent") if isinstance(record.get("parent"), str) else None
+    return inherited
+
+
+def _validate_source_manifest(
+    root: Path,
+    *,
+    parent: str | None,
+    kind: str,
+    required_roles: Sequence[str],
+    source_keys: set[str],
+) -> dict[str, Any]:
+    """Enforce the schema-v4 source manifest rules; return the manifest record.
+
+    - ``kind`` is only ``full`` or ``delta``;
+    - ``delta`` requires a parent (missing files are inherited from it);
+    - ``full`` must cover the union of every ancestor candidate's source set —
+      archiving only this round's changed files is exactly the v3 defect — and
+      must carry every required role's agent source.
+    """
+    if kind not in MANIFEST_KINDS:
+        raise IncompleteSourceManifestError(
+            f"source manifest kind must be one of {list(MANIFEST_KINDS)}, got {kind!r}"
+        )
+    if kind == MANIFEST_KIND_DELTA and not parent:
+        raise IncompleteSourceManifestError(
+            "delta candidate requires a parent; missing files can only be "
+            "inherited from a parent candidate"
+        )
+    roles = list(dict.fromkeys(required_roles))
+    unknown = [role for role in roles if role not in DEFAULT_REQUIRED_ROLES]
+    if unknown:
+        raise IncompleteSourceManifestError(f"unknown required roles: {unknown}")
+    if kind == MANIFEST_KIND_FULL:
+        inherited = _candidate_source_set(root, parent)
+        missing_inherited = sorted(inherited - source_keys)
+        if missing_inherited:
+            raise IncompleteSourceManifestError(
+                f"full source set must cover all {len(inherited)} inherited parent files; "
+                f"missing {len(missing_inherited)}: {missing_inherited[:5]}"
+            )
+        for role in roles:
+            present = any(
+                PurePosixPath(key.replace("\\", "/")).parts[-2:] == ("agents", f"{role}.py")
+                for key in source_keys
+            )
+            if not present:
+                raise IncompleteSourceManifestError(
+                    f"full source set is missing agents/{role}.py (required role {role!r})"
+                )
+    return {"kind": kind, "parent": parent, "required_roles": roles}
+
+
+def _temp_source_clone(repo: Path, commit: str) -> Path:
+    """Shared local clone checked out at ``commit``; never touches the worktree.
+
+    Used when the tracked worktree is dirty and generation must still read
+    ``source_commit`` blobs: a ``--shared`` clone references the original object
+    database (no copy), so blob reads, ancestry and commit-vs-commit diffs are
+    byte-identical while the user's uncommitted changes stay untouched (no
+    stash, no checkout of the real worktree). Caller removes the directory.
+    """
+    tmp = Path(tempfile.mkdtemp(prefix="codepilot-archive-clone-"))
+    try:
+        _git(repo, "clone", "--shared", "--quiet", str(repo), str(tmp))
+        _git(tmp, "checkout", "--quiet", "--detach", commit)
+    except BaseException:
+        shutil.rmtree(tmp, ignore_errors=True)
+        raise
+    return tmp
+
+
 def _read_sources(repo: Path, source_files: Sequence[str]) -> tuple[dict[str, str], dict[str, str]]:
     """Read every source once: LF-normalized text plus raw worktree byte hashes."""
     sources: dict[str, str] = {}
@@ -512,9 +704,11 @@ def _candidate_payload(
     raw_worktree_hashes: Mapping[str, str] | None,
     parent_integrity: dict[str, Any] | None,
     dirty_files: Sequence[str],
+    candidate_schema_version: int = SCHEMA_VERSION,
+    source_manifest: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": candidate_schema_version,
         "version": version,
         "parent": parent,
         "status": "pending",
@@ -536,6 +730,11 @@ def _candidate_payload(
         "parent_integrity": parent_integrity,
         "dirty_worktree": bool(dirty_files),
     }
+    if candidate_schema_version >= CANDIDATE_SCHEMA_VERSION:
+        # v4: explicit schema mirror (single source of truth is schema_version;
+        # the verifier requires the two to be equal) and the source manifest.
+        payload["candidate_schema_version"] = candidate_schema_version
+        payload["source_manifest"] = dict(source_manifest or {})
     if source_origin == SOURCE_ORIGIN_WORKTREE:
         payload["raw_worktree_hashes"] = dict(raw_worktree_hashes or {})
     if dirty_files:
@@ -561,8 +760,12 @@ def create_candidate(
     instruction: str = "",
     experiences: Sequence[Mapping[str, Any]] | None = None,
     dry_run: bool = False,
+    candidate_schema_version: int = SCHEMA_VERSION,
+    manifest_kind: str = MANIFEST_KIND_FULL,
+    required_roles: Sequence[str] = DEFAULT_REQUIRED_ROLES,
+    allow_dirty_via_temp_clone: bool = False,
 ) -> dict[str, Any]:
-    """Generate one schema-v3 candidate directory under ``root``/``candidates``.
+    """Generate one candidate directory under ``root``/``candidates``.
 
     ``root`` is the archive root, ``repo`` the source repository working tree.
     Two explicit modes (docs/notes/phase29-archive-schema.md):
@@ -574,6 +777,18 @@ def create_candidate(
       is implied); sources come from the worktree, ``raw_worktree_hashes`` and
       ``dirty_files`` are recorded, and no git provenance is claimed.
 
+    ``candidate_schema_version`` selects the record schema: ``3`` (default, the
+    Phase29 layout) or ``4`` (Phase30). v4 additionally records a
+    ``source_manifest`` (``full``/``delta`` plus required roles), inherits
+    prompts/instruction/experiences from the parent snapshot chain instead of
+    archiving an empty policy, validates the snapshot strictly (all three role
+    prompts non-empty; generation aborts otherwise), and resolves
+    ``source_commit``/``diff_base_commit`` to full commit shas so labels can
+    never be archived. A dirty worktree is still refused in git_commit mode
+    unless ``allow_dirty_via_temp_clone`` is set, in which case sources are
+    read from a throwaway ``--shared`` clone checked out at ``source_commit``
+    (the user's uncommitted changes are never stashed or touched).
+
     Refuses to overwrite an existing version directory, fails on missing
     sources, and verifies ``candidate.diff`` round-trips (forward apply against
     diff_base blobs must reproduce the sources; reverse apply against source
@@ -583,6 +798,11 @@ def create_candidate(
     checks run in throwaway directories either way). Returns the summary the
     CLI prints.
     """
+    if candidate_schema_version not in (SCHEMA_VERSION, CANDIDATE_SCHEMA_VERSION):
+        raise ArchiveError(
+            f"candidate_schema_version must be {SCHEMA_VERSION} or "
+            f"{CANDIDATE_SCHEMA_VERSION}, got {candidate_schema_version}"
+        )
     if not source_files:
         raise ArchiveError("source file list is empty; nothing to archive")
     if source_origin not in (SOURCE_ORIGIN_GIT, SOURCE_ORIGIN_WORKTREE):
@@ -609,120 +829,181 @@ def create_candidate(
         raise CandidateExistsError(f"candidate version directory already exists: {folder}")
     parent_integrity = _parent_integrity(root, parent)
     _require_commit(repo, "diff_base_commit", diff_base_commit)
-    if source_origin == SOURCE_ORIGIN_GIT:
-        _require_commit(repo, "source_commit", source_commit)
-        _require_ancestor(repo, diff_base_commit, source_commit)
     dirty_files = worktree_dirty_files(repo)
-    if source_origin == SOURCE_ORIGIN_GIT and dirty_files:
-        raise DirtyWorktreeError(
-            f"tracked worktree is dirty ({len(dirty_files)} entries); "
-            "re-run with source_origin='worktree' to record it explicitly",
-            files=dirty_files,
-        )
-
-    if source_origin == SOURCE_ORIGIN_GIT:
-        sources, source_blobs = _read_commit_sources(repo, source_commit, source_files)
-        raw_worktree_hashes: dict[str, str] | None = None
-    else:
-        sources, raw_worktree_hashes = _read_sources(repo, source_files)
-        source_blobs = None
-    base_blobs = _read_base_blobs(repo, diff_base_commit, list(sources))
-    base_hashes = {
-        path: None if raw is None else hashlib.sha256(lf_text(raw).encode("utf-8")).hexdigest()
-        for path, raw in base_blobs.items()
-    }
-    snapshot_payload: dict[str, Any] = {
-        "schema_version": 1,
-        "version": version,
-        "parent": parent,
-        "status": "pending",
-        "instruction": instruction,
-        "prompts": _extract_prompts(sources),
-        "experiences": [dict(entry) for entry in (experiences or ())],
-    }
-    snapshot = validate_snapshot(snapshot_payload, root)
-    diff = _build_diff(
-        repo,
-        diff_base_commit,
-        list(sources),
-        source_commit=source_commit if source_origin == SOURCE_ORIGIN_GIT else None,
-    )
-    diff_sha256 = hashlib.sha256(diff).hexdigest()
-
-    if dry_run:
-        # The serializer is deterministic, so hashing the serialized bytes equals
-        # hashing the file that would be written; nothing is created on disk.
-        snapshot_file_sha256 = hashlib.sha256(_serialize(snapshot)).hexdigest()
-    else:
-        folder.mkdir(parents=True, exist_ok=False)
-        try:
-            snapshot_path = folder / SNAPSHOT_REF
-            snapshot_path.write_bytes(_serialize(snapshot))
-            snapshot_file_sha256 = hashlib.sha256(snapshot_path.read_bytes()).hexdigest()
-            (folder / "sources.json").write_bytes(_serialize(dict(sources)))
-            diff_path = folder / "candidate.diff"
-            diff_path.write_bytes(diff)
-            diff_sha256 = hashlib.sha256(diff_path.read_bytes()).hexdigest()
-        except BaseException:
-            with contextlib.suppress(OSError):
-                shutil.rmtree(folder)
-            raise
-
-    # Round-trip in throwaway directories; on failure nothing half-written is
-    # allowed to survive.
+    temp_clone: Path | None = None
+    effective_repo = repo
     try:
-        _verify_diff_roundtrip(
-            repo,
-            diff=diff,
-            base_blobs=base_blobs,
-            source_texts=sources,
-            source_blobs=source_blobs,
-        )
-    except BaseException:
-        if not dry_run:
-            with contextlib.suppress(OSError):
-                shutil.rmtree(folder)
-        raise
+        if source_origin == SOURCE_ORIGIN_GIT:
+            if candidate_schema_version >= CANDIDATE_SCHEMA_VERSION:
+                # v4 records commits, never labels: resolve to full shas first.
+                diff_base_commit = _resolved_commit(repo, "diff_base_commit", diff_base_commit)
+                source_commit = _resolved_commit(repo, "source_commit", source_commit)
+            else:
+                _require_commit(repo, "source_commit", source_commit)
+            _require_ancestor(repo, diff_base_commit, source_commit)
+            if dirty_files:
+                if allow_dirty_via_temp_clone:
+                    temp_clone = _temp_source_clone(repo, source_commit)
+                    effective_repo = temp_clone
+                else:
+                    raise DirtyWorktreeError(
+                        f"tracked worktree is dirty ({len(dirty_files)} entries); "
+                        "re-run with source_origin='worktree' to record it explicitly, or "
+                        "allow_dirty_via_temp_clone=True to read from a throwaway clone",
+                        files=dirty_files,
+                    )
 
-    payload = _candidate_payload(
-        version=version,
-        parent=parent,
-        snapshot_file_sha256=snapshot_file_sha256,
-        snapshot_canonical_sha256=canonical_sha256(snapshot),
-        diff_base_commit=diff_base_commit,
-        source_commit=source_commit or None,
-        source_origin=source_origin,
-        diff_sha256=diff_sha256,
-        sources=sources,
-        base_hashes=base_hashes,
-        raw_worktree_hashes=raw_worktree_hashes,
-        parent_integrity=parent_integrity,
-        dirty_files=dirty_files,
-    )
-    if not dry_run:
+        if source_origin == SOURCE_ORIGIN_GIT:
+            sources, source_blobs = _read_commit_sources(
+                effective_repo, source_commit, source_files
+            )
+            raw_worktree_hashes: dict[str, str] | None = None
+        else:
+            sources, raw_worktree_hashes = _read_sources(repo, source_files)
+            source_blobs = None
+        # In git_commit mode the candidate's provenance is the commit tree; a
+        # dirty worktree routed through a temp clone is not part of it.
+        payload_dirty_files = [] if temp_clone is not None else dirty_files
+        source_manifest: dict[str, Any] | None = None
+        if candidate_schema_version >= CANDIDATE_SCHEMA_VERSION:
+            source_manifest = _validate_source_manifest(
+                root,
+                parent=parent,
+                kind=manifest_kind,
+                required_roles=required_roles,
+                source_keys=set(sources),
+            )
+        base_blobs = _read_base_blobs(effective_repo, diff_base_commit, list(sources))
+        base_hashes = {
+            path: None if raw is None else hashlib.sha256(lf_text(raw).encode("utf-8")).hexdigest()
+            for path, raw in base_blobs.items()
+        }
+        if candidate_schema_version >= CANDIDATE_SCHEMA_VERSION:
+            inherited = _inherit_parent_snapshot(root, parent)
+            prompts = dict(inherited["prompts"])
+            for role, text in _extract_prompts(sources).items():
+                # Only a role whose agent source is archived this round overrides
+                # the inherited value; absent roles keep the parent text.
+                if text:
+                    prompts[role] = text
+            round_experiences = [dict(entry) for entry in (experiences or ())]
+            effective_instruction = instruction or inherited["instruction"]
+            effective_experiences = round_experiences or inherited["experiences"]
+            snapshot_payload_v4: dict[str, Any] = {
+                "schema_version": 1,
+                "version": version,
+                "parent": parent,
+                "status": "pending",
+                "instruction": effective_instruction,
+                "prompts": prompts,
+                "experiences": effective_experiences,
+            }
+            # Strict: an unactivatable candidate (empty role prompts) must abort
+            # generation, not ship (Phase30 T03).
+            snapshot = validate_snapshot(snapshot_payload_v4, root, strict=True)
+        else:
+            snapshot_payload = {
+                "schema_version": 1,
+                "version": version,
+                "parent": parent,
+                "status": "pending",
+                "instruction": instruction,
+                "prompts": _extract_prompts(sources),
+                "experiences": [dict(entry) for entry in (experiences or ())],
+            }
+            snapshot = validate_snapshot(snapshot_payload, root)
+        diff = _build_diff(
+            effective_repo,
+            diff_base_commit,
+            list(sources),
+            source_commit=source_commit if source_origin == SOURCE_ORIGIN_GIT else None,
+        )
+        diff_sha256 = hashlib.sha256(diff).hexdigest()
+
+        if dry_run:
+            # The serializer is deterministic, so hashing the serialized bytes equals
+            # hashing the file that would be written; nothing is created on disk.
+            snapshot_file_sha256 = hashlib.sha256(_serialize(snapshot)).hexdigest()
+        else:
+            folder.mkdir(parents=True, exist_ok=False)
+            try:
+                snapshot_path = folder / SNAPSHOT_REF
+                snapshot_path.write_bytes(_serialize(snapshot))
+                snapshot_file_sha256 = hashlib.sha256(snapshot_path.read_bytes()).hexdigest()
+                (folder / "sources.json").write_bytes(_serialize(dict(sources)))
+                diff_path = folder / "candidate.diff"
+                diff_path.write_bytes(diff)
+                diff_sha256 = hashlib.sha256(diff_path.read_bytes()).hexdigest()
+            except BaseException:
+                with contextlib.suppress(OSError):
+                    shutil.rmtree(folder)
+                raise
+
+        # Round-trip in throwaway directories; on failure nothing half-written is
+        # allowed to survive.
         try:
-            (folder / "candidate.json").write_bytes(_serialize(payload))
+            _verify_diff_roundtrip(
+                repo,
+                diff=diff,
+                base_blobs=base_blobs,
+                source_texts=sources,
+                source_blobs=source_blobs,
+            )
         except BaseException:
-            with contextlib.suppress(OSError):
-                shutil.rmtree(folder)
+            if not dry_run:
+                with contextlib.suppress(OSError):
+                    shutil.rmtree(folder)
             raise
 
-    summary: dict[str, Any] = {
-        "directory": str(folder),
-        "version": version,
-        "parent": parent,
-        "source_origin": source_origin,
-        "diff_base_commit": diff_base_commit,
-        "source_commit": source_commit or None,
-        "snapshot_file_sha256": snapshot_file_sha256,
-        "snapshot_canonical_sha256": canonical_sha256(snapshot),
-        "diff_sha256": diff_sha256,
-        "diff_bytes": len(diff),
-        "source_files": len(sources),
-        "dirty_worktree": bool(dirty_files),
-    }
-    if dirty_files:
-        summary["dirty_files"] = dirty_files
-    if dry_run:
-        summary["dry_run"] = True
-    return summary
+        payload = _candidate_payload(
+            version=version,
+            parent=parent,
+            snapshot_file_sha256=snapshot_file_sha256,
+            snapshot_canonical_sha256=canonical_sha256(snapshot),
+            diff_base_commit=diff_base_commit,
+            source_commit=source_commit or None,
+            source_origin=source_origin,
+            diff_sha256=diff_sha256,
+            sources=sources,
+            base_hashes=base_hashes,
+            raw_worktree_hashes=raw_worktree_hashes,
+            parent_integrity=parent_integrity,
+            dirty_files=payload_dirty_files,
+            candidate_schema_version=candidate_schema_version,
+            source_manifest=source_manifest,
+        )
+        if not dry_run:
+            try:
+                (folder / "candidate.json").write_bytes(_serialize(payload))
+            except BaseException:
+                with contextlib.suppress(OSError):
+                    shutil.rmtree(folder)
+                raise
+
+        summary: dict[str, Any] = {
+            "directory": str(folder),
+            "version": version,
+            "parent": parent,
+            "candidate_schema_version": candidate_schema_version,
+            "source_origin": source_origin,
+            "diff_base_commit": diff_base_commit,
+            "source_commit": source_commit or None,
+            "snapshot_file_sha256": snapshot_file_sha256,
+            "snapshot_canonical_sha256": canonical_sha256(snapshot),
+            "diff_sha256": diff_sha256,
+            "diff_bytes": len(diff),
+            "source_files": len(sources),
+            "dirty_worktree": bool(dirty_files),
+        }
+        if source_manifest is not None:
+            summary["source_manifest"] = source_manifest
+        if temp_clone is not None:
+            summary["temp_source_clone"] = True
+        if dirty_files:
+            summary["dirty_files"] = dirty_files
+        if dry_run:
+            summary["dry_run"] = True
+        return summary
+    finally:
+        if temp_clone is not None:
+            shutil.rmtree(temp_clone, ignore_errors=True)

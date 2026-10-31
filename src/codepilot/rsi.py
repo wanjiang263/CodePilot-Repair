@@ -92,7 +92,18 @@ def extract_prompts(sources: dict[str, str]) -> dict[str, str]:
     return prompts
 
 
-def validate_snapshot(snapshot: dict[str, Any], root: Path | None = None) -> dict[str, Any]:
+def validate_snapshot(
+    snapshot: dict[str, Any], root: Path | None = None, *, strict: bool = False
+) -> dict[str, Any]:
+    """Validate one policy snapshot.
+
+    ``strict`` (Phase30) is the activation-grade check for newly generated
+    candidates: all three role prompts must be present and non-empty. The
+    default remains lenient so historical schema-1 fixtures keep loading; the
+    strict gate is applied by the v4 generator (generation aborts) and by the
+    harness fail-closed path (a selected candidate without prompts refuses to
+    run instead of falling back to builtin defaults).
+    """
     if snapshot.get("schema_version") != 1:
         raise ValueError("unsupported policy snapshot")
     if not isinstance(snapshot.get("instruction", ""), str):
@@ -103,6 +114,15 @@ def validate_snapshot(snapshot: dict[str, Any], root: Path | None = None) -> dic
         for k, v in prompts.items()
     ):
         raise ValueError("prompts must be versioned role text, not executable objects")
+    if strict:
+        missing_or_empty = sorted(
+            role for role in ("coder", "planner", "reviewer") if not prompts.get(role)
+        )
+        if missing_or_empty:
+            raise ValueError(
+                "strict snapshot requires non-empty prompts for roles coder/planner/reviewer; "
+                f"missing or empty: {missing_or_empty}"
+            )
     entries = snapshot.get("experiences", [])
     if not isinstance(entries, list) or len(entries) > 100:
         raise ValueError("experiences must be a bounded list")

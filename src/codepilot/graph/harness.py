@@ -8,12 +8,72 @@ from typing import Any
 from codepilot.graph.deps import Deps
 from codepilot.graph.evidence import failure_summary, verification_view
 from codepilot.observability.lifecycle import snapshot_hash
-from codepilot.rsi import archive_root, load_selection, read_json, retrieve, snapshot_sources
+from codepilot.rsi import (
+    archive_root,
+    load_selection,
+    read_json,
+    retrieve,
+    snapshot_sources,
+    version_dir,
+)
 from codepilot.schemas.state import RepairState
 
 
 class SnapshotIdentityError(ValueError):
     """A resumed task must never silently switch its fixed policy."""
+
+
+_SELECTION_ROLES = ("coder", "planner", "reviewer")
+
+
+def _load_selection_fail_closed(deps: Deps) -> dict[str, Any]:
+    """Load the policy selection; a selected candidate must be activatable.
+
+    Phase30 fail-closed gate: when no ``active.json`` pointer exists, the
+    builtin defaults apply (code default prompts are allowed only on this
+    path). When a pointer exists but the candidate snapshot is unreadable,
+    invalid, or missing any of the three role prompts, this raises
+    ``SnapshotIdentityError`` naming the candidate, the missing roles and the
+    snapshot path — it must never silently fall back to ``deps.*.system_prompt``
+    (the v3 defect: a candidate with ``prompts={}`` would have run with code
+    defaults while claiming candidate provenance).
+    """
+    pointer = archive_root() / "active.json"
+    if not pointer.exists():
+        return {
+            "schema_version": 1,
+            "version": "builtin-phase26-v1",
+            "parent": None,
+            "status": "pending",
+            "instruction": "",
+            "experiences": [],
+        }
+    try:
+        # Pass the root explicitly: load_selection's own default would consult
+        # rsi.archive_root(), which is not the harness's (possibly overridden)
+        # archive root.
+        selection = load_selection(archive_root())
+    except (OSError, ValueError, KeyError) as exc:
+        deps.lifecycle.emit("policy_load_failed", error=str(exc), fallback="fail_closed")
+        raise SnapshotIdentityError(
+            f"active candidate selection at {pointer} is unusable ({exc}); "
+            "refusing to fall back to builtin defaults"
+        ) from exc
+    prompts = selection.get("prompts", {})
+    missing = [role for role in _SELECTION_ROLES if not prompts.get(role)]
+    if missing:
+        version = selection.get("version")
+        try:
+            snapshot_path = version_dir(archive_root(), str(version)) / "snapshot.json"
+        except ValueError as exc:
+            raise SnapshotIdentityError(
+                f"active candidate selection has an invalid version {version!r}: {exc}"
+            ) from exc
+        raise SnapshotIdentityError(
+            f"candidate {version!r} is missing prompts for roles {missing}; "
+            f"snapshot: {snapshot_path}; refusing builtin prompt fallback"
+        )
+    return selection
 
 
 def begin(state: RepairState, deps: Deps, stage: str) -> RepairState:
@@ -49,17 +109,10 @@ def _begin(state: RepairState, deps: Deps, stage: str) -> RepairState:
                     "fixed policy snapshot identity mismatch; refusing in-flight switch"
                 )
         else:
-            try:
-                selection = load_selection()
-            except (OSError, ValueError, KeyError) as exc:
-                deps.lifecycle.emit("policy_load_failed", error=str(exc), fallback="builtin")
-                selection = {
-                    "schema_version": 1,
-                    "version": "builtin-phase26-v1",
-                    "status": "pending",
-                    "instruction": "",
-                    "experiences": [],
-                }
+            # Phase30: no-pointer -> builtin defaults; pointer present but the
+            # candidate cannot deliver role prompts -> SnapshotIdentityError
+            # (fail closed, no silent code-prompt fallback).
+            selection = _load_selection_fail_closed(deps)
             try:
                 sources = snapshot_sources()
             except OSError as exc:
