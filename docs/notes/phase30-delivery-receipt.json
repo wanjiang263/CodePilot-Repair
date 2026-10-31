@@ -1,0 +1,56 @@
+{
+  "tool": "phase30_delivery_receipt",
+  "generated_at": "2026-10-31",
+  "purpose": "Phase30 交付回执：以独立提交记录全部真实提交哈希（不自引用 SELF；修复 Phase28/29 遗留的 final_docs_commit_id=null/SELF 问题，方法同 phase29 的第三笔回执提交）",
+  "commits": {
+    "source_commit": "8e1f1f47467427b97aa9e02c076e803500d9f102",
+    "source_commit_message": "feat: make candidates activatable and self-verifying, fix re-export stale edges",
+    "candidate_commit": "ffa97d983e35618443b6c79d22bccdb6fa96fa79",
+    "candidate_commit_message": "feat: archive phase30-candidate-v4 (schema v4, pending)",
+    "receipt_commit": "c939cbc231dd9756db24c535b0c416e5acc117ec",
+    "receipt_commit_note": "receipt file configs/harness/receipts/phase30-candidate-v4.json final content (255f13c created it; c939cbc re-pinned the LF-normalized manifest bytes)",
+    "corrections_commit": "255f13c6cebd6d47707396aa87c4f47a55cb121c",
+    "docstring_commit": "6e466a8296b4271c2c0b6ed4d64588fde212b24a",
+    "test_contract_commit": "67e64286e2a25455510775797eb2a6693ca2521e",
+    "final_docs_commit": "33b4c7ed700b885fd6f4aee764b250acceed4d90",
+    "base_before_round": "6f023fa304d47b71d42c9066cc1b30daff7759fd",
+    "branch": "codex/phase12-real-issue-pilot",
+    "pushed": false,
+    "pr_created": false
+  },
+  "candidate": {
+    "path": "configs/harness/candidates/phase30-candidate-v4",
+    "schema_version": 4,
+    "candidate_schema_version": 4,
+    "parent": "phase29-candidate-v3",
+    "status": "pending",
+    "source_origin": "git_commit",
+    "source_commit": "8e1f1f47467427b97aa9e02c076e803500d9f102",
+    "diff_base_commit": "b17019beb817b92b1fbb3da879774a231d69219d",
+    "source_files": 96,
+    "candidate_tree_sha256": "8f452b7702fd85eb327e4ccd7131ca1a5decba21692f8d9a3214ab4b126e3f69",
+    "historical_manifest_sha256": "5ec24891a9dc02c656c78d0fa7b28b0e0167e23f12b43d1a1313151231d184e2",
+    "checks_passed": 22,
+    "verifier": "scripts/phase28_archive_verify.py --all --ignore-raw-drift --receipt configs/harness/receipts/phase30-candidate-v4.json --expect-receipt <witness> -> exit 0, witness=verified, historical_integrity=ok"
+  },
+  "external_witness": {
+    "receipt_sha256": "b9a24285bd0056da5a2aa20c3dab39516ea16a4c6186e16b27f973ed99d02c7d",
+    "usage": "hold this sha outside the repository; verify --receipt configs/harness/receipts/phase30-candidate-v4.json --expect-receipt <sha> detects any later modification of the receipt, the candidate files, or the historical manifest (including committed tampers)",
+    "note": "regenerating historical-baseline.json invalidates this witness by design; issue a new receipt then"
+  },
+  "p0_summary": {
+    "candidate_activatable": "closed (v4 prompts non-empty via parent-chain inheritance, strict generation gate, harness fail closed)",
+    "archive_self_verifying": "closed (12 named receipt checks, 7 tamper scenarios intercepted)",
+    "index_reexport": "closed (import-target-set fallback; probe/digest equivalence; no perf regression)"
+  },
+  "tests_summary": "unit 3009 passed / 2 platform skips; integration 125 passed; graph 250 passed + 16 known pre-existing failures (docs/notes/phase30-known-failures.json); frontend typecheck/eslint/vitest/build all green",
+  "guardrails": {
+    "real_model_requests": 0,
+    "new_cost_cny": 0,
+    "active_pointer": false,
+    "pushed": false,
+    "pr_created": false,
+    "docker_run": false,
+    "deleted_evidence_files": 0
+  }
+}
