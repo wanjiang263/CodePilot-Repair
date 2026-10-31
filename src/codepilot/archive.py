@@ -1,4 +1,4 @@
-"""Phase29 candidate archive generator: the controlled generation path to schema v3.
+"""Candidate archive generator: the controlled generation path to schema v3/v4.
 
 ``rsi.archive_candidate`` writes v1 ``candidate.json`` without snapshot/diff
 integrity fields, and historical records mix two undeclared snapshot hash rules
@@ -18,11 +18,20 @@ canonical JSON. The explicit ``worktree`` mode (the only path that tolerates a
 dirty tree) reads the worktree, records ``raw_worktree_hashes``/``dirty_files``
 and claims no git provenance (``source_commit`` is null).
 
+Schema v4 (Phase30) makes candidates activatable: a ``source_manifest``
+(``full``/``delta``) whose ``full`` set must cover every ancestor candidate's
+sources plus the required role agent files, snapshot inheritance of
+prompts/instruction/experiences along the parent chain (repairing the v3
+empty-snapshot defect), strict snapshot validation at generation time, commit
+fields resolved to full shas, and a throwaway ``--shared`` clone path for
+generating from a dirty worktree without touching it. The external receipt and
+witness layer lives in ``scripts/phase28_archive_verify.py``.
+
 Directory layout (exactly four files; no active pointer is ever created here):
 
 - ``snapshot.json``  policy snapshot, still ``schema_version=1`` so
   ``rsi.validate_snapshot`` / ``rsi.load_selection`` keep working;
-- ``candidate.json`` provenance and integrity record, ``schema_version=3``;
+- ``candidate.json`` provenance and integrity record, ``schema_version`` 3 or 4;
 - ``sources.json``   repo-relative path -> LF-normalized source text;
 - ``candidate.diff`` raw bytes of ``git diff --binary`` (commit-vs-commit in
   ``git_commit`` mode, diff_base-vs-worktree in ``worktree`` mode).
