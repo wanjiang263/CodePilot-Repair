@@ -1,0 +1,381 @@
+{
+  "tool": "phase31-static-final",
+  "files": [
+    "scripts/phase28_archive.py",
+    "scripts/phase28_archive_verify.py",
+    "scripts/phase31_receipt.py",
+    "src/codepilot/archive.py",
+    "tests/graph/_phase9_resume_worker.py",
+    "tests/graph/harness.py",
+    "tests/graph/test_path_sandbox_error.py",
+    "tests/graph/test_phase11_closure.py",
+    "tests/graph/test_phase12_closure_admission.py",
+    "tests/graph/test_phase8_integration.py",
+    "tests/graph/test_phase9_docker.py",
+    "tests/graph/test_phase9_regression.py",
+    "tests/graph/test_phase9_resume.py",
+    "tests/graph/test_synthetic_prompt_isolation.py",
+    "tests/graph/test_termination.py",
+    "tests/integration/phase28/test_phase28_archive_verify_loop.py",
+    "tests/unit/test_phase28_archive_verify.py",
+    "tests/unit/test_phase29_archive_verify.py",
+    "tests/unit/test_phase31_archive_manifest.py",
+    "tests/unit/test_phase31_archive_verify.py",
+    "tests/unit/test_phase31_receipt.py"
+  ],
+  "file_count": 21,
+  "checks": [
+    {
+      "name": "AST parse",
+      "files": [
+        "scripts/phase28_archive.py",
+        "scripts/phase28_archive_verify.py",
+        "scripts/phase31_receipt.py",
+        "src/codepilot/archive.py",
+        "tests/graph/_phase9_resume_worker.py",
+        "tests/graph/harness.py",
+        "tests/graph/test_path_sandbox_error.py",
+        "tests/graph/test_phase11_closure.py",
+        "tests/graph/test_phase12_closure_admission.py",
+        "tests/graph/test_phase8_integration.py",
+        "tests/graph/test_phase9_docker.py",
+        "tests/graph/test_phase9_regression.py",
+        "tests/graph/test_phase9_resume.py",
+        "tests/graph/test_synthetic_prompt_isolation.py",
+        "tests/graph/test_termination.py",
+        "tests/integration/phase28/test_phase28_archive_verify_loop.py",
+        "tests/unit/test_phase28_archive_verify.py",
+        "tests/unit/test_phase29_archive_verify.py",
+        "tests/unit/test_phase31_archive_manifest.py",
+        "tests/unit/test_phase31_archive_verify.py",
+        "tests/unit/test_phase31_receipt.py"
+      ],
+      "file_count": 21,
+      "exit_code": 0,
+      "errors": []
+    },
+    {
+      "name": "ruff check",
+      "command": [
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\ruff.exe",
+        "check",
+        "scripts/phase28_archive.py",
+        "scripts/phase28_archive_verify.py",
+        "scripts/phase31_receipt.py",
+        "src/codepilot/archive.py",
+        "tests/graph/_phase9_resume_worker.py",
+        "tests/graph/harness.py",
+        "tests/graph/test_path_sandbox_error.py",
+        "tests/graph/test_phase11_closure.py",
+        "tests/graph/test_phase12_closure_admission.py",
+        "tests/graph/test_phase8_integration.py",
+        "tests/graph/test_phase9_docker.py",
+        "tests/graph/test_phase9_regression.py",
+        "tests/graph/test_phase9_resume.py",
+        "tests/graph/test_synthetic_prompt_isolation.py",
+        "tests/graph/test_termination.py",
+        "tests/integration/phase28/test_phase28_archive_verify_loop.py",
+        "tests/unit/test_phase28_archive_verify.py",
+        "tests/unit/test_phase29_archive_verify.py",
+        "tests/unit/test_phase31_archive_manifest.py",
+        "tests/unit/test_phase31_archive_verify.py",
+        "tests/unit/test_phase31_receipt.py"
+      ],
+      "exit_code": 0,
+      "log": ".codex-pytest-tmp/phase31/ruff-check.log",
+      "output": "All checks passed!\n"
+    },
+    {
+      "name": "ruff format",
+      "command": [
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\ruff.exe",
+        "format",
+        "--check",
+        "scripts/phase28_archive.py",
+        "scripts/phase28_archive_verify.py",
+        "scripts/phase31_receipt.py",
+        "src/codepilot/archive.py",
+        "tests/graph/_phase9_resume_worker.py",
+        "tests/graph/harness.py",
+        "tests/graph/test_path_sandbox_error.py",
+        "tests/graph/test_phase11_closure.py",
+        "tests/graph/test_phase12_closure_admission.py",
+        "tests/graph/test_phase8_integration.py",
+        "tests/graph/test_phase9_docker.py",
+        "tests/graph/test_phase9_regression.py",
+        "tests/graph/test_phase9_resume.py",
+        "tests/graph/test_synthetic_prompt_isolation.py",
+        "tests/graph/test_termination.py",
+        "tests/integration/phase28/test_phase28_archive_verify_loop.py",
+        "tests/unit/test_phase28_archive_verify.py",
+        "tests/unit/test_phase29_archive_verify.py",
+        "tests/unit/test_phase31_archive_manifest.py",
+        "tests/unit/test_phase31_archive_verify.py",
+        "tests/unit/test_phase31_receipt.py"
+      ],
+      "exit_code": 0,
+      "log": ".codex-pytest-tmp/phase31/ruff-format.log",
+      "output": "21 files already formatted\n"
+    },
+    {
+      "name": "mypy (src/scripts files only, not whole repository)",
+      "command": [
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe",
+        "-m",
+        "mypy",
+        "scripts/phase28_archive.py",
+        "scripts/phase28_archive_verify.py",
+        "scripts/phase31_receipt.py",
+        "src/codepilot/archive.py"
+      ],
+      "exit_code": 0,
+      "log": ".codex-pytest-tmp/phase31/mypy-final.log",
+      "output": "Success: no issues found in 4 source files\r\n"
+    },
+    {
+      "name": "git diff --check",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 2,
+      "log": ".codex-pytest-tmp/phase31/git-diff-check-final.log",
+      "output": "box.run_calls[3][1] == (TARGET,)\r\ntests/graph/test_phase8_integration.py:187: trailing whitespace.\n+    assert state.attempts[-1].target_test_source == \"planner\"\r\ntests/graph/test_phase8_integration.py:188: trailing whitespace.\n+    assert state.attempts[-1].target_tests == [TARGET]\r\ntests/graph/test_phase9_docker.py:26: trailing whitespace.\n+    def base_repo(root, *, include_tests: bool = True):\r\ntests/graph/test_termination.py:289: trailing whitespace.\n+        include_existing_tests=False,\r\n",
+      "note": "CR-at-EOL findings on originally-CRLF files are expected and separately recorded; the CRLF-aware check is the authoritative line-ending gate"
+    },
+    {
+      "name": "CRLF-aware diff check",
+      "command": [
+        "git",
+        "-c",
+        "core.whitespace=cr-at-eol",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "log": ".codex-pytest-tmp/phase31/CRLF-aware-diff-check-final.log",
+      "output": "",
+      "note": "authoritative line-ending gate (core.whitespace=cr-at-eol)"
+    }
+  ],
+  "line_endings": [
+    {
+      "file": "scripts/phase28_archive.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 150,
+      "current_crlf": 0,
+      "current_lf": 151,
+      "mixed_current": false
+    },
+    {
+      "file": "scripts/phase28_archive_verify.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 1691,
+      "current_crlf": 0,
+      "current_lf": 1972,
+      "mixed_current": false
+    },
+    {
+      "file": "scripts/phase31_receipt.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 0,
+      "current_crlf": 0,
+      "current_lf": 130,
+      "mixed_current": false
+    },
+    {
+      "file": "src/codepilot/archive.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 1018,
+      "current_crlf": 0,
+      "current_lf": 1270,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/graph/_phase9_resume_worker.py",
+      "baseline_crlf": 73,
+      "baseline_lf": 0,
+      "current_crlf": 77,
+      "current_lf": 0,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/graph/harness.py",
+      "baseline_crlf": 685,
+      "baseline_lf": 0,
+      "current_crlf": 689,
+      "current_lf": 0,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/graph/test_path_sandbox_error.py",
+      "baseline_crlf": 195,
+      "baseline_lf": 0,
+      "current_crlf": 197,
+      "current_lf": 0,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/graph/test_phase11_closure.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 1154,
+      "current_crlf": 0,
+      "current_lf": 1165,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/graph/test_phase12_closure_admission.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 572,
+      "current_crlf": 0,
+      "current_lf": 573,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/graph/test_phase8_integration.py",
+      "baseline_crlf": 247,
+      "baseline_lf": 0,
+      "current_crlf": 250,
+      "current_lf": 0,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/graph/test_phase9_docker.py",
+      "baseline_crlf": 162,
+      "baseline_lf": 0,
+      "current_crlf": 162,
+      "current_lf": 0,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/graph/test_phase9_regression.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 480,
+      "current_crlf": 0,
+      "current_lf": 480,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/graph/test_phase9_resume.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 65,
+      "current_crlf": 0,
+      "current_lf": 74,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/graph/test_synthetic_prompt_isolation.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 134,
+      "current_crlf": 0,
+      "current_lf": 136,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/graph/test_termination.py",
+      "baseline_crlf": 412,
+      "baseline_lf": 0,
+      "current_crlf": 413,
+      "current_lf": 0,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/integration/phase28/test_phase28_archive_verify_loop.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 323,
+      "current_crlf": 0,
+      "current_lf": 326,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/unit/test_phase28_archive_verify.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 700,
+      "current_crlf": 0,
+      "current_lf": 712,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/unit/test_phase29_archive_verify.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 522,
+      "current_crlf": 0,
+      "current_lf": 531,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/unit/test_phase31_archive_manifest.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 0,
+      "current_crlf": 0,
+      "current_lf": 224,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/unit/test_phase31_archive_verify.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 0,
+      "current_crlf": 0,
+      "current_lf": 164,
+      "mixed_current": false
+    },
+    {
+      "file": "tests/unit/test_phase31_receipt.py",
+      "baseline_crlf": 0,
+      "baseline_lf": 0,
+      "current_crlf": 0,
+      "current_lf": 145,
+      "mixed_current": false
+    }
+  ],
+  "mixed_ending_files": [],
+  "credential_scan": {
+    "tool": "phase31-diff-only-credential-scan",
+    "base": "a97620d3380d946abe5bab90656fbadf5db1c7a8",
+    "files": [
+      "scripts/phase28_archive.py",
+      "scripts/phase28_archive_verify.py",
+      "scripts/phase31_receipt.py",
+      "src/codepilot/archive.py",
+      "tests/graph/_phase9_resume_worker.py",
+      "tests/graph/harness.py",
+      "tests/graph/test_path_sandbox_error.py",
+      "tests/graph/test_phase11_closure.py",
+      "tests/graph/test_phase12_closure_admission.py",
+      "tests/graph/test_phase8_integration.py",
+      "tests/graph/test_phase9_docker.py",
+      "tests/graph/test_phase9_regression.py",
+      "tests/graph/test_phase9_resume.py",
+      "tests/graph/test_synthetic_prompt_isolation.py",
+      "tests/graph/test_termination.py",
+      "tests/integration/phase28/test_phase28_archive_verify_loop.py",
+      "tests/unit/test_phase28_archive_verify.py",
+      "tests/unit/test_phase29_archive_verify.py",
+      "tests/unit/test_phase31_archive_manifest.py",
+      "tests/unit/test_phase31_archive_verify.py",
+      "tests/unit/test_phase31_receipt.py"
+    ],
+    "file_count": 21,
+    "patterns": [
+      "private_key",
+      "openai_key",
+      "aws_access_key",
+      "embedded_url_password"
+    ],
+    "added_lines_scanned": 1355,
+    "findings": [],
+    "exit_code": 0,
+    "note": "Only added lines since the actual start commit, including untracked new files. Values are never printed."
+  },
+  "frontend": {
+    "changed_files": [],
+    "command": "git diff --name-only 8e1f1f47467427b97aa9e02c076e803500d9f102..HEAD -- web/src",
+    "result": "0 files",
+    "typecheck": "conditionally skipped: no web/src change",
+    "eslint": "conditionally skipped: no web/src change",
+    "vitest": "conditionally skipped: no web/src change",
+    "note": "Phase30 frontend results are NOT claimed as this round's evidence"
+  },
+  "scope_note": "21 changed Python files (13 tracked modifications carried from the Phase31 working tree + 4 new R1 fixture files + 1 integration expectation update + 3 untracked Phase31 unit files); mypy only the four changed src/scripts files, not the whole repository."
+}
