@@ -1,0 +1,2259 @@
+diff --git a/scripts/phase28_archive.py b/scripts/phase28_archive.py
+index 70f7959..3c5cdaf 100644
+--- a/scripts/phase28_archive.py
++++ b/scripts/phase28_archive.py
+@@ -87,8 +87,9 @@ def main(argv: Sequence[str] | None = None) -> int:
+     )
+     parser.add_argument(
+         "--schema-version",
++        "--candidate-schema-version",
+         type=int,
+-        choices=(3, 4),
++        choices=(3, 4, 5),
+         default=4,
+         help="candidate record schema (default: 4, Phase30; 3 keeps the Phase29 layout)",
+     )
+@@ -106,7 +107,7 @@ def main(argv: Sequence[str] | None = None) -> int:
+     )
+     parser.add_argument(
+         "--source-list",
+-        required=True,
++        default=None,
+         help="JSON file (array of repo-relative paths) or comma-separated paths",
+     )
+     parser.add_argument("--archive-root", type=Path, default=None, help="archive root directory")
+@@ -128,7 +129,7 @@ def main(argv: Sequence[str] | None = None) -> int:
+             parent=args.parent or None,
+             diff_base_commit=args.diff_base,
+             source_commit=args.source_commit,
+-            source_files=parse_source_list(args.source_list),
++            source_files=parse_source_list(args.source_list) if args.source_list else None,
+             source_origin=args.source_origin,
+             allow_dirty=args.allow_dirty,
+             dry_run=args.dry_run,
+diff --git a/scripts/phase28_archive_verify.py b/scripts/phase28_archive_verify.py
+index 6ee0920..332e25d 100644
+--- a/scripts/phase28_archive_verify.py
++++ b/scripts/phase28_archive_verify.py
+@@ -62,8 +62,14 @@ from codepilot.archive import (
+     SNAPSHOT_HASH_RULE,
+     _apply_patch_in_temp,
+     _candidate_source_set,
++    _extract_prompts,
++    _inherit_parent_snapshot,
++    _parent_integrity,
++    candidate_tree_sha256,
+     canonical_sha256,
++    derive_v5_manifest,
+     lf_text,
++    verify_v5_roundtrip,
+ )
+ from codepilot.rsi import read_json, validate_snapshot, version_dir
+ 
+@@ -72,7 +78,7 @@ DEFAULT_ARCHIVE_ROOT = REPO_ROOT / "configs" / "harness"
+ 
+ FILE_BYTES_RULE = "file_bytes"
+ CANONICAL_RULE = "canonical_json_snapshot"
+-NEW_SCHEMA_VERSIONS = (2, 3, 4)
++NEW_SCHEMA_VERSIONS = (2, 3, 4, 5)
+ SOURCE_ORIGIN_GIT = "git_commit"
+ SOURCE_ORIGIN_WORKTREE = "worktree"
+ HISTORICAL_MANIFEST_NAME = "historical-baseline.json"
+@@ -414,6 +420,8 @@ def verify_new_archive(
+     ignore_raw_drift: bool,
+ ) -> dict[str, Any]:
+     """Dispatch on schema_version: v3/v4 source binding, or the v2 rule set."""
++    if candidate.get("schema_version") == 5:
++        return _verify_v5_archive(folder, candidate, archive_root=archive_root, repo=repo)
+     if candidate.get("schema_version") in (3, 4):
+         return _verify_v3_archive(
+             folder,
+@@ -427,8 +435,168 @@ def verify_new_archive(
+     )
+ 
+ 
++def _verify_v5_archive(
++    folder: Path,
++    candidate: dict[str, Any],
++    *,
++    archive_root: Path,
++    repo: Path,
++) -> dict[str, Any]:
++    checks: list[dict[str, Any]] = []
++
++    def record(name: str, ok: bool, detail: str) -> None:
++        checks.append(_pass(name, detail) if ok else _failure(name, detail))
++
++    _check_declared_metadata(candidate, folder, record)
++    file_hash, canonical_hash = _check_snapshot_hashes(folder, candidate, record)
++    sources = _check_sources_json(folder, candidate, record)
++    _check_snapshot_strict_roles(folder, record)
++    _check_not_active(str(candidate.get("version")), archive_root, record)
++    for name in ("active.json", "active.next.json"):
++        record("no_active_pointer", not (archive_root / name).exists(), f"{name} must be absent")
++    record("status_pending", candidate.get("status") == "pending", "v5 status must be pending")
++    record(
++        "candidate_schema_version",
++        candidate.get("candidate_schema_version") == 5,
++        "candidate_schema_version must equal schema_version=5",
++    )
++    seal = {k: v for k, v in candidate.items() if k != "candidate_payload_sha256"}
++    record(
++        "candidate_payload_sha256",
++        canonical_sha256(seal) == candidate.get("candidate_payload_sha256"),
++        "canonical payload seal",
++    )
++    record(
++        "source_origin",
++        candidate.get("source_origin") == SOURCE_ORIGIN_GIT
++        and candidate.get("dirty_worktree") is False
++        and "raw_worktree_hashes" not in candidate
++        and "dirty_files" not in candidate,
++        "v5 requires clean git_commit provenance",
++    )
++    source, base = candidate.get("source_commit"), candidate.get("diff_base_commit")
++    for field, commit in (("source_commit", source), ("diff_base_commit", base)):
++        record(
++            field,
++            isinstance(commit, str)
++            and re.fullmatch(r"[0-9a-f]{40}", commit) is not None
++            and _git_bytes(repo, ["rev-parse", "--verify", f"{commit}^{{commit}}"]) is not None,
++            f"{field} must be a full commit SHA",
++        )
++    record(
++        "source_commit_ancestor",
++        _git_bytes(repo, ["merge-base", "--is-ancestor", str(base), str(source)]) is not None,
++        "diff_base must be ancestor of source_commit",
++    )
++    try:
++        declared_manifest = candidate.get("source_manifest")
++        if not isinstance(declared_manifest, dict):
++            raise ValueError("source_manifest must be an object with all schema 5 fields")
++        kind = declared_manifest.get("kind")
++        if not isinstance(kind, str):
++            raise ValueError("source_manifest.kind must be full or delta")
++        expected_parent = _parent_integrity(archive_root, candidate.get("parent"), strict=True)
++        record(
++            "parent_integrity_matches",
++            candidate.get("parent_integrity") == expected_parent,
++            "parent declaration must equal recomputed strict integrity record",
++        )
++        manifest, archived, resolved = derive_v5_manifest(
++            archive_root,
++            repo,
++            parent=candidate.get("parent"),
++            kind=kind,
++            diff_base=str(base),
++            source_commit=str(source),
++        )
++        actual_manifest = candidate.get("source_manifest")
++        record(
++            "source_manifest_complete",
++            actual_manifest == manifest,
++            "all v5 manifest fields must exactly equal git/parent derivation",
++        )
++        record(
++            "resolved_source_files",
++            candidate.get("resolved_source_files") == len(resolved),
++            "resolved_source_files must equal complete resolved source count",
++        )
++        hashes = candidate.get("source_hashes", {})
++        record(
++            "source_manifest_exact_set",
++            set(hashes) == archived,
++            f"missing={sorted(archived - set(hashes))} extra={sorted(set(hashes) - archived)}",
++        )
++        for field in ("changed_files", "deleted_files", "scope_excluded_changed_files"):
++            record(
++                field,
++                isinstance(actual_manifest, dict) and actual_manifest.get(field) == manifest[field],
++                f"{field} must equal git diff -M",
++            )
++        blob_hashes = {
++            p: _lf_blob_sha256(_git_bytes(repo, ["cat-file", "blob", f"{source}:{p}"]))
++            for p in archived
++        }
++        record(
++            "source_commit_blob",
++            hashes == blob_hashes and all(blob_hashes.values()),
++            "source_hashes must equal archived source_commit LF blob hashes",
++        )
++        snapshot = read_json(folder / "snapshot.json")
++        prompts = dict(_inherit_parent_snapshot(archive_root, candidate.get("parent"))["prompts"])
++        prompts.update(
++            {role: text for role, text in _extract_prompts(sources or {}).items() if text}
++        )
++        record(
++            "snapshot_source_binding",
++            snapshot.get("prompts") == prompts
++            and all(
++                snapshot.get(field) == candidate.get(field)
++                for field in ("version", "parent", "status")
++            ),
++            "snapshot identity/status and per-role prompts must match source and inheritance",
++        )
++        paths = resolved | set(manifest["deleted_files"])
++        expected_base = {
++            p: _lf_blob_sha256(_git_bytes(repo, ["cat-file", "blob", f"{base}:{p}"]))
++            for p in sorted(paths)
++        }
++        record(
++            "base_commit_blob",
++            candidate.get("base_hashes") == expected_base,
++            "base_hashes bind complete resolved tree plus tombstones",
++        )
++        diff = (folder / "candidate.diff").read_bytes()
++        record(
++            "diff_sha256", _sha256_bytes(diff) == candidate.get("diff_sha256"), "diff bytes hash"
++        )
++        verify_v5_roundtrip(
++            repo, str(base), str(source), diff, resolved, set(manifest["deleted_files"])
++        )
++        record("diff_forward_apply", True, "complete source tree and tombstones reproduced")
++        record("diff_reverse_apply", True, "complete base tree restored")
++    except (OSError, ValueError, TypeError, KeyError) as exc:
++        record("v5_contract", False, str(exc))
++    failures = [check for check in checks if not check["ok"]]
++    return {
++        "version": folder.name,
++        "archive_class": "new",
++        "schema_version": 5,
++        "status": "failed" if failures else "ok",
++        "checks": checks,
++        "failures": failures,
++        "ok": not failures,
++        "snapshot_file_sha256": file_hash,
++        "snapshot_canonical_sha256": canonical_hash,
++        "raw_drift": {},
++    }
++
++
+ def _check_v2_reverse_apply(
+-    candidate: dict[str, Any], repo: Path, diff: bytes, record: Any
++    candidate: dict[str, Any],
++    repo: Path,
++    diff: bytes,
++    record: Any,
++    sources: Mapping[str, Any] | None = None,
+ ) -> None:
+     """v2 reverse apply, drift-immune when possible.
+ 
+@@ -472,7 +640,23 @@ def _check_v2_reverse_apply(
+                 f"{source_commit[:12]} blob tree ({len(blobs)} paths)",
+             )
+             return
+-    _check_worktree_reverse_apply(repo, diff, record)
++    if sources:
++        archived: dict[str, bytes | None] = {
++            path: text.encode("utf-8") for path, text in sources.items() if isinstance(text, str)
++        }
++        base = {
++            path: _git_bytes(
++                repo, ["cat-file", "blob", f"{candidate.get('diff_base_commit')}:{path}"]
++            )
++            for path in archived
++        }
++        _check_temp_reverse_apply(archived, base, diff, record)
++    else:
++        record(
++            "diff_reverse_apply",
++            False,
++            "archived source bytes unavailable; no live worktree fallback",
++        )
+ 
+ 
+ def _verify_v2_archive(
+@@ -492,6 +676,7 @@ def _verify_v2_archive(
+ 
+     _check_declared_metadata(candidate, folder, record)
+     file_hash, canonical_hash = _check_snapshot_hashes(folder, candidate, record)
++    sources = _check_sources_json(folder, candidate, record)
+ 
+     diff_path = folder / "candidate.diff"
+     if not diff_path.is_file():
+@@ -508,15 +693,23 @@ def _verify_v2_archive(
+         if not diff.strip():
+             record("diff_reverse_apply", True, "empty diff is trivially reversible")
+         else:
+-            _check_v2_reverse_apply(candidate, repo, diff, record)
++            _check_v2_reverse_apply(candidate, repo, diff, record, sources)
+ 
+-    _check_sources_json(folder, candidate, record)
+     raw_drift = _check_raw_worktree_hashes(candidate, repo, ignore_raw_drift, record)
+     _check_parent_integrity(candidate, archive_root, record)
+     _check_not_active(version, archive_root, record)
+ 
+     failures = [check for check in checks if not check["ok"]]
++    legacy_reasons = []
++    if candidate.get("schema_version") == 3:
++        legacy_reasons.append("schema<4")
++        snapshot = read_json(folder / "snapshot.json")
++        if any(not snapshot.get("prompts", {}).get(role) for role in DEFAULT_REQUIRED_ROLES):
++            legacy_reasons.append("empty_role_prompts")
+     return {
++        "status": "legacy_non_strict" if legacy_reasons else ("ok" if not failures else "failed"),
++        "reasons": legacy_reasons,
++        "legacy_worktree_drift": raw_drift if ignore_raw_drift else {},
+         "version": version or folder.name,
+         "archive_class": "new",
+         "schema_version": candidate.get("schema_version"),
+@@ -827,7 +1020,12 @@ def _verify_v3_archive(
+                 }
+                 _check_temp_reverse_apply(source_blobs, base_blobs, diff, record)
+             else:
+-                _check_worktree_reverse_apply(repo, diff, record)
++                archived_blobs: dict[str, bytes | None] = {
++                    path: text.encode("utf-8")
++                    for path, text in (sources_payload or {}).items()
++                    if isinstance(text, str)
++                }
++                _check_temp_reverse_apply(archived_blobs, base_blobs, diff, record)
+ 
+     # 6. Worktree raw hashes are worktree-mode provenance only.
+     raw_drift: dict[str, str] = {}
+@@ -842,7 +1040,16 @@ def _verify_v3_archive(
+     _check_not_active(version, archive_root, record)
+ 
+     failures = [check for check in checks if not check["ok"]]
++    legacy_reasons = []
++    if candidate.get("schema_version") == 3:
++        legacy_reasons.append("schema<4")
++        snapshot = read_json(folder / "snapshot.json")
++        if any(not snapshot.get("prompts", {}).get(role) for role in DEFAULT_REQUIRED_ROLES):
++            legacy_reasons.append("empty_role_prompts")
+     return {
++        "status": "legacy_non_strict" if legacy_reasons else ("ok" if not failures else "failed"),
++        "reasons": legacy_reasons,
++        "legacy_worktree_drift": raw_drift if ignore_raw_drift else {},
+         "version": version or folder.name,
+         "archive_class": "new",
+         "schema_version": candidate.get("schema_version"),
+@@ -1034,21 +1241,6 @@ def verify_historical_baseline(archive_root: Path) -> dict[str, Any]:
+     return result
+ 
+ 
+-def candidate_tree_sha256(file_hashes: Mapping[str, str]) -> str:
+-    """Canonical candidate tree hash (Phase30 receipt rule).
+-
+-    Sort the file paths, concatenate ``path + NUL + file_sha256`` for each, and
+-    take the SHA-256 of the whole concatenation. The receipt itself is never an
+-    input (it lives outside the candidate directory).
+-    """
+-    digest = hashlib.sha256()
+-    for path in sorted(file_hashes):
+-        digest.update(path.encode("utf-8"))
+-        digest.update(b"\x00")
+-        digest.update(str(file_hashes[path]).encode("ascii"))
+-    return digest.hexdigest()
+-
+-
+ def verify_receipt(
+     receipt_path: Path,
+     *,
+@@ -1185,6 +1377,8 @@ def verify_receipt(
+     declared_files = receipt.get("candidate_files")
+     declared_map: dict[str, Any] = declared_files if isinstance(declared_files, dict) else {}
+     file_problems: list[str] = []
++    if set(declared_map) != set(RECEIPT_FILE_NAMES):
++        file_problems.append("candidate_files must contain exactly the four candidate files")
+     blob_bytes: dict[str, bytes | None] = {}
+     for name in RECEIPT_FILE_NAMES:
+         declared = declared_map.get(name)
+@@ -1256,10 +1450,40 @@ def verify_receipt(
+         else:
+             record(
+                 "receipt_candidate_record",
+-                True,
+-                f"version={parsed.get('version')!r} from candidate_commit blob",
++                candidate_record is not None,
++                f"version={candidate_record.get('version')!r} from candidate_commit blob"
++                if candidate_record is not None
++                else "candidate.json blob must be an object",
+             )
+     if candidate_record is not None:
++        for receipt_field, candidate_field in (
++            ("candidate", "version"),
++            ("source_commit", "source_commit"),
++            ("diff_base", "diff_base_commit"),
++        ):
++            record(
++                f"receipt_cross_{receipt_field}",
++                receipt.get(receipt_field) == candidate_record.get(candidate_field),
++                f"receipt {receipt_field} must equal candidate.json {candidate_field}",
++            )
++        record(
++            "receipt_source_candidate_ancestry",
++            _git_bytes(
++                repo, ["merge-base", "--is-ancestor", str(source_commit), str(candidate_commit)]
++            )
++            is not None,
++            "source_commit must be ancestor of candidate_commit",
++        )
++        if candidate_record.get("schema_version") == 5:
++            record(
++                "receipt_declared_status",
++                receipt.get("status") == "pending",
++                "receipt.status must be pending",
++            )
++            verified = _verify_v5_archive(
++                folder, candidate_record, archive_root=archive_root, repo=repo
++            )
++            record("receipt_v5_candidate", verified["ok"], str(verified["failures"]))
+         declared_hashes = candidate_record.get("source_hashes")
+         hashes: dict[str, Any] = declared_hashes if isinstance(declared_hashes, dict) else {}
+         hash_problems: list[str] = []
+@@ -1302,6 +1526,28 @@ def verify_receipt(
+     diff_raw = blob_bytes.get("candidate.diff")
+     if candidate_record is None or diff_raw is None:
+         record("receipt_diff_roundtrip", False, "candidate.diff or candidate.json unavailable")
++    elif candidate_record.get("schema_version") == 5:
++        try:
++            _, _, resolved = derive_v5_manifest(
++                archive_root,
++                repo,
++                parent=candidate_record.get("parent"),
++                kind=candidate_record.get("source_manifest", {}).get("kind"),
++                diff_base=str(diff_base),
++                source_commit=str(source_commit),
++            )
++            verify_v5_roundtrip(
++                repo,
++                str(diff_base),
++                str(source_commit),
++                diff_raw,
++                resolved,
++                set(candidate_record["source_manifest"]["deleted_files"]),
++            )
++        except (ValueError, OSError) as exc:
++            record("receipt_diff_roundtrip", False, str(exc))
++        else:
++            record("receipt_diff_roundtrip", True, "complete resolved trees round-trip")
+     elif not diff_raw.strip():
+         record("receipt_diff_roundtrip", True, "empty diff is trivially consistent")
+     else:
+@@ -1388,18 +1634,42 @@ def verify_receipt(
+     # breaks this pin, which is the whole point of the external witness.
+     manifest_path = archive_root / "candidates" / HISTORICAL_MANIFEST_NAME
+     declared_manifest = receipt.get("historical_manifest_sha256")
+-    if not manifest_path.is_file():
++    is_v5 = candidate_record is not None and candidate_record.get("schema_version") == 5
++    manifest_commit = receipt.get("manifest_commit")
++    if is_v5 or manifest_commit is not None:
++        result["manifest_binding"] = "manifest_commit"
++        manifest_blob = (
++            blob(str(manifest_commit), f"{candidates_prefix}/{HISTORICAL_MANIFEST_NAME}")
++            if manifest_commit
++            else None
++        )
++        record(
++            "receipt_manifest_commit",
++            bool(manifest_commit)
++            and _git_bytes(repo, ["merge-base", "--is-ancestor", str(manifest_commit), "HEAD"])
++            is not None,
++            "manifest_commit required and must be HEAD ancestor",
++        )
++        actual_manifest = _sha256_bytes(manifest_blob) if manifest_blob is not None else None
++        record(
++            "receipt_manifest_blob",
++            actual_manifest is not None
++            and actual_manifest == receipt.get("manifest_blob_sha256") == declared_manifest,
++            "manifest_blob_sha256 and historical_manifest_sha256 must equal committed blob",
++        )
+         record(
+             "receipt_historical_manifest",
+-            False,
+-            f"{HISTORICAL_MANIFEST_NAME} is missing from the archive",
++            manifest_path.is_file()
++            and _sha256_bytes(manifest_path.read_bytes()) == actual_manifest,
++            "current manifest must equal bound blob",
+         )
+     else:
+-        actual_manifest = _sha256_bytes(manifest_path.read_bytes())
++        result["manifest_binding"] = "current_worktree"
+         record(
+             "receipt_historical_manifest",
+-            actual_manifest == declared_manifest,
+-            f"declared={declared_manifest!r} current_manifest_bytes={actual_manifest}",
++            manifest_path.is_file()
++            and _sha256_bytes(manifest_path.read_bytes()) == declared_manifest,
++            "v4 compatibility: current_worktree; no committed manifest binding",
+         )
+ 
+     result["failures"] = [c for c in checks if not c["ok"]]
+@@ -1524,14 +1794,20 @@ def verify_versions(
+ def _print_summary(report: dict[str, Any]) -> None:
+     for entry in report["versions"]:
+         if entry["archive_class"] == "new":
+-            state = "ok" if entry["ok"] else f"FAILED ({len(entry['failures'])} checks)"
++            state = (
++                entry.get("status", "ok")
++                if entry["ok"]
++                else f"FAILED ({len(entry['failures'])} checks)"
++            )
+             for failure in entry["failures"]:
+                 print(f"[fail] {entry['version']} {failure['check']}: {failure['detail']}")
+             if entry.get("raw_drift_ignored"):
+                 print(
+-                    f"[note] {entry['version']} raw worktree drift ignored: {sorted(entry['raw_drift'])}"
++                    f"[note] {entry['version']} legacy_worktree_drift: {sorted(entry['raw_drift'])}"
+                 )
+             print(f"{entry['version']:<28} new  {state}")
++            if entry.get("status") == "legacy_non_strict":
++                print(f"[note] {entry['version']} reasons={entry.get('reasons', [])}")
+         else:
+             declared = entry.get("declared")
+             declared_text = declared[:12] + "..." if isinstance(declared, str) else str(declared)
+@@ -1544,7 +1820,7 @@ def _print_summary(report: dict[str, Any]) -> None:
+             )
+     historical = report["historical_baseline"]
+     if historical["manifest_present"]:
+-        state = "ok" if historical["ok"] else "MISMATCH"
++        state = "internal-only" if historical["ok"] else "MISMATCH"
+         print(
+             f"{'historical_baseline':<28} manifest files={historical['files_checked']} "
+             f"mismatches={len(historical['mismatches'])} {state}"
+@@ -1597,6 +1873,11 @@ def main(argv: Sequence[str] | None = None) -> int:
+         action="store_true",
+         help="record raw_worktree_hashes drift as an annotation instead of a failure",
+     )
++    parser.add_argument(
++        "--strict-raw-drift",
++        action="store_true",
++        help="fail when legacy worktree-origin raw bytes drift",
++    )
+     parser.add_argument(
+         "--receipt",
+         type=Path,
+@@ -1637,7 +1918,7 @@ def main(argv: Sequence[str] | None = None) -> int:
+         archive_root=archive_root,
+         repo=args.repo,
+         versions=versions,
+-        ignore_raw_drift=args.ignore_raw_drift,
++        ignore_raw_drift=not args.strict_raw_drift,
+     )
+     receipt_result: dict[str, Any] | None = None
+     if args.receipt is not None:
+@@ -1664,8 +1945,6 @@ def main(argv: Sequence[str] | None = None) -> int:
+         historical_integrity = "ok"
+     elif (receipt_result is not None and not receipt_ok) or historical["ok"] is False:
+         historical_integrity = "failed"
+-    elif historical["ok"] is None:
+-        historical_integrity = "unverified"
+     else:
+         historical_integrity = "internal-only"
+     report["witness"] = witness
+@@ -1676,6 +1955,8 @@ def main(argv: Sequence[str] | None = None) -> int:
+         exit_code = 1
+     report["exit_code"] = exit_code
+     _print_summary(report)
++    if receipt_result is not None:
++        print(f"manifest_binding={receipt_result.get('manifest_binding', 'unverified')}")
+     print(f"witness={witness} historical_integrity={historical_integrity}")
+     if args.json is not None:
+         args.json.parent.mkdir(parents=True, exist_ok=True)
+diff --git a/scripts/phase31_receipt.py b/scripts/phase31_receipt.py
+new file mode 100644
+index 0000000..9a612f0
+--- /dev/null
++++ b/scripts/phase31_receipt.py
+@@ -0,0 +1,130 @@
++"""Deterministic v5 receipt generation. The external witness is never stored here."""
++
++from __future__ import annotations
++
++import argparse
++import hashlib
++import json
++from collections.abc import Sequence
++from pathlib import Path
++from typing import Any
++
++from codepilot.archive import ArchiveError, _git, _resolved_commit, candidate_tree_sha256
++
++RECEIPT_FILE_NAMES = ("candidate.diff", "candidate.json", "snapshot.json", "sources.json")
++
++REPO_ROOT = Path(__file__).resolve().parents[1]
++
++
++def generate_receipt(
++    *,
++    repo: Path,
++    candidate: str,
++    archive_root: Path,
++    receipt: Path,
++    candidate_commit: str,
++    source_commit: str,
++    diff_base: str,
++    manifest_commit: str,
++    replace: bool = False,
++    reason: str = "",
++) -> dict[str, Any]:
++    """Validate committed input identities before writing a deterministic receipt."""
++    if receipt.exists() and (not replace or not reason.strip()):
++        raise ArchiveError("receipt exists; --replace and a nonempty --reason are required")
++    if replace and not reason.strip():
++        raise ArchiveError("--replace requires --reason")
++    candidate_commit = _resolved_commit(repo, "candidate_commit", candidate_commit)
++    source_commit = _resolved_commit(repo, "source_commit", source_commit)
++    diff_base = _resolved_commit(repo, "diff_base", diff_base)
++    manifest_commit = _resolved_commit(repo, "manifest_commit", manifest_commit)
++    candidates = archive_root.resolve()
++    prefix = candidates.relative_to(repo.resolve()).as_posix()
++    folder = candidates / candidate
++    record = json.loads((folder / "candidate.json").read_text(encoding="utf-8"))
++    expected = {
++        "schema_version": 5,
++        "candidate_schema_version": 5,
++        "version": candidate,
++        "source_commit": source_commit,
++        "diff_base_commit": diff_base,
++        "parent": "phase30-candidate-v4",
++        "status": "pending",
++    }
++    for field, value in expected.items():
++        if record.get(field) != value:
++            raise ArchiveError(f"candidate.json {field} differs from required input {value!r}")
++    if not (candidates / record["parent"]).is_dir():
++        raise ArchiveError("parent directory missing")
++    for name in ("active.json", "active.next.json"):
++        if (candidates.parent / name).exists():
++            raise ArchiveError("active pointer must be absent")
++    for ancestor, descendant in (
++        (source_commit, candidate_commit),
++        (diff_base, source_commit),
++        (candidate_commit, "HEAD"),
++        (manifest_commit, "HEAD"),
++    ):
++        _git(repo, "merge-base", "--is-ancestor", ancestor, descendant)
++    hashes = {}
++    for name in RECEIPT_FILE_NAMES:
++        raw = (folder / name).read_bytes()
++        if raw != _git(repo, "cat-file", "blob", f"{candidate_commit}:{prefix}/{candidate}/{name}"):
++            raise ArchiveError(f"{name} disk bytes differ from candidate_commit blob")
++        hashes[name] = hashlib.sha256(raw).hexdigest()
++    manifest = _git(
++        repo, "cat-file", "blob", f"{manifest_commit}:{prefix}/historical-baseline.json"
++    )
++    if manifest != (candidates / "historical-baseline.json").read_bytes():
++        raise ArchiveError("current manifest differs from manifest_commit blob")
++    payload = {
++        "schema_version": 1,
++        "candidate": candidate,
++        "candidate_commit": candidate_commit,
++        "source_commit": source_commit,
++        "diff_base": diff_base,
++        "status": "pending",
++        "candidate_files": hashes,
++        "candidate_tree_sha256": candidate_tree_sha256(hashes),
++        "manifest_commit": manifest_commit,
++        "manifest_blob_sha256": hashlib.sha256(manifest).hexdigest(),
++        "historical_manifest_sha256": hashlib.sha256(manifest).hexdigest(),
++        "created_at": _git(repo, "show", "-s", "--format=%cI", manifest_commit).decode().strip(),
++    }
++    if replace:
++        payload["replacement_reason"] = reason.strip()
++        payload["replaced_receipt_sha256"] = (
++            hashlib.sha256(receipt.read_bytes()).hexdigest() if receipt.exists() else None
++        )
++    receipt.parent.mkdir(parents=True, exist_ok=True)
++    receipt.write_text(
++        json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
++        encoding="utf-8",
++        newline="\n",
++    )
++    return payload
++
++
++def main(argv: Sequence[str] | None = None) -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--candidate", required=True)
++    parser.add_argument(
++        "--archive-root", type=Path, default=REPO_ROOT / "configs/harness/candidates"
++    )
++    parser.add_argument("--receipt", type=Path, required=True)
++    for name in ("candidate-commit", "source-commit", "diff-base", "manifest-commit"):
++        parser.add_argument(f"--{name}", required=True)
++    parser.add_argument("--replace", action="store_true")
++    parser.add_argument("--reason", default="")
++    args = vars(parser.parse_args(argv))
++    try:
++        generate_receipt(repo=REPO_ROOT, **args)
++    except (OSError, ValueError) as exc:
++        print(json.dumps({"error": str(exc)}))
++        return 1
++    print(json.dumps({"receipt": str(args["receipt"]), "generated": True}))
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/src/codepilot/archive.py b/src/codepilot/archive.py
+index 6b66a86..52b6893 100644
+--- a/src/codepilot/archive.py
++++ b/src/codepilot/archive.py
+@@ -1,4 +1,4 @@
+-"""Phase29 candidate archive generator: the controlled generation path to schema v3.
++"""Candidate archive generator: the controlled generation path to schema v3/v4/v5.
+ 
+ ``rsi.archive_candidate`` writes v1 ``candidate.json`` without snapshot/diff
+ integrity fields, and historical records mix two undeclared snapshot hash rules
+@@ -18,11 +18,20 @@ canonical JSON. The explicit ``worktree`` mode (the only path that tolerates a
+ dirty tree) reads the worktree, records ``raw_worktree_hashes``/``dirty_files``
+ and claims no git provenance (``source_commit`` is null).
+ 
++Schema v4 (Phase30) makes candidates activatable: a ``source_manifest``
++(``full``/``delta``) whose ``full`` set must cover every ancestor candidate's
++sources plus the required role agent files, snapshot inheritance of
++prompts/instruction/experiences along the parent chain (repairing the v3
++empty-snapshot defect), strict snapshot validation at generation time, commit
++fields resolved to full shas, and a throwaway ``--shared`` clone path for
++generating from a dirty worktree without touching it. The external receipt and
++witness layer lives in ``scripts/phase28_archive_verify.py``.
++
+ Directory layout (exactly four files; no active pointer is ever created here):
+ 
+ - ``snapshot.json``  policy snapshot, still ``schema_version=1`` so
+   ``rsi.validate_snapshot`` / ``rsi.load_selection`` keep working;
+-- ``candidate.json`` provenance and integrity record, ``schema_version=3``;
++- ``candidate.json`` provenance and integrity record, ``schema_version`` 3 or 4;
+ - ``sources.json``   repo-relative path -> LF-normalized source text;
+ - ``candidate.diff`` raw bytes of ``git diff --binary`` (commit-vs-commit in
+   ``git_commit`` mode, diff_base-vs-worktree in ``worktree`` mode).
+@@ -64,6 +73,8 @@ __all__ = [
+     "SNAPSHOT_REF",
+     "SOURCE_ORIGIN_GIT",
+     "SOURCE_ORIGIN_WORKTREE",
++    "SOURCE_SCOPE",
++    "SOURCE_SCOPE_EXCLUDES",
+     "ArchiveError",
+     "CandidateExistsError",
+     "DiffVerificationError",
+@@ -72,6 +83,7 @@ __all__ = [
+     "IncompleteSourceManifestError",
+     "MissingSourceError",
+     "NonAncestorDiffBaseError",
++    "ParentIntegrityError",
+     "SourceOriginError",
+     "canonical_sha256",
+     "create_candidate",
+@@ -84,7 +96,30 @@ SCHEMA_VERSION = 3
+ #: Phase30 schema v4: source manifest (full/delta) plus parent snapshot
+ #: inheritance with strict role-prompt validation. v3 generation stays available
+ #: (and byte-reproducible) via ``candidate_schema_version=3``.
+-CANDIDATE_SCHEMA_VERSION = 4
++CANDIDATE_SCHEMA_VERSION = 5
++SOURCE_SCOPE = (
++    "src/",
++    "scripts/",
++    "tests/",
++    "web/src/",
++    "configs/harness/",
++    "pyproject.toml",
++    "web/package.json",
++)
++SOURCE_SCOPE_EXCLUDES = ("configs/harness/candidates/", "configs/harness/receipts/")
++LEGACY_PARENT_ALLOWLIST = frozenset(
++    {
++        "phase29-candidate-v3",
++        "phase28-candidate-v2",
++        "phase27-candidate-v1",
++        "phase26-candidate-v1",
++        "phase26-candidate-v2",
++        "phase26-candidate-v3",
++        "phase26-candidate-v4",
++        "phase26-candidate-v5",
++        "baseline-07625a8",
++    }
++)
+ MANIFEST_KIND_FULL = "full"
+ MANIFEST_KIND_DELTA = "delta"
+ MANIFEST_KINDS = (MANIFEST_KIND_FULL, MANIFEST_KIND_DELTA)
+@@ -162,6 +197,163 @@ class IncompleteSourceManifestError(ArchiveError):
+     """The source manifest is structurally invalid or an incomplete full set."""
+ 
+ 
++class ParentIntegrityError(ArchiveError):
++    """A parent snapshot is missing its binding or differs from declared bytes."""
++
++
++def in_source_scope(path: str) -> bool:
++    return not path.startswith(SOURCE_SCOPE_EXCLUDES) and any(
++        path.startswith(entry) if entry.endswith("/") else path == entry for entry in SOURCE_SCOPE
++    )
++
++
++def git_source_changes(repo: Path, diff_base: str, source_commit: str) -> dict[str, list[str]]:
++    """NUL-delimited -M handles spaces, tabs and renames without path guessing."""
++    parts = (
++        _git(repo, "diff", "--name-status", "-z", "-M", diff_base, source_commit)
++        .decode("utf-8")
++        .split("\0")
++    )
++    changed: set[str] = set()
++    deleted: set[str] = set()
++    excluded: set[str] = set()
++    index = 0
++    while index < len(parts) and parts[index]:
++        status, path = parts[index : index + 2]
++        index += 2
++        paths = [path]
++        if status.startswith("R"):
++            deleted.add(path)
++            path = parts[index]
++            index += 1
++            paths.append(path)
++            if in_source_scope(path):
++                changed.add(path)
++        elif status == "D":
++            deleted.add(path)
++        elif status in ("A", "M", "T"):
++            if in_source_scope(path):
++                changed.add(path)
++        else:
++            raise IncompleteSourceManifestError(f"unsupported git change status {status}")
++        excluded.update(p for p in paths if not in_source_scope(p))
++    return {
++        "changed_files": sorted(changed),
++        "deleted_files": sorted(deleted),
++        "scope_excluded_changed_files": sorted(excluded),
++    }
++
++
++def resolved_candidate_sources(root: Path, version: str, seen: tuple[str, ...] = ()) -> set[str]:
++    if version in seen or len(seen) >= _MAX_INHERITANCE_HOPS:
++        raise ArchiveError("source parent chain cycle or exceeds 8 hops")
++    record = _read_candidate_record(root, version)
++    paths = set(read_json(_version_folder(root, version) / "sources.json"))
++    manifest = record.get("source_manifest", {})
++    if record.get("schema_version", 1) >= 4 and manifest.get("kind") == "full":
++        return paths
++    parent = record.get("parent")
++    inherited = resolved_candidate_sources(root, parent, (*seen, version)) if parent else set()
++    if record.get("schema_version") == 5:
++        inherited -= set(manifest.get("deleted_files", []))
++        inherited -= {item["path"] for item in manifest.get("excluded_files", [])}
++    return inherited | paths
++
++
++def derive_v5_manifest(
++    root: Path,
++    repo: Path,
++    *,
++    parent: str | None,
++    kind: str,
++    diff_base: str,
++    source_commit: str,
++) -> tuple[dict[str, Any], set[str], set[str]]:
++    if not parent or kind not in MANIFEST_KINDS:
++        raise IncompleteSourceManifestError("schema 5 requires a parent and full/delta kind")
++    _parent_integrity(root, parent, strict=True)
++    inherited = resolved_candidate_sources(root, parent)
++    changes = git_source_changes(repo, diff_base, source_commit)
++    changed, deleted = set(changes["changed_files"]), set(changes["deleted_files"])
++    required = {f"src/codepilot/agents/{role}.py" for role in DEFAULT_REQUIRED_ROLES}
++    if required & deleted:
++        raise IncompleteSourceManifestError(
++            f"required role source deleted: {sorted(required & deleted)}"
++        )
++    excluded = sorted(p for p in inherited if not in_source_scope(p))
++    surviving = inherited - deleted - set(excluded)
++    delta = changed | (required - inherited)
++    resolved = surviving | changed | required
++    archived = resolved if kind == "full" else delta
++    manifest = {
++        "kind": kind,
++        "parent": parent,
++        "source_scope": list(SOURCE_SCOPE),
++        **changes,
++        "required_roles": list(DEFAULT_REQUIRED_ROLES),
++        "required_sources": sorted(required),
++        "excluded_files": [
++            {
++                "path": p,
++                "reason": "archive metadata is never a source input"
++                if p.startswith(SOURCE_SCOPE_EXCLUDES)
++                else "outside SOURCE_SCOPE",
++            }
++            for p in excluded
++        ],
++        "resolved_source_files": len(resolved),
++    }
++    return manifest, archived, resolved
++
++
++def verify_v5_roundtrip(
++    repo: Path,
++    diff_base: str,
++    source_commit: str,
++    diff: bytes,
++    resolved: set[str],
++    deleted: set[str],
++) -> None:
++    """Check complete resolved content and tombstones in both directions."""
++    paths = sorted(resolved | deleted)
++    base = {p: _commit_blob(repo, diff_base, p) for p in paths}
++    source = {p: _commit_blob(repo, source_commit, p) for p in paths}
++    for p in resolved:
++        if source[p] is None:
++            raise MissingSourceError(f"resolved source absent from source_commit: {p}")
++    for reverse, initial, expected in ((False, base, source), (True, source, base)):
++        if not diff.strip():
++            if initial != expected:
++                raise DiffVerificationError("empty diff does not reproduce the bound trees")
++            continue
++        folder = _apply_patch_in_temp(initial, diff, reverse=reverse)
++        try:
++            for p, raw in expected.items():
++                target = folder / p
++                actual = target.read_bytes() if target.is_file() else None
++                if actual != raw:
++                    raise DiffVerificationError(
++                        f"{'reverse' if reverse else 'forward'} mismatch: {p}"
++                    )
++        finally:
++            shutil.rmtree(folder, ignore_errors=True)
++
++
++def candidate_tree_sha256(file_hashes: Mapping[str, str]) -> str:
++    """Canonical candidate tree hash (Phase30 receipt rule).
++
++    Sort the file paths, concatenate ``path + NUL + file_sha256`` for each, and
++    take the SHA-256 of the whole concatenation. The receipt itself is never an
++    input (it lives outside the candidate directory).
++    """
++    digest = hashlib.sha256()
++    for path in sorted(file_hashes):
++        digest.update(path.encode("utf-8"))
++        digest.update(b"\x00")
++        digest.update(str(file_hashes[path]).encode("ascii"))
++    return digest.hexdigest()
++
++
+ def _spawn_git(
+     repo: Path, args: Sequence[str], stdin: bytes | None = None
+ ) -> subprocess.CompletedProcess[bytes]:
+@@ -350,6 +542,9 @@ def _apply_patch_in_temp(blobs: Mapping[str, bytes | None], patch: bytes, *, rev
+     """
+     tmp = Path(tempfile.mkdtemp(prefix="codepilot-archive-apply-"))
+     try:
++        # TEMP may live inside a checkout. Without its own repository git apply
++        # discovers the enclosing repo and silently skips paths outside the cwd.
++        _git(tmp, "init", "-q")
+         for rel, raw in blobs.items():
+             if raw is None:
+                 continue
+@@ -424,14 +619,18 @@ def _serialize(payload: dict[str, Any]) -> bytes:
+     return text.encode("utf-8")
+ 
+ 
+-def _parent_integrity(root: Path, parent: str | None) -> dict[str, Any] | None:
++def _parent_integrity(
++    root: Path, parent: str | None, *, strict: bool = False
++) -> dict[str, Any] | None:
+     """Record parent snapshot hashes next to the parent's own declaration.
+ 
+-    Comparison only, never a verdict: historical parents declared their snapshot
+-    hash under unannotated rules, so both candidate rules are reported and the
+-    generator proceeds regardless of the outcome.
++    Schema 3/4 retains the historical comparison behavior. With strict=True,
++    schema 5 rejects mismatches except explicitly allowlisted pre-v4 parents;
++    every allowed exception records its reason.
+     """
+     if not parent:
++        if strict:
++            raise ParentIntegrityError("schema 5 requires a parent")
+         return None
+     folder = _version_folder(root, parent)
+     snapshot_path = folder / SNAPSHOT_REF
+@@ -457,7 +656,20 @@ def _parent_integrity(root: Path, parent: str | None) -> dict[str, Any] | None:
+                     declared = value
+                     declared_field = field
+                     break
++    legacy_reason = None
++    if strict:
++        parent_record = _read_candidate_record(root, parent)
++        if parent_record.get("snapshot_file_sha256") != actual_file:
++            if parent_record.get("schema_version", 1) < 4 and parent in LEGACY_PARENT_ALLOWLIST:
++                legacy_reason = (
++                    "explicit legacy allowlist: schema<4 snapshot hash rule predates strict binding"
++                )
++            else:
++                raise ParentIntegrityError(
++                    f"parent {parent} snapshot_file_sha256 differs from actual bytes"
++                )
+     return {
++        **({"legacy_parent_reason": legacy_reason} if legacy_reason else {}),
+         "version": parent,
+         "snapshot_file_sha256_actual": actual_file,
+         "snapshot_canonical_sha256_actual": actual_canonical,
+@@ -527,10 +739,11 @@ def _inherit_parent_snapshot(root: Path, parent: str | None) -> dict[str, Any]:
+         chain.append(current)
+         snapshot = _read_parent_snapshot(root, current)
+         prompts = snapshot.get("prompts")
+-        if not inherited["prompts"] and isinstance(prompts, dict) and prompts:
+-            inherited["prompts"] = {
+-                role: text for role, text in prompts.items() if isinstance(text, str) and text
+-            }
++        if isinstance(prompts, dict):
++            for role in DEFAULT_REQUIRED_ROLES:
++                text = prompts.get(role)
++                if role not in inherited["prompts"] and isinstance(text, str) and text.strip():
++                    inherited["prompts"][role] = text
+         if not inherited["instruction"]:
+             instruction = snapshot.get("instruction")
+             if isinstance(instruction, str) and instruction:
+@@ -543,6 +756,13 @@ def _inherit_parent_snapshot(root: Path, parent: str | None) -> dict[str, Any]:
+                 ]
+         record = _read_candidate_record(root, current)
+         current = record.get("parent") if isinstance(record.get("parent"), str) else None
++    if current and (
++        current in seen
++        or any(role not in inherited["prompts"] for role in DEFAULT_REQUIRED_ROLES)
++        or not inherited["instruction"]
++        or not inherited["experiences"]
++    ):
++        raise ArchiveError("unresolved parent snapshot chain exceeds 8 hops or contains a cycle")
+     inherited["chain"] = chain
+     return inherited
+ 
+@@ -730,11 +950,13 @@ def _candidate_payload(
+         "parent_integrity": parent_integrity,
+         "dirty_worktree": bool(dirty_files),
+     }
+-    if candidate_schema_version >= CANDIDATE_SCHEMA_VERSION:
++    if candidate_schema_version >= 4:
+         # v4: explicit schema mirror (single source of truth is schema_version;
+         # the verifier requires the two to be equal) and the source manifest.
+         payload["candidate_schema_version"] = candidate_schema_version
+         payload["source_manifest"] = dict(source_manifest or {})
++        if candidate_schema_version == 5:
++            payload["resolved_source_files"] = payload["source_manifest"]["resolved_source_files"]
+     if source_origin == SOURCE_ORIGIN_WORKTREE:
+         payload["raw_worktree_hashes"] = dict(raw_worktree_hashes or {})
+     if dirty_files:
+@@ -754,7 +976,7 @@ def create_candidate(
+     parent: str | None = None,
+     diff_base_commit: str,
+     source_commit: str = "",
+-    source_files: Sequence[str],
++    source_files: Sequence[str] | None = None,
+     source_origin: str = SOURCE_ORIGIN_GIT,
+     allow_dirty: bool = False,
+     instruction: str = "",
+@@ -798,12 +1020,18 @@ def create_candidate(
+     checks run in throwaway directories either way). Returns the summary the
+     CLI prints.
+     """
+-    if candidate_schema_version not in (SCHEMA_VERSION, CANDIDATE_SCHEMA_VERSION):
++    if candidate_schema_version not in (3, 4, 5):
+         raise ArchiveError(
+-            f"candidate_schema_version must be {SCHEMA_VERSION} or "
+-            f"{CANDIDATE_SCHEMA_VERSION}, got {candidate_schema_version}"
++            f"candidate_schema_version must be 3, 4 or 5, got {candidate_schema_version}"
+         )
+-    if not source_files:
++    if candidate_schema_version == 5:
++        if source_origin != SOURCE_ORIGIN_GIT:
++            raise SourceOriginError("schema 5 requires git_commit provenance")
++        if source_files is not None:
++            raise IncompleteSourceManifestError(
++                "schema 5 derives source_files; caller lists forbidden"
++            )
++    elif not source_files:
+         raise ArchiveError("source file list is empty; nothing to archive")
+     if source_origin not in (SOURCE_ORIGIN_GIT, SOURCE_ORIGIN_WORKTREE):
+         raise SourceOriginError(
+@@ -827,14 +1055,14 @@ def create_candidate(
+     folder = _version_folder(root, version)
+     if folder.exists():
+         raise CandidateExistsError(f"candidate version directory already exists: {folder}")
+-    parent_integrity = _parent_integrity(root, parent)
++    parent_integrity = _parent_integrity(root, parent, strict=candidate_schema_version == 5)
+     _require_commit(repo, "diff_base_commit", diff_base_commit)
+     dirty_files = worktree_dirty_files(repo)
+     temp_clone: Path | None = None
+     effective_repo = repo
+     try:
+         if source_origin == SOURCE_ORIGIN_GIT:
+-            if candidate_schema_version >= CANDIDATE_SCHEMA_VERSION:
++            if candidate_schema_version >= 4:
+                 # v4 records commits, never labels: resolve to full shas first.
+                 diff_base_commit = _resolved_commit(repo, "diff_base_commit", diff_base_commit)
+                 source_commit = _resolved_commit(repo, "source_commit", source_commit)
+@@ -853,6 +1081,21 @@ def create_candidate(
+                         files=dirty_files,
+                     )
+ 
++        source_manifest: dict[str, Any] | None = None
++        resolved_paths: set[str] = set()
++        deleted_paths: set[str] = set()
++        if candidate_schema_version == 5:
++            source_manifest, archived_paths, resolved_paths = derive_v5_manifest(
++                root,
++                effective_repo,
++                parent=parent,
++                kind=manifest_kind,
++                diff_base=diff_base_commit,
++                source_commit=source_commit,
++            )
++            source_files = sorted(archived_paths)
++            deleted_paths = set(source_manifest["deleted_files"])
++        assert source_files is not None
+         if source_origin == SOURCE_ORIGIN_GIT:
+             sources, source_blobs = _read_commit_sources(
+                 effective_repo, source_commit, source_files
+@@ -861,11 +1104,14 @@ def create_candidate(
+         else:
+             sources, raw_worktree_hashes = _read_sources(repo, source_files)
+             source_blobs = None
++        if candidate_schema_version == 5 and set(sources) != archived_paths:
++            raise IncompleteSourceManifestError(
++                "read source set differs from the exact derived full/delta set"
++            )
+         # In git_commit mode the candidate's provenance is the commit tree; a
+         # dirty worktree routed through a temp clone is not part of it.
+         payload_dirty_files = [] if temp_clone is not None else dirty_files
+-        source_manifest: dict[str, Any] | None = None
+-        if candidate_schema_version >= CANDIDATE_SCHEMA_VERSION:
++        if candidate_schema_version == 4:
+             source_manifest = _validate_source_manifest(
+                 root,
+                 parent=parent,
+@@ -873,12 +1119,17 @@ def create_candidate(
+                 required_roles=required_roles,
+                 source_keys=set(sources),
+             )
+-        base_blobs = _read_base_blobs(effective_repo, diff_base_commit, list(sources))
++        diff_paths = (
++            sorted(resolved_paths | deleted_paths)
++            if candidate_schema_version == 5
++            else list(sources)
++        )
++        base_blobs = _read_base_blobs(effective_repo, diff_base_commit, diff_paths)
+         base_hashes = {
+             path: None if raw is None else hashlib.sha256(lf_text(raw).encode("utf-8")).hexdigest()
+             for path, raw in base_blobs.items()
+         }
+-        if candidate_schema_version >= CANDIDATE_SCHEMA_VERSION:
++        if candidate_schema_version >= 4:
+             inherited = _inherit_parent_snapshot(root, parent)
+             prompts = dict(inherited["prompts"])
+             for role, text in _extract_prompts(sources).items():
+@@ -915,7 +1166,7 @@ def create_candidate(
+         diff = _build_diff(
+             effective_repo,
+             diff_base_commit,
+-            list(sources),
++            diff_paths,
+             source_commit=source_commit if source_origin == SOURCE_ORIGIN_GIT else None,
+         )
+         diff_sha256 = hashlib.sha256(diff).hexdigest()
+@@ -942,13 +1193,23 @@ def create_candidate(
+         # Round-trip in throwaway directories; on failure nothing half-written is
+         # allowed to survive.
+         try:
+-            _verify_diff_roundtrip(
+-                repo,
+-                diff=diff,
+-                base_blobs=base_blobs,
+-                source_texts=sources,
+-                source_blobs=source_blobs,
+-            )
++            if candidate_schema_version == 5:
++                verify_v5_roundtrip(
++                    effective_repo,
++                    diff_base_commit,
++                    source_commit,
++                    diff,
++                    resolved_paths,
++                    deleted_paths,
++                )
++            else:
++                _verify_diff_roundtrip(
++                    repo,
++                    diff=diff,
++                    base_blobs=base_blobs,
++                    source_texts=sources,
++                    source_blobs=source_blobs,
++                )
+         except BaseException:
+             if not dry_run:
+                 with contextlib.suppress(OSError):
+diff --git a/tests/graph/_phase9_resume_worker.py b/tests/graph/_phase9_resume_worker.py
+index 3e6e6ea..f1d178b 100644
+--- a/tests/graph/_phase9_resume_worker.py
++++ b/tests/graph/_phase9_resume_worker.py
+@@ -33,6 +33,10 @@ harness.deps.regression_runner = RegressionRunner()
+ class CrashReviewer(PatchReviewer):
+     def review(self, state, deps):
+         if mode == "after-regression":
++            (root / "usage-before-crash.json").write_text(
++                json.dumps({"calls": deps.usage.llm_calls, "tests": deps.test_runs}),
++                encoding="utf-8",
++            )
+             os._exit(7)
+         result = super().review(state, deps)
+         (root / "usage-before-crash.json").write_text(
+diff --git a/tests/graph/harness.py b/tests/graph/harness.py
+index 80132fa..c188d0f 100644
+--- a/tests/graph/harness.py
++++ b/tests/graph/harness.py
+@@ -90,13 +90,14 @@ __all__ = [
+ ]
+ 
+ 
+-def _base_repo(root: Path) -> tuple[Path, str]:
++def _base_repo(root: Path, *, include_tests: bool = True) -> tuple[Path, str]:
+     original = root / "original"
+     (original / "src/pkg").mkdir(parents=True)
+     (original / "tests").mkdir(parents=True)
+     (original / "src/pkg/core.py").write_text(DEFECTIVE, encoding="utf-8")
+     (original / "src/pkg/helper.py").write_text(HELPER, encoding="utf-8")
+-    (original / "tests/test_core.py").write_text(EXISTING_TEST, encoding="utf-8")
++    if include_tests:
++        (original / "tests/test_core.py").write_text(EXISTING_TEST, encoding="utf-8")
+     (original / "pyproject.toml").write_text(
+         "[project]\nname='fixture'\nversion='0.0.1'\n", encoding="utf-8"
+     )
+@@ -389,6 +390,8 @@ def build_harness(
+     extra_plans: int = 0,
+     reuse: bool = False,
+     llm_config: Any | None = None,
++    coder_relocalize_replies: Sequence[Reply] = (),
++    include_existing_tests: bool = True,
+ ) -> Harness:
+     """装配一次可运行的图。
+ 
+@@ -418,7 +421,7 @@ def build_harness(
+         )
+         index = RepositoryIndex(stores, workspace.repository_id)
+     else:
+-        original, base = _base_repo(tmp_path)
++        original, base = _base_repo(tmp_path, include_tests=include_existing_tests)
+         manager = WorkspaceManager(cache_root=tmp_path / "cache")
+         workspace = manager.create(
+             source=str(original), base_commit=base, target=tmp_path / "workspace"
+@@ -465,6 +468,7 @@ def build_harness(
+         _planner_reply(script, tests)
+     for round_replies in coder_rounds:
+         script.add("coder", *round_replies)
++    script.add("coder_relocalize", *coder_relocalize_replies)
+     for item in diagnoses:
+         script.add("diagnoser", item)
+     for item in repro_drafts:
+diff --git a/tests/graph/test_path_sandbox_error.py b/tests/graph/test_path_sandbox_error.py
+index 351601c..64dd009 100644
+--- a/tests/graph/test_path_sandbox_error.py
++++ b/tests/graph/test_path_sandbox_error.py
+@@ -139,7 +139,9 @@ def test_environment_failure_during_build_stops_before_any_code_work(
+ 
+ def test_collection_error_still_enters_the_diagnosis_path(tmp_path: Path) -> None:
+     """对照组：COLLECTION_ERROR 是代码问题（补丁让测试收集不起来了），要进诊断。"""
+-    collection = scripted_result(ExecutionStatus.COLLECTION_ERROR, exit_code=2)
++    collection = scripted_result(ExecutionStatus.COLLECTION_ERROR, exit_code=2).model_copy(
++        update={"stderr_tail": "src/pkg/core.py:2: SyntaxError: invalid patched expression"}
++    )
+     harness = build_harness(
+         tmp_path,
+         results=[collection, assertion_failure("tests/test_core.py::test_normalize")],
+diff --git a/tests/graph/test_phase11_closure.py b/tests/graph/test_phase11_closure.py
+index 35df1f7..609101b 100644
+--- a/tests/graph/test_phase11_closure.py
++++ b/tests/graph/test_phase11_closure.py
+@@ -143,6 +143,7 @@ def test_coder_tool_cap_with_valid_patch_still_runs_the_whole_closure(tmp_path:
+         tmp_path,
+         results=[passed_result(), passed_result(), passed_result()],
+         coder_rounds=[THIRTY_CALLS],
++        coder_relocalize_replies=[READ],
+     )
+     reviewer = _wired(harness, [APPROVED])
+     state = harness.run()
+@@ -205,6 +206,7 @@ def test_local_tool_exhaustion_does_not_consume_the_review_allowance(tmp_path: P
+         tmp_path,
+         results=[passed_result(), passed_result(), passed_result()],
+         coder_rounds=[THIRTY_CALLS],
++        coder_relocalize_replies=[READ],
+     )
+     _wired(harness, [APPROVED])
+     state = harness.run()
+@@ -505,6 +507,7 @@ def test_a_crashed_coding_stage_leaves_no_stale_reservation(tmp_path: Path) -> N
+         tmp_path,
+         results=[passed_result(), passed_result(), passed_result()],
+         coder_rounds=[THIRTY_CALLS],
++        coder_relocalize_replies=[READ],
+     )
+     _wired(harness, [APPROVED])
+     state = _analysis_chain(harness)
+@@ -550,6 +553,7 @@ def test_closure_reservation_blocks_the_coding_dispatch_before_any_spend(tmp_pat
+         tmp_path,
+         results=[passed_result(), passed_result()],
+         coder_rounds=[THIRTY_CALLS],
++        coder_relocalize_replies=[READ],
+         input_tokens=5_000,
+     )
+     _wired(harness, [APPROVED])
+@@ -586,7 +590,7 @@ def test_closure_reservation_blocks_the_coding_dispatch_before_any_spend(tmp_pat
+     dispatched = asyncio.run(nodes.generate_patch(roomy, harness.deps))
+     assert "status" not in dispatched, dispatched.get("failure_reasons")
+     assert dispatched["coding_stop_reason"] is StopReason.BUDGET_TOOL_CALLS
+-    assert harness.llm.purposes().count("coder") == 30
++    assert sum(harness.llm.purposes().count(p) for p in ("coder", "coder_relocalize")) == 30
+ 
+ 
+ def test_a_patch_in_hand_keeps_the_graph_on_the_verification_path(tmp_path: Path) -> None:
+@@ -595,6 +599,7 @@ def test_a_patch_in_hand_keeps_the_graph_on_the_verification_path(tmp_path: Path
+         tmp_path,
+         results=[passed_result(), passed_result()],
+         coder_rounds=[THIRTY_CALLS],
++        coder_relocalize_replies=[READ],
+     )
+     state = _analysis_chain(harness)
+     update = asyncio.run(nodes.generate_patch(state, harness.deps))
+@@ -687,6 +692,7 @@ def test_the_closure_reservation_is_priced_by_the_reviewers_own_model(
+         tmp_path,
+         results=[passed_result(), passed_result()],
+         coder_rounds=[THIRTY_CALLS],
++        coder_relocalize_replies=[READ],
+         input_tokens=5_000,
+         cost_per_call=0.01,
+         llm_config=_priced_config(reviewer_input=4.0, reviewer_output=16.0),
+@@ -742,6 +748,7 @@ def test_reservation_falls_back_to_the_ledger_and_says_so(tmp_path: Path) -> Non
+         tmp_path,
+         results=[passed_result(), passed_result()],
+         coder_rounds=[THIRTY_CALLS],
++        coder_relocalize_replies=[READ],
+         input_tokens=5_000,
+         cost_per_call=0.01,
+     )
+@@ -944,6 +951,7 @@ def test_a_hard_budget_stop_is_never_masked_by_the_local_tool_cap(tmp_path: Path
+         tmp_path,
+         results=[passed_result(), passed_result()],
+         coder_rounds=[THIRTY_CALLS],
++        coder_relocalize_replies=[READ],
+         input_tokens=5_000,
+         cost_per_call=0.01,
+     )
+@@ -990,6 +998,7 @@ def test_resuming_a_finished_closure_replays_stages_without_rebilling(tmp_path:
+         tmp_path,
+         results=[passed_result(), passed_result(), passed_result()],
+         coder_rounds=[THIRTY_CALLS],
++        coder_relocalize_replies=[READ],
+     )
+     reviewer = _wired(harness, [APPROVED, APPROVED])
+ 
+@@ -1069,6 +1078,7 @@ def test_a_reviewer_behind_a_decorator_is_booked_exactly_once(tmp_path: Path) ->
+         tmp_path,
+         results=[passed_result(), passed_result(), passed_result()],
+         coder_rounds=[THIRTY_CALLS],
++        coder_relocalize_replies=[READ],
+     )
+     harness.deps.regression_runner = RegressionRunner()
+     llm = FakeLLM([APPROVED])
+@@ -1111,6 +1121,7 @@ def test_a_review_blocked_by_its_own_budget_records_the_stage_as_unexecuted(
+         tmp_path,
+         results=[passed_result(), passed_result(), passed_result()],
+         coder_rounds=[THIRTY_CALLS],
++        coder_relocalize_replies=[READ],
+     )
+     reviewer = _wired(harness, [APPROVED, APPROVED])
+     state = harness.run()
+diff --git a/tests/graph/test_phase12_closure_admission.py b/tests/graph/test_phase12_closure_admission.py
+index eb7500f..72f6242 100644
+--- a/tests/graph/test_phase12_closure_admission.py
++++ b/tests/graph/test_phase12_closure_admission.py
+@@ -455,6 +455,7 @@ def test_a_local_tool_cap_never_overrides_the_global_stop_reason(tmp_path: Path)
+         tmp_path,
+         results=[scripted_result(ExecutionStatus.ENV_ERROR)],
+         coder_rounds=[capped],
++        coder_relocalize_replies=[READ],
+     )
+     reviewer = _wired(harness, [APPROVED])
+     state = harness.run()
+diff --git a/tests/graph/test_phase8_integration.py b/tests/graph/test_phase8_integration.py
+index ac5e7e5..488e53e 100644
+--- a/tests/graph/test_phase8_integration.py
++++ b/tests/graph/test_phase8_integration.py
+@@ -21,6 +21,7 @@ from harness import (
+     CORRECT,
+     DEFECTIVE,
+     FINISH,
++    TARGET,
+     assertion_failure,
+     build_harness,
+     diagnosis,
+@@ -158,7 +159,7 @@ def test_attempt_history_and_artifacts_reconstruct_every_round(tmp_path: Path) -
+ 
+ 
+ def test_validated_reproduction_becomes_the_target_test(tmp_path: Path) -> None:
+-    """复现成功时：目标测试是复现 NodeID，且临时测试不进入最终补丁。"""
++    """复现成功仍记录专用 NodeID；已有 Planner 目标保留为验证边界。"""
+     harness = build_harness(
+         tmp_path,
+         # 脚本顺序必须对上执行顺序：基线 2 次、复现校验 1 次、两轮目标测试。
+@@ -180,9 +181,11 @@ def test_validated_reproduction_becomes_the_target_test(tmp_path: Path) -> None:
+     assert state.reproduction is not None
+     assert state.reproduction.status.value == "reproduced"
+     assert state.reproduction.test_path == f"{REPRO_TEST_DIRECTORY}/test_repro_normalize.py"
+-    # 第 1 轮跑的是复现测试，不是 Planner 选的已有测试。
++    # 复现校验使用专用测试；Phase26 后目标优先保留已有 Planner 边界。
+     assert harness.sandbox.run_calls[2][1] == (REPRO_NODE,)
+-    assert harness.sandbox.run_calls[3][1] == (REPRO_NODE,)
++    assert harness.sandbox.run_calls[3][1] == (TARGET,)
++    assert state.attempts[-1].target_test_source == "planner"
++    assert state.attempts[-1].target_tests == [TARGET]
+ 
+     assert len(state.attempts) == 2, "the loop must really run two rounds"
+     assert state.status is RunStatus.PROVISIONALLY_VERIFIED, state.model_dump_json()[:600]
+diff --git a/tests/graph/test_phase9_docker.py b/tests/graph/test_phase9_docker.py
+index 5d96ab3..9c0fce9 100644
+--- a/tests/graph/test_phase9_docker.py
++++ b/tests/graph/test_phase9_docker.py
+@@ -23,7 +23,7 @@ def test_real_regression(tmp_path: Path, monkeypatch, case):
+     fixture = "regression_break" if case == "normal" else case
+     source = Path(__file__).parents[1] / "fixtures/repos" / fixture
+ 
+-    def base_repo(root):
++    def base_repo(root, *, include_tests: bool = True):
+         original = root / "original"
+         shutil.copytree(source, original)
+         run_git(["init", "-q"], cwd=original)
+diff --git a/tests/graph/test_phase9_regression.py b/tests/graph/test_phase9_regression.py
+index e478deb..14ce877 100644
+--- a/tests/graph/test_phase9_regression.py
++++ b/tests/graph/test_phase9_regression.py
+@@ -66,8 +66,8 @@ def test_phase22_large_source_does_not_drop_review_patch(tmp_path: Path, monkeyp
+ 
+     original_base_repo = harness_module._base_repo
+ 
+-    def lf_base(root):
+-        repo, _base = original_base_repo(root)
++    def lf_base(root, *, include_tests: bool = True):
++        repo, _base = original_base_repo(root, include_tests=include_tests)
+         (repo / ".gitattributes").write_bytes(b"*.py text eol=lf\n")
+         run_git(["add", ".gitattributes"], cwd=repo)
+         run_git(["add", "--renormalize", "."], cwd=repo)
+diff --git a/tests/graph/test_phase9_resume.py b/tests/graph/test_phase9_resume.py
+index eee8a3f..ac0ba2d 100644
+--- a/tests/graph/test_phase9_resume.py
++++ b/tests/graph/test_phase9_resume.py
+@@ -27,17 +27,26 @@ def test_process_resume(tmp_path, boundary):
+         timeout=120,
+     )
+     assert resumed.returncode == 0, resumed.stdout + resumed.stderr
+-    state = json.loads((tmp_path / "resumed.json").read_text())
++    state = json.loads((tmp_path / "resumed.json").read_text(encoding="utf-8"))
+     if boundary in {"in-flight", "after-artifact"}:
+         assert state["status"] == "error"
+         assert "resume refused" in str(state["failure_reasons"])
+     else:
+         assert state["status"] == "succeeded", state["failure_reasons"]
+-        assert state["test_runs"] == 5
++        # L2 covers the complete one-test baseline and also satisfies L3.
++        assert state["test_runs"] == 4
++        assert set(state["regression"]["executions"]) == {"L1", "L2"}
++        assert state["regression"]["levels_run"] == ["L1_target", "L2_impact", "L3_full"]
++        assert state["regression"]["executed_tests"] == ["tests/test_core.py"]
++        assert state["regression"]["unexecuted_tests"] == []
++        usage = json.loads((tmp_path / "usage-before-crash.json").read_text(encoding="utf-8"))
++        assert state["usage"]["llm_calls"] == usage["calls"] + (boundary == "after-regression")
++        assert state["test_runs"] == usage["tests"]
++        assert state["review_calls"] == 1
+         assert len(state["attempts"]) == 1
+         assert state["regression"]["complete"]
+         if boundary == "after-review":
+-            usage = json.loads((tmp_path / "usage-before-crash.json").read_text())
++            usage = json.loads((tmp_path / "usage-before-crash.json").read_text(encoding="utf-8"))
+             assert state["usage"]["llm_calls"] == usage["calls"]
+             assert state["test_runs"] == usage["tests"]
+ 
+@@ -60,6 +69,6 @@ def test_corrupt_evidence_refuses_process_resume(tmp_path):
+         timeout=120,
+     )
+     assert resumed.returncode == 0, resumed.stderr
+-    state = json.loads((tmp_path / "resumed.json").read_text())
++    state = json.loads((tmp_path / "resumed.json").read_text(encoding="utf-8"))
+     assert state["status"] == "error"
+     assert state["review"] is None
+diff --git a/tests/graph/test_synthetic_prompt_isolation.py b/tests/graph/test_synthetic_prompt_isolation.py
+index 5e6b63a..0b87898 100644
+--- a/tests/graph/test_synthetic_prompt_isolation.py
++++ b/tests/graph/test_synthetic_prompt_isolation.py
+@@ -57,7 +57,9 @@ def _run_graph(tmp_path: Path, fixture: SyntheticFixture, monkeypatch: pytest.Mo
+     """在 fixture 的**推理视图**上跑一次完整的 M2 图。"""
+     repository = fixture.materialize(tmp_path / "repo")
+     monkeypatch.setattr(
+-        harness_module, "_base_repo", lambda root: (repository, fixture.metadata.base_commit)
++        harness_module,
++        "_base_repo",
++        lambda root, **_: (repository, fixture.metadata.base_commit),
+     )
+     monkeypatch.setattr(harness_module, "ISSUE", fixture.issue)
+     runner = build_harness(
+diff --git a/tests/graph/test_termination.py b/tests/graph/test_termination.py
+index 6f97a78..f1551f5 100644
+--- a/tests/graph/test_termination.py
++++ b/tests/graph/test_termination.py
+@@ -286,6 +286,7 @@ def _no_target_tests(tmp_path: Path) -> Harness:
+         results=[passed_result(NODE)],
+         coder_rounds=[[EDIT, FINISH]],
+         tests=(),
++        include_existing_tests=False,
+     )
+ 
+ 
+diff --git a/tests/integration/phase28/test_phase28_archive_verify_loop.py b/tests/integration/phase28/test_phase28_archive_verify_loop.py
+index dbffec8..119193b 100644
+--- a/tests/integration/phase28/test_phase28_archive_verify_loop.py
++++ b/tests/integration/phase28/test_phase28_archive_verify_loop.py
+@@ -221,7 +221,10 @@ def test_verify_cli_exit_codes_on_clean_and_tampered_archive(tmp_path: Path) ->
+     )
+     assert clean.returncode == 0, clean.stderr.decode("utf-8", errors="replace")
+     stdout = clean.stdout.decode("utf-8", errors="replace")
+-    assert "new  ok" in stdout
++    # Phase31 起 schema<4 的历史候选分类为 legacy_non_strict（附 reasons 注记），
++    # 退出码与 archive_class 语义不变：clean 仍 exit 0 / new；篡改仍 exit 1 / [fail]。
++    assert "new  legacy_non_strict" in stdout
++    assert "[note]" in stdout and "schema<4" in stdout
+ 
+     diff_file = root / "candidates" / V2 / "candidate.diff"
+     diff_file.write_bytes(diff_file.read_bytes().replace(b"return 3", b"return 9"))
+@@ -262,6 +265,10 @@ def test_archive_cli_dry_run_prints_json_and_writes_nothing(
+         "--source-origin",
+         "worktree",
+         "--allow-dirty",
++        # 本测试固化的是 v3 记录布局；Phase30 起 CLI 默认生成 v4（其 full
++        # manifest 会拒绝无 agent 源的源集，见下方默认行为测试）。
++        "--schema-version",
++        "3",
+         "--dry-run",
+     )
+     assert completed.returncode == 0, completed.stderr.decode("utf-8", errors="replace")
+@@ -274,3 +281,46 @@ def test_archive_cli_dry_run_prints_json_and_writes_nothing(
+     assert summary["directory"] == str(archive_root / "candidates" / "phase28-s6-dryrun")
+     # --dry-run 绝不落盘：档案根里连 candidates/ 目录都不该出现。
+     assert not archive_root.exists()
++
++
++def test_archive_cli_defaults_to_v4_and_rejects_incomplete_full_set(
++    tmp_path: Path, capsys: pytest.CaptureFixture[str]
++) -> None:
++    """Phase30 默认：CLI 不带 --schema-version 生成 v4；full manifest 拒绝缺
++    agent 源的源集（v3 的"只归档变更文件"缺陷必须被拒绝）。"""
++    import subprocess
++    import sys
++
++    archive_root = tmp_path / "v4-default-archive"
++    source_list = tmp_path / "sources-v4.json"
++    source_list.write_text(json.dumps(["README.md"]), encoding="utf-8")
++    completed = subprocess.run(
++        [
++            sys.executable,
++            str(ARCHIVE_SCRIPT),
++            "--version",
++            "phase30-dryrun-v4",
++            "--parent",
++            "",
++            "--diff-base",
++            "HEAD",
++            "--source-list",
++            str(source_list),
++            "--archive-root",
++            str(archive_root),
++            # worktree 模式：与真实仓库的 git 状态解耦（dry-run 本就不落盘）。
++            "--source-origin",
++            "worktree",
++            "--allow-dirty",
++            # 不带 --schema-version：Phase30 起 CLI 默认生成 v4。
++            "--dry-run",
++        ],
++        capture_output=True,
++        check=False,
++    )
++    assert completed.returncode == 1, completed.stderr.decode("utf-8", errors="replace")
++    error = json.loads(completed.stderr.decode("utf-8", errors="replace"))
++    assert error["error_type"] == "IncompleteSourceManifestError"
++    assert "agents/coder.py" in error["error"]
++    # 拒绝路径同样零落盘。
++    assert not archive_root.exists()
+diff --git a/tests/unit/test_phase28_archive_verify.py b/tests/unit/test_phase28_archive_verify.py
+index a7caebe..bc1a0c5 100644
+--- a/tests/unit/test_phase28_archive_verify.py
++++ b/tests/unit/test_phase28_archive_verify.py
+@@ -246,6 +246,7 @@ def test_v2_schema_archive_still_verified(tmp_path: Path) -> None:
+         archive_root=root,
+         repo=repo,
+         json_name="report-drift.json",
++        extra=("--strict-raw-drift",),
+     )
+     assert exit_code == 1
+     assert "raw_worktree_hashes" in failed_checks(entry_for(report, "phase28-t-v2hand"))
+@@ -299,11 +300,10 @@ def test_tampered_diff_fails_hash_and_reverse_apply(
+     assert set(failed_checks(entry)) >= {"diff_sha256", "diff_reverse_apply"}
+ 
+ 
+-def test_worktree_change_breaks_reverse_apply_and_raw_hashes(
++def test_worktree_strict_drift_fails_raw_hashes_but_preserves_archive_apply(
+     tmp_path: Path, capsys: pytest.CaptureFixture[str]
+ ) -> None:
+-    """Worktree-mode candidates bind content to the worktree, so drift after
+-    archival must fail both the raw-hash rule and the reverse apply."""
++    """Strict raw drift fails; archived bytes still prove their own round-trip."""
+     repo, base, _head = build_repo(tmp_path)
+     root = tmp_path / "archive"
+     create_candidate(
+@@ -318,12 +318,18 @@ def test_worktree_change_breaks_reverse_apply_and_raw_hashes(
+     cli = load_cli_module()
+ 
+     exit_code, report = verify(
+-        cli, tmp_path, version="phase28-t-work", archive_root=root, repo=repo
++        cli,
++        tmp_path,
++        version="phase28-t-work",
++        archive_root=root,
++        repo=repo,
++        extra=("--strict-raw-drift",),
+     )
+     capsys.readouterr()
+     assert exit_code == 1
+     entry = entry_for(report, "phase28-t-work")
+-    assert set(failed_checks(entry)) >= {"diff_reverse_apply", "raw_worktree_hashes"}
++    assert failed_checks(entry) == ["raw_worktree_hashes"]
++    assert next(c for c in entry["checks"] if c["check"] == "diff_reverse_apply")["ok"]
+     candidate = json.loads(
+         (root / "candidates" / "phase28-t-work" / "candidate.json").read_text(encoding="utf-8")
+     )
+@@ -334,7 +340,7 @@ def test_worktree_change_breaks_reverse_apply_and_raw_hashes(
+     git(repo, "checkout", "--", "docs/note.md")
+ 
+ 
+-def test_raw_drift_is_ignorable_only_with_explicit_flag(
++def test_raw_drift_is_strict_only_with_explicit_flag(
+     tmp_path: Path, capsys: pytest.CaptureFixture[str]
+ ) -> None:
+     repo, _base, head = build_repo(tmp_path)
+@@ -352,7 +358,12 @@ def test_raw_drift_is_ignorable_only_with_explicit_flag(
+     cli = load_cli_module()
+ 
+     exit_code, report = verify(
+-        cli, tmp_path, version="phase28-t-drift", archive_root=root, repo=repo
++        cli,
++        tmp_path,
++        version="phase28-t-drift",
++        archive_root=root,
++        repo=repo,
++        extra=("--strict-raw-drift",),
+     )
+     capsys.readouterr()
+     assert exit_code == 1
+@@ -365,7 +376,7 @@ def test_raw_drift_is_ignorable_only_with_explicit_flag(
+         archive_root=root,
+         repo=repo,
+         json_name="report-ignored.json",
+-        extra=("--ignore-raw-drift",),
++        extra=(),
+     )
+     capsys.readouterr()
+     assert exit_code == 0
+@@ -414,6 +425,7 @@ def test_missing_source_entry_and_worktree_file_fail(
+         archive_root=root,
+         repo=repo,
+         json_name="report-deleted.json",
++        extra=("--strict-raw-drift",),
+     )
+     assert exit_code == 1
+     entry = entry_for(report, "phase28-t-src-wt")
+diff --git a/tests/unit/test_phase29_archive_verify.py b/tests/unit/test_phase29_archive_verify.py
+index 796147c..4f87254 100644
+--- a/tests/unit/test_phase29_archive_verify.py
++++ b/tests/unit/test_phase29_archive_verify.py
+@@ -101,12 +101,13 @@ def verify(
+     archive_root: Path,
+     repo: Path,
+     json_name: str = "report.json",
++    extra: tuple[str, ...] = (),
+ ) -> tuple[int, dict[str, Any]]:
+     json_path = tmp_path / json_name
+     args = ["--version", version, "--archive-root", str(archive_root), "--repo", str(repo)]
+     if json_path is not None:
+         args += ["--json", str(json_path)]
+-    exit_code = cli.main(args)
++    exit_code = cli.main([*args, *extra])
+     payload = json.loads(json_path.read_text(encoding="utf-8"))
+     assert payload["exit_code"] == exit_code
+     return exit_code, payload
+@@ -328,13 +329,21 @@ def test_v3_worktree_mode_verifies_and_drift_is_detected(tmp_path: Path) -> None
+     check_names = {check["check"] for check in entry["checks"]}
+     assert {"raw_worktree_hashes", "diff_forward_apply", "diff_reverse_apply"} <= check_names
+ 
+-    # Worktree drift after the fact must fail the worktree-mode checks.
++    # Phase31: explicit strict drift fails raw hashes; archive apply stays valid.
+     write_file(repo, "src/feature.py", "def feature() -> int:\n    return 43\n")
+-    exit_code, report = verify(cli, tmp_path, version="phase29-t-wt", archive_root=root, repo=repo)
++    exit_code, report = verify(
++        cli,
++        tmp_path,
++        version="phase29-t-wt",
++        archive_root=root,
++        repo=repo,
++        extra=("--strict-raw-drift",),
++    )
+     assert exit_code == 1
+     failures = failed_checks(entry_for(report, "phase29-t-wt"))
+     assert "raw_worktree_hashes" in failures
+-    assert "diff_reverse_apply" in failures
++    assert "diff_reverse_apply" not in failures
++    assert entry_for(report, "phase29-t-wt")["status"] == "legacy_non_strict"
+     git(repo, "checkout", "--", "src/feature.py")
+ 
+ 
+diff --git a/tests/unit/test_phase31_archive_manifest.py b/tests/unit/test_phase31_archive_manifest.py
+new file mode 100644
+index 0000000..fef6bbf
+--- /dev/null
++++ b/tests/unit/test_phase31_archive_manifest.py
+@@ -0,0 +1,224 @@
++"""Schema 5 completeness, tombstones and strict parent/snapshot regression tests."""
++
++from __future__ import annotations
++
++import json
++import subprocess
++import tempfile
++from pathlib import Path
++
++import pytest
++
++from codepilot import archive
++from codepilot.archive import (
++    ArchiveError,
++    IncompleteSourceManifestError,
++    ParentIntegrityError,
++    _inherit_parent_snapshot,
++    create_candidate,
++    resolved_candidate_sources,
++)
++
++ROLES = [f"src/codepilot/agents/{r}.py" for r in ("coder", "planner", "reviewer")]
++PARENT = "phase30-candidate-v4"
++CHILD = "phase31-candidate-v5"
++
++
++def git(repo: Path, *args: str) -> str:
++    result = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, check=False)
++    assert result.returncode == 0, result.stderr.decode(errors="replace")
++    return result.stdout.decode().strip()
++
++
++def commit(repo: Path, message: str) -> str:
++    git(repo, "add", "-A")
++    git(repo, "commit", "-qm", message)
++    return git(repo, "rev-parse", "HEAD")
++
++
++def write(path: Path, text: str) -> None:
++    path.parent.mkdir(parents=True, exist_ok=True)
++    path.write_text(text, encoding="utf-8", newline="\n")
++
++
++def read(path: Path) -> dict:
++    return json.loads(path.read_text(encoding="utf-8"))
++
++
++@pytest.fixture
++def env(tmp_path: Path) -> dict:
++    repo = tmp_path / "repo"
++    repo.mkdir()
++    git(repo, "init", "-q")
++    git(repo, "config", "user.name", "Phase31 fixture")
++    git(repo, "config", "user.email", "fixture@example.invalid")
++    git(repo, "config", "core.autocrlf", "false")
++    for role, path in zip(("coder", "planner", "reviewer"), ROLES, strict=True):
++        write(repo / path, f'_SYSTEM = "{role} prompt"\n')
++    write(repo / "src/feature.py", "value = 1\n")
++    write(repo / "src/removed.py", "removed = True\n")
++    metadata = "configs/harness/candidates/historical-baseline.json"
++    write(repo / metadata, "{}\n")
++    write(repo / "docs/notes/old.md", "legacy note\n")
++    base = commit(repo, "base")
++    root = repo / "configs/harness"
++    create_candidate(
++        root,
++        repo,
++        version=PARENT,
++        diff_base_commit=base,
++        source_commit=base,
++        source_files=[*ROLES, "src/feature.py", "src/removed.py", metadata, "docs/notes/old.md"],
++        candidate_schema_version=4,
++    )
++    commit(repo, "parent archive")
++    write(repo / "src/feature.py", "value = 2\n")
++    write(repo / "src/new.py", "new = True\n")
++    write(repo / "docs/notes/new.md", "new documentation\n")
++    head = commit(repo, "round changes")
++    return {"repo": repo, "root": root, "base": base, "head": head}
++
++
++def generate(env: dict, **kwargs: object) -> dict:
++    return create_candidate(
++        env["root"],
++        env["repo"],
++        version=CHILD,
++        parent=PARENT,
++        diff_base_commit=env["base"],
++        source_commit=env["head"],
++        candidate_schema_version=5,
++        **kwargs,
++    )
++
++
++@pytest.mark.parametrize(
++    ("kind", "paths"),
++    [
++        ("full", [*ROLES, "src/feature.py"]),
++        ("delta", ["src/new.py"]),
++        ("delta", ["docs/notes/new.md"]),
++    ],
++)
++def test_v5_rejects_caller_source_lists(env: dict, kind: str, paths: list[str]) -> None:
++    with pytest.raises(IncompleteSourceManifestError, match="derives"):
++        generate(env, manifest_kind=kind, source_files=paths)
++
++
++@pytest.mark.parametrize(
++    ("kind", "mode"), [("full", "omit"), ("delta", "omit"), ("delta", "unrelated")]
++)
++def test_generator_rejects_incomplete_materialized_source_set(
++    env: dict,
++    monkeypatch: pytest.MonkeyPatch,
++    kind: str,
++    mode: str,
++) -> None:
++    original = archive._read_commit_sources
++
++    def incomplete(repo: Path, commit: str, files: list[str]) -> tuple[dict, dict]:
++        sources, blobs = original(repo, commit, files)
++        if mode == "omit":
++            sources.pop("src/new.py" if kind == "full" else "src/feature.py")
++        else:
++            sources = {"src/removed.py": "removed = True\n"}
++        return sources, blobs
++
++    monkeypatch.setattr(archive, "_read_commit_sources", incomplete)
++    with pytest.raises(IncompleteSourceManifestError, match="exact derived"):
++        generate(env, manifest_kind=kind)
++
++
++@pytest.mark.parametrize("kind", ["full", "delta"])
++def test_complete_derived_set(env: dict, kind: str) -> None:
++    generate(env, manifest_kind=kind)
++    folder = env["root"] / "candidates" / CHILD
++    record = read(folder / "candidate.json")
++    manifest = record["source_manifest"]
++    assert set(manifest["changed_files"]) == {"src/feature.py", "src/new.py"}
++    expected = {*ROLES, "src/feature.py", "src/new.py", "src/removed.py"}
++    assert set(record["source_hashes"]) == (
++        expected if kind == "full" else {"src/feature.py", "src/new.py"}
++    )
++    assert manifest["resolved_source_files"] == len(expected)
++    assert "configs/harness/candidates/historical-baseline.json" in {
++        p["path"] for p in manifest["excluded_files"]
++    }
++    assert "docs/notes/new.md" in manifest["scope_excluded_changed_files"]
++
++
++def test_deleted_parent_source_is_removed_and_tombstoned(env: dict) -> None:
++    (env["repo"] / "src/removed.py").unlink()
++    env["head"] = commit(env["repo"], "delete")
++    generate(env)
++    record = read(env["root"] / "candidates" / CHILD / "candidate.json")
++    assert record["source_manifest"]["deleted_files"] == ["src/removed.py"]
++    assert "src/removed.py" not in record["source_hashes"]
++    assert "deleted file" in (env["root"] / "candidates" / CHILD / "candidate.diff").read_text()
++
++
++def test_deleted_required_role_fails(env: dict) -> None:
++    (env["repo"] / ROLES[0]).unlink()
++    env["head"] = commit(env["repo"], "delete role")
++    with pytest.raises(IncompleteSourceManifestError, match="required role source deleted"):
++        generate(env)
++
++
++def test_rename_is_old_delete_and_new_add(env: dict) -> None:
++    git(env["repo"], "mv", "src/removed.py", "src/renamed.py")
++    env["head"] = commit(env["repo"], "rename")
++    generate(env)
++    record = read(env["root"] / "candidates" / CHILD / "candidate.json")
++    assert record["source_manifest"]["deleted_files"] == ["src/removed.py"]
++    assert "src/renamed.py" in record["source_manifest"]["changed_files"]
++    assert "src/removed.py" not in record["source_hashes"]
++    assert "src/renamed.py" in record["source_hashes"]
++
++
++def test_parent_snapshot_mismatch_fails(env: dict) -> None:
++    path = env["root"] / "candidates" / PARENT / "snapshot.json"
++    path.write_bytes(path.read_bytes() + b"\n")
++    with pytest.raises(ParentIntegrityError, match="snapshot_file_sha256"):
++        generate(env)
++
++
++def test_v4_full_source_set_is_a_resolution_boundary(env: dict) -> None:
++    path = env["root"] / "candidates" / PARENT / "candidate.json"
++    record = read(path)
++    record["parent"] = "old-chain-outside-resolution-boundary"
++    write(path, json.dumps(record))
++    assert resolved_candidate_sources(env["root"], PARENT) == set(
++        read(path.with_name("sources.json"))
++    )
++
++
++def test_roundtrip_temp_inside_checkout_cannot_silently_skip_patch(
++    env: dict,
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    temp = env["repo"] / "nested-temp"
++    temp.mkdir()
++    monkeypatch.setattr(tempfile, "tempdir", str(temp))
++    generate(env)
++    assert (env["root"] / "candidates" / CHILD / "candidate.diff").read_bytes()
++
++
++def test_prompts_inherit_per_role_and_detect_cycle(tmp_path: Path) -> None:
++    root = tmp_path
++    for version, parent, prompts in (
++        ("near", "far", {"coder": "near coder"}),
++        ("far", None, {"planner": "far planner", "reviewer": "far reviewer"}),
++    ):
++        folder = root / "candidates" / version
++        write(folder / "candidate.json", json.dumps({"parent": parent}))
++        write(folder / "snapshot.json", json.dumps({"prompts": prompts, "instruction": version}))
++    result = _inherit_parent_snapshot(root, "near")
++    assert result["prompts"] == {
++        "coder": "near coder",
++        "planner": "far planner",
++        "reviewer": "far reviewer",
++    }
++    assert result["instruction"] == "near"
++    write(root / "candidates/far/candidate.json", '{"parent":"near"}')
++    with pytest.raises(ArchiveError, match="cycle"):
++        _inherit_parent_snapshot(root, "near")
+diff --git a/tests/unit/test_phase31_archive_verify.py b/tests/unit/test_phase31_archive_verify.py
+new file mode 100644
+index 0000000..ae64d97
+--- /dev/null
++++ b/tests/unit/test_phase31_archive_verify.py
+@@ -0,0 +1,164 @@
++"""Resealed payload tampering must fail the independent v5 derivation."""
++
++from __future__ import annotations
++
++import hashlib
++import json
++
++import pytest
++from scripts.phase28_archive_verify import main, verify_new_archive
++from test_phase31_archive_manifest import (
++    CHILD,
++    PARENT,
++    commit,
++    generate,
++    read,
++    write,
++)
++from test_phase31_archive_manifest import (
++    env as env,
++)
++
++from codepilot.archive import canonical_sha256, create_candidate
++
++
++def verify(env: dict) -> dict:
++    folder = env["root"] / "candidates" / CHILD
++    return verify_new_archive(
++        folder,
++        read(folder / "candidate.json"),
++        archive_root=env["root"],
++        repo=env["repo"],
++        ignore_raw_drift=True,
++    )
++
++
++@pytest.mark.parametrize("kind", ["full", "delta"])
++def test_v5_verifier_accepts_complete_sets(env: dict, kind: str) -> None:
++    generate(env, manifest_kind=kind)
++    result = verify(env)
++    assert result["ok"], result["failures"]
++
++
++@pytest.mark.parametrize(
++    "tamper",
++    [
++        "missing_changed",
++        "forbidden_source",
++        "active",
++        "parent_hash",
++        "missing_field",
++        "source_commit",
++        "invalid_manifest",
++        "snapshot_prompt",
++    ],
++)
++def test_resealed_candidate_tampering_rejected(env: dict, tamper: str) -> None:
++    generate(env)
++    path = env["root"] / "candidates" / CHILD / "candidate.json"
++    record = read(path)
++    if tamper == "missing_changed":
++        record["source_hashes"].pop("src/new.py")
++    elif tamper == "forbidden_source":
++        record["source_hashes"]["configs/harness/candidates/evil.json"] = "0" * 64
++    elif tamper == "active":
++        record["status"] = "active"
++    elif tamper == "parent_hash":
++        record["parent_integrity"]["snapshot_file_sha256_actual"] = "0" * 64
++    elif tamper == "missing_field":
++        del record["source_manifest"]["source_scope"]
++    elif tamper == "invalid_manifest":
++        record["source_manifest"] = []
++    elif tamper == "snapshot_prompt":
++        snapshot_path = path.with_name("snapshot.json")
++        snapshot = read(snapshot_path)
++        snapshot["prompts"]["coder"] = "resealed unrelated prompt"
++        write(snapshot_path, json.dumps(snapshot))
++        record["snapshot_file_sha256"] = hashlib.sha256(snapshot_path.read_bytes()).hexdigest()
++        record["snapshot_canonical_sha256"] = canonical_sha256(snapshot)
++    else:
++        record["source_commit"] = env["base"]
++    record.pop("candidate_payload_sha256")
++    record["candidate_payload_sha256"] = canonical_sha256(record)
++    write(path, json.dumps(record))
++    assert not verify(env)["ok"]
++
++
++def test_no_witness_is_internal_only(env: dict, capsys: pytest.CaptureFixture[str]) -> None:
++    generate(env)
++    commit(env["repo"], "archive")
++    from scripts.phase29_baseline_manifest import build_manifest
++
++    manifest, drift = build_manifest(
++        env["root"],
++        env["repo"],
++        baseline_commit=env["head"],
++        output_path=env["root"] / "candidates/historical-baseline.json",
++    )
++    assert not drift
++    write(env["root"] / "candidates/historical-baseline.json", json.dumps(manifest))
++    commit(env["repo"], "manifest")
++    assert main(["--all", "--repo", str(env["repo"]), "--archive-root", str(env["root"])]) == 0
++    assert "historical_integrity=internal-only" in capsys.readouterr().out
++
++
++def test_v3_empty_prompts_are_legacy_and_raw_drift_is_opt_in(env: dict) -> None:
++    create_candidate(
++        env["root"],
++        env["repo"],
++        version="legacy-worktree",
++        parent=PARENT,
++        diff_base_commit=env["base"],
++        source_origin="worktree",
++        source_files=["src/feature.py"],
++        candidate_schema_version=3,
++    )
++    folder = env["root"] / "candidates/legacy-worktree"
++    candidate = read(folder / "candidate.json")
++    write(env["repo"] / "src/feature.py", "value = 999\n")
++    result = verify_new_archive(
++        folder, candidate, archive_root=env["root"], repo=env["repo"], ignore_raw_drift=True
++    )
++    assert result["ok"], result["failures"]
++    assert result["status"] == "legacy_non_strict"
++    assert result["reasons"] == ["schema<4", "empty_role_prompts"]
++    assert result["legacy_worktree_drift"]
++    strict = verify_new_archive(
++        folder, candidate, archive_root=env["root"], repo=env["repo"], ignore_raw_drift=False
++    )
++    assert not strict["ok"]
++
++
++def test_v2_without_source_commit_uses_archived_bytes_after_raw_drift(env: dict) -> None:
++    create_candidate(
++        env["root"],
++        env["repo"],
++        version="legacy-v2-worktree",
++        parent=PARENT,
++        diff_base_commit=env["base"],
++        source_origin="worktree",
++        source_files=["src/feature.py"],
++        candidate_schema_version=3,
++    )
++    folder = env["root"] / "candidates/legacy-v2-worktree"
++    candidate = read(folder / "candidate.json")
++    candidate["schema_version"] = 2
++    write(env["repo"] / "src/feature.py", "value = 999\n")
++    result = verify_new_archive(
++        folder, candidate, archive_root=env["root"], repo=env["repo"], ignore_raw_drift=True
++    )
++    assert result["ok"], result["failures"]
++    assert result["legacy_worktree_drift"]
++
++
++def test_delta_missing_modified_source_fails_even_when_resealed(env: dict) -> None:
++    generate(env, manifest_kind="delta")
++    path = env["root"] / "candidates" / CHILD / "candidate.json"
++    candidate = read(path)
++    del candidate["source_hashes"]["src/feature.py"]
++    candidate.pop("candidate_payload_sha256")
++    candidate["candidate_payload_sha256"] = canonical_sha256(candidate)
++    write(path, json.dumps(candidate))
++    result = verify(env)
++    assert not result["ok"]
++    assert any(c["check"] == "source_manifest_exact_set" for c in result["failures"])
+diff --git a/tests/unit/test_phase31_receipt.py b/tests/unit/test_phase31_receipt.py
+new file mode 100644
+index 0000000..8cd7600
+--- /dev/null
++++ b/tests/unit/test_phase31_receipt.py
+@@ -0,0 +1,145 @@
++"""Receipt identity, committed manifest and immutable witness regression tests."""
++
++from __future__ import annotations
++
++import hashlib
++import json
++
++import pytest
++from scripts.phase28_archive_verify import verify_receipt
++from scripts.phase29_baseline_manifest import build_manifest
++from scripts.phase31_receipt import generate_receipt
++from test_phase31_archive_manifest import (  # noqa: F401
++    CHILD,
++    PARENT,
++    commit,
++    generate,
++    git,
++    read,
++    write,
++)
++from test_phase31_archive_manifest import (
++    env as env,
++)
++
++from codepilot.archive import ArchiveError
++
++
++@pytest.fixture
++def receipted(env: dict) -> dict:
++    generate(env)
++    candidate_commit = commit(env["repo"], "candidate")
++    manifest, drift = build_manifest(
++        env["root"],
++        env["repo"],
++        baseline_commit=env["head"],
++        output_path=env["root"] / "candidates/historical-baseline.json",
++    )
++    assert not drift
++    write(env["root"] / "candidates/historical-baseline.json", json.dumps(manifest))
++    manifest_commit = commit(env["repo"], "manifest")
++    receipt = env["root"] / "receipts" / f"{CHILD}.json"
++    args = {
++        "repo": env["repo"],
++        "candidate": CHILD,
++        "archive_root": env["root"] / "candidates",
++        "receipt": receipt,
++        "candidate_commit": candidate_commit,
++        "source_commit": env["head"],
++        "diff_base": env["base"],
++        "manifest_commit": manifest_commit,
++    }
++    generate_receipt(**args)
++    return {
++        **env,
++        "args": args,
++        "receipt": receipt,
++        "witness": hashlib.sha256(receipt.read_bytes()).hexdigest(),
++    }
++
++
++def check(data: dict, witness: str | None = None) -> dict:
++    return verify_receipt(
++        data["receipt"], archive_root=data["root"], repo=data["repo"], expect_receipt=witness
++    )
++
++
++def test_v5_receipt_bound_to_manifest_commit(receipted: dict) -> None:
++    result = check(receipted, receipted["witness"])
++    assert result["ok"], result["failures"]
++    assert result["manifest_binding"] == "manifest_commit"
++    assert result["witness"] == "verified"
++
++
++@pytest.mark.parametrize(
++    "field",
++    [
++        "candidate",
++        "source_commit",
++        "diff_base",
++        "manifest_commit",
++        "manifest_blob_sha256",
++        "historical_manifest_sha256",
++        "missing_manifest_commit",
++        "extra_candidate_file",
++        "status",
++    ],
++)
++def test_receipt_independent_fields_rejected(receipted: dict, field: str) -> None:
++    receipt = read(receipted["receipt"])
++    if field == "missing_manifest_commit":
++        del receipt["manifest_commit"]
++    elif field == "candidate":
++        receipt[field] = PARENT
++    elif field == "source_commit":
++        # This valid older commit has most identical blobs; equality is still required.
++        receipt[field] = receipted["base"]
++    elif field == "diff_base":
++        receipt[field] = receipted["head"]
++    elif field == "manifest_commit":
++        receipt[field] = receipted["base"]
++    elif field == "extra_candidate_file":
++        receipt["candidate_files"]["unexpected.json"] = "0" * 64
++    elif field == "status":
++        receipt[field] = "active"
++    else:
++        receipt[field] = "0" * 64
++    write(receipted["receipt"], json.dumps(receipt))
++    assert not check(receipted)["ok"]
++
++
++def test_synchronized_receipt_edit_breaks_unchanged_witness(receipted: dict) -> None:
++    receipt = read(receipted["receipt"])
++    receipt["created_at"] = "edited metadata"
++    write(receipted["receipt"], json.dumps(receipt))
++    result = check(receipted, receipted["witness"])
++    assert not result["ok"]
++    assert result["witness"] == "mismatch"
++
++
++def test_only_candidate_json_source_commit_change_is_rejected(receipted: dict) -> None:
++    path = receipted["root"] / "candidates" / CHILD / "candidate.json"
++    candidate = read(path)
++    candidate["source_commit"] = receipted["base"]
++    write(path, json.dumps(candidate))
++    result = check(receipted)
++    assert not result["ok"]
++    assert any(c["check"] == "receipt_candidate_files" for c in result["failures"])
++
++
++def test_generator_refuses_overwrite_and_records_replace_reason(receipted: dict) -> None:
++    with pytest.raises(ArchiveError, match="receipt exists"):
++        generate_receipt(**receipted["args"])
++    generated = generate_receipt(**receipted["args"], replace=True, reason="fixture replacement")
++    assert generated["replacement_reason"] == "fixture replacement"
++    assert generated["replaced_receipt_sha256"] == receipted["witness"]
++
++
++@pytest.mark.parametrize("field", ["source_commit", "diff_base", "candidate", "manifest_commit"])
++def test_generator_rejects_inconsistent_inputs(receipted: dict, field: str) -> None:
++    args = {**receipted["args"], "receipt": receipted["receipt"].with_name("other.json")}
++    args[field] = PARENT if field == "candidate" else receipted["base"]
++    if field == "diff_base":
++        args[field] = receipted["head"]
++    with pytest.raises((ArchiveError, OSError, ValueError)):
++        generate_receipt(**args)
