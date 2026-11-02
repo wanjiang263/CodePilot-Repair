@@ -101,12 +101,13 @@ def verify(
     archive_root: Path,
     repo: Path,
     json_name: str = "report.json",
+    extra: tuple[str, ...] = (),
 ) -> tuple[int, dict[str, Any]]:
     json_path = tmp_path / json_name
     args = ["--version", version, "--archive-root", str(archive_root), "--repo", str(repo)]
     if json_path is not None:
         args += ["--json", str(json_path)]
-    exit_code = cli.main(args)
+    exit_code = cli.main([*args, *extra])
     payload = json.loads(json_path.read_text(encoding="utf-8"))
     assert payload["exit_code"] == exit_code
     return exit_code, payload
@@ -328,13 +329,21 @@ def test_v3_worktree_mode_verifies_and_drift_is_detected(tmp_path: Path) -> None
     check_names = {check["check"] for check in entry["checks"]}
     assert {"raw_worktree_hashes", "diff_forward_apply", "diff_reverse_apply"} <= check_names
 
-    # Worktree drift after the fact must fail the worktree-mode checks.
+    # Phase31: explicit strict drift fails raw hashes; archive apply stays valid.
     write_file(repo, "src/feature.py", "def feature() -> int:\n    return 43\n")
-    exit_code, report = verify(cli, tmp_path, version="phase29-t-wt", archive_root=root, repo=repo)
+    exit_code, report = verify(
+        cli,
+        tmp_path,
+        version="phase29-t-wt",
+        archive_root=root,
+        repo=repo,
+        extra=("--strict-raw-drift",),
+    )
     assert exit_code == 1
     failures = failed_checks(entry_for(report, "phase29-t-wt"))
     assert "raw_worktree_hashes" in failures
-    assert "diff_reverse_apply" in failures
+    assert "diff_reverse_apply" not in failures
+    assert entry_for(report, "phase29-t-wt")["status"] == "legacy_non_strict"
     git(repo, "checkout", "--", "src/feature.py")
 
 

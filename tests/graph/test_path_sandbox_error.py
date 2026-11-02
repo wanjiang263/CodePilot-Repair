@@ -139,7 +139,9 @@ def test_environment_failure_during_build_stops_before_any_code_work(
 
 def test_collection_error_still_enters_the_diagnosis_path(tmp_path: Path) -> None:
     """对照组：COLLECTION_ERROR 是代码问题（补丁让测试收集不起来了），要进诊断。"""
-    collection = scripted_result(ExecutionStatus.COLLECTION_ERROR, exit_code=2)
+    collection = scripted_result(ExecutionStatus.COLLECTION_ERROR, exit_code=2).model_copy(
+        update={"stderr_tail": "src/pkg/core.py:2: SyntaxError: invalid patched expression"}
+    )
     harness = build_harness(
         tmp_path,
         results=[collection, assertion_failure("tests/test_core.py::test_normalize")],

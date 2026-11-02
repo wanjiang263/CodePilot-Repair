@@ -27,17 +27,26 @@ def test_process_resume(tmp_path, boundary):
         timeout=120,
     )
     assert resumed.returncode == 0, resumed.stdout + resumed.stderr
-    state = json.loads((tmp_path / "resumed.json").read_text())
+    state = json.loads((tmp_path / "resumed.json").read_text(encoding="utf-8"))
     if boundary in {"in-flight", "after-artifact"}:
         assert state["status"] == "error"
         assert "resume refused" in str(state["failure_reasons"])
     else:
         assert state["status"] == "succeeded", state["failure_reasons"]
-        assert state["test_runs"] == 5
+        # L2 covers the complete one-test baseline and also satisfies L3.
+        assert state["test_runs"] == 4
+        assert set(state["regression"]["executions"]) == {"L1", "L2"}
+        assert state["regression"]["levels_run"] == ["L1_target", "L2_impact", "L3_full"]
+        assert state["regression"]["executed_tests"] == ["tests/test_core.py"]
+        assert state["regression"]["unexecuted_tests"] == []
+        usage = json.loads((tmp_path / "usage-before-crash.json").read_text(encoding="utf-8"))
+        assert state["usage"]["llm_calls"] == usage["calls"] + (boundary == "after-regression")
+        assert state["test_runs"] == usage["tests"]
+        assert state["review_calls"] == 1
         assert len(state["attempts"]) == 1
         assert state["regression"]["complete"]
         if boundary == "after-review":
-            usage = json.loads((tmp_path / "usage-before-crash.json").read_text())
+            usage = json.loads((tmp_path / "usage-before-crash.json").read_text(encoding="utf-8"))
             assert state["usage"]["llm_calls"] == usage["calls"]
             assert state["test_runs"] == usage["tests"]
 
@@ -60,6 +69,6 @@ def test_corrupt_evidence_refuses_process_resume(tmp_path):
         timeout=120,
     )
     assert resumed.returncode == 0, resumed.stderr
-    state = json.loads((tmp_path / "resumed.json").read_text())
+    state = json.loads((tmp_path / "resumed.json").read_text(encoding="utf-8"))
     assert state["status"] == "error"
     assert state["review"] is None

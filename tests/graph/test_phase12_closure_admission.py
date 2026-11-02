@@ -455,6 +455,7 @@ def test_a_local_tool_cap_never_overrides_the_global_stop_reason(tmp_path: Path)
         tmp_path,
         results=[scripted_result(ExecutionStatus.ENV_ERROR)],
         coder_rounds=[capped],
+        coder_relocalize_replies=[READ],
     )
     reviewer = _wired(harness, [APPROVED])
     state = harness.run()

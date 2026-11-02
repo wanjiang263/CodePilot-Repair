@@ -246,6 +246,7 @@ def test_v2_schema_archive_still_verified(tmp_path: Path) -> None:
         archive_root=root,
         repo=repo,
         json_name="report-drift.json",
+        extra=("--strict-raw-drift",),
     )
     assert exit_code == 1
     assert "raw_worktree_hashes" in failed_checks(entry_for(report, "phase28-t-v2hand"))
@@ -299,11 +300,10 @@ def test_tampered_diff_fails_hash_and_reverse_apply(
     assert set(failed_checks(entry)) >= {"diff_sha256", "diff_reverse_apply"}
 
 
-def test_worktree_change_breaks_reverse_apply_and_raw_hashes(
+def test_worktree_strict_drift_fails_raw_hashes_but_preserves_archive_apply(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """Worktree-mode candidates bind content to the worktree, so drift after
-    archival must fail both the raw-hash rule and the reverse apply."""
+    """Strict raw drift fails; archived bytes still prove their own round-trip."""
     repo, base, _head = build_repo(tmp_path)
     root = tmp_path / "archive"
     create_candidate(
@@ -318,12 +318,18 @@ def test_worktree_change_breaks_reverse_apply_and_raw_hashes(
     cli = load_cli_module()
 
     exit_code, report = verify(
-        cli, tmp_path, version="phase28-t-work", archive_root=root, repo=repo
+        cli,
+        tmp_path,
+        version="phase28-t-work",
+        archive_root=root,
+        repo=repo,
+        extra=("--strict-raw-drift",),
     )
     capsys.readouterr()
     assert exit_code == 1
     entry = entry_for(report, "phase28-t-work")
-    assert set(failed_checks(entry)) >= {"diff_reverse_apply", "raw_worktree_hashes"}
+    assert failed_checks(entry) == ["raw_worktree_hashes"]
+    assert next(c for c in entry["checks"] if c["check"] == "diff_reverse_apply")["ok"]
     candidate = json.loads(
         (root / "candidates" / "phase28-t-work" / "candidate.json").read_text(encoding="utf-8")
     )
@@ -334,7 +340,7 @@ def test_worktree_change_breaks_reverse_apply_and_raw_hashes(
     git(repo, "checkout", "--", "docs/note.md")
 
 
-def test_raw_drift_is_ignorable_only_with_explicit_flag(
+def test_raw_drift_is_strict_only_with_explicit_flag(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     repo, _base, head = build_repo(tmp_path)
@@ -352,7 +358,12 @@ def test_raw_drift_is_ignorable_only_with_explicit_flag(
     cli = load_cli_module()
 
     exit_code, report = verify(
-        cli, tmp_path, version="phase28-t-drift", archive_root=root, repo=repo
+        cli,
+        tmp_path,
+        version="phase28-t-drift",
+        archive_root=root,
+        repo=repo,
+        extra=("--strict-raw-drift",),
     )
     capsys.readouterr()
     assert exit_code == 1
@@ -365,7 +376,7 @@ def test_raw_drift_is_ignorable_only_with_explicit_flag(
         archive_root=root,
         repo=repo,
         json_name="report-ignored.json",
-        extra=("--ignore-raw-drift",),
+        extra=(),
     )
     capsys.readouterr()
     assert exit_code == 0
@@ -414,6 +425,7 @@ def test_missing_source_entry_and_worktree_file_fail(
         archive_root=root,
         repo=repo,
         json_name="report-deleted.json",
+        extra=("--strict-raw-drift",),
     )
     assert exit_code == 1
     entry = entry_for(report, "phase28-t-src-wt")

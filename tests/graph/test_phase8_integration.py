@@ -21,6 +21,7 @@ from harness import (
     CORRECT,
     DEFECTIVE,
     FINISH,
+    TARGET,
     assertion_failure,
     build_harness,
     diagnosis,
@@ -158,7 +159,7 @@ def test_attempt_history_and_artifacts_reconstruct_every_round(tmp_path: Path) -
 
 
 def test_validated_reproduction_becomes_the_target_test(tmp_path: Path) -> None:
-    """复现成功时：目标测试是复现 NodeID，且临时测试不进入最终补丁。"""
+    """复现成功仍记录专用 NodeID；已有 Planner 目标保留为验证边界。"""
     harness = build_harness(
         tmp_path,
         # 脚本顺序必须对上执行顺序：基线 2 次、复现校验 1 次、两轮目标测试。
@@ -180,9 +181,11 @@ def test_validated_reproduction_becomes_the_target_test(tmp_path: Path) -> None:
     assert state.reproduction is not None
     assert state.reproduction.status.value == "reproduced"
     assert state.reproduction.test_path == f"{REPRO_TEST_DIRECTORY}/test_repro_normalize.py"
-    # 第 1 轮跑的是复现测试，不是 Planner 选的已有测试。
+    # 复现校验使用专用测试；Phase26 后目标优先保留已有 Planner 边界。
     assert harness.sandbox.run_calls[2][1] == (REPRO_NODE,)
-    assert harness.sandbox.run_calls[3][1] == (REPRO_NODE,)
+    assert harness.sandbox.run_calls[3][1] == (TARGET,)
+    assert state.attempts[-1].target_test_source == "planner"
+    assert state.attempts[-1].target_tests == [TARGET]
 
     assert len(state.attempts) == 2, "the loop must really run two rounds"
     assert state.status is RunStatus.PROVISIONALLY_VERIFIED, state.model_dump_json()[:600]

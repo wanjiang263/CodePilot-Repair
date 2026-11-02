@@ -62,8 +62,14 @@ from codepilot.archive import (
     SNAPSHOT_HASH_RULE,
     _apply_patch_in_temp,
     _candidate_source_set,
+    _extract_prompts,
+    _inherit_parent_snapshot,
+    _parent_integrity,
+    candidate_tree_sha256,
     canonical_sha256,
+    derive_v5_manifest,
     lf_text,
+    verify_v5_roundtrip,
 )
 from codepilot.rsi import read_json, validate_snapshot, version_dir
 
@@ -72,7 +78,7 @@ DEFAULT_ARCHIVE_ROOT = REPO_ROOT / "configs" / "harness"
 
 FILE_BYTES_RULE = "file_bytes"
 CANONICAL_RULE = "canonical_json_snapshot"
-NEW_SCHEMA_VERSIONS = (2, 3, 4)
+NEW_SCHEMA_VERSIONS = (2, 3, 4, 5)
 SOURCE_ORIGIN_GIT = "git_commit"
 SOURCE_ORIGIN_WORKTREE = "worktree"
 HISTORICAL_MANIFEST_NAME = "historical-baseline.json"
@@ -414,6 +420,8 @@ def verify_new_archive(
     ignore_raw_drift: bool,
 ) -> dict[str, Any]:
     """Dispatch on schema_version: v3/v4 source binding, or the v2 rule set."""
+    if candidate.get("schema_version") == 5:
+        return _verify_v5_archive(folder, candidate, archive_root=archive_root, repo=repo)
     if candidate.get("schema_version") in (3, 4):
         return _verify_v3_archive(
             folder,
@@ -427,8 +435,168 @@ def verify_new_archive(
     )
 
 
+def _verify_v5_archive(
+    folder: Path,
+    candidate: dict[str, Any],
+    *,
+    archive_root: Path,
+    repo: Path,
+) -> dict[str, Any]:
+    checks: list[dict[str, Any]] = []
+
+    def record(name: str, ok: bool, detail: str) -> None:
+        checks.append(_pass(name, detail) if ok else _failure(name, detail))
+
+    _check_declared_metadata(candidate, folder, record)
+    file_hash, canonical_hash = _check_snapshot_hashes(folder, candidate, record)
+    sources = _check_sources_json(folder, candidate, record)
+    _check_snapshot_strict_roles(folder, record)
+    _check_not_active(str(candidate.get("version")), archive_root, record)
+    for name in ("active.json", "active.next.json"):
+        record("no_active_pointer", not (archive_root / name).exists(), f"{name} must be absent")
+    record("status_pending", candidate.get("status") == "pending", "v5 status must be pending")
+    record(
+        "candidate_schema_version",
+        candidate.get("candidate_schema_version") == 5,
+        "candidate_schema_version must equal schema_version=5",
+    )
+    seal = {k: v for k, v in candidate.items() if k != "candidate_payload_sha256"}
+    record(
+        "candidate_payload_sha256",
+        canonical_sha256(seal) == candidate.get("candidate_payload_sha256"),
+        "canonical payload seal",
+    )
+    record(
+        "source_origin",
+        candidate.get("source_origin") == SOURCE_ORIGIN_GIT
+        and candidate.get("dirty_worktree") is False
+        and "raw_worktree_hashes" not in candidate
+        and "dirty_files" not in candidate,
+        "v5 requires clean git_commit provenance",
+    )
+    source, base = candidate.get("source_commit"), candidate.get("diff_base_commit")
+    for field, commit in (("source_commit", source), ("diff_base_commit", base)):
+        record(
+            field,
+            isinstance(commit, str)
+            and re.fullmatch(r"[0-9a-f]{40}", commit) is not None
+            and _git_bytes(repo, ["rev-parse", "--verify", f"{commit}^{{commit}}"]) is not None,
+            f"{field} must be a full commit SHA",
+        )
+    record(
+        "source_commit_ancestor",
+        _git_bytes(repo, ["merge-base", "--is-ancestor", str(base), str(source)]) is not None,
+        "diff_base must be ancestor of source_commit",
+    )
+    try:
+        declared_manifest = candidate.get("source_manifest")
+        if not isinstance(declared_manifest, dict):
+            raise ValueError("source_manifest must be an object with all schema 5 fields")
+        kind = declared_manifest.get("kind")
+        if not isinstance(kind, str):
+            raise ValueError("source_manifest.kind must be full or delta")
+        expected_parent = _parent_integrity(archive_root, candidate.get("parent"), strict=True)
+        record(
+            "parent_integrity_matches",
+            candidate.get("parent_integrity") == expected_parent,
+            "parent declaration must equal recomputed strict integrity record",
+        )
+        manifest, archived, resolved = derive_v5_manifest(
+            archive_root,
+            repo,
+            parent=candidate.get("parent"),
+            kind=kind,
+            diff_base=str(base),
+            source_commit=str(source),
+        )
+        actual_manifest = candidate.get("source_manifest")
+        record(
+            "source_manifest_complete",
+            actual_manifest == manifest,
+            "all v5 manifest fields must exactly equal git/parent derivation",
+        )
+        record(
+            "resolved_source_files",
+            candidate.get("resolved_source_files") == len(resolved),
+            "resolved_source_files must equal complete resolved source count",
+        )
+        hashes = candidate.get("source_hashes", {})
+        record(
+            "source_manifest_exact_set",
+            set(hashes) == archived,
+            f"missing={sorted(archived - set(hashes))} extra={sorted(set(hashes) - archived)}",
+        )
+        for field in ("changed_files", "deleted_files", "scope_excluded_changed_files"):
+            record(
+                field,
+                isinstance(actual_manifest, dict) and actual_manifest.get(field) == manifest[field],
+                f"{field} must equal git diff -M",
+            )
+        blob_hashes = {
+            p: _lf_blob_sha256(_git_bytes(repo, ["cat-file", "blob", f"{source}:{p}"]))
+            for p in archived
+        }
+        record(
+            "source_commit_blob",
+            hashes == blob_hashes and all(blob_hashes.values()),
+            "source_hashes must equal archived source_commit LF blob hashes",
+        )
+        snapshot = read_json(folder / "snapshot.json")
+        prompts = dict(_inherit_parent_snapshot(archive_root, candidate.get("parent"))["prompts"])
+        prompts.update(
+            {role: text for role, text in _extract_prompts(sources or {}).items() if text}
+        )
+        record(
+            "snapshot_source_binding",
+            snapshot.get("prompts") == prompts
+            and all(
+                snapshot.get(field) == candidate.get(field)
+                for field in ("version", "parent", "status")
+            ),
+            "snapshot identity/status and per-role prompts must match source and inheritance",
+        )
+        paths = resolved | set(manifest["deleted_files"])
+        expected_base = {
+            p: _lf_blob_sha256(_git_bytes(repo, ["cat-file", "blob", f"{base}:{p}"]))
+            for p in sorted(paths)
+        }
+        record(
+            "base_commit_blob",
+            candidate.get("base_hashes") == expected_base,
+            "base_hashes bind complete resolved tree plus tombstones",
+        )
+        diff = (folder / "candidate.diff").read_bytes()
+        record(
+            "diff_sha256", _sha256_bytes(diff) == candidate.get("diff_sha256"), "diff bytes hash"
+        )
+        verify_v5_roundtrip(
+            repo, str(base), str(source), diff, resolved, set(manifest["deleted_files"])
+        )
+        record("diff_forward_apply", True, "complete source tree and tombstones reproduced")
+        record("diff_reverse_apply", True, "complete base tree restored")
+    except (OSError, ValueError, TypeError, KeyError) as exc:
+        record("v5_contract", False, str(exc))
+    failures = [check for check in checks if not check["ok"]]
+    return {
+        "version": folder.name,
+        "archive_class": "new",
+        "schema_version": 5,
+        "status": "failed" if failures else "ok",
+        "checks": checks,
+        "failures": failures,
+        "ok": not failures,
+        "snapshot_file_sha256": file_hash,
+        "snapshot_canonical_sha256": canonical_hash,
+        "raw_drift": {},
+    }
+
+
 def _check_v2_reverse_apply(
-    candidate: dict[str, Any], repo: Path, diff: bytes, record: Any
+    candidate: dict[str, Any],
+    repo: Path,
+    diff: bytes,
+    record: Any,
+    sources: Mapping[str, Any] | None = None,
 ) -> None:
     """v2 reverse apply, drift-immune when possible.
 
@@ -472,7 +640,23 @@ def _check_v2_reverse_apply(
                 f"{source_commit[:12]} blob tree ({len(blobs)} paths)",
             )
             return
-    _check_worktree_reverse_apply(repo, diff, record)
+    if sources:
+        archived: dict[str, bytes | None] = {
+            path: text.encode("utf-8") for path, text in sources.items() if isinstance(text, str)
+        }
+        base = {
+            path: _git_bytes(
+                repo, ["cat-file", "blob", f"{candidate.get('diff_base_commit')}:{path}"]
+            )
+            for path in archived
+        }
+        _check_temp_reverse_apply(archived, base, diff, record)
+    else:
+        record(
+            "diff_reverse_apply",
+            False,
+            "archived source bytes unavailable; no live worktree fallback",
+        )
 
 
 def _verify_v2_archive(
@@ -492,6 +676,7 @@ def _verify_v2_archive(
 
     _check_declared_metadata(candidate, folder, record)
     file_hash, canonical_hash = _check_snapshot_hashes(folder, candidate, record)
+    sources = _check_sources_json(folder, candidate, record)
 
     diff_path = folder / "candidate.diff"
     if not diff_path.is_file():
@@ -508,15 +693,23 @@ def _verify_v2_archive(
         if not diff.strip():
             record("diff_reverse_apply", True, "empty diff is trivially reversible")
         else:
-            _check_v2_reverse_apply(candidate, repo, diff, record)
+            _check_v2_reverse_apply(candidate, repo, diff, record, sources)
 
-    _check_sources_json(folder, candidate, record)
     raw_drift = _check_raw_worktree_hashes(candidate, repo, ignore_raw_drift, record)
     _check_parent_integrity(candidate, archive_root, record)
     _check_not_active(version, archive_root, record)
 
     failures = [check for check in checks if not check["ok"]]
+    legacy_reasons = []
+    if candidate.get("schema_version") == 3:
+        legacy_reasons.append("schema<4")
+        snapshot = read_json(folder / "snapshot.json")
+        if any(not snapshot.get("prompts", {}).get(role) for role in DEFAULT_REQUIRED_ROLES):
+            legacy_reasons.append("empty_role_prompts")
     return {
+        "status": "legacy_non_strict" if legacy_reasons else ("ok" if not failures else "failed"),
+        "reasons": legacy_reasons,
+        "legacy_worktree_drift": raw_drift if ignore_raw_drift else {},
         "version": version or folder.name,
         "archive_class": "new",
         "schema_version": candidate.get("schema_version"),
@@ -827,7 +1020,12 @@ def _verify_v3_archive(
                 }
                 _check_temp_reverse_apply(source_blobs, base_blobs, diff, record)
             else:
-                _check_worktree_reverse_apply(repo, diff, record)
+                archived_blobs: dict[str, bytes | None] = {
+                    path: text.encode("utf-8")
+                    for path, text in (sources_payload or {}).items()
+                    if isinstance(text, str)
+                }
+                _check_temp_reverse_apply(archived_blobs, base_blobs, diff, record)
 
     # 6. Worktree raw hashes are worktree-mode provenance only.
     raw_drift: dict[str, str] = {}
@@ -842,7 +1040,16 @@ def _verify_v3_archive(
     _check_not_active(version, archive_root, record)
 
     failures = [check for check in checks if not check["ok"]]
+    legacy_reasons = []
+    if candidate.get("schema_version") == 3:
+        legacy_reasons.append("schema<4")
+        snapshot = read_json(folder / "snapshot.json")
+        if any(not snapshot.get("prompts", {}).get(role) for role in DEFAULT_REQUIRED_ROLES):
+            legacy_reasons.append("empty_role_prompts")
     return {
+        "status": "legacy_non_strict" if legacy_reasons else ("ok" if not failures else "failed"),
+        "reasons": legacy_reasons,
+        "legacy_worktree_drift": raw_drift if ignore_raw_drift else {},
         "version": version or folder.name,
         "archive_class": "new",
         "schema_version": candidate.get("schema_version"),
@@ -1034,21 +1241,6 @@ def verify_historical_baseline(archive_root: Path) -> dict[str, Any]:
     return result
 
 
-def candidate_tree_sha256(file_hashes: Mapping[str, str]) -> str:
-    """Canonical candidate tree hash (Phase30 receipt rule).
-
-    Sort the file paths, concatenate ``path + NUL + file_sha256`` for each, and
-    take the SHA-256 of the whole concatenation. The receipt itself is never an
-    input (it lives outside the candidate directory).
-    """
-    digest = hashlib.sha256()
-    for path in sorted(file_hashes):
-        digest.update(path.encode("utf-8"))
-        digest.update(b"\x00")
-        digest.update(str(file_hashes[path]).encode("ascii"))
-    return digest.hexdigest()
-
-
 def verify_receipt(
     receipt_path: Path,
     *,
@@ -1185,6 +1377,8 @@ def verify_receipt(
     declared_files = receipt.get("candidate_files")
     declared_map: dict[str, Any] = declared_files if isinstance(declared_files, dict) else {}
     file_problems: list[str] = []
+    if set(declared_map) != set(RECEIPT_FILE_NAMES):
+        file_problems.append("candidate_files must contain exactly the four candidate files")
     blob_bytes: dict[str, bytes | None] = {}
     for name in RECEIPT_FILE_NAMES:
         declared = declared_map.get(name)
@@ -1256,10 +1450,40 @@ def verify_receipt(
         else:
             record(
                 "receipt_candidate_record",
-                True,
-                f"version={parsed.get('version')!r} from candidate_commit blob",
+                candidate_record is not None,
+                f"version={candidate_record.get('version')!r} from candidate_commit blob"
+                if candidate_record is not None
+                else "candidate.json blob must be an object",
             )
     if candidate_record is not None:
+        for receipt_field, candidate_field in (
+            ("candidate", "version"),
+            ("source_commit", "source_commit"),
+            ("diff_base", "diff_base_commit"),
+        ):
+            record(
+                f"receipt_cross_{receipt_field}",
+                receipt.get(receipt_field) == candidate_record.get(candidate_field),
+                f"receipt {receipt_field} must equal candidate.json {candidate_field}",
+            )
+        record(
+            "receipt_source_candidate_ancestry",
+            _git_bytes(
+                repo, ["merge-base", "--is-ancestor", str(source_commit), str(candidate_commit)]
+            )
+            is not None,
+            "source_commit must be ancestor of candidate_commit",
+        )
+        if candidate_record.get("schema_version") == 5:
+            record(
+                "receipt_declared_status",
+                receipt.get("status") == "pending",
+                "receipt.status must be pending",
+            )
+            verified = _verify_v5_archive(
+                folder, candidate_record, archive_root=archive_root, repo=repo
+            )
+            record("receipt_v5_candidate", verified["ok"], str(verified["failures"]))
         declared_hashes = candidate_record.get("source_hashes")
         hashes: dict[str, Any] = declared_hashes if isinstance(declared_hashes, dict) else {}
         hash_problems: list[str] = []
@@ -1302,6 +1526,28 @@ def verify_receipt(
     diff_raw = blob_bytes.get("candidate.diff")
     if candidate_record is None or diff_raw is None:
         record("receipt_diff_roundtrip", False, "candidate.diff or candidate.json unavailable")
+    elif candidate_record.get("schema_version") == 5:
+        try:
+            _, _, resolved = derive_v5_manifest(
+                archive_root,
+                repo,
+                parent=candidate_record.get("parent"),
+                kind=candidate_record.get("source_manifest", {}).get("kind"),
+                diff_base=str(diff_base),
+                source_commit=str(source_commit),
+            )
+            verify_v5_roundtrip(
+                repo,
+                str(diff_base),
+                str(source_commit),
+                diff_raw,
+                resolved,
+                set(candidate_record["source_manifest"]["deleted_files"]),
+            )
+        except (ValueError, OSError) as exc:
+            record("receipt_diff_roundtrip", False, str(exc))
+        else:
+            record("receipt_diff_roundtrip", True, "complete resolved trees round-trip")
     elif not diff_raw.strip():
         record("receipt_diff_roundtrip", True, "empty diff is trivially consistent")
     else:
@@ -1388,18 +1634,42 @@ def verify_receipt(
     # breaks this pin, which is the whole point of the external witness.
     manifest_path = archive_root / "candidates" / HISTORICAL_MANIFEST_NAME
     declared_manifest = receipt.get("historical_manifest_sha256")
-    if not manifest_path.is_file():
+    is_v5 = candidate_record is not None and candidate_record.get("schema_version") == 5
+    manifest_commit = receipt.get("manifest_commit")
+    if is_v5 or manifest_commit is not None:
+        result["manifest_binding"] = "manifest_commit"
+        manifest_blob = (
+            blob(str(manifest_commit), f"{candidates_prefix}/{HISTORICAL_MANIFEST_NAME}")
+            if manifest_commit
+            else None
+        )
+        record(
+            "receipt_manifest_commit",
+            bool(manifest_commit)
+            and _git_bytes(repo, ["merge-base", "--is-ancestor", str(manifest_commit), "HEAD"])
+            is not None,
+            "manifest_commit required and must be HEAD ancestor",
+        )
+        actual_manifest = _sha256_bytes(manifest_blob) if manifest_blob is not None else None
+        record(
+            "receipt_manifest_blob",
+            actual_manifest is not None
+            and actual_manifest == receipt.get("manifest_blob_sha256") == declared_manifest,
+            "manifest_blob_sha256 and historical_manifest_sha256 must equal committed blob",
+        )
         record(
             "receipt_historical_manifest",
-            False,
-            f"{HISTORICAL_MANIFEST_NAME} is missing from the archive",
+            manifest_path.is_file()
+            and _sha256_bytes(manifest_path.read_bytes()) == actual_manifest,
+            "current manifest must equal bound blob",
         )
     else:
-        actual_manifest = _sha256_bytes(manifest_path.read_bytes())
+        result["manifest_binding"] = "current_worktree"
         record(
             "receipt_historical_manifest",
-            actual_manifest == declared_manifest,
-            f"declared={declared_manifest!r} current_manifest_bytes={actual_manifest}",
+            manifest_path.is_file()
+            and _sha256_bytes(manifest_path.read_bytes()) == declared_manifest,
+            "v4 compatibility: current_worktree; no committed manifest binding",
         )
 
     result["failures"] = [c for c in checks if not c["ok"]]
@@ -1524,14 +1794,20 @@ def verify_versions(
 def _print_summary(report: dict[str, Any]) -> None:
     for entry in report["versions"]:
         if entry["archive_class"] == "new":
-            state = "ok" if entry["ok"] else f"FAILED ({len(entry['failures'])} checks)"
+            state = (
+                entry.get("status", "ok")
+                if entry["ok"]
+                else f"FAILED ({len(entry['failures'])} checks)"
+            )
             for failure in entry["failures"]:
                 print(f"[fail] {entry['version']} {failure['check']}: {failure['detail']}")
             if entry.get("raw_drift_ignored"):
                 print(
-                    f"[note] {entry['version']} raw worktree drift ignored: {sorted(entry['raw_drift'])}"
+                    f"[note] {entry['version']} legacy_worktree_drift: {sorted(entry['raw_drift'])}"
                 )
             print(f"{entry['version']:<28} new  {state}")
+            if entry.get("status") == "legacy_non_strict":
+                print(f"[note] {entry['version']} reasons={entry.get('reasons', [])}")
         else:
             declared = entry.get("declared")
             declared_text = declared[:12] + "..." if isinstance(declared, str) else str(declared)
@@ -1544,7 +1820,7 @@ def _print_summary(report: dict[str, Any]) -> None:
             )
     historical = report["historical_baseline"]
     if historical["manifest_present"]:
-        state = "ok" if historical["ok"] else "MISMATCH"
+        state = "internal-only" if historical["ok"] else "MISMATCH"
         print(
             f"{'historical_baseline':<28} manifest files={historical['files_checked']} "
             f"mismatches={len(historical['mismatches'])} {state}"
@@ -1598,6 +1874,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="record raw_worktree_hashes drift as an annotation instead of a failure",
     )
     parser.add_argument(
+        "--strict-raw-drift",
+        action="store_true",
+        help="fail when legacy worktree-origin raw bytes drift",
+    )
+    parser.add_argument(
         "--receipt",
         type=Path,
         default=None,
@@ -1637,7 +1918,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         archive_root=archive_root,
         repo=args.repo,
         versions=versions,
-        ignore_raw_drift=args.ignore_raw_drift,
+        ignore_raw_drift=not args.strict_raw_drift,
     )
     receipt_result: dict[str, Any] | None = None
     if args.receipt is not None:
@@ -1664,8 +1945,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         historical_integrity = "ok"
     elif (receipt_result is not None and not receipt_ok) or historical["ok"] is False:
         historical_integrity = "failed"
-    elif historical["ok"] is None:
-        historical_integrity = "unverified"
     else:
         historical_integrity = "internal-only"
     report["witness"] = witness
@@ -1676,6 +1955,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         exit_code = 1
     report["exit_code"] = exit_code
     _print_summary(report)
+    if receipt_result is not None:
+        print(f"manifest_binding={receipt_result.get('manifest_binding', 'unverified')}")
     print(f"witness={witness} historical_integrity={historical_integrity}")
     if args.json is not None:
         args.json.parent.mkdir(parents=True, exist_ok=True)

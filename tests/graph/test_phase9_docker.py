@@ -23,7 +23,7 @@ def test_real_regression(tmp_path: Path, monkeypatch, case):
     fixture = "regression_break" if case == "normal" else case
     source = Path(__file__).parents[1] / "fixtures/repos" / fixture
 
-    def base_repo(root):
+    def base_repo(root, *, include_tests: bool = True):
         original = root / "original"
         shutil.copytree(source, original)
         run_git(["init", "-q"], cwd=original)

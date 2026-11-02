@@ -286,6 +286,7 @@ def _no_target_tests(tmp_path: Path) -> Harness:
         results=[passed_result(NODE)],
         coder_rounds=[[EDIT, FINISH]],
         tests=(),
+        include_existing_tests=False,
     )
 
 

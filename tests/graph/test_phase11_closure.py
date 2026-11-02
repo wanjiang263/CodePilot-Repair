@@ -143,6 +143,7 @@ def test_coder_tool_cap_with_valid_patch_still_runs_the_whole_closure(tmp_path: 
         tmp_path,
         results=[passed_result(), passed_result(), passed_result()],
         coder_rounds=[THIRTY_CALLS],
+        coder_relocalize_replies=[READ],
     )
     reviewer = _wired(harness, [APPROVED])
     state = harness.run()
@@ -205,6 +206,7 @@ def test_local_tool_exhaustion_does_not_consume_the_review_allowance(tmp_path: P
         tmp_path,
         results=[passed_result(), passed_result(), passed_result()],
         coder_rounds=[THIRTY_CALLS],
+        coder_relocalize_replies=[READ],
     )
     _wired(harness, [APPROVED])
     state = harness.run()
@@ -505,6 +507,7 @@ def test_a_crashed_coding_stage_leaves_no_stale_reservation(tmp_path: Path) -> N
         tmp_path,
         results=[passed_result(), passed_result(), passed_result()],
         coder_rounds=[THIRTY_CALLS],
+        coder_relocalize_replies=[READ],
     )
     _wired(harness, [APPROVED])
     state = _analysis_chain(harness)
@@ -550,6 +553,7 @@ def test_closure_reservation_blocks_the_coding_dispatch_before_any_spend(tmp_pat
         tmp_path,
         results=[passed_result(), passed_result()],
         coder_rounds=[THIRTY_CALLS],
+        coder_relocalize_replies=[READ],
         input_tokens=5_000,
     )
     _wired(harness, [APPROVED])
@@ -586,7 +590,7 @@ def test_closure_reservation_blocks_the_coding_dispatch_before_any_spend(tmp_pat
     dispatched = asyncio.run(nodes.generate_patch(roomy, harness.deps))
     assert "status" not in dispatched, dispatched.get("failure_reasons")
     assert dispatched["coding_stop_reason"] is StopReason.BUDGET_TOOL_CALLS
-    assert harness.llm.purposes().count("coder") == 30
+    assert sum(harness.llm.purposes().count(p) for p in ("coder", "coder_relocalize")) == 30
 
 
 def test_a_patch_in_hand_keeps_the_graph_on_the_verification_path(tmp_path: Path) -> None:
@@ -595,6 +599,7 @@ def test_a_patch_in_hand_keeps_the_graph_on_the_verification_path(tmp_path: Path
         tmp_path,
         results=[passed_result(), passed_result()],
         coder_rounds=[THIRTY_CALLS],
+        coder_relocalize_replies=[READ],
     )
     state = _analysis_chain(harness)
     update = asyncio.run(nodes.generate_patch(state, harness.deps))
@@ -687,6 +692,7 @@ def test_the_closure_reservation_is_priced_by_the_reviewers_own_model(
         tmp_path,
         results=[passed_result(), passed_result()],
         coder_rounds=[THIRTY_CALLS],
+        coder_relocalize_replies=[READ],
         input_tokens=5_000,
         cost_per_call=0.01,
         llm_config=_priced_config(reviewer_input=4.0, reviewer_output=16.0),
@@ -742,6 +748,7 @@ def test_reservation_falls_back_to_the_ledger_and_says_so(tmp_path: Path) -> Non
         tmp_path,
         results=[passed_result(), passed_result()],
         coder_rounds=[THIRTY_CALLS],
+        coder_relocalize_replies=[READ],
         input_tokens=5_000,
         cost_per_call=0.01,
     )
@@ -944,6 +951,7 @@ def test_a_hard_budget_stop_is_never_masked_by_the_local_tool_cap(tmp_path: Path
         tmp_path,
         results=[passed_result(), passed_result()],
         coder_rounds=[THIRTY_CALLS],
+        coder_relocalize_replies=[READ],
         input_tokens=5_000,
         cost_per_call=0.01,
     )
@@ -990,6 +998,7 @@ def test_resuming_a_finished_closure_replays_stages_without_rebilling(tmp_path: 
         tmp_path,
         results=[passed_result(), passed_result(), passed_result()],
         coder_rounds=[THIRTY_CALLS],
+        coder_relocalize_replies=[READ],
     )
     reviewer = _wired(harness, [APPROVED, APPROVED])
 
@@ -1069,6 +1078,7 @@ def test_a_reviewer_behind_a_decorator_is_booked_exactly_once(tmp_path: Path) ->
         tmp_path,
         results=[passed_result(), passed_result(), passed_result()],
         coder_rounds=[THIRTY_CALLS],
+        coder_relocalize_replies=[READ],
     )
     harness.deps.regression_runner = RegressionRunner()
     llm = FakeLLM([APPROVED])
@@ -1111,6 +1121,7 @@ def test_a_review_blocked_by_its_own_budget_records_the_stage_as_unexecuted(
         tmp_path,
         results=[passed_result(), passed_result(), passed_result()],
         coder_rounds=[THIRTY_CALLS],
+        coder_relocalize_replies=[READ],
     )
     reviewer = _wired(harness, [APPROVED, APPROVED])
     state = harness.run()

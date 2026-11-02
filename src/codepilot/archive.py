@@ -1,4 +1,4 @@
-"""Candidate archive generator: the controlled generation path to schema v3/v4.
+"""Candidate archive generator: the controlled generation path to schema v3/v4/v5.
 
 ``rsi.archive_candidate`` writes v1 ``candidate.json`` without snapshot/diff
 integrity fields, and historical records mix two undeclared snapshot hash rules
@@ -73,6 +73,8 @@ __all__ = [
     "SNAPSHOT_REF",
     "SOURCE_ORIGIN_GIT",
     "SOURCE_ORIGIN_WORKTREE",
+    "SOURCE_SCOPE",
+    "SOURCE_SCOPE_EXCLUDES",
     "ArchiveError",
     "CandidateExistsError",
     "DiffVerificationError",
@@ -81,6 +83,7 @@ __all__ = [
     "IncompleteSourceManifestError",
     "MissingSourceError",
     "NonAncestorDiffBaseError",
+    "ParentIntegrityError",
     "SourceOriginError",
     "canonical_sha256",
     "create_candidate",
@@ -93,7 +96,30 @@ SCHEMA_VERSION = 3
 #: Phase30 schema v4: source manifest (full/delta) plus parent snapshot
 #: inheritance with strict role-prompt validation. v3 generation stays available
 #: (and byte-reproducible) via ``candidate_schema_version=3``.
-CANDIDATE_SCHEMA_VERSION = 4
+CANDIDATE_SCHEMA_VERSION = 5
+SOURCE_SCOPE = (
+    "src/",
+    "scripts/",
+    "tests/",
+    "web/src/",
+    "configs/harness/",
+    "pyproject.toml",
+    "web/package.json",
+)
+SOURCE_SCOPE_EXCLUDES = ("configs/harness/candidates/", "configs/harness/receipts/")
+LEGACY_PARENT_ALLOWLIST = frozenset(
+    {
+        "phase29-candidate-v3",
+        "phase28-candidate-v2",
+        "phase27-candidate-v1",
+        "phase26-candidate-v1",
+        "phase26-candidate-v2",
+        "phase26-candidate-v3",
+        "phase26-candidate-v4",
+        "phase26-candidate-v5",
+        "baseline-07625a8",
+    }
+)
 MANIFEST_KIND_FULL = "full"
 MANIFEST_KIND_DELTA = "delta"
 MANIFEST_KINDS = (MANIFEST_KIND_FULL, MANIFEST_KIND_DELTA)
@@ -169,6 +195,163 @@ class NonAncestorDiffBaseError(ArchiveError):
 
 class IncompleteSourceManifestError(ArchiveError):
     """The source manifest is structurally invalid or an incomplete full set."""
+
+
+class ParentIntegrityError(ArchiveError):
+    """A parent snapshot is missing its binding or differs from declared bytes."""
+
+
+def in_source_scope(path: str) -> bool:
+    return not path.startswith(SOURCE_SCOPE_EXCLUDES) and any(
+        path.startswith(entry) if entry.endswith("/") else path == entry for entry in SOURCE_SCOPE
+    )
+
+
+def git_source_changes(repo: Path, diff_base: str, source_commit: str) -> dict[str, list[str]]:
+    """NUL-delimited -M handles spaces, tabs and renames without path guessing."""
+    parts = (
+        _git(repo, "diff", "--name-status", "-z", "-M", diff_base, source_commit)
+        .decode("utf-8")
+        .split("\0")
+    )
+    changed: set[str] = set()
+    deleted: set[str] = set()
+    excluded: set[str] = set()
+    index = 0
+    while index < len(parts) and parts[index]:
+        status, path = parts[index : index + 2]
+        index += 2
+        paths = [path]
+        if status.startswith("R"):
+            deleted.add(path)
+            path = parts[index]
+            index += 1
+            paths.append(path)
+            if in_source_scope(path):
+                changed.add(path)
+        elif status == "D":
+            deleted.add(path)
+        elif status in ("A", "M", "T"):
+            if in_source_scope(path):
+                changed.add(path)
+        else:
+            raise IncompleteSourceManifestError(f"unsupported git change status {status}")
+        excluded.update(p for p in paths if not in_source_scope(p))
+    return {
+        "changed_files": sorted(changed),
+        "deleted_files": sorted(deleted),
+        "scope_excluded_changed_files": sorted(excluded),
+    }
+
+
+def resolved_candidate_sources(root: Path, version: str, seen: tuple[str, ...] = ()) -> set[str]:
+    if version in seen or len(seen) >= _MAX_INHERITANCE_HOPS:
+        raise ArchiveError("source parent chain cycle or exceeds 8 hops")
+    record = _read_candidate_record(root, version)
+    paths = set(read_json(_version_folder(root, version) / "sources.json"))
+    manifest = record.get("source_manifest", {})
+    if record.get("schema_version", 1) >= 4 and manifest.get("kind") == "full":
+        return paths
+    parent = record.get("parent")
+    inherited = resolved_candidate_sources(root, parent, (*seen, version)) if parent else set()
+    if record.get("schema_version") == 5:
+        inherited -= set(manifest.get("deleted_files", []))
+        inherited -= {item["path"] for item in manifest.get("excluded_files", [])}
+    return inherited | paths
+
+
+def derive_v5_manifest(
+    root: Path,
+    repo: Path,
+    *,
+    parent: str | None,
+    kind: str,
+    diff_base: str,
+    source_commit: str,
+) -> tuple[dict[str, Any], set[str], set[str]]:
+    if not parent or kind not in MANIFEST_KINDS:
+        raise IncompleteSourceManifestError("schema 5 requires a parent and full/delta kind")
+    _parent_integrity(root, parent, strict=True)
+    inherited = resolved_candidate_sources(root, parent)
+    changes = git_source_changes(repo, diff_base, source_commit)
+    changed, deleted = set(changes["changed_files"]), set(changes["deleted_files"])
+    required = {f"src/codepilot/agents/{role}.py" for role in DEFAULT_REQUIRED_ROLES}
+    if required & deleted:
+        raise IncompleteSourceManifestError(
+            f"required role source deleted: {sorted(required & deleted)}"
+        )
+    excluded = sorted(p for p in inherited if not in_source_scope(p))
+    surviving = inherited - deleted - set(excluded)
+    delta = changed | (required - inherited)
+    resolved = surviving | changed | required
+    archived = resolved if kind == "full" else delta
+    manifest = {
+        "kind": kind,
+        "parent": parent,
+        "source_scope": list(SOURCE_SCOPE),
+        **changes,
+        "required_roles": list(DEFAULT_REQUIRED_ROLES),
+        "required_sources": sorted(required),
+        "excluded_files": [
+            {
+                "path": p,
+                "reason": "archive metadata is never a source input"
+                if p.startswith(SOURCE_SCOPE_EXCLUDES)
+                else "outside SOURCE_SCOPE",
+            }
+            for p in excluded
+        ],
+        "resolved_source_files": len(resolved),
+    }
+    return manifest, archived, resolved
+
+
+def verify_v5_roundtrip(
+    repo: Path,
+    diff_base: str,
+    source_commit: str,
+    diff: bytes,
+    resolved: set[str],
+    deleted: set[str],
+) -> None:
+    """Check complete resolved content and tombstones in both directions."""
+    paths = sorted(resolved | deleted)
+    base = {p: _commit_blob(repo, diff_base, p) for p in paths}
+    source = {p: _commit_blob(repo, source_commit, p) for p in paths}
+    for p in resolved:
+        if source[p] is None:
+            raise MissingSourceError(f"resolved source absent from source_commit: {p}")
+    for reverse, initial, expected in ((False, base, source), (True, source, base)):
+        if not diff.strip():
+            if initial != expected:
+                raise DiffVerificationError("empty diff does not reproduce the bound trees")
+            continue
+        folder = _apply_patch_in_temp(initial, diff, reverse=reverse)
+        try:
+            for p, raw in expected.items():
+                target = folder / p
+                actual = target.read_bytes() if target.is_file() else None
+                if actual != raw:
+                    raise DiffVerificationError(
+                        f"{'reverse' if reverse else 'forward'} mismatch: {p}"
+                    )
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
+
+def candidate_tree_sha256(file_hashes: Mapping[str, str]) -> str:
+    """Canonical candidate tree hash (Phase30 receipt rule).
+
+    Sort the file paths, concatenate ``path + NUL + file_sha256`` for each, and
+    take the SHA-256 of the whole concatenation. The receipt itself is never an
+    input (it lives outside the candidate directory).
+    """
+    digest = hashlib.sha256()
+    for path in sorted(file_hashes):
+        digest.update(path.encode("utf-8"))
+        digest.update(b"\x00")
+        digest.update(str(file_hashes[path]).encode("ascii"))
+    return digest.hexdigest()
 
 
 def _spawn_git(
@@ -359,6 +542,9 @@ def _apply_patch_in_temp(blobs: Mapping[str, bytes | None], patch: bytes, *, rev
     """
     tmp = Path(tempfile.mkdtemp(prefix="codepilot-archive-apply-"))
     try:
+        # TEMP may live inside a checkout. Without its own repository git apply
+        # discovers the enclosing repo and silently skips paths outside the cwd.
+        _git(tmp, "init", "-q")
         for rel, raw in blobs.items():
             if raw is None:
                 continue
@@ -433,14 +619,18 @@ def _serialize(payload: dict[str, Any]) -> bytes:
     return text.encode("utf-8")
 
 
-def _parent_integrity(root: Path, parent: str | None) -> dict[str, Any] | None:
+def _parent_integrity(
+    root: Path, parent: str | None, *, strict: bool = False
+) -> dict[str, Any] | None:
     """Record parent snapshot hashes next to the parent's own declaration.
 
-    Comparison only, never a verdict: historical parents declared their snapshot
-    hash under unannotated rules, so both candidate rules are reported and the
-    generator proceeds regardless of the outcome.
+    Schema 3/4 retains the historical comparison behavior. With strict=True,
+    schema 5 rejects mismatches except explicitly allowlisted pre-v4 parents;
+    every allowed exception records its reason.
     """
     if not parent:
+        if strict:
+            raise ParentIntegrityError("schema 5 requires a parent")
         return None
     folder = _version_folder(root, parent)
     snapshot_path = folder / SNAPSHOT_REF
@@ -466,7 +656,20 @@ def _parent_integrity(root: Path, parent: str | None) -> dict[str, Any] | None:
                     declared = value
                     declared_field = field
                     break
+    legacy_reason = None
+    if strict:
+        parent_record = _read_candidate_record(root, parent)
+        if parent_record.get("snapshot_file_sha256") != actual_file:
+            if parent_record.get("schema_version", 1) < 4 and parent in LEGACY_PARENT_ALLOWLIST:
+                legacy_reason = (
+                    "explicit legacy allowlist: schema<4 snapshot hash rule predates strict binding"
+                )
+            else:
+                raise ParentIntegrityError(
+                    f"parent {parent} snapshot_file_sha256 differs from actual bytes"
+                )
     return {
+        **({"legacy_parent_reason": legacy_reason} if legacy_reason else {}),
         "version": parent,
         "snapshot_file_sha256_actual": actual_file,
         "snapshot_canonical_sha256_actual": actual_canonical,
@@ -536,10 +739,11 @@ def _inherit_parent_snapshot(root: Path, parent: str | None) -> dict[str, Any]:
         chain.append(current)
         snapshot = _read_parent_snapshot(root, current)
         prompts = snapshot.get("prompts")
-        if not inherited["prompts"] and isinstance(prompts, dict) and prompts:
-            inherited["prompts"] = {
-                role: text for role, text in prompts.items() if isinstance(text, str) and text
-            }
+        if isinstance(prompts, dict):
+            for role in DEFAULT_REQUIRED_ROLES:
+                text = prompts.get(role)
+                if role not in inherited["prompts"] and isinstance(text, str) and text.strip():
+                    inherited["prompts"][role] = text
         if not inherited["instruction"]:
             instruction = snapshot.get("instruction")
             if isinstance(instruction, str) and instruction:
@@ -552,6 +756,13 @@ def _inherit_parent_snapshot(root: Path, parent: str | None) -> dict[str, Any]:
                 ]
         record = _read_candidate_record(root, current)
         current = record.get("parent") if isinstance(record.get("parent"), str) else None
+    if current and (
+        current in seen
+        or any(role not in inherited["prompts"] for role in DEFAULT_REQUIRED_ROLES)
+        or not inherited["instruction"]
+        or not inherited["experiences"]
+    ):
+        raise ArchiveError("unresolved parent snapshot chain exceeds 8 hops or contains a cycle")
     inherited["chain"] = chain
     return inherited
 
@@ -739,11 +950,13 @@ def _candidate_payload(
         "parent_integrity": parent_integrity,
         "dirty_worktree": bool(dirty_files),
     }
-    if candidate_schema_version >= CANDIDATE_SCHEMA_VERSION:
+    if candidate_schema_version >= 4:
         # v4: explicit schema mirror (single source of truth is schema_version;
         # the verifier requires the two to be equal) and the source manifest.
         payload["candidate_schema_version"] = candidate_schema_version
         payload["source_manifest"] = dict(source_manifest or {})
+        if candidate_schema_version == 5:
+            payload["resolved_source_files"] = payload["source_manifest"]["resolved_source_files"]
     if source_origin == SOURCE_ORIGIN_WORKTREE:
         payload["raw_worktree_hashes"] = dict(raw_worktree_hashes or {})
     if dirty_files:
@@ -763,7 +976,7 @@ def create_candidate(
     parent: str | None = None,
     diff_base_commit: str,
     source_commit: str = "",
-    source_files: Sequence[str],
+    source_files: Sequence[str] | None = None,
     source_origin: str = SOURCE_ORIGIN_GIT,
     allow_dirty: bool = False,
     instruction: str = "",
@@ -807,12 +1020,18 @@ def create_candidate(
     checks run in throwaway directories either way). Returns the summary the
     CLI prints.
     """
-    if candidate_schema_version not in (SCHEMA_VERSION, CANDIDATE_SCHEMA_VERSION):
+    if candidate_schema_version not in (3, 4, 5):
         raise ArchiveError(
-            f"candidate_schema_version must be {SCHEMA_VERSION} or "
-            f"{CANDIDATE_SCHEMA_VERSION}, got {candidate_schema_version}"
+            f"candidate_schema_version must be 3, 4 or 5, got {candidate_schema_version}"
         )
-    if not source_files:
+    if candidate_schema_version == 5:
+        if source_origin != SOURCE_ORIGIN_GIT:
+            raise SourceOriginError("schema 5 requires git_commit provenance")
+        if source_files is not None:
+            raise IncompleteSourceManifestError(
+                "schema 5 derives source_files; caller lists forbidden"
+            )
+    elif not source_files:
         raise ArchiveError("source file list is empty; nothing to archive")
     if source_origin not in (SOURCE_ORIGIN_GIT, SOURCE_ORIGIN_WORKTREE):
         raise SourceOriginError(
@@ -836,14 +1055,14 @@ def create_candidate(
     folder = _version_folder(root, version)
     if folder.exists():
         raise CandidateExistsError(f"candidate version directory already exists: {folder}")
-    parent_integrity = _parent_integrity(root, parent)
+    parent_integrity = _parent_integrity(root, parent, strict=candidate_schema_version == 5)
     _require_commit(repo, "diff_base_commit", diff_base_commit)
     dirty_files = worktree_dirty_files(repo)
     temp_clone: Path | None = None
     effective_repo = repo
     try:
         if source_origin == SOURCE_ORIGIN_GIT:
-            if candidate_schema_version >= CANDIDATE_SCHEMA_VERSION:
+            if candidate_schema_version >= 4:
                 # v4 records commits, never labels: resolve to full shas first.
                 diff_base_commit = _resolved_commit(repo, "diff_base_commit", diff_base_commit)
                 source_commit = _resolved_commit(repo, "source_commit", source_commit)
@@ -862,6 +1081,21 @@ def create_candidate(
                         files=dirty_files,
                     )
 
+        source_manifest: dict[str, Any] | None = None
+        resolved_paths: set[str] = set()
+        deleted_paths: set[str] = set()
+        if candidate_schema_version == 5:
+            source_manifest, archived_paths, resolved_paths = derive_v5_manifest(
+                root,
+                effective_repo,
+                parent=parent,
+                kind=manifest_kind,
+                diff_base=diff_base_commit,
+                source_commit=source_commit,
+            )
+            source_files = sorted(archived_paths)
+            deleted_paths = set(source_manifest["deleted_files"])
+        assert source_files is not None
         if source_origin == SOURCE_ORIGIN_GIT:
             sources, source_blobs = _read_commit_sources(
                 effective_repo, source_commit, source_files
@@ -870,11 +1104,14 @@ def create_candidate(
         else:
             sources, raw_worktree_hashes = _read_sources(repo, source_files)
             source_blobs = None
+        if candidate_schema_version == 5 and set(sources) != archived_paths:
+            raise IncompleteSourceManifestError(
+                "read source set differs from the exact derived full/delta set"
+            )
         # In git_commit mode the candidate's provenance is the commit tree; a
         # dirty worktree routed through a temp clone is not part of it.
         payload_dirty_files = [] if temp_clone is not None else dirty_files
-        source_manifest: dict[str, Any] | None = None
-        if candidate_schema_version >= CANDIDATE_SCHEMA_VERSION:
+        if candidate_schema_version == 4:
             source_manifest = _validate_source_manifest(
                 root,
                 parent=parent,
@@ -882,12 +1119,17 @@ def create_candidate(
                 required_roles=required_roles,
                 source_keys=set(sources),
             )
-        base_blobs = _read_base_blobs(effective_repo, diff_base_commit, list(sources))
+        diff_paths = (
+            sorted(resolved_paths | deleted_paths)
+            if candidate_schema_version == 5
+            else list(sources)
+        )
+        base_blobs = _read_base_blobs(effective_repo, diff_base_commit, diff_paths)
         base_hashes = {
             path: None if raw is None else hashlib.sha256(lf_text(raw).encode("utf-8")).hexdigest()
             for path, raw in base_blobs.items()
         }
-        if candidate_schema_version >= CANDIDATE_SCHEMA_VERSION:
+        if candidate_schema_version >= 4:
             inherited = _inherit_parent_snapshot(root, parent)
             prompts = dict(inherited["prompts"])
             for role, text in _extract_prompts(sources).items():
@@ -924,7 +1166,7 @@ def create_candidate(
         diff = _build_diff(
             effective_repo,
             diff_base_commit,
-            list(sources),
+            diff_paths,
             source_commit=source_commit if source_origin == SOURCE_ORIGIN_GIT else None,
         )
         diff_sha256 = hashlib.sha256(diff).hexdigest()
@@ -951,13 +1193,23 @@ def create_candidate(
         # Round-trip in throwaway directories; on failure nothing half-written is
         # allowed to survive.
         try:
-            _verify_diff_roundtrip(
-                repo,
-                diff=diff,
-                base_blobs=base_blobs,
-                source_texts=sources,
-                source_blobs=source_blobs,
-            )
+            if candidate_schema_version == 5:
+                verify_v5_roundtrip(
+                    effective_repo,
+                    diff_base_commit,
+                    source_commit,
+                    diff,
+                    resolved_paths,
+                    deleted_paths,
+                )
+            else:
+                _verify_diff_roundtrip(
+                    repo,
+                    diff=diff,
+                    base_blobs=base_blobs,
+                    source_texts=sources,
+                    source_blobs=source_blobs,
+                )
         except BaseException:
             if not dry_run:
                 with contextlib.suppress(OSError):

@@ -57,7 +57,9 @@ def _run_graph(tmp_path: Path, fixture: SyntheticFixture, monkeypatch: pytest.Mo
     """在 fixture 的**推理视图**上跑一次完整的 M2 图。"""
     repository = fixture.materialize(tmp_path / "repo")
     monkeypatch.setattr(
-        harness_module, "_base_repo", lambda root: (repository, fixture.metadata.base_commit)
+        harness_module,
+        "_base_repo",
+        lambda root, **_: (repository, fixture.metadata.base_commit),
     )
     monkeypatch.setattr(harness_module, "ISSUE", fixture.issue)
     runner = build_harness(

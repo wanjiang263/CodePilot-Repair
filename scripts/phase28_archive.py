@@ -87,8 +87,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument(
         "--schema-version",
+        "--candidate-schema-version",
         type=int,
-        choices=(3, 4),
+        choices=(3, 4, 5),
         default=4,
         help="candidate record schema (default: 4, Phase30; 3 keeps the Phase29 layout)",
     )
@@ -106,7 +107,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument(
         "--source-list",
-        required=True,
+        default=None,
         help="JSON file (array of repo-relative paths) or comma-separated paths",
     )
     parser.add_argument("--archive-root", type=Path, default=None, help="archive root directory")
@@ -128,7 +129,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             parent=args.parent or None,
             diff_base_commit=args.diff_base,
             source_commit=args.source_commit,
-            source_files=parse_source_list(args.source_list),
+            source_files=parse_source_list(args.source_list) if args.source_list else None,
             source_origin=args.source_origin,
             allow_dirty=args.allow_dirty,
             dry_run=args.dry_run,

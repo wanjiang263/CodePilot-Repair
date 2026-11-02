@@ -33,6 +33,10 @@ harness.deps.regression_runner = RegressionRunner()
 class CrashReviewer(PatchReviewer):
     def review(self, state, deps):
         if mode == "after-regression":
+            (root / "usage-before-crash.json").write_text(
+                json.dumps({"calls": deps.usage.llm_calls, "tests": deps.test_runs}),
+                encoding="utf-8",
+            )
             os._exit(7)
         result = super().review(state, deps)
         (root / "usage-before-crash.json").write_text(

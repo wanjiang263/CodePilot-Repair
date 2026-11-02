@@ -66,8 +66,8 @@ def test_phase22_large_source_does_not_drop_review_patch(tmp_path: Path, monkeyp
 
     original_base_repo = harness_module._base_repo
 
-    def lf_base(root):
-        repo, _base = original_base_repo(root)
+    def lf_base(root, *, include_tests: bool = True):
+        repo, _base = original_base_repo(root, include_tests=include_tests)
         (repo / ".gitattributes").write_bytes(b"*.py text eol=lf\n")
         run_git(["add", ".gitattributes"], cwd=repo)
         run_git(["add", "--renormalize", "."], cwd=repo)

@@ -90,13 +90,14 @@ __all__ = [
 ]
 
 
-def _base_repo(root: Path) -> tuple[Path, str]:
+def _base_repo(root: Path, *, include_tests: bool = True) -> tuple[Path, str]:
     original = root / "original"
     (original / "src/pkg").mkdir(parents=True)
     (original / "tests").mkdir(parents=True)
     (original / "src/pkg/core.py").write_text(DEFECTIVE, encoding="utf-8")
     (original / "src/pkg/helper.py").write_text(HELPER, encoding="utf-8")
-    (original / "tests/test_core.py").write_text(EXISTING_TEST, encoding="utf-8")
+    if include_tests:
+        (original / "tests/test_core.py").write_text(EXISTING_TEST, encoding="utf-8")
     (original / "pyproject.toml").write_text(
         "[project]\nname='fixture'\nversion='0.0.1'\n", encoding="utf-8"
     )
@@ -389,6 +390,8 @@ def build_harness(
     extra_plans: int = 0,
     reuse: bool = False,
     llm_config: Any | None = None,
+    coder_relocalize_replies: Sequence[Reply] = (),
+    include_existing_tests: bool = True,
 ) -> Harness:
     """装配一次可运行的图。
 
@@ -418,7 +421,7 @@ def build_harness(
         )
         index = RepositoryIndex(stores, workspace.repository_id)
     else:
-        original, base = _base_repo(tmp_path)
+        original, base = _base_repo(tmp_path, include_tests=include_existing_tests)
         manager = WorkspaceManager(cache_root=tmp_path / "cache")
         workspace = manager.create(
             source=str(original), base_commit=base, target=tmp_path / "workspace"
@@ -465,6 +468,7 @@ def build_harness(
         _planner_reply(script, tests)
     for round_replies in coder_rounds:
         script.add("coder", *round_replies)
+    script.add("coder_relocalize", *coder_relocalize_replies)
     for item in diagnoses:
         script.add("diagnoser", item)
     for item in repro_drafts:

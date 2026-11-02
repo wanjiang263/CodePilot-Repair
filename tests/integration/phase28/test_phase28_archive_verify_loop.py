@@ -221,7 +221,10 @@ def test_verify_cli_exit_codes_on_clean_and_tampered_archive(tmp_path: Path) -> 
     )
     assert clean.returncode == 0, clean.stderr.decode("utf-8", errors="replace")
     stdout = clean.stdout.decode("utf-8", errors="replace")
-    assert "new  ok" in stdout
+    # Phase31 起 schema<4 的历史候选分类为 legacy_non_strict（附 reasons 注记），
+    # 退出码与 archive_class 语义不变：clean 仍 exit 0 / new；篡改仍 exit 1 / [fail]。
+    assert "new  legacy_non_strict" in stdout
+    assert "[note]" in stdout and "schema<4" in stdout
 
     diff_file = root / "candidates" / V2 / "candidate.diff"
     diff_file.write_bytes(diff_file.read_bytes().replace(b"return 3", b"return 9"))
