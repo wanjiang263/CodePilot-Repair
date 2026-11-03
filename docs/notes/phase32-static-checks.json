@@ -1,0 +1,165 @@
+{
+  "tool": "phase32-static-final",
+  "generated_at": "2026-11-03T12:28:32+00:00",
+  "base_commit": "0dbddfeef327410aac292ef0e7df7182c5222f02",
+  "files": [
+    "scripts/phase28_index_profile.py",
+    "scripts/phase31_receipt.py",
+    "scripts/phase32_activation_dryrun.py",
+    "scripts/phase32_index_profile.py",
+    "scripts/phase32_official_probe.py",
+    "scripts/phase32_provider_matrix.py",
+    "scripts/phase32_runtime_results.py",
+    "scripts/phase32_static_checks.py",
+    "scripts/phase32_test_gate.py",
+    "src/codepilot/repo/index.py",
+    "tests/unit/test_phase31_receipt.py"
+  ],
+  "file_count": 11,
+  "checks": [
+    {
+      "name": "AST parse",
+      "files": [
+        "scripts/phase28_index_profile.py",
+        "scripts/phase31_receipt.py",
+        "scripts/phase32_activation_dryrun.py",
+        "scripts/phase32_index_profile.py",
+        "scripts/phase32_official_probe.py",
+        "scripts/phase32_provider_matrix.py",
+        "scripts/phase32_runtime_results.py",
+        "scripts/phase32_static_checks.py",
+        "scripts/phase32_test_gate.py",
+        "src/codepilot/repo/index.py",
+        "tests/unit/test_phase31_receipt.py"
+      ],
+      "file_count": 11,
+      "exit_code": 0,
+      "errors": []
+    },
+    {
+      "name": "ruff check",
+      "command": [
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\ruff.exe",
+        "check",
+        "scripts/phase28_index_profile.py",
+        "scripts/phase31_receipt.py",
+        "scripts/phase32_activation_dryrun.py",
+        "scripts/phase32_index_profile.py",
+        "scripts/phase32_official_probe.py",
+        "scripts/phase32_provider_matrix.py",
+        "scripts/phase32_runtime_results.py",
+        "scripts/phase32_static_checks.py",
+        "scripts/phase32_test_gate.py",
+        "src/codepilot/repo/index.py",
+        "tests/unit/test_phase31_receipt.py"
+      ],
+      "exit_code": 0,
+      "log": ".codex-pytest-tmp\\phase32\\ruff-check.log",
+      "output": "All checks passed!"
+    },
+    {
+      "name": "ruff format --check",
+      "command": [
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\ruff.exe",
+        "format",
+        "--check",
+        "scripts/phase28_index_profile.py",
+        "scripts/phase31_receipt.py",
+        "scripts/phase32_activation_dryrun.py",
+        "scripts/phase32_index_profile.py",
+        "scripts/phase32_official_probe.py",
+        "scripts/phase32_provider_matrix.py",
+        "scripts/phase32_runtime_results.py",
+        "scripts/phase32_static_checks.py",
+        "scripts/phase32_test_gate.py",
+        "src/codepilot/repo/index.py",
+        "tests/unit/test_phase31_receipt.py"
+      ],
+      "exit_code": 0,
+      "log": ".codex-pytest-tmp\\phase32\\ruff-format.log",
+      "output": "11 files already formatted"
+    },
+    {
+      "name": "mypy (changed src/scripts, new errors vs BASE)",
+      "scope": [
+        "scripts/phase28_index_profile.py",
+        "scripts/phase31_receipt.py",
+        "scripts/phase32_activation_dryrun.py",
+        "scripts/phase32_index_profile.py",
+        "scripts/phase32_official_probe.py",
+        "scripts/phase32_provider_matrix.py",
+        "scripts/phase32_runtime_results.py",
+        "scripts/phase32_static_checks.py",
+        "scripts/phase32_test_gate.py",
+        "src/codepilot/repo/index.py"
+      ],
+      "exit_code": 0,
+      "pre_existing_files": {
+        "phase28_index_profile.py": {
+          "current_errors": 17,
+          "baseline_errors": 17,
+          "new_errors": []
+        }
+      }
+    },
+    {
+      "name": "mypy (src + scripts, informational)",
+      "informational": true,
+      "note": "the repository has never type-checked every script; untouched files carry pre-existing errors, so this whole-directory count is recorded, not gated",
+      "exit_code": 1,
+      "output": "\"getrusage\"  [attr-defined]\nscripts\\phase28_index_profile.py:87: error: Module has no attribute \"RUSAGE_SELF\"  [attr-defined]\nscripts\\phase28_index_profile.py:360: error: Argument 1 to \"setdefault\" of \"MutableMapping\" has incompatible type \"tuple[float | str, str]\"; expected \"tuple[str, str]\"  [arg-type]\nscripts\\phase28_index_profile.py:367: error: Function is missing a return type annotation  [no-untyped-def]\nscripts\\phase28_index_profile.py:368: error: List item 0 has incompatible type \"str\"; expected \"float\"  [list-item]\nscripts\\phase28_index_profile.py:376: error: Function is missing a return type annotation  [no-untyped-def]\nscripts\\phase28_index_profile.py:376: error: Function is missing a type annotation for one or more parameters  [no-untyped-def]\nscripts\\phase28_index_profile.py:379: error: List item 0 has incompatible type \"str\"; expected \"float\"  [list-item]\nscripts\\phase28_index_profile.py:467: error: Cannot assign to a method  [method-assign]\nscripts\\phase28_index_profile.py:479: error: Missing type arguments for generic type \"OrderedDict\"  [type-arg]\nscripts\\phase28_index_profile.py:540: error: Item \"Connection\" of \"Engine | Connection\" has no attribute \"dispose\"  [union-attr]\nscripts\\phase28_index_profile.py:586: error: \"OrderedDict[tuple[str, str, str], tuple[ParsedFile, int]]\" has no attribute \"evictions\"  [attr-defined]\nscripts\\phase28_index_profile.py:627: error: Value of type \"Any | None\" is not indexable  [index]\nscripts\\phase28_index_profile.py:670: error: Returning Any from function declared to return \"dict[str, Any]\"  [no-any-return]\nscripts\\phase28_index_profile.py:908: error: Value of type variable \"_NumberT\" of \"median\" cannot be \"Any | None\"  [type-var]\nscripts\\phase28_index_profile.py:923: error: Returning Any from function declared to return \"float\"  [no-any-return]\nscripts\\phase28_index_profile.py:1049: error: Returning Any from function declared to return \"float\"  [no-any-return]\nFound 173 errors in 24 files (checked 279 source files)"
+    },
+    {
+      "name": "git diff --check",
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "0dbddfeef327410aac292ef0e7df7182c5222f02"
+      ],
+      "exit_code": 0,
+      "log": ".codex-pytest-tmp\\phase32\\diff-check.log",
+      "output": ""
+    },
+    {
+      "name": "git diff --check (CRLF-aware)",
+      "command": [
+        "git",
+        "-c",
+        "core.whitespace=cr-at-eol",
+        "diff",
+        "--check",
+        "0dbddfeef327410aac292ef0e7df7182c5222f02"
+      ],
+      "exit_code": 0,
+      "log": ".codex-pytest-tmp\\phase32\\diff-check-crlf.log",
+      "output": ""
+    },
+    {
+      "name": "EOL (LF only)",
+      "files": [
+        "scripts/phase28_index_profile.py",
+        "scripts/phase31_receipt.py",
+        "scripts/phase32_activation_dryrun.py",
+        "scripts/phase32_index_profile.py",
+        "scripts/phase32_official_probe.py",
+        "scripts/phase32_provider_matrix.py",
+        "scripts/phase32_runtime_results.py",
+        "scripts/phase32_static_checks.py",
+        "scripts/phase32_test_gate.py",
+        "src/codepilot/repo/index.py",
+        "tests/unit/test_phase31_receipt.py"
+      ],
+      "file_count": 11,
+      "exit_code": 0,
+      "offenders": []
+    },
+    {
+      "name": "credential scan (added lines only)",
+      "added_lines": 1562,
+      "exit_code": 0,
+      "hits": []
+    }
+  ],
+  "failed": []
+}
