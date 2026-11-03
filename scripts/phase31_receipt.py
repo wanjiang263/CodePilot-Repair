@@ -1,4 +1,10 @@
-"""Deterministic v5 receipt generation. The external witness is never stored here."""
+"""Deterministic schema-5 receipt generation for any candidate in the chain.
+
+The parent is read from the candidate record itself; an explicit parent argument is
+only an assertion that must agree with candidate.json. The record status must be
+pending and is copied into the receipt, and both schema_version and
+candidate_schema_version must be 5. The external witness is never stored here.
+"""
 
 from __future__ import annotations
 
@@ -26,6 +32,7 @@ def generate_receipt(
     source_commit: str,
     diff_base: str,
     manifest_commit: str,
+    parent: str | None = None,
     replace: bool = False,
     reason: str = "",
 ) -> dict[str, Any]:
@@ -48,13 +55,21 @@ def generate_receipt(
         "version": candidate,
         "source_commit": source_commit,
         "diff_base_commit": diff_base,
-        "parent": "phase30-candidate-v4",
-        "status": "pending",
     }
     for field, value in expected.items():
         if record.get(field) != value:
             raise ArchiveError(f"candidate.json {field} differs from required input {value!r}")
-    if not (candidates / record["parent"]).is_dir():
+    record_parent = record.get("parent")
+    if not isinstance(record_parent, str) or not record_parent.strip():
+        raise ArchiveError("candidate.json parent must be a nonempty string")
+    if parent is not None and parent != record_parent:
+        raise ArchiveError(
+            f"candidate.json parent {record_parent!r} differs from requested parent {parent!r}"
+        )
+    record_status = record.get("status")
+    if record_status != "pending":
+        raise ArchiveError(f"candidate.json status must be pending, got {record_status!r}")
+    if not (candidates / record_parent).is_dir():
         raise ArchiveError("parent directory missing")
     for name in ("active.json", "active.next.json"):
         if (candidates.parent / name).exists():
@@ -83,7 +98,7 @@ def generate_receipt(
         "candidate_commit": candidate_commit,
         "source_commit": source_commit,
         "diff_base": diff_base,
-        "status": "pending",
+        "status": record_status,
         "candidate_files": hashes,
         "candidate_tree_sha256": candidate_tree_sha256(hashes),
         "manifest_commit": manifest_commit,
@@ -114,6 +129,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--receipt", type=Path, required=True)
     for name in ("candidate-commit", "source-commit", "diff-base", "manifest-commit"):
         parser.add_argument(f"--{name}", required=True)
+    parser.add_argument("--parent", default=None)
     parser.add_argument("--replace", action="store_true")
     parser.add_argument("--reason", default="")
     args = vars(parser.parse_args(argv))

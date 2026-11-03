@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 
 import pytest
 from scripts.phase28_archive_verify import verify_receipt
 from scripts.phase29_baseline_manifest import build_manifest
 from scripts.phase31_receipt import generate_receipt
-from test_phase31_archive_manifest import (  # noqa: F401
+from test_phase31_archive_manifest import (
     CHILD,
     PARENT,
     commit,
@@ -22,7 +23,7 @@ from test_phase31_archive_manifest import (
     env as env,
 )
 
-from codepilot.archive import ArchiveError
+from codepilot.archive import ArchiveError, create_candidate
 
 
 @pytest.fixture
@@ -143,3 +144,141 @@ def test_generator_rejects_inconsistent_inputs(receipted: dict, field: str) -> N
         args[field] = receipted["head"]
     with pytest.raises((ArchiveError, OSError, ValueError)):
         generate_receipt(**args)
+
+
+GRANDCHILD = "phase32-candidate-v6"
+
+RECEIPT_FIELDS = {
+    "schema_version",
+    "candidate",
+    "candidate_commit",
+    "source_commit",
+    "diff_base",
+    "status",
+    "candidate_files",
+    "candidate_tree_sha256",
+    "manifest_commit",
+    "manifest_blob_sha256",
+    "historical_manifest_sha256",
+    "created_at",
+}
+
+
+def imported_chain(receipted: dict) -> dict:
+    """Re-create the finished v5 chain in a fresh repo and archive v6 on top."""
+    source = receipted["repo"]
+    repo = source.parent / "chain"
+    repo.mkdir()
+    git(repo, "init", "-q")
+    git(repo, "config", "user.name", "Phase32 fixture")
+    git(repo, "config", "user.email", "fixture@example.invalid")
+    git(repo, "config", "core.autocrlf", "false")
+    for path in sorted(source.rglob("*")):
+        relative = path.relative_to(source)
+        if not path.is_file() or ".git" in relative.parts:
+            continue
+        target = repo / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, target)
+    imported = commit(repo, "import chain")
+    write(repo / "src/extra.py", "extra = True\n")
+    head = commit(repo, "round change")
+    root = repo / "configs/harness"
+    create_candidate(
+        root,
+        repo,
+        version=GRANDCHILD,
+        parent=CHILD,
+        diff_base_commit=imported,
+        source_commit=head,
+        candidate_schema_version=5,
+    )
+    candidate_commit = commit(repo, "grandchild archive")
+    record = read(root / "candidates" / GRANDCHILD / "candidate.json")
+    assert record["parent"] == CHILD
+    return {
+        "repo": repo,
+        "root": root,
+        "candidate_commit": candidate_commit,
+        "manifest_commit": head,
+        "source_commit": head,
+        "diff_base": imported,
+        "receipt": root / "receipts" / f"{GRANDCHILD}.json",
+    }
+
+
+def test_generator_accepts_a_different_legal_parent(receipted: dict) -> None:
+    chain = imported_chain(receipted)
+    payload = generate_receipt(
+        repo=chain["repo"],
+        candidate=GRANDCHILD,
+        archive_root=chain["root"] / "candidates",
+        receipt=chain["receipt"],
+        candidate_commit=chain["candidate_commit"],
+        source_commit=chain["source_commit"],
+        diff_base=chain["diff_base"],
+        manifest_commit=chain["manifest_commit"],
+    )
+    assert payload["candidate"] == GRANDCHILD
+    assert payload["status"] == "pending"
+    assert set(payload) == RECEIPT_FIELDS
+    result = verify_receipt(
+        chain["receipt"], archive_root=chain["root"], repo=chain["repo"], expect_receipt=None
+    )
+    assert result["ok"], result["failures"]
+
+
+def test_generated_receipt_keeps_the_schema1_field_set(receipted: dict) -> None:
+    assert set(read(receipted["receipt"])) == RECEIPT_FIELDS
+
+
+def test_generator_rejects_parent_disagreement(receipted: dict) -> None:
+    args = {**receipted["args"], "receipt": receipted["receipt"].with_name("parent.json")}
+    with pytest.raises(ArchiveError, match="parent"):
+        generate_receipt(**args, parent="phase29-candidate-v3")
+    payload = generate_receipt(**args, parent=PARENT)
+    assert payload["candidate"] == CHILD
+
+
+def test_generator_rejects_non_pending_candidate(receipted: dict) -> None:
+    path = receipted["root"] / "candidates" / CHILD / "candidate.json"
+    record = read(path)
+    record["status"] = "active"
+    write(path, json.dumps(record))
+    args = {**receipted["args"], "receipt": receipted["receipt"].with_name("status.json")}
+    with pytest.raises(ArchiveError, match="pending"):
+        generate_receipt(**args)
+
+
+@pytest.mark.parametrize("field", ["schema_version", "candidate_schema_version"])
+def test_generator_rejects_other_schema_versions(receipted: dict, field: str) -> None:
+    path = receipted["root"] / "candidates" / CHILD / "candidate.json"
+    record = read(path)
+    record[field] = 4
+    write(path, json.dumps(record))
+    args = {**receipted["args"], "receipt": receipted["receipt"].with_name(f"{field}.json")}
+    with pytest.raises(ArchiveError, match=field):
+        generate_receipt(**args)
+
+
+@pytest.mark.parametrize("value", ["", None, "phase32-missing-parent"])
+def test_generator_rejects_missing_parent_record(receipted: dict, value: str | None) -> None:
+    path = receipted["root"] / "candidates" / CHILD / "candidate.json"
+    record = read(path)
+    record["parent"] = value
+    write(path, json.dumps(record))
+    args = {**receipted["args"], "receipt": receipted["receipt"].with_name("no-parent.json")}
+    with pytest.raises(ArchiveError, match="parent"):
+        generate_receipt(**args)
+
+
+def test_generator_requires_current_manifest_bytes(receipted: dict) -> None:
+    args = {**receipted["args"], "receipt": receipted["receipt"].with_name("manifest.json")}
+    manifest = receipted["root"] / "candidates/historical-baseline.json"
+    original = manifest.read_bytes()
+    manifest.unlink()
+    with pytest.raises(OSError):
+        generate_receipt(**args)
+    manifest.write_bytes(original)
+    with pytest.raises(ArchiveError, match="current manifest differs"):
+        generate_receipt(**{**args, "manifest_commit": receipted["base"]})
