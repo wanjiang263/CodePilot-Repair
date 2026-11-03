@@ -91,8 +91,18 @@ PATH 移除、`PYTHONUTF8=1 PYTHONIOENCODING=utf-8`（仅环境加固，测试�
 
 ## 6. 静态检查（范围如实）
 
-对象为本轮全部 21 个修改/新增 Python 文件（17 tracked 修改 + 3 个 R1 fixture 文件 + 1 integration
-钉子更新 + 3 个未跟踪 Phase31 单测文件转正；mypy 只对 4 个 src/scripts 文件，不宣称全仓）：
+对象为本轮全部 21 个修改/新增 Python 文件 = **17 个修改文件 + 4 个新增文件**
+（`git diff --name-status 8e1f1f4..e56ee0b` 范围内 A=4、M=17；mypy 只对 4 个 src/scripts 文件，
+不宣称全仓）：
+
+- 4 个新增（A）：`scripts/phase31_receipt.py`、`tests/unit/test_phase31_archive_manifest.py`、
+  `tests/unit/test_phase31_archive_verify.py`、`tests/unit/test_phase31_receipt.py`
+- 3 个 R1 fixture 包装（`tests/graph/test_phase9_regression.py`、`tests/graph/test_synthetic_prompt_isolation.py`、
+  `tests/graph/test_phase9_docker.py`）、integration 钉子
+  （`tests/integration/phase28/test_phase28_archive_verify_loop.py`），以及
+  `tests/graph/harness.py`、`tests/graph/_phase9_resume_worker.py`、`tests/graph/test_path_sandbox_error.py`
+  **全部落在上面这 17 个修改文件里**，不重复相加
+- 17 + 4 = 21，与 `docs/notes/phase31-static-checks.json` 的 `file_count=21` 一致
 
 - AST parse 21/21 exit 0；`ruff check` exit 0；`ruff format --check` exit 0（21 files already formatted）
 - `mypy`（scripts/phase28_archive.py、scripts/phase28_archive_verify.py、scripts/phase31_receipt.py、
@@ -114,8 +124,17 @@ PATH 移除、`PYTHONUTF8=1 PYTHONIOENCODING=utf-8`（仅环境加固，测试�
 - 源集：changed_files=21（与 `git diff --name-status -M 8e1f1f4..<S>` 的范围内文件一一对应）；
   diff 范围 37 文件 = 21 范围内 + 16 scope_excluded（phase29/30 文档与 v4 档案产物）；
   excluded_files=4（.gitignore、historical-baseline.json=archive 元数据、两份 phase28 文档，
-  均附范围外理由）——无遗漏；resolved_source_files=107（=91 继承 v2∪v3∪v4 集 + 16 个新文件，
-  与 sources.json 107 条一致）
+  均附范围外理由）——无遗漏
+- 源集账目（逐项可复算，v5 sources.json 共 107 条）：v4 源集 **96** → v5 剔除 4 个范围外文件
+  （`.gitignore`、`configs/harness/candidates/historical-baseline.json`、
+  `docs/notes/phase28-independent-review.md`、`docs/notes/phase28-validation.md`）→ **继承 92**；
+  changed_files=**21**，其中 **6** 个是 v4 已有文件（`scripts/phase28_archive.py`、
+  `scripts/phase28_archive_verify.py`、`src/codepilot/archive.py`、
+  `tests/integration/phase28/test_phase28_archive_verify_loop.py`、
+  `tests/unit/test_phase28_archive_verify.py`、`tests/unit/test_phase29_archive_verify.py`），
+  其余 **15** 个是本轮新增到源集的文件；**92 + 15 = 107**，与 sources.json 107 条一致
+- **16 是 `source_manifest.scope_excluded_changed_files` 的条目数（范围外 changed 路径），不是新增源码数**；
+  37 = 21 范围内 changed + 16 scope_excluded，两套账目不可混算
 - snapshot：schema_version=1，coder/planner/reviewer prompt 非空（361/1823/496 字符），逐字节继承自
   v4 链（本轮无 prompt 覆盖，如实记录），instruction/experiences 继承；strict parent integrity：
   v4 declared snapshot_file_sha256=55afb0ba… 与实际字节一致（file_bytes_consistent=true；v4 的哈希
@@ -140,6 +159,15 @@ PATH 移除、`PYTHONUTF8=1 PYTHONIOENCODING=utf-8`（仅环境加固，测试�
   historical_files_modified=False、new_archive_status=passed、manifest_binding=manifest_commit、
   **witness=verified、historical_integrity=ok**；phase31-candidate-v5 → new ok。
   日志 `verify-all-final.log` sha256 e302ede5…。
+- **phase28-candidate-v2 的 legacy worktree drift（如实记录）**：同一命令输出
+  `[note] phase28-candidate-v2 legacy_worktree_drift:` 11 个文件
+  （`scripts/phase28_archive.py`、`scripts/phase28_archive_verify.py`、`src/codepilot/archive.py`、
+  `src/codepilot/graph/harness.py`、`src/codepilot/repo/index.py`、`src/codepilot/rsi.py`、
+  `tests/integration/phase28/test_phase28_archive_verify_loop.py`、`tests/unit/test_phase26_closeout.py`、
+  `tests/unit/test_phase26_harness.py`、`tests/unit/test_phase28_archive.py`、
+  `tests/unit/test_phase28_archive_verify.py`）。`--ignore-raw-drift` 时按设计忽略，历史 manifest
+  文件本身未被修改；但 `historical_files_modified=False` **只表示 manifest 文件未被改，
+  不表示 v2 的原始工作区零漂移**，v2 历史文件本轮一字未动。
 
 ## 9. 未验证项与边界（如实）
 
@@ -162,7 +190,7 @@ PATH 移除、`PYTHONUTF8=1 PYTHONIOENCODING=utf-8`（仅环境加固，测试�
 [x] 完整 archive 复跑 0 failed                        — 143 passed 单命令整跑（r2-full.log；任务书 5 文件命令 73 passed）
 [x] unit/integration/api 全量 0 failed                — 3055 / 126 / 113 passed（final-unit3/integration2/api3.log）
 [x] 静态检查通过，范围如实                            — 21 文件 AST/ruff×2/mypy(4 文件)/CRLF-aware exit 0；凭据 1355 行 0 findings
-[x] v5 候选字段、源集、哈希正确                       — schema 5/pending/parent=v4/21+16+4 源集账目/107 resolved/4 文件
+[x] v5 候选字段、源集、哈希正确                       — schema 5/pending/parent=v4；源集 96-4=92 继承 +15 新=107；changed 21=17 改+4 增；diff 37=21 范围内+16 scope_excluded；4 文件
 [x] manifest 与 v5 一致且已提交                       — <M>=a938429，44 条含 v5，旧条目 0 mismatch
 [x] receipt 绑定 manifest_commit，外部 witness 验证   — manifest_commit=a938429；witness=d2689f7a…（仓库外）
 [x] verify --all exit 0                               — witness=verified, historical_integrity=ok, new_failures=0, unexplained=0

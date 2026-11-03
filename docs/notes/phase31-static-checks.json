@@ -377,5 +377,5 @@
     "vitest": "conditionally skipped: no web/src change",
     "note": "Phase30 frontend results are NOT claimed as this round's evidence"
   },
-  "scope_note": "21 changed Python files (13 tracked modifications carried from the Phase31 working tree + 4 new R1 fixture files + 1 integration expectation update + 3 untracked Phase31 unit files); mypy only the four changed src/scripts files, not the whole repository."
+  "scope_note": "21 changed Python files = 17 modified + 4 added (git diff --name-status 8e1f1f4..e56ee0b, in-scope: A=4, M=17). Added: scripts/phase31_receipt.py, tests/unit/test_phase31_archive_manifest.py, tests/unit/test_phase31_archive_verify.py, tests/unit/test_phase31_receipt.py. The 3 R1 fixture wrappers (tests/graph/test_phase9_regression.py, tests/graph/test_synthetic_prompt_isolation.py, tests/graph/test_phase9_docker.py), the integration pin (tests/integration/phase28/test_phase28_archive_verify_loop.py), and tests/graph/harness.py, tests/graph/_phase9_resume_worker.py, tests/graph/test_path_sandbox_error.py all sit inside the 17 modified files and are not counted twice. mypy only the four changed src/scripts files, not the whole repository."
 }
