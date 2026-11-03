@@ -1,0 +1,209 @@
+{
+  "tool": "phase33-static-final",
+  "generated_at": "2026-11-03T18:58:17+00:00",
+  "base_commit": "b4825911b8e2880adfe6177b9aca6f4c35bf15b1",
+  "files": [
+    "scripts/phase32_index_profile.py",
+    "scripts/phase32_provider_matrix.py",
+    "scripts/phase32_static_checks.py",
+    "scripts/phase32_test_gate.py",
+    "scripts/phase33_runtime_results.py",
+    "src/codepilot/api/demo.py",
+    "src/codepilot/api/settings_routes.py",
+    "src/codepilot/observability/logging.py",
+    "src/codepilot/repo/index.py",
+    "src/codepilot/sandbox/docker.py",
+    "src/codepilot/sandbox/phases.py",
+    "tests/api/test_phase33_windows_transient_locks.py",
+    "tests/unit/llm/test_phase33_provider_real.py",
+    "tests/unit/repo/test_index.py",
+    "tests/unit/repo/test_phase29_index_incremental.py",
+    "tests/unit/test_phase33_test_gate.py"
+  ],
+  "file_count": 16,
+  "checks": [
+    {
+      "name": "AST parse",
+      "files": [
+        "scripts/phase32_index_profile.py",
+        "scripts/phase32_provider_matrix.py",
+        "scripts/phase32_static_checks.py",
+        "scripts/phase32_test_gate.py",
+        "scripts/phase33_runtime_results.py",
+        "src/codepilot/api/demo.py",
+        "src/codepilot/api/settings_routes.py",
+        "src/codepilot/observability/logging.py",
+        "src/codepilot/repo/index.py",
+        "src/codepilot/sandbox/docker.py",
+        "src/codepilot/sandbox/phases.py",
+        "tests/api/test_phase33_windows_transient_locks.py",
+        "tests/unit/llm/test_phase33_provider_real.py",
+        "tests/unit/repo/test_index.py",
+        "tests/unit/repo/test_phase29_index_incremental.py",
+        "tests/unit/test_phase33_test_gate.py"
+      ],
+      "file_count": 16,
+      "exit_code": 0,
+      "errors": []
+    },
+    {
+      "name": "ruff check",
+      "command": [
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\ruff.exe",
+        "check",
+        "scripts/phase32_index_profile.py",
+        "scripts/phase32_provider_matrix.py",
+        "scripts/phase32_static_checks.py",
+        "scripts/phase32_test_gate.py",
+        "scripts/phase33_runtime_results.py",
+        "src/codepilot/api/demo.py",
+        "src/codepilot/api/settings_routes.py",
+        "src/codepilot/observability/logging.py",
+        "src/codepilot/repo/index.py",
+        "src/codepilot/sandbox/docker.py",
+        "src/codepilot/sandbox/phases.py",
+        "tests/api/test_phase33_windows_transient_locks.py",
+        "tests/unit/llm/test_phase33_provider_real.py",
+        "tests/unit/repo/test_index.py",
+        "tests/unit/repo/test_phase29_index_incremental.py",
+        "tests/unit/test_phase33_test_gate.py"
+      ],
+      "exit_code": 0,
+      "log": ".codex-pytest-tmp/phase33/ruff-check.log",
+      "output": "All checks passed!"
+    },
+    {
+      "name": "ruff format --check",
+      "command": [
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\ruff.exe",
+        "format",
+        "--check",
+        "scripts/phase32_index_profile.py",
+        "scripts/phase32_provider_matrix.py",
+        "scripts/phase32_static_checks.py",
+        "scripts/phase32_test_gate.py",
+        "scripts/phase33_runtime_results.py",
+        "src/codepilot/api/demo.py",
+        "src/codepilot/api/settings_routes.py",
+        "src/codepilot/observability/logging.py",
+        "src/codepilot/repo/index.py",
+        "src/codepilot/sandbox/docker.py",
+        "src/codepilot/sandbox/phases.py",
+        "tests/api/test_phase33_windows_transient_locks.py",
+        "tests/unit/llm/test_phase33_provider_real.py",
+        "tests/unit/repo/test_index.py",
+        "tests/unit/repo/test_phase29_index_incremental.py",
+        "tests/unit/test_phase33_test_gate.py"
+      ],
+      "exit_code": 0,
+      "log": ".codex-pytest-tmp/phase33/ruff-format.log",
+      "output": "16 files already formatted"
+    },
+    {
+      "name": "mypy (changed src/scripts, new errors vs BASE, full-path keys)",
+      "scope": [
+        "scripts/phase32_index_profile.py",
+        "scripts/phase32_provider_matrix.py",
+        "scripts/phase32_static_checks.py",
+        "scripts/phase32_test_gate.py",
+        "scripts/phase33_runtime_results.py",
+        "src/codepilot/api/demo.py",
+        "src/codepilot/api/settings_routes.py",
+        "src/codepilot/observability/logging.py",
+        "src/codepilot/repo/index.py",
+        "src/codepilot/sandbox/docker.py",
+        "src/codepilot/sandbox/phases.py"
+      ],
+      "exit_code": 0,
+      "pre_existing_files": {}
+    },
+    {
+      "name": "mypy (src + scripts, informational debt, not gated)",
+      "informational": true,
+      "note": "the repository has never type-checked every script; untouched files carry pre-existing errors, so this whole-directory count is recorded as debt, not gated",
+      "exit_code": 1,
+      "output": "ext  [no-untyped-call]\nscripts\\phase23_run.py:223: error: Call to untyped function \"sandbox\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:232: error: Call to untyped function \"read\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:243: error: Call to untyped function \"write\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:288: error: Call to untyped function \"write\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:292: error: Call to untyped function \"sha\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:308: error: Call to untyped function \"phase_cost\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:317: error: Call to untyped function \"sha\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:336: error: Call to untyped function \"export_checkpoint\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:337: error: Call to untyped function \"read\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:359: error: Call to untyped function \"sha\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:385: error: Call to untyped function \"sha\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:389: error: Call to untyped function \"write\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:402: error: Call to untyped function \"write\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:444: error: Call to untyped function \"write\" in typed context  [no-untyped-call]\nscripts\\phase23_run.py:450: error: Call to untyped function \"main\" in typed context  [no-untyped-call]\nscripts\\swebench_smoke.py:484: error: Returning Any from function declared to return \"LLMResponse\"  [no-any-return]\nscripts\\swebench_smoke.py:582: error: Returning Any from function declared to return \"dict[str, Any]\"  [no-any-return]\nscripts\\swebench_smoke.py:723: error: Returning Any from function declared to return \"dict[str, Any]\"  [no-any-return]\nFound 173 errors in 24 files (checked 281 source files)"
+    },
+    {
+      "name": "locale JSON parse",
+      "files": [
+        "web/src/locales/en-US/index.json",
+        "web/src/locales/zh-CN/index.json"
+      ],
+      "key_counts": {
+        "web/src/locales/en-US/index.json": 1039,
+        "web/src/locales/zh-CN/index.json": 1039
+      },
+      "key_parity": {
+        "equal": true
+      },
+      "exit_code": 0,
+      "errors": []
+    },
+    {
+      "name": "git diff --check",
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "b4825911b8e2880adfe6177b9aca6f4c35bf15b1"
+      ],
+      "exit_code": 0,
+      "log": ".codex-pytest-tmp/phase33/diff-check.log",
+      "output": ""
+    },
+    {
+      "name": "git diff --check (CRLF-aware)",
+      "command": [
+        "git",
+        "-c",
+        "core.whitespace=cr-at-eol",
+        "diff",
+        "--check",
+        "b4825911b8e2880adfe6177b9aca6f4c35bf15b1"
+      ],
+      "exit_code": 0,
+      "log": ".codex-pytest-tmp/phase33/diff-check-crlf.log",
+      "output": ""
+    },
+    {
+      "name": "EOL (LF only)",
+      "files": [
+        "scripts/phase32_index_profile.py",
+        "scripts/phase32_provider_matrix.py",
+        "scripts/phase32_static_checks.py",
+        "scripts/phase32_test_gate.py",
+        "scripts/phase33_runtime_results.py",
+        "src/codepilot/api/demo.py",
+        "src/codepilot/api/settings_routes.py",
+        "src/codepilot/observability/logging.py",
+        "src/codepilot/repo/index.py",
+        "src/codepilot/sandbox/docker.py",
+        "src/codepilot/sandbox/phases.py",
+        "tests/api/test_phase33_windows_transient_locks.py",
+        "tests/unit/llm/test_phase33_provider_real.py",
+        "tests/unit/repo/test_index.py",
+        "tests/unit/repo/test_phase29_index_incremental.py",
+        "tests/unit/test_phase33_test_gate.py"
+      ],
+      "file_count": 16,
+      "exit_code": 0,
+      "offenders": []
+    },
+    {
+      "name": "credential scan (added lines only)",
+      "added_lines": 2058,
+      "exit_code": 0,
+      "hits": []
+    },
+    {
+      "name": "web/src scope",
+      "command": "git diff --name-only b482591..HEAD -- web/src",
+      "output": "",
+      "changed_files": 0,
+      "exit_code": 0,
+      "result": "web/src has zero diff in this phase; frontend gates and page E2E conditionally skipped (documented, not faked)"
+    }
+  ],
+  "failed": []
+}

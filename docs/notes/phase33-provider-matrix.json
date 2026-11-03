@@ -1,0 +1,215 @@
+{
+  "tool": "phase32-provider-matrix",
+  "generated_at": "2026-11-03T15:19:39+00:00",
+  "real_mode": false,
+  "pytest": {
+    "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe -m pytest tests/unit/llm/test_openai_compatible.py tests/unit/llm/test_phase14_protocols.py tests/unit/llm/test_phase28_http_matrix.py tests/unit/llm/test_phase29_http_matrix.py tests/unit/llm/test_http_total_deadline.py tests/unit/llm/test_tracking_chain_accounting.py tests/unit/llm/test_dispatch_ledger_reconciliation.py tests/unit/llm/test_cost.py tests/unit/llm/test_retry.py -q -p no:cacheprovider --basetemp=D:\\Projects\\Desktop\\CodePilot-Repair\\.codex-pytest-tmp\\phase33\\evidence\\t01\\final-run\\pytest-basetemp --junitxml=D:\\Projects\\Desktop\\CodePilot-Repair\\.codex-pytest-tmp\\phase33\\evidence\\t01\\final-run\\provider-matrix.xml",
+    "exit_code": 0,
+    "log": ".codex-pytest-tmp\\phase33\\evidence\\t01\\final-run\\provider-matrix.log",
+    "junit": ".codex-pytest-tmp\\phase33\\evidence\\t01\\final-run\\provider-matrix.xml",
+    "summary": [
+      "166 passed in 79.03s (0:01:19)"
+    ]
+  },
+  "totals_from_junit": {
+    "tests": 166,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "fake_rows": [
+    {
+      "protocol": "openai_compatible",
+      "mode": "fake-http-loopback",
+      "modules": [
+        "tests/unit/llm/test_openai_compatible.py",
+        "tests/unit/llm/test_phase28_http_matrix.py",
+        "tests/unit/llm/test_phase29_http_matrix.py",
+        "tests/unit/llm/test_http_total_deadline.py"
+      ],
+      "covers": [
+        "streaming chunks",
+        "usage accounting on the wire",
+        "delayed response headers",
+        "slow response body inside the total deadline",
+        "no hidden retry (one wire request)"
+      ],
+      "result": {
+        "module_tests": {
+          "passed": 104,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "node_count": 104
+      },
+      "status": "fake-verified"
+    },
+    {
+      "protocol": "anthropic",
+      "mode": "fake-http-loopback",
+      "modules": [
+        "tests/unit/llm/test_phase14_protocols.py",
+        "tests/unit/llm/test_http_total_deadline.py"
+      ],
+      "covers": [
+        "message protocol mapping",
+        "cancellation",
+        "deadline behaviour"
+      ],
+      "result": {
+        "module_tests": {
+          "passed": 27,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "node_count": 27
+      },
+      "status": "fake-verified"
+    },
+    {
+      "protocol": "bedrock",
+      "mode": "fake-client",
+      "modules": [
+        "tests/unit/llm/test_phase28_http_matrix.py"
+      ],
+      "covers": [
+        "bedrock converse request shaping over a stubbed boto3 client"
+      ],
+      "result": {
+        "module_tests": {
+          "passed": 39,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "node_count": 39
+      },
+      "status": "fake-verified (botocore missing: client is stubbed)"
+    },
+    {
+      "protocol": "cancellation",
+      "mode": "fake-http-loopback",
+      "modules": [
+        "tests/unit/llm/test_http_total_deadline.py"
+      ],
+      "covers": [
+        "one cancel does not disturb another request",
+        "no background request after cancel",
+        "shared client survives an in-flight cancel"
+      ],
+      "result": {
+        "module_tests": {
+          "passed": 22,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "node_count": 22
+      },
+      "status": "fake-verified"
+    },
+    {
+      "protocol": "usage-and-cost",
+      "mode": "fake-http-loopback",
+      "modules": [
+        "tests/unit/llm/test_tracking_chain_accounting.py",
+        "tests/unit/llm/test_dispatch_ledger_reconciliation.py",
+        "tests/unit/llm/test_cost.py",
+        "tests/unit/llm/test_retry.py"
+      ],
+      "covers": [
+        "usage reconciliation",
+        "unknown vs zero cost attribution",
+        "authorisation/frozen ledger rows are not overwritten"
+      ],
+      "result": {
+        "module_tests": {
+          "passed": 57,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "node_count": 57
+      },
+      "status": "fake-verified"
+    }
+  ],
+  "real_provider": {
+    "budget": {
+      "env": "PHASE32_REAL_BUDGET_CNY",
+      "raw_present": false,
+      "budget_cny": null,
+      "cap_cny": 20.0,
+      "effective_budget_cny": null,
+      "capped": false,
+      "real_requests_allowed": false
+    },
+    "credentials_present": {
+      "OPENAI_API_KEY": false,
+      "OPENAI_BASE_URL": false,
+      "ANTHROPIC_API_KEY": false,
+      "AWS_ACCESS_KEY_ID": false,
+      "AWS_SECRET_ACCESS_KEY": false,
+      "boto3_installed": false,
+      "botocore_installed": false
+    },
+    "rows": [
+      {
+        "row": "openai-compatible real endpoint",
+        "provider": "openai-compatible",
+        "model": null,
+        "status": "blocked",
+        "missing": [
+          "--real flag (real channel disabled by default)",
+          "PHASE32_REAL_BUDGET_CNY > 0",
+          "OPENAI_API_KEY",
+          "OPENAI_BASE_URL",
+          "PHASE32_REAL_MODEL_OPENAI"
+        ],
+        "real_requests": 0
+      },
+      {
+        "row": "anthropic real endpoint",
+        "provider": "anthropic",
+        "model": null,
+        "status": "blocked",
+        "missing": [
+          "--real flag (real channel disabled by default)",
+          "PHASE32_REAL_BUDGET_CNY > 0",
+          "ANTHROPIC_API_KEY",
+          "PHASE32_REAL_MODEL_ANTHROPIC"
+        ],
+        "real_requests": 0
+      },
+      {
+        "row": "bedrock real endpoint (boto3 + credentials)",
+        "provider": "bedrock",
+        "model": null,
+        "status": "blocked",
+        "missing": [
+          "--real flag (real channel disabled by default)",
+          "PHASE32_REAL_BUDGET_CNY > 0",
+          "AWS_ACCESS_KEY_ID",
+          "AWS_SECRET_ACCESS_KEY",
+          "boto3 importable",
+          "botocore importable",
+          "AWS_REGION or AWS_DEFAULT_REGION",
+          "PHASE32_REAL_MODEL_BEDROCK"
+        ],
+        "real_requests": 0
+      }
+    ],
+    "real_requests": 0,
+    "real_cost_cny": 0.0,
+    "cost_known": true,
+    "cost_unknown_calls": 0,
+    "cost_is_lower_bound": false,
+    "llm_calls": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "note": "No real request was issued in this run. Zero-cost fake coverage is not a substitute for a real-provider row and is not reported as one. Pass --real to enable the real channel."
+  },
+  "overlap_note": "fake_rows overlap; never sum them into a test total"
+}

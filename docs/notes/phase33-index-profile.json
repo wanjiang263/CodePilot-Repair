@@ -1,0 +1,237 @@
+{
+  "phase": 33,
+  "generated_at": "2026-11-03T22:17:41+00:00",
+  "tool": "consolidated by lead from evidence/t05 artifacts (T05, owner t05-index); all numbers read from the listed evidence files, none invented",
+  "source_evidence": {
+    "profile_after": {
+      "path": ".codex-pytest-tmp/phase33/evidence/t05/profile-after.json",
+      "sha256": "eadfb31ad5372a584986ec39d500920e0921deba0726e1ae71840820c4b8880a"
+    },
+    "profile_baseline": {
+      "path": ".codex-pytest-tmp/phase33/evidence/t05/profile-baseline.json",
+      "sha256": "ec6da9925f061c3b3f5163cc79e34fc4e1d6a69893ea53c17ab08aff6fb66201"
+    },
+    "report": {
+      "path": ".codex-pytest-tmp/phase33/evidence/t05/REPORT.md",
+      "sha256": "d3f21d586a682c27538d556d738fc910cc454807476d7dd697b2fb85e3bfe407"
+    },
+    "after_drive_log": {
+      "path": ".codex-pytest-tmp/phase33/evidence/t05/after-drive.log",
+      "sha256": "5e72d9d211dc193a9c22ef8d9d7be0595dde43c143ad83b4deb137c2a99e845d"
+    }
+  },
+  "pinned_commit": "b4825911b8e2880adfe6177b9aca6f4c35bf15b1",
+  "probe_file": "src/codepilot/eval/swebench_runner.py",
+  "probe_edit": "def _phase32_probe() -> int:\n    return 42",
+  "phase32_original_observations": {
+    "cold_s": 68.43,
+    "nochange_s": 3.07,
+    "change_s": 82.51,
+    "change_body_s": 24.49,
+    "parsed": 958,
+    "content_reused": 2404,
+    "edges_rebuilt_on_symbol_change": 151822,
+    "source": "phase33 task book (user-cited phase32 measurements); reproduced in phase33 baseline drive below"
+  },
+  "runs_baseline_phase33_repro": [
+    {
+      "scenario": "cold",
+      "association_mode": "complete_closure_v2",
+      "fast_mode": false,
+      "wall_index_s": 74.3651,
+      "scan_files": 2417,
+      "symbol_rows": 10270,
+      "edge_rows": 152325,
+      "parsed": 965,
+      "content_reused": 0,
+      "parse_errors": 2
+    },
+    {
+      "scenario": "nochange",
+      "association_mode": "verified_snapshot_v2",
+      "fast_mode": false,
+      "wall_index_s": 2.9835,
+      "scan_files": 2417,
+      "symbol_rows": 10270,
+      "edge_rows": 152325,
+      "parsed": 0,
+      "content_reused": 2417,
+      "parse_errors": 2
+    },
+    {
+      "scenario": "change",
+      "association_mode": "complete_closure_v2",
+      "fast_mode": false,
+      "wall_index_s": 86.3175,
+      "scan_files": 2417,
+      "symbol_rows": 10271,
+      "edge_rows": 152371,
+      "parsed": 965,
+      "content_reused": 2416,
+      "parse_errors": 2
+    },
+    {
+      "scenario": "change_body",
+      "association_mode": "complete_closure_v2",
+      "fast_mode": true,
+      "wall_index_s": 37.1212,
+      "scan_files": 2417,
+      "symbol_rows": 10271,
+      "edge_rows": 152371,
+      "parsed": 965,
+      "content_reused": 2416,
+      "parse_errors": 2
+    },
+    {
+      "scenario": "verify_change",
+      "association_mode": "complete_closure_v2",
+      "fast_mode": false,
+      "wall_index_s": 79.5934,
+      "scan_files": 2417,
+      "symbol_rows": 10271,
+      "edge_rows": 152371,
+      "parsed": 965,
+      "content_reused": 0,
+      "parse_errors": 2
+    },
+    {
+      "scenario": "verify_change_body",
+      "association_mode": "complete_closure_v2",
+      "fast_mode": false,
+      "wall_index_s": 86.3427,
+      "scan_files": 2417,
+      "symbol_rows": 10271,
+      "edge_rows": 152371,
+      "parsed": 965,
+      "content_reused": 0,
+      "parse_errors": 2
+    }
+  ],
+  "runs_after_fix": [
+    {
+      "scenario": "cold",
+      "association_mode": "complete_closure_v2",
+      "fast_mode": false,
+      "wall_index_s": 103.8921,
+      "scan_files": 2417,
+      "symbol_rows": 10270,
+      "edge_rows": 152325,
+      "parsed": 965,
+      "content_reused": 0,
+      "parse_errors": 2
+    },
+    {
+      "scenario": "nochange",
+      "association_mode": "verified_snapshot_v2",
+      "fast_mode": false,
+      "wall_index_s": 7.3209,
+      "scan_files": 2417,
+      "symbol_rows": 10270,
+      "edge_rows": 152325,
+      "parsed": 0,
+      "content_reused": 2417,
+      "parse_errors": 2
+    },
+    {
+      "scenario": "change",
+      "association_mode": "complete_closure_v2",
+      "fast_mode": false,
+      "wall_index_s": 45.001,
+      "scan_files": 2417,
+      "symbol_rows": 10271,
+      "edge_rows": 152371,
+      "parsed": 965,
+      "content_reused": 2416,
+      "parse_errors": 2
+    },
+    {
+      "scenario": "change_body",
+      "association_mode": "complete_closure_v2",
+      "fast_mode": true,
+      "wall_index_s": 37.1284,
+      "scan_files": 2417,
+      "symbol_rows": 10271,
+      "edge_rows": 152371,
+      "parsed": 965,
+      "content_reused": 2416,
+      "parse_errors": 2
+    },
+    {
+      "scenario": "verify_change",
+      "association_mode": "complete_closure_v2",
+      "fast_mode": false,
+      "wall_index_s": 73.8523,
+      "scan_files": 2417,
+      "symbol_rows": 10271,
+      "edge_rows": 152371,
+      "parsed": 965,
+      "content_reused": 0,
+      "parse_errors": 2
+    },
+    {
+      "scenario": "verify_change_body",
+      "association_mode": "complete_closure_v2",
+      "fast_mode": false,
+      "wall_index_s": 75.7243,
+      "scan_files": 2417,
+      "symbol_rows": 10271,
+      "edge_rows": 152371,
+      "parsed": 965,
+      "content_reused": 0,
+      "parse_errors": 2
+    }
+  ],
+  "verdict": {
+    "change_le_cold": {
+      "holds": true,
+      "change_s": 45.001,
+      "cold_s": 103.8921
+    },
+    "change_body_le_cold": {
+      "holds": true,
+      "change_body_s": 37.1284,
+      "cold_s": 103.8921
+    },
+    "change_vs_baseline_repro_pct": -47.9,
+    "fast_path_default": "on",
+    "negative_return": "fixed: change 86.32s -> 45.00s (-47.9% vs same-day baseline repro); no bypass needed",
+    "cold_nochange_note": "after-fix cold/nochange inflation is scan I/O noise on the loaded machine (scan 22.41->36.77s, code path unchanged; same-round full verify_change 73.85s ~= baseline full 79.59s proves no full-path regression)"
+  },
+  "dump_index_equality": {
+    "all_equal": true,
+    "pairs": [
+      {
+        "a": "db-after-nochange",
+        "b": "db-after-cold",
+        "equal": true
+      },
+      {
+        "a": "db-after-change",
+        "b": "db-after-verify_change",
+        "equal": true
+      },
+      {
+        "a": "db-after-change_body",
+        "b": "db-after-verify_change_body",
+        "equal": true
+      }
+    ],
+    "note": "pickle dump_index byte-equality between fast/closure paths and full reindex; lead independently re-ran compare_dumps for change vs verify_change: equal=true, whole sha256 1ca389fd3f41908c13e83ad9425f24a01bc43416f6a5653b163b6ae0a59c9c46 identical"
+  },
+  "counters": {
+    "parsed_after": 965,
+    "content_reused_after": 2416,
+    "edge_rows_final": 152371,
+    "symbol_rows_final": 10271,
+    "baseline_equivalence": "edge_rows/symbol_rows identical between baseline repro and after-fix runs",
+    "parse_cache": "in-process LRU keyed by file content sha256; nochange parsed=0; cross-process disk cache measured ~0 gain (parse stage ~2s) and NOT introduced (REPORT.md §3)"
+  },
+  "limitations": [
+    "single repository, single measurement per scenario; no extrapolation to large repos",
+    "high-fan-in hub file change can grow the affected closure toward the full graph (degrades to the old path, never worse)",
+    "delta channel over-approximates the affected closure by design (sound, not minimal)",
+    "parse cache is per-process LRU; cold process reparses unchanged sources",
+    "machine under sustained external load 85-89% during measurement"
+  ],
+  "source_evidence_note": "detailed analysis: .codex-pytest-tmp/phase33/evidence/t05/REPORT.md (12374B)"
+}
