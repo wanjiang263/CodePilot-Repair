@@ -5,11 +5,15 @@
 
 1. **体改动 fast path**：当改动不增删任何 symbol（symbol id 集合不变）时，
    ``replace_for_sources`` 只替换改动文件 symbol 的边，不再全图 DELETE+INSERT；
-2. **符号集变化回退**：新增/删除/重命名 symbol 或删除文件时，回退全图替换，
-   结果仍与全量索引逐字段一致。
+2. **符号集变化闭包重建（Phase33 T05 契约变更）**：新增/删除/重命名 symbol
+   或删除文件时，只重建变更文件及其受影响 importer/reexport 闭包的边，不再
+   无条件全图删插——Phase32 剖面证实整图删插是负收益（change 82.5s 比
+   cold 68.4s 还慢 20.6%）；结果仍与全量索引逐字段一致。
 
-两条路径都必须通过 dump_index 等价断言；fast path 与回退的选择只由
-symbol 集合是否变化决定，不由性能决定。
+两条路径都必须通过 dump_index 等价断言；fast path 与闭包重建的选择只由
+symbol 集合是否变化决定，不由性能决定。等价性断言一律保留不放宽；被替换的
+只有旧"回退全图替换"间谍断言（any(len(ids) >= total_symbols)），新契约见
+test_symbol_addition_rebuilds_affected_closure_and_stays_equivalent。
 """
 
 from __future__ import annotations
@@ -120,9 +124,17 @@ def test_body_only_change_replaces_only_changed_file_edges(
     assert stats.association_mode == "complete_closure_v2"
 
 
-def test_symbol_addition_falls_back_to_full_replace_and_stays_equivalent(
+def test_symbol_addition_rebuilds_affected_closure_and_stays_equivalent(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Phase33 T05 契约变更：符号集变化不再全图删插，只重建受影响闭包。
+
+    旧 Phase29 断言 any(len(ids) >= total_symbols)（全图替换间谍）在剖面中
+    被证实是负收益来源（change 82.5s > cold 68.4s，15 万条边整图删插），
+    经 lead 批准替换为闭包契约：replaced 源集恰为闭包文件的符号、闭包 ⊇
+    变更文件、⊊ 全图、与 index 内部计算的 edge_closure_paths 一致。
+    dump_index 等价门槛原样保留。
+    """
     root = build_workspace(tmp_path)
     repository_id = "repo_p29_add"
     stores, indexer = index_fresh(root, repository_id)
@@ -133,14 +145,27 @@ def test_symbol_addition_falls_back_to_full_replace_and_stays_equivalent(
         "def hub_new_function(value: int) -> int:\n    return value * 3\n",
         encoding="utf-8",
     )
-    indexer.index(stores, _ws(root, repository_id))
+    stats = indexer.index(stores, _ws(root, repository_id))
     stores.session.commit()
 
+    # 闭包 = 变更文件 + 绑定脏模块 pkg.hub 的 importer（leaf/extra 都是
+    # from pkg.hub import hub_add）；pkg/__init__.py 无 import，不入闭包。
+    assert stats.fast_mode is False
+    assert set(stats.edge_closure_paths) == {HUB, LEAF, "pkg/extra.py"}
+
+    all_symbols = stores.symbols.list_by_repo(repository_id)
+    path_by_file = {f.id: f.path for f in stores.files.list_by_repo(repository_id)}
+    closure_ids = {
+        s.id for s in all_symbols if path_by_file[s.file_id] in set(stats.edge_closure_paths)
+    }
+    hub_ids = {s.id for s in all_symbols if "hub" in s.qualified_name}
+
     replaced = [ids for ids in calls["source_ids"] if ids]
+    # 主 replace 恰好一次；dangling/TEST 替换的 sources 为空，已被过滤。
     assert replaced
-    total_symbols = len(stores.symbols.list_by_repo(repository_id))
-    # Symbol set changed: the conservative full-graph replace must engage.
-    assert any(len(ids) >= total_symbols for ids in replaced)
+    assert all(set(ids) == closure_ids for ids in replaced)
+    assert hub_ids <= closure_ids
+    assert closure_ids < {s.id for s in all_symbols}  # 真子集：闭包 ⊊ 全图
 
     ref_stores, _ = index_fresh(root, repository_id)
     assert dump_index(stores, repository_id)[1:] == dump_index(ref_stores, repository_id)[1:]

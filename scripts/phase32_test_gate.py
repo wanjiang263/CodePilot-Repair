@@ -17,9 +17,12 @@ assumed):
    run and refuses to start (exit 3) when the machine is below the documented
    floor, so an OOM is reported as an environment condition instead of twelve
    mysterious test failures.
-3. Every run leaves pytest temporary trees behind. The gate clears the pytest
-   temp root it owns before each run and records how much it reclaimed (disk,
-   not RAM, but it keeps the cleanup races away).
+3. Every run leaves pytest temporary trees behind. The gate gives each group
+   run its own ``--basetemp`` under ``<SCRATCH>/pytest/`` and removes exactly
+   that directory when the run finishes. It never touches the shared
+   ``%TEMP%/pytest-of-<user>`` root, so concurrent pytest processes on the
+   same machine keep their data (Phase33 D2 fix; the previous behaviour of
+   wiping the global root has been deleted, not reworded).
 
 The gate never retries, never sleeps its way past a failure and never widens a
 mocked timeout: a red run stays red.
@@ -27,6 +30,7 @@ mocked timeout: a red run stays red.
 Usage:
   ``.venv/Scripts/python.exe scripts/phase32_test_gate.py --repeat 2``
   ``.venv/Scripts/python.exe scripts/phase32_test_gate.py --suite unit --repeat 1``
+  ``.venv/Scripts/python.exe scripts/phase32_test_gate.py --scratch .codex-pytest-tmp/phase33 --repeat 1``
 """
 
 from __future__ import annotations
@@ -38,7 +42,6 @@ import os
 import shutil
 import subprocess
 import sys
-import tempfile
 import time
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -83,10 +86,6 @@ def memory() -> dict[str, int]:
     }
 
 
-def pytest_temp_root() -> Path:
-    return Path(tempfile.gettempdir()) / ("pytest-of-" + (Path.home().name or "user"))
-
-
 def tree_bytes(path: Path) -> int:
     total = 0
     for entry in path.rglob("*"):
@@ -98,23 +97,42 @@ def tree_bytes(path: Path) -> int:
     return total
 
 
-def clear_pytest_temp() -> dict[str, int]:
-    root = pytest_temp_root()
-    if not root.is_dir():
-        return {"dirs_removed": 0, "bytes_removed": 0}
-    removed = 0
-    freed = 0
-    for child in list(root.iterdir()):
-        try:
-            freed += tree_bytes(child) if child.is_dir() else child.stat().st_size
-            if child.is_dir():
-                shutil.rmtree(child, ignore_errors=True)
-            else:
-                child.unlink(missing_ok=True)
-            removed += 1
-        except OSError:
-            continue
-    return {"dirs_removed": removed, "bytes_removed": freed}
+def resolve_scratch(raw: str | None) -> Path:
+    """Resolve --scratch against ROOT so the gate is cwd-independent."""
+    candidate = Path(raw) if raw else SCRATCH
+    if not candidate.is_absolute():
+        candidate = ROOT / candidate
+    return candidate
+
+
+def basetemp_dir(scratch: Path, suite: str, run_index: int) -> Path:
+    """One isolated pytest basetemp per group run: <scratch>/pytest/<suite>-run<n>-<ts>."""
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S-%f")
+    return scratch / "pytest" / f"{suite}-run{run_index}-{stamp}"
+
+
+def display_path(path: Path) -> str:
+    """Repo-relative when possible, absolute when scratch lives outside ROOT."""
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def remove_owned_dir(path: Path) -> dict[str, object]:
+    """Delete exactly one directory this gate created; never walk outside it."""
+    record: dict[str, object] = {
+        "path": str(path),
+        "existed": path.is_dir(),
+        "removed": False,
+        "bytes_removed": 0,
+    }
+    if not record["existed"]:
+        return record
+    record["bytes_removed"] = tree_bytes(path)
+    shutil.rmtree(path, ignore_errors=True)
+    record["removed"] = not path.exists()
+    return record
 
 
 def locate_rg() -> Path | None:
@@ -158,14 +176,30 @@ def wait_for_memory(min_free_mb: int, min_headroom_mb: int, wait_s: int) -> dict
 
 
 def run_group(
-    suite: str, index: int, env: dict[str, str], target: str, extra: list[str]
+    suite: str,
+    index: int,
+    env: dict[str, str],
+    target: str,
+    extra: list[str],
+    scratch: Path,
 ) -> dict[str, object]:
-    log = SCRATCH / f"gate-{suite}-run{index}.log"
-    junit = SCRATCH / f"gate-{suite}-run{index}.xml"
+    log = scratch / f"gate-{suite}-run{index}.log"
+    junit = scratch / f"gate-{suite}-run{index}.xml"
+    basetemp = basetemp_dir(scratch, suite, index)
+    basetemp.mkdir(parents=True, exist_ok=True)
     started_at = datetime.now(UTC).isoformat(timespec="seconds")
     started = time.monotonic()
     paths = [part for part in target.split(",") if part]
-    command = [str(PYTHON), "-m", "pytest", *paths, "-q", *extra, f"--junitxml={junit}"]
+    command = [
+        str(PYTHON),
+        "-m",
+        "pytest",
+        *paths,
+        "-q",
+        *extra,
+        f"--junitxml={junit}",
+        f"--basetemp={basetemp}",
+    ]
     with log.open("wb") as handle:
         completed = subprocess.run(
             command,
@@ -177,6 +211,9 @@ def run_group(
         )
     wall_s = round(time.monotonic() - started, 2)
     tail = log.read_text(encoding="utf-8", errors="replace").strip().splitlines()[-1:]
+    # Clean up only the directory this run created; the shared
+    # %TEMP%/pytest-of-<user> root is never listed, never walked, never removed.
+    reclaimed = remove_owned_dir(basetemp)
     record = {
         "suite": suite,
         "run": index,
@@ -184,10 +221,12 @@ def run_group(
         "exit_code": completed.returncode,
         "wall_s": wall_s,
         "memory_after": memory(),
-        "log": str(log.relative_to(ROOT)),
-        "junit": str(junit.relative_to(ROOT)),
+        "log": display_path(log),
+        "junit": display_path(junit),
+        "basetemp": str(basetemp),
         "command": " ".join(command),
         "summary_line": tail[0] if tail else "",
+        "temp_reclaimed": reclaimed,
     }
     print(json.dumps(record, ensure_ascii=False), flush=True)
     return record
@@ -214,8 +253,21 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--min-free-mb", type=int, default=1500)
     parser.add_argument("--min-headroom-mb", type=int, default=2000)
     parser.add_argument("--wait-seconds", type=int, default=0)
-    parser.add_argument("--summary", default=str(SCRATCH / "test-gate.json"))
+    parser.add_argument(
+        "--scratch",
+        default=None,
+        metavar="DIR",
+        help=(
+            "scratch root for logs/junit/summary and per-run pytest basetemp dirs; "
+            f"relative paths resolve under the repo root (default: {SCRATCH.relative_to(ROOT).as_posix()})"
+        ),
+    )
+    parser.add_argument("--summary", default=None)
     args = parser.parse_args(argv)
+    scratch = resolve_scratch(args.scratch)
+    summary_path = Path(args.summary) if args.summary else scratch / "test-gate.json"
+    if not summary_path.is_absolute():
+        summary_path = ROOT / summary_path
     groups: list[tuple[str, str]] = [(name, f"tests/{name}") for name in (args.suite or [])]
     for raw in args.target or []:
         name, _, path = raw.partition("=")
@@ -225,26 +277,25 @@ def main(argv: list[str] | None = None) -> int:
     if not groups:
         groups = [("unit", "tests/unit"), ("api", "tests/api")]
     extra = list(args.pytest_arg or [])
-    SCRATCH.mkdir(parents=True, exist_ok=True)
+    scratch.mkdir(parents=True, exist_ok=True)
     rg = locate_rg()
     env = child_env(rg)
     records = []
     blocked = []
     for suite, target in groups:
         for index in range(1, args.repeat + 1):
-            reclaimed = clear_pytest_temp()
             before = wait_for_memory(args.min_free_mb, args.min_headroom_mb, args.wait_seconds)
             if not before["sufficient"]:
                 blocked.append({"suite": suite, "run": index, "memory": before})
                 print(json.dumps({"blocked": blocked[-1]}, ensure_ascii=False), flush=True)
                 continue
-            record = run_group(suite, index, env, target, extra)
+            record = run_group(suite, index, env, target, extra, scratch)
             record["memory_before"] = before
-            record["temp_reclaimed"] = reclaimed
             records.append(record)
     summary = {
         "tool": "phase32-test-gate",
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "scratch": str(scratch),
         "rg_path": str(rg) if rg else None,
         "rg_version": rg_version(rg),
         "sequential": True,
@@ -257,7 +308,7 @@ def main(argv: list[str] | None = None) -> int:
         "blocked_runs": blocked,
         "failed_runs": [f"{r['suite']}#{r['run']}" for r in records if r["exit_code"] != 0],
     }
-    Path(args.summary).write_text(
+    summary_path.write_text(
         json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
     )
     if blocked:

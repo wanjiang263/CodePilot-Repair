@@ -159,7 +159,7 @@ def _docker_status() -> dict[str, Any]:
         }
 
 
-def _force_rmtree(path: Path) -> None:
+def _force_rmtree(path: Path, *, attempts: int = 5) -> None:
     def onerror(func: Any, target: str, _exc: Any) -> None:
         try:
             Path(target).chmod(stat.S_IWRITE | stat.S_IREAD)
@@ -167,9 +167,24 @@ def _force_rmtree(path: Path) -> None:
         except OSError:
             pass
 
-    shutil.rmtree(path, onerror=onerror)
-    if path.exists():
-        raise OSError(f"artifact directory could not be fully removed: {path.name}")
+    # Windows anti-virus scanners hold freshly written files (git objects,
+    # sqlite journals) without FILE_SHARE_DELETE for a few milliseconds, so
+    # unlink/rmdir intermittently fail with sharing violations. Retry with
+    # exponential backoff instead of turning a transient scan into an
+    # ``artifact_cleanup_failed`` skip on the cleanup route.
+    delay = 0.1
+    for attempt in range(attempts):
+        shutil.rmtree(path, onerror=onerror)
+        if not path.exists():
+            return
+        if attempt == attempts - 1:
+            break
+        time.sleep(delay)
+        delay *= 2.0
+    survivors = sorted(str(item.relative_to(path)) for item in path.rglob("*"))[:20]
+    raise OSError(
+        f"artifact directory could not be fully removed: {path.name}; survivors={survivors}"
+    )
 
 
 def build_settings_router() -> APIRouter:

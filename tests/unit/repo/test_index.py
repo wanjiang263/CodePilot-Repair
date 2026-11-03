@@ -19,7 +19,7 @@ from codepilot.repo.parser import ParsedFile, TreeSitterParser
 from codepilot.repo.workspace import Workspace, normalize_source
 from codepilot.storage.db import create_engine_from_url, create_session_factory, init_db
 from codepilot.storage.models import SymbolRow
-from codepilot.storage.repository import Stores
+from codepilot.storage.repository import EdgeStore, Stores
 from support.indexdump import dump_index as _dump
 
 FIXTURE_REPOS = Path(__file__).resolve().parents[2] / "fixtures" / "repos"
@@ -650,3 +650,254 @@ def test_default_cache_bounds_match_explicit_128(
     explicit_second = explicit_indexer.index(fresh_stores, _ws(root_explicit))
     assert len(default_second.parsed_paths) == len(explicit_second.parsed_paths) == 2
     assert len(default_second.parse_reused_paths) == len(explicit_second.parse_reused_paths) == 128
+
+
+# ---------------------------------------------------------------- Phase33 T05
+# 闭包模式行为契约（D4 索引负收益修复）：符号集变化不再全图删插，replace 只覆盖
+# 变更文件及其受影响 importer/reexport 闭包。四条传播通道各自钉死（binding→脏模块
+# 定点传播、stem 对应、方法名集合差异），等价性一律用 dump_index 逐字节判定。
+
+
+def _closure_root(tmp_path: Path) -> Path:
+    """pkg.core（被调）/ pkg.user（import core）/ pkg.unrelated（无 import）。"""
+    root = tmp_path / "closure-ws"
+    (root / "pkg").mkdir(parents=True)
+    (root / "pkg" / "__init__.py").write_text("", encoding="utf8")
+    (root / "pkg" / "core.py").write_text(
+        "def compute(x: int) -> int:\n    return x + 1\n", encoding="utf8"
+    )
+    (root / "pkg" / "user.py").write_text(
+        "from pkg.core import compute\n\n\ndef run(x: int) -> int:\n    return compute(x)\n",
+        encoding="utf8",
+    )
+    (root / "pkg" / "unrelated.py").write_text(
+        "def other() -> int:\n    return 0\n", encoding="utf8"
+    )
+    return root
+
+
+def test_body_only_change_keeps_fast_mode_and_reports_closure(
+    stores: Stores, fresh_stores: Stores, tmp_path: Path
+) -> None:
+    """只改函数体：符号集不变 → fast_mode=True，闭包只含变更文件。"""
+    root = _closure_root(tmp_path)
+    repo_id = _ws(root).repository_id
+    indexer = Indexer()
+    first = indexer.index(stores, _ws(root))
+    assert first.incremental is False
+    ids_before = {s.id for s in stores.symbols.list_by_repo(repo_id)}
+
+    (root / "pkg" / "core.py").write_text(
+        "def compute(x: int) -> int:\n    return x + 2\n", encoding="utf8"
+    )
+    second = indexer.index(stores, _ws(root))
+    assert second.fast_mode is True
+    assert second.edge_closure_paths == ("pkg/core.py",)
+    # 符号集确实没变（symbol_id 与内容无关，只有增删/改名才变）。
+    assert {s.id for s in stores.symbols.list_by_repo(repo_id)} == ids_before
+    Indexer().index(fresh_stores, _ws(root))
+    assert _dump(stores, repo_id) == _dump(fresh_stores, repo_id)
+
+
+def test_symbol_addition_rebuilds_only_affected_closure(
+    stores: Stores,
+    fresh_stores: Stores,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """新增函数：闭包={变更文件, 脏模块 importer}；间谍源集==闭包符号 ⊊ 全图。"""
+    root = _closure_root(tmp_path)
+    repo_id = _ws(root).repository_id
+    indexer = Indexer()
+    indexer.index(stores, _ws(root))
+    stores.session.commit()
+
+    calls: list[list[str]] = []
+    original = EdgeStore.replace_for_sources
+
+    def spy(self: EdgeStore, repository_id: str, source_ids: list[str], rows: object) -> None:
+        calls.append(list(source_ids))
+        return original(self, repository_id, source_ids, rows)
+
+    monkeypatch.setattr(EdgeStore, "replace_for_sources", spy)
+
+    (root / "pkg" / "core.py").write_text(
+        "def compute(x: int) -> int:\n    return x + 1\n\n\n"
+        "def added(x: int) -> int:\n    return x * 2\n",
+        encoding="utf8",
+    )
+    stats = indexer.index(stores, _ws(root))
+    stores.session.commit()
+
+    assert stats.fast_mode is False
+    # user.py 绑定脏模块 pkg.core 入闭包；unrelated.py 无 import，不入。
+    assert set(stats.edge_closure_paths) == {"pkg/core.py", "pkg/user.py"}
+
+    all_symbols = stores.symbols.list_by_repo(repo_id)
+    path_by_file = {f.id: f.path for f in stores.files.list_by_repo(repo_id)}
+    closure_ids = {
+        s.id for s in all_symbols if path_by_file[s.file_id] in set(stats.edge_closure_paths)
+    }
+    replaced = [ids for ids in calls if ids]
+    # 主 replace 恰一次：sources==闭包文件符号（dangling/TEST 的 sources 为空被过滤）。
+    assert replaced == [sorted(closure_ids)]
+    assert closure_ids < {s.id for s in all_symbols}  # 真子集：闭包 ⊊ 全图
+    Indexer().index(fresh_stores, _ws(root))
+    assert _dump(stores, repo_id) == _dump(fresh_stores, repo_id)
+
+
+def test_import_retarget_guard_falls_back_from_fast_to_closure(
+    stores: Stores, fresh_stores: Stores, tmp_path: Path
+) -> None:
+    """import 换目标但符号集不变：Phase30 守卫触发 → 从 fast 回落闭包模式。"""
+    root = tmp_path / "guard-ws"
+    (root / "pkg").mkdir(parents=True)
+    (root / "pkg" / "__init__.py").write_text("", encoding="utf8")
+    (root / "pkg" / "a.py").write_text(
+        "def alpha() -> int:\n    return 1\n\n\ndef beta() -> int:\n    return 2\n",
+        encoding="utf8",
+    )
+    (root / "pkg" / "user.py").write_text(
+        "from pkg.a import alpha\n\n\ndef use() -> int:\n    return alpha()\n",
+        encoding="utf8",
+    )
+    repo_id = _ws(root).repository_id
+    indexer = Indexer()
+    indexer.index(stores, _ws(root))
+
+    (root / "pkg" / "user.py").write_text(
+        "from pkg.a import beta\n\n\ndef use() -> int:\n    return beta()\n",
+        encoding="utf8",
+    )
+    stats = indexer.index(stores, _ws(root))
+
+    assert stats.fast_mode is False  # binding 变化触发守卫，回落闭包而非全图
+    assert stats.edge_closure_paths == ("pkg/user.py",)
+    Indexer().index(fresh_stores, _ws(root))
+    assert _dump(stores, repo_id) == _dump(fresh_stores, repo_id)
+
+
+def test_reexport_retarget_rebuilds_consumer_chain(
+    stores: Stores, fresh_stores: Stores, tmp_path: Path
+) -> None:
+    """reexport 漂移：b.py 从转发 pkg.a.alpha 变为本地定义 → consumer 经脏传播入闭包。"""
+    root = tmp_path / "reexport-ws"
+    (root / "pkg").mkdir(parents=True)
+    (root / "pkg" / "__init__.py").write_text("", encoding="utf8")
+    (root / "pkg" / "a.py").write_text("def alpha() -> int:\n    return 1\n", encoding="utf8")
+    (root / "pkg" / "b.py").write_text("from pkg.a import alpha\n", encoding="utf8")
+    (root / "pkg" / "consumer.py").write_text(
+        "from pkg.b import alpha\n\n\ndef use() -> int:\n    return alpha()\n",
+        encoding="utf8",
+    )
+    repo_id = _ws(root).repository_id
+    indexer = Indexer()
+    indexer.index(stores, _ws(root))
+
+    (root / "pkg" / "b.py").write_text("def alpha() -> int:\n    return 3\n", encoding="utf8")
+    stats = indexer.index(stores, _ws(root))
+
+    assert stats.fast_mode is False
+    # dirty={pkg.b}；consumer 绑定 pkg.b → 入闭包；a.py 未变且不 import pkg.b，不入。
+    assert set(stats.edge_closure_paths) == {"pkg/b.py", "pkg/consumer.py"}
+    Indexer().index(fresh_stores, _ws(root))
+    assert _dump(stores, repo_id) == _dump(fresh_stores, repo_id)
+
+
+def test_file_removal_leaves_no_stale_edges(
+    stores: Stores, fresh_stores: Stores, tmp_path: Path
+) -> None:
+    """删除文件：无陈旧边（source/target 只指向现存符号或 None），闭包只含受影响 importer。"""
+    root = _closure_root(tmp_path)
+    repo_id = _ws(root).repository_id
+    indexer = Indexer()
+    indexer.index(stores, _ws(root))
+    stores.session.commit()
+
+    (root / "pkg" / "core.py").unlink()
+    stats = indexer.index(stores, _ws(root))
+    stores.session.commit()
+
+    assert stats.fast_mode is False
+    assert "pkg/core.py" in stats.removed_paths
+    assert stats.edge_closure_paths == ("pkg/user.py",)
+
+    symbol_ids = {s.id for s in stores.symbols.list_by_repo(repo_id)}
+    edges = RepositoryIndex(stores, repo_id).edges()
+    assert all(e.source_id in symbol_ids for e in edges)
+    assert all(e.target_id is None or e.target_id in symbol_ids for e in edges)
+    Indexer().index(fresh_stores, _ws(root))
+    assert _dump(stores, repo_id) == _dump(fresh_stores, repo_id)
+
+
+def test_new_same_named_method_pulls_attribute_callers_into_closure(
+    stores: Stores, fresh_stores: Stores, tmp_path: Path
+) -> None:
+    """delta 通道：新增同名方法 → 未解析属性调用的调用方文件也入闭包。
+
+    calls.py 的全局方法名表意味着新增/删除任何 method 名都会改变无关文件里
+    obj.shared() 这类属性回退调用的 CALL 边，闭包必须把这些调用方拉进来。
+    """
+    root = tmp_path / "delta-ws"
+    (root / "pkg").mkdir(parents=True)
+    (root / "pkg" / "__init__.py").write_text("", encoding="utf8")
+    (root / "pkg" / "a.py").write_text(
+        "class First:\n    def shared(self) -> int:\n        return 1\n", encoding="utf8"
+    )
+    (root / "user.py").write_text(
+        "def poke(obj) -> int:\n    return obj.shared()\n", encoding="utf8"
+    )
+    repo_id = _ws(root).repository_id
+    indexer = Indexer()
+    indexer.index(stores, _ws(root))
+
+    (root / "pkg" / "a.py").write_text(
+        "class First:\n    def shared(self) -> int:\n        return 1\n\n\n"
+        "class Second:\n    def shared(self) -> int:\n        return 2\n",
+        encoding="utf8",
+    )
+    stats = indexer.index(stores, _ws(root))
+
+    assert stats.fast_mode is False
+    # user.py 不 import 任何脏模块，靠方法名差异通道入闭包。
+    assert set(stats.edge_closure_paths) == {"pkg/a.py", "user.py"}
+    Indexer().index(fresh_stores, _ws(root))
+    assert _dump(stores, repo_id) == _dump(fresh_stores, repo_id)
+
+
+def test_stem_counterpart_test_file_joins_closure(
+    stores: Stores, fresh_stores: Stores, tmp_path: Path
+) -> None:
+    """stem 通道：test_widget.py 不 import widget.py，widget 增符号仍拉测试文件入闭包。
+
+    test_links.py 的 counterpart-stem 通道不依赖 import：变更文件 stem 对应的
+    测试文件必须入闭包，否则新符号的 TEST low 边会缺失。
+    """
+    root = tmp_path / "stem-ws"
+    (root / "pkg").mkdir(parents=True)
+    (root / "pkg" / "__init__.py").write_text("", encoding="utf8")
+    (root / "pkg" / "widget.py").write_text("def spin() -> int:\n    return 1\n", encoding="utf8")
+    (root / "tests").mkdir()
+    (root / "tests" / "test_widget.py").write_text(
+        "def test_spin_works() -> None:\n    assert True\n", encoding="utf8"
+    )
+    repo_id = _ws(root).repository_id
+    indexer = Indexer()
+    indexer.index(stores, _ws(root))
+
+    (root / "pkg" / "widget.py").write_text(
+        "def spin() -> int:\n    return 1\n\n\ndef extra() -> int:\n    return 2\n",
+        encoding="utf8",
+    )
+    stats = indexer.index(stores, _ws(root))
+
+    assert stats.fast_mode is False
+    assert set(stats.edge_closure_paths) == {"pkg/widget.py", "tests/test_widget.py"}
+
+    extra_id = next(
+        s.id for s in stores.symbols.list_by_repo(repo_id) if s.qualified_name == "pkg.widget.extra"
+    )
+    test_edges = [e for e in RepositoryIndex(stores, repo_id).edges() if e.kind == "TEST"]
+    assert any(e.target_id == extra_id for e in test_edges)  # stem low 通道补齐新符号
+    Indexer().index(fresh_stores, _ws(root))
+    assert _dump(stores, repo_id) == _dump(fresh_stores, repo_id)

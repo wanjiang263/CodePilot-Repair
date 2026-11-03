@@ -8,10 +8,13 @@ marked simulated in the run report and in the UI.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import os
 import re
 import shutil
+import stat
+import time
 from collections import Counter
 from collections.abc import Sequence
 from pathlib import Path
@@ -64,10 +67,53 @@ def _content_digest(root: Path) -> str:
 
 
 def _remove(path: Path) -> None:
+    """Best-effort removal that tolerates read-only git objects on Windows.
+
+    ``git`` marks loose objects and pack files read-only; a plain
+    ``rmtree(ignore_errors=True)`` then silently leaves the whole tree behind
+    (observed as leftover ``*.tmp-<pid>`` staging directories in the demo
+    cache). Clear the write bit and retry through ``onerror`` instead.
+    """
+
+    def _onerror(func: Any, target: str, _exc: Any) -> None:
+        try:
+            Path(target).chmod(stat.S_IWRITE | stat.S_IREAD)
+            func(target)
+        except OSError:
+            pass
+
     if path.is_dir():
-        shutil.rmtree(path, ignore_errors=True)
+        shutil.rmtree(path, onerror=_onerror)
     elif path.exists():
+        with contextlib.suppress(OSError):
+            path.chmod(stat.S_IWRITE | stat.S_IREAD)
         path.unlink(missing_ok=True)
+
+
+def _replace_with_retry(staging: Path, target: Path, *, attempts: int = 5) -> None:
+    """``Path.replace`` with bounded retries against transient Windows locks.
+
+    Anti-virus scanners briefly hold handles **without** ``FILE_SHARE_DELETE``
+    on the ``.git`` objects git just wrote, so the first rename can fail with
+    ``PermissionError [WinError 5]`` although nothing in this process uses the
+    directory. The lock clears within milliseconds; retry with exponential
+    backoff instead of failing the whole run. Before every attempt the target
+    is re-checked: a concurrent materialization may have won the race, in
+    which case this staging copy is simply discarded.
+    """
+    delay = 0.1
+    for attempt in range(attempts):
+        if (target / ".git").is_dir():
+            _remove(staging)
+            return
+        try:
+            staging.replace(target)
+            return
+        except OSError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(delay)
+            delay *= 2.0
 
 
 def materialize_demo_repo(source: Path, cache_root: Path) -> tuple[Path, str]:
@@ -107,7 +153,7 @@ def materialize_demo_repo(source: Path, cache_root: Path) -> tuple[Path, str]:
         if target.exists():
             _remove(staging)
         else:
-            staging.replace(target)
+            _replace_with_retry(staging, target)
     except BaseException:
         _remove(staging)
         raise

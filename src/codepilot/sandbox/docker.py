@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import os
 import re
 import shlex
@@ -29,6 +30,7 @@ from codepilot.sandbox.base import EnvironmentBuildResult
 from codepilot.sandbox.env_spec import EnvSpec
 from codepilot.sandbox.junit import JUnitParseError, JUnitReport, parse_junit
 from codepilot.sandbox.paths import validate_workspace_path
+from codepilot.sandbox.phases import timed_phase
 from codepilot.sandbox.runners import NativeParse, RunnerAdapter
 from codepilot.sandbox.status import classify_execution, is_third_party_dependency_error
 from codepilot.sandbox.transfer import (
@@ -237,29 +239,36 @@ class DockerSandbox:
         result: EnvironmentBuildResult | None = None
         cleanup_error: str | None = None
         try:
-            container = self.client.containers.create(
-                image=base_image,
-                command=["/bin/sh", "-lc", "while :; do sleep 3600; done"],
-                working_dir="/workspace",
-                network_mode="bridge",
-                user="0:0",
-                read_only=False,
-                privileged=False,
-                detach=True,
-                labels={_LABEL_OWNER: "1", _LABEL_CREATED: str(self._clock())},
-            )
-            container.start()
-            archive = _workspace_archive(workspace)
-            if not container.put_archive("/", archive):
-                raise RuntimeError("无法把固定 base commit workspace 复制进构建容器")
+            with timed_phase("build_container_create", image=base_image) as phase:
+                container = self.client.containers.create(
+                    image=base_image,
+                    command=["/bin/sh", "-lc", "while :; do sleep 3600; done"],
+                    working_dir="/workspace",
+                    network_mode="bridge",
+                    user="0:0",
+                    read_only=False,
+                    privileged=False,
+                    detach=True,
+                    labels={_LABEL_OWNER: "1", _LABEL_CREATED: str(self._clock())},
+                )
+                phase["container_id"] = str(getattr(container, "id", ""))[:12]
+            with timed_phase("build_container_start"):
+                container.start()
+            with timed_phase("build_workspace_copy") as phase:
+                archive = _workspace_archive(workspace)
+                phase["archive_bytes"] = len(archive)
+                if not container.put_archive("/", archive):
+                    raise RuntimeError("无法把固定 base commit workspace 复制进构建容器")
             script = _build_script(env_spec)
-            execution = container.exec_run(
-                ["/bin/sh", "-lc", script],
-                workdir="/workspace",
-                environment=dict(env_spec.env),
-                demux=True,
-            )
-            exit_code, output = _exec_result(execution)
+            with timed_phase("build_install_exec", script=redact_text(script)) as phase:
+                execution = container.exec_run(
+                    ["/bin/sh", "-lc", script],
+                    workdir="/workspace",
+                    environment=dict(env_spec.env),
+                    demux=True,
+                )
+                exit_code, output = _exec_result(execution)
+                phase["exit_code"] = exit_code
             if exit_code != 0:
                 combined = redact_text(_decode_exec_output(output))
                 result = EnvironmentBuildResult(
@@ -276,7 +285,8 @@ class DockerSandbox:
                     f'LABEL codepilot.env_sha256="{_env_digest(env_spec)}"',
                     f'LABEL codepilot.repository_sha256="{_text_digest(repository)}"',
                 ]
-                image = container.commit(repository=_ENV_REPOSITORY, tag=key, changes=changes)
+                with timed_phase("build_image_commit", repository=_ENV_REPOSITORY, tag=key):
+                    image = container.commit(repository=_ENV_REPOSITORY, tag=key, changes=changes)
                 result = EnvironmentBuildResult(
                     status=ExecutionStatus.PASS,
                     image_ref=image_ref,
@@ -302,7 +312,8 @@ class DockerSandbox:
         finally:
             if container is not None:
                 try:
-                    container.remove(force=True)
+                    with timed_phase("build_container_cleanup"):
+                        container.remove(force=True)
                 except DockerException as exc:
                     cleanup_error = redact_text(str(exc))
         if cleanup_error:
@@ -325,17 +336,29 @@ class DockerSandbox:
             pass
         if not self.base_dockerfile.is_file():
             raise RuntimeError(f"基础镜像 Dockerfile 不存在: {self.base_dockerfile}")
-        context = self.base_dockerfile.parent.parent
-        relative = self.base_dockerfile.relative_to(context).as_posix()
-        self.client.images.build(
-            path=str(context),
-            dockerfile=relative,
-            tag=tag,
-            buildargs={"PYTHON_VERSION": python_version},
-            rm=True,
-            forcerm=True,
-            labels={_LABEL_OWNER: "1", "codepilot.kind": "base"},
-        )
+        # Phase33 T02 修复（Phase32 docker-minimal 310s 超时根因）：旧实现传
+        # path=仓库根，docker-py 打 context tar 前会 rec_walk 整个仓库树
+        # （.venv/.git/.codex-pytest-tmp，Windows 上数万文件），310s 走不完。
+        # Dockerfile.base 无 COPY/ADD，构建根本不需要宿主 context → 改用
+        # fileobj 微上下文（mkbuildcontext 只打 Dockerfile 自身字节），
+        # 宿主目录遍历归零。同时剥掉 '# syntax=' 指令行：离线环境 BuildKit
+        # 拉不到 docker/dockerfile:1 前端镜像（registry-1.docker.io DNS 被
+        # 投毒不可达），剥掉后 BuildKit 走内置前端、classic builder 视为注释，
+        # 两条路径都不再触发 registry 访问。磁盘上的 Dockerfile 不改。
+        with timed_phase("base_image_ensure", tag=tag, python_version=python_version) as phase:
+            original = self.base_dockerfile.read_text(encoding="utf-8")
+            content = _strip_syntax_directive(original)
+            phase["syntax_directive_stripped"] = content != original
+            payload = content.encode("utf-8")
+            phase["dockerfile_bytes"] = len(payload)
+            self.client.images.build(
+                fileobj=io.BytesIO(payload),
+                tag=tag,
+                buildargs={"PYTHON_VERSION": python_version},
+                rm=True,
+                forcerm=True,
+                labels={_LABEL_OWNER: "1", "codepilot.kind": "base"},
+            )
         return tag
 
     def _get_valid_cached_image(
@@ -456,64 +479,76 @@ class DockerSandbox:
                 "codepilot.transfer": token,
             }
             if not self.bind_workspace:
-                for name in volumes:
-                    self.client.api.create_volume(
-                        name=name, labels={**labels, _LABEL_KIND: "volume"}
-                    )
-                    created.append(name)
-            config = execution_container_config(
-                image_ref=environment.image_ref or "",
-                workspace_volume=(
-                    daemon_bind_source(str(workspace.resolve()))
+                with timed_phase("volume_create", count=len(volumes)):
+                    for name in volumes:
+                        self.client.api.create_volume(
+                            name=name, labels={**labels, _LABEL_KIND: "volume"}
+                        )
+                        created.append(name)
+            with timed_phase("command_inject", command=redact_text(command)):
+                config = execution_container_config(
+                    image_ref=environment.image_ref or "",
+                    workspace_volume=(
+                        daemon_bind_source(str(workspace.resolve()))
+                        if self.bind_workspace
+                        else volumes[0]
+                    ),
+                    output_volume=daemon_bind_source(str(output_dir.resolve()))
                     if self.bind_workspace
-                    else volumes[0]
-                ),
-                output_volume=daemon_bind_source(str(output_dir.resolve()))
-                if self.bind_workspace
-                else volumes[1],
-                command=command,
-                environment=environment_values,
-                workspace_target=self.workspace_target,
-                created_at=self._clock(),
-            )
-            container = self.client.containers.create(**config)
+                    else volumes[1],
+                    command=command,
+                    environment=environment_values,
+                    workspace_target=self.workspace_target,
+                    created_at=self._clock(),
+                )
+            with timed_phase("container_create", image=environment.image_ref or "") as phase:
+                container = self.client.containers.create(**config)
+                phase["container_id"] = str(getattr(container, "id", ""))[:12]
             if not self.bind_workspace:
                 # 上传只能由另一个容器代做：daemon 对只读 rootfs 的容器直接拒绝
                 # ``put_archive``（实测 400 "container rootfs is marked read-only"），
                 # 而把测试容器改成可写就等于放弃本轮要守住的只读根契约。
-                staged = stage_into_volumes(
-                    self.client,
-                    image_ref=environment.image_ref or "",
-                    workspace=workspace,
-                    workspace_volume=volumes[0],
-                    output_volume=volumes[1],
-                    labels={**labels, _LABEL_KIND: _KIND_EXECUTION_STAGE},
-                )
+                with timed_phase("workspace_copy") as phase:
+                    staged = stage_into_volumes(
+                        self.client,
+                        image_ref=environment.image_ref or "",
+                        workspace=workspace,
+                        workspace_volume=volumes[0],
+                        output_volume=volumes[1],
+                        labels={**labels, _LABEL_KIND: _KIND_EXECUTION_STAGE},
+                    )
+                    phase["uploaded_bytes"] = staged.uploaded_bytes
                 if staged.cleanup_error:
                     # staging 容器删不掉要留证据（它可能还占着卷），但不改写主判定。
                     cleanup_notes.append(staged.cleanup_error)
-            container.start()
-            try:
-                wait_result = container.wait(timeout=env_spec.timeout_seconds)
-                exit_code = _status_code(wait_result)
-            except (RequestsTimeout, RequestsConnectionError, TimeoutError) as exc:
-                if not _is_wait_timeout(exc):
-                    raise
-                timed_out = True
+            with timed_phase("container_start"):
+                container.start()
+            with timed_phase("test_wait", timeout_seconds=env_spec.timeout_seconds) as phase:
                 try:
-                    container.kill()
-                except DockerException as kill_error:
-                    cleanup_notes.append(f"超时后 kill 失败: {redact_text(str(kill_error))}")
+                    wait_result = container.wait(timeout=env_spec.timeout_seconds)
+                    exit_code = _status_code(wait_result)
+                    phase["exit_code"] = exit_code
+                except (RequestsTimeout, RequestsConnectionError, TimeoutError) as exc:
+                    if not _is_wait_timeout(exc):
+                        raise
+                    timed_out = True
+                    phase["timed_out"] = True
+                    try:
+                        container.kill()
+                    except DockerException as kill_error:
+                        cleanup_notes.append(f"超时后 kill 失败: {redact_text(str(kill_error))}")
             # 回传必须发生在 remove 之前：卷随容器删除后就没有读取入口了。
             # 超时被 kill 的场合同样先回传，留下的部分日志是归因证据；回传失败
             # 会被记成 sandbox_error，但 classify 仍按 TIMEOUT 优先归因。
-            try:
-                collect_output(self.client, str(container.id), destination=output_dir)
-            except (DockerException, OSError, ValueError, RuntimeError) as exc:
-                if sandbox_error is None:
-                    sandbox_error = (
-                        f"结果归档回传失败: {type(exc).__name__}: {redact_text(str(exc))}"
-                    )
+            with timed_phase("output_collect") as phase:
+                try:
+                    collect_output(self.client, str(container.id), destination=output_dir)
+                    phase["files"] = sum(1 for item in output_dir.rglob("*") if item.is_file())
+                except (DockerException, OSError, ValueError, RuntimeError) as exc:
+                    if sandbox_error is None:
+                        sandbox_error = (
+                            f"结果归档回传失败: {type(exc).__name__}: {redact_text(str(exc))}"
+                        )
         except TransferError as exc:
             sandbox_error = f"工作区传输失败: {redact_text(str(exc))}"
         except DockerException as exc:
@@ -521,20 +556,23 @@ class DockerSandbox:
         except (OSError, ValueError, RuntimeError) as exc:
             sandbox_error = redact_text(str(exc))
         finally:
-            if container is not None:
-                try:
-                    container.reload()
-                    oom_killed = bool(
-                        getattr(container, "attrs", {}).get("State", {}).get("OOMKilled", False)
-                    )
-                except DockerException as exc:
-                    if sandbox_error is None:
-                        sandbox_error = f"读取容器状态失败: {redact_text(str(exc))}"
-                try:
-                    container.remove(force=True)
-                except DockerException as exc:
-                    cleanup_notes.append(f"容器强制删除失败: {redact_text(str(exc))}")
-            cleanup_notes.extend(self._remove_volumes(created))
+            with timed_phase("cleanup") as phase:
+                if container is not None:
+                    try:
+                        container.reload()
+                        oom_killed = bool(
+                            getattr(container, "attrs", {}).get("State", {}).get("OOMKilled", False)
+                        )
+                        phase["oom_killed"] = oom_killed
+                    except DockerException as exc:
+                        if sandbox_error is None:
+                            sandbox_error = f"读取容器状态失败: {redact_text(str(exc))}"
+                    try:
+                        container.remove(force=True)
+                    except DockerException as exc:
+                        cleanup_notes.append(f"容器强制删除失败: {redact_text(str(exc))}")
+                cleanup_notes.extend(self._remove_volumes(created))
+                phase["cleanup_notes"] = len(cleanup_notes)
 
         cleanup_error = "; ".join(cleanup_notes) or None
 
@@ -744,6 +782,22 @@ def _build_script(env_spec: EnvSpec) -> str:
     if len(commands) == 1:
         commands.append("python --version")
     return "\n".join(commands)
+
+
+def _strip_syntax_directive(text: str) -> str:
+    """去掉 Dockerfile 首行的 BuildKit '# syntax=' 前端指令（只处理内存副本）。
+
+    离线环境 BuildKit 解析该指令必须先从 registry 拉 docker/dockerfile:1 前端
+    镜像，必然失败；剥掉后 BuildKit 回退内置 dockerfile 前端，classic builder
+    本来就把它当注释。Dockerfile.base 只用了 ARG/FROM/ENV/RUN/WORKDIR/USER/CMD
+    这些内置前端完整支持的基础指令，剥离不改变构建语义。
+    """
+    lines = text.splitlines(keepends=True)
+    if lines:
+        head = lines[0].lstrip("\ufeff").strip().lower()
+        if head.startswith("# syntax=") or head.startswith("#syntax="):
+            return "".join(lines[1:])
+    return text
 
 
 def _workspace_archive(workspace: Path) -> bytes:

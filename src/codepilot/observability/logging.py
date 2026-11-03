@@ -53,7 +53,13 @@ def configure_logging(level: str = "INFO", *, json_output: bool = False) -> None
     global _configured
 
     numeric = getattr(logging, level.upper(), logging.INFO)
-    logging.basicConfig(format="%(message)s", stream=sys.stderr, level=numeric, force=True)
+    # 同样传活代理而非 sys.stderr 本身：stdlib 的 StreamHandler 在构造时按值固化流
+    # 对象。测试期 basicConfig 捕获到的是 pytest 的瞬时捕获缓冲，teardown 关闭后，
+    # 后台线程（如 anyio portal 里的 api.request 日志）再写就抛
+    # ValueError: I/O operation on closed file，污染整个进程的后续测试。
+    logging.basicConfig(
+        format="%(message)s", stream=cast("TextIO", _stderr), level=numeric, force=True
+    )
 
     renderer = (
         structlog.processors.JSONRenderer(ensure_ascii=False)

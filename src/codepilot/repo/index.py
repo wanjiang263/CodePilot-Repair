@@ -10,9 +10,20 @@ Phase29 T10 adds one bounded exception to the full rebuild: when a run changes n
 symbol id anywhere (``old_symbol_ids == new_symbol_ids``, content-independent ids),
 edge extraction and edge row replacement are restricted to the changed files —
 for every other source the recomputed rows are provably identical to the stored
-ones, so leaving them untouched is equivalence, not staleness. Any symbol-set
-change falls back to the full rebuild. See the fast-path comment in
-``Indexer.index`` and tests/unit/repo/test_phase29_index_incremental.py.
+ones, so leaving them untouched is equivalence, not staleness. See the fast-path
+comment in ``Indexer.index`` and
+tests/unit/repo/test_phase29_index_incremental.py.
+
+Phase33 T05 replaces the previous "any symbol-set change falls back to the full
+rebuild" rule with an affected-closure rebuild: changed and removed files,
+every file whose import bindings resolve (directly or through a re-export
+chain) to a dirty module, every test file linked to a changed or removed file
+by the counterpart-stem rule, and every file containing an unresolved attribute
+call whose method-name candidate set changed. Extraction and edge-row
+replacement are restricted to that closure;
+``IndexStats.edge_closure_paths`` reports it (empty means the whole graph
+was replaced). Equivalence against a full rebuild is still pinned by dump_index
+comparisons in tests/unit/repo/.
 """
 
 from __future__ import annotations
@@ -20,9 +31,9 @@ from __future__ import annotations
 import hashlib
 import time
 from collections import OrderedDict
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, cast
 
 from codepilot.clock import utcnow
@@ -30,7 +41,11 @@ from codepilot.observability.logging import get_logger
 from codepilot.repo.calls import extract_calls
 from codepilot.repo.context import AnalysisContext
 from codepilot.repo.edges import extract_edges
-from codepilot.repo.imports import ImportResolver
+
+# _absolute_module is package-private but deliberately shared here so the
+# closure walk and the resolver can never disagree about what a raw import
+# string means for a given file.
+from codepilot.repo.imports import ImportResolver, _absolute_module
 from codepilot.repo.models import (
     Confidence,
     GraphEdge,
@@ -39,8 +54,8 @@ from codepilot.repo.models import (
     confidence_to_score,
     score_to_confidence,
 )
-from codepilot.repo.parser import ParsedFile, PythonParser, default_parser
-from codepilot.repo.scanner import RepositoryScanner, ScannedFile
+from codepilot.repo.parser import ParsedFile, PythonParser, default_parser, descendants
+from codepilot.repo.scanner import RepositoryScanner, ScannedFile, is_test_path
 from codepilot.repo.symbols import file_id, module_name
 from codepilot.repo.test_links import extract_test_links
 from codepilot.repo.workspace import Workspace
@@ -79,6 +94,13 @@ class IndexStats:
     parse_reused_paths: tuple[str, ...] = ()
     fast_mode: bool = False
     """本次运行是否走了 Phase29 T10 的增量快边路径（完整重建时为 False）。"""
+    edge_closure_paths: tuple[str, ...] = ()
+    """本次边替换实际覆盖的闭包文件路径（Phase33 T05）。
+
+    空元组表示全图替换（冷启动、语义指纹不匹配或完整重建）；非空表示
+    ``replace_for_sources`` 只删插了这些文件（加上被删文件的旧符号）的边。
+    fast_mode 与闭包模式都会填这个字段，测试用它断言"只重建受影响边"。
+    """
 
 
 class IndexScanIncompleteError(OSError):
@@ -183,6 +205,8 @@ class Indexer:
         # Initialised before the closure: the verified-snapshot return path never
         # reaches the incremental guard below.
         fast_mode = False
+        closure_mode = False
+        edge_closure_paths: tuple[str, ...] = ()
 
         def finish(
             reparsed: list[str],
@@ -217,6 +241,7 @@ class Indexer:
                 parse_errors=tuple(sorted(parse_errors)),
                 duration_seconds=time.monotonic() - started,
                 fast_mode=fast_mode,
+                edge_closure_paths=edge_closure_paths,
             )
 
         if (
@@ -312,7 +337,10 @@ class Indexer:
                 new_symbol_ids.add(symbol.id)
                 symbol_rows.append(_symbol_row(repository_id, symbol))
 
-        old_symbol_ids = {row.id for row in stores.symbols.list_by_repo(repository_id)}
+        # Keep the rows, not just the ids: the affected-closure walk needs the
+        # stored method names/kinds to detect candidate-set changes (Phase33).
+        old_symbol_rows = stores.symbols.list_by_repo(repository_id)
+        old_symbol_ids = {row.id for row in old_symbol_rows}
         removed_symbol_ids = old_symbol_ids - new_symbol_ids
         changed_path_set = {f.path for f in changed}
 
@@ -323,8 +351,10 @@ class Indexer:
         # deterministic extractors — so edge *extraction* and edge *row
         # replacement* can be restricted to the changed files instead of
         # rebuilding the whole graph. Any symbol-set change (added, removed or
-        # renamed symbol, removed file, new parse error) falls back to the
-        # conservative full rebuild below. The equivalence claim is pinned by
+        # renamed symbol, removed file, new parse error) falls into the
+        # affected-closure rebuild (Phase33 T05) or, when the semantics
+        # fingerprint does not match, the conservative full rebuild. The
+        # equivalence claim is pinned by
         # tests/support/indexdump.dump_index comparisons
         # (tests/unit/repo/test_phase29_index_incremental.py) and by the
         # semantic digests in docs/notes/phase29-index-profile.json.
@@ -333,41 +363,76 @@ class Indexer:
         # persisted fingerprint matches: a legacy or stale-semantics index must
         # take the full rebuild (see the deleted-IMPORT case in
         # test_phase26_cold_index_rebuilds_old_semantics).
+        semantics_match = stores.repositories.index_semantics(repository_id) == fingerprint
         fast_mode = (
             incremental
             and not removed_paths
             and old_symbol_ids == new_symbol_ids
-            and stores.repositories.index_semantics(repository_id) == fingerprint
+            and semantics_match
         )
-        only_paths = frozenset(changed_path_set) if fast_mode else None
-        all_edges = _extract_all_edges(context, only_paths=only_paths)
-        if fast_mode and _import_bindings_changed(stores, all_edges, changed_path_set, context):
-            # Phase30: a body-only edit can still retarget imports (re-export
-            # swap, alias retarget). The changed file's own IMPORT target set
-            # then differs from the stored one, and every downstream file that
-            # resolved THROUGH the old target (two re-export hops away) now
-            # has stale edges that no bounded replacement can see. Fall back
-            # to the conservative full rebuild.
-            fast_mode = False
-            all_edges = _extract_all_edges(context)
-        edge_recompute_sources = (
-            {
+        if fast_mode:
+            all_edges = _extract_all_edges(context, only_paths=frozenset(changed_path_set))
+            if _import_bindings_changed(stores, all_edges, changed_path_set, context):
+                # Phase30: a body-only edit can still retarget imports (re-export
+                # swap, alias retarget). The changed file's own IMPORT target set
+                # then differs from the stored one, and every downstream file that
+                # resolved THROUGH the old target (two re-export hops away) now
+                # has stale edges that the changed-file restriction cannot see.
+                # Drop to the affected-closure rebuild below, which re-extracts
+                # the whole importer/re-export chain instead of the full graph.
+                fast_mode = False
+        if fast_mode:
+            context_paths = {source_file.path for source_file in context.files}
+            edge_closure_paths = tuple(sorted(p for p in changed_path_set if p in context_paths))
+            edge_recompute_sources = {
                 symbol.id
                 for source_file in context.files
                 if source_file.path in changed_path_set
                 for symbol in source_file.symbols
+            } | removed_symbol_ids
+        elif incremental and semantics_match:
+            # Phase33 T05 affected-closure rebuild: replace edge rows only for
+            # files that can provably differ from the stored ones (see
+            # _affected_closure). Extraction runs on FULL-context import
+            # bindings so re-export chains resolve exactly like a full rebuild;
+            # only the emitted edge set is restricted to the closure.
+            closure_mode = True
+            imports_full = ImportResolver(context)
+            old_methods, new_methods = _closure_source_maps(context, old_symbol_rows)
+            affected = _affected_closure(
+                context,
+                imports_full,
+                changed_path_set=changed_path_set,
+                removed_paths=removed_paths,
+                old_methods=old_methods,
+                new_methods=new_methods,
+            )
+            affected_ids = {
+                symbol.id
+                for source_file in context.files
+                if source_file.path in affected
+                for symbol in source_file.symbols
             }
-            | removed_symbol_ids
-            if fast_mode
-            else old_symbol_ids | new_symbol_ids
-        )
+            calls = extract_calls(context, imports_full, only_paths=affected)
+            all_edges = (
+                *(edge for edge in imports_full.edges() if edge.source_id in affected_ids),
+                *calls,
+                *extract_edges(context, imports_full, only_paths=affected),
+                *extract_test_links(context, imports_full, calls, only_paths=affected),
+            )
+            edge_closure_paths = tuple(sorted(affected))
+            edge_recompute_sources = affected_ids | removed_symbol_ids
+        else:
+            all_edges = _extract_all_edges(context)
+            edge_recompute_sources = old_symbol_ids | new_symbol_ids
         edge_rows = _edge_rows(
             repository_id,
             tuple(edge for edge in all_edges if edge.kind != "TEST"),
             edge_recompute_sources,
         )
-        # Fast path: the extractors above already restricted output to the
-        # changed files, so these TEST rows replace exactly their own sources.
+        # Fast/closure path: the extractors above already restricted output to
+        # the closure files, so every TEST source is inside
+        # edge_recompute_sources and these rows are a pure insert.
         computed_test_edges = tuple(edge for edge in all_edges if edge.kind == "TEST")
 
         removed_file_ids = [file_id(repository_id, path) for path in removed_paths]
@@ -396,7 +461,7 @@ class Indexer:
             stores,
             repository_id,
             computed_test_edges,
-            full_replace=not fast_mode,
+            full_replace=not (fast_mode or closure_mode),
         )
 
         stores.repositories.set_index_semantics(repository_id, fingerprint)
@@ -406,6 +471,8 @@ class Indexer:
             repository_id=repository_id,
             incremental=incremental,
             fast_mode=fast_mode,
+            closure_mode=closure_mode,
+            edge_closure=len(edge_closure_paths),
             changed=len(changed),
             removed=len(removed_paths),
             reused=len(reused),
@@ -629,6 +696,130 @@ def _import_bindings_changed(
             if row.kind == "IMPORT":
                 stored_bindings.add((row.source_id, row.target_id or "", row.target_name or ""))
     return new_bindings != stored_bindings
+
+
+def _closure_source_maps(
+    context: AnalysisContext, old_rows: list[SymbolRow]
+) -> tuple[dict[str, frozenset[str]], dict[str, frozenset[str]]]:
+    """新旧方法名 → id 集（属性调用候选集比较用，Phase33 T05）。
+
+    镜像 calls.py 的 ``_methods_by_name`` 构建：只收 method/test_method。某个方法名的
+    id 集变化时，任何文件里未解析属性调用（``obj.thing()``）的保守回退候选集都可能
+    变化，闭包必须把含此类调用的文件拉进受影响集（见 ``_affected_closure``）。
+    """
+    old_methods: dict[str, set[str]] = {}
+    for row in old_rows:
+        if row.kind in ("method", "test_method"):
+            old_methods.setdefault(row.name, set()).add(row.id)
+    new_methods: dict[str, set[str]] = {}
+    for symbol in context.symbols:
+        if symbol.kind in {"method", "test_method"}:
+            new_methods.setdefault(symbol.name, set()).add(symbol.id)
+    return (
+        {name: frozenset(ids) for name, ids in old_methods.items()},
+        {name: frozenset(ids) for name, ids in new_methods.items()},
+    )
+
+
+def _affected_closure(
+    context: AnalysisContext,
+    imports: ImportResolver,
+    *,
+    changed_path_set: set[str],
+    removed_paths: list[str],
+    old_methods: Mapping[str, frozenset[str]],
+    new_methods: Mapping[str, frozenset[str]],
+) -> frozenset[str]:
+    """一次增量变化后，边行可能与存量不同的文件路径集合。
+
+    四个通道与提取器的全部"绕过本文件内容"的边来源一一对应：
+
+    1. 变更/删除文件自身。
+    2. import 绑定传播（imports.py + resolution.py）：绑定了脏模块的文件。
+       ``imports`` 必须是全上下文解析（不能 only_paths 受限），re-export 链才
+       解析得动。fixpoint 把链折进脏集：hub 变更 → mid 因 ``from pkg.hub
+       import x`` 入闭包并把 pkg.mid 折脏 → consumer 因绑定 pkg.mid 入闭包。
+       包前缀规则（脏项以 mention + "." 开头）覆盖 ``import pkg`` 后走
+       ``pkg.c.x`` 的 dotted 引用（resolution.py 裸模块导入特判）。mentions
+       同时收文本 absolute（``_absolute_module``）与解析后的
+       ``target_module``：模块被删除后 ``target_module`` 为 None，只有文本
+       形式能命中脏集。
+    3. counterpart stem（test_links.py 通道 (c)）：test_x.py 与 x.py 的 TEST
+       边不经 import；x.py 变更/删除时对应测试文件必须入闭包。
+    4. 属性调用候选（calls.py 的保守回退）：全局同名方法表变化（delta 非空）
+       会改变任何文件里 ``obj.thing()`` 的候选集；扫描未入集文件的语法树，
+       attribute 名命中 delta 即入闭包（过近似，安全侧）。
+
+    通道 3/4 拉入的文件不再传播脏集：它们自身内容未变，下游对它们的解析
+    也不变。返回集外的文件保留存量边行——全量重建会逐字节重现它们。
+    """
+    file_by_path = {source_file.path: source_file for source_file in context.files}
+    affected = {path for path in changed_path_set if path in file_by_path}
+    dirty = {
+        module_name(path) for path in (*changed_path_set, *removed_paths) if path.endswith(".py")
+    }
+
+    mentions: dict[str, set[str]] = {}
+    for binding in imports.bindings:
+        source = context.by_id.get(binding.source_id)
+        if source is None:
+            continue
+        bucket = mentions.setdefault(source.path, set())
+        if binding.target_module:
+            bucket.add(binding.target_module)
+        absolute = _absolute_module(file_by_path[source.path], binding.module)
+        if absolute is not None:
+            bucket.add(absolute)
+
+    grew = True
+    while grew:
+        grew = False
+        for source_file in context.files:
+            if source_file.path in affected:
+                continue
+            for module in mentions.get(source_file.path, ()):
+                if module in dirty or any(d.startswith(module + ".") for d in dirty):
+                    affected.add(source_file.path)
+                    if source_file.path.endswith(".py"):
+                        dirty.add(module_name(source_file.path))
+                    grew = True
+                    break
+
+    changed_stems = {PurePosixPath(path).stem for path in (*changed_path_set, *removed_paths)}
+    for source_file in context.files:
+        if source_file.path in affected or not is_test_path(source_file.path):
+            continue
+        stem = PurePosixPath(source_file.path).stem
+        if stem.startswith("test_"):
+            counterpart = stem.removeprefix("test_")
+        elif stem.endswith("_test"):
+            counterpart = stem.removesuffix("_test")
+        else:
+            continue
+        if counterpart in changed_stems:
+            affected.add(source_file.path)
+
+    delta = {
+        name
+        for name in set(old_methods) | set(new_methods)
+        if old_methods.get(name, frozenset()) != new_methods.get(name, frozenset())
+    }
+    if delta:
+        for source_file in context.files:
+            if source_file.path in affected:
+                continue
+            for node in descendants(source_file.parsed.root):
+                if node.kind != "call":
+                    continue
+                function = node.field("function")
+                if function is None or function.kind != "attribute":
+                    continue
+                attribute = function.field("attribute")
+                if attribute is not None and attribute.text in delta:
+                    affected.add(source_file.path)
+                    break
+
+    return frozenset(affected)
 
 
 def _edge_rows(
