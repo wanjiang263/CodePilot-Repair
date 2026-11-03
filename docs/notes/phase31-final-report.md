@@ -176,6 +176,10 @@ PATH 移除、`PYTHONUTF8=1 PYTHONIOENCODING=utf-8`（仅环境加固，测试�
 - 官方 Harness、大仓性能：未跑——性能一栏如实写"本轮未跑"，不沿用 Phase30 数字
 - 页面 E2E：web/src 0 改动，条件跳过
 - unit/api 各经历 2 次环境性失败后以第 3 次单命令整跑为最终证据（§3），首轮日志保留
+- `docs/notes/phase30-errata.md` 是 **Phase30 口径勘误**（归档测试 29 而非 30、fail-closed 5 而非 6、
+  v4 的 96 = 91 继承 + 5 新增、mypy 实检 9 文件、v4 无 manifest_commit 等）；Phase32 已将其入库，
+  仅补充报告口径，**v1–v5 历史候选、旧 manifest、旧 receipt、旧账本字节一字未改**。
+  Phase30 final report 内的旧口径仍按原字节保留，以本勘误为准，不回写历史报告。
 
 ## 10. 下一阶段条件
 
