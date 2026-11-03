@@ -564,6 +564,7 @@ def execute_index(
     cache = indexer._parsed
     result: dict[str, Any] = {
         "association_mode": stats.association_mode,
+        "fast_mode": getattr(stats, "fast_mode", None),
         "wall_index_s": round(wall_index, 4),
         "wall_commit_s": round(wall_commit, 4),
         "indexer_reported_s": round(stats.duration_seconds, 4),

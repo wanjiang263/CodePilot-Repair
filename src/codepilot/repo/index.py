@@ -77,6 +77,8 @@ class IndexStats:
     duration_seconds: float
     association_mode: str = "complete_closure_v2"
     parse_reused_paths: tuple[str, ...] = ()
+    fast_mode: bool = False
+    """本次运行是否走了 Phase29 T10 的增量快边路径（完整重建时为 False）。"""
 
 
 class IndexScanIncompleteError(OSError):
@@ -178,8 +180,15 @@ class Indexer:
                 fingerprint_input += b"unavailable"
         fingerprint = hashlib.sha256(fingerprint_input).hexdigest()
 
+        # Initialised before the closure: the verified-snapshot return path never
+        # reaches the incremental guard below.
+        fast_mode = False
+
         def finish(
-            reparsed: list[str], parse_reused: list[str], parse_errors: list[str], mode: str
+            reparsed: list[str],
+            parse_reused: list[str],
+            parse_errors: list[str],
+            mode: str,
         ) -> IndexStats:
             return IndexStats(
                 association_mode=mode,
@@ -207,6 +216,7 @@ class Indexer:
                 reused_paths=tuple(f.path for f in reused),
                 parse_errors=tuple(sorted(parse_errors)),
                 duration_seconds=time.monotonic() - started,
+                fast_mode=fast_mode,
             )
 
         if (
@@ -395,6 +405,7 @@ class Indexer:
             "repo.index.done",
             repository_id=repository_id,
             incremental=incremental,
+            fast_mode=fast_mode,
             changed=len(changed),
             removed=len(removed_paths),
             reused=len(reused),
