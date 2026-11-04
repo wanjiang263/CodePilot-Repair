@@ -1,0 +1,924 @@
+diff --git a/scripts/phase28_archive_verify.py b/scripts/phase28_archive_verify.py
+index 9833f78..17b71b4 100644
+--- a/scripts/phase28_archive_verify.py
++++ b/scripts/phase28_archive_verify.py
+@@ -61,7 +61,9 @@ from codepilot.archive import (
+     GIT_NORMALIZATION_POLICY,
+     MANIFEST_KINDS,
+     NORMALIZATION_NOTE,
++    NORMALIZATION_NOTE_WORKTREE,
+     SNAPSHOT_HASH_RULE,
++    WORKTREE_NORMALIZATION_POLICY,
+     _apply_patch_in_temp,
+     _candidate_source_set,
+     _extract_prompts,
+@@ -86,6 +88,14 @@ SOURCE_ORIGIN_WORKTREE = "worktree"
+ HISTORICAL_MANIFEST_NAME = "historical-baseline.json"
+ #: Phase28-33 wording: git_commit candidates never actually stored raw hashes.
+ LEGACY_NORMALIZATION_NOTE = "UTF-8 LF normalized; raw worktree hashes recorded separately"
++#: Historical candidates that predate ``normalization_policy``. The seal pins the
++#: exact payload, so a new candidate reusing an old version name cannot qualify.
++LEGACY_NORMALIZATION_EXEMPT: dict[str, str] = {
++    "phase29-candidate-v3": "2d88b1de5910e914a1b58a1b3d846caaecedb1d28210754485188cfd10e592a4",
++    "phase30-candidate-v4": "7b6c125ebef80d1fa1f33e2c5c4b6814d43325661ab9ebdd37e4555be075bb3c",
++    "phase31-candidate-v5": "664037d863b4cb04f1e69bbdf44c2af090a17218beaa08c80e5077ff44a4fce1",
++    "phase33-candidate-v6": "d96374ef56a93b4628a29cf09907a52d2d2627362084d0862066360a2191769d",
++}
+ RECEIPT_SCHEMA_VERSION = 1
+ RECEIPT_FILE_NAMES = ("candidate.diff", "candidate.json", "snapshot.json", "sources.json")
+ 
+@@ -345,51 +355,74 @@ def _check_parent_integrity(candidate: dict[str, Any], archive_root: Path, recor
+     )
+ 
+ 
+-def _check_normalization(candidate: dict[str, Any], record: Any) -> bool:
+-    """Verify the schema-v5 normalization declaration against what is stored.
++def _legacy_normalization_exempt(candidate: dict[str, Any]) -> bool:
++    version = candidate.get("version")
++    if not isinstance(version, str):
++        return False
++    expected = LEGACY_NORMALIZATION_EXEMPT.get(version)
++    return (
++        expected is not None
++        and candidate.get("normalization") == LEGACY_NORMALIZATION_NOTE
++        and candidate.get("candidate_payload_sha256") == expected
++    )
++
+ 
+-    New candidates (Phase34+) must carry the structured ``normalization_policy``
+-    and the matching note: LF hashes only, raw bytes recoverable from
+-    source_commit blobs, no raw hashes stored. Historical v5/v6 candidates have
+-    the old note and no policy; that is annotated as ``normalization_note_stale``
+-    and never failed, because their bytes are immutable. Returns the stale flag.
++def _check_normalization(candidate: dict[str, Any], record: Any) -> bool:
++    """Verify the normalization declaration against what is actually stored.
++
++    New candidates carry a structured ``normalization_policy`` selected by
++    ``source_origin``: git_commit stores LF hashes only, worktree stores raw
++    hashes too. Historical v3/v4/v5/v6 candidates predate the policy; they are
++    exempt only when BOTH the version and the sealed payload hash match the
++    pinned table, so a new candidate reusing an old version name fails. Returns
++    the ``normalization_note_stale`` flag (true only for pinned legacy records).
+     """
+-    if candidate.get("schema_version") != 5:
+-        return False
++    schema = candidate.get("schema_version")
+     note = candidate.get("normalization")
+     policy = candidate.get("normalization_policy")
++    origin = candidate.get("source_origin")
+     if policy is None:
+-        if note == LEGACY_NORMALIZATION_NOTE:
++        if _legacy_normalization_exempt(candidate):
+             record(
+                 "normalization_policy",
+                 True,
+-                "legacy candidate without normalization_policy; "
++                f"legacy candidate {candidate.get('version')} exempt by pinned payload seal; "
+                 "normalization_note_stale (raw hashes were never stored)",
+             )
+             return True
++        if isinstance(schema, int) and schema < 3:
++            return False
+         record(
+             "normalization_policy",
+             False,
+-            "schema 5 requires normalization_policy; the note claims a policy that is not declared",
++            "candidate has no normalization_policy and is not a pinned legacy archive",
+         )
+         return False
+     problems: list[str] = []
+     if not isinstance(policy, dict):
+         problems.append(f"normalization_policy must be an object, got {policy!r}")
+-    else:
++    elif origin == SOURCE_ORIGIN_GIT:
+         for key, expected in GIT_NORMALIZATION_POLICY.items():
+             if policy.get(key) != expected:
+                 problems.append(f"{key} must be {expected!r}, got {policy.get(key)!r}")
+         if note != NORMALIZATION_NOTE:
+-            problems.append("normalization note differs from the policy text")
+-        if policy.get("raw_hashes_stored") is True and "raw_worktree_hashes" not in candidate:
+-            problems.append("policy claims raw hashes are stored but raw_worktree_hashes is absent")
+-        if candidate.get("source_origin") != SOURCE_ORIGIN_GIT:
+-            problems.append("git normalization policy requires source_origin=git_commit")
++            problems.append("normalization note differs from the git_commit policy text")
++        if "raw_worktree_hashes" in candidate:
++            problems.append("git_commit normalization policy must not carry raw_worktree_hashes")
++    elif origin == SOURCE_ORIGIN_WORKTREE:
++        for key, expected in WORKTREE_NORMALIZATION_POLICY.items():
++            if policy.get(key) != expected:
++                problems.append(f"{key} must be {expected!r}, got {policy.get(key)!r}")
++        if note != NORMALIZATION_NOTE_WORKTREE:
++            problems.append("normalization note differs from the worktree policy text")
++        if "raw_worktree_hashes" not in candidate:
++            problems.append("worktree normalization policy requires raw_worktree_hashes")
++    else:
++        problems.append(f"unknown source_origin {origin!r} for a normalization policy")
+     record(
+         "normalization_policy",
+         not problems,
+-        "; ".join(problems) if problems else "LF hash + source_commit blob policy matches the note",
++        "; ".join(problems) if problems else "normalization policy matches the stored bytes",
+     )
+     return False
+ 
+@@ -884,6 +917,7 @@ def _verify_v3_archive(
+ 
+     _check_declared_metadata(candidate, folder, record)
+     file_hash, canonical_hash = _check_snapshot_hashes(folder, candidate, record)
++    normalization_note_stale = _check_normalization(candidate, record)
+ 
+     # 1. Payload seal: canonical JSON over everything except the seal itself.
+     declared_seal = candidate.get("candidate_payload_sha256")
+@@ -1111,6 +1145,7 @@ def _verify_v3_archive(
+         "source_origin": origin,
+         "snapshot_file_sha256": file_hash,
+         "snapshot_canonical_sha256": canonical_hash,
++        "normalization_note_stale": normalization_note_stale,
+         "checks": checks,
+         "failures": failures,
+         "raw_drift": raw_drift,
+diff --git a/scripts/phase34_runtime_results.py b/scripts/phase34_runtime_results.py
+new file mode 100644
+index 0000000..9d372b8
+--- /dev/null
++++ b/scripts/phase34_runtime_results.py
+@@ -0,0 +1,407 @@
++"""Phase34 runtime evidence: lifecycle-checked JSON for the v8 closeout.
++
++Same evidence-head semantics as the Phase33 generator: the JSON describes the
++tree at ``recorded_through``, not whatever HEAD is now. ``phase_commits`` covers
++``base..recorded_through``; ``code_commits`` is path-filtered. ``--check`` reads
++the recorded commits, allows only ``docs/`` changes after them, and rebuilds the
++payload at the recorded tree. ``recorded_head`` is the evidence head;
++``actual_head_at_write`` records the HEAD at generation time explicitly.
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++import sys
++from datetime import UTC, datetime
++from pathlib import Path
++from typing import Any
++
++ROOT = Path(__file__).resolve().parents[1]
++if str(ROOT) not in sys.path:
++    sys.path.insert(0, str(ROOT))
++
++from scripts.phase33_runtime_results import (  # noqa: E402
++    DOC_PATH_PREFIX,
++    commit_resolves,
++    commit_touches_code,
++    git,
++    is_ancestor,
++    load_json,
++    merge_gate_records,
++    missing,
++    normalise,
++    regression_rows,
++    rel,
++    sha256,
++    static_section,
++    unit_aggregate,
++)
++
++DEFAULT_SCRATCH = ROOT / ".codex-pytest-tmp" / "phase34"
++DEFAULT_OUT = ROOT / "docs" / "notes" / "phase34-runtime-results.json"
++CANDIDATE_FILES = ("candidate.json", "candidate.diff", "snapshot.json", "sources.json")
++
++UNVERIFIED = [
++    "real provider streaming/usage/billing (0 requests, 0 cost; rows blocked)",
++    "full Docker suite (not run in Phase34)",
++    "large repository (>=20k files)",
++    "24h stability",
++    "frontend checks (web/src zero diff; conditionally skipped)",
++    "src/codepilot/eval/swebench_runner.py:423 build-context risk (P2, untouched)",
++]
++
++
++def commits_section(
++    base: str, recorded_through: str
++) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
++    log_out = git("log", "--format=%H%x09%s", f"{base}..{recorded_through}")
++    phase: list[dict[str, Any]] = []
++    for line in log_out.splitlines():
++        if line.strip():
++            commit_hash, _, subject = line.partition("\t")
++            phase.append({"hash": commit_hash, "short": commit_hash[:7], "subject": subject})
++    code = [commit for commit in phase if commit_touches_code(commit["hash"])]
++    return phase, code
++
++
++def regression_section(scratch: Path) -> dict[str, Any]:
++    merged = merge_gate_records(scratch)
++    if not merged["records"]:
++        return missing(scratch / "test-gate-phase34.json")
++    rows = regression_rows(merged["records"])
++    latest = merged["latest"] or {}
++    failed = [
++        {
++            "group": run.get("suite"),
++            "run": run.get("run"),
++            "exit_code": run.get("exit_code"),
++            "summary_line": run.get("summary_line"),
++        }
++        for run in merged["records"]
++        if run.get("exit_code") not in (0, None)
++    ]
++    blocked: list[Any] = []
++    for gate in merged["summaries"]:
++        blocked.extend(gate.get("blocked_runs", []))
++    out: dict[str, Any] = {
++        "sources": merged["sources"],
++        "rg_path": latest.get("rg_path"),
++        "rg_version": latest.get("rg_version"),
++        "preconditions": latest.get("preconditions"),
++        "blocked_runs": blocked,
++        "failed_runs": failed,
++        "groups": rows,
++        "selected_tests_note": (
++            "full repository selection: unit 3109 + eval 483 + sandbox 66 + "
++            "integration 126 + api 118 + graph 266 = 4168; tests/docker 35 deselected"
++        ),
++    }
++    aggregate = unit_aggregate(rows)
++    if aggregate is not None:
++        out["unit_aggregate"] = aggregate
++    return out
++
++
++def candidate_section(version: str) -> dict[str, Any]:
++    folder = ROOT / "configs" / "harness" / "candidates" / version
++    record = load_json(folder / "candidate.json")
++    if not isinstance(record, dict):
++        return missing(folder / "candidate.json")
++    return {
++        "version": record.get("version"),
++        "status": record.get("status"),
++        "parent": record.get("parent"),
++        "schema_version": record.get("schema_version"),
++        "source_commit": record.get("source_commit"),
++        "diff_base_commit": record.get("diff_base_commit"),
++        "normalization_policy": record.get("normalization_policy"),
++        "file_sha256": {name: sha256(folder / name) for name in CANDIDATE_FILES},
++    }
++
++
++def archive_section(scratch: Path) -> dict[str, Any]:
++    path = scratch / "verify-v8.json"
++    data = load_json(path)
++    if not isinstance(data, dict):
++        return missing(path)
++    keep = (
++        "exit_code",
++        "witness",
++        "historical_integrity",
++        "new_archive_status",
++        "totals",
++        "receipt",
++        "historical_baseline",
++    )
++    out: dict[str, Any] = {key: data.get(key) for key in keep if key in data}
++    versions = data.get("versions")
++    if isinstance(versions, list):
++        out["versions_summary"] = [
++            {
++                "version": entry.get("version"),
++                "ok": entry.get("ok"),
++                "normalization_note_stale": entry.get("normalization_note_stale"),
++                "failures": len(entry.get("failures", [])),
++            }
++            for entry in versions
++        ]
++    out["source"] = rel(path)
++    out["source_sha256"] = sha256(path)
++    return out
++
++
++def provider_section(scratch: Path) -> dict[str, Any]:
++    path = scratch / "provider-matrix.json"
++    data = load_json(path)
++    if not isinstance(data, dict):
++        return missing(path)
++    real = data.get("real_provider", {})
++    return {
++        "source": rel(path),
++        "source_sha256": sha256(path),
++        "real_mode": data.get("real_mode"),
++        "real_requests": real.get("real_requests"),
++        "real_cost_cny": real.get("real_cost_cny"),
++        "cost_known": real.get("cost_known"),
++        "rows": [
++            {
++                "row": row.get("row"),
++                "status": row.get("status"),
++                "real_requests": row.get("real_requests"),
++                "missing": row.get("missing"),
++            }
++            for row in real.get("rows", [])
++        ],
++        "fake_totals": data.get("totals_from_junit"),
++    }
++
++
++def lifecycle_section(scratch: Path) -> dict[str, Any]:
++    pre = scratch / "pre-fix-check.log"
++    return {
++        "before_fix": {
++            "commit": "dba045dabd70f0e6eb7779287136944b589f2734",
++            "command": "scripts/phase33_runtime_results.py --check",
++            "exit_code": 1,
++            "sections": ["code_commits", "head_commit"],
++            "log": rel(pre),
++            "log_sha256": sha256(pre),
++        },
++        "rule": (
++            "recorded_through/recorded_head describe the evidence tree; "
++            "phase_commits=base..recorded_through; code_commits is path-filtered; "
++            "changes after recorded_through must be docs-only"
++        ),
++    }
++
++
++def build_payload(
++    base: str,
++    scratch: Path,
++    *,
++    recorded_through: str,
++    recorded_head: str,
++    actual_head: str,
++) -> dict[str, Any]:
++    resolved_base = git("rev-parse", base)
++    phase, code = commits_section(resolved_base, recorded_through)
++    web_diff = git("diff", "--name-only", f"{resolved_base}..{recorded_through}", "--", "web/src")
++    web_files = [path for path in web_diff.splitlines() if path.strip()]
++    active = ROOT / "configs" / "harness"
++    return {
++        "phase": 34,
++        "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
++        "generator": "scripts/phase34_runtime_results.py",
++        "base_commit": resolved_base,
++        "recorded_through": recorded_through,
++        "recorded_head": recorded_head,
++        "actual_head_at_write": actual_head,
++        "phase_commits": phase,
++        "code_commits": code,
++        "final_regression": regression_section(scratch),
++        "static_checks": static_section(scratch),
++        "provider_matrix": provider_section(scratch),
++        "candidates": {
++            "v7": candidate_section("phase34-candidate-v7"),
++            "v8": candidate_section("phase34-candidate-v8"),
++            "active_pointer_exists": (active / "active.json").is_file()
++            or (active / "active.next.json").is_file(),
++        },
++        "archive_verify_v8": archive_section(scratch),
++        "runtime_lifecycle": lifecycle_section(scratch),
++        "page_e2e": {
++            "command": f"git diff --name-only {resolved_base}..{recorded_through} -- web/src",
++            "changed_files": len(web_files),
++            "files": web_files,
++            "result": (
++                "conditionally skipped: web/src has zero diff in this phase"
++                if not web_files
++                else "frontend checks required"
++            ),
++        },
++        "unverified": UNVERIFIED,
++    }
++
++
++def _emit(payload: dict[str, Any]) -> None:
++    print(json.dumps(payload, indent=2, ensure_ascii=False))
++
++
++def _check(written_path: Path, scratch: Path, base_override: str | None) -> int:
++    def fail(reason: str, **extra: Any) -> int:
++        _emit({"check": "fail", "reason": reason, **extra})
++        return 1
++
++    if not written_path.is_file():
++        return fail("written_file_missing", expected=rel(written_path))
++    try:
++        written = json.loads(written_path.read_text(encoding="utf-8"))
++    except (OSError, json.JSONDecodeError) as exc:
++        return fail("written_file_unreadable", detail=str(exc))
++    if not isinstance(written, dict):
++        return fail("written_file_not_object")
++
++    recorded = written.get("recorded_through")
++    recorded_head = written.get("recorded_head")
++    actual_head = written.get("actual_head_at_write")
++    if not isinstance(recorded, str) or not recorded:
++        return fail("recorded_through_missing")
++    if not isinstance(recorded_head, str) or not recorded_head:
++        return fail("recorded_head_missing")
++    if not isinstance(actual_head, str) or not actual_head:
++        return fail("actual_head_at_write_missing")
++    if not commit_resolves(recorded):
++        return fail("recorded_through_unknown", recorded_through=recorded)
++    if not commit_resolves(recorded_head):
++        return fail("recorded_head_unknown", recorded_head=recorded_head)
++    if recorded_head != recorded:
++        return fail(
++            "recorded_head_mismatch",
++            recorded_through=recorded,
++            recorded_head=recorded_head,
++        )
++    if not is_ancestor(recorded, "HEAD"):
++        return fail("recorded_through_not_ancestor", recorded_through=recorded)
++    changed = [p for p in git("diff", "--name-only", f"{recorded}..HEAD").splitlines() if p.strip()]
++    offending = [path for path in changed if not path.startswith(DOC_PATH_PREFIX)]
++    if offending:
++        return fail(
++            "code_changed_after_evidence",
++            recorded_through=recorded,
++            offending=offending[:20],
++            changed=changed[:50],
++        )
++
++    base = written.get("base_commit")
++    if not isinstance(base, str) or not base:
++        return fail("base_commit_missing")
++    if not commit_resolves(base):
++        return fail("base_commit_unknown", base_commit=base)
++    if base_override is not None:
++        if not commit_resolves(base_override):
++            return fail("base_override_unknown", base_override=base_override)
++        if git("rev-parse", base_override) != git("rev-parse", base):
++            return fail(
++                "base_override_mismatch",
++                written_base=git("rev-parse", base),
++                base_override=git("rev-parse", base_override),
++            )
++    if not is_ancestor(base, recorded):
++        return fail(
++            "base_not_ancestor_of_recorded_through",
++            base_commit=base,
++            recorded_through=recorded,
++        )
++
++    payload = build_payload(
++        base,
++        scratch,
++        recorded_through=recorded,
++        recorded_head=recorded_head,
++        actual_head=actual_head,
++    )
++    rebuilt = normalise(payload, written.get("generated_at"))
++    current = normalise(written, written.get("generated_at"))
++    if rebuilt == current:
++        _emit({"check": "pass", "file": rel(written_path), "sha256": sha256(written_path)})
++        return 0
++    pa, pb = json.loads(rebuilt), json.loads(current)
++    sections = [key for key in sorted(set(pa) | set(pb)) if pa.get(key) != pb.get(key)]
++    return fail("payload_mismatch", sections=sections)
++
++
++def main(argv: list[str] | None = None) -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument(
++        "--base",
++        default=None,
++        help="phase34 baseline commit; --write requires it unless --out records base_commit",
++    )
++    parser.add_argument("--scratch", default=str(DEFAULT_SCRATCH))
++    parser.add_argument("--out", default=str(DEFAULT_OUT))
++    mode = parser.add_mutually_exclusive_group(required=True)
++    mode.add_argument(
++        "--check",
++        action="store_true",
++        help="verify the written file against recorded_through; exit 1 on mismatch",
++    )
++    mode.add_argument("--write", action="store_true", help="write the rebuilt payload to --out")
++    args = parser.parse_args(argv)
++
++    scratch = Path(args.scratch)
++    if not scratch.is_absolute():
++        scratch = ROOT / scratch
++    out = Path(args.out)
++    if not out.is_absolute():
++        out = ROOT / out
++
++    if args.check:
++        return _check(out, scratch, args.base)
++
++    base = args.base
++    if base is None and out.is_file():
++        try:
++            existing = json.loads(out.read_text(encoding="utf-8"))
++        except (OSError, json.JSONDecodeError):
++            existing = None
++        if isinstance(existing, dict) and isinstance(existing.get("base_commit"), str):
++            base = existing["base_commit"]
++    if not isinstance(base, str) or not base:
++        _emit({"write": "fail", "reason": "base_commit_required", "hint": "pass --base <sha>"})
++        return 2
++    try:
++        git("rev-parse", "--verify", args.base or base)
++    except RuntimeError as exc:
++        _emit({"write": "fail", "reason": "base_commit_unknown", "detail": str(exc)})
++        return 2
++
++    recorded = git("rev-parse", "HEAD")
++    payload = build_payload(
++        base,
++        scratch,
++        recorded_through=recorded,
++        recorded_head=recorded,
++        actual_head=recorded,
++    )
++    if out.is_file():
++        try:
++            existing = json.loads(out.read_text(encoding="utf-8"))
++        except (OSError, json.JSONDecodeError):
++            existing = None
++        if (
++            isinstance(existing, dict)
++            and isinstance(existing.get("generated_at"), str)
++            and normalise(payload, existing["generated_at"])
++            == normalise(existing, existing["generated_at"])
++        ):
++            payload["generated_at"] = existing["generated_at"]
++    text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
++    out.parent.mkdir(parents=True, exist_ok=True)
++    out.write_text(text, encoding="utf-8", newline="\n")
++    _emit({"written": rel(out), "sha256": sha256(out)})
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/verify_archive.sh b/scripts/verify_archive.sh
+new file mode 100644
+index 0000000..6f9f3af
+--- /dev/null
++++ b/scripts/verify_archive.sh
+@@ -0,0 +1,22 @@
++#!/usr/bin/env sh
++# Reproducible archive verifier entrypoint.
++#
++# The shared .venv is often a junction/symlink to the main checkout's venv, and
++# its editable install pins `codepilot` to the main checkout's src. Force this
++# checkout's src first so a worktree run sees the code being verified.
++set -eu
++
++root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
++if [ -n "${PYTHON:-}" ]; then
++    py=$PYTHON
++elif [ -x "$root/.venv/Scripts/python.exe" ]; then
++    py="$root/.venv/Scripts/python.exe"
++elif [ -x "$root/.venv/bin/python" ]; then
++    py="$root/.venv/bin/python"
++else
++    py=python
++fi
++
++PYTHONPATH="$root/src${PYTHONPATH:+:$PYTHONPATH}"
++export PYTHONPATH
++exec "$py" "$root/scripts/phase28_archive_verify.py" "$@"
+diff --git a/src/codepilot/archive.py b/src/codepilot/archive.py
+index 6ceb9a0..8b9393c 100644
+--- a/src/codepilot/archive.py
++++ b/src/codepilot/archive.py
+@@ -77,6 +77,7 @@ __all__ = [
+     "SOURCE_ORIGIN_WORKTREE",
+     "SOURCE_SCOPE",
+     "SOURCE_SCOPE_EXCLUDES",
++    "WORKTREE_NORMALIZATION_POLICY",
+     "ArchiveError",
+     "CandidateExistsError",
+     "DiffVerificationError",
+@@ -148,6 +149,11 @@ GIT_NORMALIZATION_POLICY: dict[str, Any] = {
+     "raw_bytes": "source_commit_git_blob",
+     "raw_hashes_stored": False,
+ }
++WORKTREE_NORMALIZATION_POLICY: dict[str, Any] = {
++    "source_hash": "lf_sha256",
++    "raw_bytes": "worktree",
++    "raw_hashes_stored": True,
++}
+ 
+ #: Flags shared by the generator and the verifier so both sides compute the
+ #: exact same diff bytes for the same commits and paths.
+@@ -973,6 +979,9 @@ def _candidate_payload(
+     if source_origin == SOURCE_ORIGIN_GIT:
+         # Raw bytes live in the source_commit blobs; only LF hashes are stored.
+         payload["normalization_policy"] = dict(GIT_NORMALIZATION_POLICY)
++    else:
++        # Worktree mode stores raw hashes, so the policy must say so.
++        payload["normalization_policy"] = dict(WORKTREE_NORMALIZATION_POLICY)
+     if candidate_schema_version >= 4:
+         # v4: explicit schema mirror (single source of truth is schema_version;
+         # the verifier requires the two to be equal) and the source manifest.
+diff --git a/tests/unit/test_phase34_archive_normalization.py b/tests/unit/test_phase34_archive_normalization.py
+index 57cd977..9e9bcd7 100644
+--- a/tests/unit/test_phase34_archive_normalization.py
++++ b/tests/unit/test_phase34_archive_normalization.py
+@@ -1,10 +1,10 @@
+-"""Phase34 T02: normalization policy must match what the archive actually stores.
++"""Phase34 T02/P1: normalization policy must match what the archive stores.
+ 
+-History: git_commit candidates only ever stored LF-normalized source_hashes, yet
+-their note claimed raw worktree hashes were recorded separately. New candidates
+-now carry a structured ``normalization_policy`` and a mode-specific note; the
+-verifier rejects a claim without structure and annotates legacy v5/v6 candidates
+-(``normalization_note_stale``) without failing them.
++git_commit candidates store LF hashes only; worktree candidates store raw hashes
++too. New candidates carry a structured ``normalization_policy`` selected by
++source_origin. Historical v3/v4/v5/v6 candidates predate the policy and are
++exempt only when BOTH the version and the sealed payload hash match the pinned
++table, so a new candidate cannot bypass the requirement by reusing an old note.
+ """
+ 
+ from __future__ import annotations
+@@ -14,6 +14,8 @@ import json
+ from pathlib import Path
+ from typing import Any
+ 
++import pytest
++from scripts import phase28_archive_verify as verify_mod
+ from scripts.phase28_archive_verify import (
+     LEGACY_NORMALIZATION_NOTE,
+     verify_new_archive,
+@@ -28,6 +30,8 @@ from codepilot.archive import (
+     GIT_NORMALIZATION_POLICY,
+     NORMALIZATION_NOTE,
+     NORMALIZATION_NOTE_WORKTREE,
++    WORKTREE_NORMALIZATION_POLICY,
++    SourceOriginError,
+     canonical_sha256,
+     create_candidate,
+ )
+@@ -59,7 +63,8 @@ def test_new_candidate_records_policy_and_matching_note(env: dict) -> None:
+     assert result["normalization_note_stale"] is False
+ 
+ 
+-def test_legacy_note_without_policy_is_annotated_not_failed(env: dict) -> None:
++def test_unlisted_schema5_with_legacy_note_fails(env: dict) -> None:
++    """The old bypass: any schema-5 candidate could write the legacy note."""
+     generate(env)
+     path = env["root"] / "candidates" / CHILD / "candidate.json"
+     record = read(path)
+@@ -68,6 +73,28 @@ def test_legacy_note_without_policy_is_annotated_not_failed(env: dict) -> None:
+     reseal(record)
+     write(path, json.dumps(record))
+     result = verify(env)
++    assert not result["ok"]
++    check = next(c for c in result["checks"] if c["check"] == "normalization_policy")
++    assert not check["ok"]
++    assert result["normalization_note_stale"] is False
++
++
++def test_pinned_legacy_candidate_is_annotated_not_failed(
++    env: dict, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    generate(env)
++    path = env["root"] / "candidates" / CHILD / "candidate.json"
++    record = read(path)
++    record["normalization"] = LEGACY_NORMALIZATION_NOTE
++    record.pop("normalization_policy")
++    reseal(record)
++    write(path, json.dumps(record))
++    monkeypatch.setattr(
++        verify_mod,
++        "LEGACY_NORMALIZATION_EXEMPT",
++        {CHILD: record["candidate_payload_sha256"]},
++    )
++    result = verify(env)
+     assert result["ok"], result["failures"]
+     assert result["normalization_note_stale"] is True
+     check = next(c for c in result["checks"] if c["check"] == "normalization_policy")
+@@ -100,7 +127,7 @@ def test_new_note_without_policy_fails(env: dict) -> None:
+     assert result["normalization_note_stale"] is False
+ 
+ 
+-def test_worktree_candidate_keeps_raw_hashes_without_policy(tmp_path: Path) -> None:
++def test_worktree_candidate_records_policy_and_verifies(tmp_path: Path) -> None:
+     repo = tmp_path / "repo"
+     repo.mkdir()
+     git_cmd(repo, "init", "-q")
+@@ -119,10 +146,88 @@ def test_worktree_candidate_keeps_raw_hashes_without_policy(tmp_path: Path) -> N
+         source_origin="worktree",
+         source_files=["src/app.py"],
+     )
+-    record = read(root / "candidates" / "phase34-worktree" / "candidate.json")
++    folder = root / "candidates" / "phase34-worktree"
++    record = read(folder / "candidate.json")
+     assert record["normalization"] == NORMALIZATION_NOTE_WORKTREE
+-    assert "normalization_policy" not in record
++    assert record["normalization_policy"] == WORKTREE_NORMALIZATION_POLICY
+     assert set(record["raw_worktree_hashes"]) == {"src/app.py"}
++    result = verify_new_archive(
++        folder, record, archive_root=root, repo=repo, ignore_raw_drift=False
++    )
++    assert result["ok"], result["failures"]
++
++
++def test_worktree_policy_mismatch_fails(tmp_path: Path) -> None:
++    repo = tmp_path / "repo"
++    repo.mkdir()
++    git_cmd(repo, "init", "-q")
++    git_cmd(repo, "config", "user.name", "Phase34 fixture")
++    git_cmd(repo, "config", "user.email", "fixture@example.invalid")
++    git_cmd(repo, "config", "core.autocrlf", "false")
++    (repo / "src").mkdir()
++    (repo / "src/app.py").write_text("value = 1\n", encoding="utf-8", newline="\n")
++    base = commit(repo, "base")
++    root = repo / "configs/harness"
++    create_candidate(
++        root,
++        repo,
++        version="phase34-worktree-bad",
++        diff_base_commit=base,
++        source_origin="worktree",
++        source_files=["src/app.py"],
++    )
++    folder = root / "candidates" / "phase34-worktree-bad"
++    path = folder / "candidate.json"
++    record = read(path)
++    record["normalization_policy"]["raw_hashes_stored"] = False
++    reseal(record)
++    write(path, json.dumps(record))
++    result = verify_new_archive(
++        folder, record, archive_root=root, repo=repo, ignore_raw_drift=False
++    )
++    assert not result["ok"]
++    assert "normalization_policy" in {failure["check"] for failure in result["failures"]}
++
++
++def test_schema5_worktree_generation_is_rejected(tmp_path: Path) -> None:
++    repo = tmp_path / "repo"
++    repo.mkdir()
++    with pytest.raises(SourceOriginError, match="schema 5 requires git_commit"):
++        create_candidate(
++            tmp_path / "archive",
++            repo,
++            version="phase34-schema5-worktree",
++            diff_base_commit="deadbeef",
++            source_origin="worktree",
++            candidate_schema_version=5,
++        )
++
++
++def test_schema3_git_no_policy_fails_unless_pinned(
++    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    repo, base, head = build_repo(tmp_path)
++    root = tmp_path / "archive"
++    version = "phase34-schema3-legacy"
++    generate_schema3(root, repo, version, base, head)
++    folder = root / "candidates" / version
++    path = folder / "candidate.json"
++    record = read(path)
++    record["normalization"] = LEGACY_NORMALIZATION_NOTE
++    record.pop("normalization_policy")
++    reseal(record)
++    write(path, json.dumps(record))
++    result = verify_new_archive(folder, record, archive_root=root, repo=repo, ignore_raw_drift=True)
++    assert not result["ok"]
++    assert "normalization_policy" in {failure["check"] for failure in result["failures"]}
++    monkeypatch.setattr(
++        verify_mod,
++        "LEGACY_NORMALIZATION_EXEMPT",
++        {version: record["candidate_payload_sha256"]},
++    )
++    result = verify_new_archive(folder, record, archive_root=root, repo=repo, ignore_raw_drift=True)
++    assert result["ok"], result["failures"]
++    assert result["normalization_note_stale"] is True
+ 
+ 
+ def test_crlf_source_hashes_only_lf_bytes(tmp_path: Path) -> None:
+diff --git a/tests/unit/test_phase34_runtime_results.py b/tests/unit/test_phase34_runtime_results.py
+new file mode 100644
+index 0000000..326b9c1
+--- /dev/null
++++ b/tests/unit/test_phase34_runtime_results.py
+@@ -0,0 +1,126 @@
++"""Phase34 runtime generator lifecycle tests (evidence head, not current HEAD)."""
++
++from __future__ import annotations
++
++import json
++import subprocess
++from pathlib import Path
++from typing import Any
++
++import pytest
++from scripts import phase33_runtime_results as p33
++from scripts import phase34_runtime_results as runtime
++
++
++def git(repo: Path, *args: str) -> str:
++    done = subprocess.run(
++        ["git", "-C", str(repo), *args],
++        capture_output=True,
++        text=True,
++        encoding="utf-8",
++        check=False,
++    )
++    assert done.returncode == 0, done.stderr
++    return done.stdout.strip()
++
++
++def commit(repo: Path, message: str) -> str:
++    git(repo, "add", "-A")
++    git(repo, "commit", "-qm", message)
++    return git(repo, "rev-parse", "HEAD")
++
++
++def write(path: Path, text: str) -> None:
++    path.parent.mkdir(parents=True, exist_ok=True)
++    path.write_text(text, encoding="utf-8", newline="\n")
++
++
++@pytest.fixture
++def env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
++    repo = tmp_path / "repo"
++    repo.mkdir()
++    git(repo, "init", "-q")
++    git(repo, "config", "user.name", "Phase34 fixture")
++    git(repo, "config", "user.email", "fixture@example.invalid")
++    git(repo, "config", "core.autocrlf", "false")
++    write(repo / "src/app.py", "value = 1\n")
++    base = commit(repo, "base")
++    write(repo / "src/app.py", "value = 2\n")
++    code = commit(repo, "code change")
++    write(repo / "docs/notes/phase.md", "evidence\n")
++    tip = commit(repo, "docs change")
++    monkeypatch.setattr(runtime, "ROOT", repo)
++    monkeypatch.setattr(p33, "ROOT", repo)
++    return {
++        "repo": repo,
++        "base": base,
++        "code": code,
++        "tip": tip,
++        "scratch": tmp_path / "scratch",
++        "out": tmp_path / "runtime.json",
++    }
++
++
++def run(env: dict[str, Any], mode: str, *extra: str) -> int:
++    return runtime.main([mode, "--scratch", str(env["scratch"]), "--out", str(env["out"]), *extra])
++
++
++def written(env: dict[str, Any]) -> dict[str, Any]:
++    return json.loads(env["out"].read_text(encoding="utf-8"))
++
++
++def test_write_records_lifecycle(env: dict[str, Any]) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    payload = written(env)
++    assert payload["recorded_through"] == env["tip"]
++    assert payload["recorded_head"] == env["tip"]
++    assert payload["actual_head_at_write"] == env["tip"]
++    assert {item["hash"] for item in payload["phase_commits"]} == {env["code"], env["tip"]}
++    assert [item["hash"] for item in payload["code_commits"]] == [env["code"]]
++
++
++def test_check_passes_at_recorded_through(env: dict[str, Any]) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    assert run(env, "--check") == 0
++
++
++def test_docs_only_commit_after_evidence_keeps_check_green(env: dict[str, Any]) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    write(env["repo"] / "docs/notes/after.md", "later docs\n")
++    commit(env["repo"], "docs after evidence")
++    assert run(env, "--check") == 0
++
++
++def test_code_commit_after_evidence_fails(
++    env: dict[str, Any], capsys: pytest.CaptureFixture[str]
++) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    write(env["repo"] / "src/app.py", "value = 3\n")
++    commit(env["repo"], "code after evidence")
++    assert run(env, "--check") == 1
++    assert "code_changed_after_evidence" in capsys.readouterr().out
++
++
++def test_tampered_recorded_head_fails(
++    env: dict[str, Any], capsys: pytest.CaptureFixture[str]
++) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    payload = written(env)
++    payload["recorded_head"] = env["base"]
++    env["out"].write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
++    assert run(env, "--check") == 1
++    assert "recorded_head_mismatch" in capsys.readouterr().out
++
++
++def test_double_write_is_byte_identical(env: dict[str, Any]) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    first = env["out"].read_bytes()
++    assert run(env, "--write") == 0
++    assert env["out"].read_bytes() == first
++
++
++def test_check_does_not_modify_json(env: dict[str, Any]) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    before = env["out"].read_bytes()
++    assert run(env, "--check") == 0
++    assert env["out"].read_bytes() == before
