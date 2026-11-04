@@ -1,0 +1,993 @@
+diff --git a/scripts/phase28_archive_verify.py b/scripts/phase28_archive_verify.py
+index 332e25d..9833f78 100644
+--- a/scripts/phase28_archive_verify.py
++++ b/scripts/phase28_archive_verify.py
+@@ -58,7 +58,9 @@ from typing import Any
+ 
+ from codepilot.archive import (
+     DEFAULT_REQUIRED_ROLES,
++    GIT_NORMALIZATION_POLICY,
+     MANIFEST_KINDS,
++    NORMALIZATION_NOTE,
+     SNAPSHOT_HASH_RULE,
+     _apply_patch_in_temp,
+     _candidate_source_set,
+@@ -82,6 +84,8 @@ NEW_SCHEMA_VERSIONS = (2, 3, 4, 5)
+ SOURCE_ORIGIN_GIT = "git_commit"
+ SOURCE_ORIGIN_WORKTREE = "worktree"
+ HISTORICAL_MANIFEST_NAME = "historical-baseline.json"
++#: Phase28-33 wording: git_commit candidates never actually stored raw hashes.
++LEGACY_NORMALIZATION_NOTE = "UTF-8 LF normalized; raw worktree hashes recorded separately"
+ RECEIPT_SCHEMA_VERSION = 1
+ RECEIPT_FILE_NAMES = ("candidate.diff", "candidate.json", "snapshot.json", "sources.json")
+ 
+@@ -341,6 +345,55 @@ def _check_parent_integrity(candidate: dict[str, Any], archive_root: Path, recor
+     )
+ 
+ 
++def _check_normalization(candidate: dict[str, Any], record: Any) -> bool:
++    """Verify the schema-v5 normalization declaration against what is stored.
++
++    New candidates (Phase34+) must carry the structured ``normalization_policy``
++    and the matching note: LF hashes only, raw bytes recoverable from
++    source_commit blobs, no raw hashes stored. Historical v5/v6 candidates have
++    the old note and no policy; that is annotated as ``normalization_note_stale``
++    and never failed, because their bytes are immutable. Returns the stale flag.
++    """
++    if candidate.get("schema_version") != 5:
++        return False
++    note = candidate.get("normalization")
++    policy = candidate.get("normalization_policy")
++    if policy is None:
++        if note == LEGACY_NORMALIZATION_NOTE:
++            record(
++                "normalization_policy",
++                True,
++                "legacy candidate without normalization_policy; "
++                "normalization_note_stale (raw hashes were never stored)",
++            )
++            return True
++        record(
++            "normalization_policy",
++            False,
++            "schema 5 requires normalization_policy; the note claims a policy that is not declared",
++        )
++        return False
++    problems: list[str] = []
++    if not isinstance(policy, dict):
++        problems.append(f"normalization_policy must be an object, got {policy!r}")
++    else:
++        for key, expected in GIT_NORMALIZATION_POLICY.items():
++            if policy.get(key) != expected:
++                problems.append(f"{key} must be {expected!r}, got {policy.get(key)!r}")
++        if note != NORMALIZATION_NOTE:
++            problems.append("normalization note differs from the policy text")
++        if policy.get("raw_hashes_stored") is True and "raw_worktree_hashes" not in candidate:
++            problems.append("policy claims raw hashes are stored but raw_worktree_hashes is absent")
++        if candidate.get("source_origin") != SOURCE_ORIGIN_GIT:
++            problems.append("git normalization policy requires source_origin=git_commit")
++    record(
++        "normalization_policy",
++        not problems,
++        "; ".join(problems) if problems else "LF hash + source_commit blob policy matches the note",
++    )
++    return False
++
++
+ def _check_not_active(version: str, archive_root: Path, record: Any) -> None:
+     active_problems: list[str] = []
+     for pointer_name in ("active.json", "active.next.json"):
+@@ -450,6 +503,7 @@ def _verify_v5_archive(
+     _check_declared_metadata(candidate, folder, record)
+     file_hash, canonical_hash = _check_snapshot_hashes(folder, candidate, record)
+     sources = _check_sources_json(folder, candidate, record)
++    normalization_note_stale = _check_normalization(candidate, record)
+     _check_snapshot_strict_roles(folder, record)
+     _check_not_active(str(candidate.get("version")), archive_root, record)
+     for name in ("active.json", "active.next.json"):
+@@ -587,6 +641,7 @@ def _verify_v5_archive(
+         "ok": not failures,
+         "snapshot_file_sha256": file_hash,
+         "snapshot_canonical_sha256": canonical_hash,
++        "normalization_note_stale": normalization_note_stale,
+         "raw_drift": {},
+     }
+ 
+diff --git a/scripts/phase32_provider_matrix.py b/scripts/phase32_provider_matrix.py
+index 9043cde..c21cc99 100644
+--- a/scripts/phase32_provider_matrix.py
++++ b/scripts/phase32_provider_matrix.py
+@@ -234,6 +234,8 @@ def credentials_present() -> dict[str, bool]:
+         "ANTHROPIC_API_KEY",
+         "AWS_ACCESS_KEY_ID",
+         "AWS_SECRET_ACCESS_KEY",
++        "AWS_REGION",
++        "AWS_DEFAULT_REGION",
+     ]
+     presence = {name: bool(os.environ.get(name)) for name in names}
+     for module in ("boto3", "botocore"):
+@@ -338,11 +340,14 @@ def row_missing(
+     model_id: str | None,
+     *,
+     spent_cny: float | None = None,
++    creds: dict[str, bool] | None = None,
+ ) -> list[str]:
+     """Per-row missing list: every provider row names its OWN gaps.
+ 
+     Never share one list between rows — that was the D1 defect: a single
+-    missing_real list was copied onto all three rows.
++    missing_real list was copied onto all three rows. When ``creds`` is given
++    (the ``credentials_present()`` map) the gate reads that map instead of
++    re-probing the environment, so presence is computed exactly once.
+     """
+     meta = REAL_PROVIDERS[key]
+     missing: list[str] = []
+@@ -355,15 +360,27 @@ def row_missing(
+             f"effective cap {effective:.6f} CNY"
+         )
+     for name in meta["required_env"]:
+-        if not os.environ.get(name):
++        present = bool(creds.get(name)) if creds is not None else bool(os.environ.get(name))
++        if not present:
+             missing.append(name)
+     for module in meta.get("required_modules", ()):
+-        try:
+-            __import__(module)
+-        except ImportError:
++        if creds is not None:
++            installed = bool(creds.get(module + "_installed"))
++        else:
++            try:
++                __import__(module)
++            except ImportError:
++                installed = False
++            else:
++                installed = True
++        if not installed:
+             missing.append(module + " importable")
+     region_env = meta.get("region_env")
+-    if region_env and not any(os.environ.get(name) for name in region_env):
++    if region_env and not (
++        any(creds.get(name) for name in region_env)
++        if creds is not None
++        else any(os.environ.get(name) for name in region_env)
++    ):
+         missing.append(" or ".join(region_env))
+     if not model_id:
+         missing.append(meta["model_env"])
+@@ -573,7 +590,9 @@ def probe_provider(
+     )
+     try:
+         response = tracked.complete(request)
+-    except BaseException as exc:  # every dispatch failure is reported, not hidden
++    except Exception as exc:  # every dispatched failure is reported, not hidden
++        # KeyboardInterrupt/SystemExit are control flow, not provider results:
++        # they must propagate instead of being turned into a "real-failed" row.
+         row.update(
+             status="real-failed",
+             real_requests=_dispatched(inner, counter),
+@@ -637,7 +656,7 @@ def run_real_channels(
+     total_requests = 0
+     for key in REAL_PROVIDER_ORDER:
+         model_id = resolve_model_id(key, model_overrides)
+-        missing = row_missing(key, plan, model_id, spent_cny=usage.cost)
++        missing = row_missing(key, plan, model_id, spent_cny=usage.cost, creds=creds)
+         if missing or not model_id:
+             rows.append(
+                 {
+@@ -693,7 +712,7 @@ def blocked_real_provider(
+     rows: list[dict[str, Any]] = []
+     for key in REAL_PROVIDER_ORDER:
+         model_id = resolve_model_id(key, model_overrides)
+-        missing = row_missing(key, plan, model_id)
++        missing = row_missing(key, plan, model_id, creds=creds)
+         if not real_requested:
+             missing.insert(0, "--real flag (real channel disabled by default)")
+         rows.append(
+diff --git a/scripts/phase33_runtime_results.py b/scripts/phase33_runtime_results.py
+index c095491..f76ffe5 100644
+--- a/scripts/phase33_runtime_results.py
++++ b/scripts/phase33_runtime_results.py
+@@ -19,12 +19,25 @@ evidence:
+ - archive verify     -> <scratch>/verify-v6.json (T09)
+ 
+ A missing input is recorded as {"status": "missing-input", "expected": ...},
+-never fabricated. --check rebuilds the payload and compares with the written
+-file (generated_at normalised); any mismatch exits 1. Only --write writes.
++never fabricated.
++
++Evidence lifecycle (Phase34 T01): the JSON is a record of the tree at
++``recorded_through``, not of whatever HEAD is now. ``phase_commits`` lists
++``base..recorded_through``; ``code_commits`` is the subset of those commits
++that touch a CODE path (src/, scripts/, tests/, web/src/, pyproject.toml,
++web/package.json). Archive/docs/receipt commits therefore never count as code.
++
++--check reads ``recorded_through`` and ``head_commit`` from the written file
++(never from the current HEAD), proves ``recorded_through`` is an ancestor of
++HEAD, allows only docs/ paths to have changed since, and rebuilds the payload
++at ``recorded_through`` for a normalised comparison. Any later code commit —
++or a tampered recorded hash — exits 1. Only --write writes, and repeating
++--write with unchanged inputs reproduces the same bytes (the existing
++generated_at is kept).
+ 
+ Usage:
+   .venv/Scripts/python.exe scripts/phase33_runtime_results.py --check
+-  .venv/Scripts/python.exe scripts/phase33_runtime_results.py --write
++  .venv/Scripts/python.exe scripts/phase33_runtime_results.py --write --base <sha>
+ """
+ 
+ from __future__ import annotations
+@@ -41,10 +54,17 @@ from pathlib import Path
+ from typing import Any
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+-DEFAULT_BASE = "b4825911b8e2880adfe6177b9aca6f4c35bf15b1"
+ DEFAULT_SCRATCH = ROOT / ".codex-pytest-tmp" / "phase33"
+ DEFAULT_OUT = ROOT / "docs" / "notes" / "phase33-runtime-results.json"
+ 
++#: Paths that make a commit a CODE commit. Archive/docs/receipt commits touch
++#: neither prefix nor file, so they never appear in ``code_commits`` (Phase34
++#: P0: C4 was a docs commit and must not be counted as code).
++CODE_PATH_PREFIXES = ("src/", "scripts/", "tests/", "web/src/")
++CODE_PATH_FILES = ("pyproject.toml", "web/package.json")
++#: Everything outside this prefix is forbidden after ``recorded_through``.
++DOC_PATH_PREFIX = "docs/"
++
+ PYTEST_TIME = re.compile(r"in (\d+(?:\.\d+)?)s")
+ 
+ 
+@@ -59,6 +79,36 @@ def git(*args: str) -> str:
+     return (done.stdout or "").strip()
+ 
+ 
++def commit_resolves(revision: str) -> bool:
++    try:
++        git("rev-parse", "--verify", f"{revision}^{{commit}}")
++    except RuntimeError:
++        return False
++    return True
++
++
++def is_ancestor(ancestor: str, descendant: str) -> bool:
++    # merge-base exits 1 (not an error) when the answer is "no"; git() would raise.
++    done = subprocess.run(
++        ["git", "merge-base", "--is-ancestor", ancestor, descendant],
++        cwd=ROOT,
++        capture_output=True,
++        text=True,
++        encoding="utf-8",
++        check=False,
++    )
++    return done.returncode == 0
++
++
++def is_code_path(path: str) -> bool:
++    return path in CODE_PATH_FILES or path.startswith(CODE_PATH_PREFIXES)
++
++
++def commit_touches_code(revision: str) -> bool:
++    listed = git("diff-tree", "--no-commit-id", "--name-only", "-r", "--root", revision)
++    return any(is_code_path(line.strip()) for line in listed.splitlines() if line.strip())
++
++
+ def sha256(path: Path) -> str:
+     return hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else "missing"
+ 
+@@ -452,15 +502,18 @@ def candidates_section() -> dict[str, Any]:
+     return out
+ 
+ 
+-def build_payload(base: str, scratch: Path) -> dict[str, Any]:
+-    head = git("rev-parse", "HEAD")
+-    log_out = git("log", "--format=%H%x09%s", f"{base}..HEAD")
+-    commits = []
++def build_payload(
++    base: str, scratch: Path, *, recorded_through: str, head_commit: str
++) -> dict[str, Any]:
++    resolved_base = git("rev-parse", base)
++    log_out = git("log", "--format=%H%x09%s", f"{resolved_base}..{recorded_through}")
++    phase_commits = []
+     for line in log_out.splitlines():
+         if line.strip():
+             h, _, s = line.partition("\t")
+-            commits.append({"hash": h, "short": h[:7], "subject": s})
+-    web_diff = git("diff", "--name-only", f"{base}..HEAD", "--", "web/src")
++            phase_commits.append({"hash": h, "short": h[:7], "subject": s})
++    code_commits = [commit for commit in phase_commits if commit_touches_code(commit["hash"])]
++    web_diff = git("diff", "--name-only", f"{resolved_base}..{recorded_through}", "--", "web/src")
+     web_files = [x for x in web_diff.splitlines() if x.strip()]
+ 
+     merged = merge_gate_records(scratch)
+@@ -511,9 +564,11 @@ def build_payload(base: str, scratch: Path) -> dict[str, Any]:
+         "phase": 33,
+         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
+         "generator": "scripts/phase33_runtime_results.py",
+-        "base_commit": git("rev-parse", base),
+-        "head_commit": head,
+-        "code_commits": commits,
++        "base_commit": resolved_base,
++        "recorded_through": recorded_through,
++        "head_commit": head_commit,
++        "phase_commits": phase_commits,
++        "code_commits": code_commits,
+         "final_regression": final_regression,
+         "first_round_failures": first_round_failures(scratch),
+         "static_checks": static_section(scratch),
+@@ -523,7 +578,7 @@ def build_payload(base: str, scratch: Path) -> dict[str, Any]:
+         "candidates": candidates_section(),
+         "archive_verify_v6": archive_section(scratch),
+         "page_e2e": {
+-            "command": f"git diff --name-only {base[:7]}..HEAD -- web/src",
++            "command": f"git diff --name-only {resolved_base}..{recorded_through} -- web/src",
+             "changed_files": len(web_files),
+             "files": web_files,
+             "result": (
+@@ -546,16 +601,104 @@ def normalise(payload: dict[str, Any], generated_at: str | None) -> str:
+     return json.dumps(data, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
+ 
+ 
++def _emit(payload: dict[str, Any]) -> None:
++    print(json.dumps(payload, indent=2, ensure_ascii=False))
++
++
++def _check(written_path: Path, scratch: Path, base_override: str | None) -> int:
++    """Verify the written file against the tree it claims to describe."""
++
++    def fail(reason: str, **extra: Any) -> int:
++        _emit({"check": "fail", "reason": reason, **extra})
++        return 1
++
++    if not written_path.is_file():
++        return fail("written_file_missing", expected=rel(written_path))
++    try:
++        written = json.loads(written_path.read_text(encoding="utf-8"))
++    except (OSError, json.JSONDecodeError) as exc:
++        return fail("written_file_unreadable", detail=str(exc))
++    if not isinstance(written, dict):
++        return fail("written_file_not_object")
++
++    recorded = written.get("recorded_through")
++    recorded_head = written.get("head_commit")
++    if not isinstance(recorded, str) or not recorded:
++        return fail("recorded_through_missing")
++    if not isinstance(recorded_head, str) or not recorded_head:
++        return fail("head_commit_missing")
++    if not commit_resolves(recorded):
++        return fail("recorded_through_unknown", recorded_through=recorded)
++    if not commit_resolves(recorded_head):
++        return fail("head_commit_unknown", head_commit=recorded_head)
++    # --write always records the same commit in both fields; a mismatch is
++    # either tampering or a hand-edited file.
++    if recorded_head != recorded:
++        return fail(
++            "head_recorded_mismatch",
++            recorded_through=recorded,
++            head_commit=recorded_head,
++        )
++    if not is_ancestor(recorded, "HEAD"):
++        return fail("recorded_through_not_ancestor", recorded_through=recorded)
++    changed = [p for p in git("diff", "--name-only", f"{recorded}..HEAD").splitlines() if p.strip()]
++    offending = [p for p in changed if not p.startswith(DOC_PATH_PREFIX)]
++    if offending:
++        return fail(
++            "code_changed_after_evidence",
++            recorded_through=recorded,
++            offending=offending[:20],
++            changed=changed[:50],
++        )
++
++    base = written.get("base_commit")
++    if not isinstance(base, str) or not base:
++        return fail("base_commit_missing")
++    if not commit_resolves(base):
++        return fail("base_commit_unknown", base_commit=base)
++    if base_override is not None:
++        if not commit_resolves(base_override):
++            return fail("base_override_unknown", base_override=base_override)
++        resolved_override = git("rev-parse", base_override)
++        resolved_base = git("rev-parse", base)
++        if resolved_override != resolved_base:
++            return fail(
++                "base_override_mismatch",
++                written_base=resolved_base,
++                base_override=resolved_override,
++            )
++    if not is_ancestor(base, recorded):
++        return fail(
++            "base_not_ancestor_of_recorded_through",
++            base_commit=base,
++            recorded_through=recorded,
++        )
++
++    payload = build_payload(base, scratch, recorded_through=recorded, head_commit=recorded_head)
++    rebuilt = normalise(payload, written.get("generated_at"))
++    current = normalise(written, written.get("generated_at"))
++    if rebuilt == current:
++        _emit({"check": "pass", "file": rel(written_path), "sha256": sha256(written_path)})
++        return 0
++    pa, pb = json.loads(rebuilt), json.loads(current)
++    sections = [k for k in sorted(set(pa) | set(pb)) if pa.get(k) != pb.get(k)]
++    return fail("payload_mismatch", sections=sections)
++
++
+ def main(argv: list[str] | None = None) -> int:
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument(
+-        "--base", default=DEFAULT_BASE, help="phase33 baseline commit (verified via git)"
++        "--base",
++        default=None,
++        help="phase33 baseline commit; --write requires it unless --out already records base_commit",
+     )
+     parser.add_argument("--scratch", default=str(DEFAULT_SCRATCH))
+     parser.add_argument("--out", default=str(DEFAULT_OUT))
+     mode = parser.add_mutually_exclusive_group(required=True)
+     mode.add_argument(
+-        "--check", action="store_true", help="rebuild from evidence and compare; exit 1 on mismatch"
++        "--check",
++        action="store_true",
++        help="verify the written file against recorded_through; exit 1 on mismatch",
+     )
+     mode.add_argument("--write", action="store_true", help="write the rebuilt payload to --out")
+     args = parser.parse_args(argv)
+@@ -567,33 +710,49 @@ def main(argv: list[str] | None = None) -> int:
+     if not out.is_absolute():
+         out = ROOT / out
+ 
+-    git("rev-parse", "--verify", args.base)  # fail fast if base unknown
+-    payload = build_payload(args.base, scratch)
+-
+-    if args.write:
+-        text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+-        out.write_text(text, encoding="utf-8", newline="\n")
+-        print(json.dumps({"written": rel(out), "sha256": sha256(out)}, indent=2))
+-        return 0
+-
+-    if not out.is_file():
+-        print(
+-            json.dumps(
+-                {"check": "fail", "reason": "written file missing", "expected": rel(out)}, indent=2
+-            )
+-        )
+-        return 1
+-    written = json.loads(out.read_text(encoding="utf-8"))
+-    a = normalise(payload, written.get("generated_at"))
+-    b = normalise(written, written.get("generated_at"))
+-    if a == b:
+-        print(json.dumps({"check": "pass", "file": rel(out), "sha256": sha256(out)}, indent=2))
+-        return 0
+-    # report first differing top-level section for triage
+-    pa, pb = json.loads(a), json.loads(b)
+-    diffs = [k for k in sorted(set(pa) | set(pb)) if pa.get(k) != pb.get(k)]
+-    print(json.dumps({"check": "fail", "sections": diffs}, indent=2, ensure_ascii=False))
+-    return 1
++    if args.check:
++        return _check(out, scratch, args.base)
++
++    base = args.base
++    if base is None and out.is_file():
++        try:
++            existing = json.loads(out.read_text(encoding="utf-8"))
++        except (OSError, json.JSONDecodeError):
++            existing = None
++        if isinstance(existing, dict) and isinstance(existing.get("base_commit"), str):
++            base = existing["base_commit"]
++    if not isinstance(base, str) or not base:
++        _emit({"write": "fail", "reason": "base_commit_required", "hint": "pass --base <sha>"})
++        return 2
++    try:
++        git("rev-parse", "--verify", args.base or base)  # fail fast if base unknown
++    except RuntimeError as exc:
++        _emit({"write": "fail", "reason": "base_commit_unknown", "detail": str(exc)})
++        return 2
++
++    recorded_through = git("rev-parse", "HEAD")
++    payload = build_payload(
++        base, scratch, recorded_through=recorded_through, head_commit=recorded_through
++    )
++    # Idempotent writes: unchanged inputs keep the previous generated_at so two
++    # consecutive --write runs produce byte-identical files.
++    if out.is_file():
++        try:
++            existing = json.loads(out.read_text(encoding="utf-8"))
++        except (OSError, json.JSONDecodeError):
++            existing = None
++        if (
++            isinstance(existing, dict)
++            and isinstance(existing.get("generated_at"), str)
++            and normalise(payload, existing["generated_at"])
++            == normalise(existing, existing["generated_at"])
++        ):
++            payload["generated_at"] = existing["generated_at"]
++    text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
++    out.parent.mkdir(parents=True, exist_ok=True)
++    out.write_text(text, encoding="utf-8", newline="\n")
++    _emit({"written": rel(out), "sha256": sha256(out)})
++    return 0
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/src/codepilot/archive.py b/src/codepilot/archive.py
+index 52b6893..6ceb9a0 100644
+--- a/src/codepilot/archive.py
++++ b/src/codepilot/archive.py
+@@ -64,10 +64,12 @@ __all__ = [
+     "DEFAULT_REQUIRED_ROLES",
+     "DIFF_FLAGS",
+     "GENERATOR_ID",
++    "GIT_NORMALIZATION_POLICY",
+     "MANIFEST_KINDS",
+     "MANIFEST_KIND_DELTA",
+     "MANIFEST_KIND_FULL",
+     "NORMALIZATION_NOTE",
++    "NORMALIZATION_NOTE_WORKTREE",
+     "SCHEMA_VERSION",
+     "SNAPSHOT_HASH_RULE",
+     "SNAPSHOT_REF",
+@@ -131,7 +133,21 @@ SOURCE_ORIGIN_GIT = "git_commit"
+ SOURCE_ORIGIN_WORKTREE = "worktree"
+ SNAPSHOT_REF = "snapshot.json"
+ SNAPSHOT_HASH_RULE = "file_bytes_sha256"
+-NORMALIZATION_NOTE = "UTF-8 LF normalized; raw worktree hashes recorded separately"
++#: Phase34: the old note claimed raw worktree hashes were recorded in every
++#: mode, but git_commit mode never stored them. The note is now mode-specific,
++#: and the machine-readable policy below states exactly what is stored.
++NORMALIZATION_NOTE = (
++    "UTF-8 LF normalized; raw bytes are recoverable from source_commit git blobs; "
++    "raw hashes are not stored in git_commit mode"
++)
++NORMALIZATION_NOTE_WORKTREE = (
++    "UTF-8 LF normalized; raw worktree bytes are recorded as raw_worktree_hashes"
++)
++GIT_NORMALIZATION_POLICY: dict[str, Any] = {
++    "source_hash": "lf_sha256",
++    "raw_bytes": "source_commit_git_blob",
++    "raw_hashes_stored": False,
++}
+ 
+ #: Flags shared by the generator and the verifier so both sides compute the
+ #: exact same diff bytes for the same commits and paths.
+@@ -946,10 +962,17 @@ def _candidate_payload(
+         },
+         "base_hashes": dict(base_hashes),
+         "source_files": len(sources),
+-        "normalization": NORMALIZATION_NOTE,
++        "normalization": (
++            NORMALIZATION_NOTE
++            if source_origin == SOURCE_ORIGIN_GIT
++            else NORMALIZATION_NOTE_WORKTREE
++        ),
+         "parent_integrity": parent_integrity,
+         "dirty_worktree": bool(dirty_files),
+     }
++    if source_origin == SOURCE_ORIGIN_GIT:
++        # Raw bytes live in the source_commit blobs; only LF hashes are stored.
++        payload["normalization_policy"] = dict(GIT_NORMALIZATION_POLICY)
+     if candidate_schema_version >= 4:
+         # v4: explicit schema mirror (single source of truth is schema_version;
+         # the verifier requires the two to be equal) and the source manifest.
+diff --git a/tests/unit/llm/test_phase33_provider_real.py b/tests/unit/llm/test_phase33_provider_real.py
+index 3488b52..8b23d88 100644
+--- a/tests/unit/llm/test_phase33_provider_real.py
++++ b/tests/unit/llm/test_phase33_provider_real.py
+@@ -523,3 +523,68 @@ def test_budget_is_capped_at_20_cny(
+     # the only budget variable in the script remains PHASE32_REAL_BUDGET_CNY
+     assert matrix_module.BUDGET_ENV == "PHASE32_REAL_BUDGET_CNY"
+     assert matrix_module.BUDGET_CAP_CNY == 20.0
++
++
++# ---------------------------------------------------------------------------
++# 6. Phase34 T03: control flow propagates; the presence map feeds the gate
++# ---------------------------------------------------------------------------
++
++
++def test_keyboard_interrupt_is_not_swallowed(
++    matrix_module: types.ModuleType, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    for key in (
++        "PHASE32_REAL_BUDGET_CNY",
++        "AWS_ACCESS_KEY_ID",
++        "AWS_SECRET_ACCESS_KEY",
++        "AWS_REGION",
++        "PHASE32_REAL_MODEL_BEDROCK",
++    ):
++        monkeypatch.setenv(key, FULL_ENV[key])
++
++    class InterruptingBedrock(FakeBedrockClient):
++        def converse(self, **kwargs: Any) -> Any:
++            self.calls.append(kwargs)
++            raise KeyboardInterrupt
++
++    with pytest.raises(KeyboardInterrupt):
++        run_channels(matrix_module, bedrock_client=InterruptingBedrock())
++
++
++def test_row_gate_consumes_credentials_present(
++    matrix_module: types.ModuleType, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    apply_env(monkeypatch)  # the environment itself claims every credential exists
++    names = (
++        "OPENAI_API_KEY",
++        "OPENAI_BASE_URL",
++        "ANTHROPIC_API_KEY",
++        "AWS_ACCESS_KEY_ID",
++        "AWS_SECRET_ACCESS_KEY",
++        "AWS_REGION",
++        "AWS_DEFAULT_REGION",
++    )
++    absent = dict.fromkeys(names, False)
++    absent.update({"boto3_installed": False, "botocore_installed": False})
++    monkeypatch.setattr(matrix_module, "credentials_present", lambda: dict(absent))
++
++    def explode(*args: Any, **kwargs: Any) -> Any:
++        raise AssertionError("credentials map says absent; nothing may dispatch")
++
++    section = matrix_module.run_real_channels(
++        matrix_module.budget(),
++        llm_config_path=matrix_module.DEFAULT_LLM_CONFIG,
++        model_overrides={},
++        http_client_factory=explode,
++        bedrock_client_factory=explode,
++    )
++    assert section["real_requests"] == 0
++    assert section["real_cost_cny"] == 0.0
++    rows = rows_by_provider(section)
++    for row in rows.values():
++        assert row["status"] == "blocked"
++        assert row["real_requests"] == 0
++    assert "OPENAI_API_KEY" in rows["openai-compatible"]["missing"]
++    assert "ANTHROPIC_API_KEY" in rows["anthropic"]["missing"]
++    assert "AWS_ACCESS_KEY_ID" in rows["bedrock"]["missing"]
++    assert "boto3 importable" in rows["bedrock"]["missing"]
+diff --git a/tests/unit/test_phase28_archive.py b/tests/unit/test_phase28_archive.py
+index ea0b5e8..0777719 100644
+--- a/tests/unit/test_phase28_archive.py
++++ b/tests/unit/test_phase28_archive.py
+@@ -16,6 +16,8 @@ from typing import Any
+ import pytest
+ 
+ from codepilot.archive import (
++    GIT_NORMALIZATION_POLICY,
++    NORMALIZATION_NOTE,
+     ArchiveError,
+     CandidateExistsError,
+     DiffVerificationError,
+@@ -135,9 +137,8 @@ def test_generate_writes_self_verifying_v2_directory(tmp_path: Path) -> None:
+     assert candidate["diff_base_commit"] == base
+     assert candidate["source_commit"] == head
+     assert candidate["source_files"] == len(SOURCE_PATHS)
+-    assert (
+-        candidate["normalization"] == "UTF-8 LF normalized; raw worktree hashes recorded separately"
+-    )
++    assert candidate["normalization"] == NORMALIZATION_NOTE
++    assert candidate["normalization_policy"] == GIT_NORMALIZATION_POLICY
+     assert candidate["parent_integrity"] is None
+     assert candidate["dirty_worktree"] is False
+     assert "code_revision" not in candidate
+diff --git a/tests/unit/test_phase33_runtime_results.py b/tests/unit/test_phase33_runtime_results.py
+new file mode 100644
+index 0000000..069cff9
+--- /dev/null
++++ b/tests/unit/test_phase33_runtime_results.py
+@@ -0,0 +1,178 @@
++"""Phase34 T01: the runtime JSON records evidence through a commit, not HEAD.
++
++The Phase33 defect: the JSON was written at C3, but --check recomputed
++``base..HEAD`` and compared against it, so the docs/receipt commit C4 became an
++extra ``code_commits`` entry and the check could never pass at the final HEAD.
++These tests pin the corrected lifecycle on throwaway repositories:
++
++- ``recorded_through``/``head_commit`` come from the written file;
++- ``phase_commits`` = ``base..recorded_through``;
++- ``code_commits`` is path-filtered (docs/archive commits never count);
++- docs-only commits after the evidence keep --check green;
++- code commits after the evidence fail with ``code_changed_after_evidence``;
++- tampering a recorded commit or hash fails;
++- two --write runs are byte-identical and --check never writes.
++"""
++
++from __future__ import annotations
++
++import json
++import subprocess
++from pathlib import Path
++from typing import Any
++
++import pytest
++from scripts import phase33_runtime_results as runtime
++
++
++def git(repo: Path, *args: str) -> str:
++    done = subprocess.run(
++        ["git", "-C", str(repo), *args],
++        capture_output=True,
++        text=True,
++        encoding="utf-8",
++        check=False,
++    )
++    assert done.returncode == 0, done.stderr
++    return done.stdout.strip()
++
++
++def commit(repo: Path, message: str) -> str:
++    git(repo, "add", "-A")
++    git(repo, "commit", "-qm", message)
++    return git(repo, "rev-parse", "HEAD")
++
++
++def write(path: Path, text: str) -> None:
++    path.parent.mkdir(parents=True, exist_ok=True)
++    path.write_text(text, encoding="utf-8", newline="\n")
++
++
++@pytest.fixture
++def env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
++    repo = tmp_path / "repo"
++    repo.mkdir()
++    git(repo, "init", "-q")
++    git(repo, "config", "user.name", "Phase34 fixture")
++    git(repo, "config", "user.email", "fixture@example.invalid")
++    git(repo, "config", "core.autocrlf", "false")
++    write(repo / "src/app.py", "value = 1\n")
++    base = commit(repo, "base")
++    write(repo / "src/app.py", "value = 2\n")
++    code = commit(repo, "code change")
++    write(repo / "docs/notes/phase.md", "evidence\n")
++    tip = commit(repo, "docs change")
++    monkeypatch.setattr(runtime, "ROOT", repo)
++    return {
++        "repo": repo,
++        "base": base,
++        "code": code,
++        "tip": tip,
++        "scratch": tmp_path / "scratch",
++        "out": tmp_path / "runtime.json",
++    }
++
++
++def run(env: dict[str, Any], mode: str, *extra: str) -> int:
++    return runtime.main([mode, "--scratch", str(env["scratch"]), "--out", str(env["out"]), *extra])
++
++
++def written(env: dict[str, Any]) -> dict[str, Any]:
++    return json.loads(env["out"].read_text(encoding="utf-8"))
++
++
++def store(env: dict[str, Any], payload: dict[str, Any]) -> None:
++    env["out"].write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
++
++
++def test_write_records_lifecycle_and_filters_code_commits(env: dict[str, Any]) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    payload = written(env)
++    assert payload["recorded_through"] == env["tip"]
++    assert payload["head_commit"] == env["tip"]
++    assert {item["hash"] for item in payload["phase_commits"]} == {env["code"], env["tip"]}
++    # the docs commit is inside the phase window but must not be a code commit
++    assert [item["hash"] for item in payload["code_commits"]] == [env["code"]]
++
++
++def test_check_passes_at_recorded_through(env: dict[str, Any]) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    assert run(env, "--check") == 0
++
++
++def test_docs_only_commit_after_evidence_keeps_check_green(env: dict[str, Any]) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    write(env["repo"] / "docs/notes/after.md", "later docs\n")
++    commit(env["repo"], "docs after evidence")
++    assert run(env, "--check") == 0
++
++
++def test_code_commit_after_evidence_fails(
++    env: dict[str, Any], capsys: pytest.CaptureFixture[str]
++) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    write(env["repo"] / "src/app.py", "value = 3\n")
++    commit(env["repo"], "code after evidence")
++    assert run(env, "--check") == 1
++    assert "code_changed_after_evidence" in capsys.readouterr().out
++
++
++def test_missing_recorded_through_fails(
++    env: dict[str, Any], capsys: pytest.CaptureFixture[str]
++) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    payload = written(env)
++    payload.pop("recorded_through")
++    store(env, payload)
++    assert run(env, "--check") == 1
++    assert "recorded_through_missing" in capsys.readouterr().out
++
++
++def test_unknown_recorded_through_fails(
++    env: dict[str, Any], capsys: pytest.CaptureFixture[str]
++) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    payload = written(env)
++    payload["recorded_through"] = "0" * 40
++    store(env, payload)
++    assert run(env, "--check") == 1
++    assert "recorded_through_unknown" in capsys.readouterr().out
++
++
++def test_tampered_code_commit_hash_fails(
++    env: dict[str, Any], capsys: pytest.CaptureFixture[str]
++) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    payload = written(env)
++    payload["code_commits"][0]["hash"] = env["tip"]
++    payload["code_commits"][0]["short"] = env["tip"][:7]
++    store(env, payload)
++    assert run(env, "--check") == 1
++    output = capsys.readouterr().out
++    assert "payload_mismatch" in output
++    assert "code_commits" in output
++
++
++def test_tampered_head_commit_fails(
++    env: dict[str, Any], capsys: pytest.CaptureFixture[str]
++) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    payload = written(env)
++    payload["head_commit"] = env["base"]
++    store(env, payload)
++    assert run(env, "--check") == 1
++    assert "head_recorded_mismatch" in capsys.readouterr().out
++
++
++def test_double_write_is_byte_identical(env: dict[str, Any]) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    first = env["out"].read_bytes()
++    assert run(env, "--write") == 0  # base is read back from the written file
++    assert env["out"].read_bytes() == first
++
++
++def test_check_does_not_modify_json(env: dict[str, Any]) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    before = env["out"].read_bytes()
++    assert run(env, "--check") == 0
++    assert env["out"].read_bytes() == before
+diff --git a/tests/unit/test_phase34_archive_normalization.py b/tests/unit/test_phase34_archive_normalization.py
+new file mode 100644
+index 0000000..57cd977
+--- /dev/null
++++ b/tests/unit/test_phase34_archive_normalization.py
+@@ -0,0 +1,138 @@
++"""Phase34 T02: normalization policy must match what the archive actually stores.
++
++History: git_commit candidates only ever stored LF-normalized source_hashes, yet
++their note claimed raw worktree hashes were recorded separately. New candidates
++now carry a structured ``normalization_policy`` and a mode-specific note; the
++verifier rejects a claim without structure and annotates legacy v5/v6 candidates
++(``normalization_note_stale``) without failing them.
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++from pathlib import Path
++from typing import Any
++
++from scripts.phase28_archive_verify import (
++    LEGACY_NORMALIZATION_NOTE,
++    verify_new_archive,
++)
++from test_phase28_archive import FEATURE_V2, build_repo
++from test_phase28_archive import generate as generate_schema3
++from test_phase31_archive_manifest import CHILD, commit, generate, read, write
++from test_phase31_archive_manifest import env as env
++from test_phase31_archive_manifest import git as git_cmd
++
++from codepilot.archive import (
++    GIT_NORMALIZATION_POLICY,
++    NORMALIZATION_NOTE,
++    NORMALIZATION_NOTE_WORKTREE,
++    canonical_sha256,
++    create_candidate,
++)
++
++
++def reseal(record: dict[str, Any]) -> None:
++    record.pop("candidate_payload_sha256", None)
++    record["candidate_payload_sha256"] = canonical_sha256(record)
++
++
++def verify(env: dict) -> dict:
++    folder = env["root"] / "candidates" / CHILD
++    return verify_new_archive(
++        folder,
++        read(folder / "candidate.json"),
++        archive_root=env["root"],
++        repo=env["repo"],
++        ignore_raw_drift=True,
++    )
++
++
++def test_new_candidate_records_policy_and_matching_note(env: dict) -> None:
++    generate(env)
++    record = read(env["root"] / "candidates" / CHILD / "candidate.json")
++    assert record["normalization"] == NORMALIZATION_NOTE
++    assert record["normalization_policy"] == GIT_NORMALIZATION_POLICY
++    result = verify(env)
++    assert result["ok"], result["failures"]
++    assert result["normalization_note_stale"] is False
++
++
++def test_legacy_note_without_policy_is_annotated_not_failed(env: dict) -> None:
++    generate(env)
++    path = env["root"] / "candidates" / CHILD / "candidate.json"
++    record = read(path)
++    record["normalization"] = LEGACY_NORMALIZATION_NOTE
++    record.pop("normalization_policy")
++    reseal(record)
++    write(path, json.dumps(record))
++    result = verify(env)
++    assert result["ok"], result["failures"]
++    assert result["normalization_note_stale"] is True
++    check = next(c for c in result["checks"] if c["check"] == "normalization_policy")
++    assert check["ok"] and "normalization_note_stale" in check["detail"]
++
++
++def test_policy_claiming_raw_hashes_are_stored_fails(env: dict) -> None:
++    generate(env)
++    path = env["root"] / "candidates" / CHILD / "candidate.json"
++    record = read(path)
++    record["normalization_policy"]["raw_hashes_stored"] = True
++    reseal(record)
++    write(path, json.dumps(record))
++    result = verify(env)
++    assert not result["ok"]
++    assert "normalization_policy" in {failure["check"] for failure in result["failures"]}
++
++
++def test_new_note_without_policy_fails(env: dict) -> None:
++    generate(env)
++    path = env["root"] / "candidates" / CHILD / "candidate.json"
++    record = read(path)
++    record.pop("normalization_policy")
++    reseal(record)
++    write(path, json.dumps(record))
++    result = verify(env)
++    assert not result["ok"]
++    check = next(c for c in result["checks"] if c["check"] == "normalization_policy")
++    assert not check["ok"]
++    assert result["normalization_note_stale"] is False
++
++
++def test_worktree_candidate_keeps_raw_hashes_without_policy(tmp_path: Path) -> None:
++    repo = tmp_path / "repo"
++    repo.mkdir()
++    git_cmd(repo, "init", "-q")
++    git_cmd(repo, "config", "user.name", "Phase34 fixture")
++    git_cmd(repo, "config", "user.email", "fixture@example.invalid")
++    git_cmd(repo, "config", "core.autocrlf", "false")
++    (repo / "src").mkdir()
++    (repo / "src/app.py").write_text("value = 1\n", encoding="utf-8", newline="\n")
++    base = commit(repo, "base")
++    root = repo / "configs/harness"
++    create_candidate(
++        root,
++        repo,
++        version="phase34-worktree",
++        diff_base_commit=base,
++        source_origin="worktree",
++        source_files=["src/app.py"],
++    )
++    record = read(root / "candidates" / "phase34-worktree" / "candidate.json")
++    assert record["normalization"] == NORMALIZATION_NOTE_WORKTREE
++    assert "normalization_policy" not in record
++    assert set(record["raw_worktree_hashes"]) == {"src/app.py"}
++
++
++def test_crlf_source_hashes_only_lf_bytes(tmp_path: Path) -> None:
++    repo, base, head = build_repo(tmp_path)
++    root = tmp_path / "archive"
++    generate_schema3(root, repo, "phase34-crlf", base, head)
++    record = read(root / "candidates" / "phase34-crlf" / "candidate.json")
++    lf_hash = hashlib.sha256(FEATURE_V2.encode("utf-8")).hexdigest()
++    raw_hash = hashlib.sha256((repo / "src/feature.py").read_bytes()).hexdigest()
++    assert record["source_hashes"]["src/feature.py"] == lf_hash
++    assert lf_hash != raw_hash
++    assert record["normalization"] == NORMALIZATION_NOTE
++    assert record["normalization_policy"] == GIT_NORMALIZATION_POLICY
