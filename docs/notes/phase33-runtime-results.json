@@ -1,41 +1,10 @@
 {
   "phase": 33,
-  "generated_at": "2026-11-04T06:07:13+00:00",
+  "generated_at": "2026-11-03T22:21:36+00:00",
   "generator": "scripts/phase33_runtime_results.py",
   "base_commit": "b4825911b8e2880adfe6177b9aca6f4c35bf15b1",
-  "recorded_through": "b485103622a65ae52464857fbf5853f02a6cb5f4",
-  "head_commit": "b485103622a65ae52464857fbf5853f02a6cb5f4",
-  "phase_commits": [
-    {
-      "hash": "b485103622a65ae52464857fbf5853f02a6cb5f4",
-      "short": "b485103",
-      "subject": "docs: bind phase34-candidate-v7 receipt"
-    },
-    {
-      "hash": "00d805835a03e6d85caab92572cf23068d586546",
-      "short": "00d8058",
-      "subject": "docs: bind phase34-candidate-v7 into the historical baseline manifest"
-    },
-    {
-      "hash": "fc1c359107248fb70a1968893bbab9ad410180e0",
-      "short": "fc1c359",
-      "subject": "feat: archive phase34-candidate-v7 (pending, parent v6)"
-    },
-    {
-      "hash": "dae25819b4b75292ff56eb4c8dfb5db154522367",
-      "short": "dae2581",
-      "subject": "fix: clarify archive normalization policy"
-    },
-    {
-      "hash": "3a97b98e2b5a6764d07a224c642bab3a6f5ee6fa",
-      "short": "3a97b98",
-      "subject": "fix: make phase33 runtime check evidence-head aware"
-    },
-    {
-      "hash": "dba045dabd70f0e6eb7779287136944b589f2734",
-      "short": "dba045d",
-      "subject": "docs: phase33 final report, runtime results and v6 receipt"
-    },
+  "head_commit": "cabf5ef512f14112fe00171ace83d1cc8e3869ad",
+  "code_commits": [
     {
       "hash": "cabf5ef512f14112fe00171ace83d1cc8e3869ad",
       "short": "cabf5ef",
@@ -45,23 +14,6 @@
       "hash": "8c6df9594ef3d96ee9839a7ebe8e8deb84d592da",
       "short": "8c6df95",
       "subject": "chore: archive phase33-candidate-v6 (pending, parent v5)"
-    },
-    {
-      "hash": "d3171135511de95dfcdf54feab7c4ef636bd37d6",
-      "short": "d317113",
-      "subject": "fix: close phase33 provider, gate and index gaps"
-    }
-  ],
-  "code_commits": [
-    {
-      "hash": "dae25819b4b75292ff56eb4c8dfb5db154522367",
-      "short": "dae2581",
-      "subject": "fix: clarify archive normalization policy"
-    },
-    {
-      "hash": "3a97b98e2b5a6764d07a224c642bab3a6f5ee6fa",
-      "short": "3a97b98",
-      "subject": "fix: make phase33 runtime check evidence-head aware"
     },
     {
       "hash": "d3171135511de95dfcdf54feab7c4ef636bd37d6",
@@ -836,7 +788,7 @@
     "source_sha256": "0d1cf380082cc81605103d9bbb5af43e0cb6b6d63a1a7914a8a4e06eb9cb2d2f"
   },
   "page_e2e": {
-    "command": "git diff --name-only b4825911b8e2880adfe6177b9aca6f4c35bf15b1..b485103622a65ae52464857fbf5853f02a6cb5f4 -- web/src",
+    "command": "git diff --name-only b482591..HEAD -- web/src",
     "changed_files": 0,
     "files": [],
     "result": "conditionally skipped: web/src has zero diff in this phase"

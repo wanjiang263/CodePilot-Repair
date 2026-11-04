@@ -186,13 +186,19 @@ CONDITIONAL PASS。逐项验收现状见 docs/notes/phase34-final-report.md。
     验证其为 HEAD 祖先，且 `recorded_through..HEAD` 只允许 `docs/` 路径变化；
     重建 payload 时使用记录值。硬编码 base 已删除；
   - `--write` 在内容未变时保留旧 `generated_at`，连续两次写入字节一致。
-- 修复后：在 C8b `b485103` 上重生成并 `--check` → exit 0，
-  docs/notes/phase33-runtime-results.json sha256
-  `d893cb3a8024fb6de27b4e0194c7239d323fe0ecd1650d3ea618fad315e037a6`；
-  C9 为 docs-only，提交后按同一规则复跑，实测结果记录于
-  `.codex-pytest-tmp/phase34/final-check.log`（未跟踪），见 phase34-final-report.md §一。
+- Phase33 证据已恢复为 C4 原样：`phase33-runtime-results.json` sha256
+  `f1c37a32a7a29eb831ea172d36fd5b1c8aba5c934f2594d07fd9456467a23330`，
+  `phase33-delivery-receipt.json` sha256
+  `b0a97696d9a9f25f68a7f3aa67eceae85fb7e4697bc8d5d661dc2689e6df8acd`。
+  Phase34 的生命周期验收改由 `docs/notes/phase34-runtime-results.json` 承担，
+  其 `recorded_through` / `recorded_head` 语义与 C5 修复一致。
+- Phase33 JSON 是冻结历史，不再用 `scripts/phase33_runtime_results.py --check`
+  校验（恢复后没有 `recorded_through`，在该 HEAD 会报
+  `recorded_through_missing`）；详见 `docs/notes/phase33-errata.md` 与
+  `docs/notes/phase34-final-report.md`。
 - 上方验收清单“runtime JSON 可由 --check 复现”（第 147 行）在 Phase33 交付时
-  于 C4 不成立；Phase34 修复后成立。因此本报告不再声称 16 项全部闭环。
+  于 C4 不成立；Phase34 修复后由 Phase34 JSON 成立。因此本报告不再声称
+  16 项全部闭环。
 
 ### 2. 性能口径修正（原始数值不变，撤回因果表述）
 

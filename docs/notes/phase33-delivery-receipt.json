@@ -2,17 +2,8 @@
   "phase": 33,
   "generated_at": "2026-11-03T22:28:56+00:00",
   "tool": "lead-consolidated delivery receipt; every hash computed from the referenced file at generation time; no invented values",
-  "verdict": "CONDITIONAL PASS",
-  "original_verdict": "PASS",
-  "verdict_basis": "Phase34 correction: the P0 runtime --check now passes at the evidence HEAD and v7 verifies with an external witness; real provider remains explicitly unverified. The original Phase33 basis is preserved in original_verdict_basis.",
-  "original_verdict_basis": "docs/notes/phase33-final-report.md acceptance checklist: all 16 items closed; real provider explicitly documented as unverified (spec-permitted blocked state)",
-  "post_delivery_correction": {
-    "phase": 34,
-    "verdict": "CONDITIONAL PASS",
-    "reason": "The Phase33 runtime --check failed at the final delivery HEAD because the C4 docs/receipt commit was counted as a code commit. Phase34 C5 3a97b98 introduced recorded_through/phase_commits and path-filtered code_commits; --check passed at C8b and again after the docs-only C9 commit.",
-    "corrected_report": "docs/notes/phase33-final-report.md#post-delivery-correction-phase34",
-    "phase34_report": "docs/notes/phase34-final-report.md"
-  },
+  "verdict": "PASS",
+  "verdict_basis": "docs/notes/phase33-final-report.md acceptance checklist: all 16 items closed; real provider explicitly documented as unverified (spec-permitted blocked state)",
   "commits": {
     "base": "b4825911b8e2880adfe6177b9aca6f4c35bf15b1",
     "C1": {
