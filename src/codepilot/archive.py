@@ -77,6 +77,7 @@ __all__ = [
     "SOURCE_ORIGIN_WORKTREE",
     "SOURCE_SCOPE",
     "SOURCE_SCOPE_EXCLUDES",
+    "WORKTREE_NORMALIZATION_POLICY",
     "ArchiveError",
     "CandidateExistsError",
     "DiffVerificationError",
@@ -147,6 +148,11 @@ GIT_NORMALIZATION_POLICY: dict[str, Any] = {
     "source_hash": "lf_sha256",
     "raw_bytes": "source_commit_git_blob",
     "raw_hashes_stored": False,
+}
+WORKTREE_NORMALIZATION_POLICY: dict[str, Any] = {
+    "source_hash": "lf_sha256",
+    "raw_bytes": "worktree",
+    "raw_hashes_stored": True,
 }
 
 #: Flags shared by the generator and the verifier so both sides compute the
@@ -973,6 +979,9 @@ def _candidate_payload(
     if source_origin == SOURCE_ORIGIN_GIT:
         # Raw bytes live in the source_commit blobs; only LF hashes are stored.
         payload["normalization_policy"] = dict(GIT_NORMALIZATION_POLICY)
+    else:
+        # Worktree mode stores raw hashes, so the policy must say so.
+        payload["normalization_policy"] = dict(WORKTREE_NORMALIZATION_POLICY)
     if candidate_schema_version >= 4:
         # v4: explicit schema mirror (single source of truth is schema_version;
         # the verifier requires the two to be equal) and the source manifest.

@@ -61,7 +61,9 @@ from codepilot.archive import (
     GIT_NORMALIZATION_POLICY,
     MANIFEST_KINDS,
     NORMALIZATION_NOTE,
+    NORMALIZATION_NOTE_WORKTREE,
     SNAPSHOT_HASH_RULE,
+    WORKTREE_NORMALIZATION_POLICY,
     _apply_patch_in_temp,
     _candidate_source_set,
     _extract_prompts,
@@ -86,6 +88,14 @@ SOURCE_ORIGIN_WORKTREE = "worktree"
 HISTORICAL_MANIFEST_NAME = "historical-baseline.json"
 #: Phase28-33 wording: git_commit candidates never actually stored raw hashes.
 LEGACY_NORMALIZATION_NOTE = "UTF-8 LF normalized; raw worktree hashes recorded separately"
+#: Historical candidates that predate ``normalization_policy``. The seal pins the
+#: exact payload, so a new candidate reusing an old version name cannot qualify.
+LEGACY_NORMALIZATION_EXEMPT: dict[str, str] = {
+    "phase29-candidate-v3": "2d88b1de5910e914a1b58a1b3d846caaecedb1d28210754485188cfd10e592a4",
+    "phase30-candidate-v4": "7b6c125ebef80d1fa1f33e2c5c4b6814d43325661ab9ebdd37e4555be075bb3c",
+    "phase31-candidate-v5": "664037d863b4cb04f1e69bbdf44c2af090a17218beaa08c80e5077ff44a4fce1",
+    "phase33-candidate-v6": "d96374ef56a93b4628a29cf09907a52d2d2627362084d0862066360a2191769d",
+}
 RECEIPT_SCHEMA_VERSION = 1
 RECEIPT_FILE_NAMES = ("candidate.diff", "candidate.json", "snapshot.json", "sources.json")
 
@@ -345,51 +355,74 @@ def _check_parent_integrity(candidate: dict[str, Any], archive_root: Path, recor
     )
 
 
-def _check_normalization(candidate: dict[str, Any], record: Any) -> bool:
-    """Verify the schema-v5 normalization declaration against what is stored.
-
-    New candidates (Phase34+) must carry the structured ``normalization_policy``
-    and the matching note: LF hashes only, raw bytes recoverable from
-    source_commit blobs, no raw hashes stored. Historical v5/v6 candidates have
-    the old note and no policy; that is annotated as ``normalization_note_stale``
-    and never failed, because their bytes are immutable. Returns the stale flag.
-    """
-    if candidate.get("schema_version") != 5:
+def _legacy_normalization_exempt(candidate: dict[str, Any]) -> bool:
+    version = candidate.get("version")
+    if not isinstance(version, str):
         return False
+    expected = LEGACY_NORMALIZATION_EXEMPT.get(version)
+    return (
+        expected is not None
+        and candidate.get("normalization") == LEGACY_NORMALIZATION_NOTE
+        and candidate.get("candidate_payload_sha256") == expected
+    )
+
+
+def _check_normalization(candidate: dict[str, Any], record: Any) -> bool:
+    """Verify the normalization declaration against what is actually stored.
+
+    New candidates carry a structured ``normalization_policy`` selected by
+    ``source_origin``: git_commit stores LF hashes only, worktree stores raw
+    hashes too. Historical v3/v4/v5/v6 candidates predate the policy; they are
+    exempt only when BOTH the version and the sealed payload hash match the
+    pinned table, so a new candidate reusing an old version name fails. Returns
+    the ``normalization_note_stale`` flag (true only for pinned legacy records).
+    """
+    schema = candidate.get("schema_version")
     note = candidate.get("normalization")
     policy = candidate.get("normalization_policy")
+    origin = candidate.get("source_origin")
     if policy is None:
-        if note == LEGACY_NORMALIZATION_NOTE:
+        if _legacy_normalization_exempt(candidate):
             record(
                 "normalization_policy",
                 True,
-                "legacy candidate without normalization_policy; "
+                f"legacy candidate {candidate.get('version')} exempt by pinned payload seal; "
                 "normalization_note_stale (raw hashes were never stored)",
             )
             return True
+        if isinstance(schema, int) and schema < 3:
+            return False
         record(
             "normalization_policy",
             False,
-            "schema 5 requires normalization_policy; the note claims a policy that is not declared",
+            "candidate has no normalization_policy and is not a pinned legacy archive",
         )
         return False
     problems: list[str] = []
     if not isinstance(policy, dict):
         problems.append(f"normalization_policy must be an object, got {policy!r}")
-    else:
+    elif origin == SOURCE_ORIGIN_GIT:
         for key, expected in GIT_NORMALIZATION_POLICY.items():
             if policy.get(key) != expected:
                 problems.append(f"{key} must be {expected!r}, got {policy.get(key)!r}")
         if note != NORMALIZATION_NOTE:
-            problems.append("normalization note differs from the policy text")
-        if policy.get("raw_hashes_stored") is True and "raw_worktree_hashes" not in candidate:
-            problems.append("policy claims raw hashes are stored but raw_worktree_hashes is absent")
-        if candidate.get("source_origin") != SOURCE_ORIGIN_GIT:
-            problems.append("git normalization policy requires source_origin=git_commit")
+            problems.append("normalization note differs from the git_commit policy text")
+        if "raw_worktree_hashes" in candidate:
+            problems.append("git_commit normalization policy must not carry raw_worktree_hashes")
+    elif origin == SOURCE_ORIGIN_WORKTREE:
+        for key, expected in WORKTREE_NORMALIZATION_POLICY.items():
+            if policy.get(key) != expected:
+                problems.append(f"{key} must be {expected!r}, got {policy.get(key)!r}")
+        if note != NORMALIZATION_NOTE_WORKTREE:
+            problems.append("normalization note differs from the worktree policy text")
+        if "raw_worktree_hashes" not in candidate:
+            problems.append("worktree normalization policy requires raw_worktree_hashes")
+    else:
+        problems.append(f"unknown source_origin {origin!r} for a normalization policy")
     record(
         "normalization_policy",
         not problems,
-        "; ".join(problems) if problems else "LF hash + source_commit blob policy matches the note",
+        "; ".join(problems) if problems else "normalization policy matches the stored bytes",
     )
     return False
 
@@ -884,6 +917,7 @@ def _verify_v3_archive(
 
     _check_declared_metadata(candidate, folder, record)
     file_hash, canonical_hash = _check_snapshot_hashes(folder, candidate, record)
+    normalization_note_stale = _check_normalization(candidate, record)
 
     # 1. Payload seal: canonical JSON over everything except the seal itself.
     declared_seal = candidate.get("candidate_payload_sha256")
@@ -1111,6 +1145,7 @@ def _verify_v3_archive(
         "source_origin": origin,
         "snapshot_file_sha256": file_hash,
         "snapshot_canonical_sha256": canonical_hash,
+        "normalization_note_stale": normalization_note_stale,
         "checks": checks,
         "failures": failures,
         "raw_drift": raw_drift,
