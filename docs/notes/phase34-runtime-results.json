@@ -1,0 +1,934 @@
+{
+  "phase": 34,
+  "generated_at": "2026-11-04T16:24:47+00:00",
+  "generator": "scripts/phase34_runtime_results.py",
+  "base_commit": "dba045dabd70f0e6eb7779287136944b589f2734",
+  "recorded_through": "f2a59955bb8272fd8bf19105aeeb951e0adf886a",
+  "recorded_head": "f2a59955bb8272fd8bf19105aeeb951e0adf886a",
+  "actual_head_at_write": "f2a59955bb8272fd8bf19105aeeb951e0adf886a",
+  "phase_commits": [
+    {
+      "hash": "f2a59955bb8272fd8bf19105aeeb951e0adf886a",
+      "short": "f2a5995",
+      "subject": "docs: restore phase33 evidence and record phase33 errata"
+    },
+    {
+      "hash": "7ba9b168cf11a6277ec049561d1f1bce414e0dbb",
+      "short": "7ba9b16",
+      "subject": "docs: bind phase34-candidate-v8 receipt"
+    },
+    {
+      "hash": "7a23d1d495df854b8da33d3a2e96d3b41cad4265",
+      "short": "7a23d1d",
+      "subject": "docs: bind phase34-candidate-v8 into the historical baseline manifest"
+    },
+    {
+      "hash": "75b867156a38c1e0143694390f66528580f6fb0b",
+      "short": "75b8671",
+      "subject": "feat: archive phase34-candidate-v8 (pending, parent v7)"
+    },
+    {
+      "hash": "7bed25625343e9e0ef43a8175a34bfda3ea0e6d0",
+      "short": "7bed256",
+      "subject": "fix: enforce normalization policy and add reproducible archive entrypoint"
+    },
+    {
+      "hash": "62b49a2a489d307f276217e3a3d0bc5e1cb7cfdb",
+      "short": "62b49a2",
+      "subject": "docs: correct phase33 report and record phase34 closeout"
+    },
+    {
+      "hash": "b485103622a65ae52464857fbf5853f02a6cb5f4",
+      "short": "b485103",
+      "subject": "docs: bind phase34-candidate-v7 receipt"
+    },
+    {
+      "hash": "00d805835a03e6d85caab92572cf23068d586546",
+      "short": "00d8058",
+      "subject": "docs: bind phase34-candidate-v7 into the historical baseline manifest"
+    },
+    {
+      "hash": "fc1c359107248fb70a1968893bbab9ad410180e0",
+      "short": "fc1c359",
+      "subject": "feat: archive phase34-candidate-v7 (pending, parent v6)"
+    },
+    {
+      "hash": "dae25819b4b75292ff56eb4c8dfb5db154522367",
+      "short": "dae2581",
+      "subject": "fix: clarify archive normalization policy"
+    },
+    {
+      "hash": "3a97b98e2b5a6764d07a224c642bab3a6f5ee6fa",
+      "short": "3a97b98",
+      "subject": "fix: make phase33 runtime check evidence-head aware"
+    }
+  ],
+  "code_commits": [
+    {
+      "hash": "7bed25625343e9e0ef43a8175a34bfda3ea0e6d0",
+      "short": "7bed256",
+      "subject": "fix: enforce normalization policy and add reproducible archive entrypoint"
+    },
+    {
+      "hash": "dae25819b4b75292ff56eb4c8dfb5db154522367",
+      "short": "dae2581",
+      "subject": "fix: clarify archive normalization policy"
+    },
+    {
+      "hash": "3a97b98e2b5a6764d07a224c642bab3a6f5ee6fa",
+      "short": "3a97b98",
+      "subject": "fix: make phase33 runtime check evidence-head aware"
+    }
+  ],
+  "final_regression": {
+    "sources": [
+      {
+        "path": "D:/cp34/final/test-gate-api.json",
+        "sha256": "4d3949810b04b09a5144c7d1dbfc55e7dfc53ee0e04e2735836ef758a5c2057e",
+        "kind": "gate-summary"
+      },
+      {
+        "path": "D:/cp34/final/test-gate-eval.json",
+        "sha256": "219f86b61eb4d5af892407b11926cf255bb90f2afe3c862f1a0dad86edb5bb69",
+        "kind": "gate-summary"
+      },
+      {
+        "path": "D:/cp34/final/test-gate-graph.json",
+        "sha256": "6b20f0cafcbe0e717d0d20de408f1a745cd7199ca31c75dccb744ab122aac0c3",
+        "kind": "gate-summary"
+      },
+      {
+        "path": "D:/cp34/final/test-gate-integration.json",
+        "sha256": "1831e2ce5608fd46e1c8b91049347c77242a7c87612fecfabe8d6bdc5ee305f8",
+        "kind": "gate-summary"
+      },
+      {
+        "path": "D:/cp34/final/test-gate-sandbox.json",
+        "sha256": "b3998db0c3c9c06f56b628be1617c43fa19585276a6a491d4d4693cb7c5cf3e4",
+        "kind": "gate-summary"
+      },
+      {
+        "path": "D:/cp34/final/test-gate-unit-a.json",
+        "sha256": "446daed815113e50b6d75754b14911c0b2a497b2dc8c6d6ee2abb3e147197b4a",
+        "kind": "gate-summary"
+      },
+      {
+        "path": "D:/cp34/final/test-gate-unit-b.json",
+        "sha256": "da8bf2d19c7b999cbdf52de23c7987575b24da491e9546508d16c22f4c04ae36",
+        "kind": "gate-summary"
+      },
+      {
+        "path": "D:/cp34/final/test-gate-unit-c.json",
+        "sha256": "fbf5c0c138e867727d2863c9872872cb9f1504dc7bfcf5ea980736a9049d5096",
+        "kind": "gate-summary"
+      },
+      {
+        "path": "D:/cp34/final/test-gate-unit-d.json",
+        "sha256": "fba9518658f5a5565839cca7958760526f0b7c3e9f451da7c29d7d7a34db22e7",
+        "kind": "gate-summary"
+      }
+    ],
+    "rg_path": "C:\\Users\\lenovo\\AppData\\Local\\OpenAI\\Codex\\bin\\rg.EXE",
+    "rg_version": "ripgrep 15.1.0 (rev af60c2de9d)",
+    "preconditions": {
+      "min_free_mb": 400,
+      "min_commit_headroom_mb": 1000,
+      "wait_seconds": 300
+    },
+    "blocked_runs": [],
+    "failed_runs": [
+      {
+        "group": "eval",
+        "run": 1,
+        "exit_code": 1,
+        "summary_line": "2 failed, 479 passed, 2 skipped in 780.18s (0:13:00)"
+      }
+    ],
+    "groups": [
+      {
+        "group": "unit-a",
+        "run": 1,
+        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/agents tests/unit/api tests/unit/context tests/unit/eval tests/unit/failure tests/unit/graph tests/unit/llm -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final\\gate-unit-a-run1.xml --basetemp=D:\\cp34\\final\\pytest\\unit-a-run1-20261104T150300-977656",
+        "exit_code": 0,
+        "summary_line": "1535 passed in 172.14s (0:02:52)",
+        "wall_s": 177.11,
+        "failed": 0,
+        "junit_counts": {
+          "passed": 1535,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "log": "D:/cp34/final/gate-unit-a-run1.log",
+        "log_sha256": "0aaf0ceeacf624bd861691da7f8717a07c52cf555130ac1133d7e244d901dbb1",
+        "junit": "D:/cp34/final/gate-unit-a-run1.xml",
+        "junit_sha256": "d807598562e4f8099341ea8f061773e16f542cf090cb0b7c4b00c56016de1cfe",
+        "memory_before": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 2864,
+          "total_pagefile_mb": 47320,
+          "avail_pagefile_mb": 6646,
+          "commit_headroom_mb": 6646,
+          "load_pct": 82,
+          "sufficient": 1
+        },
+        "memory_after": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1674,
+          "total_pagefile_mb": 47320,
+          "avail_pagefile_mb": 4848,
+          "commit_headroom_mb": 4848,
+          "load_pct": 89
+        },
+        "basetemp": "D:\\cp34\\final\\pytest\\unit-a-run1-20261104T150300-977656"
+      },
+      {
+        "group": "unit-b",
+        "run": 1,
+        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/observability tests/unit/patch tests/unit/repo tests/unit/retrieval tests/unit/sandbox tests/unit/schemas tests/unit/settings tests/unit/storage -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final\\gate-unit-b-run1.xml --basetemp=D:\\cp34\\final\\pytest\\unit-b-run1-20261104T150609-292251",
+        "exit_code": 0,
+        "summary_line": "1138 passed, 2 skipped in 283.34s (0:04:43)",
+        "wall_s": 287.88,
+        "failed": 0,
+        "junit_counts": {
+          "passed": 1138,
+          "failure": 0,
+          "error": 0,
+          "skipped": 2
+        },
+        "log": "D:/cp34/final/gate-unit-b-run1.log",
+        "log_sha256": "3f888aa11b4f7553e28f53c9b00f35bfaee394cae1e958aacd55948db18ac435",
+        "junit": "D:/cp34/final/gate-unit-b-run1.xml",
+        "junit_sha256": "69a4b15657823102cc67c880bbd1a45e7dcf797d86a77b373c9e6def9784ff80",
+        "memory_before": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1671,
+          "total_pagefile_mb": 47320,
+          "avail_pagefile_mb": 4845,
+          "commit_headroom_mb": 4845,
+          "load_pct": 89,
+          "sufficient": 1
+        },
+        "memory_after": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1882,
+          "total_pagefile_mb": 47384,
+          "avail_pagefile_mb": 5611,
+          "commit_headroom_mb": 5611,
+          "load_pct": 88
+        },
+        "basetemp": "D:\\cp34\\final\\pytest\\unit-b-run1-20261104T150609-292251"
+      },
+      {
+        "group": "unit-c",
+        "run": 1,
+        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/test_artifacts.py tests/unit/test_cli.py tests/unit/test_cli_glm.py tests/unit/test_fsutil_replace.py tests/unit/test_index_real_repo.py tests/unit/test_m3_batch.py tests/unit/test_net_proxy.py tests/unit/test_phase19_acceptance_gate.py tests/unit/test_phase20_batch_controls.py tests/unit/test_phase21_budget_chain.py tests/unit/test_phase23_runtime.py tests/unit/test_phase26_closeout.py tests/unit/test_phase26_estimation.py tests/unit/test_phase26_final.py tests/unit/test_phase26_harness.py tests/unit/test_phase28_archive.py tests/unit/test_phase28_archive_verify.py tests/unit/test_phase29_archive.py tests/unit/test_phase29_archive_security.py tests/unit/test_phase29_archive_verify.py tests/unit/test_phase30_archive_receipt.py tests/unit/test_phase30_archive_v4.py tests/unit/test_phase30_harness_failclosed.py tests/unit/test_phase31_archive_manifest.py tests/unit/test_phase31_archive_verify.py tests/unit/test_phase31_receipt.py tests/unit/test_phase33_runtime_results.py tests/unit/test_phase33_test_gate.py tests/unit/test_phase34_archive_normalization.py tests/unit/test_phase34_runtime_results.py tests/unit/test_phase6_repro_stats.py -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final\\gate-unit-c-run1.xml --basetemp=D:\\cp34\\final\\pytest\\unit-c-run1-20261104T151127-413250",
+        "exit_code": 0,
+        "summary_line": "420 passed in 954.41s (0:15:54)",
+        "wall_s": 958.92,
+        "failed": 0,
+        "junit_counts": {
+          "passed": 420,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "log": "D:/cp34/final/gate-unit-c-run1.log",
+        "log_sha256": "58978ec3214fef1ae4521e6a0f52a4c269ee385d6a9da7fede16861b598b98d7",
+        "junit": "D:/cp34/final/gate-unit-c-run1.xml",
+        "junit_sha256": "d853736e5c3a344c6fef8e22736749f7bede5afd51b07a165fec02be3eb8820f",
+        "memory_before": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1871,
+          "total_pagefile_mb": 47384,
+          "avail_pagefile_mb": 5595,
+          "commit_headroom_mb": 5595,
+          "load_pct": 88,
+          "sufficient": 1
+        },
+        "memory_after": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1876,
+          "total_pagefile_mb": 47384,
+          "avail_pagefile_mb": 4430,
+          "commit_headroom_mb": 4430,
+          "load_pct": 88
+        },
+        "basetemp": "D:\\cp34\\final\\pytest\\unit-c-run1-20261104T151127-413250"
+      },
+      {
+        "group": "unit-d",
+        "run": 1,
+        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/tools -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final\\gate-unit-d-run1.xml --basetemp=D:\\cp34\\final\\pytest\\unit-d-run1-20261104T152823-352517",
+        "exit_code": 0,
+        "summary_line": "25 passed in 6.16s",
+        "wall_s": 10.45,
+        "failed": 0,
+        "junit_counts": {
+          "passed": 25,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "log": "D:/cp34/final/gate-unit-d-run1.log",
+        "log_sha256": "7041c34487cb547b28c92e77b29e33fd485f9197f33fbe7ef5e81b23913ad8bd",
+        "junit": "D:/cp34/final/gate-unit-d-run1.xml",
+        "junit_sha256": "74cf2280ef92995962b2044bf77befcd9f0241b3d8a2c0e8486185ce0731fa49",
+        "memory_before": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1880,
+          "total_pagefile_mb": 47384,
+          "avail_pagefile_mb": 4451,
+          "commit_headroom_mb": 4451,
+          "load_pct": 88,
+          "sufficient": 1
+        },
+        "memory_after": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1894,
+          "total_pagefile_mb": 47384,
+          "avail_pagefile_mb": 4527,
+          "commit_headroom_mb": 4527,
+          "load_pct": 88
+        },
+        "basetemp": "D:\\cp34\\final\\pytest\\unit-d-run1-20261104T152823-352517"
+      },
+      {
+        "group": "eval",
+        "run": 1,
+        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/eval -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final\\gate-eval-run1.xml --basetemp=D:\\cp34\\final\\pytest\\eval-run1-20261104T152835-024332",
+        "exit_code": 1,
+        "summary_line": "2 failed, 479 passed, 2 skipped in 780.18s (0:13:00)",
+        "wall_s": 783.77,
+        "failed": 2,
+        "junit_counts": {
+          "passed": 479,
+          "failure": 2,
+          "error": 0,
+          "skipped": 2
+        },
+        "log": "D:/cp34/final/gate-eval-run1.log",
+        "log_sha256": "13b2bb6521f529b4e82545901742e9c06971f5f2ebbae27165b272061511e2d9",
+        "junit": "D:/cp34/final/gate-eval-run1.xml",
+        "junit_sha256": "adcb25bf3c57a3dfa373351a4723f2dd7f48a4f31d7b30904ef15d9e8147283f",
+        "memory_before": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1895,
+          "total_pagefile_mb": 47384,
+          "avail_pagefile_mb": 4525,
+          "commit_headroom_mb": 4525,
+          "load_pct": 88,
+          "sufficient": 1
+        },
+        "memory_after": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1221,
+          "total_pagefile_mb": 48152,
+          "avail_pagefile_mb": 2022,
+          "commit_headroom_mb": 2022,
+          "load_pct": 92
+        },
+        "basetemp": "D:\\cp34\\final\\pytest\\eval-run1-20261104T152835-024332"
+      },
+      {
+        "group": "sandbox",
+        "run": 1,
+        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/sandbox -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final\\gate-sandbox-run1.xml --basetemp=D:\\cp34\\final\\pytest\\sandbox-run1-20261104T154200-889573",
+        "exit_code": 0,
+        "summary_line": "66 passed, 1 deselected in 2.65s",
+        "wall_s": 6.75,
+        "failed": 0,
+        "junit_counts": {
+          "passed": 66,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "log": "D:/cp34/final/gate-sandbox-run1.log",
+        "log_sha256": "8a7069a9a8fe684e9cc09a71d844df3878855b1b11ebefd2fca4665f181bb564",
+        "junit": "D:/cp34/final/gate-sandbox-run1.xml",
+        "junit_sha256": "f780d5c8f1359da0cae00b77731d6a2517b57bfebb945b80c3db8086c4bcf81f",
+        "memory_before": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1203,
+          "total_pagefile_mb": 48152,
+          "avail_pagefile_mb": 2033,
+          "commit_headroom_mb": 2033,
+          "load_pct": 92,
+          "sufficient": 1
+        },
+        "memory_after": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1423,
+          "total_pagefile_mb": 48152,
+          "avail_pagefile_mb": 2138,
+          "commit_headroom_mb": 2138,
+          "load_pct": 91
+        },
+        "basetemp": "D:\\cp34\\final\\pytest\\sandbox-run1-20261104T154200-889573"
+      },
+      {
+        "group": "api",
+        "run": 1,
+        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/api -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final\\gate-api-run1.xml --basetemp=D:\\cp34\\final\\pytest\\api-run1-20261104T154922-574514",
+        "exit_code": 0,
+        "summary_line": "117 passed, 1 skipped in 128.72s (0:02:08)",
+        "wall_s": 137.56,
+        "failed": 0,
+        "junit_counts": {
+          "passed": 117,
+          "failure": 0,
+          "error": 0,
+          "skipped": 1
+        },
+        "log": "D:/cp34/final/gate-api-run1.log",
+        "log_sha256": "9269dc3eb3379224ccb1666eadfb6dbcc22dd52087320c168db99e8afbbea862",
+        "junit": "D:/cp34/final/gate-api-run1.xml",
+        "junit_sha256": "1f22dc2f4bf45f07d1f6317e0b64b32ea1cc223b7e6582678af328954bcf0ef4",
+        "memory_before": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 2119,
+          "total_pagefile_mb": 48152,
+          "avail_pagefile_mb": 4448,
+          "commit_headroom_mb": 4448,
+          "load_pct": 86,
+          "sufficient": 1
+        },
+        "memory_after": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 2575,
+          "total_pagefile_mb": 48152,
+          "avail_pagefile_mb": 6841,
+          "commit_headroom_mb": 6841,
+          "load_pct": 84
+        },
+        "basetemp": "D:\\cp34\\final\\pytest\\api-run1-20261104T154922-574514"
+      },
+      {
+        "group": "graph",
+        "run": 1,
+        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/graph -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final\\gate-graph-run1.xml --basetemp=D:\\cp34\\final\\pytest\\graph-run1-20261104T155147-541108",
+        "exit_code": 0,
+        "summary_line": "266 passed, 13 deselected in 1384.93s (0:23:04)",
+        "wall_s": 1391.52,
+        "failed": 0,
+        "junit_counts": {
+          "passed": 266,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "log": "D:/cp34/final/gate-graph-run1.log",
+        "log_sha256": "38824ffeea16c5a3a525ae32617cfa7f12266a0091decab588c82aea4c1b099c",
+        "junit": "D:/cp34/final/gate-graph-run1.xml",
+        "junit_sha256": "455603137172330635625f49ee3318449b6ecbe1221af20dcc946f54dafd5d54",
+        "memory_before": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 2567,
+          "total_pagefile_mb": 48152,
+          "avail_pagefile_mb": 6831,
+          "commit_headroom_mb": 6831,
+          "load_pct": 84,
+          "sufficient": 1
+        },
+        "memory_after": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 2301,
+          "total_pagefile_mb": 48944,
+          "avail_pagefile_mb": 2979,
+          "commit_headroom_mb": 2979,
+          "load_pct": 85
+        },
+        "basetemp": "D:\\cp34\\final\\pytest\\graph-run1-20261104T155147-541108"
+      },
+      {
+        "group": "integration",
+        "run": 1,
+        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/integration -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final\\gate-integration-run1.xml --basetemp=D:\\cp34\\final\\pytest\\integration-run1-20261104T161613-973959",
+        "exit_code": 0,
+        "summary_line": "126 passed, 1 deselected in 342.46s (0:05:42)",
+        "wall_s": 347.0,
+        "failed": 0,
+        "junit_counts": {
+          "passed": 126,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "log": "D:/cp34/final/gate-integration-run1.log",
+        "log_sha256": "b067e7b184f7373c6941c5e335869c889314b5a55fb50714be3eab4355dca44c",
+        "junit": "D:/cp34/final/gate-integration-run1.xml",
+        "junit_sha256": "273e8c006b70bb56d3ba68dcfae7d6f7002d281becff149ab7e9e6d84903aa4a",
+        "memory_before": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1556,
+          "total_pagefile_mb": 48944,
+          "avail_pagefile_mb": 2622,
+          "commit_headroom_mb": 2622,
+          "load_pct": 90,
+          "sufficient": 1
+        },
+        "memory_after": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1883,
+          "total_pagefile_mb": 48944,
+          "avail_pagefile_mb": 3657,
+          "commit_headroom_mb": 3657,
+          "load_pct": 88
+        },
+        "basetemp": "D:\\cp34\\final\\pytest\\integration-run1-20261104T161613-973959"
+      }
+    ],
+    "selected_tests_note": "full repository selection: unit 3109 + eval 483 + sandbox 66 + integration 126 + api 118 + graph 266 = 4168; tests/docker 35 deselected",
+    "unit_aggregate": {
+      "batches": [
+        "unit-a",
+        "unit-b",
+        "unit-c",
+        "unit-d"
+      ],
+      "junit_counts": {
+        "passed": 3118,
+        "failure": 0,
+        "error": 0,
+        "skipped": 2
+      },
+      "failed": 0,
+      "wall_s": 1434.36
+    }
+  },
+  "static_checks": {
+    "source": "D:/cp34/final/static-checks.json",
+    "source_sha256": "56174fe60a3689edbc9ecc10a90ac7eaa6f50c4f032ac73923554950358c975a",
+    "file_count": 10,
+    "files": [
+      "scripts/phase28_archive_verify.py",
+      "scripts/phase32_provider_matrix.py",
+      "scripts/phase33_runtime_results.py",
+      "scripts/phase34_runtime_results.py",
+      "src/codepilot/archive.py",
+      "tests/unit/llm/test_phase33_provider_real.py",
+      "tests/unit/test_phase28_archive.py",
+      "tests/unit/test_phase33_runtime_results.py",
+      "tests/unit/test_phase34_archive_normalization.py",
+      "tests/unit/test_phase34_runtime_results.py"
+    ],
+    "failed": [
+      "git diff --check",
+      "git diff --check (CRLF-aware)"
+    ],
+    "checks": [
+      {
+        "name": "AST parse",
+        "exit_code": 0
+      },
+      {
+        "name": "ruff check",
+        "exit_code": 0
+      },
+      {
+        "name": "ruff format --check",
+        "exit_code": 0
+      },
+      {
+        "name": "mypy (changed src/scripts, new errors vs BASE, full-path keys)",
+        "exit_code": 0
+      },
+      {
+        "name": "mypy (src + scripts, informational debt, not gated)",
+        "exit_code": 2
+      },
+      {
+        "name": "locale JSON parse",
+        "exit_code": 0
+      },
+      {
+        "name": "git diff --check",
+        "exit_code": 2
+      },
+      {
+        "name": "git diff --check (CRLF-aware)",
+        "exit_code": 2
+      },
+      {
+        "name": "EOL (LF only)",
+        "exit_code": 0
+      },
+      {
+        "name": "credential scan (added lines only)",
+        "exit_code": 0
+      },
+      {
+        "name": "web/src scope",
+        "exit_code": 0
+      }
+    ],
+    "docs_copy": null,
+    "docs_copy_sha256": null
+  },
+  "provider_matrix": {
+    "source": "D:/cp34/final/provider-matrix.json",
+    "source_sha256": "439f8ecc3d43796889e04e2e293a410d96c443ecb72dca19075c29ddbc48ae6d",
+    "real_mode": false,
+    "real_requests": 0,
+    "real_cost_cny": 0.0,
+    "cost_known": true,
+    "rows": [
+      {
+        "row": "openai-compatible real endpoint",
+        "status": "blocked",
+        "real_requests": 0,
+        "missing": [
+          "--real flag (real channel disabled by default)",
+          "PHASE32_REAL_BUDGET_CNY > 0",
+          "OPENAI_API_KEY",
+          "OPENAI_BASE_URL",
+          "PHASE32_REAL_MODEL_OPENAI"
+        ]
+      },
+      {
+        "row": "anthropic real endpoint",
+        "status": "blocked",
+        "real_requests": 0,
+        "missing": [
+          "--real flag (real channel disabled by default)",
+          "PHASE32_REAL_BUDGET_CNY > 0",
+          "ANTHROPIC_API_KEY",
+          "PHASE32_REAL_MODEL_ANTHROPIC"
+        ]
+      },
+      {
+        "row": "bedrock real endpoint (boto3 + credentials)",
+        "status": "blocked",
+        "real_requests": 0,
+        "missing": [
+          "--real flag (real channel disabled by default)",
+          "PHASE32_REAL_BUDGET_CNY > 0",
+          "AWS_ACCESS_KEY_ID",
+          "AWS_SECRET_ACCESS_KEY",
+          "boto3 importable",
+          "botocore importable",
+          "AWS_REGION or AWS_DEFAULT_REGION",
+          "PHASE32_REAL_MODEL_BEDROCK"
+        ]
+      }
+    ],
+    "fake_totals": {
+      "tests": 166,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "candidates": {
+    "v7": {
+      "version": "phase34-candidate-v7",
+      "status": "pending",
+      "parent": "phase33-candidate-v6",
+      "schema_version": 5,
+      "source_commit": "dae25819b4b75292ff56eb4c8dfb5db154522367",
+      "diff_base_commit": "d3171135511de95dfcdf54feab7c4ef636bd37d6",
+      "normalization_policy": {
+        "raw_bytes": "source_commit_git_blob",
+        "raw_hashes_stored": false,
+        "source_hash": "lf_sha256"
+      },
+      "file_sha256": {
+        "candidate.json": "342c818866ce90a778d51c924f4492c111a5ae9cfbda5037e66e2c5800d97c3b",
+        "candidate.diff": "47d4927a0f5cb3bc2c78631e6a1762851a557c645e9243dfa3271be66c0240f0",
+        "snapshot.json": "f5fe3f364b126457bd7e029bd25212b7c4038c16cda33ced833422350bfd921e",
+        "sources.json": "14e18061f71704a3e0e059923ca9a6a4b5f3b465653f325d804b902894b4fbb3"
+      }
+    },
+    "v8": {
+      "version": "phase34-candidate-v8",
+      "status": "pending",
+      "parent": "phase34-candidate-v7",
+      "schema_version": 5,
+      "source_commit": "7bed25625343e9e0ef43a8175a34bfda3ea0e6d0",
+      "diff_base_commit": "dae25819b4b75292ff56eb4c8dfb5db154522367",
+      "normalization_policy": {
+        "raw_bytes": "source_commit_git_blob",
+        "raw_hashes_stored": false,
+        "source_hash": "lf_sha256"
+      },
+      "file_sha256": {
+        "candidate.json": "8228c87a8e2f873a1386ca64e9045c6ad77d6e248f43743723e20a3e840b0032",
+        "candidate.diff": "7281578700ce136d05495734f5634a3bd36bf641c72b6a12737aa6d6c4f72f43",
+        "snapshot.json": "a46cd34e5a9b10a4305b4fa470d2a918ac47aeccfb29096609603f372d8b8858",
+        "sources.json": "de62d0e745c1f7cb9cd31feca7c9b24eb5ed4f4866c3e9fbed9edd18da5d1c7b"
+      }
+    },
+    "active_pointer_exists": false
+  },
+  "archive_verify_v8": {
+    "exit_code": 0,
+    "witness": "verified",
+    "historical_integrity": "ok",
+    "new_archive_status": "passed",
+    "totals": {
+      "historical_baseline_files": 56,
+      "historical_baseline_mismatches": 0,
+      "historical_files_modified": false,
+      "new_archive_failures": 0,
+      "new_archives": 7,
+      "old_archives": 7,
+      "old_unexplained_mismatches": 0,
+      "unknown_entries": 0,
+      "versions_checked": 14
+    },
+    "receipt": {
+      "candidate": "phase34-candidate-v8",
+      "check": "receipt",
+      "checks": [
+        {
+          "check": "receipt_witness",
+          "detail": "receipt sha256 matches the external witness",
+          "ok": true
+        },
+        {
+          "check": "receipt_schema",
+          "detail": "schema and required fields present",
+          "ok": true
+        },
+        {
+          "check": "receipt_commit_ancestor",
+          "detail": "merge-base --is-ancestor 75b867156a38c1e0143694390f66528580f6fb0b HEAD(7ba9b168cf11a6277ec049561d1f1bce414e0dbb) holds",
+          "ok": true
+        },
+        {
+          "check": "receipt_candidate_files",
+          "detail": "4 files match receipt at blob and disk",
+          "ok": true
+        },
+        {
+          "check": "receipt_candidate_tree_self",
+          "detail": "declared='255b9774c631a2e9a52f6ba1eeed4e41b84c041e47ce87b5947669a2a6b2ef19' recomputed_from_receipt=255b9774c631a2e9a52f6ba1eeed4e41b84c041e47ce87b5947669a2a6b2ef19",
+          "ok": true
+        },
+        {
+          "check": "receipt_candidate_tree_current",
+          "detail": "declared='255b9774c631a2e9a52f6ba1eeed4e41b84c041e47ce87b5947669a2a6b2ef19' recomputed_from_disk=255b9774c631a2e9a52f6ba1eeed4e41b84c041e47ce87b5947669a2a6b2ef19",
+          "ok": true
+        },
+        {
+          "check": "receipt_source_ancestry",
+          "detail": "diff_base=dae25819b4b75292ff56eb4c8dfb5db154522367 ancestor-of source_commit=7bed25625343e9e0ef43a8175a34bfda3ea0e6d0: holds",
+          "ok": true
+        },
+        {
+          "check": "receipt_candidate_record",
+          "detail": "version='phase34-candidate-v8' from candidate_commit blob",
+          "ok": true
+        },
+        {
+          "check": "receipt_cross_candidate",
+          "detail": "receipt candidate must equal candidate.json version",
+          "ok": true
+        },
+        {
+          "check": "receipt_cross_source_commit",
+          "detail": "receipt source_commit must equal candidate.json source_commit",
+          "ok": true
+        },
+        {
+          "check": "receipt_cross_diff_base",
+          "detail": "receipt diff_base must equal candidate.json diff_base_commit",
+          "ok": true
+        },
+        {
+          "check": "receipt_source_candidate_ancestry",
+          "detail": "source_commit must be ancestor of candidate_commit",
+          "ok": true
+        },
+        {
+          "check": "receipt_declared_status",
+          "detail": "receipt.status must be pending",
+          "ok": true
+        },
+        {
+          "check": "receipt_v5_candidate",
+          "detail": "[]",
+          "ok": true
+        },
+        {
+          "check": "receipt_source_hashes_blobs",
+          "detail": "127 paths match source_commit blobs",
+          "ok": true
+        },
+        {
+          "check": "receipt_status_pending",
+          "detail": "candidate.json status='pending' (must be 'pending')",
+          "ok": true
+        },
+        {
+          "check": "receipt_parent_present",
+          "detail": "parent='phase34-candidate-v7' directory present",
+          "ok": true
+        },
+        {
+          "check": "receipt_diff_roundtrip",
+          "detail": "complete resolved trees round-trip",
+          "ok": true
+        },
+        {
+          "check": "receipt_snapshot_strict",
+          "detail": "role prompts present and non-empty",
+          "ok": true
+        },
+        {
+          "check": "receipt_not_active",
+          "detail": "no active pointer references it",
+          "ok": true
+        },
+        {
+          "check": "receipt_manifest_commit",
+          "detail": "manifest_commit required and must be HEAD ancestor",
+          "ok": true
+        },
+        {
+          "check": "receipt_manifest_blob",
+          "detail": "manifest_blob_sha256 and historical_manifest_sha256 must equal committed blob",
+          "ok": true
+        },
+        {
+          "check": "receipt_historical_manifest",
+          "detail": "current manifest must equal bound blob",
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "manifest_binding": "manifest_commit",
+      "ok": true,
+      "receipt_path": "configs\\harness\\receipts\\phase34-candidate-v8.json",
+      "receipt_sha256": "ad088be25cbd1038392706ad960c93e12ac8843b227d235dd7ba0fbfe1ae8241",
+      "witness": "verified"
+    },
+    "historical_baseline": {
+      "baseline_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
+      "check": "historical_baseline",
+      "files_checked": 56,
+      "manifest_path": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\configs\\harness\\candidates\\historical-baseline.json",
+      "manifest_present": true,
+      "mismatches": {},
+      "notes": [],
+      "ok": true
+    },
+    "versions_summary": [
+      {
+        "version": "baseline-07625a8",
+        "ok": true,
+        "normalization_note_stale": null,
+        "failures": 0
+      },
+      {
+        "version": "phase26-candidate-v1",
+        "ok": true,
+        "normalization_note_stale": null,
+        "failures": 0
+      },
+      {
+        "version": "phase26-candidate-v2",
+        "ok": true,
+        "normalization_note_stale": null,
+        "failures": 0
+      },
+      {
+        "version": "phase26-candidate-v3",
+        "ok": true,
+        "normalization_note_stale": null,
+        "failures": 0
+      },
+      {
+        "version": "phase26-candidate-v4",
+        "ok": true,
+        "normalization_note_stale": null,
+        "failures": 0
+      },
+      {
+        "version": "phase26-candidate-v5",
+        "ok": true,
+        "normalization_note_stale": null,
+        "failures": 0
+      },
+      {
+        "version": "phase27-candidate-v1",
+        "ok": true,
+        "normalization_note_stale": null,
+        "failures": 0
+      },
+      {
+        "version": "phase28-candidate-v2",
+        "ok": true,
+        "normalization_note_stale": null,
+        "failures": 0
+      },
+      {
+        "version": "phase29-candidate-v3",
+        "ok": true,
+        "normalization_note_stale": true,
+        "failures": 0
+      },
+      {
+        "version": "phase30-candidate-v4",
+        "ok": true,
+        "normalization_note_stale": true,
+        "failures": 0
+      },
+      {
+        "version": "phase31-candidate-v5",
+        "ok": true,
+        "normalization_note_stale": true,
+        "failures": 0
+      },
+      {
+        "version": "phase33-candidate-v6",
+        "ok": true,
+        "normalization_note_stale": true,
+        "failures": 0
+      },
+      {
+        "version": "phase34-candidate-v7",
+        "ok": true,
+        "normalization_note_stale": false,
+        "failures": 0
+      },
+      {
+        "version": "phase34-candidate-v8",
+        "ok": true,
+        "normalization_note_stale": false,
+        "failures": 0
+      }
+    ],
+    "source": "D:/cp34/final/verify-v8.json",
+    "source_sha256": "fdbe12193e37e0d276dd13891ad34eda4e8a0ae6fad55a10ae61dedb70475860"
+  },
+  "runtime_lifecycle": {
+    "before_fix": {
+      "commit": "dba045dabd70f0e6eb7779287136944b589f2734",
+      "command": "scripts/phase33_runtime_results.py --check",
+      "exit_code": 1,
+      "sections": [
+        "code_commits",
+        "head_commit"
+      ],
+      "log": "D:/cp34/final/pre-fix-check.log",
+      "log_sha256": "8faf7598c41cb0c57506bfdc3148557640e3123550968c0b1360a8efb2713f61"
+    },
+    "rule": "recorded_through/recorded_head describe the evidence tree; phase_commits=base..recorded_through; code_commits is path-filtered; changes after recorded_through must be docs-only"
+  },
+  "page_e2e": {
+    "command": "git diff --name-only dba045dabd70f0e6eb7779287136944b589f2734..f2a59955bb8272fd8bf19105aeeb951e0adf886a -- web/src",
+    "changed_files": 0,
+    "files": [],
+    "result": "conditionally skipped: web/src has zero diff in this phase"
+  },
+  "unverified": [
+    "real provider streaming/usage/billing (0 requests, 0 cost; rows blocked)",
+    "full Docker suite (not run in Phase34)",
+    "large repository (>=20k files)",
+    "24h stability",
+    "frontend checks (web/src zero diff; conditionally skipped)",
+    "src/codepilot/eval/swebench_runner.py:423 build-context risk (P2, untouched)"
+  ]
+}
