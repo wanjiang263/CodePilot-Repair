@@ -64,10 +64,12 @@ __all__ = [
     "DEFAULT_REQUIRED_ROLES",
     "DIFF_FLAGS",
     "GENERATOR_ID",
+    "GIT_NORMALIZATION_POLICY",
     "MANIFEST_KINDS",
     "MANIFEST_KIND_DELTA",
     "MANIFEST_KIND_FULL",
     "NORMALIZATION_NOTE",
+    "NORMALIZATION_NOTE_WORKTREE",
     "SCHEMA_VERSION",
     "SNAPSHOT_HASH_RULE",
     "SNAPSHOT_REF",
@@ -131,7 +133,21 @@ SOURCE_ORIGIN_GIT = "git_commit"
 SOURCE_ORIGIN_WORKTREE = "worktree"
 SNAPSHOT_REF = "snapshot.json"
 SNAPSHOT_HASH_RULE = "file_bytes_sha256"
-NORMALIZATION_NOTE = "UTF-8 LF normalized; raw worktree hashes recorded separately"
+#: Phase34: the old note claimed raw worktree hashes were recorded in every
+#: mode, but git_commit mode never stored them. The note is now mode-specific,
+#: and the machine-readable policy below states exactly what is stored.
+NORMALIZATION_NOTE = (
+    "UTF-8 LF normalized; raw bytes are recoverable from source_commit git blobs; "
+    "raw hashes are not stored in git_commit mode"
+)
+NORMALIZATION_NOTE_WORKTREE = (
+    "UTF-8 LF normalized; raw worktree bytes are recorded as raw_worktree_hashes"
+)
+GIT_NORMALIZATION_POLICY: dict[str, Any] = {
+    "source_hash": "lf_sha256",
+    "raw_bytes": "source_commit_git_blob",
+    "raw_hashes_stored": False,
+}
 
 #: Flags shared by the generator and the verifier so both sides compute the
 #: exact same diff bytes for the same commits and paths.
@@ -946,10 +962,17 @@ def _candidate_payload(
         },
         "base_hashes": dict(base_hashes),
         "source_files": len(sources),
-        "normalization": NORMALIZATION_NOTE,
+        "normalization": (
+            NORMALIZATION_NOTE
+            if source_origin == SOURCE_ORIGIN_GIT
+            else NORMALIZATION_NOTE_WORKTREE
+        ),
         "parent_integrity": parent_integrity,
         "dirty_worktree": bool(dirty_files),
     }
+    if source_origin == SOURCE_ORIGIN_GIT:
+        # Raw bytes live in the source_commit blobs; only LF hashes are stored.
+        payload["normalization_policy"] = dict(GIT_NORMALIZATION_POLICY)
     if candidate_schema_version >= 4:
         # v4: explicit schema mirror (single source of truth is schema_version;
         # the verifier requires the two to be equal) and the source manifest.

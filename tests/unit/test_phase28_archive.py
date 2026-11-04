@@ -16,6 +16,8 @@ from typing import Any
 import pytest
 
 from codepilot.archive import (
+    GIT_NORMALIZATION_POLICY,
+    NORMALIZATION_NOTE,
     ArchiveError,
     CandidateExistsError,
     DiffVerificationError,
@@ -135,9 +137,8 @@ def test_generate_writes_self_verifying_v2_directory(tmp_path: Path) -> None:
     assert candidate["diff_base_commit"] == base
     assert candidate["source_commit"] == head
     assert candidate["source_files"] == len(SOURCE_PATHS)
-    assert (
-        candidate["normalization"] == "UTF-8 LF normalized; raw worktree hashes recorded separately"
-    )
+    assert candidate["normalization"] == NORMALIZATION_NOTE
+    assert candidate["normalization_policy"] == GIT_NORMALIZATION_POLICY
     assert candidate["parent_integrity"] is None
     assert candidate["dirty_worktree"] is False
     assert "code_revision" not in candidate

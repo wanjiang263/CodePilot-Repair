@@ -234,6 +234,8 @@ def credentials_present() -> dict[str, bool]:
         "ANTHROPIC_API_KEY",
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
+        "AWS_REGION",
+        "AWS_DEFAULT_REGION",
     ]
     presence = {name: bool(os.environ.get(name)) for name in names}
     for module in ("boto3", "botocore"):
@@ -338,11 +340,14 @@ def row_missing(
     model_id: str | None,
     *,
     spent_cny: float | None = None,
+    creds: dict[str, bool] | None = None,
 ) -> list[str]:
     """Per-row missing list: every provider row names its OWN gaps.
 
     Never share one list between rows — that was the D1 defect: a single
-    missing_real list was copied onto all three rows.
+    missing_real list was copied onto all three rows. When ``creds`` is given
+    (the ``credentials_present()`` map) the gate reads that map instead of
+    re-probing the environment, so presence is computed exactly once.
     """
     meta = REAL_PROVIDERS[key]
     missing: list[str] = []
@@ -355,15 +360,27 @@ def row_missing(
             f"effective cap {effective:.6f} CNY"
         )
     for name in meta["required_env"]:
-        if not os.environ.get(name):
+        present = bool(creds.get(name)) if creds is not None else bool(os.environ.get(name))
+        if not present:
             missing.append(name)
     for module in meta.get("required_modules", ()):
-        try:
-            __import__(module)
-        except ImportError:
+        if creds is not None:
+            installed = bool(creds.get(module + "_installed"))
+        else:
+            try:
+                __import__(module)
+            except ImportError:
+                installed = False
+            else:
+                installed = True
+        if not installed:
             missing.append(module + " importable")
     region_env = meta.get("region_env")
-    if region_env and not any(os.environ.get(name) for name in region_env):
+    if region_env and not (
+        any(creds.get(name) for name in region_env)
+        if creds is not None
+        else any(os.environ.get(name) for name in region_env)
+    ):
         missing.append(" or ".join(region_env))
     if not model_id:
         missing.append(meta["model_env"])
@@ -573,7 +590,9 @@ def probe_provider(
     )
     try:
         response = tracked.complete(request)
-    except BaseException as exc:  # every dispatch failure is reported, not hidden
+    except Exception as exc:  # every dispatched failure is reported, not hidden
+        # KeyboardInterrupt/SystemExit are control flow, not provider results:
+        # they must propagate instead of being turned into a "real-failed" row.
         row.update(
             status="real-failed",
             real_requests=_dispatched(inner, counter),
@@ -637,7 +656,7 @@ def run_real_channels(
     total_requests = 0
     for key in REAL_PROVIDER_ORDER:
         model_id = resolve_model_id(key, model_overrides)
-        missing = row_missing(key, plan, model_id, spent_cny=usage.cost)
+        missing = row_missing(key, plan, model_id, spent_cny=usage.cost, creds=creds)
         if missing or not model_id:
             rows.append(
                 {
@@ -693,7 +712,7 @@ def blocked_real_provider(
     rows: list[dict[str, Any]] = []
     for key in REAL_PROVIDER_ORDER:
         model_id = resolve_model_id(key, model_overrides)
-        missing = row_missing(key, plan, model_id)
+        missing = row_missing(key, plan, model_id, creds=creds)
         if not real_requested:
             missing.insert(0, "--real flag (real channel disabled by default)")
         rows.append(

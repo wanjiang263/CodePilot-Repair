@@ -58,7 +58,9 @@ from typing import Any
 
 from codepilot.archive import (
     DEFAULT_REQUIRED_ROLES,
+    GIT_NORMALIZATION_POLICY,
     MANIFEST_KINDS,
+    NORMALIZATION_NOTE,
     SNAPSHOT_HASH_RULE,
     _apply_patch_in_temp,
     _candidate_source_set,
@@ -82,6 +84,8 @@ NEW_SCHEMA_VERSIONS = (2, 3, 4, 5)
 SOURCE_ORIGIN_GIT = "git_commit"
 SOURCE_ORIGIN_WORKTREE = "worktree"
 HISTORICAL_MANIFEST_NAME = "historical-baseline.json"
+#: Phase28-33 wording: git_commit candidates never actually stored raw hashes.
+LEGACY_NORMALIZATION_NOTE = "UTF-8 LF normalized; raw worktree hashes recorded separately"
 RECEIPT_SCHEMA_VERSION = 1
 RECEIPT_FILE_NAMES = ("candidate.diff", "candidate.json", "snapshot.json", "sources.json")
 
@@ -341,6 +345,55 @@ def _check_parent_integrity(candidate: dict[str, Any], archive_root: Path, recor
     )
 
 
+def _check_normalization(candidate: dict[str, Any], record: Any) -> bool:
+    """Verify the schema-v5 normalization declaration against what is stored.
+
+    New candidates (Phase34+) must carry the structured ``normalization_policy``
+    and the matching note: LF hashes only, raw bytes recoverable from
+    source_commit blobs, no raw hashes stored. Historical v5/v6 candidates have
+    the old note and no policy; that is annotated as ``normalization_note_stale``
+    and never failed, because their bytes are immutable. Returns the stale flag.
+    """
+    if candidate.get("schema_version") != 5:
+        return False
+    note = candidate.get("normalization")
+    policy = candidate.get("normalization_policy")
+    if policy is None:
+        if note == LEGACY_NORMALIZATION_NOTE:
+            record(
+                "normalization_policy",
+                True,
+                "legacy candidate without normalization_policy; "
+                "normalization_note_stale (raw hashes were never stored)",
+            )
+            return True
+        record(
+            "normalization_policy",
+            False,
+            "schema 5 requires normalization_policy; the note claims a policy that is not declared",
+        )
+        return False
+    problems: list[str] = []
+    if not isinstance(policy, dict):
+        problems.append(f"normalization_policy must be an object, got {policy!r}")
+    else:
+        for key, expected in GIT_NORMALIZATION_POLICY.items():
+            if policy.get(key) != expected:
+                problems.append(f"{key} must be {expected!r}, got {policy.get(key)!r}")
+        if note != NORMALIZATION_NOTE:
+            problems.append("normalization note differs from the policy text")
+        if policy.get("raw_hashes_stored") is True and "raw_worktree_hashes" not in candidate:
+            problems.append("policy claims raw hashes are stored but raw_worktree_hashes is absent")
+        if candidate.get("source_origin") != SOURCE_ORIGIN_GIT:
+            problems.append("git normalization policy requires source_origin=git_commit")
+    record(
+        "normalization_policy",
+        not problems,
+        "; ".join(problems) if problems else "LF hash + source_commit blob policy matches the note",
+    )
+    return False
+
+
 def _check_not_active(version: str, archive_root: Path, record: Any) -> None:
     active_problems: list[str] = []
     for pointer_name in ("active.json", "active.next.json"):
@@ -450,6 +503,7 @@ def _verify_v5_archive(
     _check_declared_metadata(candidate, folder, record)
     file_hash, canonical_hash = _check_snapshot_hashes(folder, candidate, record)
     sources = _check_sources_json(folder, candidate, record)
+    normalization_note_stale = _check_normalization(candidate, record)
     _check_snapshot_strict_roles(folder, record)
     _check_not_active(str(candidate.get("version")), archive_root, record)
     for name in ("active.json", "active.next.json"):
@@ -587,6 +641,7 @@ def _verify_v5_archive(
         "ok": not failures,
         "snapshot_file_sha256": file_hash,
         "snapshot_canonical_sha256": canonical_hash,
+        "normalization_note_stale": normalization_note_stale,
         "raw_drift": {},
     }
 

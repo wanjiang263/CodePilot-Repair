@@ -523,3 +523,68 @@ def test_budget_is_capped_at_20_cny(
     # the only budget variable in the script remains PHASE32_REAL_BUDGET_CNY
     assert matrix_module.BUDGET_ENV == "PHASE32_REAL_BUDGET_CNY"
     assert matrix_module.BUDGET_CAP_CNY == 20.0
+
+
+# ---------------------------------------------------------------------------
+# 6. Phase34 T03: control flow propagates; the presence map feeds the gate
+# ---------------------------------------------------------------------------
+
+
+def test_keyboard_interrupt_is_not_swallowed(
+    matrix_module: types.ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    for key in (
+        "PHASE32_REAL_BUDGET_CNY",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_REGION",
+        "PHASE32_REAL_MODEL_BEDROCK",
+    ):
+        monkeypatch.setenv(key, FULL_ENV[key])
+
+    class InterruptingBedrock(FakeBedrockClient):
+        def converse(self, **kwargs: Any) -> Any:
+            self.calls.append(kwargs)
+            raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        run_channels(matrix_module, bedrock_client=InterruptingBedrock())
+
+
+def test_row_gate_consumes_credentials_present(
+    matrix_module: types.ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    apply_env(monkeypatch)  # the environment itself claims every credential exists
+    names = (
+        "OPENAI_API_KEY",
+        "OPENAI_BASE_URL",
+        "ANTHROPIC_API_KEY",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_REGION",
+        "AWS_DEFAULT_REGION",
+    )
+    absent = dict.fromkeys(names, False)
+    absent.update({"boto3_installed": False, "botocore_installed": False})
+    monkeypatch.setattr(matrix_module, "credentials_present", lambda: dict(absent))
+
+    def explode(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError("credentials map says absent; nothing may dispatch")
+
+    section = matrix_module.run_real_channels(
+        matrix_module.budget(),
+        llm_config_path=matrix_module.DEFAULT_LLM_CONFIG,
+        model_overrides={},
+        http_client_factory=explode,
+        bedrock_client_factory=explode,
+    )
+    assert section["real_requests"] == 0
+    assert section["real_cost_cny"] == 0.0
+    rows = rows_by_provider(section)
+    for row in rows.values():
+        assert row["status"] == "blocked"
+        assert row["real_requests"] == 0
+    assert "OPENAI_API_KEY" in rows["openai-compatible"]["missing"]
+    assert "ANTHROPIC_API_KEY" in rows["anthropic"]["missing"]
+    assert "AWS_ACCESS_KEY_ID" in rows["bedrock"]["missing"]
+    assert "boto3 importable" in rows["bedrock"]["missing"]
