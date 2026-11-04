@@ -19,12 +19,25 @@ evidence:
 - archive verify     -> <scratch>/verify-v6.json (T09)
 
 A missing input is recorded as {"status": "missing-input", "expected": ...},
-never fabricated. --check rebuilds the payload and compares with the written
-file (generated_at normalised); any mismatch exits 1. Only --write writes.
+never fabricated.
+
+Evidence lifecycle (Phase34 T01): the JSON is a record of the tree at
+``recorded_through``, not of whatever HEAD is now. ``phase_commits`` lists
+``base..recorded_through``; ``code_commits`` is the subset of those commits
+that touch a CODE path (src/, scripts/, tests/, web/src/, pyproject.toml,
+web/package.json). Archive/docs/receipt commits therefore never count as code.
+
+--check reads ``recorded_through`` and ``head_commit`` from the written file
+(never from the current HEAD), proves ``recorded_through`` is an ancestor of
+HEAD, allows only docs/ paths to have changed since, and rebuilds the payload
+at ``recorded_through`` for a normalised comparison. Any later code commit —
+or a tampered recorded hash — exits 1. Only --write writes, and repeating
+--write with unchanged inputs reproduces the same bytes (the existing
+generated_at is kept).
 
 Usage:
   .venv/Scripts/python.exe scripts/phase33_runtime_results.py --check
-  .venv/Scripts/python.exe scripts/phase33_runtime_results.py --write
+  .venv/Scripts/python.exe scripts/phase33_runtime_results.py --write --base <sha>
 """
 
 from __future__ import annotations
@@ -41,9 +54,16 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_BASE = "b4825911b8e2880adfe6177b9aca6f4c35bf15b1"
 DEFAULT_SCRATCH = ROOT / ".codex-pytest-tmp" / "phase33"
 DEFAULT_OUT = ROOT / "docs" / "notes" / "phase33-runtime-results.json"
+
+#: Paths that make a commit a CODE commit. Archive/docs/receipt commits touch
+#: neither prefix nor file, so they never appear in ``code_commits`` (Phase34
+#: P0: C4 was a docs commit and must not be counted as code).
+CODE_PATH_PREFIXES = ("src/", "scripts/", "tests/", "web/src/")
+CODE_PATH_FILES = ("pyproject.toml", "web/package.json")
+#: Everything outside this prefix is forbidden after ``recorded_through``.
+DOC_PATH_PREFIX = "docs/"
 
 PYTEST_TIME = re.compile(r"in (\d+(?:\.\d+)?)s")
 
@@ -57,6 +77,36 @@ def git(*args: str) -> str:
             f"git {' '.join(args)} failed rc={done.returncode}: {done.stderr.strip()}"
         )
     return (done.stdout or "").strip()
+
+
+def commit_resolves(revision: str) -> bool:
+    try:
+        git("rev-parse", "--verify", f"{revision}^{{commit}}")
+    except RuntimeError:
+        return False
+    return True
+
+
+def is_ancestor(ancestor: str, descendant: str) -> bool:
+    # merge-base exits 1 (not an error) when the answer is "no"; git() would raise.
+    done = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=False,
+    )
+    return done.returncode == 0
+
+
+def is_code_path(path: str) -> bool:
+    return path in CODE_PATH_FILES or path.startswith(CODE_PATH_PREFIXES)
+
+
+def commit_touches_code(revision: str) -> bool:
+    listed = git("diff-tree", "--no-commit-id", "--name-only", "-r", "--root", revision)
+    return any(is_code_path(line.strip()) for line in listed.splitlines() if line.strip())
 
 
 def sha256(path: Path) -> str:
@@ -452,15 +502,18 @@ def candidates_section() -> dict[str, Any]:
     return out
 
 
-def build_payload(base: str, scratch: Path) -> dict[str, Any]:
-    head = git("rev-parse", "HEAD")
-    log_out = git("log", "--format=%H%x09%s", f"{base}..HEAD")
-    commits = []
+def build_payload(
+    base: str, scratch: Path, *, recorded_through: str, head_commit: str
+) -> dict[str, Any]:
+    resolved_base = git("rev-parse", base)
+    log_out = git("log", "--format=%H%x09%s", f"{resolved_base}..{recorded_through}")
+    phase_commits = []
     for line in log_out.splitlines():
         if line.strip():
             h, _, s = line.partition("\t")
-            commits.append({"hash": h, "short": h[:7], "subject": s})
-    web_diff = git("diff", "--name-only", f"{base}..HEAD", "--", "web/src")
+            phase_commits.append({"hash": h, "short": h[:7], "subject": s})
+    code_commits = [commit for commit in phase_commits if commit_touches_code(commit["hash"])]
+    web_diff = git("diff", "--name-only", f"{resolved_base}..{recorded_through}", "--", "web/src")
     web_files = [x for x in web_diff.splitlines() if x.strip()]
 
     merged = merge_gate_records(scratch)
@@ -511,9 +564,11 @@ def build_payload(base: str, scratch: Path) -> dict[str, Any]:
         "phase": 33,
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "generator": "scripts/phase33_runtime_results.py",
-        "base_commit": git("rev-parse", base),
-        "head_commit": head,
-        "code_commits": commits,
+        "base_commit": resolved_base,
+        "recorded_through": recorded_through,
+        "head_commit": head_commit,
+        "phase_commits": phase_commits,
+        "code_commits": code_commits,
         "final_regression": final_regression,
         "first_round_failures": first_round_failures(scratch),
         "static_checks": static_section(scratch),
@@ -523,7 +578,7 @@ def build_payload(base: str, scratch: Path) -> dict[str, Any]:
         "candidates": candidates_section(),
         "archive_verify_v6": archive_section(scratch),
         "page_e2e": {
-            "command": f"git diff --name-only {base[:7]}..HEAD -- web/src",
+            "command": f"git diff --name-only {resolved_base}..{recorded_through} -- web/src",
             "changed_files": len(web_files),
             "files": web_files,
             "result": (
@@ -546,16 +601,104 @@ def normalise(payload: dict[str, Any], generated_at: str | None) -> str:
     return json.dumps(data, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
 
 
+def _emit(payload: dict[str, Any]) -> None:
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+
+
+def _check(written_path: Path, scratch: Path, base_override: str | None) -> int:
+    """Verify the written file against the tree it claims to describe."""
+
+    def fail(reason: str, **extra: Any) -> int:
+        _emit({"check": "fail", "reason": reason, **extra})
+        return 1
+
+    if not written_path.is_file():
+        return fail("written_file_missing", expected=rel(written_path))
+    try:
+        written = json.loads(written_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return fail("written_file_unreadable", detail=str(exc))
+    if not isinstance(written, dict):
+        return fail("written_file_not_object")
+
+    recorded = written.get("recorded_through")
+    recorded_head = written.get("head_commit")
+    if not isinstance(recorded, str) or not recorded:
+        return fail("recorded_through_missing")
+    if not isinstance(recorded_head, str) or not recorded_head:
+        return fail("head_commit_missing")
+    if not commit_resolves(recorded):
+        return fail("recorded_through_unknown", recorded_through=recorded)
+    if not commit_resolves(recorded_head):
+        return fail("head_commit_unknown", head_commit=recorded_head)
+    # --write always records the same commit in both fields; a mismatch is
+    # either tampering or a hand-edited file.
+    if recorded_head != recorded:
+        return fail(
+            "head_recorded_mismatch",
+            recorded_through=recorded,
+            head_commit=recorded_head,
+        )
+    if not is_ancestor(recorded, "HEAD"):
+        return fail("recorded_through_not_ancestor", recorded_through=recorded)
+    changed = [p for p in git("diff", "--name-only", f"{recorded}..HEAD").splitlines() if p.strip()]
+    offending = [p for p in changed if not p.startswith(DOC_PATH_PREFIX)]
+    if offending:
+        return fail(
+            "code_changed_after_evidence",
+            recorded_through=recorded,
+            offending=offending[:20],
+            changed=changed[:50],
+        )
+
+    base = written.get("base_commit")
+    if not isinstance(base, str) or not base:
+        return fail("base_commit_missing")
+    if not commit_resolves(base):
+        return fail("base_commit_unknown", base_commit=base)
+    if base_override is not None:
+        if not commit_resolves(base_override):
+            return fail("base_override_unknown", base_override=base_override)
+        resolved_override = git("rev-parse", base_override)
+        resolved_base = git("rev-parse", base)
+        if resolved_override != resolved_base:
+            return fail(
+                "base_override_mismatch",
+                written_base=resolved_base,
+                base_override=resolved_override,
+            )
+    if not is_ancestor(base, recorded):
+        return fail(
+            "base_not_ancestor_of_recorded_through",
+            base_commit=base,
+            recorded_through=recorded,
+        )
+
+    payload = build_payload(base, scratch, recorded_through=recorded, head_commit=recorded_head)
+    rebuilt = normalise(payload, written.get("generated_at"))
+    current = normalise(written, written.get("generated_at"))
+    if rebuilt == current:
+        _emit({"check": "pass", "file": rel(written_path), "sha256": sha256(written_path)})
+        return 0
+    pa, pb = json.loads(rebuilt), json.loads(current)
+    sections = [k for k in sorted(set(pa) | set(pb)) if pa.get(k) != pb.get(k)]
+    return fail("payload_mismatch", sections=sections)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--base", default=DEFAULT_BASE, help="phase33 baseline commit (verified via git)"
+        "--base",
+        default=None,
+        help="phase33 baseline commit; --write requires it unless --out already records base_commit",
     )
     parser.add_argument("--scratch", default=str(DEFAULT_SCRATCH))
     parser.add_argument("--out", default=str(DEFAULT_OUT))
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument(
-        "--check", action="store_true", help="rebuild from evidence and compare; exit 1 on mismatch"
+        "--check",
+        action="store_true",
+        help="verify the written file against recorded_through; exit 1 on mismatch",
     )
     mode.add_argument("--write", action="store_true", help="write the rebuilt payload to --out")
     args = parser.parse_args(argv)
@@ -567,33 +710,49 @@ def main(argv: list[str] | None = None) -> int:
     if not out.is_absolute():
         out = ROOT / out
 
-    git("rev-parse", "--verify", args.base)  # fail fast if base unknown
-    payload = build_payload(args.base, scratch)
+    if args.check:
+        return _check(out, scratch, args.base)
 
-    if args.write:
-        text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
-        out.write_text(text, encoding="utf-8", newline="\n")
-        print(json.dumps({"written": rel(out), "sha256": sha256(out)}, indent=2))
-        return 0
+    base = args.base
+    if base is None and out.is_file():
+        try:
+            existing = json.loads(out.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            existing = None
+        if isinstance(existing, dict) and isinstance(existing.get("base_commit"), str):
+            base = existing["base_commit"]
+    if not isinstance(base, str) or not base:
+        _emit({"write": "fail", "reason": "base_commit_required", "hint": "pass --base <sha>"})
+        return 2
+    try:
+        git("rev-parse", "--verify", args.base or base)  # fail fast if base unknown
+    except RuntimeError as exc:
+        _emit({"write": "fail", "reason": "base_commit_unknown", "detail": str(exc)})
+        return 2
 
-    if not out.is_file():
-        print(
-            json.dumps(
-                {"check": "fail", "reason": "written file missing", "expected": rel(out)}, indent=2
-            )
-        )
-        return 1
-    written = json.loads(out.read_text(encoding="utf-8"))
-    a = normalise(payload, written.get("generated_at"))
-    b = normalise(written, written.get("generated_at"))
-    if a == b:
-        print(json.dumps({"check": "pass", "file": rel(out), "sha256": sha256(out)}, indent=2))
-        return 0
-    # report first differing top-level section for triage
-    pa, pb = json.loads(a), json.loads(b)
-    diffs = [k for k in sorted(set(pa) | set(pb)) if pa.get(k) != pb.get(k)]
-    print(json.dumps({"check": "fail", "sections": diffs}, indent=2, ensure_ascii=False))
-    return 1
+    recorded_through = git("rev-parse", "HEAD")
+    payload = build_payload(
+        base, scratch, recorded_through=recorded_through, head_commit=recorded_through
+    )
+    # Idempotent writes: unchanged inputs keep the previous generated_at so two
+    # consecutive --write runs produce byte-identical files.
+    if out.is_file():
+        try:
+            existing = json.loads(out.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            existing = None
+        if (
+            isinstance(existing, dict)
+            and isinstance(existing.get("generated_at"), str)
+            and normalise(payload, existing["generated_at"])
+            == normalise(existing, existing["generated_at"])
+        ):
+            payload["generated_at"] = existing["generated_at"]
+    text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(text, encoding="utf-8", newline="\n")
+    _emit({"written": rel(out), "sha256": sha256(out)})
+    return 0
 
 
 if __name__ == "__main__":
