@@ -1,6 +1,6 @@
 # Phase33 最终报告
 
-结论：PASS
+结论：CONDITIONAL PASS (corrected in Phase34)
 
 生成时点：C3 (cabf5ef512f14112fe00171ace83d1cc8e3869ad) 之后、C4 之前；本报告所在提交即 C4（回执 + Phase33 文档）。
 证据根：.codex-pytest-tmp/phase33/（未跟踪，完整保留）；phase32 历史证据未覆盖、未改写（基线哈希见 evidence/phase32-baseline-hashes.txt）。
@@ -164,3 +164,51 @@
 - evidence/launch-bugs/：3 次启动 bug 隔离 + duplaunch 更正诊断（PPID 审计规则）
 - evidence/t02/、t05/（REPORT.md + 双 profile + 6 DB）、t06/（api-flake-analysis.md + oom-analysis.md）、t07-static/lead-cleanup.md、t09-sources-blob-check.json、phase32-baseline-hashes.txt
 - 汇总 JSON：test-gate-part2.json、test-gate-part3.json、static-checks.json、verify-v6.json、external-witness.txt
+
+## Post-delivery correction (Phase34)
+
+本节由 Phase34 追加；上方 Phase33 原始交付记录保留不改写，仅顶部结论已改为
+CONDITIONAL PASS。逐项验收现状见 docs/notes/phase34-final-report.md。
+
+### 1. P0：runtime --check 在 Phase33 最终 HEAD 失败
+
+- 事实：JSON 冻结于 C3 `cabf5ef`；C4 `dba045d` 是 docs/receipt 提交。原脚本每次
+  `--check` 都用 `git log base..HEAD` 重算并把结果与文件比较，且 `head_commit`
+  取当前 HEAD，因此 C4 被算成一条 code commit、最终 HEAD 永远多一条 → exit 1。
+- 复现（Phase34 起点 `dba045d`，日志 `.codex-pytest-tmp/phase34/pre-fix-check.log`）：
+  `scripts/phase33_runtime_results.py --check` → exit 1，
+  `sections=["code_commits","head_commit"]`。
+- 修复（C5 `3a97b98`）：
+  - 新增 `recorded_through`（证据记录到的提交）与 `phase_commits`（base..recorded_through）；
+  - `code_commits` 改为按路径过滤（`src/ scripts/ tests/ web/src/ pyproject.toml
+    web/package.json`），docs/archive/receipt 提交不再计入；
+  - `--check` 从已写入 JSON 读取 `recorded_through`/`head_commit`（不读取当前 HEAD），
+    验证其为 HEAD 祖先，且 `recorded_through..HEAD` 只允许 `docs/` 路径变化；
+    重建 payload 时使用记录值。硬编码 base 已删除；
+  - `--write` 在内容未变时保留旧 `generated_at`，连续两次写入字节一致。
+- 修复后：在 C8b `b485103` 上重生成并 `--check` → exit 0，
+  docs/notes/phase33-runtime-results.json sha256
+  `d893cb3a8024fb6de27b4e0194c7239d323fe0ecd1650d3ea618fad315e037a6`；
+  C9 为 docs-only，提交后按同一规则复跑，实测结果记录于
+  `.codex-pytest-tmp/phase34/final-check.log`（未跟踪），见 phase34-final-report.md §一。
+- 上方验收清单“runtime JSON 可由 --check 复现”（第 147 行）在 Phase33 交付时
+  于 C4 不成立；Phase34 修复后成立。因此本报告不再声称 16 项全部闭环。
+
+### 2. 性能口径修正（原始数值不变，撤回因果表述）
+
+- “无全量回归”的表述撤回：单仓、单次测量不能支撑“无回归”的因果结论。
+- 有本轮数据支持的结论：change 路径改善（86.32s → 45.00s，−47.9%）。
+- cold（74.37 → 103.89s）与 nochange（2.98 → 7.32s）变慢，存在回退风险。
+- scan 22.41 → 36.77s 是观察到的相关性，不是已证明的因果；同轮全量
+  verify_change 73.85s vs 基线 79.59s 只是该轮对照，不能外推。
+- 单仓（2417 文件）、单次测量、机器负载 85–89%，未重复测量，不外推。
+
+### 3. 其它修正
+
+- 归档 normalization 文案与实际不符（git_commit 模式声称存了 raw worktree
+  hashes，实际未存）由 C6 修正：新候选带 `normalization_policy`，历史 v5/v6
+  只标注 `normalization_note_stale=true`，不因此失败。
+- OOM 继续定性为“隔离/保护”而非修复；gate 阈值 `min_free_mb=1200` /
+  `min_commit_headroom_mb=2500` 在低内存机器上可能拒绝运行。
+- 真实 provider、Docker 全量、大仓、24h 长稳仍未验证（见 Phase34 报告）。
+
