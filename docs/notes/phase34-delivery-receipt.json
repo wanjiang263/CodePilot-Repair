@@ -1,6 +1,6 @@
 {
   "phase": 34,
-  "generated_at": "2026-11-05T13:34:02+08:00",
+  "generated_at": "2026-11-05T13:36:51+08:00",
   "tool": "lead-consolidated delivery receipt; every hash computed from the referenced file at generation time; no invented values",
   "verdict": "PASS",
   "verdict_basis": "All in-scope Phase34 acceptance items pass: P0/P1/P2 fixes landed, v9 archive verifies with an external witness, the full nine-group regression is 4176 passed / 0 failed / 3 skipped, static code gates pass, and the final runtime check exits 0. Real-provider, full-Docker, large-repo, 24h and frontend checks remain explicitly out of scope per the Phase34 instruction.",
@@ -37,9 +37,10 @@
     "C21": "8312044203f7093cb1d908056d6fe180a5f03e6a",
     "C22": "eb82317a0e38912209d4223248e49a11773e72f7",
     "C23": "dda2e3e6c8f2e9351521600029e8780b7f05cfa8",
-    "C24": "the commit containing this receipt + refreshed evidence pack + runtime JSON + final report (docs-only; hash unknown at generation time)",
-    "C25": "docs-only commit adding docs/notes/phase34-selfcontained-check.log and the final hash backfill (hash not embedded)",
-    "C18": "5f6f3eb539bcb7af771b29ddb18f27cf29e39507"
+    "C24": "c1e23c056d5ff16bd1db5dbe57a4fec95f8b3123",
+    "C25": "4aff028cb4394671520649eea6c64474be637af1",
+    "C18": "5f6f3eb539bcb7af771b29ddb18f27cf29e39507",
+    "C26": "the commit containing this receipt + the clean-clone green log + final hash backfill (docs-only; hash unknown at generation time)"
   },
   "p0_runtime_check": {
     "before_fix": {
@@ -71,7 +72,7 @@
       "evidence_dir": "docs/notes/phase34-evidence",
       "evidence_manifest_sha256": "7cc67c5d495d63adcf1b849b5ca4df287e1c342d1e09ddbf012b70f4e3bb9795",
       "requires_scratch": false,
-      "post_evidence_check_log": "default --check exit 0 at C23 without --scratch; clean-clone log: docs/notes/phase34-selfcontained-check.log (C25)"
+      "post_evidence_check_log": "default --check exit 0 at C23/C25 without --scratch; clean-clone green log: docs/notes/phase34-selfcontained-check.log"
     }
   },
   "candidate": {
@@ -259,12 +260,12 @@
   "mainline": {
     "branch": "codex/phase12-real-issue-pilot",
     "pre_merge_head": "5f6f3eb539bcb7af771b29ddb18f27cf29e39507",
-    "target": "C25 (final docs commit); fast-forward after all commits",
+    "target": "C26 (final docs commit); fast-forward after all commits",
     "ff_only": true,
     "pushed": false
   },
   "docs_sha256": {
-    "docs/notes/phase34-final-report.md": "965da021e42c6b8f710b451f155c364df7966ce2149d03b5bd11ba43448fb85a",
+    "docs/notes/phase34-final-report.md": "3a454e35067ee942971d2b540788e64098b1096a4d6248d1696fdca516d2b664",
     "docs/notes/phase34-runtime-results.json": "18da1faeaa63d65d0c81805355d51d15d72d4617cf76d9b20503290e73d0a963",
     "docs/notes/phase34-static-checks.json": "a1e6d2e7536ee01af5a2dc62a6ab3970a8f9bc8ebd30104b345e5a23a0b735ec",
     "docs/notes/phase33-errata.md": "f82c71acce0ad94783bfe6fa8d94a3d239089850b28b8c5ae10301ab6cf21827",
@@ -277,7 +278,9 @@
     "docs/notes/phase34-evidence/provider-matrix.json": "aee887bf6e3b616ddad2e51ba40c549efbe1ddf1a255c42a91eb3bc2a3b29ef6",
     "docs/notes/phase34-evidence/pre-fix-check.log": "8faf7598c41cb0c57506bfdc3148557640e3123550968c0b1360a8efb2713f61",
     "docs/notes/phase34-evidence/external-witness-v9.txt": "486c32ca7a794d3d83e4b102b6c86e211a08268ca88a72f3bac0a2b30866b621",
-    "docs/notes/phase34-selfcontained-check.first-attempt.log": "3b573722980fb6fe90e364f1489120efd7f64db243d00224bbb30e8498f97c20"
+    "docs/notes/phase34-selfcontained-check.first-attempt.log": "3b573722980fb6fe90e364f1489120efd7f64db243d00224bbb30e8498f97c20",
+    "docs/notes/phase34-selfcontained-check.log": "e2d4128ba4ab3da6f3e7f21080f48b3b4c37b55d67457d72e499af0551b35176",
+    "docs/notes/phase34-selfcontained-check.pre-json-pin.log": "44c88859ee7e795b0d0e7b903184406b16d76fe93121bb55752ffc2f672e9de0"
   },
   "constraints_honored": [
     "single controller, no teammate/subagent",
@@ -292,7 +295,9 @@
     "default runtime --check has no external scratch dependency; D:/cp34/final-v9 is generation-time only",
     "clean-clone regression script added (log committed in C21)",
     "clean-clone regression script added; byte pinning via docs/notes/.gitattributes and configs/harness/.gitattributes",
-    "first clean-clone autocrlf failure preserved as docs/notes/phase34-selfcontained-check.first-attempt.log"
+    "first clean-clone autocrlf failure preserved as docs/notes/phase34-selfcontained-check.first-attempt.log",
+    "clean-clone check passed at C25 with the delivered runtime JSON sha 18da1fae... (byte-identical)",
+    "phase33/34 note byte pinning added after the C24 pass showed a CRLF-converted clone JSON"
   ],
   "evidence_pack": {
     "dir": "docs/notes/phase34-evidence",
@@ -309,7 +314,16 @@
     },
     "selfcontained_regression": {
       "command": "bash scripts/phase34_selfcontained_check.sh",
-      "status": "pending C25 run"
+      "exit_code": 0,
+      "run_at_commit": "C25 4aff028cb4394671520649eea6c64474be637af1",
+      "log": "docs/notes/phase34-selfcontained-check.log",
+      "log_sha256": "e2d4128ba4ab3da6f3e7f21080f48b3b4c37b55d67457d72e499af0551b35176",
+      "check_output_sha256": "18da1faeaa63d65d0c81805355d51d15d72d4617cf76d9b20503290e73d0a963",
+      "byte_identical_runtime_json": true,
+      "previous_logs": {
+        "first_attempt_failure": "docs/notes/phase34-selfcontained-check.first-attempt.log",
+        "pre_json_pin_pass": "docs/notes/phase34-selfcontained-check.pre-json-pin.log"
+      }
     }
   }
 }

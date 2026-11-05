@@ -10,8 +10,9 @@ v9 归档、全仓九组回归、静态门槛、runtime/归档生命周期）已
 （runtime 证据不再携带机器路径）；C19 `e2b3c8eb450b0fe4980f8ae247c8302ec89ea455`
 是证据自包含主体。C20 提交证据包初版；C21 固定证据目录字节并保留首次
 clean-clone 失败日志；C23 `dda2e3e6c8f2e9351521600029e8780b7f05cfa8`
-固定 `configs/harness` 字节；C24 刷新证据包/runtime/报告/回执；C25 提交
-clean-clone 绿色日志与最终哈希（docs-only）。
+固定 `configs/harness` 字节；C24 刷新证据包/runtime/报告/回执；C25
+`4aff028cb4394671520649eea6c64474be637af1` 固定 Phase33/34 note 字节并保留
+pre-json-pin 通过日志；C26 提交 clean-clone 绿色日志与最终哈希（docs-only）。
 Phase34 起点：`dba045dabd70f0e6eb7779287136944b589f2734`。
 
 交付硬约束：Phase34 runtime `--check` 默认读取仓库内
@@ -68,8 +69,15 @@ $ .venv/Scripts/python.exe scripts/phase34_evidence_manifest.py --check
 
 `SHA256SUMS` sha256 为
 `7cc67c5d495d63adcf1b849b5ca4df287e1c342d1e09ddbf012b70f4e3bb9795`。
-clean-clone 回归结果见 §六 第 18 项与
-`docs/notes/phase34-selfcontained-check.log`（C25 回填）。九组全量回归证据仍是
+clean-clone 回归（在 C25 提交上执行，C26 记录）：**exit 0，`check=pass`**，
+clone 内 runtime JSON sha 与交付文件一致
+（`18da1faeaa63d65d0c81805355d51d15d72d4617cf76d9b20503290e73d0a963`），
+日志为 `docs/notes/phase34-selfcontained-check.log`。首次失败（autocrlf 改证据
+字节，`evidence_manifest_mismatch`）保留在
+`docs/notes/phase34-selfcontained-check.first-attempt.log`；第二次在 C24 上
+`--check` 已通过但 clone JSON 被 CRLF 转换（日志 sha `5b9baa...`），保留在
+`docs/notes/phase34-selfcontained-check.pre-json-pin.log`；C25 的 note 字节固定
+后第三次通过且字节一致。九组全量回归证据仍是
 在 C15 代码状态上采集的原始 gate 摘要/日志/JUnit；C19/C22 只改证据生成器、
 清单工具、测试 fixture 与 shell 回归脚本，目标测试分别 32/32 与 12/12 通过，
 静态门槛在 C22 重跑（见 §四）。
@@ -85,7 +93,7 @@ clean-clone 回归结果见 §六 第 18 项与
 - Phase34 证据由 `scripts/phase34_runtime_results.py` 生成，使用
   `recorded_head` / `actual_head_at_write`，不再使用误导性的 `head_commit`。
 - 最终代码 HEAD（C22）上 `phase34_runtime_results.py --check` **不带
-  `--scratch`** exit 0；C24/C25 仅 docs 变化后再复跑通过。
+  `--scratch`** exit 0；C24/C25/C26 仅 docs 变化后再复跑通过。
 
 ### P1-1 可复现性（C10 `7bed256`）
 
@@ -240,17 +248,18 @@ eval isolation 失败：
 - C21 `8312044` 证据目录 `-text`；保留首次 clean-clone 失败日志
 - C22 `eb82317` 派生 runtime JSON 移除 gate `command`（机器绝对路径）
 - C23 `dda2e3e` 固定 `configs/harness` 证据/候选/回执字节
-- C24（本提交）刷新证据包、runtime JSON、静态结果、最终报告、delivery receipt
-- C25 docs-only：clean-clone 绿色日志与最终哈希回填
+- C24 `c1e23c0` 刷新证据包、runtime JSON、静态结果、最终报告、delivery receipt
+- C25 `4aff028` 固定 Phase33/34 note 字节；保留 pre-json-pin 通过日志
+- C26（本提交）clean-clone 绿色日志与最终哈希回填
 - 不 push、不 PR、不激活。
 
 ## 六、验收清单（逐项）
 
 | # | 项 | 状态 | 证据 |
 |---|---|---|---|
-| 1 | 最终代码 HEAD 上 Phase34 runtime `--check`（无 `--scratch`）exit 0 | 通过 | C22 默认 0；C24/C25 复跑 0 |
+| 1 | 最终代码 HEAD 上 Phase34 runtime `--check`（无 `--scratch`）exit 0 | 通过 | C22 默认 0；C24/C25/C26 复跑 0 |
 | 2 | 记录点后代码提交 → 非 0 | 通过 | `test_phase34_runtime_results.py` |
-| 3 | 记录点后仅 docs → 0 | 通过 | 单测 + C24/C25 结构 |
+| 3 | 记录点后仅 docs → 0 | 通过 | 单测 + C24/C25/C26 结构 |
 | 4 | 篡改 `code_commits`/`recorded_head` → 非 0 | 通过 | 单测 |
 | 5 | Phase33 报告不再无条件 PASS | 通过 | 顶部 CONDITIONAL PASS + errata |
 | 6 | v9 pending、parent=v8、diff_base=7bed256、无 active | 通过 | candidate.json |
@@ -262,10 +271,10 @@ eval isolation 失败：
 | 12 | 静态检查，CRLF/生成物差异如实记录 | 通过（代码门槛） | §四（C22 重跑） |
 | 13 | provider fake 通过，real_requests=0、cost=0 | 通过 | 166 passed, 0/0 |
 | 14 | 性能口径降级，cold 回退写明 | 通过 | phase33 errata |
-| 15 | 本地提交完成，tracked clean | 通过 | C5–C25 |
+| 15 | 本地提交完成，tracked clean | 通过 | C5–C26 |
 | 16 | 未 push、未 PR、未激活 | 通过 | 无远端操作、无 active |
 | 17 | 仓库内证据包 `SHA256SUMS` 47 项校验通过 | 通过 | `phase34_evidence_manifest.py --check`；sha256 `7cc67c5d...` |
-| 18 | 干净 clone（无 `D:/cp34`）默认 `--check` exit 0 | 待 C25 回归日志 | `scripts/phase34_selfcontained_check.sh` + `phase34-selfcontained-check.log` |
+| 18 | 干净 clone（无 `D:/cp34`）默认 `--check` exit 0 | 通过 | `scripts/phase34_selfcontained_check.sh`；绿灯 `phase34-selfcontained-check.log`，输出 sha `18da1fae...`；首次失败与 pre-json-pin 日志保留 |
 | 19 | runtime JSON 的 `evidence_dir`/`evidence_manifest_sha256` 正确且无外部 scratch | 通过 | `test_write_records_in_repo_evidence` + clone 断言 |
 
 ## 七、未验证（按 Phase34 指令显式排除）
@@ -290,12 +299,14 @@ eval isolation 失败：
     sha256 `7cc67c5d495d63adcf1b849b5ca4df287e1c342d1e09ddbf012b70f4e3bb9795`。
   - 默认命令：`.venv/Scripts/python.exe scripts/phase34_runtime_results.py --check`
     （无需 `--scratch`）。
-- **字节固定**：`docs/notes/.gitattributes`（`phase34-evidence/** -text`）与
-  `configs/harness/.gitattributes`（`** -text`），防止 clone 的
-  `core.autocrlf` 改变证据/候选/回执字节。首次失败日志：
-  `docs/notes/phase34-selfcontained-check.first-attempt.log`。
+- **字节固定**：`docs/notes/.gitattributes`（`phase33-*`、`phase34-*`、
+  `phase34-evidence/**` 均为 `-text`）与 `configs/harness/.gitattributes`
+  （`** -text`），防止 clone 的 `core.autocrlf` 改变证据/候选/回执/报告字节。
+  首次失败日志：`docs/notes/phase34-selfcontained-check.first-attempt.log`；
+  C24 通过但 clone JSON 被 CRLF 转换：`...pre-json-pin.log`。
 - **clean-clone 回归日志**：`docs/notes/phase34-selfcontained-check.log`
-  （`bash scripts/phase34_selfcontained_check.sh` 的输出；C25 回填）。
+  （在 C25 提交上运行：exit 0，`check=pass`，clone 内 runtime JSON sha
+  `18da1fae...`，与交付文件一致）。
 - `docs/notes/phase34-runtime-results.json`（sha256
   `18da1faeaa63d65d0c81805355d51d15d72d4617cf76d9b20503290e73d0a963`）、
   `docs/notes/phase34-static-checks.json`（sha256
