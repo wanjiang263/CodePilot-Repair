@@ -57,13 +57,22 @@ CONSUMED_EVIDENCE = (
 )
 
 UNVERIFIED = [
-    "real provider streaming/usage/billing (0 requests, 0 cost; rows blocked)",
+    "real provider streaming (non-streaming matrix only)",
+    "real provider usage/billing (0 requests, 0 cost; rows blocked)",
     "full Docker suite (not run in Phase34)",
     "large repository (>=20k files)",
     "24h stability",
     "frontend checks (web/src zero diff; conditionally skipped)",
-    "src/codepilot/eval/swebench_runner.py:423 build-context risk (P2, untouched)",
+    "frontend browser E2E (no suite in the repository)",
+    "src/codepilot/sandbox/swebench_env.py:423 build-context potential misuse (P2, audited)",
 ]
+
+EXTERNAL_EVIDENCE = {
+    "docker": "docker-summary.json",
+    "large_repo": "large-repo-summary.json",
+    "soak": "soak-summary.json",
+    "frontend": "frontend-summary.json",
+}
 
 
 def commits_section(
@@ -342,6 +351,45 @@ def lifecycle_section(scratch: Path) -> dict[str, Any]:
     }
 
 
+def external_validation_section(scratch: Path) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for key, name in EXTERNAL_EVIDENCE.items():
+        path = scratch / name
+        data = load_json(path)
+        if not isinstance(data, dict):
+            out[key] = missing(path)
+            continue
+        out[key] = {
+            "status": data.get("status"),
+            "source": rel(path),
+            "source_sha256": sha256(path),
+            "summary": data.get("summary"),
+        }
+    return out
+
+
+def unverified_list(external: dict[str, Any], provider: dict[str, Any]) -> list[str]:
+    items = list(UNVERIFIED)
+
+    def drop(prefix: str) -> None:
+        items[:] = [item for item in items if not item.startswith(prefix)]
+
+    if str(external.get("docker", {}).get("status")) in {"passed", "verified"}:
+        drop("full Docker suite")
+    if str(external.get("large_repo", {}).get("status")) in {"passed", "verified"}:
+        drop("large repository")
+    if str(external.get("soak", {}).get("status")) in {"passed", "verified"}:
+        drop("24h stability")
+    if str(external.get("frontend", {}).get("status")) in {"passed", "verified"}:
+        drop("frontend checks")
+    rows = provider.get("rows") or []
+    if provider.get("real_requests", 0) and any(
+        row.get("status") == "real-verified" for row in rows
+    ):
+        drop("real provider usage/billing")
+    return items
+
+
 def build_payload(
     base: str,
     scratch: Path,
@@ -354,6 +402,8 @@ def build_payload(
     phase, code = commits_section(resolved_base, recorded_through)
     web_diff = git("diff", "--name-only", f"{resolved_base}..{recorded_through}", "--", "web/src")
     web_files = [path for path in web_diff.splitlines() if path.strip()]
+    provider = provider_section(scratch)
+    external = external_validation_section(scratch)
     return {
         "phase": 34,
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -368,7 +418,8 @@ def build_payload(
         "code_commits": code,
         "final_regression": regression_section(scratch),
         "static_checks": static_section(scratch),
-        "provider_matrix": provider_section(scratch),
+        "provider_matrix": provider,
+        "external_validation": external,
         "candidates": candidates_section(),
         "archive_verify": archive_section(scratch),
         "runtime_lifecycle": lifecycle_section(scratch),
@@ -382,7 +433,7 @@ def build_payload(
                 else "frontend checks required"
             ),
         },
-        "unverified": UNVERIFIED,
+        "unverified": unverified_list(external, provider),
     }
 
 
