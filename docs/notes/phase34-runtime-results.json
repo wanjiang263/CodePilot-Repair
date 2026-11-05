@@ -1,14 +1,89 @@
 {
   "phase": 34,
-  "generated_at": "2026-11-05T05:33:11+00:00",
+  "generated_at": "2026-11-05T11:04:44+00:00",
   "generator": "scripts/phase34_runtime_results.py",
   "base_commit": "dba045dabd70f0e6eb7779287136944b589f2734",
-  "recorded_through": "dda2e3e6c8f2e9351521600029e8780b7f05cfa8",
-  "recorded_head": "dda2e3e6c8f2e9351521600029e8780b7f05cfa8",
-  "actual_head_at_write": "dda2e3e6c8f2e9351521600029e8780b7f05cfa8",
+  "recorded_through": "f843fe352e83bcb89184ac0c2b76390da9c66354",
+  "recorded_head": "f843fe352e83bcb89184ac0c2b76390da9c66354",
+  "actual_head_at_write": "f843fe352e83bcb89184ac0c2b76390da9c66354",
   "evidence_dir": "docs/notes/phase34-evidence",
-  "evidence_manifest_sha256": "7cc67c5d495d63adcf1b849b5ca4df287e1c342d1e09ddbf012b70f4e3bb9795",
+  "evidence_manifest_sha256": "4aa78793e726aa7d19a49222b163381cc63305d3caa6a4adc8d139a209e80292",
   "phase_commits": [
+    {
+      "hash": "f843fe352e83bcb89184ac0c2b76390da9c66354",
+      "short": "f843fe3",
+      "subject": "docs: bind phase34-candidate-v12 receipt"
+    },
+    {
+      "hash": "1b972c315441c4ab31d69f5ef6b1b3a232adf49e",
+      "short": "1b972c3",
+      "subject": "docs: bind phase34-candidate-v12 into the historical baseline manifest"
+    },
+    {
+      "hash": "6d138a37cdb615fc7da1e6d8c4dec50bb042a1db",
+      "short": "6d138a3",
+      "subject": "feat: archive phase34-candidate-v12 (pending, parent v11)"
+    },
+    {
+      "hash": "254b0a81248b8455c236696f9915e2a237b8c05e",
+      "short": "254b0a8",
+      "subject": "style: normalize phase26 final test line endings"
+    },
+    {
+      "hash": "c22ba0053cfd34dc1a51eb4d1d6da12679c2ebaf",
+      "short": "c22ba00",
+      "subject": "docs: bind phase34-candidate-v11 receipt"
+    },
+    {
+      "hash": "3b7b327a75da8cdd8cd958c28604eb8b23cf8af9",
+      "short": "3b7b327",
+      "subject": "docs: bind phase34-candidate-v11 into the historical baseline manifest"
+    },
+    {
+      "hash": "2dfe3e5f20d033f2de2740a69dc762658a18b002",
+      "short": "2dfe3e5",
+      "subject": "feat: archive phase34-candidate-v11 (pending, parent v10)"
+    },
+    {
+      "hash": "bc2160d471cf3ddf937f214935c0f57408715588",
+      "short": "bc2160d",
+      "subject": "fix: make spawn release test robust and discover the latest archive"
+    },
+    {
+      "hash": "a4c7dd571cf40d8006168c66b4a4cbd6f571a955",
+      "short": "a4c7dd5",
+      "subject": "docs: bind phase34-candidate-v10 receipt"
+    },
+    {
+      "hash": "64d2bd952ed464985cf26c660ee1799e73f74296",
+      "short": "64d2bd9",
+      "subject": "docs: bind phase34-candidate-v10 into the historical baseline manifest"
+    },
+    {
+      "hash": "e0b1a6fcfbdf68ad626777467b15b247a51d8030",
+      "short": "e0b1a6f",
+      "subject": "feat: archive phase34-candidate-v10 (pending, parent v9)"
+    },
+    {
+      "hash": "7646709f94a7768699b607e4a3a81528930797b0",
+      "short": "7646709",
+      "subject": "feat: support phase34 candidate v10 in runtime evidence"
+    },
+    {
+      "hash": "92e9ff359e1aba8e06ce23df7a8482dc88479d9a",
+      "short": "92e9ff3",
+      "subject": "docs: record the clean-clone pass for phase34 evidence"
+    },
+    {
+      "hash": "4aff028cb4394671520649eea6c64474be637af1",
+      "short": "4aff028",
+      "subject": "docs: pin phase33/34 note bytes across git checkouts"
+    },
+    {
+      "hash": "c1e23c056d5ff16bd1db5dbe57a4fec95f8b3123",
+      "short": "c1e23c0",
+      "subject": "docs: refresh phase34 evidence with byte-pinned candidates"
+    },
     {
       "hash": "dda2e3e6c8f2e9351521600029e8780b7f05cfa8",
       "short": "dda2e3e",
@@ -122,6 +197,21 @@
   ],
   "code_commits": [
     {
+      "hash": "254b0a81248b8455c236696f9915e2a237b8c05e",
+      "short": "254b0a8",
+      "subject": "style: normalize phase26 final test line endings"
+    },
+    {
+      "hash": "bc2160d471cf3ddf937f214935c0f57408715588",
+      "short": "bc2160d",
+      "subject": "fix: make spawn release test robust and discover the latest archive"
+    },
+    {
+      "hash": "7646709f94a7768699b607e4a3a81528930797b0",
+      "short": "7646709",
+      "subject": "feat: support phase34 candidate v10 in runtime evidence"
+    },
+    {
       "hash": "eb82317a0e38912209d4223248e49a11773e72f7",
       "short": "eb82317",
       "subject": "fix: omit machine-specific gate commands from runtime evidence"
@@ -156,47 +246,47 @@
     "sources": [
       {
         "path": "docs/notes/phase34-evidence/test-gate-api.json",
-        "sha256": "288dc431db048d407f9b497a31a66e7a3fe67f2012480b55f7469926a35c4291",
+        "sha256": "f086524125e3f4df4f2600e953e3899eca9a634e717ee4b8cfa0bee1510d8187",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-eval.json",
-        "sha256": "3ec990d1880b43767167ddbf66b20feb0caf437e2ecfe21f299c3f54c7221ca0",
+        "sha256": "0bf2a69bcc30f31fd5f963c08ebba5f43c8d1f65d6062c1701df77761672de15",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-graph.json",
-        "sha256": "aa0fd5eb42ac2dd36546eac91ce70589dcffe2fcfbe2f15614795a0b17d68658",
+        "sha256": "bcf560c8e4fcb351ab6c36a7f25df88725c81b854b5dc802be40db0ac3273c3d",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-integration.json",
-        "sha256": "fa11784be9ed918d5b1baab23953e0afa8e38092f067db796b642d42417e22ca",
+        "sha256": "b5801fc027818a72236cfa6272f4c109b7e7e63d1ab90ff4c39fe6d481ff220b",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-sandbox.json",
-        "sha256": "7683c04ce6d13118091abebf5e8c55761f37feaf8f039adde1a2c8e6193b1012",
+        "sha256": "6375e6ae277becb05a698c39e15df25068ec1d6744fcbda03d4c81276987741e",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-unit-a.json",
-        "sha256": "1100c046f9451488ca8165c480c17929703d44d45215863e259e91e4c0eb5b6d",
+        "sha256": "40824e8e8cbf182940c31ca240c91016138af0b5a513a746d4ce84d6f5c335ac",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-unit-b.json",
-        "sha256": "fc9d610cbb2eff7f54b3f8c794fa1fb324ef2eb85d4e5e7e1af13a66a5811790",
+        "sha256": "5f64466f8529e46651e1f87da2a092df9cc4ab4732c4e72a0754c769c9d0d384",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-unit-c.json",
-        "sha256": "4fab6743696f58d1d58c2fc5b22d84a163000fc7aaf9226be93eb74eca1ec4c3",
+        "sha256": "2bb92c10281b77ca67c5540414f42b52e99b57719fcf17fc6720b104b376dbf2",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-unit-d.json",
-        "sha256": "60f476d23e910af6f09c6529858494fef41133c7c9dfbe3ff2a0d48768f92e06",
+        "sha256": "605bb02ace53797b3ad9590780f3ea3a88865f82908cd2a388d9d296b072ac43",
         "kind": "gate-summary"
       }
     ],
@@ -214,8 +304,8 @@
         "group": "unit-a",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "1535 passed in 170.35s (0:02:50)",
-        "wall_s": 174.61,
+        "summary_line": "1535 passed in 258.51s (0:04:18)",
+        "wall_s": 268.38,
         "failed": 0,
         "junit_counts": {
           "passed": 1535,
@@ -224,34 +314,34 @@
           "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-unit-a-run1.log",
-        "log_sha256": "9086895b74f8414a8ad7ae6df04664c7a2845cd371b876507baeb6825db0a244",
+        "log_sha256": "e7957a4a0a44c58157d1e5972e55c5237f45688e8c92604a5568597d09f99451",
         "junit": "docs/notes/phase34-evidence/gate-unit-a-run1.xml",
-        "junit_sha256": "cb91c919ce02508068a04b2dd30ebbe00a768164be3b8a9f3c20a5422f6319b7",
+        "junit_sha256": "53e935d26617c5da28d8c9fa4c25c38dfad50fc384418f9c218437e203fcc648",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3199,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7257,
-          "commit_headroom_mb": 7257,
-          "load_pct": 80,
+          "avail_phys_mb": 2257,
+          "total_pagefile_mb": 48160,
+          "avail_pagefile_mb": 3338,
+          "commit_headroom_mb": 3338,
+          "load_pct": 86,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2993,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7265,
-          "commit_headroom_mb": 7265,
-          "load_pct": 81
+          "avail_phys_mb": 1879,
+          "total_pagefile_mb": 48604,
+          "avail_pagefile_mb": 3293,
+          "commit_headroom_mb": 3293,
+          "load_pct": 88
         },
-        "basetemp": "unit-a-run1-20261105T011329-754329"
+        "basetemp": "unit-a-run1-20261105T085111-773623"
       },
       {
         "group": "unit-b",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "1138 passed, 2 skipped in 243.76s (0:04:03)",
-        "wall_s": 247.74,
+        "summary_line": "1138 passed, 2 skipped in 501.21s (0:08:21)",
+        "wall_s": 509.81,
         "failed": 0,
         "junit_counts": {
           "passed": 1138,
@@ -260,70 +350,34 @@
           "skipped": 2
         },
         "log": "docs/notes/phase34-evidence/gate-unit-b-run1.log",
-        "log_sha256": "33c80af3cd93eaf03913324fc5c1691ab634e1d99f4329be72126685a686c3da",
+        "log_sha256": "c1e098f1d2287d01bd8a461e51aa1988af4747c01e434e745dc3dbd885d8af62",
         "junit": "docs/notes/phase34-evidence/gate-unit-b-run1.xml",
-        "junit_sha256": "fc83abdd02b2dccaacf782553a047b79a07e6806aedf9985e12b52252a3da0c9",
+        "junit_sha256": "4879b438528f127664e43d6dbeef6145f0ff1550b28d07e8dd2ee6fe8431f96b",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2995,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7263,
-          "commit_headroom_mb": 7263,
-          "load_pct": 81,
+          "avail_phys_mb": 1883,
+          "total_pagefile_mb": 48604,
+          "avail_pagefile_mb": 3341,
+          "commit_headroom_mb": 3341,
+          "load_pct": 88,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3179,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7270,
-          "commit_headroom_mb": 7270,
-          "load_pct": 80
+          "avail_phys_mb": 2634,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 8049,
+          "commit_headroom_mb": 8049,
+          "load_pct": 83
         },
-        "basetemp": "unit-b-run1-20261105T011627-660667"
-      },
-      {
-        "group": "unit-c",
-        "run": 1,
-        "exit_code": 0,
-        "summary_line": "420 passed in 934.55s (0:15:34)",
-        "wall_s": 939.25,
-        "failed": 0,
-        "junit_counts": {
-          "passed": 420,
-          "failure": 0,
-          "error": 0,
-          "skipped": 0
-        },
-        "log": "docs/notes/phase34-evidence/gate-unit-c-run1.log",
-        "log_sha256": "2caaf1489e780b8081c2442187108dac8f7b902da8ce943b6d570d0323d7cc0b",
-        "junit": "docs/notes/phase34-evidence/gate-unit-c-run1.xml",
-        "junit_sha256": "5ffd3b9ec0a295165add0afcac91ade84649cc7a6d474e90de6f8edd5cd78b64",
-        "memory_before": {
-          "total_phys_mb": 16176,
-          "avail_phys_mb": 3183,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7268,
-          "commit_headroom_mb": 7268,
-          "load_pct": 80,
-          "sufficient": 1
-        },
-        "memory_after": {
-          "total_phys_mb": 16176,
-          "avail_phys_mb": 2089,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7728,
-          "commit_headroom_mb": 7728,
-          "load_pct": 87
-        },
-        "basetemp": "unit-c-run1-20261105T012047-631187"
+        "basetemp": "unit-b-run1-20261105T085551-533044"
       },
       {
         "group": "unit-d",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "25 passed in 6.98s",
-        "wall_s": 11.58,
+        "summary_line": "25 passed in 9.01s",
+        "wall_s": 16.06,
         "failed": 0,
         "junit_counts": {
           "passed": 25,
@@ -332,34 +386,34 @@
           "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-unit-d-run1.log",
-        "log_sha256": "d8627082541069c9205fa55a2edb6e404caac6a93aa11495c69f65423e13cf11",
+        "log_sha256": "340e1afe74d540758983d9bd8a548f724ab8894e35ca1c6b050425aa5fda51e6",
         "junit": "docs/notes/phase34-evidence/gate-unit-d-run1.xml",
-        "junit_sha256": "d1d041f776f5010c594a3d6d47cbd09ec97c25bc74b26039d2ee0b925e50f6cc",
+        "junit_sha256": "6f2198c489eaa7c93be6fc7e2029319899ac29dd5f872d15dcd44439599bfa45",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2075,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7721,
-          "commit_headroom_mb": 7721,
-          "load_pct": 87,
+          "avail_phys_mb": 1035,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5681,
+          "commit_headroom_mb": 5681,
+          "load_pct": 93,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2062,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7658,
-          "commit_headroom_mb": 7658,
-          "load_pct": 87
+          "avail_phys_mb": 1921,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5703,
+          "commit_headroom_mb": 5703,
+          "load_pct": 88
         },
-        "basetemp": "unit-d-run1-20261105T013726-572671"
+        "basetemp": "unit-d-run1-20261105T092722-982438"
       },
       {
         "group": "eval",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "483 passed in 791.37s (0:13:11)",
-        "wall_s": 795.45,
+        "summary_line": "483 passed in 1110.85s (0:18:30)",
+        "wall_s": 1117.61,
         "failed": 0,
         "junit_counts": {
           "passed": 483,
@@ -368,34 +422,34 @@
           "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-eval-run1.log",
-        "log_sha256": "83fd94e84def5fb42dadac3546b9091399a1eaf4e7cfba03e1a7475fbc40a28e",
+        "log_sha256": "1b51ab38a1676c1c8aa4b6c8ba4066a6b70f1ca8edb07e886d177668e5d63e0c",
         "junit": "docs/notes/phase34-evidence/gate-eval-run1.xml",
-        "junit_sha256": "1b2699c7f5420cc505a076f87ea0f58e730d01ccff168256edecf94a341386a7",
+        "junit_sha256": "608bdb80e6c795fc8346c50b8dbad425ffdf03f06f0d1dc8f84cd2c8d19885fa",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2070,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7658,
-          "commit_headroom_mb": 7658,
-          "load_pct": 87,
+          "avail_phys_mb": 1911,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5692,
+          "commit_headroom_mb": 5692,
+          "load_pct": 88,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2240,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7567,
-          "commit_headroom_mb": 7567,
-          "load_pct": 86
+          "avail_phys_mb": 983,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5475,
+          "commit_headroom_mb": 5475,
+          "load_pct": 93
         },
-        "basetemp": "eval-run1-20261105T013739-297983"
+        "basetemp": "eval-run1-20261105T092740-026852"
       },
       {
         "group": "sandbox",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "66 passed, 1 deselected in 1.83s",
-        "wall_s": 5.73,
+        "summary_line": "66 passed, 1 deselected in 3.92s",
+        "wall_s": 10.33,
         "failed": 0,
         "junit_counts": {
           "passed": 66,
@@ -404,34 +458,34 @@
           "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-sandbox-run1.log",
-        "log_sha256": "11eb7f97f6028b1eec2c464178620b55e5455e664fbda74b0fca050182c7be1d",
+        "log_sha256": "49e7617180841bdae85830dfe0854bd600a5abdf58d2f829d1381540096a6052",
         "junit": "docs/notes/phase34-evidence/gate-sandbox-run1.xml",
-        "junit_sha256": "25932bdb0b013e57df42b11589a7d36d2b571ca95f2fc1b54444c3e34445a403",
+        "junit_sha256": "262ccc9bc8d64bb449d537ccc0caf62b5712d70e68bbe7054262dff4d5245f7c",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2247,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7573,
-          "commit_headroom_mb": 7573,
-          "load_pct": 86,
+          "avail_phys_mb": 984,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5490,
+          "commit_headroom_mb": 5490,
+          "load_pct": 93,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2233,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7578,
-          "commit_headroom_mb": 7578,
-          "load_pct": 86
+          "avail_phys_mb": 998,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5448,
+          "commit_headroom_mb": 5448,
+          "load_pct": 93
         },
-        "basetemp": "sandbox-run1-20261105T015201-025072"
+        "basetemp": "sandbox-run1-20261105T094649-271789"
       },
       {
         "group": "integration",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "126 passed, 1 deselected in 428.97s (0:07:08)",
-        "wall_s": 433.2,
+        "summary_line": "126 passed, 1 deselected in 544.90s (0:09:04)",
+        "wall_s": 551.09,
         "failed": 0,
         "junit_counts": {
           "passed": 126,
@@ -440,34 +494,34 @@
           "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-integration-run1.log",
-        "log_sha256": "c0f3fc4bc2ec080a90ba78e2c1dd85bfce6e4d51a3528fc07dd5818da28c40c0",
+        "log_sha256": "3dbb0b979731abd8de125cbeac8848ef7840193315b71e9a492b13db9d5e6239",
         "junit": "docs/notes/phase34-evidence/gate-integration-run1.xml",
-        "junit_sha256": "5a717f7b3e0ea4257c40f3c36d292dd2c9bfb5319d36beca9ed439aa7ed4345d",
+        "junit_sha256": "f13fadaca71b467e8bf1288ce2e697f145931fc3b9f7c9d53973ef558dcbbfb5",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2217,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7551,
-          "commit_headroom_mb": 7551,
-          "load_pct": 86,
+          "avail_phys_mb": 984,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5457,
+          "commit_headroom_mb": 5457,
+          "load_pct": 93,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2120,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7517,
-          "commit_headroom_mb": 7517,
-          "load_pct": 86
+          "avail_phys_mb": 1967,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5497,
+          "commit_headroom_mb": 5497,
+          "load_pct": 87
         },
-        "basetemp": "integration-run1-20261105T015207-151696"
+        "basetemp": "integration-run1-20261105T094700-281894"
       },
       {
         "group": "api",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "117 passed, 1 skipped in 144.60s (0:02:24)",
-        "wall_s": 154.38,
+        "summary_line": "117 passed, 1 skipped in 154.68s (0:02:34)",
+        "wall_s": 168.45,
         "failed": 0,
         "junit_counts": {
           "passed": 117,
@@ -476,34 +530,34 @@
           "skipped": 1
         },
         "log": "docs/notes/phase34-evidence/gate-api-run1.log",
-        "log_sha256": "f3639bb5aa6ec6f0872a6ad2c5445d328b7440e45caecdc8f53021c8bf44c9c6",
+        "log_sha256": "3a2e67be7acd34c597ac298cc4630d452691d1e730a476c4821fa87e775da0a2",
         "junit": "docs/notes/phase34-evidence/gate-api-run1.xml",
-        "junit_sha256": "5cede295a87bdc71eca593fcf8fd92857b6d3c5dcaceb53634aaeb2599a08ad7",
+        "junit_sha256": "680069a623562c5000aafb66df7db5f5d08e77e15e955cabeb160aa7cac648c6",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2119,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7514,
-          "commit_headroom_mb": 7514,
-          "load_pct": 86,
+          "avail_phys_mb": 1975,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5506,
+          "commit_headroom_mb": 5506,
+          "load_pct": 87,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2049,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7585,
-          "commit_headroom_mb": 7585,
+          "avail_phys_mb": 1982,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5509,
+          "commit_headroom_mb": 5509,
           "load_pct": 87
         },
-        "basetemp": "api-run1-20261105T015934-748276"
+        "basetemp": "api-run1-20261105T095618-518081"
       },
       {
         "group": "graph",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "266 passed, 13 deselected in 1227.12s (0:20:27)",
-        "wall_s": 1233.78,
+        "summary_line": "266 passed, 13 deselected in 1556.84s (0:25:56)",
+        "wall_s": 1564.94,
         "failed": 0,
         "junit_counts": {
           "passed": 266,
@@ -512,30 +566,66 @@
           "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-graph-run1.log",
-        "log_sha256": "f6b52355f3d4466f1f8170f9e05c1f9526d0610dce9f8db89fbb6db787a1d541",
+        "log_sha256": "7bab4a36992b28f6a2535613a4540cde17bdb5471fc9c18769e556ccf1f9d788",
         "junit": "docs/notes/phase34-evidence/gate-graph-run1.xml",
-        "junit_sha256": "8dcb839a555f205c94fdcf89f49c53db340e2aacdf900a125b6d43b6cd68a3d5",
+        "junit_sha256": "395be9124a6de3b9c42448fc73e801c14e3ad437c6b3f0bf2d5df7bcbc6b50e1",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2057,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7585,
-          "commit_headroom_mb": 7585,
+          "avail_phys_mb": 1991,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5512,
+          "commit_headroom_mb": 5512,
           "load_pct": 87,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 1975,
-          "total_pagefile_mb": 46274,
-          "avail_pagefile_mb": 7690,
-          "commit_headroom_mb": 7690,
-          "load_pct": 87
+          "avail_phys_mb": 1666,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5716,
+          "commit_headroom_mb": 5716,
+          "load_pct": 89
         },
-        "basetemp": "graph-run1-20261105T020216-964863"
+        "basetemp": "graph-run1-20261105T095911-300987"
+      },
+      {
+        "group": "unit-c",
+        "run": 1,
+        "exit_code": 0,
+        "summary_line": "425 passed in 1301.15s (0:21:41)",
+        "wall_s": 1308.44,
+        "failed": 0,
+        "junit_counts": {
+          "passed": 425,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "log": "docs/notes/phase34-evidence/gate-unit-c-run1.log",
+        "log_sha256": "11d049ae8bc4a088fe7f8bd50e6da24db6cfc32449086ffdeed255f414b2a48c",
+        "junit": "docs/notes/phase34-evidence/gate-unit-c-run1.xml",
+        "junit_sha256": "50b4d80714a7d0018b53cb3e92a3d331d81b67101539e0b530f2202794d070d4",
+        "memory_before": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 853,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 4880,
+          "commit_headroom_mb": 4880,
+          "load_pct": 94,
+          "sufficient": 1
+        },
+        "memory_after": {
+          "total_phys_mb": 16176,
+          "avail_phys_mb": 1358,
+          "total_pagefile_mb": 48048,
+          "avail_pagefile_mb": 5396,
+          "commit_headroom_mb": 5396,
+          "load_pct": 91
+        },
+        "basetemp": "unit-c-run1-20261105T103914-817306"
       }
     ],
-    "selected_tests_note": "full repository selection: unit 3120 (3118 passed + 2 skipped) + eval 483 + sandbox 66 + integration 126 + api 118 + graph 266 = 4179; tests/docker 35 deselected",
+    "selected_tests_note": "full repository selection: unit-a 1535 + unit-b 1140 + unit-d 25 + eval 483 + sandbox 66 + integration 126 + api 118 + graph 266 + unit-c 425 = 4184; tests/docker 35 deselected",
     "unit_aggregate": {
       "batches": [
         "unit-a",
@@ -544,19 +634,19 @@
         "unit-d"
       ],
       "junit_counts": {
-        "passed": 3118,
+        "passed": 3123,
         "failure": 0,
         "error": 0,
         "skipped": 2
       },
       "failed": 0,
-      "wall_s": 1373.18
+      "wall_s": 2102.69
     }
   },
   "static_checks": {
     "source": "docs/notes/phase34-evidence/static-checks.json",
-    "source_sha256": "a1e6d2e7536ee01af5a2dc62a6ab3970a8f9bc8ebd30104b345e5a23a0b735ec",
-    "file_count": 15,
+    "source_sha256": "5cae0673a34d2e13f6cf0e31f742cd23d15a0cfba9a0579b14a94f2805ff3930",
+    "file_count": 16,
     "files": [
       "scripts/__init__.py",
       "scripts/phase28_archive_verify.py",
@@ -569,6 +659,7 @@
       "src/codepilot/graph/harness.py",
       "tests/eval/test_isolation.py",
       "tests/unit/llm/test_phase33_provider_real.py",
+      "tests/unit/test_phase26_final.py",
       "tests/unit/test_phase28_archive.py",
       "tests/unit/test_phase33_runtime_results.py",
       "tests/unit/test_phase34_archive_normalization.py",
@@ -629,7 +720,7 @@
   },
   "provider_matrix": {
     "source": "docs/notes/phase34-evidence/provider-matrix.json",
-    "source_sha256": "aee887bf6e3b616ddad2e51ba40c549efbe1ddf1a255c42a91eb3bc2a3b29ef6",
+    "source_sha256": "317bba9db1471c485869c184706371e307a17122f697438c485c3fc1196035e8",
     "real_mode": false,
     "real_requests": 0,
     "real_cost_cny": 0.0,
@@ -739,26 +830,83 @@
         "sources.json": "be7d60560f2ff567001b97bb47750dc16ebcddd8c4bd51748a7cc681e312c9fc"
       }
     },
+    "v10": {
+      "version": "phase34-candidate-v10",
+      "status": "pending",
+      "parent": "phase34-candidate-v9",
+      "schema_version": 5,
+      "source_commit": "7646709f94a7768699b607e4a3a81528930797b0",
+      "diff_base_commit": "cc0dd9a9e0b9d61d9d897b0584ee4c54f6c89af2",
+      "normalization_policy": {
+        "raw_bytes": "source_commit_git_blob",
+        "raw_hashes_stored": false,
+        "source_hash": "lf_sha256"
+      },
+      "file_sha256": {
+        "candidate.json": "5ccad67744024a0cf9087734e1427d3c18b9ae666435a6774963adea1ea79cba",
+        "candidate.diff": "d26c12841efde4aa7288abe5715490dc09f06c4fd1fb22ac581e2d77afb72e36",
+        "snapshot.json": "6edf5eff6079ca44862e19bec962ef325d2d0c69c7eadb186d5574579990af64",
+        "sources.json": "0922656112811a4e3d02726463efe75ef8f50bc965f940c1a5a247ce8b6391da"
+      }
+    },
+    "v11": {
+      "version": "phase34-candidate-v11",
+      "status": "pending",
+      "parent": "phase34-candidate-v10",
+      "schema_version": 5,
+      "source_commit": "bc2160d471cf3ddf937f214935c0f57408715588",
+      "diff_base_commit": "7646709f94a7768699b607e4a3a81528930797b0",
+      "normalization_policy": {
+        "raw_bytes": "source_commit_git_blob",
+        "raw_hashes_stored": false,
+        "source_hash": "lf_sha256"
+      },
+      "file_sha256": {
+        "candidate.json": "3c4118afbf543014fcf99cba133228dec202cf89a776965cffb8e06d368dd38a",
+        "candidate.diff": "cc6f62e7294577fcf6fbf8537db1b45c1700d8a4730fb9d96b1fc7b59e7f73ac",
+        "snapshot.json": "ec087b338d215ede193bba421f433a2269979a3833d711e73a3f59e85ea6aa66",
+        "sources.json": "b29452f4a507ab203ec04cfbc785d6856a9db3c495cfdc8db70be1388a790b64"
+      }
+    },
+    "v12": {
+      "version": "phase34-candidate-v12",
+      "status": "pending",
+      "parent": "phase34-candidate-v11",
+      "schema_version": 5,
+      "source_commit": "254b0a81248b8455c236696f9915e2a237b8c05e",
+      "diff_base_commit": "bc2160d471cf3ddf937f214935c0f57408715588",
+      "normalization_policy": {
+        "raw_bytes": "source_commit_git_blob",
+        "raw_hashes_stored": false,
+        "source_hash": "lf_sha256"
+      },
+      "file_sha256": {
+        "candidate.json": "458b42b55407ed4ae27c142719dca164dc716125199d2038f44aa77fa79a61a8",
+        "candidate.diff": "0a2e0de07223be604ac8f817254e0b0da86163a652e2dda114e3a9eaa63aaf38",
+        "snapshot.json": "2d4ae4b8d6bb6acc13df4fa026f7cab72b236aa5f6418d2144b148884d628864",
+        "sources.json": "b29452f4a507ab203ec04cfbc785d6856a9db3c495cfdc8db70be1388a790b64"
+      }
+    },
     "active_pointer_exists": false
   },
-  "archive_verify_v8": {
+  "archive_verify": {
     "exit_code": 0,
     "witness": "verified",
     "historical_integrity": "ok",
     "new_archive_status": "passed",
     "totals": {
-      "historical_baseline_files": 60,
+      "historical_baseline_files": 72,
       "historical_baseline_mismatches": 0,
       "historical_files_modified": false,
       "new_archive_failures": 0,
-      "new_archives": 8,
+      "new_archives": 11,
       "old_archives": 7,
       "old_unexplained_mismatches": 0,
       "unknown_entries": 0,
-      "versions_checked": 15
+      "versions_checked": 18
     },
     "receipt": {
-      "candidate": "phase34-candidate-v9",
+      "candidate": "phase34-candidate-v12",
       "check": "receipt",
       "checks": [
         {
@@ -773,7 +921,7 @@
         },
         {
           "check": "receipt_commit_ancestor",
-          "detail": "merge-base --is-ancestor cabcaa383f838c8db430d8b40496bc086caeb337 HEAD(975582be9000100717c962e86588e4ade6b806fc) holds",
+          "detail": "merge-base --is-ancestor 6d138a37cdb615fc7da1e6d8c4dec50bb042a1db HEAD(f843fe352e83bcb89184ac0c2b76390da9c66354) holds",
           "ok": true
         },
         {
@@ -783,22 +931,22 @@
         },
         {
           "check": "receipt_candidate_tree_self",
-          "detail": "declared='751adc16de8a8ec0c91ad29780d91cdb51559574784438a0942734206e209455' recomputed_from_receipt=751adc16de8a8ec0c91ad29780d91cdb51559574784438a0942734206e209455",
+          "detail": "declared='fa3f034b89b12dc0a3e8d8919a5ae00301df874a3d405701e124482935e0f670' recomputed_from_receipt=fa3f034b89b12dc0a3e8d8919a5ae00301df874a3d405701e124482935e0f670",
           "ok": true
         },
         {
           "check": "receipt_candidate_tree_current",
-          "detail": "declared='751adc16de8a8ec0c91ad29780d91cdb51559574784438a0942734206e209455' recomputed_from_disk=751adc16de8a8ec0c91ad29780d91cdb51559574784438a0942734206e209455",
+          "detail": "declared='fa3f034b89b12dc0a3e8d8919a5ae00301df874a3d405701e124482935e0f670' recomputed_from_disk=fa3f034b89b12dc0a3e8d8919a5ae00301df874a3d405701e124482935e0f670",
           "ok": true
         },
         {
           "check": "receipt_source_ancestry",
-          "detail": "diff_base=7bed25625343e9e0ef43a8175a34bfda3ea0e6d0 ancestor-of source_commit=cc0dd9a9e0b9d61d9d897b0584ee4c54f6c89af2: holds",
+          "detail": "diff_base=bc2160d471cf3ddf937f214935c0f57408715588 ancestor-of source_commit=254b0a81248b8455c236696f9915e2a237b8c05e: holds",
           "ok": true
         },
         {
           "check": "receipt_candidate_record",
-          "detail": "version='phase34-candidate-v9' from candidate_commit blob",
+          "detail": "version='phase34-candidate-v12' from candidate_commit blob",
           "ok": true
         },
         {
@@ -833,7 +981,7 @@
         },
         {
           "check": "receipt_source_hashes_blobs",
-          "detail": "129 paths match source_commit blobs",
+          "detail": "133 paths match source_commit blobs",
           "ok": true
         },
         {
@@ -843,7 +991,7 @@
         },
         {
           "check": "receipt_parent_present",
-          "detail": "parent='phase34-candidate-v8' directory present",
+          "detail": "parent='phase34-candidate-v11' directory present",
           "ok": true
         },
         {
@@ -880,14 +1028,14 @@
       "failures": [],
       "manifest_binding": "manifest_commit",
       "ok": true,
-      "receipt_path": "configs\\harness\\receipts\\phase34-candidate-v9.json",
-      "receipt_sha256": "8bd6795b6fb97d15154849aaa46569d58367edbe11ce6ce39423e6f2a4b03c36",
+      "receipt_path": "configs\\harness\\receipts\\phase34-candidate-v12.json",
+      "receipt_sha256": "99d8787cf12bd45fdf00552fe374438f834ddbac51cbe75f3825e7ca683de6fa",
       "witness": "verified"
     },
     "historical_baseline": {
       "baseline_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
       "check": "historical_baseline",
-      "files_checked": 60,
+      "files_checked": 72,
       "manifest_path": "configs/harness/candidates/historical-baseline.json",
       "manifest_present": true,
       "mismatches": {},
@@ -968,6 +1116,24 @@
         "failures": 0
       },
       {
+        "version": "phase34-candidate-v10",
+        "ok": true,
+        "normalization_note_stale": false,
+        "failures": 0
+      },
+      {
+        "version": "phase34-candidate-v11",
+        "ok": true,
+        "normalization_note_stale": false,
+        "failures": 0
+      },
+      {
+        "version": "phase34-candidate-v12",
+        "ok": true,
+        "normalization_note_stale": false,
+        "failures": 0
+      },
+      {
         "version": "phase34-candidate-v7",
         "ok": true,
         "normalization_note_stale": false,
@@ -986,8 +1152,8 @@
         "failures": 0
       }
     ],
-    "source": "docs/notes/phase34-evidence/verify-v9.json",
-    "source_sha256": "aa86a6b43048f63880c1653ffd1b23687f8bda381839efda9465aeb75b43644f"
+    "source": "docs/notes/phase34-evidence/verify-v12.json",
+    "source_sha256": "c046843df24a0a7bfb0332f54612acd90571e3b2775ef5eb9f2f7aad6293b39a"
   },
   "runtime_lifecycle": {
     "before_fix": {
@@ -1004,7 +1170,7 @@
     "rule": "recorded_through/recorded_head describe the evidence tree; phase_commits=base..recorded_through; code_commits is path-filtered; changes after recorded_through must be docs-only"
   },
   "page_e2e": {
-    "command": "git diff --name-only dba045dabd70f0e6eb7779287136944b589f2734..dda2e3e6c8f2e9351521600029e8780b7f05cfa8 -- web/src",
+    "command": "git diff --name-only dba045dabd70f0e6eb7779287136944b589f2734..f843fe352e83bcb89184ac0c2b76390da9c66354 -- web/src",
     "changed_files": 0,
     "files": [],
     "result": "conditionally skipped: web/src has zero diff in this phase"

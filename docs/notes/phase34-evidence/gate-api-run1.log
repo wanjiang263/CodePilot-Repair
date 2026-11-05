@@ -2,4 +2,4 @@
 ..............................................                           [100%]
 =========================== short test summary info ===========================
 SKIPPED [1] tests\api\test_phase13_history.py:99: real GLM14 archived artifacts are not present on this checkout
-117 passed, 1 skipped in 144.60s (0:02:24)
+117 passed, 1 skipped in 154.68s (0:02:34)

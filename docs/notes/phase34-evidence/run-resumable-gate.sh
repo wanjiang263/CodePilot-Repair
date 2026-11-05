@@ -12,7 +12,7 @@ cd "$ROOT" || exit 1
 run_group() {
     name="$1"
     paths="$2"
-    summary="D:/cp34/final-v9/test-gate-$name.json"
+    summary="D:/cp34/final-v11/test-gate-$name.json"
     if [ -f "$summary" ]; then
         ok=$("$V" -c "import json,sys; d=json.load(open(sys.argv[1],encoding='utf-8')); print(1 if d.get('runs') and all(r.get('exit_code')==0 for r in d['runs']) else 0)" "$summary")
         if [ "$ok" = "1" ]; then
@@ -28,12 +28,12 @@ run_group() {
         --pytest-arg="not docker and not llm" \
         --pytest-arg=-p \
         --pytest-arg=no:cacheprovider \
-        --scratch D:/cp34/final-v9 \
+        --scratch D:/cp34/final-v11 \
         --summary "$summary" \
         --min-free-mb 400 \
         --min-headroom-mb 1000 \
         --wait-seconds 300 \
-        > "D:/cp34/final-v9/run-$name.log" 2>&1
+        > "D:/cp34/final-v11/run-$name.log" 2>&1
     echo "$name exit=$?"
     return 0
 }

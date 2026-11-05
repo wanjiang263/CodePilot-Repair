@@ -1,14 +1,14 @@
 {
   "tool": "phase32-provider-matrix",
-  "generated_at": "2026-11-05T02:26:24+00:00",
+  "generated_at": "2026-11-05T11:03:50+00:00",
   "real_mode": false,
   "pytest": {
-    "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe -m pytest tests/unit/llm/test_openai_compatible.py tests/unit/llm/test_phase14_protocols.py tests/unit/llm/test_phase28_http_matrix.py tests/unit/llm/test_phase29_http_matrix.py tests/unit/llm/test_http_total_deadline.py tests/unit/llm/test_tracking_chain_accounting.py tests/unit/llm/test_dispatch_ledger_reconciliation.py tests/unit/llm/test_cost.py tests/unit/llm/test_retry.py -q -p no:cacheprovider --basetemp=D:\\cp34\\final-v9\\provider-matrix\\pytest-basetemp --junitxml=D:\\cp34\\final-v9\\provider-matrix\\provider-matrix.xml",
+    "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/llm/test_openai_compatible.py tests/unit/llm/test_phase14_protocols.py tests/unit/llm/test_phase28_http_matrix.py tests/unit/llm/test_phase29_http_matrix.py tests/unit/llm/test_http_total_deadline.py tests/unit/llm/test_tracking_chain_accounting.py tests/unit/llm/test_dispatch_ledger_reconciliation.py tests/unit/llm/test_cost.py tests/unit/llm/test_retry.py -q -p no:cacheprovider --basetemp=D:\\cp34\\final-v12\\provider-matrix\\pytest-basetemp --junitxml=D:\\cp34\\final-v12\\provider-matrix\\provider-matrix.xml",
     "exit_code": 0,
-    "log": "D:\\cp34\\final-v9\\provider-matrix\\provider-matrix.log",
-    "junit": "D:\\cp34\\final-v9\\provider-matrix\\provider-matrix.xml",
+    "log": "D:\\cp34\\final-v12\\provider-matrix\\provider-matrix.log",
+    "junit": "D:\\cp34\\final-v12\\provider-matrix\\provider-matrix.xml",
     "summary": [
-      "166 passed in 80.79s (0:01:20)"
+      "166 passed in 81.96s (0:01:21)"
     ]
   },
   "totals_from_junit": {

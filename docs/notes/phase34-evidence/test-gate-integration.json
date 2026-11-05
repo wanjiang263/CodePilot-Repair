@@ -1,7 +1,7 @@
 {
   "tool": "phase32-test-gate",
-  "generated_at": "2026-11-05T01:59:34+00:00",
-  "scratch": "D:\\cp34\\final-v9",
+  "generated_at": "2026-11-05T09:56:18+00:00",
+  "scratch": "D:\\cp34\\final-v11",
   "rg_path": "C:\\Users\\lenovo\\AppData\\Local\\OpenAI\\Codex\\bin\\rg.EXE",
   "rg_version": "ripgrep 15.1.0 (rev af60c2de9d)",
   "sequential": true,
@@ -14,35 +14,35 @@
     {
       "suite": "integration",
       "run": 1,
-      "started_at": "2026-11-05T01:52:07+00:00",
+      "started_at": "2026-11-05T09:47:00+00:00",
       "exit_code": 0,
-      "wall_s": 433.2,
+      "wall_s": 551.09,
       "memory_after": {
         "total_phys_mb": 16176,
-        "avail_phys_mb": 2120,
-        "total_pagefile_mb": 46274,
-        "avail_pagefile_mb": 7517,
-        "commit_headroom_mb": 7517,
-        "load_pct": 86
+        "avail_phys_mb": 1967,
+        "total_pagefile_mb": 48048,
+        "avail_pagefile_mb": 5497,
+        "commit_headroom_mb": 5497,
+        "load_pct": 87
       },
-      "log": "D:\\cp34\\final-v9\\gate-integration-run1.log",
-      "junit": "D:\\cp34\\final-v9\\gate-integration-run1.xml",
-      "basetemp": "D:\\cp34\\final-v9\\pytest\\integration-run1-20261105T015207-151696",
-      "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/integration -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-integration-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\integration-run1-20261105T015207-151696",
-      "summary_line": "126 passed, 1 deselected in 428.97s (0:07:08)",
+      "log": "D:\\cp34\\final-v11\\gate-integration-run1.log",
+      "junit": "D:\\cp34\\final-v11\\gate-integration-run1.xml",
+      "basetemp": "D:\\cp34\\final-v11\\pytest\\integration-run1-20261105T094700-281894",
+      "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/integration -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v11\\gate-integration-run1.xml --basetemp=D:\\cp34\\final-v11\\pytest\\integration-run1-20261105T094700-281894",
+      "summary_line": "126 passed, 1 deselected in 544.90s (0:09:04)",
       "temp_reclaimed": {
-        "path": "D:\\cp34\\final-v9\\pytest\\integration-run1-20261105T015207-151696",
+        "path": "D:\\cp34\\final-v11\\pytest\\integration-run1-20261105T094700-281894",
         "existed": true,
         "removed": false,
-        "bytes_removed": 18663984
+        "bytes_removed": 18660453
       },
       "memory_before": {
         "total_phys_mb": 16176,
-        "avail_phys_mb": 2217,
-        "total_pagefile_mb": 46274,
-        "avail_pagefile_mb": 7551,
-        "commit_headroom_mb": 7551,
-        "load_pct": 86,
+        "avail_phys_mb": 984,
+        "total_pagefile_mb": 48048,
+        "avail_pagefile_mb": 5457,
+        "commit_headroom_mb": 5457,
+        "load_pct": 93,
         "sufficient": 1
       }
     }

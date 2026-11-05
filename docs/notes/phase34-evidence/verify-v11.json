@@ -1,0 +1,1881 @@
+{
+  "archive_root": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\configs\\harness",
+  "exit_code": 0,
+  "historical_baseline": {
+    "baseline_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
+    "check": "historical_baseline",
+    "files_checked": 68,
+    "manifest_path": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\configs\\harness\\candidates\\historical-baseline.json",
+    "manifest_present": true,
+    "mismatches": {},
+    "notes": [],
+    "ok": true
+  },
+  "historical_evidence_notes": [
+    "git status shows no tracked changes under candidates/"
+  ],
+  "historical_integrity": "ok",
+  "ignore_raw_drift": true,
+  "new_archive_status": "passed",
+  "receipt": {
+    "candidate": "phase34-candidate-v11",
+    "check": "receipt",
+    "checks": [
+      {
+        "check": "receipt_witness",
+        "detail": "receipt sha256 matches the external witness",
+        "ok": true
+      },
+      {
+        "check": "receipt_schema",
+        "detail": "schema and required fields present",
+        "ok": true
+      },
+      {
+        "check": "receipt_commit_ancestor",
+        "detail": "merge-base --is-ancestor 2dfe3e5f20d033f2de2740a69dc762658a18b002 HEAD(c22ba0053cfd34dc1a51eb4d1d6da12679c2ebaf) holds",
+        "ok": true
+      },
+      {
+        "check": "receipt_candidate_files",
+        "detail": "4 files match receipt at blob and disk",
+        "ok": true
+      },
+      {
+        "check": "receipt_candidate_tree_self",
+        "detail": "declared='e396ea3c93e43d2e20f9d051a0f5314c9a90e744979c8ccd9e10583509a4f4d4' recomputed_from_receipt=e396ea3c93e43d2e20f9d051a0f5314c9a90e744979c8ccd9e10583509a4f4d4",
+        "ok": true
+      },
+      {
+        "check": "receipt_candidate_tree_current",
+        "detail": "declared='e396ea3c93e43d2e20f9d051a0f5314c9a90e744979c8ccd9e10583509a4f4d4' recomputed_from_disk=e396ea3c93e43d2e20f9d051a0f5314c9a90e744979c8ccd9e10583509a4f4d4",
+        "ok": true
+      },
+      {
+        "check": "receipt_source_ancestry",
+        "detail": "diff_base=7646709f94a7768699b607e4a3a81528930797b0 ancestor-of source_commit=bc2160d471cf3ddf937f214935c0f57408715588: holds",
+        "ok": true
+      },
+      {
+        "check": "receipt_candidate_record",
+        "detail": "version='phase34-candidate-v11' from candidate_commit blob",
+        "ok": true
+      },
+      {
+        "check": "receipt_cross_candidate",
+        "detail": "receipt candidate must equal candidate.json version",
+        "ok": true
+      },
+      {
+        "check": "receipt_cross_source_commit",
+        "detail": "receipt source_commit must equal candidate.json source_commit",
+        "ok": true
+      },
+      {
+        "check": "receipt_cross_diff_base",
+        "detail": "receipt diff_base must equal candidate.json diff_base_commit",
+        "ok": true
+      },
+      {
+        "check": "receipt_source_candidate_ancestry",
+        "detail": "source_commit must be ancestor of candidate_commit",
+        "ok": true
+      },
+      {
+        "check": "receipt_declared_status",
+        "detail": "receipt.status must be pending",
+        "ok": true
+      },
+      {
+        "check": "receipt_v5_candidate",
+        "detail": "[]",
+        "ok": true
+      },
+      {
+        "check": "receipt_source_hashes_blobs",
+        "detail": "133 paths match source_commit blobs",
+        "ok": true
+      },
+      {
+        "check": "receipt_status_pending",
+        "detail": "candidate.json status='pending' (must be 'pending')",
+        "ok": true
+      },
+      {
+        "check": "receipt_parent_present",
+        "detail": "parent='phase34-candidate-v10' directory present",
+        "ok": true
+      },
+      {
+        "check": "receipt_diff_roundtrip",
+        "detail": "complete resolved trees round-trip",
+        "ok": true
+      },
+      {
+        "check": "receipt_snapshot_strict",
+        "detail": "role prompts present and non-empty",
+        "ok": true
+      },
+      {
+        "check": "receipt_not_active",
+        "detail": "no active pointer references it",
+        "ok": true
+      },
+      {
+        "check": "receipt_manifest_commit",
+        "detail": "manifest_commit required and must be HEAD ancestor",
+        "ok": true
+      },
+      {
+        "check": "receipt_manifest_blob",
+        "detail": "manifest_blob_sha256 and historical_manifest_sha256 must equal committed blob",
+        "ok": true
+      },
+      {
+        "check": "receipt_historical_manifest",
+        "detail": "current manifest must equal bound blob",
+        "ok": true
+      }
+    ],
+    "failures": [],
+    "manifest_binding": "manifest_commit",
+    "ok": true,
+    "receipt_path": "configs\\harness\\receipts\\phase34-candidate-v11.json",
+    "receipt_sha256": "b9e0b775747c6eb9f38ead706f4a1bc8eb5f284f7c0b8294fe188c55583fd839",
+    "witness": "verified"
+  },
+  "repo": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1",
+  "skipped_entries": [],
+  "tool": "phase28_archive_verify",
+  "totals": {
+    "historical_baseline_files": 68,
+    "historical_baseline_mismatches": 0,
+    "historical_files_modified": false,
+    "new_archive_failures": 0,
+    "new_archives": 10,
+    "old_archives": 7,
+    "old_unexplained_mismatches": 0,
+    "unknown_entries": 0,
+    "versions_checked": 17
+  },
+  "versions": [
+    {
+      "archive_class": "old",
+      "baseline_blob_commit": "748ad2f3c882dbba4caafa19bb3fdb1c2ee7982d",
+      "baseline_blob_matches_file": true,
+      "baseline_git_blob_sha256": "fb589399e9c1743bf3cc2edca9fa8c0e46d195337f4f1548f42544afcae399cb",
+      "declared": null,
+      "declared_field": null,
+      "declared_matches_canonical": false,
+      "declared_matches_file_bytes": false,
+      "git_blob_sha1": "50e702c4de996d3affce0229a564ef3b1aaae875",
+      "inferred_rule": null,
+      "notes": [
+        "no declared snapshot hash in candidate.json; rule not inferable"
+      ],
+      "ok": true,
+      "schema_version": 1,
+      "snapshot_canonical_sha256": "66f187980f477fd614eaa1acf55515cc749dccefe08002c087bf067ada8ec034",
+      "snapshot_file_sha256": "fb589399e9c1743bf3cc2edca9fa8c0e46d195337f4f1548f42544afcae399cb",
+      "unexplained_mismatch": false,
+      "version": "baseline-07625a8"
+    },
+    {
+      "archive_class": "old",
+      "baseline_blob_commit": "748ad2f3c882dbba4caafa19bb3fdb1c2ee7982d",
+      "baseline_blob_matches_file": true,
+      "baseline_git_blob_sha256": "33e056f0586c4d4d4db3352a029beddee63eeed1261b40d88ca6926c3a4874bc",
+      "declared": null,
+      "declared_field": null,
+      "declared_matches_canonical": false,
+      "declared_matches_file_bytes": false,
+      "git_blob_sha1": "fc081a742db6f158588d5f1274dbb21bb611195a",
+      "inferred_rule": null,
+      "notes": [
+        "no declared snapshot hash in candidate.json; rule not inferable"
+      ],
+      "ok": true,
+      "schema_version": 1,
+      "snapshot_canonical_sha256": "94e749efe82b6403d48642c51fc728b2b5bbfa35e530d3e27c9c6679e63d7d29",
+      "snapshot_file_sha256": "33e056f0586c4d4d4db3352a029beddee63eeed1261b40d88ca6926c3a4874bc",
+      "unexplained_mismatch": false,
+      "version": "phase26-candidate-v1"
+    },
+    {
+      "archive_class": "old",
+      "baseline_blob_commit": "748ad2f3c882dbba4caafa19bb3fdb1c2ee7982d",
+      "baseline_blob_matches_file": true,
+      "baseline_git_blob_sha256": "760037cb3df5a3eafcf845dfbaaae9ca266511e0c2d5c34531178863ba54c6ef",
+      "declared": "c44a73316d5e89292a8033dbf533a8401c237d6f6804a45fdfb5b12ea6eb8c4f",
+      "declared_field": "snapshot_sha256",
+      "declared_matches_canonical": true,
+      "declared_matches_file_bytes": false,
+      "git_blob_sha1": "6ef627a10dc30910158166bdc09a5687610d7440",
+      "inferred_rule": "canonical_json_snapshot",
+      "notes": [],
+      "ok": true,
+      "schema_version": 1,
+      "snapshot_canonical_sha256": "c44a73316d5e89292a8033dbf533a8401c237d6f6804a45fdfb5b12ea6eb8c4f",
+      "snapshot_file_sha256": "760037cb3df5a3eafcf845dfbaaae9ca266511e0c2d5c34531178863ba54c6ef",
+      "unexplained_mismatch": false,
+      "version": "phase26-candidate-v2"
+    },
+    {
+      "archive_class": "old",
+      "baseline_blob_commit": "748ad2f3c882dbba4caafa19bb3fdb1c2ee7982d",
+      "baseline_blob_matches_file": true,
+      "baseline_git_blob_sha256": "309ced0e14d4bf4e43575a4f89952605cacb36062d93a3a1831d0d836b6dd18e",
+      "declared": "2d39f7d5c644d23a7e61a8f1ac04c7529eeb338e3cf7cbe27ea941bcaf2f144f",
+      "declared_field": "snapshot_sha256",
+      "declared_matches_canonical": true,
+      "declared_matches_file_bytes": false,
+      "git_blob_sha1": "b9b9c8e1362160345c68e446942a7d47c5ad3730",
+      "inferred_rule": "canonical_json_snapshot",
+      "notes": [],
+      "ok": true,
+      "schema_version": 1,
+      "snapshot_canonical_sha256": "2d39f7d5c644d23a7e61a8f1ac04c7529eeb338e3cf7cbe27ea941bcaf2f144f",
+      "snapshot_file_sha256": "309ced0e14d4bf4e43575a4f89952605cacb36062d93a3a1831d0d836b6dd18e",
+      "unexplained_mismatch": false,
+      "version": "phase26-candidate-v3"
+    },
+    {
+      "archive_class": "old",
+      "baseline_blob_commit": "748ad2f3c882dbba4caafa19bb3fdb1c2ee7982d",
+      "baseline_blob_matches_file": true,
+      "baseline_git_blob_sha256": "481681fffe1c1f5fcc8f2c0181ec3af0d37df6ac0926bc52cc222feebdba92ac",
+      "declared": "07545762e8051fc84ed9e67f2053f22222f242373e3b13a7b7cc08c39181e99d",
+      "declared_field": "snapshot_sha256",
+      "declared_matches_canonical": true,
+      "declared_matches_file_bytes": false,
+      "git_blob_sha1": "26cb7b38c0a8359b5d9bf15c475b54cabba1eea1",
+      "inferred_rule": "canonical_json_snapshot",
+      "notes": [],
+      "ok": true,
+      "schema_version": 1,
+      "snapshot_canonical_sha256": "07545762e8051fc84ed9e67f2053f22222f242373e3b13a7b7cc08c39181e99d",
+      "snapshot_file_sha256": "481681fffe1c1f5fcc8f2c0181ec3af0d37df6ac0926bc52cc222feebdba92ac",
+      "unexplained_mismatch": false,
+      "version": "phase26-candidate-v4"
+    },
+    {
+      "archive_class": "old",
+      "baseline_blob_commit": "748ad2f3c882dbba4caafa19bb3fdb1c2ee7982d",
+      "baseline_blob_matches_file": true,
+      "baseline_git_blob_sha256": "69b118a769255548edb2152f5a34994493049fe80eef7f3cbffbd572d3ea5753",
+      "declared": "ecf503d292a5a030514ed7f31926180b6d230b88251e616e026dc15ecfbfd052",
+      "declared_field": "snapshot_sha256",
+      "declared_matches_canonical": true,
+      "declared_matches_file_bytes": false,
+      "git_blob_sha1": "4f765c95c1d7d87383535af195119ee64a785f42",
+      "inferred_rule": "canonical_json_snapshot",
+      "notes": [],
+      "ok": true,
+      "schema_version": 1,
+      "snapshot_canonical_sha256": "ecf503d292a5a030514ed7f31926180b6d230b88251e616e026dc15ecfbfd052",
+      "snapshot_file_sha256": "69b118a769255548edb2152f5a34994493049fe80eef7f3cbffbd572d3ea5753",
+      "unexplained_mismatch": false,
+      "version": "phase26-candidate-v5"
+    },
+    {
+      "archive_class": "old",
+      "baseline_blob_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
+      "baseline_blob_matches_file": true,
+      "baseline_git_blob_sha256": "6c4f26dbbfd6057f621ec35849f4aaa90ee78927df45c76ecf04bee1ffc2991e",
+      "declared": "6c4f26dbbfd6057f621ec35849f4aaa90ee78927df45c76ecf04bee1ffc2991e",
+      "declared_field": "snapshot_sha256",
+      "declared_matches_canonical": false,
+      "declared_matches_file_bytes": true,
+      "git_blob_sha1": "37353c544a314a1e3e5104adfe6fd4e2e67f9b61",
+      "inferred_rule": "file_bytes",
+      "notes": [],
+      "ok": true,
+      "schema_version": 1,
+      "snapshot_canonical_sha256": "334cf34ba3111cad157ad302737fc8f5d1cbe18177b1e3fbcf550aebdec4aa13",
+      "snapshot_file_sha256": "6c4f26dbbfd6057f621ec35849f4aaa90ee78927df45c76ecf04bee1ffc2991e",
+      "unexplained_mismatch": false,
+      "version": "phase27-candidate-v1"
+    },
+    {
+      "archive_class": "new",
+      "checks": [
+        {
+          "check": "version_matches_directory",
+          "detail": "candidate.json version='phase28-candidate-v2', directory='phase28-candidate-v2'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_hash_rule_declared",
+          "detail": "snapshot_hash_rule='file_bytes_sha256' (expected 'file_bytes_sha256')",
+          "ok": true
+        },
+        {
+          "check": "snapshot_ref_fixed",
+          "detail": "snapshot_ref='snapshot.json'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_file_sha256",
+          "detail": "declared='d0fd3a5ac133637454c87a153aa78ae917204387c5cece0cd8f5c2f8d6de5155' actual_file_bytes=d0fd3a5ac133637454c87a153aa78ae917204387c5cece0cd8f5c2f8d6de5155",
+          "ok": true
+        },
+        {
+          "check": "snapshot_canonical_sha256",
+          "detail": "declared='def0ec454d6c9258feeef1b940680cb717d14edae3a2811ddd0d4e941d3ca67a' actual_canonical='def0ec454d6c9258feeef1b940680cb717d14edae3a2811ddd0d4e941d3ca67a'",
+          "ok": true
+        },
+        {
+          "check": "source_hashes",
+          "detail": "mismatched=[] only_in_candidate=[] only_in_sources=[] non_string=[]",
+          "ok": true
+        },
+        {
+          "check": "source_files_count",
+          "detail": "declared=75 actual=75",
+          "ok": true
+        },
+        {
+          "check": "diff_sha256",
+          "detail": "declared='f49713553d713fa199230f180f07a27a5f51414a58e2a64e212685db28d45da1' actual=f49713553d713fa199230f180f07a27a5f51414a58e2a64e212685db28d45da1",
+          "ok": true
+        },
+        {
+          "check": "diff_reverse_apply",
+          "detail": "candidate.diff reverse-applies against source_commit 770c0dce6bba blob tree (75 paths)",
+          "ok": true
+        },
+        {
+          "check": "raw_worktree_hashes",
+          "detail": "15 file(s) differ from recorded raw worktree hashes (ignored by --ignore-raw-drift)",
+          "ok": true
+        },
+        {
+          "check": "parent_integrity_matches",
+          "detail": "parent phase27-candidate-v1 matches",
+          "ok": true
+        },
+        {
+          "check": "not_active",
+          "detail": "no active pointer references this version",
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "legacy_worktree_drift": {
+        "scripts/phase28_archive.py": "d493c5ca9c7359654ede0d65965e35cbd8f6ade667d6dafeb5daaba18fc8ee7a",
+        "scripts/phase28_archive_verify.py": "2c7c28942bbf63385399bc07cb523f691825cd0a606ace956980aa533ea58f5b",
+        "scripts/phase28_index_profile.py": "2a692f9683169b7b089e47d0ef9c5890ba30918a9d474a622e14f5f8cd5e8b2f",
+        "src/codepilot/archive.py": "54f490da54cc44e091f321223bbc16870f356f73c7eeaa89d7aa541101fadd40",
+        "src/codepilot/graph/harness.py": "a8d6015206fe67c809d5f98baa90588dbb71c3ef5ad28f2d25f80703a2f11d74",
+        "src/codepilot/repo/index.py": "db90d359e0e764f01e27d1e0715c354f4b6fe24ebca283537984e12aba4cc81a",
+        "src/codepilot/rsi.py": "1dac632a4258b7747e2b4a0a6e0320a9aee7d36bb191eb35218e3d72d36cf73a",
+        "src/codepilot/sandbox/docker.py": "738cf73bcd068d5fc914c0f70640adf810832726f854a5889dac5a065aa66ee1",
+        "tests/integration/phase28/test_phase28_archive_verify_loop.py": "e9d2349497fab153038c1b5327eee77f6cbd66a9e561df7424f610819b3b067a",
+        "tests/unit/repo/test_index.py": "0604bda8da1a2a2166188896be1da433f5b853dc50e7737cfd1a30786334f93b",
+        "tests/unit/test_phase26_closeout.py": "674e5149939a3bc21be56388ceb4ced4255ae1bebc5e42283eef17c9cdccd24e",
+        "tests/unit/test_phase26_final.py": "d3fd235c7114abc748f52b74b419f9333af5d0dbcbe677117d015c1653005a6a",
+        "tests/unit/test_phase26_harness.py": "b0864bfb07fdf88d31f3411dd59d12c4ce82fa6be95a944925048ccecd9c2790",
+        "tests/unit/test_phase28_archive.py": "131894c6a55776e41bf0c8a9bbf59d4529bf91f22baa1671068611c0b175cda5",
+        "tests/unit/test_phase28_archive_verify.py": "d914f4f20c242685d32693270a41c3e38c739aa8e9c746591a53335258e1c82d"
+      },
+      "ok": true,
+      "raw_drift": {
+        "scripts/phase28_archive.py": "d493c5ca9c7359654ede0d65965e35cbd8f6ade667d6dafeb5daaba18fc8ee7a",
+        "scripts/phase28_archive_verify.py": "2c7c28942bbf63385399bc07cb523f691825cd0a606ace956980aa533ea58f5b",
+        "scripts/phase28_index_profile.py": "2a692f9683169b7b089e47d0ef9c5890ba30918a9d474a622e14f5f8cd5e8b2f",
+        "src/codepilot/archive.py": "54f490da54cc44e091f321223bbc16870f356f73c7eeaa89d7aa541101fadd40",
+        "src/codepilot/graph/harness.py": "a8d6015206fe67c809d5f98baa90588dbb71c3ef5ad28f2d25f80703a2f11d74",
+        "src/codepilot/repo/index.py": "db90d359e0e764f01e27d1e0715c354f4b6fe24ebca283537984e12aba4cc81a",
+        "src/codepilot/rsi.py": "1dac632a4258b7747e2b4a0a6e0320a9aee7d36bb191eb35218e3d72d36cf73a",
+        "src/codepilot/sandbox/docker.py": "738cf73bcd068d5fc914c0f70640adf810832726f854a5889dac5a065aa66ee1",
+        "tests/integration/phase28/test_phase28_archive_verify_loop.py": "e9d2349497fab153038c1b5327eee77f6cbd66a9e561df7424f610819b3b067a",
+        "tests/unit/repo/test_index.py": "0604bda8da1a2a2166188896be1da433f5b853dc50e7737cfd1a30786334f93b",
+        "tests/unit/test_phase26_closeout.py": "674e5149939a3bc21be56388ceb4ced4255ae1bebc5e42283eef17c9cdccd24e",
+        "tests/unit/test_phase26_final.py": "d3fd235c7114abc748f52b74b419f9333af5d0dbcbe677117d015c1653005a6a",
+        "tests/unit/test_phase26_harness.py": "b0864bfb07fdf88d31f3411dd59d12c4ce82fa6be95a944925048ccecd9c2790",
+        "tests/unit/test_phase28_archive.py": "131894c6a55776e41bf0c8a9bbf59d4529bf91f22baa1671068611c0b175cda5",
+        "tests/unit/test_phase28_archive_verify.py": "d914f4f20c242685d32693270a41c3e38c739aa8e9c746591a53335258e1c82d"
+      },
+      "raw_drift_ignored": true,
+      "reasons": [],
+      "schema_version": 2,
+      "snapshot_canonical_sha256": "def0ec454d6c9258feeef1b940680cb717d14edae3a2811ddd0d4e941d3ca67a",
+      "snapshot_file_sha256": "d0fd3a5ac133637454c87a153aa78ae917204387c5cece0cd8f5c2f8d6de5155",
+      "status": "ok",
+      "version": "phase28-candidate-v2"
+    },
+    {
+      "archive_class": "new",
+      "checks": [
+        {
+          "check": "version_matches_directory",
+          "detail": "candidate.json version='phase29-candidate-v3', directory='phase29-candidate-v3'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_hash_rule_declared",
+          "detail": "snapshot_hash_rule='file_bytes_sha256' (expected 'file_bytes_sha256')",
+          "ok": true
+        },
+        {
+          "check": "snapshot_ref_fixed",
+          "detail": "snapshot_ref='snapshot.json'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_file_sha256",
+          "detail": "declared='ed47993c596a2b2bfedb35af03276c81bbf0befad76a47f7d14f34fe616363ee' actual_file_bytes=ed47993c596a2b2bfedb35af03276c81bbf0befad76a47f7d14f34fe616363ee",
+          "ok": true
+        },
+        {
+          "check": "snapshot_canonical_sha256",
+          "detail": "declared='144147d215b08b6105e1957b94c93ac0a32f6aa82d8c120a6840aec8e613c57f' actual_canonical='144147d215b08b6105e1957b94c93ac0a32f6aa82d8c120a6840aec8e613c57f'",
+          "ok": true
+        },
+        {
+          "check": "normalization_policy",
+          "detail": "legacy candidate phase29-candidate-v3 exempt by pinned payload seal; normalization_note_stale (raw hashes were never stored)",
+          "ok": true
+        },
+        {
+          "check": "candidate_payload_sha256",
+          "detail": "declared='2d88b1de5910e914a1b58a1b3d846caaecedb1d28210754485188cfd10e592a4' recomputed=2d88b1de5910e914a1b58a1b3d846caaecedb1d28210754485188cfd10e592a4",
+          "ok": true
+        },
+        {
+          "check": "source_origin_declared",
+          "detail": "source_origin='git_commit'",
+          "ok": true
+        },
+        {
+          "check": "origin_dirty_consistency",
+          "detail": "dirty_worktree=False for git_commit mode",
+          "ok": true
+        },
+        {
+          "check": "source_commit_resolves",
+          "detail": "source_commit='b17019beb817b92b1fbb3da879774a231d69219d' resolves to a commit",
+          "ok": true
+        },
+        {
+          "check": "source_commit_ancestor",
+          "detail": "merge-base --is-ancestor 38e395ac5373b2029f7171f82bd4f0ad7f932ba5 b17019beb817b92b1fbb3da879774a231d69219d holds",
+          "ok": true
+        },
+        {
+          "check": "source_hashes",
+          "detail": "mismatched=[] only_in_candidate=[] only_in_sources=[] non_string=[]",
+          "ok": true
+        },
+        {
+          "check": "source_files_count",
+          "detail": "declared=26 actual=26",
+          "ok": true
+        },
+        {
+          "check": "source_commit_blob",
+          "detail": "26 paths match source_commit blobs",
+          "ok": true
+        },
+        {
+          "check": "base_commit_blob",
+          "detail": "base_hashes match diff_base blobs",
+          "ok": true
+        },
+        {
+          "check": "diff_sha256",
+          "detail": "declared='e3548c09b666d15c04ba1fc4d923bcb835a4d85cda927138735590105b772dd0' actual=e3548c09b666d15c04ba1fc4d923bcb835a4d85cda927138735590105b772dd0",
+          "ok": true
+        },
+        {
+          "check": "diff_forward_apply",
+          "detail": "base blobs + diff reproduce sources.json",
+          "ok": true
+        },
+        {
+          "check": "diff_reverse_apply",
+          "detail": "reverse-applied tree equals diff_base blobs",
+          "ok": true
+        },
+        {
+          "check": "parent_integrity_matches",
+          "detail": "parent phase28-candidate-v2 matches",
+          "ok": true
+        },
+        {
+          "check": "not_active",
+          "detail": "no active pointer references this version",
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "legacy_worktree_drift": {},
+      "normalization_note_stale": true,
+      "ok": true,
+      "raw_drift": {},
+      "raw_drift_ignored": false,
+      "reasons": [
+        "schema<4",
+        "empty_role_prompts"
+      ],
+      "schema_version": 3,
+      "snapshot_canonical_sha256": "144147d215b08b6105e1957b94c93ac0a32f6aa82d8c120a6840aec8e613c57f",
+      "snapshot_file_sha256": "ed47993c596a2b2bfedb35af03276c81bbf0befad76a47f7d14f34fe616363ee",
+      "source_origin": "git_commit",
+      "status": "legacy_non_strict",
+      "version": "phase29-candidate-v3"
+    },
+    {
+      "archive_class": "new",
+      "checks": [
+        {
+          "check": "version_matches_directory",
+          "detail": "candidate.json version='phase30-candidate-v4', directory='phase30-candidate-v4'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_hash_rule_declared",
+          "detail": "snapshot_hash_rule='file_bytes_sha256' (expected 'file_bytes_sha256')",
+          "ok": true
+        },
+        {
+          "check": "snapshot_ref_fixed",
+          "detail": "snapshot_ref='snapshot.json'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_file_sha256",
+          "detail": "declared='55afb0baedfb1210d0b1334a84dbaa267e67a20decae2cb4b48259c61e1814ac' actual_file_bytes=55afb0baedfb1210d0b1334a84dbaa267e67a20decae2cb4b48259c61e1814ac",
+          "ok": true
+        },
+        {
+          "check": "snapshot_canonical_sha256",
+          "detail": "declared='e1c8ad3275e33f619ec5315c71a62e53fdd2f383e6e87dc7da32c73e6de14093' actual_canonical='e1c8ad3275e33f619ec5315c71a62e53fdd2f383e6e87dc7da32c73e6de14093'",
+          "ok": true
+        },
+        {
+          "check": "normalization_policy",
+          "detail": "legacy candidate phase30-candidate-v4 exempt by pinned payload seal; normalization_note_stale (raw hashes were never stored)",
+          "ok": true
+        },
+        {
+          "check": "candidate_payload_sha256",
+          "detail": "declared='7b6c125ebef80d1fa1f33e2c5c4b6814d43325661ab9ebdd37e4555be075bb3c' recomputed=7b6c125ebef80d1fa1f33e2c5c4b6814d43325661ab9ebdd37e4555be075bb3c",
+          "ok": true
+        },
+        {
+          "check": "source_origin_declared",
+          "detail": "source_origin='git_commit'",
+          "ok": true
+        },
+        {
+          "check": "origin_dirty_consistency",
+          "detail": "dirty_worktree=False for git_commit mode",
+          "ok": true
+        },
+        {
+          "check": "source_commit_resolves",
+          "detail": "source_commit='8e1f1f47467427b97aa9e02c076e803500d9f102' resolves to a commit",
+          "ok": true
+        },
+        {
+          "check": "source_commit_ancestor",
+          "detail": "merge-base --is-ancestor b17019beb817b92b1fbb3da879774a231d69219d 8e1f1f47467427b97aa9e02c076e803500d9f102 holds",
+          "ok": true
+        },
+        {
+          "check": "source_hashes",
+          "detail": "mismatched=[] only_in_candidate=[] only_in_sources=[] non_string=[]",
+          "ok": true
+        },
+        {
+          "check": "source_files_count",
+          "detail": "declared=96 actual=96",
+          "ok": true
+        },
+        {
+          "check": "source_commit_blob",
+          "detail": "96 paths match source_commit blobs",
+          "ok": true
+        },
+        {
+          "check": "base_commit_blob",
+          "detail": "base_hashes match diff_base blobs",
+          "ok": true
+        },
+        {
+          "check": "diff_sha256",
+          "detail": "declared='dbfdc9996999c27af3ff406d2c68b8063917763ef8e839f077cbc47de17efdbd' actual=dbfdc9996999c27af3ff406d2c68b8063917763ef8e839f077cbc47de17efdbd",
+          "ok": true
+        },
+        {
+          "check": "diff_forward_apply",
+          "detail": "base blobs + diff reproduce sources.json",
+          "ok": true
+        },
+        {
+          "check": "diff_reverse_apply",
+          "detail": "reverse-applied tree equals diff_base blobs",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_declared",
+          "detail": "kind='full' parent='phase29-candidate-v3' roles=['coder', 'planner', 'reviewer']",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_full_coverage",
+          "detail": "covers all 91 inherited files and required role sources",
+          "ok": true
+        },
+        {
+          "check": "snapshot_strict_roles",
+          "detail": "coder/planner/reviewer prompts present and non-empty",
+          "ok": true
+        },
+        {
+          "check": "parent_integrity_matches",
+          "detail": "parent phase29-candidate-v3 matches",
+          "ok": true
+        },
+        {
+          "check": "not_active",
+          "detail": "no active pointer references this version",
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "legacy_worktree_drift": {},
+      "normalization_note_stale": true,
+      "ok": true,
+      "raw_drift": {},
+      "raw_drift_ignored": false,
+      "reasons": [],
+      "schema_version": 4,
+      "snapshot_canonical_sha256": "e1c8ad3275e33f619ec5315c71a62e53fdd2f383e6e87dc7da32c73e6de14093",
+      "snapshot_file_sha256": "55afb0baedfb1210d0b1334a84dbaa267e67a20decae2cb4b48259c61e1814ac",
+      "source_origin": "git_commit",
+      "status": "ok",
+      "version": "phase30-candidate-v4"
+    },
+    {
+      "archive_class": "new",
+      "checks": [
+        {
+          "check": "version_matches_directory",
+          "detail": "candidate.json version='phase31-candidate-v5', directory='phase31-candidate-v5'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_hash_rule_declared",
+          "detail": "snapshot_hash_rule='file_bytes_sha256' (expected 'file_bytes_sha256')",
+          "ok": true
+        },
+        {
+          "check": "snapshot_ref_fixed",
+          "detail": "snapshot_ref='snapshot.json'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_file_sha256",
+          "detail": "declared='fae8c29a80300e3a2d7a26ec9f07426a2fb140606c4ecdce2c9bd468a97e738d' actual_file_bytes=fae8c29a80300e3a2d7a26ec9f07426a2fb140606c4ecdce2c9bd468a97e738d",
+          "ok": true
+        },
+        {
+          "check": "snapshot_canonical_sha256",
+          "detail": "declared='9ea628f7587d7f1fe96e8133de2196650eeb7aec6b0ce75914f3cbde319b550d' actual_canonical='9ea628f7587d7f1fe96e8133de2196650eeb7aec6b0ce75914f3cbde319b550d'",
+          "ok": true
+        },
+        {
+          "check": "source_hashes",
+          "detail": "mismatched=[] only_in_candidate=[] only_in_sources=[] non_string=[]",
+          "ok": true
+        },
+        {
+          "check": "source_files_count",
+          "detail": "declared=107 actual=107",
+          "ok": true
+        },
+        {
+          "check": "normalization_policy",
+          "detail": "legacy candidate phase31-candidate-v5 exempt by pinned payload seal; normalization_note_stale (raw hashes were never stored)",
+          "ok": true
+        },
+        {
+          "check": "snapshot_strict_roles",
+          "detail": "coder/planner/reviewer prompts present and non-empty",
+          "ok": true
+        },
+        {
+          "check": "not_active",
+          "detail": "no active pointer references this version",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.next.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "status_pending",
+          "detail": "v5 status must be pending",
+          "ok": true
+        },
+        {
+          "check": "candidate_schema_version",
+          "detail": "candidate_schema_version must equal schema_version=5",
+          "ok": true
+        },
+        {
+          "check": "candidate_payload_sha256",
+          "detail": "canonical payload seal",
+          "ok": true
+        },
+        {
+          "check": "source_origin",
+          "detail": "v5 requires clean git_commit provenance",
+          "ok": true
+        },
+        {
+          "check": "source_commit",
+          "detail": "source_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "diff_base_commit",
+          "detail": "diff_base_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "source_commit_ancestor",
+          "detail": "diff_base must be ancestor of source_commit",
+          "ok": true
+        },
+        {
+          "check": "parent_integrity_matches",
+          "detail": "parent declaration must equal recomputed strict integrity record",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_complete",
+          "detail": "all v5 manifest fields must exactly equal git/parent derivation",
+          "ok": true
+        },
+        {
+          "check": "resolved_source_files",
+          "detail": "resolved_source_files must equal complete resolved source count",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_exact_set",
+          "detail": "missing=[] extra=[]",
+          "ok": true
+        },
+        {
+          "check": "changed_files",
+          "detail": "changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "deleted_files",
+          "detail": "deleted_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "scope_excluded_changed_files",
+          "detail": "scope_excluded_changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "source_commit_blob",
+          "detail": "source_hashes must equal archived source_commit LF blob hashes",
+          "ok": true
+        },
+        {
+          "check": "snapshot_source_binding",
+          "detail": "snapshot identity/status and per-role prompts must match source and inheritance",
+          "ok": true
+        },
+        {
+          "check": "base_commit_blob",
+          "detail": "base_hashes bind complete resolved tree plus tombstones",
+          "ok": true
+        },
+        {
+          "check": "diff_sha256",
+          "detail": "diff bytes hash",
+          "ok": true
+        },
+        {
+          "check": "diff_forward_apply",
+          "detail": "complete source tree and tombstones reproduced",
+          "ok": true
+        },
+        {
+          "check": "diff_reverse_apply",
+          "detail": "complete base tree restored",
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "normalization_note_stale": true,
+      "ok": true,
+      "raw_drift": {},
+      "schema_version": 5,
+      "snapshot_canonical_sha256": "9ea628f7587d7f1fe96e8133de2196650eeb7aec6b0ce75914f3cbde319b550d",
+      "snapshot_file_sha256": "fae8c29a80300e3a2d7a26ec9f07426a2fb140606c4ecdce2c9bd468a97e738d",
+      "status": "ok",
+      "version": "phase31-candidate-v5"
+    },
+    {
+      "archive_class": "new",
+      "checks": [
+        {
+          "check": "version_matches_directory",
+          "detail": "candidate.json version='phase33-candidate-v6', directory='phase33-candidate-v6'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_hash_rule_declared",
+          "detail": "snapshot_hash_rule='file_bytes_sha256' (expected 'file_bytes_sha256')",
+          "ok": true
+        },
+        {
+          "check": "snapshot_ref_fixed",
+          "detail": "snapshot_ref='snapshot.json'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_file_sha256",
+          "detail": "declared='cb403a1992ec0ed9f6249a06a2b813e269fcd68cfd8524225f3643e3d9e6b905' actual_file_bytes=cb403a1992ec0ed9f6249a06a2b813e269fcd68cfd8524225f3643e3d9e6b905",
+          "ok": true
+        },
+        {
+          "check": "snapshot_canonical_sha256",
+          "detail": "declared='59217fb528a24e71e82591d6b011f5ae05296e26a12499558cecec48b4a24165' actual_canonical='59217fb528a24e71e82591d6b011f5ae05296e26a12499558cecec48b4a24165'",
+          "ok": true
+        },
+        {
+          "check": "source_hashes",
+          "detail": "mismatched=[] only_in_candidate=[] only_in_sources=[] non_string=[]",
+          "ok": true
+        },
+        {
+          "check": "source_files_count",
+          "detail": "declared=122 actual=122",
+          "ok": true
+        },
+        {
+          "check": "normalization_policy",
+          "detail": "legacy candidate phase33-candidate-v6 exempt by pinned payload seal; normalization_note_stale (raw hashes were never stored)",
+          "ok": true
+        },
+        {
+          "check": "snapshot_strict_roles",
+          "detail": "coder/planner/reviewer prompts present and non-empty",
+          "ok": true
+        },
+        {
+          "check": "not_active",
+          "detail": "no active pointer references this version",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.next.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "status_pending",
+          "detail": "v5 status must be pending",
+          "ok": true
+        },
+        {
+          "check": "candidate_schema_version",
+          "detail": "candidate_schema_version must equal schema_version=5",
+          "ok": true
+        },
+        {
+          "check": "candidate_payload_sha256",
+          "detail": "canonical payload seal",
+          "ok": true
+        },
+        {
+          "check": "source_origin",
+          "detail": "v5 requires clean git_commit provenance",
+          "ok": true
+        },
+        {
+          "check": "source_commit",
+          "detail": "source_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "diff_base_commit",
+          "detail": "diff_base_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "source_commit_ancestor",
+          "detail": "diff_base must be ancestor of source_commit",
+          "ok": true
+        },
+        {
+          "check": "parent_integrity_matches",
+          "detail": "parent declaration must equal recomputed strict integrity record",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_complete",
+          "detail": "all v5 manifest fields must exactly equal git/parent derivation",
+          "ok": true
+        },
+        {
+          "check": "resolved_source_files",
+          "detail": "resolved_source_files must equal complete resolved source count",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_exact_set",
+          "detail": "missing=[] extra=[]",
+          "ok": true
+        },
+        {
+          "check": "changed_files",
+          "detail": "changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "deleted_files",
+          "detail": "deleted_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "scope_excluded_changed_files",
+          "detail": "scope_excluded_changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "source_commit_blob",
+          "detail": "source_hashes must equal archived source_commit LF blob hashes",
+          "ok": true
+        },
+        {
+          "check": "snapshot_source_binding",
+          "detail": "snapshot identity/status and per-role prompts must match source and inheritance",
+          "ok": true
+        },
+        {
+          "check": "base_commit_blob",
+          "detail": "base_hashes bind complete resolved tree plus tombstones",
+          "ok": true
+        },
+        {
+          "check": "diff_sha256",
+          "detail": "diff bytes hash",
+          "ok": true
+        },
+        {
+          "check": "diff_forward_apply",
+          "detail": "complete source tree and tombstones reproduced",
+          "ok": true
+        },
+        {
+          "check": "diff_reverse_apply",
+          "detail": "complete base tree restored",
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "normalization_note_stale": true,
+      "ok": true,
+      "raw_drift": {},
+      "schema_version": 5,
+      "snapshot_canonical_sha256": "59217fb528a24e71e82591d6b011f5ae05296e26a12499558cecec48b4a24165",
+      "snapshot_file_sha256": "cb403a1992ec0ed9f6249a06a2b813e269fcd68cfd8524225f3643e3d9e6b905",
+      "status": "ok",
+      "version": "phase33-candidate-v6"
+    },
+    {
+      "archive_class": "new",
+      "checks": [
+        {
+          "check": "version_matches_directory",
+          "detail": "candidate.json version='phase34-candidate-v10', directory='phase34-candidate-v10'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_hash_rule_declared",
+          "detail": "snapshot_hash_rule='file_bytes_sha256' (expected 'file_bytes_sha256')",
+          "ok": true
+        },
+        {
+          "check": "snapshot_ref_fixed",
+          "detail": "snapshot_ref='snapshot.json'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_file_sha256",
+          "detail": "declared='6edf5eff6079ca44862e19bec962ef325d2d0c69c7eadb186d5574579990af64' actual_file_bytes=6edf5eff6079ca44862e19bec962ef325d2d0c69c7eadb186d5574579990af64",
+          "ok": true
+        },
+        {
+          "check": "snapshot_canonical_sha256",
+          "detail": "declared='012123900b34e45b79dd9fd50ef862bad837a94836ec45e451375ee4732a3824' actual_canonical='012123900b34e45b79dd9fd50ef862bad837a94836ec45e451375ee4732a3824'",
+          "ok": true
+        },
+        {
+          "check": "source_hashes",
+          "detail": "mismatched=[] only_in_candidate=[] only_in_sources=[] non_string=[]",
+          "ok": true
+        },
+        {
+          "check": "source_files_count",
+          "detail": "declared=133 actual=133",
+          "ok": true
+        },
+        {
+          "check": "normalization_policy",
+          "detail": "normalization policy matches the stored bytes",
+          "ok": true
+        },
+        {
+          "check": "snapshot_strict_roles",
+          "detail": "coder/planner/reviewer prompts present and non-empty",
+          "ok": true
+        },
+        {
+          "check": "not_active",
+          "detail": "no active pointer references this version",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.next.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "status_pending",
+          "detail": "v5 status must be pending",
+          "ok": true
+        },
+        {
+          "check": "candidate_schema_version",
+          "detail": "candidate_schema_version must equal schema_version=5",
+          "ok": true
+        },
+        {
+          "check": "candidate_payload_sha256",
+          "detail": "canonical payload seal",
+          "ok": true
+        },
+        {
+          "check": "source_origin",
+          "detail": "v5 requires clean git_commit provenance",
+          "ok": true
+        },
+        {
+          "check": "source_commit",
+          "detail": "source_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "diff_base_commit",
+          "detail": "diff_base_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "source_commit_ancestor",
+          "detail": "diff_base must be ancestor of source_commit",
+          "ok": true
+        },
+        {
+          "check": "parent_integrity_matches",
+          "detail": "parent declaration must equal recomputed strict integrity record",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_complete",
+          "detail": "all v5 manifest fields must exactly equal git/parent derivation",
+          "ok": true
+        },
+        {
+          "check": "resolved_source_files",
+          "detail": "resolved_source_files must equal complete resolved source count",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_exact_set",
+          "detail": "missing=[] extra=[]",
+          "ok": true
+        },
+        {
+          "check": "changed_files",
+          "detail": "changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "deleted_files",
+          "detail": "deleted_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "scope_excluded_changed_files",
+          "detail": "scope_excluded_changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "source_commit_blob",
+          "detail": "source_hashes must equal archived source_commit LF blob hashes",
+          "ok": true
+        },
+        {
+          "check": "snapshot_source_binding",
+          "detail": "snapshot identity/status and per-role prompts must match source and inheritance",
+          "ok": true
+        },
+        {
+          "check": "base_commit_blob",
+          "detail": "base_hashes bind complete resolved tree plus tombstones",
+          "ok": true
+        },
+        {
+          "check": "diff_sha256",
+          "detail": "diff bytes hash",
+          "ok": true
+        },
+        {
+          "check": "diff_forward_apply",
+          "detail": "complete source tree and tombstones reproduced",
+          "ok": true
+        },
+        {
+          "check": "diff_reverse_apply",
+          "detail": "complete base tree restored",
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "normalization_note_stale": false,
+      "ok": true,
+      "raw_drift": {},
+      "schema_version": 5,
+      "snapshot_canonical_sha256": "012123900b34e45b79dd9fd50ef862bad837a94836ec45e451375ee4732a3824",
+      "snapshot_file_sha256": "6edf5eff6079ca44862e19bec962ef325d2d0c69c7eadb186d5574579990af64",
+      "status": "ok",
+      "version": "phase34-candidate-v10"
+    },
+    {
+      "archive_class": "new",
+      "checks": [
+        {
+          "check": "version_matches_directory",
+          "detail": "candidate.json version='phase34-candidate-v11', directory='phase34-candidate-v11'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_hash_rule_declared",
+          "detail": "snapshot_hash_rule='file_bytes_sha256' (expected 'file_bytes_sha256')",
+          "ok": true
+        },
+        {
+          "check": "snapshot_ref_fixed",
+          "detail": "snapshot_ref='snapshot.json'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_file_sha256",
+          "detail": "declared='ec087b338d215ede193bba421f433a2269979a3833d711e73a3f59e85ea6aa66' actual_file_bytes=ec087b338d215ede193bba421f433a2269979a3833d711e73a3f59e85ea6aa66",
+          "ok": true
+        },
+        {
+          "check": "snapshot_canonical_sha256",
+          "detail": "declared='b4836a48a0a34f4fddeb67574ede1b229185dfb28cf9bdb95ccc132a2d8ab7f8' actual_canonical='b4836a48a0a34f4fddeb67574ede1b229185dfb28cf9bdb95ccc132a2d8ab7f8'",
+          "ok": true
+        },
+        {
+          "check": "source_hashes",
+          "detail": "mismatched=[] only_in_candidate=[] only_in_sources=[] non_string=[]",
+          "ok": true
+        },
+        {
+          "check": "source_files_count",
+          "detail": "declared=133 actual=133",
+          "ok": true
+        },
+        {
+          "check": "normalization_policy",
+          "detail": "normalization policy matches the stored bytes",
+          "ok": true
+        },
+        {
+          "check": "snapshot_strict_roles",
+          "detail": "coder/planner/reviewer prompts present and non-empty",
+          "ok": true
+        },
+        {
+          "check": "not_active",
+          "detail": "no active pointer references this version",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.next.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "status_pending",
+          "detail": "v5 status must be pending",
+          "ok": true
+        },
+        {
+          "check": "candidate_schema_version",
+          "detail": "candidate_schema_version must equal schema_version=5",
+          "ok": true
+        },
+        {
+          "check": "candidate_payload_sha256",
+          "detail": "canonical payload seal",
+          "ok": true
+        },
+        {
+          "check": "source_origin",
+          "detail": "v5 requires clean git_commit provenance",
+          "ok": true
+        },
+        {
+          "check": "source_commit",
+          "detail": "source_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "diff_base_commit",
+          "detail": "diff_base_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "source_commit_ancestor",
+          "detail": "diff_base must be ancestor of source_commit",
+          "ok": true
+        },
+        {
+          "check": "parent_integrity_matches",
+          "detail": "parent declaration must equal recomputed strict integrity record",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_complete",
+          "detail": "all v5 manifest fields must exactly equal git/parent derivation",
+          "ok": true
+        },
+        {
+          "check": "resolved_source_files",
+          "detail": "resolved_source_files must equal complete resolved source count",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_exact_set",
+          "detail": "missing=[] extra=[]",
+          "ok": true
+        },
+        {
+          "check": "changed_files",
+          "detail": "changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "deleted_files",
+          "detail": "deleted_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "scope_excluded_changed_files",
+          "detail": "scope_excluded_changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "source_commit_blob",
+          "detail": "source_hashes must equal archived source_commit LF blob hashes",
+          "ok": true
+        },
+        {
+          "check": "snapshot_source_binding",
+          "detail": "snapshot identity/status and per-role prompts must match source and inheritance",
+          "ok": true
+        },
+        {
+          "check": "base_commit_blob",
+          "detail": "base_hashes bind complete resolved tree plus tombstones",
+          "ok": true
+        },
+        {
+          "check": "diff_sha256",
+          "detail": "diff bytes hash",
+          "ok": true
+        },
+        {
+          "check": "diff_forward_apply",
+          "detail": "complete source tree and tombstones reproduced",
+          "ok": true
+        },
+        {
+          "check": "diff_reverse_apply",
+          "detail": "complete base tree restored",
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "normalization_note_stale": false,
+      "ok": true,
+      "raw_drift": {},
+      "schema_version": 5,
+      "snapshot_canonical_sha256": "b4836a48a0a34f4fddeb67574ede1b229185dfb28cf9bdb95ccc132a2d8ab7f8",
+      "snapshot_file_sha256": "ec087b338d215ede193bba421f433a2269979a3833d711e73a3f59e85ea6aa66",
+      "status": "ok",
+      "version": "phase34-candidate-v11"
+    },
+    {
+      "archive_class": "new",
+      "checks": [
+        {
+          "check": "version_matches_directory",
+          "detail": "candidate.json version='phase34-candidate-v7', directory='phase34-candidate-v7'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_hash_rule_declared",
+          "detail": "snapshot_hash_rule='file_bytes_sha256' (expected 'file_bytes_sha256')",
+          "ok": true
+        },
+        {
+          "check": "snapshot_ref_fixed",
+          "detail": "snapshot_ref='snapshot.json'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_file_sha256",
+          "detail": "declared='f5fe3f364b126457bd7e029bd25212b7c4038c16cda33ced833422350bfd921e' actual_file_bytes=f5fe3f364b126457bd7e029bd25212b7c4038c16cda33ced833422350bfd921e",
+          "ok": true
+        },
+        {
+          "check": "snapshot_canonical_sha256",
+          "detail": "declared='c9023be86ae6f859c8a69e2713e813ede66b5e6b17ff80eef891f509f37ec6c7' actual_canonical='c9023be86ae6f859c8a69e2713e813ede66b5e6b17ff80eef891f509f37ec6c7'",
+          "ok": true
+        },
+        {
+          "check": "source_hashes",
+          "detail": "mismatched=[] only_in_candidate=[] only_in_sources=[] non_string=[]",
+          "ok": true
+        },
+        {
+          "check": "source_files_count",
+          "detail": "declared=124 actual=124",
+          "ok": true
+        },
+        {
+          "check": "normalization_policy",
+          "detail": "normalization policy matches the stored bytes",
+          "ok": true
+        },
+        {
+          "check": "snapshot_strict_roles",
+          "detail": "coder/planner/reviewer prompts present and non-empty",
+          "ok": true
+        },
+        {
+          "check": "not_active",
+          "detail": "no active pointer references this version",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.next.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "status_pending",
+          "detail": "v5 status must be pending",
+          "ok": true
+        },
+        {
+          "check": "candidate_schema_version",
+          "detail": "candidate_schema_version must equal schema_version=5",
+          "ok": true
+        },
+        {
+          "check": "candidate_payload_sha256",
+          "detail": "canonical payload seal",
+          "ok": true
+        },
+        {
+          "check": "source_origin",
+          "detail": "v5 requires clean git_commit provenance",
+          "ok": true
+        },
+        {
+          "check": "source_commit",
+          "detail": "source_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "diff_base_commit",
+          "detail": "diff_base_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "source_commit_ancestor",
+          "detail": "diff_base must be ancestor of source_commit",
+          "ok": true
+        },
+        {
+          "check": "parent_integrity_matches",
+          "detail": "parent declaration must equal recomputed strict integrity record",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_complete",
+          "detail": "all v5 manifest fields must exactly equal git/parent derivation",
+          "ok": true
+        },
+        {
+          "check": "resolved_source_files",
+          "detail": "resolved_source_files must equal complete resolved source count",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_exact_set",
+          "detail": "missing=[] extra=[]",
+          "ok": true
+        },
+        {
+          "check": "changed_files",
+          "detail": "changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "deleted_files",
+          "detail": "deleted_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "scope_excluded_changed_files",
+          "detail": "scope_excluded_changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "source_commit_blob",
+          "detail": "source_hashes must equal archived source_commit LF blob hashes",
+          "ok": true
+        },
+        {
+          "check": "snapshot_source_binding",
+          "detail": "snapshot identity/status and per-role prompts must match source and inheritance",
+          "ok": true
+        },
+        {
+          "check": "base_commit_blob",
+          "detail": "base_hashes bind complete resolved tree plus tombstones",
+          "ok": true
+        },
+        {
+          "check": "diff_sha256",
+          "detail": "diff bytes hash",
+          "ok": true
+        },
+        {
+          "check": "diff_forward_apply",
+          "detail": "complete source tree and tombstones reproduced",
+          "ok": true
+        },
+        {
+          "check": "diff_reverse_apply",
+          "detail": "complete base tree restored",
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "normalization_note_stale": false,
+      "ok": true,
+      "raw_drift": {},
+      "schema_version": 5,
+      "snapshot_canonical_sha256": "c9023be86ae6f859c8a69e2713e813ede66b5e6b17ff80eef891f509f37ec6c7",
+      "snapshot_file_sha256": "f5fe3f364b126457bd7e029bd25212b7c4038c16cda33ced833422350bfd921e",
+      "status": "ok",
+      "version": "phase34-candidate-v7"
+    },
+    {
+      "archive_class": "new",
+      "checks": [
+        {
+          "check": "version_matches_directory",
+          "detail": "candidate.json version='phase34-candidate-v8', directory='phase34-candidate-v8'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_hash_rule_declared",
+          "detail": "snapshot_hash_rule='file_bytes_sha256' (expected 'file_bytes_sha256')",
+          "ok": true
+        },
+        {
+          "check": "snapshot_ref_fixed",
+          "detail": "snapshot_ref='snapshot.json'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_file_sha256",
+          "detail": "declared='a46cd34e5a9b10a4305b4fa470d2a918ac47aeccfb29096609603f372d8b8858' actual_file_bytes=a46cd34e5a9b10a4305b4fa470d2a918ac47aeccfb29096609603f372d8b8858",
+          "ok": true
+        },
+        {
+          "check": "snapshot_canonical_sha256",
+          "detail": "declared='73e0f28df967260b902ea376c4ee0b38cabd7663ac3397a6ab6f8207c7670bef' actual_canonical='73e0f28df967260b902ea376c4ee0b38cabd7663ac3397a6ab6f8207c7670bef'",
+          "ok": true
+        },
+        {
+          "check": "source_hashes",
+          "detail": "mismatched=[] only_in_candidate=[] only_in_sources=[] non_string=[]",
+          "ok": true
+        },
+        {
+          "check": "source_files_count",
+          "detail": "declared=127 actual=127",
+          "ok": true
+        },
+        {
+          "check": "normalization_policy",
+          "detail": "normalization policy matches the stored bytes",
+          "ok": true
+        },
+        {
+          "check": "snapshot_strict_roles",
+          "detail": "coder/planner/reviewer prompts present and non-empty",
+          "ok": true
+        },
+        {
+          "check": "not_active",
+          "detail": "no active pointer references this version",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.next.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "status_pending",
+          "detail": "v5 status must be pending",
+          "ok": true
+        },
+        {
+          "check": "candidate_schema_version",
+          "detail": "candidate_schema_version must equal schema_version=5",
+          "ok": true
+        },
+        {
+          "check": "candidate_payload_sha256",
+          "detail": "canonical payload seal",
+          "ok": true
+        },
+        {
+          "check": "source_origin",
+          "detail": "v5 requires clean git_commit provenance",
+          "ok": true
+        },
+        {
+          "check": "source_commit",
+          "detail": "source_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "diff_base_commit",
+          "detail": "diff_base_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "source_commit_ancestor",
+          "detail": "diff_base must be ancestor of source_commit",
+          "ok": true
+        },
+        {
+          "check": "parent_integrity_matches",
+          "detail": "parent declaration must equal recomputed strict integrity record",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_complete",
+          "detail": "all v5 manifest fields must exactly equal git/parent derivation",
+          "ok": true
+        },
+        {
+          "check": "resolved_source_files",
+          "detail": "resolved_source_files must equal complete resolved source count",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_exact_set",
+          "detail": "missing=[] extra=[]",
+          "ok": true
+        },
+        {
+          "check": "changed_files",
+          "detail": "changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "deleted_files",
+          "detail": "deleted_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "scope_excluded_changed_files",
+          "detail": "scope_excluded_changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "source_commit_blob",
+          "detail": "source_hashes must equal archived source_commit LF blob hashes",
+          "ok": true
+        },
+        {
+          "check": "snapshot_source_binding",
+          "detail": "snapshot identity/status and per-role prompts must match source and inheritance",
+          "ok": true
+        },
+        {
+          "check": "base_commit_blob",
+          "detail": "base_hashes bind complete resolved tree plus tombstones",
+          "ok": true
+        },
+        {
+          "check": "diff_sha256",
+          "detail": "diff bytes hash",
+          "ok": true
+        },
+        {
+          "check": "diff_forward_apply",
+          "detail": "complete source tree and tombstones reproduced",
+          "ok": true
+        },
+        {
+          "check": "diff_reverse_apply",
+          "detail": "complete base tree restored",
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "normalization_note_stale": false,
+      "ok": true,
+      "raw_drift": {},
+      "schema_version": 5,
+      "snapshot_canonical_sha256": "73e0f28df967260b902ea376c4ee0b38cabd7663ac3397a6ab6f8207c7670bef",
+      "snapshot_file_sha256": "a46cd34e5a9b10a4305b4fa470d2a918ac47aeccfb29096609603f372d8b8858",
+      "status": "ok",
+      "version": "phase34-candidate-v8"
+    },
+    {
+      "archive_class": "new",
+      "checks": [
+        {
+          "check": "version_matches_directory",
+          "detail": "candidate.json version='phase34-candidate-v9', directory='phase34-candidate-v9'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_hash_rule_declared",
+          "detail": "snapshot_hash_rule='file_bytes_sha256' (expected 'file_bytes_sha256')",
+          "ok": true
+        },
+        {
+          "check": "snapshot_ref_fixed",
+          "detail": "snapshot_ref='snapshot.json'",
+          "ok": true
+        },
+        {
+          "check": "snapshot_file_sha256",
+          "detail": "declared='7483129a946454f3b7e5f254e3aa10b6df39a8b29dd399e8607d8cf1404b6b4b' actual_file_bytes=7483129a946454f3b7e5f254e3aa10b6df39a8b29dd399e8607d8cf1404b6b4b",
+          "ok": true
+        },
+        {
+          "check": "snapshot_canonical_sha256",
+          "detail": "declared='23a3ef5ba2019d40de711c1dee4f4a3a4d5df0a81762f2ac353fd36be7f27011' actual_canonical='23a3ef5ba2019d40de711c1dee4f4a3a4d5df0a81762f2ac353fd36be7f27011'",
+          "ok": true
+        },
+        {
+          "check": "source_hashes",
+          "detail": "mismatched=[] only_in_candidate=[] only_in_sources=[] non_string=[]",
+          "ok": true
+        },
+        {
+          "check": "source_files_count",
+          "detail": "declared=129 actual=129",
+          "ok": true
+        },
+        {
+          "check": "normalization_policy",
+          "detail": "normalization policy matches the stored bytes",
+          "ok": true
+        },
+        {
+          "check": "snapshot_strict_roles",
+          "detail": "coder/planner/reviewer prompts present and non-empty",
+          "ok": true
+        },
+        {
+          "check": "not_active",
+          "detail": "no active pointer references this version",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "no_active_pointer",
+          "detail": "active.next.json must be absent",
+          "ok": true
+        },
+        {
+          "check": "status_pending",
+          "detail": "v5 status must be pending",
+          "ok": true
+        },
+        {
+          "check": "candidate_schema_version",
+          "detail": "candidate_schema_version must equal schema_version=5",
+          "ok": true
+        },
+        {
+          "check": "candidate_payload_sha256",
+          "detail": "canonical payload seal",
+          "ok": true
+        },
+        {
+          "check": "source_origin",
+          "detail": "v5 requires clean git_commit provenance",
+          "ok": true
+        },
+        {
+          "check": "source_commit",
+          "detail": "source_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "diff_base_commit",
+          "detail": "diff_base_commit must be a full commit SHA",
+          "ok": true
+        },
+        {
+          "check": "source_commit_ancestor",
+          "detail": "diff_base must be ancestor of source_commit",
+          "ok": true
+        },
+        {
+          "check": "parent_integrity_matches",
+          "detail": "parent declaration must equal recomputed strict integrity record",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_complete",
+          "detail": "all v5 manifest fields must exactly equal git/parent derivation",
+          "ok": true
+        },
+        {
+          "check": "resolved_source_files",
+          "detail": "resolved_source_files must equal complete resolved source count",
+          "ok": true
+        },
+        {
+          "check": "source_manifest_exact_set",
+          "detail": "missing=[] extra=[]",
+          "ok": true
+        },
+        {
+          "check": "changed_files",
+          "detail": "changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "deleted_files",
+          "detail": "deleted_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "scope_excluded_changed_files",
+          "detail": "scope_excluded_changed_files must equal git diff -M",
+          "ok": true
+        },
+        {
+          "check": "source_commit_blob",
+          "detail": "source_hashes must equal archived source_commit LF blob hashes",
+          "ok": true
+        },
+        {
+          "check": "snapshot_source_binding",
+          "detail": "snapshot identity/status and per-role prompts must match source and inheritance",
+          "ok": true
+        },
+        {
+          "check": "base_commit_blob",
+          "detail": "base_hashes bind complete resolved tree plus tombstones",
+          "ok": true
+        },
+        {
+          "check": "diff_sha256",
+          "detail": "diff bytes hash",
+          "ok": true
+        },
+        {
+          "check": "diff_forward_apply",
+          "detail": "complete source tree and tombstones reproduced",
+          "ok": true
+        },
+        {
+          "check": "diff_reverse_apply",
+          "detail": "complete base tree restored",
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "normalization_note_stale": false,
+      "ok": true,
+      "raw_drift": {},
+      "schema_version": 5,
+      "snapshot_canonical_sha256": "23a3ef5ba2019d40de711c1dee4f4a3a4d5df0a81762f2ac353fd36be7f27011",
+      "snapshot_file_sha256": "7483129a946454f3b7e5f254e3aa10b6df39a8b29dd399e8607d8cf1404b6b4b",
+      "status": "ok",
+      "version": "phase34-candidate-v9"
+    }
+  ],
+  "witness": "verified"
+}
