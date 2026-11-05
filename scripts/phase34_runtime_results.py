@@ -162,6 +162,10 @@ def regression_section(scratch: Path) -> dict[str, Any]:
     if not merged["records"]:
         return missing(scratch / "test-gate-phase34.json")
     rows = regression_rows(merged["records"])
+    # The raw gate summary keeps the command; the payload omits it because the
+    # command embeds generation-machine absolute paths and would differ in a clone.
+    for row in rows:
+        row.pop("command", None)
     latest = merged["latest"] or {}
     failed = [
         {
