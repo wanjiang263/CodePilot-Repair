@@ -1,0 +1,4 @@
+# Archive metadata and candidate files are byte-hashed by the verifier.
+# Disable EOL conversion so a clone with a different core.autocrlf setting
+# checks out exactly the bytes recorded in SHA256SUMS and the baseline manifest.
+** -text
