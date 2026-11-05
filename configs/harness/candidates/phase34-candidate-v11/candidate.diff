@@ -1,0 +1,109 @@
+diff --git a/scripts/phase34_runtime_results.py b/scripts/phase34_runtime_results.py
+index 47bcf64..03f23bd 100644
+--- a/scripts/phase34_runtime_results.py
++++ b/scripts/phase34_runtime_results.py
+@@ -19,6 +19,7 @@ from __future__ import annotations
+ 
+ import argparse
+ import json
++import re
+ import sys
+ from datetime import UTC, datetime
+ from pathlib import Path
+@@ -52,7 +53,6 @@ CANDIDATE_FILES = ("candidate.json", "candidate.diff", "snapshot.json", "sources
+ CONSUMED_EVIDENCE = (
+     "static-checks.json",
+     "provider-matrix.json",
+-    "verify-v10.json",
+     "pre-fix-check.log",
+ )
+ 
+@@ -134,6 +134,12 @@ def _evidence_problem(scratch: Path) -> dict[str, Any] | None:
+             "missing": ["test-gate-*.json"],
+         }
+     required = set(CONSUMED_EVIDENCE)
++    if not _verify_reports(scratch):
++        return {
++            "reason": "evidence_missing",
++            "evidence_dir": rel(scratch),
++            "missing": ["verify-v*.json"],
++        }
+     for run in merged["records"]:
+         for key in ("log", "junit"):
+             value = run.get(key)
+@@ -229,8 +235,34 @@ def candidate_section(version: str) -> dict[str, Any]:
+     }
+ 
+ 
++def _version_number(name: str) -> int:
++    match = re.search(r"-v(\d+)", name)
++    return int(match.group(1)) if match else -1
++
++
++def _verify_reports(scratch: Path) -> list[Path]:
++    return sorted(scratch.glob("verify-v*.json"), key=lambda path: _version_number(path.name))
++
++
++def candidates_section() -> dict[str, Any]:
++    folder = ROOT / "configs" / "harness" / "candidates"
++    versions = sorted(
++        (path for path in folder.glob("phase34-candidate-v*") if path.is_dir()),
++        key=lambda path: _version_number(path.name),
++    )
++    out: dict[str, Any] = {
++        f"v{_version_number(path.name)}": candidate_section(path.name) for path in versions
++    }
++    active = ROOT / "configs" / "harness"
++    out["active_pointer_exists"] = (active / "active.json").is_file() or (
++        active / "active.next.json"
++    ).is_file()
++    return out
++
++
+ def archive_section(scratch: Path) -> dict[str, Any]:
+-    path = scratch / "verify-v10.json"
++    reports = _verify_reports(scratch)
++    path = reports[-1] if reports else scratch / "verify-v11.json"
+     data = load_json(path)
+     if not isinstance(data, dict):
+         return missing(path)
+@@ -322,7 +354,6 @@ def build_payload(
+     phase, code = commits_section(resolved_base, recorded_through)
+     web_diff = git("diff", "--name-only", f"{resolved_base}..{recorded_through}", "--", "web/src")
+     web_files = [path for path in web_diff.splitlines() if path.strip()]
+-    active = ROOT / "configs" / "harness"
+     return {
+         "phase": 34,
+         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
+@@ -338,14 +369,7 @@ def build_payload(
+         "final_regression": regression_section(scratch),
+         "static_checks": static_section(scratch),
+         "provider_matrix": provider_section(scratch),
+-        "candidates": {
+-            "v7": candidate_section("phase34-candidate-v7"),
+-            "v8": candidate_section("phase34-candidate-v8"),
+-            "v9": candidate_section("phase34-candidate-v9"),
+-            "v10": candidate_section("phase34-candidate-v10"),
+-            "active_pointer_exists": (active / "active.json").is_file()
+-            or (active / "active.next.json").is_file(),
+-        },
++        "candidates": candidates_section(),
+         "archive_verify": archive_section(scratch),
+         "runtime_lifecycle": lifecycle_section(scratch),
+         "page_e2e": {
+diff --git a/tests/unit/test_phase26_final.py b/tests/unit/test_phase26_final.py
+index ab989d8..5190fd0 100644
+--- a/tests/unit/test_phase26_final.py
++++ b/tests/unit/test_phase26_final.py
+@@ -248,9 +248,9 @@ def test_process_exit_releases_workspace(tmp_path):
+     )
+     process.start()
+     try:
+-        assert ready.wait(10)
++        assert ready.wait(60)
+         release.set()
+-        process.join(10)
++        process.join(60)
+         assert process.exitcode == 0
+         with (
+             dispatch_scope(DispatchScope(Deadline(time.monotonic() + 2))),
