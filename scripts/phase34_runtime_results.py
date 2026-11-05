@@ -1,4 +1,4 @@
-"""Phase34 runtime evidence: lifecycle-checked JSON for the v8 closeout.
+"""Phase34 runtime evidence: lifecycle-checked JSON for the v9 closeout.
 
 Same evidence-head semantics as the Phase33 generator: the JSON describes the
 tree at ``recorded_through``, not whatever HEAD is now. ``phase_commits`` covers
@@ -6,6 +6,13 @@ tree at ``recorded_through``, not whatever HEAD is now. ``phase_commits`` covers
 the recorded commits, allows only ``docs/`` changes after them, and rebuilds the
 payload at the recorded tree. ``recorded_head`` is the evidence head;
 ``actual_head_at_write`` records the HEAD at generation time explicitly.
+
+Evidence is self-contained: the default scratch is the in-repo pack at
+``docs/notes/phase34-evidence`` and ``--check`` verifies its ``SHA256SUMS``
+before rebuilding. A missing or tampered file is reported as
+``evidence_missing``/``evidence_manifest_mismatch``, never as a payload
+mismatch. Absolute paths recorded by the original gate runs are rebound to the
+pack by basename, so a clean clone never reads the generation-time scratch.
 """
 
 from __future__ import annotations
@@ -37,10 +44,17 @@ from scripts.phase33_runtime_results import (  # noqa: E402
     static_section,
     unit_aggregate,
 )
+from scripts.phase34_evidence_manifest import MANIFEST_NAME, verify_manifest  # noqa: E402
 
-DEFAULT_SCRATCH = ROOT / ".codex-pytest-tmp" / "phase34"
+DEFAULT_SCRATCH = ROOT / "docs" / "notes" / "phase34-evidence"
 DEFAULT_OUT = ROOT / "docs" / "notes" / "phase34-runtime-results.json"
 CANDIDATE_FILES = ("candidate.json", "candidate.diff", "snapshot.json", "sources.json")
+CONSUMED_EVIDENCE = (
+    "static-checks.json",
+    "provider-matrix.json",
+    "verify-v9.json",
+    "pre-fix-check.log",
+)
 
 UNVERIFIED = [
     "real provider streaming/usage/billing (0 requests, 0 cost; rows blocked)",
@@ -65,8 +79,86 @@ def commits_section(
     return phase, code
 
 
-def regression_section(scratch: Path) -> dict[str, Any]:
+def _scrub(value: str, scratch: Path) -> str:
+    text = str(value)
+    for actual, label in ((scratch, "<evidence>"), (ROOT, "<repo>")):
+        for variant in {str(actual), str(actual).replace("\\", "/")}:
+            if variant:
+                text = text.replace(variant, label)
+    return text
+
+
+def _rebind(value: Any, scratch: Path) -> Any:
+    """Map a generation-time absolute path to its file in the evidence pack."""
+    if not isinstance(value, str) or not value:
+        return value
+    path = Path(value)
+    if path.is_absolute():
+        return rel(scratch / path.name)
+    return value.replace("\\", "/")
+
+
+def evidence_records(scratch: Path) -> dict[str, Any]:
+    """Merge gate summaries, rebinding every external path into the pack."""
     merged = merge_gate_records(scratch)
+    for run in merged["records"]:
+        for key in ("log", "junit"):
+            run[key] = _rebind(run.get(key), scratch)
+        basetemp = run.get("basetemp")
+        if isinstance(basetemp, str) and basetemp:
+            run["basetemp"] = Path(basetemp).name
+        command = run.get("command")
+        if isinstance(command, str) and command:
+            run["command"] = _scrub(command, scratch)
+    return merged
+
+
+def _evidence_problem(scratch: Path) -> dict[str, Any] | None:
+    report = verify_manifest(scratch)
+    if not report.get("ok"):
+        problem: dict[str, Any] = {
+            "reason": str(report.get("reason") or "evidence_manifest_invalid"),
+            "evidence_dir": rel(scratch),
+        }
+        for key in ("missing", "mismatched", "errors"):
+            value = report.get(key)
+            if value:
+                problem[key] = value
+        return problem
+    merged = evidence_records(scratch)
+    gate_files = sorted(path.name for path in scratch.glob("test-gate*.json"))
+    if not gate_files:
+        return {
+            "reason": "evidence_missing",
+            "evidence_dir": rel(scratch),
+            "missing": ["test-gate-*.json"],
+        }
+    required = set(CONSUMED_EVIDENCE)
+    for run in merged["records"]:
+        for key in ("log", "junit"):
+            value = run.get(key)
+            if isinstance(value, str) and value:
+                required.add(Path(value).name)
+    missing_files = sorted(name for name in required if not (scratch / name).is_file())
+    if missing_files:
+        return {
+            "reason": "evidence_missing",
+            "evidence_dir": rel(scratch),
+            "missing": missing_files,
+        }
+    listed = set(report.get("paths") or [])
+    unlisted = sorted(set(gate_files) - listed)
+    if unlisted:
+        return {
+            "reason": "evidence_unlisted",
+            "evidence_dir": rel(scratch),
+            "unlisted": unlisted,
+        }
+    return None
+
+
+def regression_section(scratch: Path) -> dict[str, Any]:
+    merged = evidence_records(scratch)
     if not merged["records"]:
         return missing(scratch / "test-gate-phase34.json")
     rows = regression_rows(merged["records"])
@@ -136,6 +228,11 @@ def archive_section(scratch: Path) -> dict[str, Any]:
         "historical_baseline",
     )
     out: dict[str, Any] = {key: data.get(key) for key in keep if key in data}
+    baseline = out.get("historical_baseline")
+    if isinstance(baseline, dict):
+        baseline = dict(baseline)
+        baseline["manifest_path"] = "configs/harness/candidates/historical-baseline.json"
+        out["historical_baseline"] = baseline
     versions = data.get("versions")
     if isinstance(versions, list):
         out["versions_summary"] = [
@@ -218,6 +315,8 @@ def build_payload(
         "recorded_through": recorded_through,
         "recorded_head": recorded_head,
         "actual_head_at_write": actual_head,
+        "evidence_dir": rel(scratch),
+        "evidence_manifest_sha256": sha256(scratch / MANIFEST_NAME),
         "phase_commits": phase,
         "code_commits": code,
         "final_regression": regression_section(scratch),
@@ -316,6 +415,11 @@ def _check(written_path: Path, scratch: Path, base_override: str | None) -> int:
             recorded_through=recorded,
         )
 
+    problem = _evidence_problem(scratch)
+    if problem is not None:
+        reason = str(problem.pop("reason"))
+        return fail(reason, **problem)
+
     payload = build_payload(
         base,
         scratch,
@@ -360,6 +464,12 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.check:
         return _check(out, scratch, args.base)
+
+    problem = _evidence_problem(scratch)
+    if problem is not None:
+        reason = str(problem.pop("reason"))
+        _emit({"write": "fail", "reason": reason, **problem})
+        return 2
 
     base = args.base
     if base is None and out.is_file():
