@@ -1,0 +1,313 @@
+{
+  "phase": 35,
+  "generated_at": "2026-11-06T02:46:17+08:00",
+  "tool": "delivery receipt; every hash computed from the referenced file at generation time",
+  "verdict": "PASS (Phase34/v13 archive and regression; external validation partial)",
+  "verdict_basis": "v13 source matches the final code commit; 19-version archive verify passes with witness verified and baseline 76; nine-group regression is 4182 passed / 0 failed / 4 skipped. Frontend and 20k large-repo validation pass. Docker is 26/35 with a deterministic synthetic-fixture base_commit failure; the 24h soak is running; real provider is blocked because no credentials were provided. The project is not fully production-ready.",
+  "commits": {
+    "base": "dba045dabd70f0e6eb7779287136944b589f2734",
+    "C39": "5163f26859da54967fc5d4a71bf72455f3ba4a1a",
+    "C40": "7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d",
+    "C41": "c4194cb2e8ff95aa41622aa4d266924077683725",
+    "C42": "d3ab82e04830e27d7ecb8d73bc394f07811c7abc",
+    "C43": "bc493631ede7e77a4c7a2e109e3926d31a405b23",
+    "C44": "83a8ce01fd795baf32af0aaa58a2c4f098c30171",
+    "C45": "this report + receipt + clean-clone log (docs-only; hash not embedded)",
+    "C46": "planned 24h soak summary update after the scheduled check (docs-only)",
+    "push": false,
+    "pr": false,
+    "publish": false,
+    "activate": false
+  },
+  "candidate": {
+    "version": "phase34-candidate-v13",
+    "status": "pending",
+    "parent": "phase34-candidate-v12",
+    "schema_version": 5,
+    "source_commit": "7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d",
+    "diff_base_commit": "254b0a81248b8455c236696f9915e2a237b8c05e",
+    "resolved_source_files": 134,
+    "source_scope_files": 787,
+    "files_sha256": {
+      "candidate.diff": "1ab950921132bafca44db0f8540694a1080cc213a3fec3779dec4324be8075d5",
+      "candidate.json": "ab6b8a83cbe0160ca0ac5e61e44f452edf5ad13dcc28928a8e407225b6cde801",
+      "snapshot.json": "08daf2a7bd0deed4a1e170fcf25bbf329a5d1fa5c91bd7ea4284169ec900a57d",
+      "sources.json": "ab89014d8fa0323e08015e2d36b785569a02845bec368a3844d4ec9b26ae8b8d"
+    },
+    "candidate_tree_sha256": "f1236ed4e22e649092772aa3c178e25c37c1721bbfe7c5b8558db510d86ffd20",
+    "receipt_sha256": "105bacf33d2b07e9a3b76920c4270d479e4b3ed4f878367d1405b78005c36f47",
+    "external_witness_sha256": "7c7ed280cb5f297560dd70cd947adcd2ef7f62b72ffb54948833fd08f028a6aa",
+    "active_pointer_exists": false
+  },
+  "archive": {
+    "historical_manifest": {
+      "path": "configs/harness/candidates/historical-baseline.json",
+      "sha256": "66accc3c5accf58ed43e1a283517cb7f8d49aa2ab5defe667e25468bcf17e868",
+      "files": 76,
+      "baseline_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
+      "zero_change_since_baseline": true
+    },
+    "verify": {
+      "exit_code": 0,
+      "witness": "verified",
+      "historical_integrity": "ok",
+      "totals": {
+        "historical_baseline_files": 76,
+        "historical_baseline_mismatches": 0,
+        "historical_files_modified": false,
+        "new_archive_failures": 0,
+        "new_archives": 12,
+        "old_archives": 7,
+        "old_unexplained_mismatches": 0,
+        "unknown_entries": 0,
+        "versions_checked": 19
+      },
+      "v13": {
+        "ok": true,
+        "checks": 32,
+        "failures": 0
+      },
+      "full_report": {
+        "path": "docs/notes/phase34-evidence/verify-v13.json",
+        "sha256": "845dc56adda3225d797a9f2c1a2a3135571ee0040e6600526c7c74ba71adc1a7"
+      }
+    }
+  },
+  "regression": {
+    "groups": {
+      "unit-a": "1535 passed, exit 0",
+      "unit-b": "1138 passed, 2 skipped, exit 0",
+      "unit-c": "427 passed, exit 0",
+      "unit-d": "25 passed, exit 0",
+      "eval": "482 passed, 1 skipped, exit 0",
+      "sandbox": "66 passed, exit 0",
+      "integration": "126 passed, exit 0",
+      "api": "117 passed, 1 skipped, exit 0",
+      "graph": "266 passed, exit 0"
+    },
+    "totals": {
+      "passed": 4182,
+      "failed": 0,
+      "skipped": 4,
+      "selected": 4186
+    },
+    "note": "D:/cp35/final13 scratch (neutral name); the earlier D:/cp35/regression scratch was rejected because 'regression' in the tmp path changed the issue-analyzer rule."
+  },
+  "static": {
+    "files": 17,
+    "failed": [
+      "git diff --check",
+      "git diff --check (CRLF-aware)"
+    ],
+    "failed_is_generated_artifact_only": true,
+    "informational_mypy_exit": 1,
+    "source_sha256": "e05860e5d6e461e387a7b4eee1dfeaa9a9fab8205371d450410f16c3ac479be8"
+  },
+  "external": {
+    "frontend": {
+      "status": "passed",
+      "summary": {
+        "install": "npm ci: 359 packages",
+        "typecheck": "passed",
+        "lint": "passed (eslint --max-warnings=0)",
+        "vitest": {
+          "files": 14,
+          "tests": 50,
+          "passed": true
+        },
+        "build": "passed (vite build, 6.35s)",
+        "e2e": "no Playwright/Cypress suite in the repository; build/typecheck/lint/vitest only"
+      },
+      "source_sha256": "97463c88b0eb61817ce06c5c7fc76785d84d9eba69b0e6bd7992282831791244"
+    },
+    "large_repo": {
+      "status": "passed",
+      "summary": {
+        "repo": "D:\\cp35\\large\\repo",
+        "files": 20201,
+        "commit": "7e9917219a282e35dd9037d378b61db702740963",
+        "profile": "large-repo-profile.json",
+        "runs": [
+          {
+            "association_mode": "complete_closure_v2",
+            "fast_mode": false,
+            "wall_index_s": 208.4381,
+            "scan_files": 20201,
+            "symbol_rows": 40200,
+            "edge_rows": 0,
+            "parse_errors": 0,
+            "db_bytes": 24489984,
+            "peak_working_set_bytes": 332427264,
+            "changed": 20201,
+            "content_reused": 0
+          },
+          {
+            "association_mode": "verified_snapshot_v2",
+            "fast_mode": false,
+            "wall_index_s": 77.5459,
+            "scan_files": 20201,
+            "symbol_rows": 40200,
+            "edge_rows": 0,
+            "parse_errors": 0,
+            "db_bytes": 24489984,
+            "peak_working_set_bytes": 117325824,
+            "changed": 0,
+            "content_reused": 20201
+          },
+          {
+            "association_mode": "complete_closure_v2",
+            "fast_mode": false,
+            "wall_index_s": 73.5382,
+            "scan_files": 20201,
+            "symbol_rows": 40201,
+            "edge_rows": 0,
+            "parse_errors": 0,
+            "db_bytes": 24494080,
+            "peak_working_set_bytes": 460853248,
+            "changed": 1,
+            "content_reused": 20200
+          },
+          {
+            "association_mode": "complete_closure_v2",
+            "fast_mode": true,
+            "wall_index_s": 72.6063,
+            "scan_files": 20201,
+            "symbol_rows": 40201,
+            "edge_rows": 0,
+            "parse_errors": 0,
+            "db_bytes": 24494080,
+            "peak_working_set_bytes": 462761984,
+            "changed": 1,
+            "content_reused": 20200
+          }
+        ],
+        "verification": "skipped (--no-verify)",
+        "parse_errors": 0,
+        "peak_working_set_bytes": 462761984,
+        "db_bytes_last": 24494080
+      },
+      "source_sha256": "a78d8587a4d40ed66e21b7e8e4395051dab4c3b5d746eb00dd563dda1b49b7e9"
+    },
+    "docker": {
+      "status": "failed",
+      "summary": {
+        "tests": 35,
+        "passed": 26,
+        "failed": 9,
+        "errors": 0,
+        "skipped": 0,
+        "failure_class": "tests/docker/test_synthetic_suite.py: WorkspaceError base_commit not found in the workspace cache",
+        "root_cause": "The synthetic fixture repo is a file tree and the evaluator's generated workspace cache cannot resolve metadata.base_commit. Reproduced in a focused recheck and in a full idle rerun; this is a deterministic fixture/evaluator defect, not a v13 code regression and not load-related.",
+        "runs": [
+          "full run under heavy large-repo/Docker load: 26 passed / 9 failed",
+          "focused tests/docker/test_synthetic_suite.py recheck: 1 passed / 9 failed",
+          "full idle rerun after the large profile finished: 26 passed / 9 failed"
+        ],
+        "fix_scope": "A dedicated fixture/evaluator fix would change tests/ or src/ and require a new candidate (v14)."
+      },
+      "source_sha256": "154c3c41f9408f5b636bbb57dc25b2855de30d27d02aacdb2aa21dd7ee17dd93"
+    },
+    "soak": {
+      "status": "running",
+      "expected_finish": "2026-11-07T02:45:00+08:00",
+      "summary": "D:/cp35/soak/summary-final.json (to be copied as soak-summary.json)",
+      "idle_smokes": [
+        "soak-idle-smoke1.json",
+        "soak-idle-smoke2.json"
+      ],
+      "failed_attempts": [
+        "soak-attempt1-heartbeat.jsonl",
+        "soak-attempt2-failed.json",
+        "soak-attempt2-heartbeat.jsonl",
+        "soak-attempt3-heartbeat.jsonl"
+      ]
+    },
+    "real_provider": {
+      "status": "blocked",
+      "reason": "worktree .env with OPENAI_API_KEY/OPENAI_BASE_URL/PHASE32_REAL_BUDGET_CNY was absent",
+      "real_requests": 0,
+      "real_cost_cny": 0.0,
+      "models_planned": [
+        "glm5.3flash",
+        "spark-2.6"
+      ],
+      "protocol": "OpenAI-compatible",
+      "budget_gate_cny": 20
+    }
+  },
+  "evidence_pack": {
+    "dir": "docs/notes/phase34-evidence",
+    "manifest": "docs/notes/phase34-evidence/SHA256SUMS",
+    "manifest_sha256": "dba3c0701b39f7899800f32dfaf31676ec5c75907166e366563127a6bf6960e5",
+    "entries": 73,
+    "runtime_json": "docs/notes/phase34-runtime-results.json",
+    "runtime_json_sha256": "37b939c939dc47035efdca82d8c62c148767946922fbcb6edef5edc50cb078de",
+    "runtime_check": "pass",
+    "requires_scratch": false
+  },
+  "clean_clone": {
+    "status": "pending",
+    "log": "docs/notes/phase35-selfcontained-check.log",
+    "note": "run after the 24h soak summary update; the shallow marker remains true"
+  },
+  "stats": {
+    "commits_at_c38": 318,
+    "effective_source_scope_files": 787,
+    "curated_source_files": 134,
+    "untracked_status_entries": 172,
+    "untracked_files_uall": 176,
+    "note": "see docs/notes/phase35-errata.md"
+  },
+  "shallow_history": {
+    "is_shallow": true,
+    "boundary_commit": "04a523fafbd61bc2e49420963b84ed8e2bd1b3cf",
+    "unshallow_result": "git fetch --unshallow origin is a no-op; the boundary is not on origin",
+    "clean_clone_scope": "existing history only; full-history clone not verified"
+  },
+  "p2": {
+    "path": "src/codepilot/sandbox/swebench_env.py:423",
+    "status": "audited, not changed",
+    "detail": "DockerSdkBackend.build has no real caller; the official path does not build; the generic base build uses a fileobj micro-context in docker.py:354"
+  },
+  "mainline": {
+    "branch": "codex/phase12-real-issue-pilot",
+    "pre_merge_head": "9e99eda2036a17d4c0f38c2a8e505c57716bdd39",
+    "target": "C46 (after the 24h soak update); fast-forward after all docs",
+    "ff_only": true,
+    "pushed": false
+  },
+  "unverified": [
+    "Docker full suite: 26/35, 9 deterministic synthetic-fixture base_commit failures; v14 fix required",
+    "24h soak: running; result pending",
+    "real provider streaming/usage/billing: credentials absent; 0 requests, 0 cost",
+    "full-history clone: repository shallow; boundary not on origin",
+    "frontend browser E2E: no Playwright/Cypress suite",
+    "P2 images.build context guard: audited, not implemented"
+  ],
+  "docs_sha256": {
+    "docs/notes/phase35-final-report.md": "802d0f3f21b18633329481c1f8b22965e8a134b20da3183b9aa1ff5ff6f0327d",
+    "docs/notes/phase34-runtime-results.json": "37b939c939dc47035efdca82d8c62c148767946922fbcb6edef5edc50cb078de",
+    "docs/notes/phase35-static-checks.json": "e05860e5d6e461e387a7b4eee1dfeaa9a9fab8205371d450410f16c3ac479be8",
+    "docs/notes/phase34-evidence/SHA256SUMS": "dba3c0701b39f7899800f32dfaf31676ec5c75907166e366563127a6bf6960e5",
+    "docs/notes/phase34-evidence/verify-v13.json": "845dc56adda3225d797a9f2c1a2a3135571ee0040e6600526c7c74ba71adc1a7",
+    "docs/notes/phase34-evidence/external-witness-v13.txt": "7c7ed280cb5f297560dd70cd947adcd2ef7f62b72ffb54948833fd08f028a6aa",
+    "configs/harness/receipts/phase34-candidate-v13.json": "105bacf33d2b07e9a3b76920c4270d479e4b3ed4f878367d1405b78005c36f47",
+    "configs/harness/candidates/historical-baseline.json": "66accc3c5accf58ed43e1a283517cb7f8d49aa2ab5defe667e25468bcf17e868",
+    "docs/notes/phase34-evidence/frontend-summary.json": "97463c88b0eb61817ce06c5c7fc76785d84d9eba69b0e6bd7992282831791244",
+    "docs/notes/phase34-evidence/large-repo-summary.json": "a78d8587a4d40ed66e21b7e8e4395051dab4c3b5d746eb00dd563dda1b49b7e9",
+    "docs/notes/phase34-evidence/docker-summary.json": "154c3c41f9408f5b636bbb57dc25b2855de30d27d02aacdb2aa21dd7ee17dd93",
+    "docs/notes/phase35-errata.md": "aca99e25212e637d2efff1f72dfd4f4c07ad476d4d55808e1d6e1d03375645e8"
+  },
+  "constraints_honored": [
+    "single controller, no teammate/subagent",
+    "no push/PR/publish/activate",
+    "C1-C4 history unchanged",
+    "v1-v12 candidate files unchanged",
+    "v13 is the final candidate; no active pointer",
+    "real model requests 0, cost 0",
+    "no skip/xfail/deleted/weakened tests to hide failures",
+    "Docker and 24h failures recorded, not hidden",
+    "evidence pack in-repo with SHA256SUMS; default --check has no external scratch dependency",
+    "byte pinning via docs/notes/.gitattributes and configs/harness/.gitattributes"
+  ]
+}
