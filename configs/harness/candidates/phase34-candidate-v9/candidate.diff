@@ -1,0 +1,192 @@
+diff --git a/scripts/phase34_runtime_results.py b/scripts/phase34_runtime_results.py
+index 9d372b8..662d83f 100644
+--- a/scripts/phase34_runtime_results.py
++++ b/scripts/phase34_runtime_results.py
+@@ -93,8 +93,9 @@ def regression_section(scratch: Path) -> dict[str, Any]:
+         "failed_runs": failed,
+         "groups": rows,
+         "selected_tests_note": (
+-            "full repository selection: unit 3109 + eval 483 + sandbox 66 + "
+-            "integration 126 + api 118 + graph 266 = 4168; tests/docker 35 deselected"
++            "full repository selection: unit 3120 (3118 passed + 2 skipped) + "
++            "eval 483 + sandbox 66 + integration 126 + api 118 + graph 266 = 4179; "
++            "tests/docker 35 deselected"
+         ),
+     }
+     aggregate = unit_aggregate(rows)
+@@ -121,7 +122,7 @@ def candidate_section(version: str) -> dict[str, Any]:
+ 
+ 
+ def archive_section(scratch: Path) -> dict[str, Any]:
+-    path = scratch / "verify-v8.json"
++    path = scratch / "verify-v9.json"
+     data = load_json(path)
+     if not isinstance(data, dict):
+         return missing(path)
+@@ -225,6 +226,7 @@ def build_payload(
+         "candidates": {
+             "v7": candidate_section("phase34-candidate-v7"),
+             "v8": candidate_section("phase34-candidate-v8"),
++            "v9": candidate_section("phase34-candidate-v9"),
+             "active_pointer_exists": (active / "active.json").is_file()
+             or (active / "active.next.json").is_file(),
+         },
+diff --git a/src/codepilot/eval/swebench_isolation.py b/src/codepilot/eval/swebench_isolation.py
+index f90c284..f860c01 100644
+--- a/src/codepilot/eval/swebench_isolation.py
++++ b/src/codepilot/eval/swebench_isolation.py
+@@ -27,6 +27,7 @@ from __future__ import annotations
+ 
+ import ast
+ import hashlib
++import json
+ import os
+ import re
+ import secrets
+@@ -867,6 +868,48 @@ def _tool_read_attempts(
+ # -------------------------------------------------------- Artifact / Checkpoint
+ 
+ 
++def _is_audit_probe_artifact(entry: Path) -> bool:
++    """True for tool-result artifacts produced by the isolation audit's own probes.
++
++    ``audit_tool_registry`` deliberately calls ``read_file``/``search_code`` on
++    eval paths. The tool layer records the request in a ``tool-results/*.json``
++    artifact, so the attempted path (and a sentinel pattern for the search probe)
++    appears there by construction. A failed probe, or a successful ``search_code``
++    that returned no matches, carries no evaluation content — the tool audit
++    already asserts the read failed / the search was empty. A successful
++    ``read_file`` or a non-empty search is still scanned and fails the audit.
++    """
++    if entry.suffix != ".json" or entry.parent.name != "tool-results":
++        return False
++    try:
++        payload = json.loads(entry.read_text(encoding="utf-8"))
++    except (OSError, UnicodeDecodeError, ValueError):
++        return False
++    if not isinstance(payload, dict):
++        return False
++    result = payload.get("result")
++    if not isinstance(result, dict):
++        return False
++    arguments = payload.get("arguments")
++    if not isinstance(arguments, dict):
++        return False
++    pattern = arguments.get("pattern")
++    if isinstance(pattern, str) and GOLD_SENTINEL_PREFIX in pattern:
++        # audit_tool_registry probes search_code with the sentinel token/prefix;
++        # the request artifact necessarily contains that token.
++        return True
++    raw = arguments.get("path") or arguments.get("path_glob") or ""
++    probe = str(raw).replace("\\", "/")
++    if not any(attempt.replace("\\", "/") in probe for attempt in _EVALUATION_READ_ATTEMPTS):
++        return False
++    if result.get("ok") is False:
++        return True
++    if result.get("ok") is True and payload.get("tool") == "search_code":
++        data = result.get("data")
++        return isinstance(data, dict) and not data.get("matches")
++    return False
++
++
+ def audit_artifact_tree(
+     root: Path,
+     *,
+@@ -932,6 +975,8 @@ def audit_artifact_tree(
+                     f"artifact 文件的真实路径逃出根目录: {relative}",
+                     where="artifact",
+                 )
++            if _is_audit_probe_artifact(entry):
++                continue
+             if _file_contains(entry, sentinel_bytes):
+                 _raise(
+                     "gold_sentinel_in_artifact",
+diff --git a/src/codepilot/graph/harness.py b/src/codepilot/graph/harness.py
+index 07e706f..de3f605 100644
+--- a/src/codepilot/graph/harness.py
++++ b/src/codepilot/graph/harness.py
+@@ -118,6 +118,11 @@ def _begin(state: RepairState, deps: Deps, stage: str) -> RepairState:
+             except OSError as exc:
+                 deps.lifecycle.emit("source_snapshot_unavailable", error=str(exc))
+                 sources = {}
++            # Evaluation modules are not inference-side inputs. Keeping them out
++            # of the harness artifact prevents eval code/markers from leaking
++            # into an inference-side artifact (the isolation audit treats any
++            # eval content there as a violation).
++            sources = {name: text for name, text in sources.items() if not name.startswith("eval/")}
+             snapshot = {
+                 "selection": selection,
+                 "selection_source": str(archive_root()),
+diff --git a/tests/eval/test_isolation.py b/tests/eval/test_isolation.py
+index 3963b65..463bdf0 100644
+--- a/tests/eval/test_isolation.py
++++ b/tests/eval/test_isolation.py
+@@ -29,6 +29,7 @@ import asyncio
+ import json
+ import shutil
+ import sys
++import traceback
+ from dataclasses import dataclass
+ from pathlib import Path
+ from typing import Any
+@@ -179,11 +180,14 @@ class _CopyWorkspaceManager:
+ class _RuleSandbox:
+     """按规则返回结果的沙箱。
+ 
+-    第一次目标测试返回 FAIL（驱动 diagnose → 第二轮 coder），之后返回 PASS（驱动
+-    regression → review → finalize）。这样一轮跑图会真实经过
+-    planner/coder/diagnoser/reviewer 四个角色的 LLM 调用，运行时隔离检查才覆盖到
+-    "所有模型输入"而不只是第一轮。基线（``tests=()``）返回全部可见测试 PASS，
+-    否则 ``_authorized_targets`` 会因为"基线里没有这个测试"而拒绝执行目标测试。
++    ``run_target_tests`` 之前，``build_env`` 会以 selected 非空做 supplemental
++    baseline collect；那些调用不能失败。真正的补丁后目标执行来自
++    ``run_target_tests`` 节点：让该节点的第一次调用返回 FAIL（驱动
++    diagnose → 第二轮 coder），之后返回 PASS（驱动 regression → review → finalize）。
++    这样一轮跑图会真实经过 planner/coder/diagnoser/reviewer 四个角色的 LLM 调用，
++    运行时隔离检查才覆盖到"所有模型输入"而不只是第一轮。基线（``tests=()``）
++    返回全部可见测试 PASS，否则 ``_authorized_targets`` 会因为"基线里没有这个
++    测试"而拒绝执行目标测试。
+     """
+ 
+     backend = "fake"
+@@ -192,6 +196,7 @@ class _RuleSandbox:
+         self._nodes = node_ids
+         self.run_calls: list[tuple[str, ...]] = []
+         self._target_calls = 0
++        self._target_exec_calls = 0
+ 
+     def build_env(self, **kwargs: Any) -> EnvironmentBuildResult:
+         del kwargs
+@@ -209,7 +214,12 @@ class _RuleSandbox:
+         failing = False
+         if selected:
+             self._target_calls += 1
+-            failing = self._target_calls == 1
++            in_target_node = any(
++                frame.name == "run_target_tests" for frame in traceback.extract_stack()
++            )
++            if in_target_node:
++                self._target_exec_calls += 1
++                failing = self._target_exec_calls == 1
+         cases = [
+             TestCaseResult(
+                 node_id=node,
+@@ -320,6 +330,18 @@ def runtime_run(tmp_path_factory: pytest.TempPathFactory) -> _RuntimeRun:
+     repository = evaluator.materialized_repository(fixture)
+     index = _build_index(fixture, repository, root / "index")
+     script = gen._build_script(fixture, "correct", index)
++    # run_target_tests reuses an execution when the patch hash is unchanged, so
++    # the retry must produce a distinct (still behaviour-preserving) patch for
++    # the sandbox's second target run to actually happen.
++    first_edit = script["coder"][0]
++    script["coder"][2] = {
++        "tool": "edit_file",
++        "arguments": {
++            "path": first_edit["arguments"]["path"],
++            "search": first_edit["arguments"]["replace"],
++            "replace": first_edit["arguments"]["replace"] + "  # second attempt",
++        },
++    }
+     bundle = ProviderBundle.scripted(script)
+     node_ids = sorted(
+         path.relative_to(repository).as_posix() for path in (repository / "tests").glob("test_*.py")
