@@ -1,6 +1,6 @@
 {
   "phase": 34,
-  "generated_at": "2026-11-05T19:20:50+08:00",
+  "generated_at": "2026-11-06T00:07:20+08:00",
   "tool": "delivery receipt; every hash computed from the referenced file at generation time; no invented values",
   "verdict": "PASS",
   "verdict_basis": "Phase34 functional scope PASS. Archive consistency PASS with v12: source_commit=254b0a8 (final code HEAD C33), 18 versions verified, new_failures=0, witness=verified, historical baseline 72/0. Full regression 4181 passed / 0 failed / 3 skipped. The repository is shallow; the full-history clone limitation is recorded explicitly.",
@@ -34,7 +34,8 @@
     "activate": false,
     "C38": "the commit containing this final receipt + the C36/C37 commit-label and hash correction (docs-only; hash unknown at generation time)",
     "C36_note": "evidence pack + runtime JSON + report draft + receipt (docs-only)",
-    "C37_note": "clean-clone log + final hash backfill (docs-only)"
+    "C37_note": "clean-clone log + final hash backfill (docs-only)",
+    "C39": "the stats-correction docs commit (318 commits / 787 effective SOURCE_SCOPE / 172-176 untracked; docs-only; hash unknown at generation time)"
   },
   "candidate": {
     "version": "phase34-candidate-v12",
@@ -62,7 +63,9 @@
       "raw_bytes": "source_commit_git_blob",
       "raw_hashes_stored": false,
       "source_hash": "lf_sha256"
-    }
+    },
+    "source_scope_files": 787,
+    "source_scope_note": "133 is the curated inherited+changed source set; 787 is the tracked effective SOURCE_SCOPE count (including configs/harness, excluding candidates/receipts). All 7 SOURCE_SCOPE changes from cc0dd9a to C33 are covered by v10/v11/v12."
   },
   "candidate_history": {
     "v9": {
@@ -156,11 +159,11 @@
     "phase34_generator": "scripts/phase34_runtime_results.py",
     "runtime_json": {
       "path": "docs/notes/phase34-runtime-results.json",
-      "sha256": "00b1fba41779314b50f9df3a84c703f5d05e58fcc2da36f589790c42398f50dd",
-      "recorded_through": "f843fe352e83bcb89184ac0c2b76390da9c66354",
-      "recorded_head": "f843fe352e83bcb89184ac0c2b76390da9c66354",
-      "actual_head_at_write": "f843fe352e83bcb89184ac0c2b76390da9c66354",
-      "phase_commits": 37,
+      "sha256": "b33acdd6bd215c0ab6856488bbc54065fc9c9ee27cce94d9bde7ed8ed138f762",
+      "recorded_through": "9e99eda2036a17d4c0f38c2a8e505c57716bdd39",
+      "recorded_head": "9e99eda2036a17d4c0f38c2a8e505c57716bdd39",
+      "actual_head_at_write": "9e99eda2036a17d4c0f38c2a8e505c57716bdd39",
+      "phase_commits": 40,
       "code_commits": [
         "254b0a81248b8455c236696f9915e2a237b8c05e",
         "bc2160d471cf3ddf937f214935c0f57408715588",
@@ -174,7 +177,7 @@
       ],
       "check_exit_code": 0,
       "evidence_dir": "docs/notes/phase34-evidence",
-      "evidence_manifest_sha256": "4aa78793e726aa7d19a49222b163381cc63305d3caa6a4adc8d139a209e80292",
+      "evidence_manifest_sha256": "c550e95cd38d06a892d34c9f1c8c4c9c3ac13b57dfbd5e1873e516c4a5da28f0",
       "requires_scratch": false,
       "post_evidence_check_log": "default --check exit 0 at C35b without --scratch; C36 clean-clone green log: docs/notes/phase34-selfcontained-check.log"
     }
@@ -182,7 +185,7 @@
   "evidence_pack": {
     "dir": "docs/notes/phase34-evidence",
     "manifest": "docs/notes/phase34-evidence/SHA256SUMS",
-    "manifest_sha256": "4aa78793e726aa7d19a49222b163381cc63305d3caa6a4adc8d139a209e80292",
+    "manifest_sha256": "c550e95cd38d06a892d34c9f1c8c4c9c3ac13b57dfbd5e1873e516c4a5da28f0",
     "entries": 56,
     "runtime_check_command": ".venv/Scripts/python.exe scripts/phase34_runtime_results.py --check",
     "requires_scratch": false,
@@ -261,13 +264,14 @@
     "boundary_commit": "04a523fafbd61bc2e49420963b84ed8e2bd1b3cf",
     "origin": "https://github.com/wanjiang263/CodePilot-Repair.git",
     "unshallow_result": "git fetch --unshallow origin exits 0 but leaves the shallow file unchanged; the boundary is not on any origin branch",
-    "clean_clone_scope": "existing 303-commit history only; full-history clone not verified",
-    "clone_marker_note": "CLONE_SHALLOW=false is a --local artifact: the clone has the same truncated 303-commit history, with 04a523f as a parentless root; SOURCE_SHALLOW=true is the authoritative scope marker"
+    "clean_clone_scope": "existing 318-commit history only; full-history clone not verified",
+    "clone_marker_note": "CLONE_SHALLOW=false is a --local artifact: the clone has the same truncated 318-commit history, with 04a523f as a parentless root; SOURCE_SHALLOW=true is the authoritative scope marker",
+    "history_scope": "existing 318-commit history only; the clone marker is false because clone --local did not copy .git/shallow; full-history clone not verified"
   },
   "external_anchor": {
     "receipt_sha256": "99d8787cf12bd45fdf00552fe374438f834ddbac51cbe75f3825e7ca683de6fa",
-    "evidence_manifest_sha256": "4aa78793e726aa7d19a49222b163381cc63305d3caa6a4adc8d139a209e80292",
-    "runtime_json_sha256": "00b1fba41779314b50f9df3a84c703f5d05e58fcc2da36f589790c42398f50dd",
+    "evidence_manifest_sha256": "c550e95cd38d06a892d34c9f1c8c4c9c3ac13b57dfbd5e1873e516c4a5da28f0",
+    "runtime_json_sha256": "b33acdd6bd215c0ab6856488bbc54065fc9c9ee27cce94d9bde7ed8ed138f762",
     "witness_path": "docs/notes/phase34-evidence/external-witness-v12.txt",
     "note": "The v12 receipt is externally witnessed. The evidence manifest/runtime hash anchor is recorded outside the automated --check chain; --check detects drift, not a coordinated rewrite of pack + manifest + runtime JSON."
   },
@@ -277,29 +281,30 @@
     "large repository (>=20k files)",
     "24h stability",
     "frontend checks (web/src zero diff; conditionally skipped)",
-    "src/codepilot/eval/swebench_runner.py:423 build-context risk (P2, untouched)",
+    "src/codepilot/sandbox/swebench_env.py:423 build-context potential misuse (P2, audited; official path does not build)",
     "full-history clone (repository is shallow; boundary not on origin)",
     "Phase35 activation dry-run, real-provider smoke, Docker/official Harness full run"
   ],
   "mainline": {
     "branch": "codex/phase12-real-issue-pilot",
-    "pre_merge_head": "5f6f3eb539bcb7af771b29ddb18f27cf29e39507",
-    "target": "C38 (final docs commit); fast-forward after all commits",
+    "pre_merge_head": "9e99eda2036a17d4c0f38c2a8e505c57716bdd39",
+    "target": "C39 (stats correction; Phase34 final docs)",
     "ff_only": true,
     "pushed": false
   },
   "docs_sha256": {
-    "docs/notes/phase34-final-report.md": "32efff6d0c5b5f81ee0d5902bfd2d8f0fca23e80e3ded5215aaaac5d82a679ae",
-    "docs/notes/phase34-runtime-results.json": "00b1fba41779314b50f9df3a84c703f5d05e58fcc2da36f589790c42398f50dd",
+    "docs/notes/phase34-final-report.md": "ed827a6ad55effe515a7c2f0c35309fe1a5be1a931db8a54185c95b1de023a90",
+    "docs/notes/phase34-runtime-results.json": "b33acdd6bd215c0ab6856488bbc54065fc9c9ee27cce94d9bde7ed8ed138f762",
     "docs/notes/phase34-static-checks.json": "5cae0673a34d2e13f6cf0e31f742cd23d15a0cfba9a0579b14a94f2805ff3930",
-    "docs/notes/phase34-evidence/SHA256SUMS": "4aa78793e726aa7d19a49222b163381cc63305d3caa6a4adc8d139a209e80292",
+    "docs/notes/phase34-evidence/SHA256SUMS": "c550e95cd38d06a892d34c9f1c8c4c9c3ac13b57dfbd5e1873e516c4a5da28f0",
     "docs/notes/phase34-evidence/static-checks.json": "5cae0673a34d2e13f6cf0e31f742cd23d15a0cfba9a0579b14a94f2805ff3930",
     "docs/notes/phase34-evidence/provider-matrix.json": "317bba9db1471c485869c184706371e307a17122f697438c485c3fc1196035e8",
     "docs/notes/phase34-evidence/verify-v12.json": "c046843df24a0a7bfb0332f54612acd90571e3b2775ef5eb9f2f7aad6293b39a",
     "docs/notes/phase34-evidence/external-witness-v12.txt": "6f57186c0189ed78c482757e950c6e4f40ce8f4d7d6f93080a8142d1e6bc1c00",
     "configs/harness/candidates/historical-baseline.json": "2ad37791e3074d7867c58e238d5fb37e32014636c407dc6145dcd75493b7a0f5",
     "configs/harness/receipts/phase34-candidate-v12.json": "99d8787cf12bd45fdf00552fe374438f834ddbac51cbe75f3825e7ca683de6fa",
-    "docs/notes/phase34-selfcontained-check.log": "abe09bce95f7e64824ec1ed98504bce325797c47072259989084b286682ec99a"
+    "docs/notes/phase34-selfcontained-check.log": "abe09bce95f7e64824ec1ed98504bce325797c47072259989084b286682ec99a",
+    "docs/notes/phase35-errata.md": "aca99e25212e637d2efff1f72dfd4f4c07ad476d4d55808e1d6e1d03375645e8"
   },
   "constraints_honored": [
     "single controller, no teammate/subagent",
@@ -308,7 +313,7 @@
     "v1-v9 candidate files unchanged (byte sha verified)",
     "v10/v11 preserved as historical candidates; v12 is the final candidate",
     "Phase33 runtime JSON and delivery receipt restored byte-for-byte",
-    "176 untracked historical files untouched and uncommitted",
+    "172 untracked status entries / 176 files untouched and uncommitted (logs/ collapses 5->1)",
     "real model requests 0, cost 0",
     "no skip/xfail/deleted/weakened tests to hide failures",
     "test startup wait raised to 60s with behavioral assertions unchanged; documented as a test-only robustness fix",

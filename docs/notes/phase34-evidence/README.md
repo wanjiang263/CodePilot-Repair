@@ -10,9 +10,10 @@ clone without the generation-time scratch directory (`D:/cp34/final-v10` or
 The final candidate is `phase34-candidate-v12` (`pending`, parent
 `phase34-candidate-v11`, source commit `254b0a81248b8455c236696f9915e2a237b8c05e`,
 diff base `bc2160d471cf3ddf937f214935c0f57408715588`). It resolves the v9/v10
-source drift: the 133-file source manifest includes the evidence-tool scripts,
-the `configs/harness` byte pin, the `test_phase26_final.py` startup-wait fix and
-the LF normalization.
+source drift: the 133-file curated source manifest (787 effective SOURCE_SCOPE
+files; the candidate covers the inherited list plus every scope change) includes
+the evidence-tool scripts, the `configs/harness` byte pin, the
+`test_phase26_final.py` startup-wait fix and the LF normalization.
 
 `verify-v12.json` is the 18-version archive report:
 `new=11 old=7 new_failures=0 unexplained=0 witness=verified
@@ -72,9 +73,12 @@ directory is rejected as `evidence_missing`.
 
 The current repository is shallow (`shallow` contains `04a523f`). The boundary
 commit is not reachable from any `origin` branch, so `git fetch --unshallow` is
-a no-op; the clean-clone result covers the existing 303-commit history only.
-The clean-clone script prints `SOURCE_SHALLOW`, `CLONE_SHALLOW` and
-`HISTORY_SCOPE=existing_shallow_history_only`; a full-history clone is not
+a no-op; the clean-clone result covers the existing 318-commit history only.
+Counts at the C38 closeout: 318 commits; 787 effective SOURCE_SCOPE files;
+v12's 133-file source set is curated; the main checkout has 172 `git status`
+untracked entries / 176 files (`logs/` collapses 5→1). The clean-clone script
+prints `SOURCE_SHALLOW` and `CLONE_SHALLOW`; `CLONE_SHALLOW=false` is a
+`--local` marker artifact, not full-history proof. A full-history clone is not
 verified.
 
 Evidence, candidate, receipt and generated note files are pinned with
