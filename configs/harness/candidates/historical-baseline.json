@@ -293,6 +293,30 @@
     },
     {
       "baseline_commit_sha256": null,
+      "bytes": 26133,
+      "path": "candidates/phase34-candidate-v10/candidate.diff",
+      "sha256": "d26c12841efde4aa7288abe5715490dc09f06c4fd1fb22ac581e2d77afb72e36"
+    },
+    {
+      "baseline_commit_sha256": null,
+      "bytes": 35317,
+      "path": "candidates/phase34-candidate-v10/candidate.json",
+      "sha256": "5ccad67744024a0cf9087734e1427d3c18b9ae666435a6774963adea1ea79cba"
+    },
+    {
+      "baseline_commit_sha256": null,
+      "bytes": 3893,
+      "path": "candidates/phase34-candidate-v10/snapshot.json",
+      "sha256": "6edf5eff6079ca44862e19bec962ef325d2d0c69c7eadb186d5574579990af64"
+    },
+    {
+      "baseline_commit_sha256": null,
+      "bytes": 2313438,
+      "path": "candidates/phase34-candidate-v10/sources.json",
+      "sha256": "0922656112811a4e3d02726463efe75ef8f50bc965f940c1a5a247ce8b6391da"
+    },
+    {
+      "baseline_commit_sha256": null,
       "bytes": 40893,
       "path": "candidates/phase34-candidate-v7/candidate.diff",
       "sha256": "47d4927a0f5cb3bc2c78631e6a1762851a557c645e9243dfa3271be66c0240f0"
@@ -364,8 +388,8 @@
       "sha256": "be7d60560f2ff567001b97bb47750dc16ebcddd8c4bd51748a7cc681e312c9fc"
     }
   ],
-  "generated_at_epoch": 1793840932,
-  "manifest_head": "cabcaa383f838c8db430d8b40496bc086caeb337",
+  "generated_at_epoch": 1793860756,
+  "manifest_head": "e0b1a6fcfbdf68ad626777467b15b247a51d8030",
   "note": "Per-file SHA256 of every candidate file at freeze time; the verifier compares current bytes against this manifest (catches committed tampering that a git log -1 heuristic cannot see).",
   "tool": "phase29_baseline_manifest",
   "zero_change_since_baseline": true
