@@ -1,0 +1,23 @@
+{
+  "check": "fail",
+  "reason": "evidence_manifest_mismatch",
+  "evidence_dir": "docs/notes/phase34-evidence",
+  "mismatched": [
+    "README.md",
+    "external-witness-v9.txt",
+    "provider-matrix.json",
+    "provider-matrix/provider-matrix.log",
+    "resumable.log",
+    "run-resumable-gate.sh",
+    "static-checks.json",
+    "test-gate-api.json",
+    "test-gate-eval.json",
+    "test-gate-graph.json",
+    "test-gate-integration.json",
+    "test-gate-sandbox.json",
+    "test-gate-unit-a.json",
+    "test-gate-unit-b.json",
+    "test-gate-unit-c.json",
+    "test-gate-unit-d.json"
+  ]
+}

@@ -1,0 +1,3 @@
+# Evidence files are byte-pinned by SHA256SUMS and must not be EOL-converted
+# by a clone that inherits a different core.autocrlf setting.
+phase34-evidence/** -text
