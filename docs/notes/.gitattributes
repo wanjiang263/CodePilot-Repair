@@ -1,3 +1,6 @@
-# Evidence files are byte-pinned by SHA256SUMS and must not be EOL-converted
-# by a clone that inherits a different core.autocrlf setting.
+# Evidence and generated note files are byte-hashed by the delivery receipt and
+# SHA256SUMS; a clone that inherits a different core.autocrlf setting must
+# check out exactly the delivered bytes.
+phase33-* -text
+phase34-* -text
 phase34-evidence/** -text
