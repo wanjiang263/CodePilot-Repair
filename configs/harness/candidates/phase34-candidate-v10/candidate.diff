@@ -1,0 +1,674 @@
+diff --git a/configs/harness/.gitattributes b/configs/harness/.gitattributes
+new file mode 100644
+index 0000000..afed1e3
+--- /dev/null
++++ b/configs/harness/.gitattributes
+@@ -0,0 +1,4 @@
++# Archive metadata and candidate files are byte-hashed by the verifier.
++# Disable EOL conversion so a clone with a different core.autocrlf setting
++# checks out exactly the bytes recorded in SHA256SUMS and the baseline manifest.
++** -text
+diff --git a/scripts/__init__.py b/scripts/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/scripts/phase34_evidence_manifest.py b/scripts/phase34_evidence_manifest.py
+new file mode 100644
+index 0000000..4b0aeac
+--- /dev/null
++++ b/scripts/phase34_evidence_manifest.py
+@@ -0,0 +1,145 @@
++"""Write and verify the in-repo Phase34 evidence manifest (SHA256SUMS).
++
++The Phase34 runtime evidence is only reproducible if the files it reads ship
++with the repository. This tool owns the manifest for
++``docs/notes/phase34-evidence``: ``--write`` hashes every file in the pack
++(except the manifest itself) and ``--check`` proves the pack still matches.
++The runtime generator imports :func:`verify_manifest` so a missing or tampered
++evidence file is reported as ``evidence_missing``/``evidence_manifest_mismatch``
++instead of looking like a runtime payload mismatch.
++"""
++
++from __future__ import annotations
++
++import argparse
++import hashlib
++import json
++import sys
++from pathlib import Path, PurePosixPath
++from typing import Any
++
++ROOT = Path(__file__).resolve().parents[1]
++DEFAULT_DIR = ROOT / "docs" / "notes" / "phase34-evidence"
++MANIFEST_NAME = "SHA256SUMS"
++
++
++def sha256(path: Path) -> str:
++    return hashlib.sha256(path.read_bytes()).hexdigest()
++
++
++def _parse(folder: Path) -> tuple[dict[str, str], list[str]]:
++    manifest = folder / MANIFEST_NAME
++    if not manifest.is_file():
++        return {}, [f"missing {MANIFEST_NAME}"]
++    entries: dict[str, str] = {}
++    errors: list[str] = []
++    for lineno, raw in enumerate(manifest.read_text(encoding="utf-8").splitlines(), 1):
++        line = raw.strip()
++        if not line or line.startswith("#"):
++            continue
++        parts = line.split(None, 1)
++        if len(parts) != 2:
++            errors.append(f"line {lineno}: expected '<sha256>  <path>'")
++            continue
++        digest, name = parts
++        name = name.strip()
++        if name.startswith("*"):
++            name = name[1:]
++        name = name.replace("\\", "/")
++        if len(digest) != 64 or any(char not in "0123456789abcdefABCDEF" for char in digest):
++            errors.append(f"line {lineno}: invalid sha256 {digest!r}")
++            continue
++        if name.startswith("/") or ".." in PurePosixPath(name).parts:
++            errors.append(f"line {lineno}: unsafe path {name!r}")
++            continue
++        if name in entries:
++            errors.append(f"line {lineno}: duplicate path {name!r}")
++            continue
++        entries[name] = digest.lower()
++    if not entries and not errors:
++        errors.append(f"{MANIFEST_NAME} lists no files")
++    return entries, errors
++
++
++def verify_manifest(folder: Path) -> dict[str, Any]:
++    """Return a JSON-ready integrity report for an evidence folder."""
++    report: dict[str, Any] = {"folder": str(folder), "manifest": MANIFEST_NAME}
++    if not folder.is_dir():
++        report.update({"ok": False, "reason": "evidence_missing", "missing": [MANIFEST_NAME]})
++        return report
++    manifest = folder / MANIFEST_NAME
++    if not manifest.is_file():
++        report.update(
++            {
++                "ok": False,
++                "reason": "evidence_missing",
++                "entries": 0,
++                "paths": [],
++                "missing": [MANIFEST_NAME],
++                "mismatched": [],
++                "errors": [],
++            }
++        )
++        return report
++    entries, errors = _parse(folder)
++    missing = sorted(name for name in entries if not (folder / name).is_file())
++    mismatched = sorted(
++        name
++        for name, digest in entries.items()
++        if (folder / name).is_file() and sha256(folder / name) != digest
++    )
++    if missing:
++        reason = "evidence_missing"
++    elif mismatched:
++        reason = "evidence_manifest_mismatch"
++    elif errors:
++        reason = "evidence_manifest_invalid"
++    else:
++        reason = "ok"
++    report.update(
++        {
++            "ok": reason == "ok",
++            "reason": reason,
++            "entries": len(entries),
++            "paths": sorted(entries),
++            "missing": missing,
++            "mismatched": mismatched,
++            "errors": errors,
++        }
++    )
++    return report
++
++
++def write_manifest(folder: Path) -> dict[str, Any]:
++    if not folder.is_dir():
++        return {"ok": False, "reason": "evidence_missing", "folder": str(folder)}
++    names = sorted(
++        path.relative_to(folder).as_posix()
++        for path in folder.rglob("*")
++        if path.is_file() and path.name != MANIFEST_NAME
++    )
++    if not names:
++        return {"ok": False, "reason": "evidence_empty", "folder": str(folder)}
++    lines = [f"{sha256(folder / name)}  {name}" for name in names]
++    (folder / MANIFEST_NAME).write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
++    return {"ok": True, "manifest": str(folder / MANIFEST_NAME), "entries": len(names)}
++
++
++def main(argv: list[str] | None = None) -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--folder", default=str(DEFAULT_DIR))
++    mode = parser.add_mutually_exclusive_group(required=True)
++    mode.add_argument("--write", action="store_true", help="rewrite SHA256SUMS")
++    mode.add_argument("--check", action="store_true", help="verify SHA256SUMS")
++    args = parser.parse_args(argv)
++
++    folder = Path(args.folder)
++    if not folder.is_absolute():
++        folder = ROOT / folder
++    result = write_manifest(folder) if args.write else verify_manifest(folder)
++    print(json.dumps(result, indent=2, ensure_ascii=False))
++    return 0 if result.get("ok") else 1
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/phase34_runtime_results.py b/scripts/phase34_runtime_results.py
+index 662d83f..47bcf64 100644
+--- a/scripts/phase34_runtime_results.py
++++ b/scripts/phase34_runtime_results.py
+@@ -1,4 +1,4 @@
+-"""Phase34 runtime evidence: lifecycle-checked JSON for the v8 closeout.
++"""Phase34 runtime evidence: lifecycle-checked JSON for the v10 closeout.
+ 
+ Same evidence-head semantics as the Phase33 generator: the JSON describes the
+ tree at ``recorded_through``, not whatever HEAD is now. ``phase_commits`` covers
+@@ -6,6 +6,13 @@ tree at ``recorded_through``, not whatever HEAD is now. ``phase_commits`` covers
+ the recorded commits, allows only ``docs/`` changes after them, and rebuilds the
+ payload at the recorded tree. ``recorded_head`` is the evidence head;
+ ``actual_head_at_write`` records the HEAD at generation time explicitly.
++
++Evidence is self-contained: the default scratch is the in-repo pack at
++``docs/notes/phase34-evidence`` and ``--check`` verifies its ``SHA256SUMS``
++before rebuilding. A missing or tampered file is reported as
++``evidence_missing``/``evidence_manifest_mismatch``, never as a payload
++mismatch. Absolute paths recorded by the original gate runs are rebound to the
++pack by basename, so a clean clone never reads the generation-time scratch.
+ """
+ 
+ from __future__ import annotations
+@@ -37,10 +44,17 @@ from scripts.phase33_runtime_results import (  # noqa: E402
+     static_section,
+     unit_aggregate,
+ )
++from scripts.phase34_evidence_manifest import MANIFEST_NAME, verify_manifest  # noqa: E402
+ 
+-DEFAULT_SCRATCH = ROOT / ".codex-pytest-tmp" / "phase34"
++DEFAULT_SCRATCH = ROOT / "docs" / "notes" / "phase34-evidence"
+ DEFAULT_OUT = ROOT / "docs" / "notes" / "phase34-runtime-results.json"
+ CANDIDATE_FILES = ("candidate.json", "candidate.diff", "snapshot.json", "sources.json")
++CONSUMED_EVIDENCE = (
++    "static-checks.json",
++    "provider-matrix.json",
++    "verify-v10.json",
++    "pre-fix-check.log",
++)
+ 
+ UNVERIFIED = [
+     "real provider streaming/usage/billing (0 requests, 0 cost; rows blocked)",
+@@ -65,11 +79,109 @@ def commits_section(
+     return phase, code
+ 
+ 
+-def regression_section(scratch: Path) -> dict[str, Any]:
++def _scrub(value: str, scratch: Path) -> str:
++    text = str(value)
++    for actual, label in ((scratch, "<evidence>"), (ROOT, "<repo>")):
++        for variant in {str(actual), str(actual).replace("\\", "/")}:
++            if variant:
++                text = text.replace(variant, label)
++    return text
++
++
++def _rebind(value: Any, scratch: Path) -> Any:
++    """Map a generation-time absolute path to its file in the evidence pack."""
++    if not isinstance(value, str) or not value:
++        return value
++    path = Path(value)
++    if path.is_absolute():
++        return rel(scratch / path.name)
++    return value.replace("\\", "/")
++
++
++def evidence_records(scratch: Path) -> dict[str, Any]:
++    """Merge gate summaries, rebinding every external path into the pack."""
+     merged = merge_gate_records(scratch)
++    for run in merged["records"]:
++        for key in ("log", "junit"):
++            run[key] = _rebind(run.get(key), scratch)
++        basetemp = run.get("basetemp")
++        if isinstance(basetemp, str) and basetemp:
++            run["basetemp"] = Path(basetemp).name
++        command = run.get("command")
++        if isinstance(command, str) and command:
++            run["command"] = _scrub(command, scratch)
++    return merged
++
++
++def _evidence_problem(scratch: Path) -> dict[str, Any] | None:
++    report = verify_manifest(scratch)
++    if not report.get("ok"):
++        problem: dict[str, Any] = {
++            "reason": str(report.get("reason") or "evidence_manifest_invalid"),
++            "evidence_dir": rel(scratch),
++        }
++        for key in ("missing", "mismatched", "errors"):
++            value = report.get(key)
++            if value:
++                problem[key] = value
++        return problem
++    merged = evidence_records(scratch)
++    gate_files = sorted(path.name for path in scratch.glob("test-gate*.json"))
++    if not gate_files:
++        return {
++            "reason": "evidence_missing",
++            "evidence_dir": rel(scratch),
++            "missing": ["test-gate-*.json"],
++        }
++    required = set(CONSUMED_EVIDENCE)
++    for run in merged["records"]:
++        for key in ("log", "junit"):
++            value = run.get(key)
++            if isinstance(value, str) and value:
++                required.add(Path(value).name)
++    missing_files = sorted(name for name in required if not (scratch / name).is_file())
++    if missing_files:
++        return {
++            "reason": "evidence_missing",
++            "evidence_dir": rel(scratch),
++            "missing": missing_files,
++        }
++    listed = set(report.get("paths") or [])
++    unlisted = sorted(set(gate_files) - listed)
++    if unlisted:
++        return {
++            "reason": "evidence_unlisted",
++            "evidence_dir": rel(scratch),
++            "unlisted": unlisted,
++        }
++    return None
++
++
++def selection_note(rows: list[dict[str, Any]]) -> str:
++    parts: list[str] = []
++    selected = 0
++    for row in rows:
++        counts = row.get("junit_counts") or {}
++        total = sum(int(counts.get(key) or 0) for key in ("passed", "failure", "error", "skipped"))
++        if total:
++            parts.append(f"{row.get('group')} {total}")
++            selected += total
++    return (
++        "full repository selection: "
++        + " + ".join(parts)
++        + f" = {selected}; tests/docker 35 deselected"
++    )
++
++
++def regression_section(scratch: Path) -> dict[str, Any]:
++    merged = evidence_records(scratch)
+     if not merged["records"]:
+         return missing(scratch / "test-gate-phase34.json")
+     rows = regression_rows(merged["records"])
++    # The raw gate summary keeps the command; the payload omits it because the
++    # command embeds generation-machine absolute paths and would differ in a clone.
++    for row in rows:
++        row.pop("command", None)
+     latest = merged["latest"] or {}
+     failed = [
+         {
+@@ -92,11 +204,7 @@ def regression_section(scratch: Path) -> dict[str, Any]:
+         "blocked_runs": blocked,
+         "failed_runs": failed,
+         "groups": rows,
+-        "selected_tests_note": (
+-            "full repository selection: unit 3120 (3118 passed + 2 skipped) + "
+-            "eval 483 + sandbox 66 + integration 126 + api 118 + graph 266 = 4179; "
+-            "tests/docker 35 deselected"
+-        ),
++        "selected_tests_note": selection_note(rows),
+     }
+     aggregate = unit_aggregate(rows)
+     if aggregate is not None:
+@@ -122,7 +230,7 @@ def candidate_section(version: str) -> dict[str, Any]:
+ 
+ 
+ def archive_section(scratch: Path) -> dict[str, Any]:
+-    path = scratch / "verify-v9.json"
++    path = scratch / "verify-v10.json"
+     data = load_json(path)
+     if not isinstance(data, dict):
+         return missing(path)
+@@ -136,6 +244,11 @@ def archive_section(scratch: Path) -> dict[str, Any]:
+         "historical_baseline",
+     )
+     out: dict[str, Any] = {key: data.get(key) for key in keep if key in data}
++    baseline = out.get("historical_baseline")
++    if isinstance(baseline, dict):
++        baseline = dict(baseline)
++        baseline["manifest_path"] = "configs/harness/candidates/historical-baseline.json"
++        out["historical_baseline"] = baseline
+     versions = data.get("versions")
+     if isinstance(versions, list):
+         out["versions_summary"] = [
+@@ -218,6 +331,8 @@ def build_payload(
+         "recorded_through": recorded_through,
+         "recorded_head": recorded_head,
+         "actual_head_at_write": actual_head,
++        "evidence_dir": rel(scratch),
++        "evidence_manifest_sha256": sha256(scratch / MANIFEST_NAME),
+         "phase_commits": phase,
+         "code_commits": code,
+         "final_regression": regression_section(scratch),
+@@ -227,10 +342,11 @@ def build_payload(
+             "v7": candidate_section("phase34-candidate-v7"),
+             "v8": candidate_section("phase34-candidate-v8"),
+             "v9": candidate_section("phase34-candidate-v9"),
++            "v10": candidate_section("phase34-candidate-v10"),
+             "active_pointer_exists": (active / "active.json").is_file()
+             or (active / "active.next.json").is_file(),
+         },
+-        "archive_verify_v8": archive_section(scratch),
++        "archive_verify": archive_section(scratch),
+         "runtime_lifecycle": lifecycle_section(scratch),
+         "page_e2e": {
+             "command": f"git diff --name-only {resolved_base}..{recorded_through} -- web/src",
+@@ -316,6 +432,11 @@ def _check(written_path: Path, scratch: Path, base_override: str | None) -> int:
+             recorded_through=recorded,
+         )
+ 
++    problem = _evidence_problem(scratch)
++    if problem is not None:
++        reason = str(problem.pop("reason"))
++        return fail(reason, **problem)
++
+     payload = build_payload(
+         base,
+         scratch,
+@@ -361,6 +482,12 @@ def main(argv: list[str] | None = None) -> int:
+     if args.check:
+         return _check(out, scratch, args.base)
+ 
++    problem = _evidence_problem(scratch)
++    if problem is not None:
++        reason = str(problem.pop("reason"))
++        _emit({"write": "fail", "reason": reason, **problem})
++        return 2
++
+     base = args.base
+     if base is None and out.is_file():
+         try:
+diff --git a/scripts/phase34_selfcontained_check.sh b/scripts/phase34_selfcontained_check.sh
+new file mode 100644
+index 0000000..2e34deb
+--- /dev/null
++++ b/scripts/phase34_selfcontained_check.sh
+@@ -0,0 +1,56 @@
++#!/usr/bin/env bash
++# Phase34 evidence self-containment regression: clone the repository into a
++# temporary directory (no hardlinks, no alternates), run the runtime --check
++# with its default in-repo evidence pack, and assert that the delivered JSON
++# contains no external scratch paths. The clone does not contain D:/cp34, so a
++# pass proves the check is reproducible away from the generation machine.
++set -eu
++
++root=$(cd "$(dirname "$0")/.." && pwd)
++source_shallow=$(git -C "$root" rev-parse --is-shallow-repository)
++work=$(mktemp -d "${TMPDIR:-/tmp}/phase34-selfcontained-XXXXXX")
++trap 'rm -rf "$work"' EXIT INT TERM
++
++branch=$(git -C "$root" rev-parse --abbrev-ref HEAD)
++python=${PYTHON:-"$root/.venv/Scripts/python.exe"}
++if [ ! -x "$python" ]; then
++    python=$(command -v python3 || command -v python)
++fi
++
++git -c core.longpaths=true clone --quiet --no-hardlinks --local \
++    --single-branch --branch "$branch" "$root" "$work/repo"
++
++cd "$work/repo"
++export PYTHONPATH="$work/repo/src${PYTHONPATH:+:$PYTHONPATH}"
++clone_shallow=$(git rev-parse --is-shallow-repository)
++echo "SOURCE_SHALLOW=$source_shallow"
++echo "CLONE_SHALLOW=$clone_shallow"
++if [ "$clone_shallow" = "true" ]; then
++    echo "HISTORY_SCOPE=existing_shallow_history_only"
++fi
++if [ "${PHASE34_REQUIRE_FULL_HISTORY:-0}" = "1" ] && [ "$clone_shallow" = "true" ]; then
++    echo "FULL_HISTORY_REQUIRED_BUT_SHALLOW" >&2
++    exit 1
++fi
++"$python" scripts/phase34_runtime_results.py --check
++
++"$python" - <<'PY'
++import json
++import re
++from pathlib import Path
++
++payload = json.loads(
++    Path("docs/notes/phase34-runtime-results.json").read_text(encoding="utf-8")
++)
++assert payload["evidence_dir"] == "docs/notes/phase34-evidence", payload["evidence_dir"]
++assert re.fullmatch(r"[0-9a-f]{64}", payload["evidence_manifest_sha256"]), payload[
++    "evidence_manifest_sha256"
++]
++for group in payload["final_regression"]["groups"]:
++    for key in ("log", "junit"):
++        assert group[key].startswith("docs/notes/phase34-evidence/"), group[key]
++    assert "/" not in group["basetemp"] and "\\" not in group["basetemp"], group["basetemp"]
++text = Path("docs/notes/phase34-runtime-results.json").read_text(encoding="utf-8")
++assert "D:/cp34" not in text and "D:\\\\cp34" not in text
++print("SELF_CONTAINED_CHECK=PASS")
++PY
+diff --git a/tests/unit/test_phase34_runtime_results.py b/tests/unit/test_phase34_runtime_results.py
+index 326b9c1..ba48c0c 100644
+--- a/tests/unit/test_phase34_runtime_results.py
++++ b/tests/unit/test_phase34_runtime_results.py
+@@ -2,7 +2,9 @@
+ 
+ from __future__ import annotations
+ 
++import hashlib
+ import json
++import re
+ import subprocess
+ from pathlib import Path
+ from typing import Any
+@@ -35,6 +37,105 @@ def write(path: Path, text: str) -> None:
+     path.write_text(text, encoding="utf-8", newline="\n")
+ 
+ 
++def write_manifest(folder: Path) -> None:
++    lines = []
++    for path in sorted(folder.rglob("*")):
++        if path.is_file() and path.name != "SHA256SUMS":
++            digest = hashlib.sha256(path.read_bytes()).hexdigest()
++            lines.append(f"{digest}  {path.relative_to(folder).as_posix()}")
++    (folder / "SHA256SUMS").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
++
++
++def seed_evidence(folder: Path) -> None:
++    write(
++        folder / "gate-unit-a-run1.log",
++        "1 passed in 0.01s\n",
++    )
++    write(
++        folder / "gate-unit-a-run1.xml",
++        '<?xml version="1.0" encoding="utf-8"?>\n'
++        '<testsuites><testsuite name="unit-a" tests="1" failures="0" errors="0" '
++        'skipped="0"><testcase classname="tests.unit.test_ok" '
++        'name="test_ok"/></testsuite></testsuites>\n',
++    )
++    gate = {
++        "tool": "phase32-test-gate",
++        "generated_at": "2026-11-05T00:00:00+00:00",
++        "rg_path": "rg",
++        "rg_version": "test",
++        "preconditions": {"min_free_mb": 1},
++        "blocked_runs": [],
++        "failed_runs": [],
++        "runs": [
++            {
++                "suite": "unit-a",
++                "run": 1,
++                "started_at": "2026-11-05T00:00:00+00:00",
++                "exit_code": 0,
++                "summary_line": "1 passed in 0.01s",
++                "wall_s": 0.01,
++                "log": "D:\\generation\\gate-unit-a-run1.log",
++                "junit": "D:\\generation\\gate-unit-a-run1.xml",
++                "basetemp": "D:\\generation\\pytest\\unit-a-run1-20261105T000000",
++                "command": (
++                    f"python -m pytest --junitxml={folder}/gate-unit-a-run1.xml "
++                    f"--basetemp={folder}/pytest/unit-a-run1-20261105T000000"
++                ),
++                "memory_before": {"avail_phys_mb": 1},
++                "memory_after": {"avail_phys_mb": 1},
++            }
++        ],
++    }
++    write(folder / "test-gate-unit-a.json", json.dumps(gate, indent=2) + "\n")
++    write(
++        folder / "static-checks.json",
++        json.dumps({"file_count": 0, "files": [], "failed": [], "checks": []}) + "\n",
++    )
++    write(
++        folder / "provider-matrix.json",
++        json.dumps(
++            {
++                "real_mode": False,
++                "real_provider": {
++                    "real_requests": 0,
++                    "real_cost_cny": 0.0,
++                    "cost_known": True,
++                    "rows": [],
++                },
++                "totals_from_junit": {
++                    "tests": 1,
++                    "failures": 0,
++                    "errors": 0,
++                    "skipped": 0,
++                },
++            }
++        )
++        + "\n",
++    )
++    write(
++        folder / "verify-v10.json",
++        json.dumps(
++            {
++                "exit_code": 0,
++                "witness": "verified",
++                "historical_integrity": "ok",
++                "new_archive_status": "passed",
++                "totals": {},
++                "receipt": {},
++                "historical_baseline": {
++                    "manifest_path": "D:\\generation\\historical-baseline.json",
++                    "files_checked": 0,
++                    "mismatches": {},
++                    "ok": True,
++                },
++            }
++        )
++        + "\n",
++    )
++    write(folder / "pre-fix-check.log", "before fix: exit 1\n")
++    write_manifest(folder)
++
++
+ @pytest.fixture
+ def env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
+     repo = tmp_path / "repo"
+@@ -49,6 +150,8 @@ def env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
+     code = commit(repo, "code change")
+     write(repo / "docs/notes/phase.md", "evidence\n")
+     tip = commit(repo, "docs change")
++    scratch = repo / "docs" / "notes" / "phase34-evidence"
++    seed_evidence(scratch)
+     monkeypatch.setattr(runtime, "ROOT", repo)
+     monkeypatch.setattr(p33, "ROOT", repo)
+     return {
+@@ -56,7 +159,7 @@ def env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
+         "base": base,
+         "code": code,
+         "tip": tip,
+-        "scratch": tmp_path / "scratch",
++        "scratch": scratch,
+         "out": tmp_path / "runtime.json",
+     }
+ 
+@@ -79,6 +182,20 @@ def test_write_records_lifecycle(env: dict[str, Any]) -> None:
+     assert [item["hash"] for item in payload["code_commits"]] == [env["code"]]
+ 
+ 
++def test_write_records_in_repo_evidence(env: dict[str, Any]) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    payload = written(env)
++    assert payload["evidence_dir"] == "docs/notes/phase34-evidence"
++    assert re.fullmatch(r"[0-9a-f]{64}", payload["evidence_manifest_sha256"])
++    group = payload["final_regression"]["groups"][0]
++    assert group["log"] == "docs/notes/phase34-evidence/gate-unit-a-run1.log"
++    assert group["junit"] == "docs/notes/phase34-evidence/gate-unit-a-run1.xml"
++    assert "/" not in group["basetemp"] and "\\" not in group["basetemp"]
++    baseline = payload["archive_verify"]["historical_baseline"]
++    assert baseline["manifest_path"] == "configs/harness/candidates/historical-baseline.json"
++    assert "D:\\generation" not in json.dumps(payload)
++
++
+ def test_check_passes_at_recorded_through(env: dict[str, Any]) -> None:
+     assert run(env, "--write", "--base", env["base"]) == 0
+     assert run(env, "--check") == 0
+@@ -112,6 +229,53 @@ def test_tampered_recorded_head_fails(
+     assert "recorded_head_mismatch" in capsys.readouterr().out
+ 
+ 
++def test_missing_manifest_is_evidence_missing_not_payload_mismatch(
++    env: dict[str, Any], capsys: pytest.CaptureFixture[str]
++) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    (env["scratch"] / "SHA256SUMS").unlink()
++    assert run(env, "--check") == 1
++    out = capsys.readouterr().out
++    assert "evidence_missing" in out
++    assert "payload_mismatch" not in out
++
++
++def test_missing_consumed_evidence_file_is_evidence_missing(
++    env: dict[str, Any], capsys: pytest.CaptureFixture[str]
++) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    (env["scratch"] / "pre-fix-check.log").unlink()
++    assert run(env, "--check") == 1
++    out = capsys.readouterr().out
++    assert "evidence_missing" in out
++    assert "pre-fix-check.log" in out
++
++
++def test_tampered_evidence_file_is_manifest_mismatch(
++    env: dict[str, Any], capsys: pytest.CaptureFixture[str]
++) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    write(env["scratch"] / "gate-unit-a-run1.log", "tampered\n")
++    assert run(env, "--check") == 1
++    out = capsys.readouterr().out
++    assert "evidence_manifest_mismatch" in out
++    assert "gate-unit-a-run1.log" in out
++
++
++def test_manifest_path_traversal_is_rejected(
++    env: dict[str, Any], capsys: pytest.CaptureFixture[str]
++) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    manifest = env["scratch"] / "SHA256SUMS"
++    manifest.write_text(
++        manifest.read_text(encoding="utf-8") + "0" * 64 + "  ../outside\n",
++        encoding="utf-8",
++        newline="\n",
++    )
++    assert run(env, "--check") == 1
++    assert "evidence_manifest_invalid" in capsys.readouterr().out
++
++
+ def test_double_write_is_byte_identical(env: dict[str, Any]) -> None:
+     assert run(env, "--write", "--base", env["base"]) == 0
+     first = env["out"].read_bytes()
