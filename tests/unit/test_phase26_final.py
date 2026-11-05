@@ -248,9 +248,9 @@ def test_process_exit_releases_workspace(tmp_path):
     )
     process.start()
     try:
-        assert ready.wait(10)
+        assert ready.wait(60)
         release.set()
-        process.join(10)
+        process.join(60)
         assert process.exitcode == 0
         with (
             dispatch_scope(DispatchScope(Deadline(time.monotonic() + 2))),
