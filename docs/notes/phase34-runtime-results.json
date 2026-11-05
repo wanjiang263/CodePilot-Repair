@@ -1,14 +1,34 @@
 {
   "phase": 34,
-  "generated_at": "2026-11-05T05:26:46+00:00",
+  "generated_at": "2026-11-05T05:33:11+00:00",
   "generator": "scripts/phase34_runtime_results.py",
   "base_commit": "dba045dabd70f0e6eb7779287136944b589f2734",
-  "recorded_through": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
-  "recorded_head": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
-  "actual_head_at_write": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
+  "recorded_through": "dda2e3e6c8f2e9351521600029e8780b7f05cfa8",
+  "recorded_head": "dda2e3e6c8f2e9351521600029e8780b7f05cfa8",
+  "actual_head_at_write": "dda2e3e6c8f2e9351521600029e8780b7f05cfa8",
   "evidence_dir": "docs/notes/phase34-evidence",
-  "evidence_manifest_sha256": "fdfbb5f2737362a04e51b3f85be0f9435b4b25fcedc700d64937428eb5e5b30f",
+  "evidence_manifest_sha256": "7cc67c5d495d63adcf1b849b5ca4df287e1c342d1e09ddbf012b70f4e3bb9795",
   "phase_commits": [
+    {
+      "hash": "dda2e3e6c8f2e9351521600029e8780b7f05cfa8",
+      "short": "dda2e3e",
+      "subject": "chore: pin configs/harness archive bytes across git checkouts"
+    },
+    {
+      "hash": "eb82317a0e38912209d4223248e49a11773e72f7",
+      "short": "eb82317",
+      "subject": "fix: omit machine-specific gate commands from runtime evidence"
+    },
+    {
+      "hash": "8312044203f7093cb1d908056d6fe180a5f03e6a",
+      "short": "8312044",
+      "subject": "docs: keep phase34 evidence bytes stable across git checkouts"
+    },
+    {
+      "hash": "c53bf1206f3f0fd13bdc0ce391becf7473f26380",
+      "short": "c53bf12",
+      "subject": "docs: archive a self-contained phase34 evidence pack"
+    },
     {
       "hash": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
       "short": "e2b3c8e",
@@ -102,6 +122,11 @@
   ],
   "code_commits": [
     {
+      "hash": "eb82317a0e38912209d4223248e49a11773e72f7",
+      "short": "eb82317",
+      "subject": "fix: omit machine-specific gate commands from runtime evidence"
+    },
+    {
       "hash": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
       "short": "e2b3c8e",
       "subject": "fix: make phase34 runtime evidence self-contained"
@@ -188,7 +213,6 @@
       {
         "group": "unit-a",
         "run": 1,
-        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/unit/agents tests/unit/api tests/unit/context tests/unit/eval tests/unit/failure tests/unit/graph tests/unit/llm -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-unit-a-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\unit-a-run1-20261105T011329-754329",
         "exit_code": 0,
         "summary_line": "1535 passed in 170.35s (0:02:50)",
         "wall_s": 174.61,
@@ -225,7 +249,6 @@
       {
         "group": "unit-b",
         "run": 1,
-        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/unit/observability tests/unit/patch tests/unit/repo tests/unit/retrieval tests/unit/sandbox tests/unit/schemas tests/unit/settings tests/unit/storage -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-unit-b-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\unit-b-run1-20261105T011627-660667",
         "exit_code": 0,
         "summary_line": "1138 passed, 2 skipped in 243.76s (0:04:03)",
         "wall_s": 247.74,
@@ -262,7 +285,6 @@
       {
         "group": "unit-c",
         "run": 1,
-        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/unit/test_artifacts.py tests/unit/test_cli.py tests/unit/test_cli_glm.py tests/unit/test_fsutil_replace.py tests/unit/test_index_real_repo.py tests/unit/test_m3_batch.py tests/unit/test_net_proxy.py tests/unit/test_phase19_acceptance_gate.py tests/unit/test_phase20_batch_controls.py tests/unit/test_phase21_budget_chain.py tests/unit/test_phase23_runtime.py tests/unit/test_phase26_closeout.py tests/unit/test_phase26_estimation.py tests/unit/test_phase26_final.py tests/unit/test_phase26_harness.py tests/unit/test_phase28_archive.py tests/unit/test_phase28_archive_verify.py tests/unit/test_phase29_archive.py tests/unit/test_phase29_archive_security.py tests/unit/test_phase29_archive_verify.py tests/unit/test_phase30_archive_receipt.py tests/unit/test_phase30_archive_v4.py tests/unit/test_phase30_harness_failclosed.py tests/unit/test_phase31_archive_manifest.py tests/unit/test_phase31_archive_verify.py tests/unit/test_phase31_receipt.py tests/unit/test_phase33_runtime_results.py tests/unit/test_phase33_test_gate.py tests/unit/test_phase34_archive_normalization.py tests/unit/test_phase34_runtime_results.py tests/unit/test_phase6_repro_stats.py -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-unit-c-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\unit-c-run1-20261105T012047-631187",
         "exit_code": 0,
         "summary_line": "420 passed in 934.55s (0:15:34)",
         "wall_s": 939.25,
@@ -299,7 +321,6 @@
       {
         "group": "unit-d",
         "run": 1,
-        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/unit/tools -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-unit-d-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\unit-d-run1-20261105T013726-572671",
         "exit_code": 0,
         "summary_line": "25 passed in 6.98s",
         "wall_s": 11.58,
@@ -336,7 +357,6 @@
       {
         "group": "eval",
         "run": 1,
-        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/eval -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-eval-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\eval-run1-20261105T013739-297983",
         "exit_code": 0,
         "summary_line": "483 passed in 791.37s (0:13:11)",
         "wall_s": 795.45,
@@ -373,7 +393,6 @@
       {
         "group": "sandbox",
         "run": 1,
-        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/sandbox -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-sandbox-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\sandbox-run1-20261105T015201-025072",
         "exit_code": 0,
         "summary_line": "66 passed, 1 deselected in 1.83s",
         "wall_s": 5.73,
@@ -410,7 +429,6 @@
       {
         "group": "integration",
         "run": 1,
-        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/integration -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-integration-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\integration-run1-20261105T015207-151696",
         "exit_code": 0,
         "summary_line": "126 passed, 1 deselected in 428.97s (0:07:08)",
         "wall_s": 433.2,
@@ -447,7 +465,6 @@
       {
         "group": "api",
         "run": 1,
-        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/api -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-api-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\api-run1-20261105T015934-748276",
         "exit_code": 0,
         "summary_line": "117 passed, 1 skipped in 144.60s (0:02:24)",
         "wall_s": 154.38,
@@ -484,7 +501,6 @@
       {
         "group": "graph",
         "run": 1,
-        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/graph -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-graph-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\graph-run1-20261105T020216-964863",
         "exit_code": 0,
         "summary_line": "266 passed, 13 deselected in 1227.12s (0:20:27)",
         "wall_s": 1233.78,
@@ -539,7 +555,7 @@
   },
   "static_checks": {
     "source": "docs/notes/phase34-evidence/static-checks.json",
-    "source_sha256": "8ddb85afc8ab7829a609d9466fcc9a7fc0643cbdd37c4b1b66578a10452ef23a",
+    "source_sha256": "a1e6d2e7536ee01af5a2dc62a6ab3970a8f9bc8ebd30104b345e5a23a0b735ec",
     "file_count": 15,
     "files": [
       "scripts/__init__.py",
@@ -988,7 +1004,7 @@
     "rule": "recorded_through/recorded_head describe the evidence tree; phase_commits=base..recorded_through; code_commits is path-filtered; changes after recorded_through must be docs-only"
   },
   "page_e2e": {
-    "command": "git diff --name-only dba045dabd70f0e6eb7779287136944b589f2734..e2b3c8eb450b0fe4980f8ae247c8302ec89ea455 -- web/src",
+    "command": "git diff --name-only dba045dabd70f0e6eb7779287136944b589f2734..dda2e3e6c8f2e9351521600029e8780b7f05cfa8 -- web/src",
     "changed_files": 0,
     "files": [],
     "result": "conditionally skipped: web/src has zero diff in this phase"
