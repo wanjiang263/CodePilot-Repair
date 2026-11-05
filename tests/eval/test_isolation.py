@@ -29,6 +29,7 @@ import asyncio
 import json
 import shutil
 import sys
+import traceback
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -179,11 +180,14 @@ class _CopyWorkspaceManager:
 class _RuleSandbox:
     """按规则返回结果的沙箱。
 
-    第一次目标测试返回 FAIL（驱动 diagnose → 第二轮 coder），之后返回 PASS（驱动
-    regression → review → finalize）。这样一轮跑图会真实经过
-    planner/coder/diagnoser/reviewer 四个角色的 LLM 调用，运行时隔离检查才覆盖到
-    "所有模型输入"而不只是第一轮。基线（``tests=()``）返回全部可见测试 PASS，
-    否则 ``_authorized_targets`` 会因为"基线里没有这个测试"而拒绝执行目标测试。
+    ``run_target_tests`` 之前，``build_env`` 会以 selected 非空做 supplemental
+    baseline collect；那些调用不能失败。真正的补丁后目标执行来自
+    ``run_target_tests`` 节点：让该节点的第一次调用返回 FAIL（驱动
+    diagnose → 第二轮 coder），之后返回 PASS（驱动 regression → review → finalize）。
+    这样一轮跑图会真实经过 planner/coder/diagnoser/reviewer 四个角色的 LLM 调用，
+    运行时隔离检查才覆盖到"所有模型输入"而不只是第一轮。基线（``tests=()``）
+    返回全部可见测试 PASS，否则 ``_authorized_targets`` 会因为"基线里没有这个
+    测试"而拒绝执行目标测试。
     """
 
     backend = "fake"
@@ -192,6 +196,7 @@ class _RuleSandbox:
         self._nodes = node_ids
         self.run_calls: list[tuple[str, ...]] = []
         self._target_calls = 0
+        self._target_exec_calls = 0
 
     def build_env(self, **kwargs: Any) -> EnvironmentBuildResult:
         del kwargs
@@ -209,7 +214,12 @@ class _RuleSandbox:
         failing = False
         if selected:
             self._target_calls += 1
-            failing = self._target_calls == 1
+            in_target_node = any(
+                frame.name == "run_target_tests" for frame in traceback.extract_stack()
+            )
+            if in_target_node:
+                self._target_exec_calls += 1
+                failing = self._target_exec_calls == 1
         cases = [
             TestCaseResult(
                 node_id=node,
@@ -320,6 +330,18 @@ def runtime_run(tmp_path_factory: pytest.TempPathFactory) -> _RuntimeRun:
     repository = evaluator.materialized_repository(fixture)
     index = _build_index(fixture, repository, root / "index")
     script = gen._build_script(fixture, "correct", index)
+    # run_target_tests reuses an execution when the patch hash is unchanged, so
+    # the retry must produce a distinct (still behaviour-preserving) patch for
+    # the sandbox's second target run to actually happen.
+    first_edit = script["coder"][0]
+    script["coder"][2] = {
+        "tool": "edit_file",
+        "arguments": {
+            "path": first_edit["arguments"]["path"],
+            "search": first_edit["arguments"]["replace"],
+            "replace": first_edit["arguments"]["replace"] + "  # second attempt",
+        },
+    }
     bundle = ProviderBundle.scripted(script)
     node_ids = sorted(
         path.relative_to(repository).as_posix() for path in (repository / "tests").glob("test_*.py")

@@ -93,8 +93,9 @@ def regression_section(scratch: Path) -> dict[str, Any]:
         "failed_runs": failed,
         "groups": rows,
         "selected_tests_note": (
-            "full repository selection: unit 3109 + eval 483 + sandbox 66 + "
-            "integration 126 + api 118 + graph 266 = 4168; tests/docker 35 deselected"
+            "full repository selection: unit 3120 (3118 passed + 2 skipped) + "
+            "eval 483 + sandbox 66 + integration 126 + api 118 + graph 266 = 4179; "
+            "tests/docker 35 deselected"
         ),
     }
     aggregate = unit_aggregate(rows)
@@ -121,7 +122,7 @@ def candidate_section(version: str) -> dict[str, Any]:
 
 
 def archive_section(scratch: Path) -> dict[str, Any]:
-    path = scratch / "verify-v8.json"
+    path = scratch / "verify-v9.json"
     data = load_json(path)
     if not isinstance(data, dict):
         return missing(path)
@@ -225,6 +226,7 @@ def build_payload(
         "candidates": {
             "v7": candidate_section("phase34-candidate-v7"),
             "v8": candidate_section("phase34-candidate-v8"),
+            "v9": candidate_section("phase34-candidate-v9"),
             "active_pointer_exists": (active / "active.json").is_file()
             or (active / "active.next.json").is_file(),
         },

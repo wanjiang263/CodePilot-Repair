@@ -118,6 +118,11 @@ def _begin(state: RepairState, deps: Deps, stage: str) -> RepairState:
             except OSError as exc:
                 deps.lifecycle.emit("source_snapshot_unavailable", error=str(exc))
                 sources = {}
+            # Evaluation modules are not inference-side inputs. Keeping them out
+            # of the harness artifact prevents eval code/markers from leaking
+            # into an inference-side artifact (the isolation audit treats any
+            # eval content there as a violation).
+            sources = {name: text for name, text in sources.items() if not name.startswith("eval/")}
             snapshot = {
                 "selection": selection,
                 "selection_source": str(archive_root()),

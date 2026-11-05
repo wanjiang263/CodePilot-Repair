@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import json
 import os
 import re
 import secrets
@@ -867,6 +868,48 @@ def _tool_read_attempts(
 # -------------------------------------------------------- Artifact / Checkpoint
 
 
+def _is_audit_probe_artifact(entry: Path) -> bool:
+    """True for tool-result artifacts produced by the isolation audit's own probes.
+
+    ``audit_tool_registry`` deliberately calls ``read_file``/``search_code`` on
+    eval paths. The tool layer records the request in a ``tool-results/*.json``
+    artifact, so the attempted path (and a sentinel pattern for the search probe)
+    appears there by construction. A failed probe, or a successful ``search_code``
+    that returned no matches, carries no evaluation content — the tool audit
+    already asserts the read failed / the search was empty. A successful
+    ``read_file`` or a non-empty search is still scanned and fails the audit.
+    """
+    if entry.suffix != ".json" or entry.parent.name != "tool-results":
+        return False
+    try:
+        payload = json.loads(entry.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, ValueError):
+        return False
+    if not isinstance(payload, dict):
+        return False
+    result = payload.get("result")
+    if not isinstance(result, dict):
+        return False
+    arguments = payload.get("arguments")
+    if not isinstance(arguments, dict):
+        return False
+    pattern = arguments.get("pattern")
+    if isinstance(pattern, str) and GOLD_SENTINEL_PREFIX in pattern:
+        # audit_tool_registry probes search_code with the sentinel token/prefix;
+        # the request artifact necessarily contains that token.
+        return True
+    raw = arguments.get("path") or arguments.get("path_glob") or ""
+    probe = str(raw).replace("\\", "/")
+    if not any(attempt.replace("\\", "/") in probe for attempt in _EVALUATION_READ_ATTEMPTS):
+        return False
+    if result.get("ok") is False:
+        return True
+    if result.get("ok") is True and payload.get("tool") == "search_code":
+        data = result.get("data")
+        return isinstance(data, dict) and not data.get("matches")
+    return False
+
+
 def audit_artifact_tree(
     root: Path,
     *,
@@ -932,6 +975,8 @@ def audit_artifact_tree(
                     f"artifact 文件的真实路径逃出根目录: {relative}",
                     where="artifact",
                 )
+            if _is_audit_probe_artifact(entry):
+                continue
             if _file_contains(entry, sentinel_bytes):
                 _raise(
                     "gold_sentinel_in_artifact",
