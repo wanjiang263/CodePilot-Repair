@@ -1,4 +1,4 @@
-"""Phase34 runtime evidence: lifecycle-checked JSON for the v9 closeout.
+"""Phase34 runtime evidence: lifecycle-checked JSON for the v10 closeout.
 
 Same evidence-head semantics as the Phase33 generator: the JSON describes the
 tree at ``recorded_through``, not whatever HEAD is now. ``phase_commits`` covers
@@ -52,7 +52,7 @@ CANDIDATE_FILES = ("candidate.json", "candidate.diff", "snapshot.json", "sources
 CONSUMED_EVIDENCE = (
     "static-checks.json",
     "provider-matrix.json",
-    "verify-v9.json",
+    "verify-v10.json",
     "pre-fix-check.log",
 )
 
@@ -157,6 +157,22 @@ def _evidence_problem(scratch: Path) -> dict[str, Any] | None:
     return None
 
 
+def selection_note(rows: list[dict[str, Any]]) -> str:
+    parts: list[str] = []
+    selected = 0
+    for row in rows:
+        counts = row.get("junit_counts") or {}
+        total = sum(int(counts.get(key) or 0) for key in ("passed", "failure", "error", "skipped"))
+        if total:
+            parts.append(f"{row.get('group')} {total}")
+            selected += total
+    return (
+        "full repository selection: "
+        + " + ".join(parts)
+        + f" = {selected}; tests/docker 35 deselected"
+    )
+
+
 def regression_section(scratch: Path) -> dict[str, Any]:
     merged = evidence_records(scratch)
     if not merged["records"]:
@@ -188,11 +204,7 @@ def regression_section(scratch: Path) -> dict[str, Any]:
         "blocked_runs": blocked,
         "failed_runs": failed,
         "groups": rows,
-        "selected_tests_note": (
-            "full repository selection: unit 3120 (3118 passed + 2 skipped) + "
-            "eval 483 + sandbox 66 + integration 126 + api 118 + graph 266 = 4179; "
-            "tests/docker 35 deselected"
-        ),
+        "selected_tests_note": selection_note(rows),
     }
     aggregate = unit_aggregate(rows)
     if aggregate is not None:
@@ -218,7 +230,7 @@ def candidate_section(version: str) -> dict[str, Any]:
 
 
 def archive_section(scratch: Path) -> dict[str, Any]:
-    path = scratch / "verify-v9.json"
+    path = scratch / "verify-v10.json"
     data = load_json(path)
     if not isinstance(data, dict):
         return missing(path)
@@ -330,10 +342,11 @@ def build_payload(
             "v7": candidate_section("phase34-candidate-v7"),
             "v8": candidate_section("phase34-candidate-v8"),
             "v9": candidate_section("phase34-candidate-v9"),
+            "v10": candidate_section("phase34-candidate-v10"),
             "active_pointer_exists": (active / "active.json").is_file()
             or (active / "active.next.json").is_file(),
         },
-        "archive_verify_v8": archive_section(scratch),
+        "archive_verify": archive_section(scratch),
         "runtime_lifecycle": lifecycle_section(scratch),
         "page_e2e": {
             "command": f"git diff --name-only {resolved_base}..{recorded_through} -- web/src",

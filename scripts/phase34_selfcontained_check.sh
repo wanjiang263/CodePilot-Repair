@@ -7,6 +7,7 @@
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
+source_shallow=$(git -C "$root" rev-parse --is-shallow-repository)
 work=$(mktemp -d "${TMPDIR:-/tmp}/phase34-selfcontained-XXXXXX")
 trap 'rm -rf "$work"' EXIT INT TERM
 
@@ -21,6 +22,16 @@ git -c core.longpaths=true clone --quiet --no-hardlinks --local \
 
 cd "$work/repo"
 export PYTHONPATH="$work/repo/src${PYTHONPATH:+:$PYTHONPATH}"
+clone_shallow=$(git rev-parse --is-shallow-repository)
+echo "SOURCE_SHALLOW=$source_shallow"
+echo "CLONE_SHALLOW=$clone_shallow"
+if [ "$clone_shallow" = "true" ]; then
+    echo "HISTORY_SCOPE=existing_shallow_history_only"
+fi
+if [ "${PHASE34_REQUIRE_FULL_HISTORY:-0}" = "1" ] && [ "$clone_shallow" = "true" ]; then
+    echo "FULL_HISTORY_REQUIRED_BUT_SHALLOW" >&2
+    exit 1
+fi
 "$python" scripts/phase34_runtime_results.py --check
 
 "$python" - <<'PY'

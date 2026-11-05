@@ -113,7 +113,7 @@ def seed_evidence(folder: Path) -> None:
         + "\n",
     )
     write(
-        folder / "verify-v9.json",
+        folder / "verify-v10.json",
         json.dumps(
             {
                 "exit_code": 0,
@@ -191,7 +191,7 @@ def test_write_records_in_repo_evidence(env: dict[str, Any]) -> None:
     assert group["log"] == "docs/notes/phase34-evidence/gate-unit-a-run1.log"
     assert group["junit"] == "docs/notes/phase34-evidence/gate-unit-a-run1.xml"
     assert "/" not in group["basetemp"] and "\\" not in group["basetemp"]
-    baseline = payload["archive_verify_v8"]["historical_baseline"]
+    baseline = payload["archive_verify"]["historical_baseline"]
     assert baseline["manifest_path"] == "configs/harness/candidates/historical-baseline.json"
     assert "D:\\generation" not in json.dumps(payload)
 
