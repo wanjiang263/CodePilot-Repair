@@ -1,6 +1,8 @@
+SOURCE_SHALLOW=true
+CLONE_SHALLOW=false
 {
   "check": "pass",
   "file": "docs/notes/phase34-runtime-results.json",
-  "sha256": "18da1faeaa63d65d0c81805355d51d15d72d4617cf76d9b20503290e73d0a963"
+  "sha256": "00b1fba41779314b50f9df3a84c703f5d05e58fcc2da36f589790c42398f50dd"
 }
 SELF_CONTAINED_CHECK=PASS

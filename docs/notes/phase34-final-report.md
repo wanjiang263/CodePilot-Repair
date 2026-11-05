@@ -83,9 +83,14 @@ v12 数据：
   `00b1fba41779314b50f9df3a84c703f5d05e58fcc2da36f589790c42398f50dd`；
   不含 `D:/cp34`，不含 gate `command`。
 
-clean-clone 回归：在 C36 上运行，结果与日志在 C37 回填
-（`docs/notes/phase34-selfcontained-check.log`）。脚本显式打印
-`SOURCE_SHALLOW`、`CLONE_SHALLOW` 和 `HISTORY_SCOPE`。
+clean-clone 回归（C36）：exit 0，`SELF_CONTAINED_CHECK=PASS`，clone 内
+runtime JSON sha 与交付文件一致
+（`00b1fba41779314b50f9df3a84c703f5d05e58fcc2da36f589790c42398f50dd`）；
+日志 `docs/notes/phase34-selfcontained-check.log`（sha256
+`abe09bce95f7e64824ec1ed98504bce325797c47072259989084b286682ec99a`）。
+日志显示 `SOURCE_SHALLOW=true`、`CLONE_SHALLOW=false`；后者是
+`clone --local` 未复制 `.git/shallow` 的标记假象，clone 仍只有现有 303 条
+历史（边界 `04a523f` 的父对象不存在），完整历史 clone 未验证（见 §六）。
 
 ## 四、最终全量回归
 
@@ -133,9 +138,11 @@ clean-clone 回归：在 C36 上运行，结果与日志在 C37 回填
 - `origin`（`github.com/wanjiang263/CodePilot-Repair`）的分支不包含该边界提交，
   `git fetch --unshallow origin` 退出 0 但不改变 shallow 文件（no-op）。
 - 因此 clean-clone 通过范围仅限现有 303 条提交历史；完整历史 clone **未验证**。
-  脚本会打印 `HISTORY_SCOPE=existing_shallow_history_only`，不会把它写成
-  “任意完整 clone 均可复现”。这不影响 v12 候选与当前源码的一致性，也不影响
-  仓库内证据的 `--check`。
+  日志中的 `CLONE_SHALLOW=false` 是 `clone --local` 未复制 `.git/shallow` 的
+  标记假象（clone 的历史根仍是 `04a523f`，其父对象不存在），不能解读为完整
+  历史；报告中不把它写成“任意完整 clone 均可复现”。`SOURCE_SHALLOW=true`
+  才是有效的作用域声明。这不影响 v12 候选与当前源码的一致性，也不影响仓库内
+  证据的 `--check`。
 
 ## 七、提交与最终 HEAD
 
@@ -168,7 +175,7 @@ clean-clone 回归：在 C36 上运行，结果与日志在 C37 回填
 | 7 | 最终代码 HEAD 上默认 `--check` exit 0（无 `--scratch`） | 通过 | C35b 生成；C36/C37 复跑 |
 | 8 | 仓库内证据包 `SHA256SUMS` 56 项校验通过 | 通过 | `phase34_evidence_manifest.py --check` |
 | 9 | runtime JSON `evidence_dir`/`evidence_manifest_sha256` 正确、无 `D:/cp34` | 通过 | 单测 + JSON 审计 |
-| 10 | clean-clone（不复制外部 scratch）exit 0 | 待 C37 日志 | `phase34-selfcontained-check.log` |
+| 10 | clean-clone（不复制外部 scratch）exit 0 | 通过 | C36 绿灯日志；输出 sha `00b1fba...`；`SOURCE_SHALLOW=true` |
 | 11 | 九组最终全量 4181 passed / 0 failed / 3 skipped | 通过 | §四 |
 | 12 | 静态检查 16 文件，EOL/mypy/ruff 通过 | 通过（代码门槛） | §五 |
 | 13 | provider fake 166 passed，real_requests=0、cost=0 | 通过 | §四 / provider JSON |
@@ -201,7 +208,8 @@ clean-clone 回归：在 C36 上运行，结果与日志在 C37 回填
     （无需 `--scratch`）。
 - **字节固定**：`docs/notes/.gitattributes`、`configs/harness/.gitattributes`。
 - **clean-clone 日志**：`docs/notes/phase34-selfcontained-check.log`
-  （C36 运行；C37 回填）；首次失败与 pre-json-pin 日志保留。
+  （C36 运行：exit 0、`SELF_CONTAINED_CHECK=PASS`、输出 sha `00b1fba...`；
+  `SOURCE_SHALLOW=true`；首次失败与 pre-json-pin 日志保留）。
 - `docs/notes/phase34-runtime-results.json`（sha256
   `00b1fba41779314b50f9df3a84c703f5d05e58fcc2da36f589790c42398f50dd`）。
 - `docs/notes/phase34-static-checks.json`（sha256 `5cae0673…`）。
