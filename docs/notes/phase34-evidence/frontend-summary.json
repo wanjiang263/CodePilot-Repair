@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "generated_at": "2026-11-06T02:22:00+08:00",
+  "summary": {
+    "install": "npm ci: 359 packages",
+    "typecheck": "passed",
+    "lint": "passed (eslint --max-warnings=0)",
+    "vitest": {
+      "files": 14,
+      "tests": 50,
+      "passed": true
+    },
+    "build": "passed (vite build, 6.35s)",
+    "e2e": "no Playwright/Cypress suite in the repository; build/typecheck/lint/vitest only"
+  },
+  "log": "frontend-run.log",
+  "note": "web/src has zero diff in Phase34; this run validates the current frontend build and component tests, not a browser E2E suite."
+}

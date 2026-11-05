@@ -1,0 +1,733 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="35" time="175.214" timestamp="2026-11-06T02:36:45.987068+08:00" hostname="LAPTOP-H0FUOTNB"><testcase classname="tests.docker.test_cleanup" name="test_every_execution_branch_leaves_no_residue[fail]" time="15.040" /><testcase classname="tests.docker.test_cleanup" name="test_every_execution_branch_leaves_no_residue[oom]" time="3.195" /><testcase classname="tests.docker.test_cleanup" name="test_every_execution_branch_leaves_no_residue[pass]" time="2.445" /><testcase classname="tests.docker.test_cleanup" name="test_every_execution_branch_leaves_no_residue[start-failure]" time="1.365" /><testcase classname="tests.docker.test_cleanup" name="test_every_execution_branch_leaves_no_residue[timeout]" time="7.066" /><testcase classname="tests.docker.test_cleanup" name="test_residue_cleanup_only_touches_codepilot_owned_containers" time="0.844" /><testcase classname="tests.docker.test_cleanup" name="test_cleanup_scopes_every_daemon_query_by_label" time="0.575" /><testcase classname="tests.docker.test_cleanup" name="test_cleanup_failure_keeps_error_information" time="0.420" /><testcase classname="tests.docker.test_env_cache" name="test_second_build_hits_same_image_without_reinstalling" time="13.687" /><testcase classname="tests.docker.test_env_cache" name="test_cache_identity_changes_with_envspec_commit_and_repository" time="11.334" /><testcase classname="tests.docker.test_env_cache" name="test_retagged_image_is_not_reused_for_another_repository" time="9.812" /><testcase classname="tests.docker.test_env_cache" name="test_missing_image_is_rebuilt_and_cached_again" time="20.986" /><testcase classname="tests.docker.test_env_cache" name="test_cli_shows_cache_hit_on_the_second_run_of_the_same_identity" time="9.831" /><testcase classname="tests.docker.test_network" name="test_in_container_connectivity_probes_all_fail" time="2.703" /><testcase classname="tests.docker.test_network" name="test_execution_container_has_no_network_entrypoint" time="2.252" /><testcase classname="tests.docker.test_network" name="test_execution_config_contains_no_isolation_bypass" time="0.001" /><testcase classname="tests.docker.test_oom" name="test_daemon_reports_real_oomkilled_for_memory_over_the_limit" time="2.236" /><testcase classname="tests.docker.test_oom" name="test_sandbox_maps_real_oom_to_sandbox_error_and_reclaims_container" time="2.793" /><testcase classname="tests.docker.test_oom" name="test_oom_evidence_survives_a_cleanup_failure" time="2.701" /><testcase classname="tests.docker.test_sandbox_smoke" name="test_real_git_fixture_to_docker_junit_execution_artifact" time="12.964" /><testcase classname="tests.docker.test_synthetic_suite" name="test_sample_fixture_is_valid_by_real_execution[budget-export-adds-currency-column]" time="3.000"><failure message="codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: '1f174a105e5e6218a51602f10e080b1f282b8a21'&#10;  仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/2383170432328bd345ff44c1&#10;  缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\5c59587af1d6822f&#10;已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。">suite = SyntheticSuite(root=WindowsPath('D:/Projects/Desktop/CodePilot-Repair/.claude/worktrees/phase34-v7-archive-closure-942...d9c85fab89371441', test_patch_sha256='a6c3e53e394043e3237ae1425445536bd2eccd2725e33c506e806edb48a0a425'))], invalid={})
+evaluator = &lt;codepilot.eval.evaluation.GoldEvaluator object at 0x000001B7BCBB2360&gt;
+task_id = 'budget-export-adds-currency-column'
+
+    @pytest.mark.parametrize("task_id", SAMPLE_TASK_IDS)
+    def test_sample_fixture_is_valid_by_real_execution(
+        suite: SyntheticSuite, evaluator: GoldEvaluator, task_id: str
+    ) -&gt; None:
+        """base 上目标测试真的失败、gold 之后真的通过、环境是真的 Docker。"""
+        fixture = _fixture(suite, task_id)
+&gt;       validation = validate_fixture(evaluator, fixture, run_id=f"pytest-{task_id}")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\docker\test_synthetic_suite.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\src\codepilot\eval\evaluation.py:643: in validate_fixture
+    baseline = evaluator.baseline(fixture, run_id=run_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\src\codepilot\eval\evaluation.py:318: in baseline
+    outcome = self._execute(
+..\..\..\src\codepilot\eval\evaluation.py:388: in _execute
+    workspace = self._manager.create(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;codepilot.repo.workspace.WorkspaceManager object at 0x000001B7BCBB17C0&gt;
+source = 'C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-387\\suite-docker0\\repositories\\2383170432328bd345ff44c1'
+base_commit = '1f174a105e5e6218a51602f10e080b1f282b8a21'
+target = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/runs/pytest-budget-export-adds-currency-column-baseline/workspace')
+mode = 'fetch'
+
+    def create(
+        self,
+        *,
+        source: str | RepoSource,
+        base_commit: str,
+        target: Path,
+        mode: WorkspaceMode | None = None,
+    ) -&gt; Workspace:
+        """从缓存取出一份可写的 workspace，checkout 到 ``base_commit``。
+    
+        ``mode`` 的取舍见 ``WorkspaceMode``。默认 ``fetch``：自包含（沙箱里 git
+        可用）、看不到 base 之后的提交，而且比 ``copy`` 快——它从一开始就不
+        传那些对象，不需要事后删。``worktree`` 几乎是瞬时的，但与缓存共享对象库，
+        只适合不在意泄露、也不在沙箱里用 git 的场景。
+    
+        创建完成后会断言 workspace 干净（02 §6）。不干净时抛
+        ``WorkspaceError`` 而不是返回一个"能用但 patch 会是垃圾"的目录。
+        """
+        if mode is None:
+            mode = self.default_mode
+        cache, src = self.ensure_cache(source)
+    
+        resolved = self.rev_parse(cache, base_commit)
+        if resolved is None:
+            # 缓存可能是"HEAD 还能解析、但别的对象已经丢了"的半损坏状态——
+            # `_cache_usable` 挡不住这一种。重建一次再试，让这种情况能自愈；
+            # 仍然失败才认定是 base_commit 本身的问题。
+            log.warning(
+                "workspace.cache_missing_base_commit_rebuilding",
+                cache=str(cache),
+                base_commit=base_commit,
+            )
+            cache, src = self._rebuild_cache(cache, src)
+            resolved = self.rev_parse(cache, base_commit)
+            if resolved is None:
+&gt;               raise WorkspaceError(
+                    f"base_commit 不在缓存中: {base_commit!r}\n"
+                    f"  仓库: {src.normalized}\n"
+                    f"  缓存: {cache}\n"
+                    "已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，"
+                    "或者它还没有被推送到远端。"
+                )
+E               codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: '1f174a105e5e6218a51602f10e080b1f282b8a21'
+E                 仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/2383170432328bd345ff44c1
+E                 缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\5c59587af1d6822f
+E               已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。
+
+..\..\..\src\codepilot\repo\workspace.py:451: WorkspaceError</failure></testcase><testcase classname="tests.docker.test_synthetic_suite" name="test_sample_fixture_is_valid_by_real_execution[httpclient-zero-retries-makes-no-request]" time="1.531"><failure message="codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: 'b183116f7e25549fe970655167aab091bff35aac'&#10;  仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/f18e1cbbcc4a8968b91c1a17&#10;  缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\866a2b91c118d82b&#10;已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。">suite = SyntheticSuite(root=WindowsPath('D:/Projects/Desktop/CodePilot-Repair/.claude/worktrees/phase34-v7-archive-closure-942...d9c85fab89371441', test_patch_sha256='a6c3e53e394043e3237ae1425445536bd2eccd2725e33c506e806edb48a0a425'))], invalid={})
+evaluator = &lt;codepilot.eval.evaluation.GoldEvaluator object at 0x000001B7BCBB2360&gt;
+task_id = 'httpclient-zero-retries-makes-no-request'
+
+    @pytest.mark.parametrize("task_id", SAMPLE_TASK_IDS)
+    def test_sample_fixture_is_valid_by_real_execution(
+        suite: SyntheticSuite, evaluator: GoldEvaluator, task_id: str
+    ) -&gt; None:
+        """base 上目标测试真的失败、gold 之后真的通过、环境是真的 Docker。"""
+        fixture = _fixture(suite, task_id)
+&gt;       validation = validate_fixture(evaluator, fixture, run_id=f"pytest-{task_id}")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\docker\test_synthetic_suite.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\src\codepilot\eval\evaluation.py:643: in validate_fixture
+    baseline = evaluator.baseline(fixture, run_id=run_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\src\codepilot\eval\evaluation.py:318: in baseline
+    outcome = self._execute(
+..\..\..\src\codepilot\eval\evaluation.py:388: in _execute
+    workspace = self._manager.create(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;codepilot.repo.workspace.WorkspaceManager object at 0x000001B7BCBB17C0&gt;
+source = 'C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-387\\suite-docker0\\repositories\\f18e1cbbcc4a8968b91c1a17'
+base_commit = 'b183116f7e25549fe970655167aab091bff35aac'
+target = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/runs/pytest-httpclient-zero-retries-makes-no-request-baseline/workspace')
+mode = 'fetch'
+
+    def create(
+        self,
+        *,
+        source: str | RepoSource,
+        base_commit: str,
+        target: Path,
+        mode: WorkspaceMode | None = None,
+    ) -&gt; Workspace:
+        """从缓存取出一份可写的 workspace，checkout 到 ``base_commit``。
+    
+        ``mode`` 的取舍见 ``WorkspaceMode``。默认 ``fetch``：自包含（沙箱里 git
+        可用）、看不到 base 之后的提交，而且比 ``copy`` 快——它从一开始就不
+        传那些对象，不需要事后删。``worktree`` 几乎是瞬时的，但与缓存共享对象库，
+        只适合不在意泄露、也不在沙箱里用 git 的场景。
+    
+        创建完成后会断言 workspace 干净（02 §6）。不干净时抛
+        ``WorkspaceError`` 而不是返回一个"能用但 patch 会是垃圾"的目录。
+        """
+        if mode is None:
+            mode = self.default_mode
+        cache, src = self.ensure_cache(source)
+    
+        resolved = self.rev_parse(cache, base_commit)
+        if resolved is None:
+            # 缓存可能是"HEAD 还能解析、但别的对象已经丢了"的半损坏状态——
+            # `_cache_usable` 挡不住这一种。重建一次再试，让这种情况能自愈；
+            # 仍然失败才认定是 base_commit 本身的问题。
+            log.warning(
+                "workspace.cache_missing_base_commit_rebuilding",
+                cache=str(cache),
+                base_commit=base_commit,
+            )
+            cache, src = self._rebuild_cache(cache, src)
+            resolved = self.rev_parse(cache, base_commit)
+            if resolved is None:
+&gt;               raise WorkspaceError(
+                    f"base_commit 不在缓存中: {base_commit!r}\n"
+                    f"  仓库: {src.normalized}\n"
+                    f"  缓存: {cache}\n"
+                    "已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，"
+                    "或者它还没有被推送到远端。"
+                )
+E               codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: 'b183116f7e25549fe970655167aab091bff35aac'
+E                 仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/f18e1cbbcc4a8968b91c1a17
+E                 缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\866a2b91c118d82b
+E               已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。
+
+..\..\..\src\codepilot\repo\workspace.py:451: WorkspaceError</failure></testcase><testcase classname="tests.docker.test_synthetic_suite" name="test_sample_fixture_is_valid_by_real_execution[inventory-describe-crashes-on-unknown-sku]" time="1.599"><failure message="codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: 'a25fc002bdaa8a817f3232645edd442015ba6750'&#10;  仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/572d8a145b9ff164559d79f7&#10;  缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\619bbba33972ff0d&#10;已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。">suite = SyntheticSuite(root=WindowsPath('D:/Projects/Desktop/CodePilot-Repair/.claude/worktrees/phase34-v7-archive-closure-942...d9c85fab89371441', test_patch_sha256='a6c3e53e394043e3237ae1425445536bd2eccd2725e33c506e806edb48a0a425'))], invalid={})
+evaluator = &lt;codepilot.eval.evaluation.GoldEvaluator object at 0x000001B7BCBB2360&gt;
+task_id = 'inventory-describe-crashes-on-unknown-sku'
+
+    @pytest.mark.parametrize("task_id", SAMPLE_TASK_IDS)
+    def test_sample_fixture_is_valid_by_real_execution(
+        suite: SyntheticSuite, evaluator: GoldEvaluator, task_id: str
+    ) -&gt; None:
+        """base 上目标测试真的失败、gold 之后真的通过、环境是真的 Docker。"""
+        fixture = _fixture(suite, task_id)
+&gt;       validation = validate_fixture(evaluator, fixture, run_id=f"pytest-{task_id}")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\docker\test_synthetic_suite.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\src\codepilot\eval\evaluation.py:643: in validate_fixture
+    baseline = evaluator.baseline(fixture, run_id=run_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\src\codepilot\eval\evaluation.py:318: in baseline
+    outcome = self._execute(
+..\..\..\src\codepilot\eval\evaluation.py:388: in _execute
+    workspace = self._manager.create(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;codepilot.repo.workspace.WorkspaceManager object at 0x000001B7BCBB17C0&gt;
+source = 'C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-387\\suite-docker0\\repositories\\572d8a145b9ff164559d79f7'
+base_commit = 'a25fc002bdaa8a817f3232645edd442015ba6750'
+target = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/runs/pytest-inventory-describe-crashes-on-unknown-sku-baseline/workspace')
+mode = 'fetch'
+
+    def create(
+        self,
+        *,
+        source: str | RepoSource,
+        base_commit: str,
+        target: Path,
+        mode: WorkspaceMode | None = None,
+    ) -&gt; Workspace:
+        """从缓存取出一份可写的 workspace，checkout 到 ``base_commit``。
+    
+        ``mode`` 的取舍见 ``WorkspaceMode``。默认 ``fetch``：自包含（沙箱里 git
+        可用）、看不到 base 之后的提交，而且比 ``copy`` 快——它从一开始就不
+        传那些对象，不需要事后删。``worktree`` 几乎是瞬时的，但与缓存共享对象库，
+        只适合不在意泄露、也不在沙箱里用 git 的场景。
+    
+        创建完成后会断言 workspace 干净（02 §6）。不干净时抛
+        ``WorkspaceError`` 而不是返回一个"能用但 patch 会是垃圾"的目录。
+        """
+        if mode is None:
+            mode = self.default_mode
+        cache, src = self.ensure_cache(source)
+    
+        resolved = self.rev_parse(cache, base_commit)
+        if resolved is None:
+            # 缓存可能是"HEAD 还能解析、但别的对象已经丢了"的半损坏状态——
+            # `_cache_usable` 挡不住这一种。重建一次再试，让这种情况能自愈；
+            # 仍然失败才认定是 base_commit 本身的问题。
+            log.warning(
+                "workspace.cache_missing_base_commit_rebuilding",
+                cache=str(cache),
+                base_commit=base_commit,
+            )
+            cache, src = self._rebuild_cache(cache, src)
+            resolved = self.rev_parse(cache, base_commit)
+            if resolved is None:
+&gt;               raise WorkspaceError(
+                    f"base_commit 不在缓存中: {base_commit!r}\n"
+                    f"  仓库: {src.normalized}\n"
+                    f"  缓存: {cache}\n"
+                    "已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，"
+                    "或者它还没有被推送到远端。"
+                )
+E               codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: 'a25fc002bdaa8a817f3232645edd442015ba6750'
+E                 仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/572d8a145b9ff164559d79f7
+E                 缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\619bbba33972ff0d
+E               已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。
+
+..\..\..\src\codepilot\repo\workspace.py:451: WorkspaceError</failure></testcase><testcase classname="tests.docker.test_synthetic_suite" name="test_sample_fixture_is_valid_by_real_execution[taskqueue-retry-makes-one-fewer-attempt]" time="1.565"><failure message="codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: '45baac6a545e34c638bf728c4879ef095a4f8f4b'&#10;  仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/9c5d5ddfdbcf680c5b741e83&#10;  缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\a59f6b2174966fe5&#10;已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。">suite = SyntheticSuite(root=WindowsPath('D:/Projects/Desktop/CodePilot-Repair/.claude/worktrees/phase34-v7-archive-closure-942...d9c85fab89371441', test_patch_sha256='a6c3e53e394043e3237ae1425445536bd2eccd2725e33c506e806edb48a0a425'))], invalid={})
+evaluator = &lt;codepilot.eval.evaluation.GoldEvaluator object at 0x000001B7BCBB2360&gt;
+task_id = 'taskqueue-retry-makes-one-fewer-attempt'
+
+    @pytest.mark.parametrize("task_id", SAMPLE_TASK_IDS)
+    def test_sample_fixture_is_valid_by_real_execution(
+        suite: SyntheticSuite, evaluator: GoldEvaluator, task_id: str
+    ) -&gt; None:
+        """base 上目标测试真的失败、gold 之后真的通过、环境是真的 Docker。"""
+        fixture = _fixture(suite, task_id)
+&gt;       validation = validate_fixture(evaluator, fixture, run_id=f"pytest-{task_id}")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\docker\test_synthetic_suite.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\src\codepilot\eval\evaluation.py:643: in validate_fixture
+    baseline = evaluator.baseline(fixture, run_id=run_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\src\codepilot\eval\evaluation.py:318: in baseline
+    outcome = self._execute(
+..\..\..\src\codepilot\eval\evaluation.py:388: in _execute
+    workspace = self._manager.create(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;codepilot.repo.workspace.WorkspaceManager object at 0x000001B7BCBB17C0&gt;
+source = 'C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-387\\suite-docker0\\repositories\\9c5d5ddfdbcf680c5b741e83'
+base_commit = '45baac6a545e34c638bf728c4879ef095a4f8f4b'
+target = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/runs/pytest-taskqueue-retry-makes-one-fewer-attempt-baseline/workspace')
+mode = 'fetch'
+
+    def create(
+        self,
+        *,
+        source: str | RepoSource,
+        base_commit: str,
+        target: Path,
+        mode: WorkspaceMode | None = None,
+    ) -&gt; Workspace:
+        """从缓存取出一份可写的 workspace，checkout 到 ``base_commit``。
+    
+        ``mode`` 的取舍见 ``WorkspaceMode``。默认 ``fetch``：自包含（沙箱里 git
+        可用）、看不到 base 之后的提交，而且比 ``copy`` 快——它从一开始就不
+        传那些对象，不需要事后删。``worktree`` 几乎是瞬时的，但与缓存共享对象库，
+        只适合不在意泄露、也不在沙箱里用 git 的场景。
+    
+        创建完成后会断言 workspace 干净（02 §6）。不干净时抛
+        ``WorkspaceError`` 而不是返回一个"能用但 patch 会是垃圾"的目录。
+        """
+        if mode is None:
+            mode = self.default_mode
+        cache, src = self.ensure_cache(source)
+    
+        resolved = self.rev_parse(cache, base_commit)
+        if resolved is None:
+            # 缓存可能是"HEAD 还能解析、但别的对象已经丢了"的半损坏状态——
+            # `_cache_usable` 挡不住这一种。重建一次再试，让这种情况能自愈；
+            # 仍然失败才认定是 base_commit 本身的问题。
+            log.warning(
+                "workspace.cache_missing_base_commit_rebuilding",
+                cache=str(cache),
+                base_commit=base_commit,
+            )
+            cache, src = self._rebuild_cache(cache, src)
+            resolved = self.rev_parse(cache, base_commit)
+            if resolved is None:
+&gt;               raise WorkspaceError(
+                    f"base_commit 不在缓存中: {base_commit!r}\n"
+                    f"  仓库: {src.normalized}\n"
+                    f"  缓存: {cache}\n"
+                    "已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，"
+                    "或者它还没有被推送到远端。"
+                )
+E               codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: '45baac6a545e34c638bf728c4879ef095a4f8f4b'
+E                 仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/9c5d5ddfdbcf680c5b741e83
+E                 缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\a59f6b2174966fe5
+E               已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。
+
+..\..\..\src\codepilot\repo\workspace.py:451: WorkspaceError</failure></testcase><testcase classname="tests.docker.test_synthetic_suite" name="test_sample_fixture_is_valid_by_real_execution[textkit-table-keeps-its-own-split-rule]" time="1.539"><failure message="codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: '49596767306c829d634e7f149056b32d9bdea140'&#10;  仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/a7485979ef3ea8c1793fd79e&#10;  缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\ca444efa8748dc6f&#10;已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。">suite = SyntheticSuite(root=WindowsPath('D:/Projects/Desktop/CodePilot-Repair/.claude/worktrees/phase34-v7-archive-closure-942...d9c85fab89371441', test_patch_sha256='a6c3e53e394043e3237ae1425445536bd2eccd2725e33c506e806edb48a0a425'))], invalid={})
+evaluator = &lt;codepilot.eval.evaluation.GoldEvaluator object at 0x000001B7BCBB2360&gt;
+task_id = 'textkit-table-keeps-its-own-split-rule'
+
+    @pytest.mark.parametrize("task_id", SAMPLE_TASK_IDS)
+    def test_sample_fixture_is_valid_by_real_execution(
+        suite: SyntheticSuite, evaluator: GoldEvaluator, task_id: str
+    ) -&gt; None:
+        """base 上目标测试真的失败、gold 之后真的通过、环境是真的 Docker。"""
+        fixture = _fixture(suite, task_id)
+&gt;       validation = validate_fixture(evaluator, fixture, run_id=f"pytest-{task_id}")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\docker\test_synthetic_suite.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\src\codepilot\eval\evaluation.py:643: in validate_fixture
+    baseline = evaluator.baseline(fixture, run_id=run_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\src\codepilot\eval\evaluation.py:318: in baseline
+    outcome = self._execute(
+..\..\..\src\codepilot\eval\evaluation.py:388: in _execute
+    workspace = self._manager.create(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;codepilot.repo.workspace.WorkspaceManager object at 0x000001B7BCBB17C0&gt;
+source = 'C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-387\\suite-docker0\\repositories\\a7485979ef3ea8c1793fd79e'
+base_commit = '49596767306c829d634e7f149056b32d9bdea140'
+target = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/runs/pytest-textkit-table-keeps-its-own-split-rule-baseline/workspace')
+mode = 'fetch'
+
+    def create(
+        self,
+        *,
+        source: str | RepoSource,
+        base_commit: str,
+        target: Path,
+        mode: WorkspaceMode | None = None,
+    ) -&gt; Workspace:
+        """从缓存取出一份可写的 workspace，checkout 到 ``base_commit``。
+    
+        ``mode`` 的取舍见 ``WorkspaceMode``。默认 ``fetch``：自包含（沙箱里 git
+        可用）、看不到 base 之后的提交，而且比 ``copy`` 快——它从一开始就不
+        传那些对象，不需要事后删。``worktree`` 几乎是瞬时的，但与缓存共享对象库，
+        只适合不在意泄露、也不在沙箱里用 git 的场景。
+    
+        创建完成后会断言 workspace 干净（02 §6）。不干净时抛
+        ``WorkspaceError`` 而不是返回一个"能用但 patch 会是垃圾"的目录。
+        """
+        if mode is None:
+            mode = self.default_mode
+        cache, src = self.ensure_cache(source)
+    
+        resolved = self.rev_parse(cache, base_commit)
+        if resolved is None:
+            # 缓存可能是"HEAD 还能解析、但别的对象已经丢了"的半损坏状态——
+            # `_cache_usable` 挡不住这一种。重建一次再试，让这种情况能自愈；
+            # 仍然失败才认定是 base_commit 本身的问题。
+            log.warning(
+                "workspace.cache_missing_base_commit_rebuilding",
+                cache=str(cache),
+                base_commit=base_commit,
+            )
+            cache, src = self._rebuild_cache(cache, src)
+            resolved = self.rev_parse(cache, base_commit)
+            if resolved is None:
+&gt;               raise WorkspaceError(
+                    f"base_commit 不在缓存中: {base_commit!r}\n"
+                    f"  仓库: {src.normalized}\n"
+                    f"  缓存: {cache}\n"
+                    "已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，"
+                    "或者它还没有被推送到远端。"
+                )
+E               codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: '49596767306c829d634e7f149056b32d9bdea140'
+E                 仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/a7485979ef3ea8c1793fd79e
+E                 缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\ca444efa8748dc6f
+E               已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。
+
+..\..\..\src\codepilot\repo\workspace.py:451: WorkspaceError</failure></testcase><testcase classname="tests.docker.test_synthetic_suite" name="test_multi_file_sample_actually_touches_several_files" time="0.001" /><testcase classname="tests.docker.test_synthetic_suite" name="test_gold_that_does_not_fix_is_not_valid" time="3.166"><failure message="codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: 'd4d68f822cc149558aca3ada6d78e69993a41faa'&#10;  仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/04540f7e0ef6593d37b29677&#10;  缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\f0cd243391aa4ba6&#10;已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。">evaluator = &lt;codepilot.eval.evaluation.GoldEvaluator object at 0x000001B7BCBB2360&gt;
+work_root = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0')
+
+    def test_gold_that_does_not_fix_is_not_valid(evaluator: GoldEvaluator, work_root: Path) -&gt; None:
+        """gold 修好了，但目标断言要的是另一个值 ⇒ 必须判 GOLD_NOT_PASSING。
+    
+        这条是整份校验逻辑的"检查器真的会说不"证明：如果 GOLD_NOT_PASSING 永远拿不到，
+        那么 VALID 也无从可信。
+        """
+        spec = demo_spec(
+            task_id="negative-gold-not-passing",
+            pass_to_pass=(),
+            hidden_test_files={
+                "tests/test_hidden.py": (
+                    "from pkg.core import normalize\n\n\n"
+                    "def test_normalize_keeps_value() -&gt; None:\n    assert normalize(3) == 4\n"
+                )
+            },
+        )
+        fixture = load_fixture(write_fixture(work_root, spec, name="gold-not-passing"))
+&gt;       validation = validate_fixture(evaluator, fixture, run_id="pytest-negative-gold")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\docker\test_synthetic_suite.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\src\codepilot\eval\evaluation.py:643: in validate_fixture
+    baseline = evaluator.baseline(fixture, run_id=run_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\src\codepilot\eval\evaluation.py:318: in baseline
+    outcome = self._execute(
+..\..\..\src\codepilot\eval\evaluation.py:388: in _execute
+    workspace = self._manager.create(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;codepilot.repo.workspace.WorkspaceManager object at 0x000001B7BCBB17C0&gt;
+source = 'C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-387\\suite-docker0\\repositories\\04540f7e0ef6593d37b29677'
+base_commit = 'd4d68f822cc149558aca3ada6d78e69993a41faa'
+target = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/runs/pytest-negative-gold-baseline/workspace')
+mode = 'fetch'
+
+    def create(
+        self,
+        *,
+        source: str | RepoSource,
+        base_commit: str,
+        target: Path,
+        mode: WorkspaceMode | None = None,
+    ) -&gt; Workspace:
+        """从缓存取出一份可写的 workspace，checkout 到 ``base_commit``。
+    
+        ``mode`` 的取舍见 ``WorkspaceMode``。默认 ``fetch``：自包含（沙箱里 git
+        可用）、看不到 base 之后的提交，而且比 ``copy`` 快——它从一开始就不
+        传那些对象，不需要事后删。``worktree`` 几乎是瞬时的，但与缓存共享对象库，
+        只适合不在意泄露、也不在沙箱里用 git 的场景。
+    
+        创建完成后会断言 workspace 干净（02 §6）。不干净时抛
+        ``WorkspaceError`` 而不是返回一个"能用但 patch 会是垃圾"的目录。
+        """
+        if mode is None:
+            mode = self.default_mode
+        cache, src = self.ensure_cache(source)
+    
+        resolved = self.rev_parse(cache, base_commit)
+        if resolved is None:
+            # 缓存可能是"HEAD 还能解析、但别的对象已经丢了"的半损坏状态——
+            # `_cache_usable` 挡不住这一种。重建一次再试，让这种情况能自愈；
+            # 仍然失败才认定是 base_commit 本身的问题。
+            log.warning(
+                "workspace.cache_missing_base_commit_rebuilding",
+                cache=str(cache),
+                base_commit=base_commit,
+            )
+            cache, src = self._rebuild_cache(cache, src)
+            resolved = self.rev_parse(cache, base_commit)
+            if resolved is None:
+&gt;               raise WorkspaceError(
+                    f"base_commit 不在缓存中: {base_commit!r}\n"
+                    f"  仓库: {src.normalized}\n"
+                    f"  缓存: {cache}\n"
+                    "已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，"
+                    "或者它还没有被推送到远端。"
+                )
+E               codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: 'd4d68f822cc149558aca3ada6d78e69993a41faa'
+E                 仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/04540f7e0ef6593d37b29677
+E                 缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\f0cd243391aa4ba6
+E               已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。
+
+..\..\..\src\codepilot\repo\workspace.py:451: WorkspaceError</failure></testcase><testcase classname="tests.docker.test_synthetic_suite" name="test_base_that_already_passes_is_not_valid" time="3.222"><failure message="codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: '311ed298cc10d0a096f1929389fa000a5dc4e620'&#10;  仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/72123d340ca077f0f2b241e2&#10;  缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\1d7c22f0a6f2b878&#10;已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。">evaluator = &lt;codepilot.eval.evaluation.GoldEvaluator object at 0x000001B7BCBB2360&gt;
+work_root = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0')
+
+    def test_base_that_already_passes_is_not_valid(evaluator: GoldEvaluator, work_root: Path) -&gt; None:
+        """base 里缺陷本来就不存在 ⇒ 必须判 BASE_NOT_FAILING，绝不能算 VALID。
+    
+        这类 fixture 对 Resolved Rate 是纯粹的虚高来源：一个什么都不做的补丁也能"通过"。
+        """
+        from support.synth import FIXED, FIXED_WITH_SENTINEL
+    
+        spec = demo_spec(
+            task_id="negative-base-not-failing",
+            base_files={
+                "pyproject.toml": "[project]\nname='pkg'\nversion='0.0.1'\n",
+                "src/pkg/__init__.py": "",
+                "src/pkg/core.py": FIXED,
+                "tests/test_public.py": (
+                    '"""Base already behaves; the visible test pins the correct contract."""\n'
+                    "from pkg.core import normalize\n\n\n"
+                    "def test_documented_base_behaviour() -&gt; None:\n    assert normalize(3) == 3\n"
+                ),
+            },
+            gold_files={"src/pkg/core.py": FIXED_WITH_SENTINEL},
+            pass_to_pass=(),
+            fail_to_pass=("tests/test_hidden.py::test_normalize_keeps_value",),
+        )
+        fixture = load_fixture(write_fixture(work_root, spec, name="base-not-failing"))
+&gt;       validation = validate_fixture(evaluator, fixture, run_id="pytest-negative-base")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\docker\test_synthetic_suite.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\src\codepilot\eval\evaluation.py:643: in validate_fixture
+    baseline = evaluator.baseline(fixture, run_id=run_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\src\codepilot\eval\evaluation.py:318: in baseline
+    outcome = self._execute(
+..\..\..\src\codepilot\eval\evaluation.py:388: in _execute
+    workspace = self._manager.create(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;codepilot.repo.workspace.WorkspaceManager object at 0x000001B7BCBB17C0&gt;
+source = 'C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-387\\suite-docker0\\repositories\\72123d340ca077f0f2b241e2'
+base_commit = '311ed298cc10d0a096f1929389fa000a5dc4e620'
+target = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/runs/pytest-negative-base-baseline/workspace')
+mode = 'fetch'
+
+    def create(
+        self,
+        *,
+        source: str | RepoSource,
+        base_commit: str,
+        target: Path,
+        mode: WorkspaceMode | None = None,
+    ) -&gt; Workspace:
+        """从缓存取出一份可写的 workspace，checkout 到 ``base_commit``。
+    
+        ``mode`` 的取舍见 ``WorkspaceMode``。默认 ``fetch``：自包含（沙箱里 git
+        可用）、看不到 base 之后的提交，而且比 ``copy`` 快——它从一开始就不
+        传那些对象，不需要事后删。``worktree`` 几乎是瞬时的，但与缓存共享对象库，
+        只适合不在意泄露、也不在沙箱里用 git 的场景。
+    
+        创建完成后会断言 workspace 干净（02 §6）。不干净时抛
+        ``WorkspaceError`` 而不是返回一个"能用但 patch 会是垃圾"的目录。
+        """
+        if mode is None:
+            mode = self.default_mode
+        cache, src = self.ensure_cache(source)
+    
+        resolved = self.rev_parse(cache, base_commit)
+        if resolved is None:
+            # 缓存可能是"HEAD 还能解析、但别的对象已经丢了"的半损坏状态——
+            # `_cache_usable` 挡不住这一种。重建一次再试，让这种情况能自愈；
+            # 仍然失败才认定是 base_commit 本身的问题。
+            log.warning(
+                "workspace.cache_missing_base_commit_rebuilding",
+                cache=str(cache),
+                base_commit=base_commit,
+            )
+            cache, src = self._rebuild_cache(cache, src)
+            resolved = self.rev_parse(cache, base_commit)
+            if resolved is None:
+&gt;               raise WorkspaceError(
+                    f"base_commit 不在缓存中: {base_commit!r}\n"
+                    f"  仓库: {src.normalized}\n"
+                    f"  缓存: {cache}\n"
+                    "已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，"
+                    "或者它还没有被推送到远端。"
+                )
+E               codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: '311ed298cc10d0a096f1929389fa000a5dc4e620'
+E                 仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/72123d340ca077f0f2b241e2
+E                 缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\1d7c22f0a6f2b878
+E               已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。
+
+..\..\..\src\codepilot\repo\workspace.py:451: WorkspaceError</failure></testcase><testcase classname="tests.docker.test_synthetic_suite" name="test_unusable_env_spec_reports_environment_failure_not_invalid" time="3.210"><failure message="codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: 'd4d68f822cc149558aca3ada6d78e69993a41faa'&#10;  仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/dfd35e3369145f35471b506d&#10;  缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\f09921c4893ae5cf&#10;已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。">evaluator = &lt;codepilot.eval.evaluation.GoldEvaluator object at 0x000001B7BCBB2360&gt;
+work_root = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0')
+
+    def test_unusable_env_spec_reports_environment_failure_not_invalid(
+        evaluator: GoldEvaluator, work_root: Path
+    ) -&gt; None:
+        """镜像建不起来时必须是 ENV_ERROR/SANDBOX_ERROR，不能混进任务无效。
+    
+        混在一起的话，一次网络抖动就会把 fixture 从 suite 里"合法地"删掉。
+        """
+        spec = demo_spec(
+            task_id="negative-env-error",
+            env={
+                "python_version": "3.12",
+                "install": ["python -m pip install no-such-package-5f3a9c1e"],
+            },
+        )
+        fixture = load_fixture(write_fixture(work_root, spec, name="env-error"))
+&gt;       validation = validate_fixture(evaluator, fixture, run_id="pytest-negative-env")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\docker\test_synthetic_suite.py:188: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\src\codepilot\eval\evaluation.py:643: in validate_fixture
+    baseline = evaluator.baseline(fixture, run_id=run_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\src\codepilot\eval\evaluation.py:318: in baseline
+    outcome = self._execute(
+..\..\..\src\codepilot\eval\evaluation.py:388: in _execute
+    workspace = self._manager.create(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;codepilot.repo.workspace.WorkspaceManager object at 0x000001B7BCBB17C0&gt;
+source = 'C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-387\\suite-docker0\\repositories\\dfd35e3369145f35471b506d'
+base_commit = 'd4d68f822cc149558aca3ada6d78e69993a41faa'
+target = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/runs/pytest-negative-env-baseline/workspace')
+mode = 'fetch'
+
+    def create(
+        self,
+        *,
+        source: str | RepoSource,
+        base_commit: str,
+        target: Path,
+        mode: WorkspaceMode | None = None,
+    ) -&gt; Workspace:
+        """从缓存取出一份可写的 workspace，checkout 到 ``base_commit``。
+    
+        ``mode`` 的取舍见 ``WorkspaceMode``。默认 ``fetch``：自包含（沙箱里 git
+        可用）、看不到 base 之后的提交，而且比 ``copy`` 快——它从一开始就不
+        传那些对象，不需要事后删。``worktree`` 几乎是瞬时的，但与缓存共享对象库，
+        只适合不在意泄露、也不在沙箱里用 git 的场景。
+    
+        创建完成后会断言 workspace 干净（02 §6）。不干净时抛
+        ``WorkspaceError`` 而不是返回一个"能用但 patch 会是垃圾"的目录。
+        """
+        if mode is None:
+            mode = self.default_mode
+        cache, src = self.ensure_cache(source)
+    
+        resolved = self.rev_parse(cache, base_commit)
+        if resolved is None:
+            # 缓存可能是"HEAD 还能解析、但别的对象已经丢了"的半损坏状态——
+            # `_cache_usable` 挡不住这一种。重建一次再试，让这种情况能自愈；
+            # 仍然失败才认定是 base_commit 本身的问题。
+            log.warning(
+                "workspace.cache_missing_base_commit_rebuilding",
+                cache=str(cache),
+                base_commit=base_commit,
+            )
+            cache, src = self._rebuild_cache(cache, src)
+            resolved = self.rev_parse(cache, base_commit)
+            if resolved is None:
+&gt;               raise WorkspaceError(
+                    f"base_commit 不在缓存中: {base_commit!r}\n"
+                    f"  仓库: {src.normalized}\n"
+                    f"  缓存: {cache}\n"
+                    "已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，"
+                    "或者它还没有被推送到远端。"
+                )
+E               codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: 'd4d68f822cc149558aca3ada6d78e69993a41faa'
+E                 仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/repositories/dfd35e3369145f35471b506d
+E                 缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\repo-cache\f09921c4893ae5cf
+E               已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。
+
+..\..\..\src\codepilot\repo\workspace.py:451: WorkspaceError</failure></testcase><testcase classname="tests.docker.test_synthetic_suite" name="test_gold_content_is_unreachable_inside_the_container" time="1.505"><failure message="codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: 'a9100e3192aa1745e0d366a0fd09634c239facd0'&#10;  仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/probe-repo&#10;  缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\probe-cache\9977e5f62713f981&#10;已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。">suite = SyntheticSuite(root=WindowsPath('D:/Projects/Desktop/CodePilot-Repair/.claude/worktrees/phase34-v7-archive-closure-942...d9c85fab89371441', test_patch_sha256='a6c3e53e394043e3237ae1425445536bd2eccd2725e33c506e806edb48a0a425'))], invalid={})
+work_root = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0')
+
+    def test_gold_content_is_unreachable_inside_the_container(
+        suite: SyntheticSuite, work_root: Path
+    ) -&gt; None:
+        """挂载给容器的只有推理仓库，所以这三条断言只能由真实容器给出否定答案。
+    
+        host 侧的 ``check_tool_reachability`` 证明的是"目录里没有 eval/"；这条证明的是
+        "跑测试的那个进程，从它的 cwd 出发，也读不到答案"。
+        """
+        fixture = _fixture(suite, "budget-member-discount-inverted-condition")
+        repository = work_root / "probe-repo"
+        if repository.exists():
+            shutil.rmtree(repository)
+        fixture.materialize(repository)
+    
+        manager = WorkspaceManager(cache_root=work_root / "probe-cache")
+        run_dir = work_root / "probe-run"
+&gt;       workspace = manager.create(
+            source=str(repository),
+            base_commit=fixture.metadata.base_commit,
+            target=run_dir / "workspace",
+        )
+
+tests\docker\test_synthetic_suite.py:255: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;codepilot.repo.workspace.WorkspaceManager object at 0x000001B7BCB92960&gt;
+source = 'C:\\Users\\lenovo\\AppData\\Local\\Temp\\pytest-of-lenovo\\pytest-387\\suite-docker0\\probe-repo'
+base_commit = 'a9100e3192aa1745e0d366a0fd09634c239facd0'
+target = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/probe-run/workspace')
+mode = 'fetch'
+
+    def create(
+        self,
+        *,
+        source: str | RepoSource,
+        base_commit: str,
+        target: Path,
+        mode: WorkspaceMode | None = None,
+    ) -&gt; Workspace:
+        """从缓存取出一份可写的 workspace，checkout 到 ``base_commit``。
+    
+        ``mode`` 的取舍见 ``WorkspaceMode``。默认 ``fetch``：自包含（沙箱里 git
+        可用）、看不到 base 之后的提交，而且比 ``copy`` 快——它从一开始就不
+        传那些对象，不需要事后删。``worktree`` 几乎是瞬时的，但与缓存共享对象库，
+        只适合不在意泄露、也不在沙箱里用 git 的场景。
+    
+        创建完成后会断言 workspace 干净（02 §6）。不干净时抛
+        ``WorkspaceError`` 而不是返回一个"能用但 patch 会是垃圾"的目录。
+        """
+        if mode is None:
+            mode = self.default_mode
+        cache, src = self.ensure_cache(source)
+    
+        resolved = self.rev_parse(cache, base_commit)
+        if resolved is None:
+            # 缓存可能是"HEAD 还能解析、但别的对象已经丢了"的半损坏状态——
+            # `_cache_usable` 挡不住这一种。重建一次再试，让这种情况能自愈；
+            # 仍然失败才认定是 base_commit 本身的问题。
+            log.warning(
+                "workspace.cache_missing_base_commit_rebuilding",
+                cache=str(cache),
+                base_commit=base_commit,
+            )
+            cache, src = self._rebuild_cache(cache, src)
+            resolved = self.rev_parse(cache, base_commit)
+            if resolved is None:
+&gt;               raise WorkspaceError(
+                    f"base_commit 不在缓存中: {base_commit!r}\n"
+                    f"  仓库: {src.normalized}\n"
+                    f"  缓存: {cache}\n"
+                    "已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，"
+                    "或者它还没有被推送到远端。"
+                )
+E               codepilot.repo.workspace.WorkspaceError: base_commit 不在缓存中: 'a9100e3192aa1745e0d366a0fd09634c239facd0'
+E                 仓库: C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-387/suite-docker0/probe-repo
+E                 缓存: C:\Users\lenovo\AppData\Local\Temp\pytest-of-lenovo\pytest-387\suite-docker0\probe-cache\9977e5f62713f981
+E               已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。
+
+..\..\..\src\codepilot\repo\workspace.py:451: WorkspaceError</failure></testcase><testcase classname="tests.docker.test_timeout" name="test_infinite_loop_is_killed_and_reported_as_timeout" time="17.246" /><testcase classname="tests.docker.test_timeout" name="test_timeout_survives_a_cleanup_failure" time="6.917" /><testcase classname="tests.docker.test_transfer" name="test_workspace_volume_is_not_populated_from_the_image" time="2.271" /><testcase classname="tests.docker.test_user" name="test_in_container_identity_filesystem_and_privilege_contract" time="2.135" /><testcase classname="tests.docker.test_user" name="test_daemon_inspect_matches_security_and_resource_contract" time="1.153" /></testsuite></testsuites>

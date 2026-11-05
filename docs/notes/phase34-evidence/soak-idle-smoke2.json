@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "hours_requested": 0.02,
+  "started_at": "2026-11-05T18:41:52+00:00",
+  "ended_at": "2026-11-05T18:43:07+00:00",
+  "completed": true,
+  "cycles": 15,
+  "errors": [],
+  "lock_failures": 0,
+  "checkpoint_failures": 0,
+  "rss_bytes_first": 140640256,
+  "rss_bytes_last": 159805440,
+  "rss_bytes_max": 159805440,
+  "rss_slope_bytes_per_cycle": 1262182.4,
+  "summary": {
+    "cycles": 15,
+    "errors": 0,
+    "lock_failures": 0,
+    "checkpoint_failures": 0
+  }
+}

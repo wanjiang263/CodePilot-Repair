@@ -1,93 +1,113 @@
-# Phase34 evidence pack
+# Phase34/35 evidence pack
 
 This directory is the self-contained evidence input for
 `scripts/phase34_runtime_results.py`. It exists so `--check` works from a clean
-clone without the generation-time scratch directory (`D:/cp34/final-v10` or
-`D:/cp34/final-v11`).
+clone without any generation-time scratch directory.
 
 ## Final archive
 
-The final candidate is `phase34-candidate-v12` (`pending`, parent
-`phase34-candidate-v11`, source commit `254b0a81248b8455c236696f9915e2a237b8c05e`,
-diff base `bc2160d471cf3ddf937f214935c0f57408715588`). It resolves the v9/v10
-source drift: the 133-file curated source manifest (787 effective SOURCE_SCOPE
-files; the candidate covers the inherited list plus every scope change) includes
-the evidence-tool scripts, the `configs/harness` byte pin, the
-`test_phase26_final.py` startup-wait fix and the LF normalization.
+The final candidate is `phase34-candidate-v13` (`pending`, parent
+`phase34-candidate-v12`, source commit
+`7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d`, diff base
+`254b0a81248b8455c236696f9915e2a237b8c05e`). It adds the activation dry-run
+test and the runtime external-validation section to the v12 source tree; the
+134-file curated source manifest covers the inherited list plus every
+SOURCE_SCOPE change.
 
-`verify-v12.json` is the 18-version archive report:
-`new=11 old=7 new_failures=0 unexplained=0 witness=verified
-historical_integrity=ok`, historical baseline 72 files / 0 mismatches. The v9,
-v10 and v11 reports are retained as history; the runtime generator reads the
-newest `verify-v*.json`.
+`verify-v13.json` is the 19-version archive report:
+`new=12 old=7 new_failures=0 unexplained=0 witness=verified
+historical_integrity=ok`, historical baseline 76 files / 0 mismatches, v13
+32/32. v12 and earlier verify reports are retained as history; the runtime
+generator reads the newest `verify-v*.json`.
 
-## Regression evidence
+## Final regression (C43, code C40)
 
-- Eight groups (`unit-a`, `unit-b`, `unit-d`, `eval`, `sandbox`, `integration`,
-  `api`, `graph`) are the C32b full run at code C30.
-- `unit-c` is a re-run at C35b after the test-only changes: the spawn child's
-  `codepilot.graph.builder` import takes 10–13s on this machine, so the test's
-  startup wait was raised to 60s (assertions unchanged), and the file was
-  normalized from CRLF to LF to satisfy the static EOL gate.
-- Final totals: **4181 passed / 0 failed / 3 skipped**, selected **4184**.
-  `resumable.log` is the C32b nine-group log (it records the pre-fix unit-c
-  timeout); `run-unit-c.log` and `test-gate-unit-c.json` are the green C35b
-  re-run. The runtime generator reads the per-group summaries, all exit 0.
+| group | result |
+|---|---|
+| unit-a | 1535 passed |
+| unit-b | 1138 passed, 2 skipped |
+| unit-c | 427 passed |
+| unit-d | 25 passed |
+| eval | 482 passed, 1 skipped (Docker unavailable) |
+| sandbox | 66 passed |
+| integration | 126 passed |
+| api | 117 passed, 1 skipped |
+| graph | 266 passed |
 
-## Entry points
+Total: **4182 passed / 0 failed / 4 skipped**, selected **4186**. The scratch
+root is `D:/cp35/final13`; a previous run under `D:/cp35/regression` exposed a
+path-name-sensitive issue analyzer rule ("regression" in the tmp path), so the
+final run uses a neutral scratch name.
+
+## External validation
+
+- **Frontend**: `npm ci`, typecheck, lint, vitest **14 files / 50 tests** and
+  build all passed. The repository has no Playwright/Cypress suite; browser E2E
+  remains a known gap.
+- **20k large repo**: `phase32_index_profile.py` on 20,201 files: cold 208.4s,
+  no-change 77.5s, single-file 73.5s, fast 72.6s, 0 parse errors, DB 24.5 MB,
+  peak working set 332–463 MB. `large-repo-profile.json` is the raw output.
+- **Docker suite**: **26 passed / 9 failed** of 35. The 9 failures are all in
+  `tests/docker/test_synthetic_suite.py`; the evaluator's workspace cache cannot
+  resolve the fixture `metadata.base_commit` (`WorkspaceError`). Reproduced in a
+  focused recheck and in an idle full rerun, so it is deterministic and not a
+  v13 regression. The 26 non-synthetic Docker tests pass. A fix changes
+  `tests/` or `src/` and requires a new candidate (v14).
+- **24h soak**: running in a clean, Docker-stopped environment; the summary is
+  `summary-final.json` (expected 2026-11-07 02:45 +08:00). Earlier attempts under
+  the full-regression / large-repo / Docker load failed with the same
+  `WorkspaceError: base_commit not in cache`; the failed attempts are retained as
+  `soak-attempt1-heartbeat.jsonl`, `soak-attempt2-failed.json` /
+  `soak-attempt2-heartbeat.jsonl`, and `soak-attempt3-heartbeat.jsonl`. The idle
+  smokes (`soak-idle-smoke1.json`, `soak-idle-smoke2.json`) passed with 15
+  cycles each and 0 errors/lock/checkpoint failures. `soak-summary.json` is added
+  when the 24h run completes.
+- **Real provider**: blocked. `.env` with `OPENAI_API_KEY` / `OPENAI_BASE_URL` /
+  `PHASE32_REAL_BUDGET_CNY=20` was not present, so no real request was made
+  (`real_requests=0`, `cost=0`). The provider matrix remains the fake 166-test
+  run. `provider-matrix.json` will be replaced by the merged two-model
+  evidence if the credentials are provided later.
+
+## Counts (C38/C43)
+
+- 318 commits at the Phase34 closeout (grows with later docs commits).
+- 787 effective SOURCE_SCOPE files (including `configs/harness/`, excluding
+  candidates/receipts).
+- v13's 134-file source set is the curated inherited+changed list.
+- Main checkout: 172 `git status` untracked entries / 176 files (`logs/`
+  collapses 5→1).
+
+## Entry points and commands
 
 | File | Purpose |
 |---|---|
-| `test-gate-<group>.json` | Phase32 test-gate summary for one regression group |
-| `gate-<group>-run1.log` / `.xml` | Raw gate log and JUnit XML; the runtime JSON records their sha256 and parses the counts |
-| `run-<group>.log`, `run-resumable-gate.sh`, `resumable.log` | Runner logs and the exact nine-group runner |
-| `static-checks.json` | `scripts/phase32_static_checks.py` result at C33 |
-| `provider-matrix.json`, `provider-matrix/` | Fake-provider matrix summary plus its JUnit/log; real requests 0, cost 0 |
-| `verify-v12.json`, `verify-v12.log` | `scripts/phase28_archive_verify.py --all` report for 18 archive versions |
-| `external-witness-v12.txt` | External witness value for the v12 receipt |
-| `pre-fix-check.log`, `verify-v9.json`, `verify-v10.json`, `verify-v11.json` | Historical evidence retained for provenance |
-| `SHA256SUMS` | Integrity manifest for every file in this directory except itself |
-
-## Commands
+| `test-gate-<group>.json` | Phase32 gate summary for one group |
+| `gate-<group>-run1.log/.xml` | raw gate log + JUnit |
+| `static-checks.json` | C40 static result (17 files) |
+| `provider-matrix.json` | fake provider matrix (166 tests; real blocked) |
+| `verify-v13.json`, `external-witness-v13.txt` | 19-version archive report + witness |
+| `frontend-summary.json`, `frontend-run.log` | frontend build/vitest evidence |
+| `large-repo-summary.json`, `large-repo-profile.json` | 20k index timings |
+| `docker-summary.json`, `docker-junit*.xml` | Docker suite evidence |
+| `soak-summary.json` | 24h soak summary (added when complete) |
+| `SHA256SUMS` | integrity manifest for every evidence file except itself |
 
 ```bash
-# Normal delivery check: no --scratch argument, reads this directory.
 .venv/Scripts/python.exe scripts/phase34_runtime_results.py --check
-
-# After changing evidence: rewrite SHA256SUMS, then the runtime JSON.
-.venv/Scripts/python.exe scripts/phase34_evidence_manifest.py --write
-.venv/Scripts/python.exe scripts/phase34_runtime_results.py --write --base dba045dabd70f0e6eb7779287136944b589f2734
-
-# Verify only the manifest.
 .venv/Scripts/python.exe scripts/phase34_evidence_manifest.py --check
-
-# Clean-clone reproducibility regression.
 bash scripts/phase34_selfcontained_check.sh
 ```
 
-`--scratch` can still point at another directory, but that directory must be a
-copy of this pack with its own `SHA256SUMS`; a bare generation-time scratch
-directory is rejected as `evidence_missing`.
-
 ## History and byte stability
 
-The current repository is shallow (`shallow` contains `04a523f`). The boundary
-commit is not reachable from any `origin` branch, so `git fetch --unshallow` is
-a no-op; the clean-clone result covers the existing 318-commit history only.
-Counts at the C38 closeout: 318 commits; 787 effective SOURCE_SCOPE files;
-v12's 133-file source set is curated; the main checkout has 172 `git status`
-untracked entries / 176 files (`logs/` collapses 5→1). The clean-clone script
-prints `SOURCE_SHALLOW` and `CLONE_SHALLOW`; `CLONE_SHALLOW=false` is a
-`--local` marker artifact, not full-history proof. A full-history clone is not
-verified.
+The repository is shallow (`shallow` contains `04a523f`; that boundary is not on
+any `origin` branch, so `git fetch --unshallow` is a no-op). The clean-clone
+result covers the existing history only; a full-history clone is not verified.
+Evidence, candidate, receipt and generated note files are pinned with `-text`
+in `docs/notes/.gitattributes` and `configs/harness/.gitattributes`.
 
-Evidence, candidate, receipt and generated note files are pinned with
-`-text` in `docs/notes/.gitattributes` and `configs/harness/.gitattributes`, so
-a clone with a different `core.autocrlf` setting checks out the recorded bytes.
-The first clean-clone attempts are preserved under
-`docs/notes/phase34-selfcontained-check.first-attempt.log` and
-`...pre-json-pin.log`.
-
-The unverified scope is unchanged: real provider streaming/usage/billing, full
-Docker suite, large repository (>=20k files), 24h stability, frontend checks,
-and the `swebench_runner.py:423` P2 build-context risk were not run in Phase34.
+The P2 `images.build(path=...)` concern was audited at
+`src/codepilot/sandbox/swebench_env.py:423`: the official path does not call it,
+and the generic base build uses a `fileobj` micro-context
+(`src/codepilot/sandbox/docker.py:354`). No `src/` change was made; it remains a
+potential future-misuse guard item.
