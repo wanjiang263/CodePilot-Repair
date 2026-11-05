@@ -1,9 +1,9 @@
 {
   "phase": 34,
-  "generated_at": "2026-11-05T00:25:00+08:00",
+  "generated_at": "2026-11-05T10:27:22+08:00",
   "tool": "lead-consolidated delivery receipt; every hash computed from the referenced file at generation time; no invented values",
-  "verdict": "CONDITIONAL PASS",
-  "verdict_basis": "All Phase34 P0/P1/P2 fixes, v8 archive, reproducibility, history separation and mainline-merge steps completed; the full nine-group regression found 2 pre-existing eval failures reproduced at the base commit, and real-provider/Docker/large-repo/24h remain unverified.",
+  "verdict": "PASS",
+  "verdict_basis": "All in-scope Phase34 acceptance items pass: P0/P1/P2 fixes landed, v9 archive verifies with an external witness, the full nine-group regression is 4176 passed / 0 failed / 3 skipped, static code gates pass, and the final runtime check exits 0. Real-provider, full-Docker, large-repo, 24h and frontend checks remain explicitly out of scope per the Phase34 instruction.",
   "commits": {
     "base": "dba045dabd70f0e6eb7779287136944b589f2734",
     "phase33": {
@@ -23,7 +23,12 @@
     "C12a": "7a23d1d495df854b8da33d3a2e96d3b41cad4265",
     "C12b": "7ba9b16",
     "C13": "f2a59955bb8272fd8bf19105aeeb951e0adf886a",
-    "C14": "the commit containing this receipt + Phase34 report + runtime JSON + static JSON + Phase33 errata (docs-only; hash unknown at generation time)",
+    "C14": "a1ceb3463b65a6fb8993cbd1be63877fa870d713",
+    "C15": "cc0dd9a9e0b9d61d9d897b0584ee4c54f6c89af2",
+    "C16": "cabcaa383f838c8db430d8b40496bc086caeb337",
+    "C17a": "7c90c9ed61190cb186d0ca307a3e1e0f7a7ed0a1",
+    "C17b": "975582be9000100717c962e86588e4ade6b806fc",
+    "C18": "the commit containing this receipt + Phase34 report + runtime JSON + static JSON (docs-only; hash unknown at generation time)",
     "push": false,
     "pr": false,
     "publish": false,
@@ -34,49 +39,60 @@
       "command": "scripts/phase33_runtime_results.py --check @ dba045d",
       "exit_code": 1,
       "sections": ["code_commits", "head_commit"],
-      "evidence": "D:/cp34/final/pre-fix-check.log"
+      "evidence": "D:/cp34/final-v9/pre-fix-check.log"
     },
     "phase34_generator": "scripts/phase34_runtime_results.py",
     "runtime_json": {
       "path": "docs/notes/phase34-runtime-results.json",
-      "sha256": "ae3621c19e22ac8111f71f284b082e2bd7d7c2bb00178c5b565c13f93fcad5d6",
-      "recorded_through": "f2a59955bb8272fd8bf19105aeeb951e0adf886a",
-      "recorded_head": "f2a59955bb8272fd8bf19105aeeb951e0adf886a",
-      "actual_head_at_write": "f2a59955bb8272fd8bf19105aeeb951e0adf886a",
-      "phase_commits": 11,
+      "sha256": "6968b021c57d439a98010dffcd4673b620953c99ce89fa8c0cff471ecf26cf8d",
+      "recorded_through": "975582be9000100717c962e86588e4ade6b806fc",
+      "recorded_head": "975582be9000100717c962e86588e4ade6b806fc",
+      "actual_head_at_write": "975582be9000100717c962e86588e4ade6b806fc",
+      "phase_commits": 16,
       "code_commits": [
+        "cc0dd9a9e0b9d61d9d897b0584ee4c54f6c89af2",
         "7bed25625343e9e0ef43a8175a34bfda3ea0e6d0",
         "dae25819b4b75292ff56eb4c8dfb5db154522367",
         "3a97b98e2b5a6764d07a224c642bab3a6f5ee6fa"
       ],
       "check_exit_code": 0,
-      "post_c14_check_log": "D:/cp34/final/runtime-check-c14.log (untracked)"
+      "post_c18_check_log": "D:/cp34/final-v9/runtime-check-c18.log (untracked)"
     }
   },
   "candidate": {
-    "version": "phase34-candidate-v8",
+    "version": "phase34-candidate-v9",
     "status": "pending",
-    "parent": "phase34-candidate-v7",
+    "parent": "phase34-candidate-v8",
     "schema_version": 5,
     "manifest_kind": "full",
-    "source_commit": "7bed25625343e9e0ef43a8175a34bfda3ea0e6d0",
-    "diff_base_commit": "dae25819b4b75292ff56eb4c8dfb5db154522367",
-    "resolved_source_files": 127,
-    "changed_files": 6,
+    "source_commit": "cc0dd9a9e0b9d61d9d897b0584ee4c54f6c89af2",
+    "diff_base_commit": "7bed25625343e9e0ef43a8175a34bfda3ea0e6d0",
+    "resolved_source_files": 129,
+    "changed_files": 4,
     "deleted_files": [],
     "files_sha256": {
-      "candidate.diff": "7281578700ce136d05495734f5634a3bd36bf641c72b6a12737aa6d6c4f72f43",
-      "candidate.json": "8228c87a8e2f873a1386ca64e9045c6ad77d6e248f43743723e20a3e840b0032",
-      "snapshot.json": "a46cd34e5a9b10a4305b4fa470d2a918ac47aeccfb29096609603f372d8b8858",
-      "sources.json": "de62d0e745c1f7cb9cd31feca7c9b24eb5ed4f4866c3e9fbed9edd18da5d1c7b"
+      "candidate.diff": "2231dbda540cc4e09b21e9bcbe66b708fb6b01ff8d32d08f9a7e8d749ccddd43",
+      "candidate.json": "a61d1592110e4c1668afcecb27b8365503a5e92916295c9ed9685aae5d74aadc",
+      "snapshot.json": "7483129a946454f3b7e5f254e3aa10b6df39a8b29dd399e8607d8cf1404b6b4b",
+      "sources.json": "be7d60560f2ff567001b97bb47750dc16ebcddd8c4bd51748a7cc681e312c9fc"
     },
-    "candidate_tree_sha256": "255b9774c631a2e9a52f6ba1eeed4e41b84c041e47ce87b5947669a2a6b2ef19",
+    "candidate_tree_sha256": "751adc16de8a8ec0c91ad29780d91cdb51559574784438a0942734206e209455",
     "reverse_apply": "git apply --check -R exit 0",
     "active_pointer_exists": false,
     "normalization_policy": {
       "source_hash": "lf_sha256",
       "raw_bytes": "source_commit_git_blob",
       "raw_hashes_stored": false
+    }
+  },
+  "v8_protection": {
+    "version": "phase34-candidate-v8",
+    "status": "pending (unchanged)",
+    "files_sha256": {
+      "candidate.diff": "7281578700ce136d05495734f5634a3bd36bf641c72b6a12737aa6d6c4f72f43",
+      "candidate.json": "8228c87a8e2f873a1386ca64e9045c6ad77d6e248f43743723e20a3e840b0032",
+      "snapshot.json": "a46cd34e5a9b10a4305b4fa470d2a918ac47aeccfb29096609603f372d8b8858",
+      "sources.json": "de62d0e745c1f7cb9cd31feca7c9b24eb5ed4f4866c3e9fbed9edd18da5d1c7b"
     }
   },
   "v7_protection": {
@@ -101,42 +117,46 @@
   },
   "manifest": {
     "path": "configs/harness/candidates/historical-baseline.json",
-    "sha256": "79818c0746c2a1b6b9ee6117833b173ddb9ca6828a495a5a5e2c067c7bbb7e07",
-    "files": 56,
+    "sha256": "a6694704fb3b8c4195dfa9a4701228dfbe281fd8ff753028cb2376689be1750c",
+    "files": 60,
     "baseline_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
-    "manifest_commit": "7a23d1d495df854b8da33d3a2e96d3b41cad4265"
+    "manifest_commit": "7c90c9ed61190cb186d0ca307a3e1e0f7a7ed0a1"
   },
   "receipt": {
-    "path": "configs/harness/receipts/phase34-candidate-v8.json",
-    "sha256": "ad088be25cbd1038392706ad960c93e12ac8843b227d235dd7ba0fbfe1ae8241",
-    "manifest_commit": "7a23d1d495df854b8da33d3a2e96d3b41cad4265",
-    "historical_manifest_sha256": "79818c0746c2a1b6b9ee6117833b173ddb9ca6828a495a5a5e2c067c7bbb7e07",
+    "path": "configs/harness/receipts/phase34-candidate-v9.json",
+    "sha256": "8bd6795b6fb97d15154849aaa46569d58367edbe11ce6ce39423e6f2a4b03c36",
+    "manifest_commit": "7c90c9ed61190cb186d0ca307a3e1e0f7a7ed0a1",
+    "historical_manifest_sha256": "a6694704fb3b8c4195dfa9a4701228dfbe281fd8ff753028cb2376689be1750c",
     "external_witness": {
-      "path": "D:/cp34/final/external-witness-v8.txt (untracked)",
-      "sha256_of_receipt_recorded_there": "ad088be25cbd1038392706ad960c93e12ac8843b227d235dd7ba0fbfe1ae8241"
+      "path": "D:/cp34/final-v9/external-witness-v9.txt (untracked)",
+      "sha256_of_receipt_recorded_there": "8bd6795b6fb97d15154849aaa46569d58367edbe11ce6ce39423e6f2a4b03c36"
     }
   },
   "verify": {
-    "command": "bash scripts/verify_archive.sh --all --ignore-raw-drift --receipt configs/harness/receipts/phase34-candidate-v8.json --expect-receipt ad088be2...8241",
+    "command": "bash scripts/verify_archive.sh --all --ignore-raw-drift --receipt configs/harness/receipts/phase34-candidate-v9.json --expect-receipt 8bd6795b...3c36",
     "exit_code": 0,
     "witness": "verified",
     "historical_integrity": "ok",
     "new_archive_status": "passed",
     "totals": {
-      "versions_checked": 14,
-      "new_archives": 7,
+      "versions_checked": 15,
+      "new_archives": 8,
       "old_archives": 7,
       "new_archive_failures": 0,
       "old_unexplained_mismatches": 0,
       "unknown_entries": 0,
       "historical_files_modified": false,
-      "historical_baseline_files": 56,
+      "historical_baseline_files": 60,
       "historical_baseline_mismatches": 0
     },
-    "v8": {
+    "v9": {
       "ok": true,
       "checks": 32,
       "failures": [],
+      "normalization_note_stale": false
+    },
+    "v8": {
+      "ok": true,
       "normalization_note_stale": false
     },
     "v7": {
@@ -152,8 +172,8 @@
       "failed": []
     },
     "full_report": {
-      "path": "D:/cp34/final/verify-v8.json",
-      "sha256": "fdbe12193e37e0d276dd13891ad34eda4e8a0ae6fad55a10ae61dedb70475860"
+      "path": "D:/cp34/final-v9/verify-v9.json",
+      "sha256": "aa86a6b43048f63880c1653ffd1b23687f8bda381839efda9465aeb75b43644f"
     }
   },
   "regression_digest": {
@@ -162,34 +182,33 @@
       "unit-b": "1138 passed, 2 skipped, exit 0",
       "unit-c": "420 passed, exit 0",
       "unit-d": "25 passed, exit 0",
-      "eval": "2 failed, 479 passed, 2 skipped, exit 1 (both failures pre-existing at dba045d)",
+      "eval": "483 passed, exit 0",
       "sandbox": "66 passed, 1 deselected, exit 0",
       "integration": "126 passed, 1 deselected, exit 0",
       "api": "117 passed, 1 skipped, exit 0",
       "graph": "266 passed, 13 deselected, exit 0"
     },
     "totals": {
-      "passed": 4172,
-      "failed": 2,
-      "skipped": 5,
+      "passed": 4176,
+      "failed": 0,
+      "skipped": 3,
       "selected": 4179,
       "note": "4179 = reviewer baseline 4168 + 11 new Phase34 tests"
     },
-    "pre_existing_failures": [
-      "tests/eval/test_isolation.py::test_runtime_prompts_and_inference_task_are_sentinel_free",
-      "tests/eval/test_isolation.py::test_runtime_workspace_git_artifacts_and_checkpoint_are_clean"
+    "eval_isolation_fixes": [
+      "isolation fixture now fails the patched target execution from run_target_tests and retries with a distinct patch, exercising diagnoser + reviewer",
+      "harness snapshot excludes eval/ source texts",
+      "artifact audit skips only its own failed/empty probe tool-results"
     ],
-    "pre_existing_evidence": "git diff dba045d..HEAD -- src/codepilot/eval src/codepilot/graph tests/eval is empty; both tests fail identically on the base code",
     "environment_fixes": [
-      "short scratch D:/cp34/final to avoid Windows MAX_PATH",
-      "GIT_CONFIG_GLOBAL with core.longpaths=true for deep worktree fixtures",
-      "read-only junction of the main checkout's cache/swebench for the SWE-bench smoke"
+      "short scratch D:/cp34/final-v9 to avoid Windows MAX_PATH",
+      "read-only junction of the main checkout's cache/swebench for the SWE-bench smoke",
+      "final runs do not override GIT_CONFIG_GLOBAL (it broke workspace fetch tests)"
     ],
-    "first_attempt_failures": "terminal PowerShell run: unit-a 1 failed, unit-b 49 workspace/git flakes; Bash + short path rerun green (D:/cp34/final/first-attempt/)",
     "frontend": "conditionally skipped: zero web/src diff (documented, not passed)"
   },
   "static_checks_final": {
-    "files": 10,
+    "files": 13,
     "passed": [
       "AST parse",
       "ruff check",
@@ -205,9 +224,9 @@
       "git diff --check (CRLF-aware)"
     ],
     "failed_is_generated_artifact_only": true,
-    "detail": "historical-baseline.json keeps the pre-existing CRLF convention; v7/v8 candidate.diff contain unified-diff blank context lines (single space). Code-only diff checks exit 0. No check was relaxed.",
+    "detail": "historical-baseline.json keeps the pre-existing CRLF convention; v7/v8/v9 candidate.diff contain unified-diff blank context lines (single space). Code-only diff checks exit 0. No check was relaxed.",
     "informational_mypy_exit": 2,
-    "source_sha256": "56174fe60a3689edbc9ecc10a90ac7eaa6f50c4f032ac73923554950358c975a"
+    "source_sha256": "5d1724285d774e9da813421e870f5c6118899b52809bdd7e570ebdc82d5de0bc"
   },
   "real_model_usage": {
     "real_requests": 0,
@@ -224,15 +243,15 @@
   ],
   "mainline": {
     "branch": "codex/phase12-real-issue-pilot",
-    "pre_merge_head": "dba045dabd70f0e6eb7779287136944b589f2734",
-    "target": "C14 (this commit)",
+    "pre_merge_head": "a1ceb3463b65a6fb8993cbd1be63877fa870d713",
+    "target": "C18 (this commit)",
     "ff_only": true,
     "pushed": false
   },
   "docs_sha256": {
-    "docs/notes/phase34-final-report.md": "f8d7b5a17f46315c1c22dddc0cbc2af371195624e6d1f51ce79d27e7c61d329f",
-    "docs/notes/phase34-runtime-results.json": "ae3621c19e22ac8111f71f284b082e2bd7d7c2bb00178c5b565c13f93fcad5d6",
-    "docs/notes/phase34-static-checks.json": "56174fe60a3689edbc9ecc10a90ac7eaa6f50c4f032ac73923554950358c975a",
+    "docs/notes/phase34-final-report.md": "a525a0abc6c33416ec4ebea774e31f847d2d92a44160620455e02be507177c0b",
+    "docs/notes/phase34-runtime-results.json": "6968b021c57d439a98010dffcd4673b620953c99ce89fa8c0cff471ecf26cf8d",
+    "docs/notes/phase34-static-checks.json": "5d1724285d774e9da813421e870f5c6118899b52809bdd7e570ebdc82d5de0bc",
     "docs/notes/phase33-errata.md": "f82c71acce0ad94783bfe6fa8d94a3d239089850b28b8c5ae10301ab6cf21827",
     "docs/notes/phase33-final-report.md": "d4ef11024bcec6730e6d2b9e58632f2b41fbe79ee00d2e7391a43fcc299ad1cb",
     "docs/notes/phase33-runtime-results.json": "f1c37a32a7a29eb831ea172d36fd5b1c8aba5c934f2594d07fd9456467a23330",
@@ -242,7 +261,7 @@
     "single controller, no teammate/subagent",
     "no push/PR/publish/activate",
     "C1-C4 history unchanged",
-    "v1-v7 candidate files unchanged (byte sha verified)",
+    "v1-v8 candidate files unchanged (byte sha verified)",
     "Phase33 runtime JSON and delivery receipt restored byte-for-byte",
     "176 untracked historical files untouched and uncommitted",
     "real model requests 0, cost 0",
