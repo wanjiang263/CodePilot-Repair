@@ -1,0 +1,52 @@
+{
+  "tool": "phase32-test-gate",
+  "generated_at": "2026-11-05T01:59:34+00:00",
+  "scratch": "D:\\cp34\\final-v9",
+  "rg_path": "C:\\Users\\lenovo\\AppData\\Local\\OpenAI\\Codex\\bin\\rg.EXE",
+  "rg_version": "ripgrep 15.1.0 (rev af60c2de9d)",
+  "sequential": true,
+  "preconditions": {
+    "min_free_mb": 400,
+    "min_commit_headroom_mb": 1000,
+    "wait_seconds": 300
+  },
+  "runs": [
+    {
+      "suite": "integration",
+      "run": 1,
+      "started_at": "2026-11-05T01:52:07+00:00",
+      "exit_code": 0,
+      "wall_s": 433.2,
+      "memory_after": {
+        "total_phys_mb": 16176,
+        "avail_phys_mb": 2120,
+        "total_pagefile_mb": 46274,
+        "avail_pagefile_mb": 7517,
+        "commit_headroom_mb": 7517,
+        "load_pct": 86
+      },
+      "log": "D:\\cp34\\final-v9\\gate-integration-run1.log",
+      "junit": "D:\\cp34\\final-v9\\gate-integration-run1.xml",
+      "basetemp": "D:\\cp34\\final-v9\\pytest\\integration-run1-20261105T015207-151696",
+      "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/integration -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-integration-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\integration-run1-20261105T015207-151696",
+      "summary_line": "126 passed, 1 deselected in 428.97s (0:07:08)",
+      "temp_reclaimed": {
+        "path": "D:\\cp34\\final-v9\\pytest\\integration-run1-20261105T015207-151696",
+        "existed": true,
+        "removed": false,
+        "bytes_removed": 18663984
+      },
+      "memory_before": {
+        "total_phys_mb": 16176,
+        "avail_phys_mb": 2217,
+        "total_pagefile_mb": 46274,
+        "avail_pagefile_mb": 7551,
+        "commit_headroom_mb": 7551,
+        "load_pct": 86,
+        "sufficient": 1
+      }
+    }
+  ],
+  "blocked_runs": [],
+  "failed_runs": []
+}

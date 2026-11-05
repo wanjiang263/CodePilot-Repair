@@ -1,6 +1,6 @@
 {
   "phase": 34,
-  "generated_at": "2026-11-05T10:27:22+08:00",
+  "generated_at": "2026-11-05T13:28:07+08:00",
   "tool": "lead-consolidated delivery receipt; every hash computed from the referenced file at generation time; no invented values",
   "verdict": "PASS",
   "verdict_basis": "All in-scope Phase34 acceptance items pass: P0/P1/P2 fixes landed, v9 archive verifies with an external witness, the full nine-group regression is 4176 passed / 0 failed / 3 skipped, static code gates pass, and the final runtime check exits 0. Real-provider, full-Docker, large-repo, 24h and frontend checks remain explicitly out of scope per the Phase34 instruction.",
@@ -32,31 +32,41 @@
     "push": false,
     "pr": false,
     "publish": false,
-    "activate": false
+    "activate": false,
+    "C19": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
+    "C20": "the commit containing this receipt + evidence pack + runtime JSON + final report (docs-only; hash unknown at generation time)",
+    "C21": "docs-only commit adding docs/notes/phase34-selfcontained-check.log and the final hash backfill (hash not embedded)"
   },
   "p0_runtime_check": {
     "before_fix": {
       "command": "scripts/phase33_runtime_results.py --check @ dba045d",
       "exit_code": 1,
-      "sections": ["code_commits", "head_commit"],
-      "evidence": "D:/cp34/final-v9/pre-fix-check.log"
+      "sections": [
+        "code_commits",
+        "head_commit"
+      ],
+      "evidence": "docs/notes/phase34-evidence/pre-fix-check.log"
     },
     "phase34_generator": "scripts/phase34_runtime_results.py",
     "runtime_json": {
       "path": "docs/notes/phase34-runtime-results.json",
-      "sha256": "6968b021c57d439a98010dffcd4673b620953c99ce89fa8c0cff471ecf26cf8d",
-      "recorded_through": "975582be9000100717c962e86588e4ade6b806fc",
-      "recorded_head": "975582be9000100717c962e86588e4ade6b806fc",
-      "actual_head_at_write": "975582be9000100717c962e86588e4ade6b806fc",
-      "phase_commits": 16,
+      "sha256": "8e7eddae294eb1d4ba67e5cf9626aebb027c2e7de56fa05234fcf638afd4f793",
+      "recorded_through": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
+      "recorded_head": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
+      "actual_head_at_write": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
+      "phase_commits": 18,
       "code_commits": [
+        "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
         "cc0dd9a9e0b9d61d9d897b0584ee4c54f6c89af2",
         "7bed25625343e9e0ef43a8175a34bfda3ea0e6d0",
         "dae25819b4b75292ff56eb4c8dfb5db154522367",
         "3a97b98e2b5a6764d07a224c642bab3a6f5ee6fa"
       ],
       "check_exit_code": 0,
-      "post_c18_check_log": "D:/cp34/final-v9/runtime-check-c18.log (untracked)"
+      "evidence_dir": "docs/notes/phase34-evidence",
+      "evidence_manifest_sha256": "fdfbb5f2737362a04e51b3f85be0f9435b4b25fcedc700d64937428eb5e5b30f",
+      "requires_scratch": false,
+      "post_evidence_check_log": "default --check exit 0 at C19 without --scratch; clean-clone log: docs/notes/phase34-selfcontained-check.log (C21)"
     }
   },
   "candidate": {
@@ -128,7 +138,7 @@
     "manifest_commit": "7c90c9ed61190cb186d0ca307a3e1e0f7a7ed0a1",
     "historical_manifest_sha256": "a6694704fb3b8c4195dfa9a4701228dfbe281fd8ff753028cb2376689be1750c",
     "external_witness": {
-      "path": "D:/cp34/final-v9/external-witness-v9.txt (untracked)",
+      "path": "docs/notes/phase34-evidence/external-witness-v9.txt",
       "sha256_of_receipt_recorded_there": "8bd6795b6fb97d15154849aaa46569d58367edbe11ce6ce39423e6f2a4b03c36"
     }
   },
@@ -172,7 +182,7 @@
       "failed": []
     },
     "full_report": {
-      "path": "D:/cp34/final-v9/verify-v9.json",
+      "path": "docs/notes/phase34-evidence/verify-v9.json",
       "sha256": "aa86a6b43048f63880c1653ffd1b23687f8bda381839efda9465aeb75b43644f"
     }
   },
@@ -193,7 +203,7 @@
       "failed": 0,
       "skipped": 3,
       "selected": 4179,
-      "note": "4179 = reviewer baseline 4168 + 11 new Phase34 tests"
+      "note": "4179 = reviewer baseline 4168 + 11 new Phase34 tests; C19 evidence-tool delta verified by targeted 32/32 (runtime/normalization); nine-group gate summaries, logs and JUnit files preserved byte-for-byte in the in-repo evidence pack"
     },
     "eval_isolation_fixes": [
       "isolation fixture now fails the patched target execution from run_target_tests and retries with a distinct patch, exercising diagnoser + reviewer",
@@ -208,7 +218,7 @@
     "frontend": "conditionally skipped: zero web/src diff (documented, not passed)"
   },
   "static_checks_final": {
-    "files": 13,
+    "files": 15,
     "passed": [
       "AST parse",
       "ruff check",
@@ -225,8 +235,8 @@
     ],
     "failed_is_generated_artifact_only": true,
     "detail": "historical-baseline.json keeps the pre-existing CRLF convention; v7/v8/v9 candidate.diff contain unified-diff blank context lines (single space). Code-only diff checks exit 0. No check was relaxed.",
-    "informational_mypy_exit": 2,
-    "source_sha256": "5d1724285d774e9da813421e870f5c6118899b52809bdd7e570ebdc82d5de0bc"
+    "informational_mypy_exit": 1,
+    "source_sha256": "8ddb85afc8ab7829a609d9466fcc9a7fc0643cbdd37c4b1b66578a10452ef23a"
   },
   "real_model_usage": {
     "real_requests": 0,
@@ -243,19 +253,25 @@
   ],
   "mainline": {
     "branch": "codex/phase12-real-issue-pilot",
-    "pre_merge_head": "a1ceb3463b65a6fb8993cbd1be63877fa870d713",
-    "target": "C18 (this commit)",
+    "pre_merge_head": "5f6f3eb539bcb7af771b29ddb18f27cf29e39507",
+    "target": "C21 (final docs commit); fast-forward after all commits",
     "ff_only": true,
     "pushed": false
   },
   "docs_sha256": {
-    "docs/notes/phase34-final-report.md": "a525a0abc6c33416ec4ebea774e31f847d2d92a44160620455e02be507177c0b",
-    "docs/notes/phase34-runtime-results.json": "6968b021c57d439a98010dffcd4673b620953c99ce89fa8c0cff471ecf26cf8d",
-    "docs/notes/phase34-static-checks.json": "5d1724285d774e9da813421e870f5c6118899b52809bdd7e570ebdc82d5de0bc",
+    "docs/notes/phase34-final-report.md": "3024ed4f9d772538e25bfa6f593f1d81810f320a6a204b191d59f88aeb9c62c9",
+    "docs/notes/phase34-runtime-results.json": "8e7eddae294eb1d4ba67e5cf9626aebb027c2e7de56fa05234fcf638afd4f793",
+    "docs/notes/phase34-static-checks.json": "8ddb85afc8ab7829a609d9466fcc9a7fc0643cbdd37c4b1b66578a10452ef23a",
     "docs/notes/phase33-errata.md": "f82c71acce0ad94783bfe6fa8d94a3d239089850b28b8c5ae10301ab6cf21827",
     "docs/notes/phase33-final-report.md": "d4ef11024bcec6730e6d2b9e58632f2b41fbe79ee00d2e7391a43fcc299ad1cb",
     "docs/notes/phase33-runtime-results.json": "f1c37a32a7a29eb831ea172d36fd5b1c8aba5c934f2594d07fd9456467a23330",
-    "docs/notes/phase33-delivery-receipt.json": "b0a97696d9a9f25f68a7f3aa67eceae85fb7e4697bc8d5d661dc2689e6df8acd"
+    "docs/notes/phase33-delivery-receipt.json": "b0a97696d9a9f25f68a7f3aa67eceae85fb7e4697bc8d5d661dc2689e6df8acd",
+    "docs/notes/phase34-evidence/SHA256SUMS": "fdfbb5f2737362a04e51b3f85be0f9435b4b25fcedc700d64937428eb5e5b30f",
+    "docs/notes/phase34-evidence/static-checks.json": "8ddb85afc8ab7829a609d9466fcc9a7fc0643cbdd37c4b1b66578a10452ef23a",
+    "docs/notes/phase34-evidence/verify-v9.json": "aa86a6b43048f63880c1653ffd1b23687f8bda381839efda9465aeb75b43644f",
+    "docs/notes/phase34-evidence/provider-matrix.json": "aee887bf6e3b616ddad2e51ba40c549efbe1ddf1a255c42a91eb3bc2a3b29ef6",
+    "docs/notes/phase34-evidence/pre-fix-check.log": "8faf7598c41cb0c57506bfdc3148557640e3123550968c0b1360a8efb2713f61",
+    "docs/notes/phase34-evidence/external-witness-v9.txt": "486c32ca7a794d3d83e4b102b6c86e211a08268ca88a72f3bac0a2b30866b621"
   },
   "constraints_honored": [
     "single controller, no teammate/subagent",
@@ -265,6 +281,22 @@
     "Phase33 runtime JSON and delivery receipt restored byte-for-byte",
     "176 untracked historical files untouched and uncommitted",
     "real model requests 0, cost 0",
-    "no skip/xfail/deleted/weakened tests to hide failures"
-  ]
+    "no skip/xfail/deleted/weakened tests to hide failures",
+    "evidence pack copied into docs/notes/phase34-evidence with SHA256SUMS (47 entries)",
+    "default runtime --check has no external scratch dependency; D:/cp34/final-v9 is generation-time only",
+    "clean-clone regression script added (log committed in C21)"
+  ],
+  "evidence_pack": {
+    "dir": "docs/notes/phase34-evidence",
+    "manifest": "docs/notes/phase34-evidence/SHA256SUMS",
+    "manifest_sha256": "fdfbb5f2737362a04e51b3f85be0f9435b4b25fcedc700d64937428eb5e5b30f",
+    "entries": 47,
+    "runtime_check_command": ".venv/Scripts/python.exe scripts/phase34_runtime_results.py --check",
+    "requires_scratch": false,
+    "external_scratch_role": "D:/cp34/final-v9 is the generation-time scratch only; it is not a delivery dependency and is not needed by the default --check",
+    "selfcontained_regression": {
+      "command": "bash scripts/phase34_selfcontained_check.sh",
+      "status": "pending C21 run"
+    }
+  }
 }

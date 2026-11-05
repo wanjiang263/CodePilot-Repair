@@ -1,12 +1,24 @@
 {
   "phase": 34,
-  "generated_at": "2026-11-05T02:26:41+00:00",
+  "generated_at": "2026-11-05T05:26:46+00:00",
   "generator": "scripts/phase34_runtime_results.py",
   "base_commit": "dba045dabd70f0e6eb7779287136944b589f2734",
-  "recorded_through": "975582be9000100717c962e86588e4ade6b806fc",
-  "recorded_head": "975582be9000100717c962e86588e4ade6b806fc",
-  "actual_head_at_write": "975582be9000100717c962e86588e4ade6b806fc",
+  "recorded_through": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
+  "recorded_head": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
+  "actual_head_at_write": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
+  "evidence_dir": "docs/notes/phase34-evidence",
+  "evidence_manifest_sha256": "fdfbb5f2737362a04e51b3f85be0f9435b4b25fcedc700d64937428eb5e5b30f",
   "phase_commits": [
+    {
+      "hash": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
+      "short": "e2b3c8e",
+      "subject": "fix: make phase34 runtime evidence self-contained"
+    },
+    {
+      "hash": "5f6f3eb539bcb7af771b29ddb18f27cf29e39507",
+      "short": "5f6f3eb",
+      "subject": "docs: record phase34 v9 closeout as pass"
+    },
     {
       "hash": "975582be9000100717c962e86588e4ade6b806fc",
       "short": "975582b",
@@ -90,6 +102,11 @@
   ],
   "code_commits": [
     {
+      "hash": "e2b3c8eb450b0fe4980f8ae247c8302ec89ea455",
+      "short": "e2b3c8e",
+      "subject": "fix: make phase34 runtime evidence self-contained"
+    },
+    {
       "hash": "cc0dd9a9e0b9d61d9d897b0584ee4c54f6c89af2",
       "short": "cc0dd9a",
       "subject": "fix: close eval isolation gaps and teach runtime evidence about v9"
@@ -113,47 +130,47 @@
   "final_regression": {
     "sources": [
       {
-        "path": "D:/cp34/final-v9/test-gate-api.json",
+        "path": "docs/notes/phase34-evidence/test-gate-api.json",
         "sha256": "288dc431db048d407f9b497a31a66e7a3fe67f2012480b55f7469926a35c4291",
         "kind": "gate-summary"
       },
       {
-        "path": "D:/cp34/final-v9/test-gate-eval.json",
+        "path": "docs/notes/phase34-evidence/test-gate-eval.json",
         "sha256": "3ec990d1880b43767167ddbf66b20feb0caf437e2ecfe21f299c3f54c7221ca0",
         "kind": "gate-summary"
       },
       {
-        "path": "D:/cp34/final-v9/test-gate-graph.json",
+        "path": "docs/notes/phase34-evidence/test-gate-graph.json",
         "sha256": "aa0fd5eb42ac2dd36546eac91ce70589dcffe2fcfbe2f15614795a0b17d68658",
         "kind": "gate-summary"
       },
       {
-        "path": "D:/cp34/final-v9/test-gate-integration.json",
+        "path": "docs/notes/phase34-evidence/test-gate-integration.json",
         "sha256": "fa11784be9ed918d5b1baab23953e0afa8e38092f067db796b642d42417e22ca",
         "kind": "gate-summary"
       },
       {
-        "path": "D:/cp34/final-v9/test-gate-sandbox.json",
+        "path": "docs/notes/phase34-evidence/test-gate-sandbox.json",
         "sha256": "7683c04ce6d13118091abebf5e8c55761f37feaf8f039adde1a2c8e6193b1012",
         "kind": "gate-summary"
       },
       {
-        "path": "D:/cp34/final-v9/test-gate-unit-a.json",
+        "path": "docs/notes/phase34-evidence/test-gate-unit-a.json",
         "sha256": "1100c046f9451488ca8165c480c17929703d44d45215863e259e91e4c0eb5b6d",
         "kind": "gate-summary"
       },
       {
-        "path": "D:/cp34/final-v9/test-gate-unit-b.json",
+        "path": "docs/notes/phase34-evidence/test-gate-unit-b.json",
         "sha256": "fc9d610cbb2eff7f54b3f8c794fa1fb324ef2eb85d4e5e7e1af13a66a5811790",
         "kind": "gate-summary"
       },
       {
-        "path": "D:/cp34/final-v9/test-gate-unit-c.json",
+        "path": "docs/notes/phase34-evidence/test-gate-unit-c.json",
         "sha256": "4fab6743696f58d1d58c2fc5b22d84a163000fc7aaf9226be93eb74eca1ec4c3",
         "kind": "gate-summary"
       },
       {
-        "path": "D:/cp34/final-v9/test-gate-unit-d.json",
+        "path": "docs/notes/phase34-evidence/test-gate-unit-d.json",
         "sha256": "60f476d23e910af6f09c6529858494fef41133c7c9dfbe3ff2a0d48768f92e06",
         "kind": "gate-summary"
       }
@@ -171,7 +188,7 @@
       {
         "group": "unit-a",
         "run": 1,
-        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/agents tests/unit/api tests/unit/context tests/unit/eval tests/unit/failure tests/unit/graph tests/unit/llm -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-unit-a-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\unit-a-run1-20261105T011329-754329",
+        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/unit/agents tests/unit/api tests/unit/context tests/unit/eval tests/unit/failure tests/unit/graph tests/unit/llm -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-unit-a-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\unit-a-run1-20261105T011329-754329",
         "exit_code": 0,
         "summary_line": "1535 passed in 170.35s (0:02:50)",
         "wall_s": 174.61,
@@ -182,9 +199,9 @@
           "error": 0,
           "skipped": 0
         },
-        "log": "D:/cp34/final-v9/gate-unit-a-run1.log",
+        "log": "docs/notes/phase34-evidence/gate-unit-a-run1.log",
         "log_sha256": "9086895b74f8414a8ad7ae6df04664c7a2845cd371b876507baeb6825db0a244",
-        "junit": "D:/cp34/final-v9/gate-unit-a-run1.xml",
+        "junit": "docs/notes/phase34-evidence/gate-unit-a-run1.xml",
         "junit_sha256": "cb91c919ce02508068a04b2dd30ebbe00a768164be3b8a9f3c20a5422f6319b7",
         "memory_before": {
           "total_phys_mb": 16176,
@@ -203,12 +220,12 @@
           "commit_headroom_mb": 7265,
           "load_pct": 81
         },
-        "basetemp": "D:\\cp34\\final-v9\\pytest\\unit-a-run1-20261105T011329-754329"
+        "basetemp": "unit-a-run1-20261105T011329-754329"
       },
       {
         "group": "unit-b",
         "run": 1,
-        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/observability tests/unit/patch tests/unit/repo tests/unit/retrieval tests/unit/sandbox tests/unit/schemas tests/unit/settings tests/unit/storage -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-unit-b-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\unit-b-run1-20261105T011627-660667",
+        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/unit/observability tests/unit/patch tests/unit/repo tests/unit/retrieval tests/unit/sandbox tests/unit/schemas tests/unit/settings tests/unit/storage -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-unit-b-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\unit-b-run1-20261105T011627-660667",
         "exit_code": 0,
         "summary_line": "1138 passed, 2 skipped in 243.76s (0:04:03)",
         "wall_s": 247.74,
@@ -219,9 +236,9 @@
           "error": 0,
           "skipped": 2
         },
-        "log": "D:/cp34/final-v9/gate-unit-b-run1.log",
+        "log": "docs/notes/phase34-evidence/gate-unit-b-run1.log",
         "log_sha256": "33c80af3cd93eaf03913324fc5c1691ab634e1d99f4329be72126685a686c3da",
-        "junit": "D:/cp34/final-v9/gate-unit-b-run1.xml",
+        "junit": "docs/notes/phase34-evidence/gate-unit-b-run1.xml",
         "junit_sha256": "fc83abdd02b2dccaacf782553a047b79a07e6806aedf9985e12b52252a3da0c9",
         "memory_before": {
           "total_phys_mb": 16176,
@@ -240,12 +257,12 @@
           "commit_headroom_mb": 7270,
           "load_pct": 80
         },
-        "basetemp": "D:\\cp34\\final-v9\\pytest\\unit-b-run1-20261105T011627-660667"
+        "basetemp": "unit-b-run1-20261105T011627-660667"
       },
       {
         "group": "unit-c",
         "run": 1,
-        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/test_artifacts.py tests/unit/test_cli.py tests/unit/test_cli_glm.py tests/unit/test_fsutil_replace.py tests/unit/test_index_real_repo.py tests/unit/test_m3_batch.py tests/unit/test_net_proxy.py tests/unit/test_phase19_acceptance_gate.py tests/unit/test_phase20_batch_controls.py tests/unit/test_phase21_budget_chain.py tests/unit/test_phase23_runtime.py tests/unit/test_phase26_closeout.py tests/unit/test_phase26_estimation.py tests/unit/test_phase26_final.py tests/unit/test_phase26_harness.py tests/unit/test_phase28_archive.py tests/unit/test_phase28_archive_verify.py tests/unit/test_phase29_archive.py tests/unit/test_phase29_archive_security.py tests/unit/test_phase29_archive_verify.py tests/unit/test_phase30_archive_receipt.py tests/unit/test_phase30_archive_v4.py tests/unit/test_phase30_harness_failclosed.py tests/unit/test_phase31_archive_manifest.py tests/unit/test_phase31_archive_verify.py tests/unit/test_phase31_receipt.py tests/unit/test_phase33_runtime_results.py tests/unit/test_phase33_test_gate.py tests/unit/test_phase34_archive_normalization.py tests/unit/test_phase34_runtime_results.py tests/unit/test_phase6_repro_stats.py -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-unit-c-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\unit-c-run1-20261105T012047-631187",
+        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/unit/test_artifacts.py tests/unit/test_cli.py tests/unit/test_cli_glm.py tests/unit/test_fsutil_replace.py tests/unit/test_index_real_repo.py tests/unit/test_m3_batch.py tests/unit/test_net_proxy.py tests/unit/test_phase19_acceptance_gate.py tests/unit/test_phase20_batch_controls.py tests/unit/test_phase21_budget_chain.py tests/unit/test_phase23_runtime.py tests/unit/test_phase26_closeout.py tests/unit/test_phase26_estimation.py tests/unit/test_phase26_final.py tests/unit/test_phase26_harness.py tests/unit/test_phase28_archive.py tests/unit/test_phase28_archive_verify.py tests/unit/test_phase29_archive.py tests/unit/test_phase29_archive_security.py tests/unit/test_phase29_archive_verify.py tests/unit/test_phase30_archive_receipt.py tests/unit/test_phase30_archive_v4.py tests/unit/test_phase30_harness_failclosed.py tests/unit/test_phase31_archive_manifest.py tests/unit/test_phase31_archive_verify.py tests/unit/test_phase31_receipt.py tests/unit/test_phase33_runtime_results.py tests/unit/test_phase33_test_gate.py tests/unit/test_phase34_archive_normalization.py tests/unit/test_phase34_runtime_results.py tests/unit/test_phase6_repro_stats.py -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-unit-c-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\unit-c-run1-20261105T012047-631187",
         "exit_code": 0,
         "summary_line": "420 passed in 934.55s (0:15:34)",
         "wall_s": 939.25,
@@ -256,9 +273,9 @@
           "error": 0,
           "skipped": 0
         },
-        "log": "D:/cp34/final-v9/gate-unit-c-run1.log",
+        "log": "docs/notes/phase34-evidence/gate-unit-c-run1.log",
         "log_sha256": "2caaf1489e780b8081c2442187108dac8f7b902da8ce943b6d570d0323d7cc0b",
-        "junit": "D:/cp34/final-v9/gate-unit-c-run1.xml",
+        "junit": "docs/notes/phase34-evidence/gate-unit-c-run1.xml",
         "junit_sha256": "5ffd3b9ec0a295165add0afcac91ade84649cc7a6d474e90de6f8edd5cd78b64",
         "memory_before": {
           "total_phys_mb": 16176,
@@ -277,12 +294,12 @@
           "commit_headroom_mb": 7728,
           "load_pct": 87
         },
-        "basetemp": "D:\\cp34\\final-v9\\pytest\\unit-c-run1-20261105T012047-631187"
+        "basetemp": "unit-c-run1-20261105T012047-631187"
       },
       {
         "group": "unit-d",
         "run": 1,
-        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/tools -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-unit-d-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\unit-d-run1-20261105T013726-572671",
+        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/unit/tools -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-unit-d-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\unit-d-run1-20261105T013726-572671",
         "exit_code": 0,
         "summary_line": "25 passed in 6.98s",
         "wall_s": 11.58,
@@ -293,9 +310,9 @@
           "error": 0,
           "skipped": 0
         },
-        "log": "D:/cp34/final-v9/gate-unit-d-run1.log",
+        "log": "docs/notes/phase34-evidence/gate-unit-d-run1.log",
         "log_sha256": "d8627082541069c9205fa55a2edb6e404caac6a93aa11495c69f65423e13cf11",
-        "junit": "D:/cp34/final-v9/gate-unit-d-run1.xml",
+        "junit": "docs/notes/phase34-evidence/gate-unit-d-run1.xml",
         "junit_sha256": "d1d041f776f5010c594a3d6d47cbd09ec97c25bc74b26039d2ee0b925e50f6cc",
         "memory_before": {
           "total_phys_mb": 16176,
@@ -314,12 +331,12 @@
           "commit_headroom_mb": 7658,
           "load_pct": 87
         },
-        "basetemp": "D:\\cp34\\final-v9\\pytest\\unit-d-run1-20261105T013726-572671"
+        "basetemp": "unit-d-run1-20261105T013726-572671"
       },
       {
         "group": "eval",
         "run": 1,
-        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/eval -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-eval-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\eval-run1-20261105T013739-297983",
+        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/eval -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-eval-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\eval-run1-20261105T013739-297983",
         "exit_code": 0,
         "summary_line": "483 passed in 791.37s (0:13:11)",
         "wall_s": 795.45,
@@ -330,9 +347,9 @@
           "error": 0,
           "skipped": 0
         },
-        "log": "D:/cp34/final-v9/gate-eval-run1.log",
+        "log": "docs/notes/phase34-evidence/gate-eval-run1.log",
         "log_sha256": "83fd94e84def5fb42dadac3546b9091399a1eaf4e7cfba03e1a7475fbc40a28e",
-        "junit": "D:/cp34/final-v9/gate-eval-run1.xml",
+        "junit": "docs/notes/phase34-evidence/gate-eval-run1.xml",
         "junit_sha256": "1b2699c7f5420cc505a076f87ea0f58e730d01ccff168256edecf94a341386a7",
         "memory_before": {
           "total_phys_mb": 16176,
@@ -351,12 +368,12 @@
           "commit_headroom_mb": 7567,
           "load_pct": 86
         },
-        "basetemp": "D:\\cp34\\final-v9\\pytest\\eval-run1-20261105T013739-297983"
+        "basetemp": "eval-run1-20261105T013739-297983"
       },
       {
         "group": "sandbox",
         "run": 1,
-        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/sandbox -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-sandbox-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\sandbox-run1-20261105T015201-025072",
+        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/sandbox -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-sandbox-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\sandbox-run1-20261105T015201-025072",
         "exit_code": 0,
         "summary_line": "66 passed, 1 deselected in 1.83s",
         "wall_s": 5.73,
@@ -367,9 +384,9 @@
           "error": 0,
           "skipped": 0
         },
-        "log": "D:/cp34/final-v9/gate-sandbox-run1.log",
+        "log": "docs/notes/phase34-evidence/gate-sandbox-run1.log",
         "log_sha256": "11eb7f97f6028b1eec2c464178620b55e5455e664fbda74b0fca050182c7be1d",
-        "junit": "D:/cp34/final-v9/gate-sandbox-run1.xml",
+        "junit": "docs/notes/phase34-evidence/gate-sandbox-run1.xml",
         "junit_sha256": "25932bdb0b013e57df42b11589a7d36d2b571ca95f2fc1b54444c3e34445a403",
         "memory_before": {
           "total_phys_mb": 16176,
@@ -388,12 +405,12 @@
           "commit_headroom_mb": 7578,
           "load_pct": 86
         },
-        "basetemp": "D:\\cp34\\final-v9\\pytest\\sandbox-run1-20261105T015201-025072"
+        "basetemp": "sandbox-run1-20261105T015201-025072"
       },
       {
         "group": "integration",
         "run": 1,
-        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/integration -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-integration-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\integration-run1-20261105T015207-151696",
+        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/integration -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-integration-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\integration-run1-20261105T015207-151696",
         "exit_code": 0,
         "summary_line": "126 passed, 1 deselected in 428.97s (0:07:08)",
         "wall_s": 433.2,
@@ -404,9 +421,9 @@
           "error": 0,
           "skipped": 0
         },
-        "log": "D:/cp34/final-v9/gate-integration-run1.log",
+        "log": "docs/notes/phase34-evidence/gate-integration-run1.log",
         "log_sha256": "c0f3fc4bc2ec080a90ba78e2c1dd85bfce6e4d51a3528fc07dd5818da28c40c0",
-        "junit": "D:/cp34/final-v9/gate-integration-run1.xml",
+        "junit": "docs/notes/phase34-evidence/gate-integration-run1.xml",
         "junit_sha256": "5a717f7b3e0ea4257c40f3c36d292dd2c9bfb5319d36beca9ed439aa7ed4345d",
         "memory_before": {
           "total_phys_mb": 16176,
@@ -425,12 +442,12 @@
           "commit_headroom_mb": 7517,
           "load_pct": 86
         },
-        "basetemp": "D:\\cp34\\final-v9\\pytest\\integration-run1-20261105T015207-151696"
+        "basetemp": "integration-run1-20261105T015207-151696"
       },
       {
         "group": "api",
         "run": 1,
-        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/api -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-api-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\api-run1-20261105T015934-748276",
+        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/api -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-api-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\api-run1-20261105T015934-748276",
         "exit_code": 0,
         "summary_line": "117 passed, 1 skipped in 144.60s (0:02:24)",
         "wall_s": 154.38,
@@ -441,9 +458,9 @@
           "error": 0,
           "skipped": 1
         },
-        "log": "D:/cp34/final-v9/gate-api-run1.log",
+        "log": "docs/notes/phase34-evidence/gate-api-run1.log",
         "log_sha256": "f3639bb5aa6ec6f0872a6ad2c5445d328b7440e45caecdc8f53021c8bf44c9c6",
-        "junit": "D:/cp34/final-v9/gate-api-run1.xml",
+        "junit": "docs/notes/phase34-evidence/gate-api-run1.xml",
         "junit_sha256": "5cede295a87bdc71eca593fcf8fd92857b6d3c5dcaceb53634aaeb2599a08ad7",
         "memory_before": {
           "total_phys_mb": 16176,
@@ -462,12 +479,12 @@
           "commit_headroom_mb": 7585,
           "load_pct": 87
         },
-        "basetemp": "D:\\cp34\\final-v9\\pytest\\api-run1-20261105T015934-748276"
+        "basetemp": "api-run1-20261105T015934-748276"
       },
       {
         "group": "graph",
         "run": 1,
-        "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/graph -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-graph-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\graph-run1-20261105T020216-964863",
+        "command": "<repo>\\.venv\\Scripts\\python.exe -m pytest tests/graph -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v9\\gate-graph-run1.xml --basetemp=D:\\cp34\\final-v9\\pytest\\graph-run1-20261105T020216-964863",
         "exit_code": 0,
         "summary_line": "266 passed, 13 deselected in 1227.12s (0:20:27)",
         "wall_s": 1233.78,
@@ -478,9 +495,9 @@
           "error": 0,
           "skipped": 0
         },
-        "log": "D:/cp34/final-v9/gate-graph-run1.log",
+        "log": "docs/notes/phase34-evidence/gate-graph-run1.log",
         "log_sha256": "f6b52355f3d4466f1f8170f9e05c1f9526d0610dce9f8db89fbb6db787a1d541",
-        "junit": "D:/cp34/final-v9/gate-graph-run1.xml",
+        "junit": "docs/notes/phase34-evidence/gate-graph-run1.xml",
         "junit_sha256": "8dcb839a555f205c94fdcf89f49c53db340e2aacdf900a125b6d43b6cd68a3d5",
         "memory_before": {
           "total_phys_mb": 16176,
@@ -499,7 +516,7 @@
           "commit_headroom_mb": 7690,
           "load_pct": 87
         },
-        "basetemp": "D:\\cp34\\final-v9\\pytest\\graph-run1-20261105T020216-964863"
+        "basetemp": "graph-run1-20261105T020216-964863"
       }
     ],
     "selected_tests_note": "full repository selection: unit 3120 (3118 passed + 2 skipped) + eval 483 + sandbox 66 + integration 126 + api 118 + graph 266 = 4179; tests/docker 35 deselected",
@@ -521,13 +538,15 @@
     }
   },
   "static_checks": {
-    "source": "D:/cp34/final-v9/static-checks.json",
-    "source_sha256": "5d1724285d774e9da813421e870f5c6118899b52809bdd7e570ebdc82d5de0bc",
-    "file_count": 13,
+    "source": "docs/notes/phase34-evidence/static-checks.json",
+    "source_sha256": "8ddb85afc8ab7829a609d9466fcc9a7fc0643cbdd37c4b1b66578a10452ef23a",
+    "file_count": 15,
     "files": [
+      "scripts/__init__.py",
       "scripts/phase28_archive_verify.py",
       "scripts/phase32_provider_matrix.py",
       "scripts/phase33_runtime_results.py",
+      "scripts/phase34_evidence_manifest.py",
       "scripts/phase34_runtime_results.py",
       "src/codepilot/archive.py",
       "src/codepilot/eval/swebench_isolation.py",
@@ -562,7 +581,7 @@
       },
       {
         "name": "mypy (src + scripts, informational debt, not gated)",
-        "exit_code": 2
+        "exit_code": 1
       },
       {
         "name": "locale JSON parse",
@@ -593,7 +612,7 @@
     "docs_copy_sha256": null
   },
   "provider_matrix": {
-    "source": "D:/cp34/final-v9/provider-matrix.json",
+    "source": "docs/notes/phase34-evidence/provider-matrix.json",
     "source_sha256": "aee887bf6e3b616ddad2e51ba40c549efbe1ddf1a255c42a91eb3bc2a3b29ef6",
     "real_mode": false,
     "real_requests": 0,
@@ -853,7 +872,7 @@
       "baseline_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
       "check": "historical_baseline",
       "files_checked": 60,
-      "manifest_path": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\configs\\harness\\candidates\\historical-baseline.json",
+      "manifest_path": "configs/harness/candidates/historical-baseline.json",
       "manifest_present": true,
       "mismatches": {},
       "notes": [],
@@ -951,7 +970,7 @@
         "failures": 0
       }
     ],
-    "source": "D:/cp34/final-v9/verify-v9.json",
+    "source": "docs/notes/phase34-evidence/verify-v9.json",
     "source_sha256": "aa86a6b43048f63880c1653ffd1b23687f8bda381839efda9465aeb75b43644f"
   },
   "runtime_lifecycle": {
@@ -963,13 +982,13 @@
         "code_commits",
         "head_commit"
       ],
-      "log": "D:/cp34/final-v9/pre-fix-check.log",
+      "log": "docs/notes/phase34-evidence/pre-fix-check.log",
       "log_sha256": "8faf7598c41cb0c57506bfdc3148557640e3123550968c0b1360a8efb2713f61"
     },
     "rule": "recorded_through/recorded_head describe the evidence tree; phase_commits=base..recorded_through; code_commits is path-filtered; changes after recorded_through must be docs-only"
   },
   "page_e2e": {
-    "command": "git diff --name-only dba045dabd70f0e6eb7779287136944b589f2734..975582be9000100717c962e86588e4ade6b806fc -- web/src",
+    "command": "git diff --name-only dba045dabd70f0e6eb7779287136944b589f2734..e2b3c8eb450b0fe4980f8ae247c8302ec89ea455 -- web/src",
     "changed_files": 0,
     "files": [],
     "result": "conditionally skipped: web/src has zero diff in this phase"

@@ -6,9 +6,61 @@
 Phase34 指令列为“未验证/不在本轮通过项”。本轮定义的可执行验收（P0/P1/P2 修复、
 v9 归档、全仓九组回归、静态门槛、runtime/归档生命周期）已全部通过。
 
-最终代码提交：C17b `975582be9000100717c962e86588e4ade6b806fc`；
-C18 仅提交本报告、runtime JSON、静态结果与 delivery receipt（docs-only）。
+最终代码提交：C19 `e2b3c8eb450b0fe4980f8ae247c8302ec89ea455`（证据自包含）；
+C20 提交证据包、runtime JSON、静态结果、本报告与 delivery receipt（docs-only）；
+C21 提交 clean-clone 回归日志（docs-only）。
 Phase34 起点：`dba045dabd70f0e6eb7779287136944b589f2734`。
+
+交付硬约束：Phase34 runtime `--check` 默认读取仓库内
+`docs/notes/phase34-evidence`，**不需要** `--scratch`；`D:/cp34/final-v9`
+只是生成时的临时目录，不是交付依赖。
+
+## 零、证据自包含（评审 P1/P2 修复）
+
+评审复现：不带 `--scratch` 直接运行
+`scripts/phase34_runtime_results.py --check` 时，旧版默认 scratch 是
+`.codex-pytest-tmp/phase34`，证据文件在 `D:/cp34/final-v9`，因此报
+`payload_mismatch`（sections 含 `archive_verify_v8`、`final_regression`、
+`provider_matrix`、`runtime_lifecycle`、`static_checks`）。该失败不是归档被
+篡改，而是证据入口依赖外部目录。
+
+修复（C19）：
+
+- `scripts/phase34_runtime_results.py` 默认 scratch 改为仓库内
+  `docs/notes/phase34-evidence`；`--check`/`--write` 先校验证据清单。
+- 新增 `scripts/phase34_evidence_manifest.py`：`--write` 生成 `SHA256SUMS`
+  （当前 47 项），`--check` 校验存在性与哈希；拒绝绝对路径、`..` 穿越、
+  重复项和空清单。
+- 证据缺失/篡改不再伪装成 payload 不一致：
+  - `evidence_missing`：目录、清单或清单内文件缺失；
+  - `evidence_manifest_mismatch`：文件哈希与清单不符；
+  - `evidence_manifest_invalid`：清单格式非法或路径不安全；
+  - `evidence_unlisted`：使用了未列入清单的 `test-gate*.json`。
+- runtime JSON 新增 `evidence_dir` 与 `evidence_manifest_sha256`；gate 记录
+  中的绝对 `log`/`junit` 按文件名重定位到证据包，`basetemp` 只保留目录名，
+  `command` 去掉仓库/证据前缀，`historical_baseline.manifest_path` 固定为仓库
+  相对路径。
+- 新增 `scripts/phase34_selfcontained_check.sh`：把仓库 clone 到临时目录
+  （`--no-hardlinks`、不复制 `D:/cp34/final-v9`），运行默认 `--check`，并断言
+  runtime JSON 中 `evidence_dir`、`evidence_manifest_sha256` 和九组
+  `log`/`junit` 路径均为仓库相对路径、不含 `D:/cp34`。
+
+验收（C19）：
+
+```text
+$ .venv/Scripts/python.exe scripts/phase34_runtime_results.py --check
+{"check": "pass", "file": "docs/notes/phase34-runtime-results.json",
+ "sha256": "8e7eddae294eb1d4ba67e5cf9626aebb027c2e7de56fa05234fcf638afd4f793"}
+
+$ .venv/Scripts/python.exe scripts/phase34_evidence_manifest.py --check
+{"ok": true, "entries": 47, "missing": [], "mismatched": [], "errors": []}
+```
+
+clean-clone 回归结果见 §六 第 18 项与
+`docs/notes/phase34-selfcontained-check.log`（C21 回填）。九组全量回归证据仍是在 C15
+代码状态上采集的原始 gate 摘要/日志/JUnit；C19 只改证据生成器、清单工具、
+测试 fixture 与一个 shell 回归脚本，目标测试 32/32 通过，静态门槛在 C19
+重跑（见 §四）。
 
 ## 一、修复结果
 
@@ -20,8 +72,8 @@ Phase34 起点：`dba045dabd70f0e6eb7779287136944b589f2734`。
   `--check` 只允许记录点之后出现 `docs/` 变化、删除硬编码 base、`--write` 幂等。
 - Phase34 证据由 `scripts/phase34_runtime_results.py` 生成，使用
   `recorded_head` / `actual_head_at_write`，不再使用误导性的 `head_commit`。
-- 最终 HEAD（C18）上 `phase34_runtime_results.py --check` exit 0；
-  C17b 上生成，C18 docs-only 后复跑通过。
+- 最终代码 HEAD（C19）上 `phase34_runtime_results.py --check` **不带
+  `--scratch`** exit 0；C20/C21 仅 docs 变化后再复跑通过。
 
 ### P1-1 可复现性（C10 `7bed256`）
 
@@ -103,7 +155,9 @@ eval isolation 失败：
   witness 同值（`D:/cp34/final-v9/external-witness-v9.txt`）。
 - 完整校验：exit 0，`versions=15 new=8 old=7 new_failures=0 unexplained=0`、
   `witness=verified historical_integrity=ok`、baseline 60 / mismatch 0、
-  v9 checks 32/32。JSON：`D:/cp34/final-v9/verify-v9.json`。
+  v9 checks 32/32。JSON：`docs/notes/phase34-evidence/verify-v9.json`
+  （sha256 `aa86a6b43048f63880c1653ffd1b23687f8bda381839efda9465aeb75b43644f`；
+  生成时原路径为 `D:/cp34/final-v9/verify-v9.json`，已随证据包入库）。
 
 ## 三、全仓九组回归（C15 代码状态）
 
@@ -141,16 +195,18 @@ eval isolation 失败：
 .codex-pytest-tmp/phase34/static-final-v9
 --docs-out docs/notes/phase34-static-checks.json --tool phase34-static-final`
 
-- 13 个变更 Python 文件；通过：AST、ruff check、ruff format、mypy
-  （changed src/scripts，0 new errors）、locale JSON、EOL（LF）、credential scan
-  （仅新增行）、web/src scope。
+- 15 个变更 Python 文件（C19 新增 `scripts/__init__.py`、
+  `scripts/phase34_evidence_manifest.py`）；通过：AST、ruff check、ruff format、
+  mypy（changed src/scripts，0 new errors）、locale JSON、EOL（LF）、
+  credential scan（仅新增行）、web/src scope。
 - `git diff --check` / CRLF-aware 仍只命中生成物：
   1. `historical-baseline.json` 沿用既有 CRLF 约定（旧清单也是 CRLF）；
   2. v7/v8/v9 `candidate.diff` 的 unified diff 空 context 行（单个空格）。
   代码文件单独检查 exit 0；未修改脚本、未放宽检查。
 - 前端：`web/src` 零 diff → “零 diff 跳过”，不写成通过。
 - static-checks.json sha256：
-  `5d1724285d774e9da813421e870f5c6118899b52809bdd7e570ebdc82d5de0bc`。
+  `8ddb85afc8ab7829a609d9466fcc9a7fc0643cbdd37c4b1b66578a10452ef23a`
+  （与 `docs/notes/phase34-static-checks.json` 字节一致）。
 
 ## 五、提交与最终 HEAD
 
@@ -165,29 +221,36 @@ eval isolation 失败：
 - C14 `a1ceb34` v8 收口报告
 - C15 `cc0dd9a` eval isolation 修复 + runtime 生成器 v9 支持
 - C16 `cabcaa3` v9 候选；C17a `7c90c9e` v9 manifest；C17b `975582b` v9 receipt
-- C18（本提交）Phase34 runtime JSON、最终报告、静态结果、delivery receipt
+- C18 `5f6f3eb` v9 收口报告（旧收口）
+- C19 `e2b3c8e` 证据自包含：仓库内证据包、SHA256SUMS 校验、
+  `evidence_missing` 语义、clean-clone 回归脚本
+- C20（本提交）Phase34 证据包、runtime JSON、静态结果、最终报告、delivery receipt
+- C21 docs-only：clean-clone 回归日志与最终哈希回填
 - 不 push、不 PR、不激活。
 
 ## 六、验收清单（逐项）
 
 | # | 项 | 状态 | 证据 |
 |---|---|---|---|
-| 1 | 最终 HEAD 上 Phase34 runtime `--check` exit 0 | 通过 | C17b/C18 均 0 |
+| 1 | 最终代码 HEAD 上 Phase34 runtime `--check`（无 `--scratch`）exit 0 | 通过 | C19 默认 0；C20/C21 复跑 0 |
 | 2 | 记录点后代码提交 → 非 0 | 通过 | `test_phase34_runtime_results.py` |
-| 3 | 记录点后仅 docs → 0 | 通过 | 单测 + C18 结构 |
+| 3 | 记录点后仅 docs → 0 | 通过 | 单测 + C20/C21 结构 |
 | 4 | 篡改 `code_commits`/`recorded_head` → 非 0 | 通过 | 单测 |
 | 5 | Phase33 报告不再无条件 PASS | 通过 | 顶部 CONDITIONAL PASS + errata |
 | 6 | v9 pending、parent=v8、diff_base=7bed256、无 active | 通过 | candidate.json |
 | 7 | v9 normalization policy 与实现一致 | 通过 | policy + verify 32/32 |
 | 8 | v6/v7/v8 四文件 sha 未变 | 通过 | 逐项哈希 |
-| 9 | archive verify 15 versions、new_failures=0、witness verified | 通过 | `verify-v9.json` |
-| 10 | 归档/runtime 目标测试通过 | 通过 | 67 + 7 + 10 + eval isolation 15 |
-| 11 | 全仓九组实跑，0 failed | 通过 | §三 |
-| 12 | 静态检查，CRLF/生成物差异如实记录 | 通过（代码门槛） | §四 |
+| 9 | archive verify 15 versions、new_failures=0、witness verified | 通过 | `docs/notes/phase34-evidence/verify-v9.json` |
+| 10 | 归档/runtime 目标测试通过 | 通过 | 67 + 7 + 10 + eval isolation 15 + runtime/normalization 32/32（C19） |
+| 11 | 全仓九组实跑，0 failed | 通过 | §三（C15 代码状态；gate 摘要/日志/JUnit 已入库） |
+| 12 | 静态检查，CRLF/生成物差异如实记录 | 通过（代码门槛） | §四（C19 重跑） |
 | 13 | provider fake 通过，real_requests=0、cost=0 | 通过 | 166 passed, 0/0 |
 | 14 | 性能口径降级，cold 回退写明 | 通过 | phase33 errata |
-| 15 | 本地提交完成，tracked clean | 通过 | C5–C18 |
+| 15 | 本地提交完成，tracked clean | 通过 | C5–C21 |
 | 16 | 未 push、未 PR、未激活 | 通过 | 无远端操作、无 active |
+| 17 | 仓库内证据包 `SHA256SUMS` 47 项校验通过 | 通过 | `phase34_evidence_manifest.py --check` |
+| 18 | 干净 clone（无 `D:/cp34`）默认 `--check` exit 0 | 待 C21 回归日志 | `scripts/phase34_selfcontained_check.sh` + `phase34-selfcontained-check.log` |
+| 19 | runtime JSON 的 `evidence_dir`/`evidence_manifest_sha256` 正确且无外部 scratch | 通过 | `test_write_records_in_repo_evidence` + clone 断言 |
 
 ## 七、未验证（按 Phase34 指令显式排除）
 
@@ -201,9 +264,26 @@ eval isolation 失败：
 
 ## 附：证据索引
 
-- `D:/cp34/final-v9/`：九组 `test-gate-*.json`、gate 日志/junit、
-  `static-checks.json`、`provider-matrix.json`、`verify-v9.json`、
-  `external-witness-v9.txt`、`pre-fix-check.log`、runtime 日志。
-- `docs/notes/phase34-runtime-results.json`、`docs/notes/phase33-errata.md`、
-  `docs/notes/phase33-final-report.md`。
+- **主证据包（仓库内，自包含）**：`docs/notes/phase34-evidence/`
+  - 入口：九组 `test-gate-<group>.json` + `gate-<group>-run1.log/.xml`；
+    `static-checks.json`；`provider-matrix.json` + `provider-matrix/`；
+    `verify-v9.json` + `verify-v9.log`；`external-witness-v9.txt`；
+    `pre-fix-check.log`；`run-resumable-gate.sh` + `run-<group>.log`；
+    `README.md`。
+  - 完整性：`docs/notes/phase34-evidence/SHA256SUMS`，47 项，
+    sha256 `fdfbb5f2737362a04e51b3f85be0f9435b4b25fcedc700d64937428eb5e5b30f`。
+  - 默认命令：`.venv/Scripts/python.exe scripts/phase34_runtime_results.py --check`
+    （无需 `--scratch`）。
+- **clean-clone 回归日志**：`docs/notes/phase34-selfcontained-check.log`
+  （`bash scripts/phase34_selfcontained_check.sh` 的输出）。
+- `docs/notes/phase34-runtime-results.json`（sha256
+  `8e7eddae294eb1d4ba67e5cf9626aebb027c2e7de56fa05234fcf638afd4f793`）、
+  `docs/notes/phase34-static-checks.json`（sha256
+  `8ddb85afc8ab7829a609d9466fcc9a7fc0643cbdd37c4b1b66578a10452ef23a`）。
+- **生成时临时目录（非交付依赖）**：`D:/cp34/final-v9/`。它只是 C19 之前采集
+  证据的工作目录；所有被 runtime 消费的文件均已复制到
+  `docs/notes/phase34-evidence/` 并由 `SHA256SUMS` 覆盖。该目录被删除或换机器
+  不影响默认 `--check`。
 - v9 receipt：`configs/harness/receipts/phase34-candidate-v9.json`。
+- Phase33 历史：`docs/notes/phase33-errata.md`、
+  `docs/notes/phase33-final-report.md`。

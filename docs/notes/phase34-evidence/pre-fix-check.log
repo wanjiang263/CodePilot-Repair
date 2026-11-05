@@ -1,0 +1,7 @@
+{
+  "check": "fail",
+  "sections": [
+    "code_commits",
+    "head_commit"
+  ]
+}

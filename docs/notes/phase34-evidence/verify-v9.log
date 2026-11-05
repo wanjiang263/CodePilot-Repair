@@ -1,0 +1,22 @@
+baseline-07625a8             old  declared=None             rule=undeclared               ok
+phase26-candidate-v1         old  declared=None             rule=undeclared               ok
+phase26-candidate-v2         old  declared=c44a73316d5e...  rule=canonical_json_snapshot  ok
+phase26-candidate-v3         old  declared=2d39f7d5c644...  rule=canonical_json_snapshot  ok
+phase26-candidate-v4         old  declared=07545762e805...  rule=canonical_json_snapshot  ok
+phase26-candidate-v5         old  declared=ecf503d292a5...  rule=canonical_json_snapshot  ok
+phase27-candidate-v1         old  declared=6c4f26dbbfd6...  rule=file_bytes               ok
+[note] phase28-candidate-v2 legacy_worktree_drift: ['scripts/phase28_archive.py', 'scripts/phase28_archive_verify.py', 'scripts/phase28_index_profile.py', 'src/codepilot/archive.py', 'src/codepilot/graph/harness.py', 'src/codepilot/repo/index.py', 'src/codepilot/rsi.py', 'src/codepilot/sandbox/docker.py', 'tests/integration/phase28/test_phase28_archive_verify_loop.py', 'tests/unit/repo/test_index.py', 'tests/unit/test_phase26_closeout.py', 'tests/unit/test_phase26_harness.py', 'tests/unit/test_phase28_archive.py', 'tests/unit/test_phase28_archive_verify.py']
+phase28-candidate-v2         new  ok
+phase29-candidate-v3         new  legacy_non_strict
+[note] phase29-candidate-v3 reasons=['schema<4', 'empty_role_prompts']
+phase30-candidate-v4         new  ok
+phase31-candidate-v5         new  ok
+phase33-candidate-v6         new  ok
+phase34-candidate-v7         new  ok
+phase34-candidate-v8         new  ok
+phase34-candidate-v9         new  ok
+historical_baseline          manifest files=60 mismatches=0 internal-only
+versions=15 new=8 old=7 new_failures=0 unexplained=0 historical_files_modified=False new_archive_status=passed
+manifest_binding=manifest_commit
+witness=verified historical_integrity=ok
+json report written: D:\cp34\final-v9\verify-v9.json

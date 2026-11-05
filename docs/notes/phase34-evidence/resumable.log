@@ -1,0 +1,19 @@
+RUN unit-a
+unit-a exit=0
+RUN unit-b
+unit-b exit=0
+RUN unit-c
+unit-c exit=0
+RUN unit-d
+unit-d exit=0
+RUN eval
+eval exit=0
+RUN sandbox
+sandbox exit=0
+RUN integration
+integration exit=0
+RUN api
+api exit=0
+RUN graph
+graph exit=0
+ALL_GROUPS_DONE
