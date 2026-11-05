@@ -5,8 +5,9 @@
 最终代码提交：C33 `254b0a81248b8455c236696f9915e2a237b8c05e`。
 最终候选：`phase34-candidate-v12`（pending，parent v11，source C33）。
 C34 提交 v12 候选；C35a 提交历史基线 manifest；C35b 提交 v12 receipt；
-C36 提交证据包、runtime JSON、静态结果、本报告与回执；C37 提交
-clean-clone 绿色日志与最终哈希（docs-only）。Phase34 起点：
+C36 提交证据包、runtime JSON、静态结果、本报告初稿与回执；C37 提交
+clean-clone 绿色日志与最终哈希；C38 修正 C36/C37 的提交标注与回执哈希
+（docs-only）。Phase34 起点：
 `dba045dabd70f0e6eb7779287136944b589f2734`。
 
 交付硬约束：Phase34 runtime `--check` 默认读取仓库内
@@ -158,8 +159,9 @@ runtime JSON sha 与交付文件一致
 - C33 `254b0a8` 测试文件 LF 规范化。
 - C34 `6d138a3` v12 候选；C35a `1b972c3` v12 manifest；
   C35b `f843fe3` v12 receipt。
-- C36（本提交）证据包、runtime JSON、静态结果、最终报告、delivery receipt。
-- C37 docs-only：clean-clone 绿色日志与最终哈希回填。
+- C36 `fc60014` 证据包、runtime JSON、静态结果、最终报告初稿、delivery receipt。
+- C37 `489b555` clean-clone 绿色日志与最终哈希回填。
+- C38（本提交）修正 C36/C37 的提交标注与回执哈希（docs-only）。
 - 不 push、不 PR、不激活。
 
 ## 八、验收清单（逐项）

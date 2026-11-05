@@ -1,6 +1,6 @@
 {
   "phase": 34,
-  "generated_at": "2026-11-05T19:10:01+08:00",
+  "generated_at": "2026-11-05T19:20:50+08:00",
   "tool": "delivery receipt; every hash computed from the referenced file at generation time; no invented values",
   "verdict": "PASS",
   "verdict_basis": "Phase34 functional scope PASS. Archive consistency PASS with v12: source_commit=254b0a8 (final code HEAD C33), 18 versions verified, new_failures=0, witness=verified, historical baseline 72/0. Full regression 4181 passed / 0 failed / 3 skipped. The repository is shallow; the full-history clone limitation is recorded explicitly.",
@@ -26,12 +26,15 @@
     "C34": "6d138a37cdb615fc7da1e6d8c4dec50bb042a1db",
     "C35a": "1b972c315441c4ab31d69f5ef6b1b3a232adf49e",
     "C35b": "f843fe352e83bcb89184ac0c2b76390da9c66354",
-    "C36": "the commit containing this receipt + evidence pack + runtime JSON + final report (docs-only; hash unknown at generation time)",
-    "C37": "docs-only commit adding docs/notes/phase34-selfcontained-check.log and the final hash backfill (hash not embedded)",
+    "C36": "fc60014a9ea5bf6485a6946ca606b364a1ace396",
+    "C37": "489b555ccbf96c9ae2631ed081dfe90997a5eead",
     "push": false,
     "pr": false,
     "publish": false,
-    "activate": false
+    "activate": false,
+    "C38": "the commit containing this final receipt + the C36/C37 commit-label and hash correction (docs-only; hash unknown at generation time)",
+    "C36_note": "evidence pack + runtime JSON + report draft + receipt (docs-only)",
+    "C37_note": "clean-clone log + final hash backfill (docs-only)"
   },
   "candidate": {
     "version": "phase34-candidate-v12",
@@ -281,12 +284,12 @@
   "mainline": {
     "branch": "codex/phase12-real-issue-pilot",
     "pre_merge_head": "5f6f3eb539bcb7af771b29ddb18f27cf29e39507",
-    "target": "C37 (final docs commit); fast-forward after all commits",
+    "target": "C38 (final docs commit); fast-forward after all commits",
     "ff_only": true,
     "pushed": false
   },
   "docs_sha256": {
-    "docs/notes/phase34-final-report.md": "c15fa3add822d9d761ffcfd80686ec3bd1db9ddb8a609df0c7b6e19e329f159f",
+    "docs/notes/phase34-final-report.md": "32efff6d0c5b5f81ee0d5902bfd2d8f0fca23e80e3ded5215aaaac5d82a679ae",
     "docs/notes/phase34-runtime-results.json": "00b1fba41779314b50f9df3a84c703f5d05e58fcc2da36f589790c42398f50dd",
     "docs/notes/phase34-static-checks.json": "5cae0673a34d2e13f6cf0e31f742cd23d15a0cfba9a0579b14a94f2805ff3930",
     "docs/notes/phase34-evidence/SHA256SUMS": "4aa78793e726aa7d19a49222b163381cc63305d3caa6a4adc8d139a209e80292",
