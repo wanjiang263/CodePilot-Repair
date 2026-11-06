@@ -26,6 +26,7 @@ from harness import TARGET, build_harness, edit
 
 from codepilot.agents.reviewer import PatchReviewer
 from codepilot.artifacts import ArtifactStore
+from codepilot.graph import nodes
 from codepilot.graph.regression import RegressionRunner
 from codepilot.graph.routing import Node
 from codepilot.graph.stop_rules import patch_hash
@@ -74,6 +75,11 @@ def _run(tmp_path: Path, monkeypatch, *, case: str):
         return original, run_git(["rev-parse", "HEAD"], cwd=original).stdout.strip()
 
     monkeypatch.setattr(harness_module, "_base_repo", with_unrelated_test)
+    # Baseline collection is impact-scoped in current runtime. This fixture
+    # explicitly authorizes both files so L3 has an independent obligation.
+    monkeypatch.setattr(
+        nodes, "_baseline_scope", lambda state, policy: (TARGET, "tests/test_unrelated.py")
+    )
     sandbox = DockerSandbox(
         artifacts=ArtifactStore(tmp_path / "docker", case), allowed_workspace_root=tmp_path
     )

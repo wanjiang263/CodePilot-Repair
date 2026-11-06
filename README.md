@@ -101,7 +101,7 @@ SQLite queue + events + settings + audit
 
 ## 快速开始（本地）
 
-需要 Python 3.12、`uv`、Node.js 20+。Docker 仅在需要真实沙箱时使用。
+需要 Python 3.12、`uv`、Node.js 22.12+（22 系列）或 24 LTS。Docker 仅在需要真实沙箱时使用。
 
 ```bash
 uv sync --extra dev

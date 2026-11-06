@@ -23,5 +23,5 @@ jobs:
       - run: uv python install 3.12
       - run: uv export --frozen --no-dev --no-emit-project --no-hashes -o requirements-audit.txt
       - run: uvx --python 3.12 pip-audit --no-deps --disable-pip -r requirements-audit.txt
-      - run: npm audit --package-lock-only
+      - run: npm audit --package-lock-only --registry=https://registry.npmjs.org
         working-directory: web

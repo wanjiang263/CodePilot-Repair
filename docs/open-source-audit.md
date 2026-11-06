@@ -27,7 +27,7 @@ GitHub 仓库为 `wanjiang263/CodePilot-Repair`，目前私有，默认分支 `m
 
 ## 依赖安全
 
-对 universal `uv.lock` 的全部 181 个第三方 registry 包，逐版本查询 PyPI 官方 JSON 中的漏洞信息及许可元数据，查询失败为 0；最终未撤销公告命中为 **0**。前端 `npm audit --package-lock-only` 对锁文件依赖报告 **0** 已知漏洞。此结论是审查时的公告快照，不覆盖尚未公开的漏洞。
+对 universal `uv.lock` 的全部 181 个第三方 registry 包，逐版本查询 PyPI 官方 JSON 中的漏洞信息及许可元数据，查询失败为 0；最终未撤销公告命中为 **0**。候选 CI 的核心 Python `pip-audit` 也报告 0。本地 npm 镜像源最初报告 0，但随后 GitHub CI 使用官方源检出了 13 项前端开发依赖告警，因此不能采用镜像源结果。已升级 Vitest 到 5.1.0、更新兼容范围内工具链，并为 typescript-estree 明确覆盖到修复后的 minimatch >=11.0.1；官方 npm 源复扫报告 **0** 已知漏洞，50 项前端测试通过。CI 使用 Node 22；本地开发应使用新版 Vitest 支持的 Node 22.12+ 或 24。以上均为审查时公告快照，不覆盖尚未公开的漏洞。
 
 修复的锁定版本包括 certifi、filelock、GitPython、setuptools、virtualenv，以及 datasets、fsspec、huggingface-hub、tokenizers、transformers。可选依赖下限相应更新；真实模型和官方 Harness 未运行，所以不能声称这些升级已通过真实 embedding 或完整官方评测兼容性验证。另一个 pip-audit 在线扫描长时间无结果，已终止；不把它计作通过。
 
