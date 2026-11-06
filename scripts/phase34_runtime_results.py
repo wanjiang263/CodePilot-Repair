@@ -22,7 +22,7 @@ import json
 import re
 import sys
 from datetime import UTC, datetime
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -93,8 +93,9 @@ def _rebind(value: Any, scratch: Path) -> Any:
     if not isinstance(value, str) or not value:
         return value
     path = Path(value)
-    if path.is_absolute():
-        return rel(scratch / path.name)
+    windows = PureWindowsPath(value)
+    if path.is_absolute() or windows.is_absolute():
+        return rel(scratch / (windows.name if windows.is_absolute() else path.name))
     return value.replace("\\", "/")
 
 
@@ -106,7 +107,7 @@ def evidence_records(scratch: Path) -> dict[str, Any]:
             run[key] = _rebind(run.get(key), scratch)
         basetemp = run.get("basetemp")
         if isinstance(basetemp, str) and basetemp:
-            run["basetemp"] = Path(basetemp).name
+            run["basetemp"] = PureWindowsPath(basetemp).name
         command = run.get("command")
         if isinstance(command, str) and command:
             run["command"] = _scrub(command, scratch)

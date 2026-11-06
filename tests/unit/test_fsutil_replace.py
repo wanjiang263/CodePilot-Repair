@@ -3,6 +3,7 @@ from __future__ import annotations
 import errno
 import os
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -30,7 +31,7 @@ def test_transient_handle_error_is_retried_with_a_bound(
             raise _winerror(32)
         return real_replace(self, other)
 
-    monkeypatch.setattr(fsutil.os, "name", "nt")
+    monkeypatch.setattr(fsutil, "os", SimpleNamespace(name="nt"))
     monkeypatch.setattr(Path, "replace", flaky)
     fsutil.replace_path(source, target, attempts=5, base_delay=0.0)
     assert calls["count"] == 3
@@ -48,7 +49,7 @@ def test_persistent_handle_error_raises_after_the_bound(
         calls["count"] += 1
         raise _winerror(5)
 
-    monkeypatch.setattr(fsutil.os, "name", "nt")
+    monkeypatch.setattr(fsutil, "os", SimpleNamespace(name="nt"))
     monkeypatch.setattr(Path, "replace", always)
     with pytest.raises(OSError):
         fsutil.replace_path(source, tmp_path / "target", attempts=3, base_delay=0.0)
@@ -64,7 +65,7 @@ def test_non_transient_error_is_not_retried(
         calls["count"] += 1
         raise _winerror(2)
 
-    monkeypatch.setattr(fsutil.os, "name", "nt")
+    monkeypatch.setattr(fsutil, "os", SimpleNamespace(name="nt"))
     monkeypatch.setattr(Path, "replace", missing)
     with pytest.raises(OSError):
         fsutil.replace_path(tmp_path / "a", tmp_path / "b", attempts=5, base_delay=0.0)

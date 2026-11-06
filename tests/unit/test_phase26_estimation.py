@@ -165,7 +165,7 @@ def test_incomplete_scope_is_recorded_as_aggregate_evidence_only(tmp_path):
 
 
 def test_closure_reservation_is_deducted_once_from_the_remaining_window():
-    with dispatch_scope(DispatchScope(Deadline(time.monotonic() + 30), reserve=10)):
+    with dispatch_scope(DispatchScope(Deadline(30, clock=lambda: 0), reserve=10)):
         from codepilot.observability.dispatch import dispatch_timeout
 
         # 30 秒窗口扣一次 10 秒预留 = 20；扣两次会得到 10。

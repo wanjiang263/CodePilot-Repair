@@ -533,13 +533,38 @@ VALID_PATCH = (
 
 def test_dry_run_uses_real_loader_and_builds_official_command(tmp_path: Path) -> None:
     """dry-run：真实 Loader + 真实官方命令拼装，不调 LLM、不建镜像、不建 workspace。"""
+    from fetch_swebench_lite import build_snapshot_files
+
+    from codepilot.eval.swebench import SWEBenchLoader
+
+    dataset_name = smoke.DATASET_NAME
+    revision = "b" * 40
+    rows = {
+        split: [
+            json.loads(line)
+            for line in (ROOT / "tests/fixtures/swebench" / f"{split}.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+        ]
+        for split in ("dev", "test")
+    }
+    snapshot_root = tmp_path / "snapshot"
+    snapshot = snapshot_root / f"{dataset_name.replace('/', '__')}__{revision}"
+    snapshot.mkdir(parents=True)
+    for name, payload in build_snapshot_files(
+        rows, dataset_name=dataset_name, revision=revision
+    ).items():
+        (snapshot / name).write_bytes(payload)
+    loader = SWEBenchLoader(snapshot_root, dataset_name=dataset_name, revision=revision)
     config = _config(
         tmp_path,
-        instance_id="django__django-11099",
+        instance_id=rows["test"][0]["instance_id"],
+        revision=revision,
+        snapshot_root=snapshot_root,
         model=None,
         dry_run=True,
     )
-    report = smoke.run_smoke(config)
+    report = smoke.run_smoke(config, deps=smoke.SmokeDeps(loader=loader))
     assert report["status"] == "DRY_RUN"
     assert report["model_run_status"] == smoke.LIVE_NOT_RUN
     assert report["dry_run_checks"]["placeholder_removed"] is True

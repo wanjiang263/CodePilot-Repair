@@ -77,7 +77,7 @@ def test_default_scratch_stays_backward_compatible() -> None:
     assert gate.resolve_scratch(".codex-pytest-tmp/phase33") == (
         ROOT / ".codex-pytest-tmp" / "phase33"
     )
-    absolute = Path("C:/somewhere/else")
+    absolute = Path(ROOT.anchor) / "somewhere" / "else"
     assert gate.resolve_scratch(str(absolute)) == absolute
 
 

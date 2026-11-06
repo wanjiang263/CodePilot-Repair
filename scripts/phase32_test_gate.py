@@ -49,7 +49,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRATCH = ROOT / ".codex-pytest-tmp" / "phase32"
-PYTHON = ROOT / ".venv" / "Scripts" / "python.exe"
+PYTHON = Path(sys.executable)
 RG_CANDIDATES: tuple[Callable[[], Path], ...] = (
     lambda: Path.home() / "AppData" / "Local" / "OpenAI" / "Codex" / "bin" / "rg.exe",
     lambda: Path.home() / "scoop" / "shims" / "rg.exe",
@@ -73,6 +73,19 @@ class MemoryStatus(ctypes.Structure):
 
 
 def memory() -> dict[str, int]:
+    if sys.platform.startswith("linux"):
+        values = {}
+        for line in Path("/proc/meminfo").read_text(encoding="ascii").splitlines():
+            key, _, value = line.partition(":")
+            values[key] = int(value.split()[0]) // 1024
+        return {
+            "total_phys_mb": values["MemTotal"],
+            "avail_phys_mb": values["MemAvailable"],
+            "total_pagefile_mb": values["MemTotal"] + values["SwapTotal"],
+            "avail_pagefile_mb": values["MemAvailable"] + values["SwapFree"],
+            "commit_headroom_mb": max(0, values["CommitLimit"] - values["Committed_AS"]),
+            "load_pct": int(100 * (1 - values["MemAvailable"] / values["MemTotal"])),
+        }
     status = MemoryStatus()
     status.dwLength = ctypes.sizeof(MemoryStatus)
     ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status))

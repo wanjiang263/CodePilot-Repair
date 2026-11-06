@@ -245,7 +245,7 @@ def test_smoke_platform_flag_switches_endpoint(monkeypatch: pytest.MonkeyPatch) 
 
 
 def test_smoke_refuses_to_guess_among_several_aliases() -> None:
-    result = runner.invoke(app, ["llm", "smoke", "--alias", "x", "--provider", "zai"])
+    result = runner.invoke(app, ["llm", "smoke", "--alias", "x", "--provider", "zai"], color=False)
     assert result.exit_code == 2
     assert "--alias" in result.output
 
