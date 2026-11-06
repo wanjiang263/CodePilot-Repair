@@ -61,6 +61,7 @@ def _run(tmp_path: Path, monkeypatch, *, case: str):
         baseline_results=[],
         sandbox_override=sandbox,
         coder_rounds=coder_rounds,
+        coder_relocalize_replies=[READ],
         diagnoses=diagnoses,
     )
     # L2 的受影响范围与 Phase 9 的真实 Docker 用例同一给法：impact 提供 related_tests，

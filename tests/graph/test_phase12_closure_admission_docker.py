@@ -20,6 +20,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+import harness as harness_module
 import pytest
 from harness import TARGET, build_harness, edit
 
@@ -29,6 +30,7 @@ from codepilot.graph.regression import RegressionRunner
 from codepilot.graph.routing import Node
 from codepilot.graph.stop_rules import patch_hash
 from codepilot.llm.fake import FakeLLM
+from codepilot.repo.gitcmd import run_git
 from codepilot.sandbox.docker import DockerSandbox
 from codepilot.schemas.budget import RepairBudget
 from codepilot.schemas.enums import RunStatus, StopReason
@@ -58,6 +60,20 @@ ROUND_B: list[dict[str, Any]] = [
 
 def _run(tmp_path: Path, monkeypatch, *, case: str):
     """在真实 daemon 上跑完整图；只换额度与补丁形状，其余装配一致。"""
+    base_repo = harness_module._base_repo
+
+    def with_unrelated_test(root: Path, **kwargs):
+        original, _ = base_repo(root, **kwargs)
+        # Keep L2 a strict subset of L3: otherwise full-scope L2 correctly
+        # replaces L3, and the five/eight-container admission boundary vanishes.
+        (original / "tests/test_unrelated.py").write_text(
+            "def test_unrelated():\n    assert 2 + 2 == 4\n", encoding="utf-8"
+        )
+        run_git(["add", "tests/test_unrelated.py"], cwd=original)
+        run_git(["commit", "-qm", "add independent regression scope"], cwd=original)
+        return original, run_git(["rev-parse", "HEAD"], cwd=original).stdout.strip()
+
+    monkeypatch.setattr(harness_module, "_base_repo", with_unrelated_test)
     sandbox = DockerSandbox(
         artifacts=ArtifactStore(tmp_path / "docker", case), allowed_workspace_root=tmp_path
     )
