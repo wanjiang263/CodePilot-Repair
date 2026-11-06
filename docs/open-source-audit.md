@@ -50,14 +50,16 @@ GitHub 仓库为 `wanjiang263/CodePilot-Repair`，目前私有，默认分支 `m
 
 安装测试发现原 wheel 缺少默认配置及演示资源，已修复为携带审阅过的明确资源文件，并让安装后的配置和离线环境规格定位到包资源。源码运行仍使用仓库中的资源。
 
-新增前端和包安装 CI job、每周依赖审计 workflow、Dependabot 更新配置，并把工作流权限限制为 `contents: read`。GitHub 远端漏洞告警和自动安全修复已启用并回读确认；新增工作流尚未推送执行。
+新增前端和包安装 CI job、每周依赖审计 workflow、Dependabot 更新配置，并把工作流权限限制为 `contents: read`。GitHub 远端漏洞告警和自动安全修复已启用并回读确认。候选已推送到 `codex/open-source-preview`，前端、包安装和 lint/types 已在 GitHub CI 通过；全量 pytest 与 Linux Docker 暴露的问题正在修复复验，最终结果以[候选 CI](https://github.com/wanjiang263/CodePilot-Repair/actions?query=branch%3Acodex%2Fopen-source-preview)为准。
+
+CI 修复包括 pytest 根目录导入路径、旧格式差异、Docker 测试构建资源清单、跨平台路径与内存采集、隔离离线快照、固定测试时钟，以及与现行重新定位/回归去重行为一致的 Docker 夹具。没有降低覆盖率要求或跳过失败用例。
 
 ## 发布动作与保留限制
 
-1. 审阅本次候选和差异，再提交本地改动；只推送选定的项目分支，勿推本地异常 `main`。
+1. 候选已提交并仅推送 `codex/open-source-preview`；未推送本地异常 `main` 或全部 refs。
 2. 通过 PR 或正常快进方式更新远端 `main`，不需要强推；等待新增 CI 实际完成。
 3. 发布 preview 前核对远端默认分支的 LICENSE/NOTICE 和最终文件清单，再确认将整个仓库公开。公开操作不属于本次已执行动作。
 4. 仓库仍私有，GitHub 私密漏洞报告接口返回 404；已配置邮箱作为可立即使用的私密报告渠道。公开后可再启用 GitHub 私密报告。
 5. 已启用远端 `main` 基础保护：禁止强推和删除，对管理员同样生效，保留个人维护者的正常推送能力。新增 CI 实际运行后，再选择实际 check 名加入合并门禁；没有配置单人项目无法自行满足的额外审批人数。
 
-24h soak、真实 provider、真实 embedding、浏览器 E2E、复杂真实大仓及全平台 Docker 回归没有在本次执行。历史测试数字不升级为本次验证结果。它们是后续稳定版的验证工作，preview 必须保留这些限制。
+24h soak、真实 provider、真实 embedding、浏览器 E2E、复杂真实大仓及全平台 Docker 回归没有在本次执行。Linux Docker 验收已在 CI 实际执行，仍需核对最终通过结果。历史测试数字不升级为本次验证结果。这些限制必须保留在 preview 声明中。

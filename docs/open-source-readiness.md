@@ -20,14 +20,15 @@ The detailed results and evidence boundaries are in [the audit report](open-sour
 
 ## Publication actions remaining
 
-- [ ] Review and commit the candidate; push only the selected project branch, not local main or all refs.
-- [ ] Update remote main normally and obtain actual results from the new CI jobs.
+- [x] Commit and push the candidate to `codex/open-source-preview` only; local main and other refs were excluded.
+- [ ] Obtain successful results from all candidate CI jobs; frontend, package and lint/types have executed successfully, with full pytest and Docker fixes under validation.
+- [ ] Update remote main normally after candidate CI passes.
 - [ ] Add required status checks after the new CI jobs actually execute; basic branch protection is already enabled.
 - [ ] Confirm public visibility and preview release publication. Repository remains private in this audit.
 - [ ] Optionally enable GitHub private vulnerability reporting after publication; confirmed email is already available.
 
 ## Explicitly unverified
 
-No real provider request, model download, official Harness run, browser E2E, new full Docker regression or 24h soak was performed in this audit. Optional dependency upgrades have passed resolution and interface/offline checks, not real model or official Harness runtime verification. Preserve these limitations in a preview release.
+No real provider request, model download, official Harness run, browser E2E or 24h soak was performed in this audit. The Linux Docker suite has now executed in candidate CI; its result must be checked alongside full pytest before merging. Optional dependency upgrades have passed resolution and interface/offline checks, not real model or official Harness runtime verification. Preserve these limitations in a preview release.
 
 Do not zip the whole working directory. Use the audited source archive/allowlist so ignored local data and nested worktrees cannot be included accidentally.
