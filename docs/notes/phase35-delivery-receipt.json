@@ -1,9 +1,9 @@
 {
   "phase": 35,
-  "generated_at": "2026-11-06T02:46:17+08:00",
+  "generated_at": "2026-11-07T02:57:39+08:00",
   "tool": "delivery receipt; every hash computed from the referenced file at generation time",
-  "verdict": "PASS (Phase34/v13 archive and regression; external validation partial)",
-  "verdict_basis": "v13 source matches the final code commit; 19-version archive verify passes with witness verified and baseline 76; nine-group regression is 4182 passed / 0 failed / 4 skipped. Frontend and 20k large-repo validation pass. Docker is 26/35 with a deterministic synthetic-fixture base_commit failure; the 24h soak is running; real provider is blocked because no credentials were provided. The project is not fully production-ready.",
+  "verdict": "PASS (Phase34/v13 archive, regression and external validation)",
+  "verdict_basis": "v13 source matches the final code commit; 19-version archive verify passes with witness verified and baseline 76; nine-group regression is 4182 passed / 0 failed / 4 skipped; static, frontend and 20k large-repo validation pass; Docker is 35/35 under Bash; the 24h soak completed 1440 cycles with 0 errors and a negative RSS slope; both GLM and Spark returned real-verified rows. Remaining gaps: real-provider streaming, browser E2E, full-history clone and the P2 guard.",
   "commits": {
     "base": "dba045dabd70f0e6eb7779287136944b589f2734",
     "C39": "5163f26859da54967fc5d4a71bf72455f3ba4a1a",
@@ -12,8 +12,10 @@
     "C42": "d3ab82e04830e27d7ecb8d73bc394f07811c7abc",
     "C43": "bc493631ede7e77a4c7a2e109e3926d31a405b23",
     "C44": "83a8ce01fd795baf32af0aaa58a2c4f098c30171",
-    "C45": "this report + receipt + clean-clone log (docs-only; hash not embedded)",
-    "C46": "planned 24h soak summary update after the scheduled check (docs-only)",
+    "C45": "ab75c03d5b4ac72a664a849e4c8ef4baf3ae1e8d",
+    "C46": "fe6fbbcc8d530cf2285bd9040ca6d108c8544dbe",
+    "C47": "365a91e837b44b93728a96285172cb92a33fd18d",
+    "C48": "this report + receipt + clean-clone log (docs-only; hash not embedded)",
     "push": false,
     "pr": false,
     "publish": false,
@@ -189,69 +191,95 @@
       "source_sha256": "a78d8587a4d40ed66e21b7e8e4395051dab4c3b5d746eb00dd563dda1b49b7e9"
     },
     "docker": {
-      "status": "failed",
+      "status": "passed",
       "summary": {
         "tests": 35,
-        "passed": 26,
-        "failed": 9,
+        "passed": 35,
+        "failed": 0,
         "errors": 0,
         "skipped": 0,
-        "failure_class": "tests/docker/test_synthetic_suite.py: WorkspaceError base_commit not found in the workspace cache",
-        "root_cause": "The synthetic fixture repo is a file tree and the evaluator's generated workspace cache cannot resolve metadata.base_commit. Reproduced in a focused recheck and in a full idle rerun; this is a deterministic fixture/evaluator defect, not a v13 code regression and not load-related.",
-        "runs": [
-          "full run under heavy large-repo/Docker load: 26 passed / 9 failed",
-          "focused tests/docker/test_synthetic_suite.py recheck: 1 passed / 9 failed",
-          "full idle rerun after the large profile finished: 26 passed / 9 failed"
-        ],
-        "fix_scope": "A dedicated fixture/evaluator fix would change tests/ or src/ and require a new candidate (v14)."
+        "authoritative_run": "Bash/Git Bash environment: 35 passed in 316.44s",
+        "powershell_attempts": "26/35 with 9 deterministic synthetic-suite failures in the PowerShell Terminal; the same tests pass under Bash",
+        "root_cause": "The PowerShell Terminal environment (git/workspace env) caused the synthetic fixture cache failures; this is not a v13 code or fixture defect",
+        "fix_scope": "none required; rerun under Bash is the authoritative result"
       },
-      "source_sha256": "154c3c41f9408f5b636bbb57dc25b2855de30d27d02aacdb2aa21dd7ee17dd93"
+      "junit": "docs/notes/phase34-evidence/docker-junit-bash.xml",
+      "junit_sha256": "4c9919b75992d3933ba6a2e37eb3d586f77f771c82b2007dcdfc2dd376b78198",
+      "source_sha256": "5e76c768b5b61da6c68d74cdebf2439184048e0b115833d09b934b99072d6c7c"
     },
     "soak": {
-      "status": "running",
-      "expected_finish": "2026-11-07T02:45:00+08:00",
-      "summary": "D:/cp35/soak/summary-final.json (to be copied as soak-summary.json)",
-      "idle_smokes": [
-        "soak-idle-smoke1.json",
-        "soak-idle-smoke2.json"
-      ],
-      "failed_attempts": [
-        "soak-attempt1-heartbeat.jsonl",
-        "soak-attempt2-failed.json",
-        "soak-attempt2-heartbeat.jsonl",
-        "soak-attempt3-heartbeat.jsonl"
-      ]
+      "status": "passed",
+      "started_at": "2026-11-05T18:54:09+00:00",
+      "ended_at": "2026-11-06T18:54:09+00:00",
+      "completed": true,
+      "cycles": 1440,
+      "errors": 0,
+      "lock_failures": 0,
+      "checkpoint_failures": 0,
+      "rss_bytes_first": 140910592,
+      "rss_bytes_last": 145465344,
+      "rss_bytes_max": 695427072,
+      "rss_slope_bytes_per_cycle": -98110.01267188111,
+      "summary_sha256": "4e6f1d01310f6a5c939bb54aca5c1ab5469572338d1b4586d0a114ba00661933",
+      "heartbeat_sha256": "cbf4bf6c2564e169a3a2c7ce19d18e34c1c55eecf7c1ddc5aeddf3814ae63a1c"
     },
     "real_provider": {
-      "status": "blocked",
-      "reason": "worktree .env with OPENAI_API_KEY/OPENAI_BASE_URL/PHASE32_REAL_BUDGET_CNY was absent",
-      "real_requests": 0,
-      "real_cost_cny": 0.0,
-      "models_planned": [
-        "glm5.3flash",
-        "spark-2.6"
-      ],
+      "status": "verified",
       "protocol": "OpenAI-compatible",
-      "budget_gate_cny": 20
+      "budget_gate_cny": 20,
+      "real_requests": 2,
+      "real_cost_cny": 0.0,
+      "cost_known": false,
+      "cost_unknown_calls": 1,
+      "cost_is_lower_bound": true,
+      "input_tokens": 42,
+      "output_tokens": 32,
+      "rows": [
+        {
+          "row": "openai:glm-5.3-flash",
+          "status": "real-verified",
+          "real_requests": 1,
+          "input_tokens": 17,
+          "output_tokens": 16,
+          "cost_cny": 5.8399999999999997e-05,
+          "cost_known": true
+        },
+        {
+          "row": "openai:spark-x2.6",
+          "status": "real-verified",
+          "real_requests": 1,
+          "input_tokens": 25,
+          "output_tokens": 16,
+          "cost_cny": 0.0,
+          "cost_known": false
+        }
+      ],
+      "proxy_note": "Two earlier Spark attempts failed TLS through 127.0.0.1:7899; the direct NO_PROXY='*' retry succeeded. The uncertain attempts and raw logs are kept under provider-real/spark/.",
+      "matrix_sha256": "f77ff369a1b3b9ec48d88c6b42488a877a550910c0a35fa46f432a3c12925821"
     }
   },
   "evidence_pack": {
     "dir": "docs/notes/phase34-evidence",
     "manifest": "docs/notes/phase34-evidence/SHA256SUMS",
-    "manifest_sha256": "dba3c0701b39f7899800f32dfaf31676ec5c75907166e366563127a6bf6960e5",
-    "entries": 73,
+    "manifest_sha256": "ac70b3e5193936204e9ae88e70c7e29bb1a1c62ad67103b5e6a9d3e687a18de0",
+    "entries": 84,
     "runtime_json": "docs/notes/phase34-runtime-results.json",
-    "runtime_json_sha256": "37b939c939dc47035efdca82d8c62c148767946922fbcb6edef5edc50cb078de",
+    "runtime_json_sha256": "cda4c935392e36ab45919fef41868e9a7893e8b51caa1aebbe75d7b4f998f423",
     "runtime_check": "pass",
     "requires_scratch": false
   },
   "clean_clone": {
-    "status": "pending",
+    "status": "passed",
+    "commit": "365a91e837b44b93728a96285172cb92a33fd18d",
     "log": "docs/notes/phase35-selfcontained-check.log",
-    "note": "run after the 24h soak summary update; the shallow marker remains true"
+    "log_sha256": "df846448e0e42249e95229d5a26fd336e20150eb6cedfd9d14c6c0424ea67c31",
+    "source_shallow": true,
+    "clone_shallow": false,
+    "result": "SELF_CONTAINED_CHECK=PASS"
   },
   "stats": {
     "commits_at_c38": 318,
+    "commits_at_c47": 327,
     "effective_source_scope_files": 787,
     "curated_source_files": 134,
     "untracked_status_entries": 172,
@@ -272,30 +300,31 @@
   "mainline": {
     "branch": "codex/phase12-real-issue-pilot",
     "pre_merge_head": "9e99eda2036a17d4c0f38c2a8e505c57716bdd39",
-    "target": "C46 (after the 24h soak update); fast-forward after all docs",
+    "target": "C48 (after the final report/receipt); fast-forward after all docs",
     "ff_only": true,
     "pushed": false
   },
   "unverified": [
-    "Docker full suite: 26/35, 9 deterministic synthetic-fixture base_commit failures; v14 fix required",
-    "24h soak: running; result pending",
-    "real provider streaming/usage/billing: credentials absent; 0 requests, 0 cost",
-    "full-history clone: repository shallow; boundary not on origin",
+    "real provider streaming (non-streaming matrix only)",
     "frontend browser E2E: no Playwright/Cypress suite",
-    "P2 images.build context guard: audited, not implemented"
+    "full-history clone: repository shallow; boundary not on origin",
+    "P2 images.build context guard: audited, not implemented",
+    "Spark cost: no price table; cost_known=false and 0.0 is a lower bound"
   ],
   "docs_sha256": {
-    "docs/notes/phase35-final-report.md": "802d0f3f21b18633329481c1f8b22965e8a134b20da3183b9aa1ff5ff6f0327d",
-    "docs/notes/phase34-runtime-results.json": "37b939c939dc47035efdca82d8c62c148767946922fbcb6edef5edc50cb078de",
-    "docs/notes/phase35-static-checks.json": "e05860e5d6e461e387a7b4eee1dfeaa9a9fab8205371d450410f16c3ac479be8",
-    "docs/notes/phase34-evidence/SHA256SUMS": "dba3c0701b39f7899800f32dfaf31676ec5c75907166e366563127a6bf6960e5",
+    "docs/notes/phase35-final-report.md": "3c64043ebfe1a36a0b2d56305bef185137863ba0770f733e7b54507bd41cb397",
+    "docs/notes/phase34-runtime-results.json": "cda4c935392e36ab45919fef41868e9a7893e8b51caa1aebbe75d7b4f998f423",
+    "docs/notes/phase34-evidence/SHA256SUMS": "ac70b3e5193936204e9ae88e70c7e29bb1a1c62ad67103b5e6a9d3e687a18de0",
     "docs/notes/phase34-evidence/verify-v13.json": "845dc56adda3225d797a9f2c1a2a3135571ee0040e6600526c7c74ba71adc1a7",
     "docs/notes/phase34-evidence/external-witness-v13.txt": "7c7ed280cb5f297560dd70cd947adcd2ef7f62b72ffb54948833fd08f028a6aa",
     "configs/harness/receipts/phase34-candidate-v13.json": "105bacf33d2b07e9a3b76920c4270d479e4b3ed4f878367d1405b78005c36f47",
     "configs/harness/candidates/historical-baseline.json": "66accc3c5accf58ed43e1a283517cb7f8d49aa2ab5defe667e25468bcf17e868",
     "docs/notes/phase34-evidence/frontend-summary.json": "97463c88b0eb61817ce06c5c7fc76785d84d9eba69b0e6bd7992282831791244",
     "docs/notes/phase34-evidence/large-repo-summary.json": "a78d8587a4d40ed66e21b7e8e4395051dab4c3b5d746eb00dd563dda1b49b7e9",
-    "docs/notes/phase34-evidence/docker-summary.json": "154c3c41f9408f5b636bbb57dc25b2855de30d27d02aacdb2aa21dd7ee17dd93",
+    "docs/notes/phase34-evidence/docker-summary.json": "5e76c768b5b61da6c68d74cdebf2439184048e0b115833d09b934b99072d6c7c",
+    "docs/notes/phase34-evidence/soak-summary.json": "4e6f1d01310f6a5c939bb54aca5c1ab5469572338d1b4586d0a114ba00661933",
+    "docs/notes/phase34-evidence/provider-matrix.json": "f77ff369a1b3b9ec48d88c6b42488a877a550910c0a35fa46f432a3c12925821",
+    "docs/notes/phase35-selfcontained-check.log": "df846448e0e42249e95229d5a26fd336e20150eb6cedfd9d14c6c0424ea67c31",
     "docs/notes/phase35-errata.md": "aca99e25212e637d2efff1f72dfd4f4c07ad476d4d55808e1d6e1d03375645e8"
   },
   "constraints_honored": [
@@ -304,9 +333,9 @@
     "C1-C4 history unchanged",
     "v1-v12 candidate files unchanged",
     "v13 is the final candidate; no active pointer",
-    "real model requests 0, cost 0",
+    "2 real model requests total, within the 20 CNY budget gate and user authorization",
     "no skip/xfail/deleted/weakened tests to hide failures",
-    "Docker and 24h failures recorded, not hidden",
+    "Docker PowerShell failures, earlier soak failures and uncertain Spark attempts recorded, not hidden",
     "evidence pack in-repo with SHA256SUMS; default --check has no external scratch dependency",
     "byte pinning via docs/notes/.gitattributes and configs/harness/.gitattributes"
   ]
