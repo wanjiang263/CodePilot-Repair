@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import tomllib
 from pathlib import Path
 from uuid import uuid4
 
@@ -30,6 +31,10 @@ _FILES = (
 def _build_context(repo_root: Path, target: Path) -> None:
     """Copy only source and named contract inputs; no .env, keys, git or artifacts."""
     files = [repo_root / relative for relative in _FILES]
+    metadata = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
+    resources = metadata["tool"]["hatch"]["build"]["targets"]["wheel"]["force-include"]
+    files.extend(repo_root / relative for relative in resources)
+    files.extend(repo_root / relative for relative in metadata["project"]["license-files"])
     files.extend((repo_root / "src").rglob("*.py"))
     files.append(repo_root / "src/codepilot/py.typed")
     fixture = repo_root / "tests/fixtures/repos/mini_auth"

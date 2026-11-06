@@ -102,7 +102,9 @@ def test_a_refused_round_runs_no_further_container_on_real_docker(
     assert Node.REVIEW.value in visited and Node.REPAIR_PATCH.value in visited
 
     # 前提：第一轮确实在真容器里挣到了完整闭环（不是脚本给的 PASS）。
-    assert harness.deps.accounting.run_log and len(harness.deps.accounting.run_log) == 5
+    assert harness.deps.accounting.run_log and len(harness.deps.accounting.run_log) == 5, (
+        state.model_dump_json()
+    )
     assert state.execution is not None
     assert state.execution.status.value == "PASS"
     assert state.execution.diagnostics.get("execution_backend") == "docker"
@@ -154,7 +156,7 @@ def test_a_round_with_just_enough_room_closes_on_real_containers(
     harness, reviewer_llm = _run(tmp_path, monkeypatch, case="allowed")
     state = harness.run()
 
-    assert len(harness.deps.accounting.run_log) == 8, "两轮闭环都用真容器执行"
+    assert len(harness.deps.accounting.run_log) == 8, state.model_dump_json()
     assert harness.llm.purposes().count("coder") == 4
     assert len(reviewer_llm.calls) == 2, "复审重新问了模型，没有复用旧结论"
 

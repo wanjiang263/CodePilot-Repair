@@ -89,7 +89,7 @@ def test_local_tool_cap_closure_completes_on_real_containers(tmp_path: Path, mon
     state = harness.run()
 
     # 前提：局部额度**确实**用满了，而 run 没有被它判死。
-    assert len(state.tool_calls) == 30
+    assert len(state.tool_calls) == 30, state.model_dump_json()
     assert state.coding_stop_reason is StopReason.BUDGET_TOOL_CALLS
     visited = [item["node"] for item in state.events]
     for node in (Node.VALIDATE_PATCH, Node.RUN_TARGET_TESTS, Node.RUN_REGRESSION, Node.REVIEW):
