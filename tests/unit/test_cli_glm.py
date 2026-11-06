@@ -8,6 +8,7 @@ live 跑批的配置指纹是否与真正跑起来的是同一份。
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -247,7 +248,9 @@ def test_smoke_platform_flag_switches_endpoint(monkeypatch: pytest.MonkeyPatch) 
 def test_smoke_refuses_to_guess_among_several_aliases() -> None:
     result = runner.invoke(app, ["llm", "smoke", "--alias", "x", "--provider", "zai"], color=False)
     assert result.exit_code == 2
-    assert "--alias" in result.output
+    # Rich may force ANSI styling in CI despite CliRunner's color=False.
+    output = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", result.output)
+    assert "--alias" in output
 
 
 # --------------------------------------------------------------- 生效配置
