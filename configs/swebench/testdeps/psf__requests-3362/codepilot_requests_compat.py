@@ -30,18 +30,16 @@ def _normalize_argvalues(argvalues: Any) -> Any:
     for item in argvalues:
         if isinstance(item, MarkDecorator):
             mark = item.mark
-            if mark.name == "skipif" and len(mark.args) == 2 and isinstance(
-                mark.args[1], (tuple, list)
+            if (
+                mark.name == "skipif"
+                and len(mark.args) == 2
+                and isinstance(mark.args[1], (tuple, list))
             ):
                 expression, values = mark.args
-                fixed.append(
-                    pytest.param(*values, marks=[pytest.mark.skipif(expression)])
-                )
+                fixed.append(pytest.param(*values, marks=[pytest.mark.skipif(expression)]))
                 changed = True
                 continue
-            raise TypeError(
-                f"unsupported parametrize MarkDecorator value: {mark.name}"
-            )
+            raise TypeError(f"unsupported parametrize MarkDecorator value: {mark.name}")
         fixed.append(item)
     return fixed if changed else argvalues
 

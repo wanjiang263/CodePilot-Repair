@@ -87,9 +87,7 @@ def test_per_instance_dispatch_rejects_a_wrong_opening_before_any_request(
 ) -> None:
     source = _ledger(tmp_path / "pytest" / "dispatch.json", 1.25)
     manifest, manifest_path = _manifest(tmp_path, source, "pytest-dev__pytest-11148")
-    opening = instance_opening_cny(
-        manifest, "pytest-dev__pytest-11148", repo_root=tmp_path
-    )
+    opening = instance_opening_cny(manifest, "pytest-dev__pytest-11148", repo_root=tmp_path)
     base_source = {
         "kind": "per_instance",
         "instance_id": "pytest-dev__pytest-11148",
@@ -147,9 +145,7 @@ def test_schema_one_manifest_can_be_read_but_not_used_for_instance_opening(
     tmp_path: Path,
 ) -> None:
     source = _ledger(tmp_path / "pytest" / "dispatch.json", 1.0)
-    manifest = build_recovery_manifest(
-        source, run_id="legacy", reason="legacy", repo_root=tmp_path
-    )
+    manifest = build_recovery_manifest(source, run_id="legacy", reason="legacy", repo_root=tmp_path)
     assert manifest["schema_version"] == 1
     with pytest.raises(ValueError, match="schema 1"):
         instance_opening_cny(manifest, "pytest-dev__pytest-11148", repo_root=tmp_path)

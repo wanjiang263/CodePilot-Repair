@@ -137,9 +137,7 @@ def _totals(args: argparse.Namespace) -> dict[str, object]:
 
 def _opening(args: argparse.Namespace) -> dict[str, object]:
     manifest = load_recovery_manifest(args.manifest)
-    amount = instance_opening_cny(
-        manifest, args.instance, repo_root=_repo_root(args.repo_root)
-    )
+    amount = instance_opening_cny(manifest, args.instance, repo_root=_repo_root(args.repo_root))
     return {
         "manifest": str(args.manifest),
         "instance": args.instance,

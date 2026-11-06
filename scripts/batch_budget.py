@@ -264,9 +264,7 @@ def evaluate(args: argparse.Namespace) -> tuple[int, str]:
 
     instance = args.instance
     root = Path(args.repo_root) if args.repo_root is not None else ROOT
-    opening_instance = (
-        _opening_instance(manifest, instance, repo_root=root) if instance else None
-    )
+    opening_instance = _opening_instance(manifest, instance, repo_root=root) if instance else None
     registry_prior = float(registry_totals.get(instance, 0.0)) if instance else 0.0
     if opening_instance is not None and registry_prior > opening_instance + 1e-9:
         return 9, (

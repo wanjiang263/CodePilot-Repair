@@ -1,0 +1,234 @@
+[
+  {
+    "alert": 29,
+    "ghsa": "GHSA-6627-m3xw-93mp",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": ">= 3.30.0, <= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 28,
+    "ghsa": "GHSA-9c4x-gm8v-wgc4",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": ">= 3.30.0, <= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 27,
+    "ghsa": "GHSA-8mx5-7m5m-r77g",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": ">= 3.10.0, <= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 26,
+    "ghsa": "GHSA-cwqr-hh33-gh44",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": ">= 3.20.4, <= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 25,
+    "ghsa": "GHSA-rfpc-qcw5-3pc4",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": ">= 3.22.0, <= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 24,
+    "ghsa": "GHSA-9j6q-wvj5-jgjg",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": ">= 3.32.6, <= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 23,
+    "ghsa": "GHSA-69hj-f68j-2879",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": "<= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 22,
+    "ghsa": "GHSA-m462-7rxw-wvpg",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": ">= 3.30.0, <= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 21,
+    "ghsa": "GHSA-fj95-fr6c-h845",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": ">= 4.0.0, <= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 20,
+    "ghsa": "GHSA-fq56-3cx3-fjxp",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": ">= 3.22.0, <= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 19,
+    "ghsa": "GHSA-6q48-6c7w-9gw2",
+    "package": "certifi",
+    "candidate_version": "2026.10.23",
+    "vulnerable_range": ">= 2019.03.09, < 2026.10.18",
+    "candidate_affected": false
+  },
+  {
+    "alert": 18,
+    "ghsa": "GHSA-9vhv-jxww-xfm5",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": ">= 3.20.4, <= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 17,
+    "ghsa": "GHSA-567q-5qvw-pf92",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": ">= 3.22.0, <= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 16,
+    "ghsa": "GHSA-cx28-75q4-x26q",
+    "package": "virtualenv",
+    "candidate_version": "21.15.5",
+    "vulnerable_range": "< 21.14.9",
+    "candidate_affected": false
+  },
+  {
+    "alert": 15,
+    "ghsa": "GHSA-494p-63j8-28p3",
+    "package": "virtualenv",
+    "candidate_version": "21.15.5",
+    "vulnerable_range": "< 21.14.9",
+    "candidate_affected": false
+  },
+  {
+    "alert": 14,
+    "ghsa": "GHSA-394h-qwmc-48pf",
+    "package": "virtualenv",
+    "candidate_version": "21.15.5",
+    "vulnerable_range": "< 21.14.9",
+    "candidate_affected": false
+  },
+  {
+    "alert": 13,
+    "ghsa": "GHSA-fc2g-4w5p-6whm",
+    "package": "virtualenv",
+    "candidate_version": "21.15.5",
+    "vulnerable_range": "< 21.14.9",
+    "candidate_affected": false
+  },
+  {
+    "alert": 12,
+    "ghsa": "GHSA-6w3r-xr62-4xcp",
+    "package": "virtualenv",
+    "candidate_version": "21.15.5",
+    "vulnerable_range": "< 21.14.9",
+    "candidate_affected": false
+  },
+  {
+    "alert": 11,
+    "ghsa": "GHSA-qmx5-4p3x-wvqf",
+    "package": "virtualenv",
+    "candidate_version": "21.15.5",
+    "vulnerable_range": "< 21.14.9",
+    "candidate_affected": false
+  },
+  {
+    "alert": 10,
+    "ghsa": "GHSA-hhxq-47xx-j5xx",
+    "package": "virtualenv",
+    "candidate_version": "21.15.5",
+    "vulnerable_range": "< 21.14.9",
+    "candidate_affected": false
+  },
+  {
+    "alert": 9,
+    "ghsa": "GHSA-6hmw-9432-67qq",
+    "package": "langgraph-checkpoint-sqlite",
+    "candidate_version": "3.1.3",
+    "vulnerable_range": "< 3.1.2",
+    "candidate_affected": false
+  },
+  {
+    "alert": 8,
+    "ghsa": "GHSA-v4x8-3wr5-3wq8",
+    "package": "filelock",
+    "candidate_version": "4.2.9",
+    "vulnerable_range": ">= 3.20.4, <= 4.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 7,
+    "ghsa": "GHSA-xmj3-9gf7-h52w",
+    "package": "setuptools",
+    "candidate_version": "84.2.1",
+    "vulnerable_range": ">= 38.2.2, < 84.1.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 6,
+    "ghsa": "GHSA-558c-9hv2-4prj",
+    "package": "virtualenv",
+    "candidate_version": "21.15.5",
+    "vulnerable_range": "< 21.14.9",
+    "candidate_affected": false
+  },
+  {
+    "alert": 5,
+    "ghsa": "GHSA-83vg-56qc-22m7",
+    "package": "gitpython",
+    "candidate_version": "3.2.1",
+    "vulnerable_range": "<= 3.2.0",
+    "candidate_affected": false
+  },
+  {
+    "alert": 4,
+    "ghsa": "GHSA-cw65-gx24-rc82",
+    "package": "virtualenv",
+    "candidate_version": "21.15.5",
+    "vulnerable_range": "< 21.14.9",
+    "candidate_affected": false
+  },
+  {
+    "alert": 3,
+    "ghsa": "GHSA-43mp-35q3-x3fq",
+    "package": "virtualenv",
+    "candidate_version": "21.15.5",
+    "vulnerable_range": "< 21.14.9",
+    "candidate_affected": false
+  },
+  {
+    "alert": 2,
+    "ghsa": "GHSA-c978-59m8-c77v",
+    "package": "virtualenv",
+    "candidate_version": "21.15.5",
+    "vulnerable_range": "< 21.14.9",
+    "candidate_affected": false
+  },
+  {
+    "alert": 1,
+    "ghsa": "GHSA-vxj4-q4g9-crj7",
+    "package": "virtualenv",
+    "candidate_version": "21.15.5",
+    "vulnerable_range": "<= 21.14.6",
+    "candidate_affected": false
+  }
+]

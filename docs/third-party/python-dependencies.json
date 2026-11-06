@@ -502,17 +502,17 @@
   },
   {
     "name": "langgraph-checkpoint",
-    "version": "4.2.0",
+    "version": "4.3.1",
     "license_expression": "MIT",
     "license_classifiers": [],
-    "source": "https://pypi.org/pypi/langgraph-checkpoint/4.2.0/json"
+    "source": "https://pypi.org/pypi/langgraph-checkpoint/4.3.1/json"
   },
   {
     "name": "langgraph-checkpoint-sqlite",
-    "version": "3.1.1",
+    "version": "3.1.3",
     "license_expression": "MIT",
     "license_classifiers": [],
-    "source": "https://pypi.org/pypi/langgraph-checkpoint-sqlite/3.1.1/json"
+    "source": "https://pypi.org/pypi/langgraph-checkpoint-sqlite/3.1.3/json"
   },
   {
     "name": "langgraph-prebuilt",

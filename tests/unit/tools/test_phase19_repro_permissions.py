@@ -30,9 +30,7 @@ def test_reproducer_policy_can_create_and_correct_its_own_test(tmp_path: Path) -
     reproducer = WorkspacePathPolicy(tmp_path, repro_write=True)
     assert reproducer.resolve(relative, must_exist=True, for_write=True).is_file()
     new_relative = "tests/_codepilot_repro/test_issue_retry.py"
-    assert not reproducer.resolve(
-        new_relative, must_exist=False, for_write=True
-    ).exists()
+    assert not reproducer.resolve(new_relative, must_exist=False, for_write=True).exists()
 
 
 def test_coder_policy_can_still_read_reproduction_evidence(tmp_path: Path) -> None:

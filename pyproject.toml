@@ -40,7 +40,7 @@ dependencies = [
     "docker>=7.1",
     # LangGraph 编排
     "langgraph>=0.2",
-    "langgraph-checkpoint-sqlite>=2.0",
+    "langgraph-checkpoint-sqlite>=3.1.2",
     # Run Report / 静态 HTML 报告降级
     "jinja2>=3.1",
     # API（Phase 13；Phase 0 只用到 GET /health）
@@ -101,6 +101,7 @@ packages = ["src/codepilot"]
 "docs/03-AGENTS.md" = "codepilot/_resources/docs/03-AGENTS.md"
 "docs/06-security.md" = "codepilot/_resources/docs/06-security.md"
 "docs/third-party/README.md" = "codepilot/_resources/docs/third-party/README.md"
+"docs/third-party/github-advisory-review.json" = "codepilot/_resources/docs/third-party/github-advisory-review.json"
 "docs/third-party/python-dependencies.json" = "codepilot/_resources/docs/third-party/python-dependencies.json"
 "docs/third-party/python-sbom.cdx.json" = "codepilot/_resources/docs/third-party/python-sbom.cdx.json"
 "docs/third-party/upstream/SWE-bench--v4.1.0.txt" = "codepilot/_resources/docs/third-party/upstream/SWE-bench--v4.1.0.txt"
@@ -161,6 +162,7 @@ only-include = [
     "docs/03-AGENTS.md",
     "docs/06-security.md",
     "docs/third-party/README.md",
+    "docs/third-party/github-advisory-review.json",
     "docs/third-party/python-dependencies.json",
     "docs/third-party/python-sbom.cdx.json",
     "docs/third-party/upstream/SWE-bench--v4.1.0.txt",
@@ -275,6 +277,7 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 minversion = "8.0"
 testpaths = ["tests"]
+pythonpath = ["."]
 # tests/fixtures/repos/ 下是**被解析的对象**，不是被测代码。它们长得就像真
 # 仓库——`tests/test_session.py`、`conftest.py` 一应俱全，其中一个还故意带
 # 语法错误。不排除的话 pytest 会去收集它们：轻则多出一堆无夹具的失败，

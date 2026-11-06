@@ -198,7 +198,7 @@ def test_collection_attribution_uses_frames_not_substrings() -> None:
     execution = ExecutionResult(
         status=ExecutionStatus.COLLECTION_ERROR,
         stderr_tail=(
-            'ERROR collecting tests/test_core.py\n'
+            "ERROR collecting tests/test_core.py\n"
             '  File "/testbed/tests/test_core.py", line 2\n'
             "ImportError: something in docs/path.py was mentioned\n"
         ),
@@ -209,8 +209,7 @@ def test_collection_attribution_uses_frames_not_substrings() -> None:
     assert result is not None and result[1] == "workspace"
 
     execution.stderr_tail = (
-        '  File "/testbed/src/pkg/path.py", line 10\n'
-        "SyntaxError: invalid syntax"
+        '  File "/testbed/src/pkg/path.py", line 10\nSyntaxError: invalid syntax'
     )
     result = nodes._target_execution_attribution(execution, ("src/pkg/path.py",))
     assert result == (
@@ -227,9 +226,7 @@ def test_review_without_a_patch_hash_does_not_verify(tmp_path: Path) -> None:
         coder_rounds=[ROUND],
     )
     harness.deps.regression_runner = RegressionRunner()
-    harness.deps.reviewer = PatchReviewer(
-        FakeLLM([{"approved": True, "summary": "looks good"}])
-    )
+    harness.deps.reviewer = PatchReviewer(FakeLLM([{"approved": True, "summary": "looks good"}]))
     state = harness.run()
     assert state.review is not None
     try:

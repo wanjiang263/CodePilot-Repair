@@ -29,7 +29,9 @@ GitHub 仓库为 `wanjiang263/CodePilot-Repair`，目前私有，默认分支 `m
 
 对 universal `uv.lock` 的全部 181 个第三方 registry 包，逐版本查询 PyPI 官方 JSON 中的漏洞信息及许可元数据，查询失败为 0；最终未撤销公告命中为 **0**。前端 `npm audit --package-lock-only` 对锁文件依赖报告 **0** 已知漏洞。此结论是审查时的公告快照，不覆盖尚未公开的漏洞。
 
-修复的锁定版本包括 certifi、filelock、GitPython、setuptools、virtualenv，以及 datasets、fsspec、huggingface-hub、tokenizers、transformers。可选依赖下限相应更新；真实模型和官方 Harness 未运行，所以不能声称这些升级已通过真实 embedding 或完整官方评测兼容性验证。另一个 pip-audit 在线扫描长时间无结果，已终止；不把它计作通过，公告结论来自上述完整 PyPI 查询和 npm 报告。
+修复的锁定版本包括 certifi、filelock、GitPython、setuptools、virtualenv，以及 datasets、fsspec、huggingface-hub、tokenizers、transformers。可选依赖下限相应更新；真实模型和官方 Harness 未运行，所以不能声称这些升级已通过真实 embedding 或完整官方评测兼容性验证。另一个 pip-audit 在线扫描长时间无结果，已终止；不把它计作通过。
+
+推送候选后，额外对照 GitHub 默认分支的 29 条 Dependabot 告警，发现 PyPI 返回数据未覆盖的 `GHSA-6hmw-9432-67qq`：原候选的 langgraph-checkpoint-sqlite 3.1.1 仍受影响。已将其下限设为 3.1.2 并锁定到 3.1.3，同时更新 langgraph-checkpoint 到 4.3.1。最终候选对上述 29 条 GitHub 告警的受影响数为 0，逐条版本范围对照见 [GitHub 告警核对](third-party/github-advisory-review.json)。默认分支未合并前，GitHub 仍会显示旧分支告警；没有人工忽略或关闭它们。
 
 ## 安装、构建与回归
 

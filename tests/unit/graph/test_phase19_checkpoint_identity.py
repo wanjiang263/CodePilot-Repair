@@ -24,9 +24,7 @@ def _manifest(tmp_path: Path, **overrides: object) -> Path:
 def test_missing_manifest_is_not_a_fresh_run(tmp_path: Path) -> None:
     checkpoint = tmp_path / "checkpoints.sqlite"
     checkpoint.write_bytes(b"")
-    assert "without checkpoint_manifest" in (
-        checkpoint_identity_problem(checkpoint, "run-a") or ""
-    )
+    assert "without checkpoint_manifest" in (checkpoint_identity_problem(checkpoint, "run-a") or "")
 
 
 def test_schema_or_run_identity_mismatch_is_rejected(tmp_path: Path) -> None:
