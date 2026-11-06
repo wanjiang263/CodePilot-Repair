@@ -1,8 +1,8 @@
 # Phase35 收尾报告：v13 归档、最终回归与外部验证
 
-结论：**Phase34/v13 归档、九组回归与外部验证全部 PASS。** 仍未覆盖的是 real
-provider streaming、浏览器 E2E、完整历史 clone 和 P2 build-context guard；这些是
-明确的剩余项，报告不把它们写成通过，也不把本报告等同于“所有生产条件均已就绪”。
+结论：**Phase34/v13 归档、九组回归与已执行的外部验证全部 PASS。** 仍未覆盖的是
+real provider streaming、浏览器 E2E、完整历史 clone 和 P2 build-context guard；
+这些是明确的剩余项，报告不把它们写成通过，也不把本报告等同于“所有生产条件均已就绪”。
 
 - v13 归档：PASS（19 版本、12 new / 7 old、baseline 76、witness verified）。
 - 九组全量回归：PASS（4182 passed / 0 failed / 4 skipped）。

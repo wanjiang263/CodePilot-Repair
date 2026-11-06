@@ -1,6 +1,6 @@
 {
   "phase": 35,
-  "generated_at": "2026-11-07T02:57:39+08:00",
+  "generated_at": "2026-11-07T03:00:58+08:00",
   "tool": "delivery receipt; every hash computed from the referenced file at generation time",
   "verdict": "PASS (Phase34/v13 archive, regression and external validation)",
   "verdict_basis": "v13 source matches the final code commit; 19-version archive verify passes with witness verified and baseline 76; nine-group regression is 4182 passed / 0 failed / 4 skipped; static, frontend and 20k large-repo validation pass; Docker is 35/35 under Bash; the 24h soak completed 1440 cycles with 0 errors and a negative RSS slope; both GLM and Spark returned real-verified rows. Remaining gaps: real-provider streaming, browser E2E, full-history clone and the P2 guard.",
@@ -15,7 +15,8 @@
     "C45": "ab75c03d5b4ac72a664a849e4c8ef4baf3ae1e8d",
     "C46": "fe6fbbcc8d530cf2285bd9040ca6d108c8544dbe",
     "C47": "365a91e837b44b93728a96285172cb92a33fd18d",
-    "C48": "this report + receipt + clean-clone log (docs-only; hash not embedded)",
+    "C48": "docs: finalize phase35 report and delivery receipt",
+    "C49": "this wording clarification + regenerated receipt (docs-only; hash not embedded)",
     "push": false,
     "pr": false,
     "publish": false,
@@ -312,7 +313,7 @@
     "Spark cost: no price table; cost_known=false and 0.0 is a lower bound"
   ],
   "docs_sha256": {
-    "docs/notes/phase35-final-report.md": "3c64043ebfe1a36a0b2d56305bef185137863ba0770f733e7b54507bd41cb397",
+    "docs/notes/phase35-final-report.md": "ee9f77aec49b110adbbe4196e7907cfc652b468593293e7eba323bf282dce6e9",
     "docs/notes/phase34-runtime-results.json": "cda4c935392e36ab45919fef41868e9a7893e8b51caa1aebbe75d7b4f998f423",
     "docs/notes/phase34-evidence/SHA256SUMS": "ac70b3e5193936204e9ae88e70c7e29bb1a1c62ad67103b5e6a9d3e687a18de0",
     "docs/notes/phase34-evidence/verify-v13.json": "845dc56adda3225d797a9f2c1a2a3135571ee0040e6600526c7c74ba71adc1a7",
