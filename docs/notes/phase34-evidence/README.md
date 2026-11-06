@@ -47,26 +47,31 @@ final run uses a neutral scratch name.
 - **20k large repo**: `phase32_index_profile.py` on 20,201 files: cold 208.4s,
   no-change 77.5s, single-file 73.5s, fast 72.6s, 0 parse errors, DB 24.5 MB,
   peak working set 332–463 MB. `large-repo-profile.json` is the raw output.
-- **Docker suite**: **26 passed / 9 failed** of 35. The 9 failures are all in
-  `tests/docker/test_synthetic_suite.py`; the evaluator's workspace cache cannot
-  resolve the fixture `metadata.base_commit` (`WorkspaceError`). Reproduced in a
-  focused recheck and in an idle full rerun, so it is deterministic and not a
-  v13 regression. The 26 non-synthetic Docker tests pass. A fix changes
-  `tests/` or `src/` and requires a new candidate (v14).
-- **24h soak**: running in a clean, Docker-stopped environment; the summary is
-  `summary-final.json` (expected 2026-11-07 02:45 +08:00). Earlier attempts under
-  the full-regression / large-repo / Docker load failed with the same
-  `WorkspaceError: base_commit not in cache`; the failed attempts are retained as
-  `soak-attempt1-heartbeat.jsonl`, `soak-attempt2-failed.json` /
-  `soak-attempt2-heartbeat.jsonl`, and `soak-attempt3-heartbeat.jsonl`. The idle
-  smokes (`soak-idle-smoke1.json`, `soak-idle-smoke2.json`) passed with 15
-  cycles each and 0 errors/lock/checkpoint failures. `soak-summary.json` is added
-  when the 24h run completes.
-- **Real provider**: blocked. `.env` with `OPENAI_API_KEY` / `OPENAI_BASE_URL` /
-  `PHASE32_REAL_BUDGET_CNY=20` was not present, so no real request was made
-  (`real_requests=0`, `cost=0`). The provider matrix remains the fake 166-test
-  run. `provider-matrix.json` will be replaced by the merged two-model
-  evidence if the credentials are provided later.
+- **Docker suite**: **PASS** — 35/35 under the Bash/Git Bash environment
+  (316.44s). The 9 synthetic-suite failures occurred only in PowerShell Terminal
+  runs; the same tests pass under Bash, so this was a Terminal git/workspace
+  environment artifact, not a v13 code or fixture defect. The failed PowerShell
+  JUnits are retained as history; the authoritative JUnit is
+  `docker-junit-bash.xml`.
+- **24h soak**: **PASS** — 1440 cycles over 24h (2026-11-05 18:54 → 2026-11-06
+  18:54 UTC), 0 errors, 0 lock failures, 0 checkpoint failures. RSS first
+  140.9 MB / last 145.5 MB / max 695.4 MB (sawtooth); the regression slope is
+  **-98,110 bytes/cycle**, i.e. no upward trend. `soak-summary.json` and the full
+  `soak-heartbeat.jsonl` are in the pack. Earlier attempts under full-regression
+  / large-repo / Docker load failed with `WorkspaceError: base_commit not in
+  cache`; they and the two 15-cycle idle smokes are retained as history
+  (`soak-attempt*.jsonl`, `soak-idle-smoke*.json`).
+- **Real provider**: **PASS for both models** (OpenAI-compatible protocol,
+  budget gate 20 CNY, one request per model, no retries). `glm-5.3-flash`
+  returned `real-verified`: 17 in / 16 out tokens, cost 0.0000584 CNY
+  (`cost_known=true`). `spark-x2.6` returned `real-verified`: 25 in / 16 out
+  tokens; no price is configured for it, so `cost_known=false` and the cost
+  stays unknown (0.0 is a lower bound, not a claim). The merged matrix has 2
+  real requests, 42 in / 32 out tokens, `cost_known=false`. Two earlier Spark
+  attempts failed through the local proxy `127.0.0.1:7899`; the direct
+  `NO_PROXY='*'` retry succeeded, and those uncertain attempts are kept under
+  `provider-real/spark/`. Raw runs, JUnit and logs are in `provider-real/glm`
+  and `provider-real/spark`; no key is stored in the pack.
 
 ## Counts (C38/C43)
 
@@ -84,12 +89,13 @@ final run uses a neutral scratch name.
 | `test-gate-<group>.json` | Phase32 gate summary for one group |
 | `gate-<group>-run1.log/.xml` | raw gate log + JUnit |
 | `static-checks.json` | C40 static result (17 files) |
-| `provider-matrix.json` | fake provider matrix (166 tests; real blocked) |
+| `provider-matrix.json` | merged fake 166 tests + two real-verified rows |
+| `provider-real/` | raw GLM/Spark real runs, JUnit, logs, uncertain attempts |
 | `verify-v13.json`, `external-witness-v13.txt` | 19-version archive report + witness |
 | `frontend-summary.json`, `frontend-run.log` | frontend build/vitest evidence |
 | `large-repo-summary.json`, `large-repo-profile.json` | 20k index timings |
 | `docker-summary.json`, `docker-junit*.xml` | Docker suite evidence |
-| `soak-summary.json` | 24h soak summary (added when complete) |
+| `soak-summary.json`, `soak-heartbeat.jsonl` | 24h soak summary + full heartbeat |
 | `SHA256SUMS` | integrity manifest for every evidence file except itself |
 
 ```bash

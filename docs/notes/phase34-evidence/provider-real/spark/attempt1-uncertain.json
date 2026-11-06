@@ -1,0 +1,216 @@
+{
+  "tool": "phase32-provider-matrix",
+  "generated_at": "2026-11-06T05:20:07+00:00",
+  "real_mode": true,
+  "pytest": {
+    "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/llm/test_openai_compatible.py tests/unit/llm/test_phase14_protocols.py tests/unit/llm/test_phase28_http_matrix.py tests/unit/llm/test_phase29_http_matrix.py tests/unit/llm/test_http_total_deadline.py tests/unit/llm/test_tracking_chain_accounting.py tests/unit/llm/test_dispatch_ledger_reconciliation.py tests/unit/llm/test_cost.py tests/unit/llm/test_retry.py -q -p no:cacheprovider --basetemp=D:\\cp35\\real\\spark\\pytest-basetemp --junitxml=D:\\cp35\\real\\spark\\provider-matrix.xml",
+    "exit_code": 0,
+    "log": "D:\\cp35\\real\\spark\\provider-matrix.log",
+    "junit": "D:\\cp35\\real\\spark\\provider-matrix.xml",
+    "summary": [
+      "166 passed in 78.38s (0:01:18)"
+    ]
+  },
+  "totals_from_junit": {
+    "tests": 166,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "fake_rows": [
+    {
+      "protocol": "openai_compatible",
+      "mode": "fake-http-loopback",
+      "modules": [
+        "tests/unit/llm/test_openai_compatible.py",
+        "tests/unit/llm/test_phase28_http_matrix.py",
+        "tests/unit/llm/test_phase29_http_matrix.py",
+        "tests/unit/llm/test_http_total_deadline.py"
+      ],
+      "covers": [
+        "streaming chunks",
+        "usage accounting on the wire",
+        "delayed response headers",
+        "slow response body inside the total deadline",
+        "no hidden retry (one wire request)"
+      ],
+      "result": {
+        "module_tests": {
+          "passed": 104,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "node_count": 104
+      },
+      "status": "fake-verified"
+    },
+    {
+      "protocol": "anthropic",
+      "mode": "fake-http-loopback",
+      "modules": [
+        "tests/unit/llm/test_phase14_protocols.py",
+        "tests/unit/llm/test_http_total_deadline.py"
+      ],
+      "covers": [
+        "message protocol mapping",
+        "cancellation",
+        "deadline behaviour"
+      ],
+      "result": {
+        "module_tests": {
+          "passed": 27,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "node_count": 27
+      },
+      "status": "fake-verified"
+    },
+    {
+      "protocol": "bedrock",
+      "mode": "fake-client",
+      "modules": [
+        "tests/unit/llm/test_phase28_http_matrix.py"
+      ],
+      "covers": [
+        "bedrock converse request shaping over a stubbed boto3 client"
+      ],
+      "result": {
+        "module_tests": {
+          "passed": 39,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "node_count": 39
+      },
+      "status": "fake-verified (botocore missing: client is stubbed)"
+    },
+    {
+      "protocol": "cancellation",
+      "mode": "fake-http-loopback",
+      "modules": [
+        "tests/unit/llm/test_http_total_deadline.py"
+      ],
+      "covers": [
+        "one cancel does not disturb another request",
+        "no background request after cancel",
+        "shared client survives an in-flight cancel"
+      ],
+      "result": {
+        "module_tests": {
+          "passed": 22,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "node_count": 22
+      },
+      "status": "fake-verified"
+    },
+    {
+      "protocol": "usage-and-cost",
+      "mode": "fake-http-loopback",
+      "modules": [
+        "tests/unit/llm/test_tracking_chain_accounting.py",
+        "tests/unit/llm/test_dispatch_ledger_reconciliation.py",
+        "tests/unit/llm/test_cost.py",
+        "tests/unit/llm/test_retry.py"
+      ],
+      "covers": [
+        "usage reconciliation",
+        "unknown vs zero cost attribution",
+        "authorisation/frozen ledger rows are not overwritten"
+      ],
+      "result": {
+        "module_tests": {
+          "passed": 57,
+          "failure": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "node_count": 57
+      },
+      "status": "fake-verified"
+    }
+  ],
+  "real_provider": {
+    "budget": {
+      "env": "PHASE32_REAL_BUDGET_CNY",
+      "raw_present": true,
+      "budget_cny": 20.0,
+      "cap_cny": 20.0,
+      "effective_budget_cny": 20.0,
+      "capped": false,
+      "real_requests_allowed": true
+    },
+    "credentials_present": {
+      "OPENAI_API_KEY": true,
+      "OPENAI_BASE_URL": true,
+      "ANTHROPIC_API_KEY": false,
+      "AWS_ACCESS_KEY_ID": false,
+      "AWS_SECRET_ACCESS_KEY": false,
+      "AWS_REGION": false,
+      "AWS_DEFAULT_REGION": false,
+      "boto3_installed": false,
+      "botocore_installed": false
+    },
+    "rows": [
+      {
+        "row": "openai-compatible real endpoint",
+        "provider": "openai-compatible",
+        "model": "spark-x2.6",
+        "missing": [],
+        "cost_note": "no price configured for model 'spark-x2.6'; cost stays unknown",
+        "status": "real-failed",
+        "real_requests": 1,
+        "error": {
+          "type": "ProviderError",
+          "status": null,
+          "uncertain": true,
+          "message": "传输失败:  | provider=openai-compatible | model=phase33-real-openai-compatible | 结果未知（请求已发出，未收到响应）"
+        },
+        "cost_cny": 0.0,
+        "cost_known": false
+      },
+      {
+        "row": "anthropic real endpoint",
+        "provider": "anthropic",
+        "model": null,
+        "status": "blocked",
+        "missing": [
+          "ANTHROPIC_API_KEY",
+          "PHASE32_REAL_MODEL_ANTHROPIC"
+        ],
+        "real_requests": 0
+      },
+      {
+        "row": "bedrock real endpoint (boto3 + credentials)",
+        "provider": "bedrock",
+        "model": null,
+        "status": "blocked",
+        "missing": [
+          "AWS_ACCESS_KEY_ID",
+          "AWS_SECRET_ACCESS_KEY",
+          "boto3 importable",
+          "botocore importable",
+          "AWS_REGION or AWS_DEFAULT_REGION",
+          "PHASE32_REAL_MODEL_BEDROCK"
+        ],
+        "real_requests": 0
+      }
+    ],
+    "real_requests": 1,
+    "real_cost_cny": 0.0,
+    "cost_known": false,
+    "cost_unknown_calls": 1,
+    "cost_is_lower_bound": true,
+    "llm_calls": 1,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "note": "--real was requested: at most one request per provider was dispatched (no hidden retries). Costs come from the usage ledger; cost_known=false wherever no complete CNY-convertible price is configured."
+  },
+  "overlap_note": "fake_rows overlap; never sum them into a test total"
+}
