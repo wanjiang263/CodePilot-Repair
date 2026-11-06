@@ -7,6 +7,8 @@ name = "codepilot-repair"
 version = "0.1.0"
 description = "Repository-level autonomous software engineering agent"
 readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.12"
 authors = [{ name = "CodePilot-Repair" }]
 keywords = ["software-engineering-agent", "automated-program-repair", "llm", "swe-bench"]
@@ -49,12 +51,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-embeddings = ["sentence-transformers>=3.0"]
+embeddings = ["sentence-transformers>=5.7", "transformers>=5.22.1,<6"]
 faiss = ["faiss-cpu>=1.8"]
 swebench = [
     "swebench==4.1.0",
-    "datasets>=2.19,<4",
-    "huggingface-hub>=0.23,<1",
+    "datasets>=5.0.1,<6",
+    "huggingface-hub>=1.31,<3",
     "pyarrow>=15",
 ]
 postgres = ["psycopg[binary]>=3.2"]
@@ -75,6 +77,121 @@ codepilot = "codepilot.cli:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/codepilot"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"README.md" = "codepilot/_resources/README.md"
+"configs/benchmarks.yaml" = "codepilot/_resources/configs/benchmarks.yaml"
+"configs/full.yaml" = "codepilot/_resources/configs/full.yaml"
+"configs/llm.yaml" = "codepilot/_resources/configs/llm.yaml"
+"configs/subsets/manifest.json" = "codepilot/_resources/configs/subsets/manifest.json"
+"configs/subsets/swebench-lite-cal10.json" = "codepilot/_resources/configs/subsets/swebench-lite-cal10.json"
+"configs/subsets/swebench-lite-dev30.json" = "codepilot/_resources/configs/subsets/swebench-lite-dev30.json"
+"configs/subsets/swebench-lite-official-dev23.json" = "codepilot/_resources/configs/subsets/swebench-lite-official-dev23.json"
+"configs/subsets/swebench-lite-test50.json" = "codepilot/_resources/configs/subsets/swebench-lite-test50.json"
+"configs/swebench/env-specs-4.1.0.json" = "codepilot/_resources/configs/swebench/env-specs-4.1.0.json"
+"configs/swebench/instance-image-overrides.json" = "codepilot/_resources/configs/swebench/instance-image-overrides.json"
+"configs/swebench/l2cal10e-instances.json" = "codepilot/_resources/configs/swebench/l2cal10e-instances.json"
+"configs/swebench/testdeps/psf__requests-3362/codepilot_requests_compat.py" = "codepilot/_resources/configs/swebench/testdeps/psf__requests-3362/codepilot_requests_compat.py"
+"demo/mini_calc/README.md" = "codepilot/_resources/demo/mini_calc/README.md"
+"demo/mini_calc/pyproject.toml" = "codepilot/_resources/demo/mini_calc/pyproject.toml"
+"demo/mini_calc/src/demo_calc/__init__.py" = "codepilot/_resources/demo/mini_calc/src/demo_calc/__init__.py"
+"demo/mini_calc/src/demo_calc/calc.py" = "codepilot/_resources/demo/mini_calc/src/demo_calc/calc.py"
+"demo/mini_calc/tests/test_calc.py" = "codepilot/_resources/demo/mini_calc/tests/test_calc.py"
+"docs/02-实现方案.md" = "codepilot/_resources/docs/02-实现方案.md"
+"docs/03-AGENTS.md" = "codepilot/_resources/docs/03-AGENTS.md"
+"docs/06-security.md" = "codepilot/_resources/docs/06-security.md"
+"docs/third-party/README.md" = "codepilot/_resources/docs/third-party/README.md"
+"docs/third-party/python-dependencies.json" = "codepilot/_resources/docs/third-party/python-dependencies.json"
+"docs/third-party/python-sbom.cdx.json" = "codepilot/_resources/docs/third-party/python-sbom.cdx.json"
+"docs/third-party/upstream/SWE-bench--v4.1.0.txt" = "codepilot/_resources/docs/third-party/upstream/SWE-bench--v4.1.0.txt"
+"docs/third-party/upstream/astropy--astropy--03712f43fede.txt" = "codepilot/_resources/docs/third-party/upstream/astropy--astropy--03712f43fede.txt"
+"docs/third-party/upstream/astropy--astropy--a86d75ead6df.txt" = "codepilot/_resources/docs/third-party/upstream/astropy--astropy--a86d75ead6df.txt"
+"docs/third-party/upstream/django--django--b846415d1b51.txt" = "codepilot/_resources/docs/third-party/upstream/django--django--b846415d1b51.txt"
+"docs/third-party/upstream/manifest.json" = "codepilot/_resources/docs/third-party/upstream/manifest.json"
+"docs/third-party/upstream/marshmallow-code--marshmallow--ae69ff4f28b1.txt" = "codepilot/_resources/docs/third-party/upstream/marshmallow-code--marshmallow--ae69ff4f28b1.txt"
+"docs/third-party/upstream/matplotlib--matplotlib--5a1a81ea3017.txt" = "codepilot/_resources/docs/third-party/upstream/matplotlib--matplotlib--5a1a81ea3017.txt"
+"docs/third-party/upstream/mwaskom--seaborn--0874bfc01308.txt" = "codepilot/_resources/docs/third-party/upstream/mwaskom--seaborn--0874bfc01308.txt"
+"docs/third-party/upstream/pallets--flask--489a8e110850.txt" = "codepilot/_resources/docs/third-party/upstream/pallets--flask--489a8e110850.txt"
+"docs/third-party/upstream/psf--requests--09e8a9bcec80.txt" = "codepilot/_resources/docs/third-party/upstream/psf--requests--09e8a9bcec80.txt"
+"docs/third-party/upstream/psf--requests--c12dd61a3868.txt" = "codepilot/_resources/docs/third-party/upstream/psf--requests--c12dd61a3868.txt"
+"docs/third-party/upstream/pydata--xarray--73ba74dfaa52.txt" = "codepilot/_resources/docs/third-party/upstream/pydata--xarray--73ba74dfaa52.txt"
+"docs/third-party/upstream/pylint-dev--pylint--f97b14080de8.txt" = "codepilot/_resources/docs/third-party/upstream/pylint-dev--pylint--f97b14080de8.txt"
+"docs/third-party/upstream/pytest-dev--pytest--4be38574daf0.txt" = "codepilot/_resources/docs/third-party/upstream/pytest-dev--pytest--4be38574daf0.txt"
+"docs/third-party/upstream/pytest-dev--pytest--7898b9b164d4.txt" = "codepilot/_resources/docs/third-party/upstream/pytest-dev--pytest--7898b9b164d4.txt"
+"docs/third-party/upstream/pytest-dev--pytest--ca836a5f9ecc.txt" = "codepilot/_resources/docs/third-party/upstream/pytest-dev--pytest--ca836a5f9ecc.txt"
+"docs/third-party/upstream/scikit-learn--scikit-learn--3f046f2b5eea.txt" = "codepilot/_resources/docs/third-party/upstream/scikit-learn--scikit-learn--3f046f2b5eea.txt"
+"docs/third-party/upstream/sphinx-doc--sphinx--f275b949f651.txt" = "codepilot/_resources/docs/third-party/upstream/sphinx-doc--sphinx--f275b949f651.txt"
+"docs/third-party/upstream/sqlfluff--sqlfluff--6d1e394d2e68.txt" = "codepilot/_resources/docs/third-party/upstream/sqlfluff--sqlfluff--6d1e394d2e68.txt"
+"docs/third-party/upstream/sympy--sympy--0d753dffbbcb.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--0d753dffbbcb.txt"
+"docs/third-party/upstream/sympy--sympy--3c98bbadf4c3.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--3c98bbadf4c3.txt"
+"docs/third-party/upstream/sympy--sympy--5b9b04818a65.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--5b9b04818a65.txt"
+"docs/third-party/upstream/sympy--sympy--a7212a73709d.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--a7212a73709d.txt"
+"docs/third-party/upstream/sympy--sympy--b8fd72e9cdac.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--b8fd72e9cdac.txt"
+"docs/third-party/upstream/sympy--sympy--bc14d2a9c696.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--bc14d2a9c696.txt"
+"docs/third-party/upstream/sympy--sympy--e6d5cc1bce88.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--e6d5cc1bce88.txt"
+"docs/third-party/upstream/sympy--sympy--ff1f4cd13c20.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--ff1f4cd13c20.txt"
+"docs/third-party/web-sbom.cdx.json" = "codepilot/_resources/docs/third-party/web-sbom.cdx.json"
+
+[tool.hatch.build.targets.sdist]
+# Explicit paths prevent local logs, worktrees and request payloads entering archives.
+only-include = [
+    "src/codepilot",
+    "pyproject.toml",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "configs/benchmarks.yaml",
+    "configs/full.yaml",
+    "configs/llm.yaml",
+    "configs/subsets/manifest.json",
+    "configs/subsets/swebench-lite-cal10.json",
+    "configs/subsets/swebench-lite-dev30.json",
+    "configs/subsets/swebench-lite-official-dev23.json",
+    "configs/subsets/swebench-lite-test50.json",
+    "configs/swebench/env-specs-4.1.0.json",
+    "configs/swebench/instance-image-overrides.json",
+    "configs/swebench/l2cal10e-instances.json",
+    "configs/swebench/testdeps/psf__requests-3362/codepilot_requests_compat.py",
+    "demo/mini_calc/README.md",
+    "demo/mini_calc/pyproject.toml",
+    "demo/mini_calc/src/demo_calc/__init__.py",
+    "demo/mini_calc/src/demo_calc/calc.py",
+    "demo/mini_calc/tests/test_calc.py",
+    "docs/02-实现方案.md",
+    "docs/03-AGENTS.md",
+    "docs/06-security.md",
+    "docs/third-party/README.md",
+    "docs/third-party/python-dependencies.json",
+    "docs/third-party/python-sbom.cdx.json",
+    "docs/third-party/upstream/SWE-bench--v4.1.0.txt",
+    "docs/third-party/upstream/astropy--astropy--03712f43fede.txt",
+    "docs/third-party/upstream/astropy--astropy--a86d75ead6df.txt",
+    "docs/third-party/upstream/django--django--b846415d1b51.txt",
+    "docs/third-party/upstream/manifest.json",
+    "docs/third-party/upstream/marshmallow-code--marshmallow--ae69ff4f28b1.txt",
+    "docs/third-party/upstream/matplotlib--matplotlib--5a1a81ea3017.txt",
+    "docs/third-party/upstream/mwaskom--seaborn--0874bfc01308.txt",
+    "docs/third-party/upstream/pallets--flask--489a8e110850.txt",
+    "docs/third-party/upstream/psf--requests--09e8a9bcec80.txt",
+    "docs/third-party/upstream/psf--requests--c12dd61a3868.txt",
+    "docs/third-party/upstream/pydata--xarray--73ba74dfaa52.txt",
+    "docs/third-party/upstream/pylint-dev--pylint--f97b14080de8.txt",
+    "docs/third-party/upstream/pytest-dev--pytest--4be38574daf0.txt",
+    "docs/third-party/upstream/pytest-dev--pytest--7898b9b164d4.txt",
+    "docs/third-party/upstream/pytest-dev--pytest--ca836a5f9ecc.txt",
+    "docs/third-party/upstream/scikit-learn--scikit-learn--3f046f2b5eea.txt",
+    "docs/third-party/upstream/sphinx-doc--sphinx--f275b949f651.txt",
+    "docs/third-party/upstream/sqlfluff--sqlfluff--6d1e394d2e68.txt",
+    "docs/third-party/upstream/sympy--sympy--0d753dffbbcb.txt",
+    "docs/third-party/upstream/sympy--sympy--3c98bbadf4c3.txt",
+    "docs/third-party/upstream/sympy--sympy--5b9b04818a65.txt",
+    "docs/third-party/upstream/sympy--sympy--a7212a73709d.txt",
+    "docs/third-party/upstream/sympy--sympy--b8fd72e9cdac.txt",
+    "docs/third-party/upstream/sympy--sympy--bc14d2a9c696.txt",
+    "docs/third-party/upstream/sympy--sympy--e6d5cc1bce88.txt",
+    "docs/third-party/upstream/sympy--sympy--ff1f4cd13c20.txt",
+    "docs/third-party/web-sbom.cdx.json"
+]
 
 # ----------------------------------------------------------------------------
 # Ruff

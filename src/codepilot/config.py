@@ -23,7 +23,10 @@ __all__ = ["Settings", "get_settings", "read_secret_env", "reset_settings_cache"
 
 #: 仓库根目录。src/codepilot/config.py → parents[2]。
 #: 只用于定位随包分发的默认配置（``configs/``），不用于运行产物路径。
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+_PACKAGED_RESOURCES = Path(__file__).resolve().parent / "_resources"
+PROJECT_ROOT = (
+    _PACKAGED_RESOURCES if _PACKAGED_RESOURCES.is_dir() else Path(__file__).resolve().parents[2]
+)
 
 
 class Settings(BaseSettings):

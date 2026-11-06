@@ -1,0 +1,35 @@
+# Reviewed false positives: exact historical fingerprints only.
+# See docs/open-source-audit.md; no directory or generic secret-pattern exclusions.
+a9d362012d8b285c423696abc0a47d2e4ae4dd19:tests/api/api_support.py:generic-api-key:17
+a9d362012d8b285c423696abc0a47d2e4ae4dd19:tests/api/test_phase14_settings_api.py:generic-api-key:23
+a9d362012d8b285c423696abc0a47d2e4ae4dd19:web/src/components/SettingsView.test.tsx:generic-api-key:207
+a9d362012d8b285c423696abc0a47d2e4ae4dd19:web/src/components/SettingsView.test.tsx:generic-api-key:233
+a9d362012d8b285c423696abc0a47d2e4ae4dd19:web/src/components/SettingsView.test.tsx:generic-api-key:264
+475635645995c6973312cfd8445ca484e7154778:tests/unit/llm/test_llm_observability.py:generic-api-key:254
+aea174e622018c4a9ba990773db14f45b610b514:tests/unit/llm/test_glm_smoke.py:generic-api-key:36
+27df124f30938a834cf1030213d4e31ec7ba764c:tests/unit/failure/test_collect_failures.py:generic-api-key:20
+252c95b303bb67a7b926d65b8c842414760f99ac:tests/unit/sandbox/test_docker.py:generic-api-key:324
+a0970054242d2d18a2a3fffc2070b5867c91f442:docs/evidence/phase2-retrieval-eval-20261011/determinism/cases.jsonl:generic-api-key:1
+a0970054242d2d18a2a3fffc2070b5867c91f442:docs/evidence/phase2-retrieval-eval-20261011/determinism/determinism.json:generic-api-key:59
+a0970054242d2d18a2a3fffc2070b5867c91f442:docs/evidence/phase2-retrieval-eval-20261011/determinism/determinism.json:generic-api-key:62
+3773f0824dd497ead76d53aa6106484f98c3b4d5:tests/fixtures/retrieval_cases.jsonl:generic-api-key:1
+3773f0824dd497ead76d53aa6106484f98c3b4d5:tests/fixtures/retrieval_cases.jsonl:generic-api-key:2
+3773f0824dd497ead76d53aa6106484f98c3b4d5:tests/fixtures/retrieval_cases.jsonl:generic-api-key:3
+3773f0824dd497ead76d53aa6106484f98c3b4d5:tests/fixtures/retrieval_cases.jsonl:generic-api-key:11
+3672599b2b903db2fed4fac69ae547a0fe6098da:docs/evidence/phase2-semantic-20261010/manifest.json:generic-api-key:4
+3672599b2b903db2fed4fac69ae547a0fe6098da:docs/evidence/phase2-semantic-20261010/manifest.json:generic-api-key:5
+3672599b2b903db2fed4fac69ae547a0fe6098da:docs/evidence/phase2-semantic-20261010/manifest.json:generic-api-key:6
+16dfa9b184ee7489617eddfce44a143b44ac432c:docs/evidence/docker-20261010/manifest.json:generic-api-key:102
+16dfa9b184ee7489617eddfce44a143b44ac432c:docs/evidence/docker-20261010/manifest.json:generic-api-key:107
+16dfa9b184ee7489617eddfce44a143b44ac432c:docs/evidence/docker-20261010/manifest.json:generic-api-key:112
+16dfa9b184ee7489617eddfce44a143b44ac432c:docs/evidence/r23-20261010/fixture-verified.json:generic-api-key:10
+16dfa9b184ee7489617eddfce44a143b44ac432c:docs/evidence/r23-20261010/fixture-verified.json:generic-api-key:15
+16dfa9b184ee7489617eddfce44a143b44ac432c:docs/evidence/r23-20261010/fixture-verified.json:generic-api-key:26
+16dfa9b184ee7489617eddfce44a143b44ac432c:docs/evidence/r23-20261010/fixture-verified.json:generic-api-key:31
+16dfa9b184ee7489617eddfce44a143b44ac432c:docs/evidence/r23-20261010/fixture.json:generic-api-key:10
+16dfa9b184ee7489617eddfce44a143b44ac432c:docs/evidence/r23-20261010/fixture.json:generic-api-key:15
+98aa6de490a071e7661bd67c15d80eaba809b923:tests/unit/api/test_app.py:generic-api-key:11
+98aa6de490a071e7661bd67c15d80eaba809b923:tests/unit/observability/test_redaction.py:generic-api-key:72
+98aa6de490a071e7661bd67c15d80eaba809b923:tests/unit/observability/test_redaction.py:generic-api-key:119
+98aa6de490a071e7661bd67c15d80eaba809b923:tests/unit/observability/test_redaction.py:generic-api-key:147
+98aa6de490a071e7661bd67c15d80eaba809b923:tests/unit/observability/test_redaction.py:generic-api-key:154

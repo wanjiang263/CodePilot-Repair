@@ -10,6 +10,21 @@
 > 当前定位是**单用户、本地/受信网络**的工作台，不是多租户生产系统。
 > 沙箱、Docker socket 与 Provider 凭据的信任边界见 [`docs/06-security.md`](docs/06-security.md)。
 
+## 发布状态与参与
+
+当前按 **research / engineering preview** 准备发布，不承诺生产可用性。
+真实 provider、浏览器 E2E、24h 长稳及干净环境安装结果应以对应发布版本的证据为准；
+历史报告中的通过项不代表所有平台或供应商均已验证。
+
+项目自有代码采用 [Apache License 2.0](LICENSE)，允许商业使用、修改和分发，须遵守许可证条件。
+Copyright 2026 jiaoenqi。署名见 [NOTICE](NOTICE)。
+第三方内容遵循各自的许可证，须保留随附的来源及许可声明。
+第三方来源及依赖许可见 [第三方声明](docs/third-party/README.md)。
+发布前检查见 [开源准备清单](docs/open-source-readiness.md)；
+本轮审查结果与未验证范围见 [开源审查报告](docs/open-source-audit.md)。
+安全问题见 [SECURITY.md](SECURITY.md)，参与开发见 [CONTRIBUTING.md](CONTRIBUTING.md)，
+社区规范见 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
+
 ## 截图
 
 | 新建任务（中文 · 黑暗） | 设置中心 · 供应商管理（中文 · 黑暗） |

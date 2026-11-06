@@ -22,13 +22,13 @@ RUN apt-get update \
 
 WORKDIR /app
 
-COPY pyproject.toml README.md ./
+COPY pyproject.toml README.md LICENSE NOTICE ./
 COPY src ./src
-RUN pip install . && rm -rf /src build
-
 COPY configs ./configs
 COPY demo ./demo
 COPY docs ./docs
+RUN pip install . && rm -rf /src build
+
 COPY --from=web /build/web/dist ./web/dist
 
 RUN mkdir -p /data && chown -R codepilot:codepilot /app /data

@@ -1,0 +1,11 @@
+CodePilot-Repair
+Copyright 2026 jiaoenqi
+
+Project-owned material is licensed under the Apache License, Version 2.0.
+Third-party material remains subject to its own licenses and notices.
+This notice does not replace or supersede third-party attribution notices.
+
+Third-party source and dependency notices are described in
+docs/third-party/README.md. The py-tree-sitter source snapshots retain their
+MIT notice in docs/evidence/r23-20261010/upstream-LICENSE.txt.
+The built dashboard includes third-party-notices.txt for bundled dependencies.

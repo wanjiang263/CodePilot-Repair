@@ -1,0 +1,2 @@
+# Preserve upstream license bytes so the provenance SHA-256 values remain valid.
+docs/third-party/upstream/*.txt -text -whitespace

@@ -1061,7 +1061,7 @@
       "docsHint": "Documents load through the authenticated API; they are never exposed as unauthenticated static files.",
       "readme": "README",
       "license": "License",
-      "licenseValue": "This repository does not declare a project license in-tree. Third-party dependencies retain their own licenses.",
+      "licenseValue": "Project-owned code is licensed under Apache-2.0. Copyright 2026 jiaoenqi. Third-party material retains its own licenses and notices.",
       "disclaimer": "Fake and live runs are labelled separately. Official SWE-bench verdicts are never inferred from UI state."
     }
   }

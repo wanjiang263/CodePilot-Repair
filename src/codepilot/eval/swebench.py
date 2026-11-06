@@ -895,7 +895,9 @@ class SWEBenchLoader:
 
 def _default_env_spec_snapshot() -> Path:
     """仓库内冻结的官方规格快照（不含 swebench 依赖，纯 JSON）。"""
-    repo_root = Path(__file__).resolve().parents[3]
+    from codepilot.config import PROJECT_ROOT
+
+    repo_root = PROJECT_ROOT
     return repo_root / "configs" / "swebench" / f"env-specs-{HARNESS_VERSION}.json"
 
 

@@ -1,5 +1,8 @@
 name: CI
 
+permissions:
+  contents: read
+
 # 04 通用完成标准：ruff + mypy + 非 docker、非 llm 的 pytest。
 # Phase 1 的真实 Docker 验收独立运行，缺 daemon / 全部 skip 均不算通过。
 # 真实 LLM 的验收（@pytest.mark.llm）永不进入 CI（03 §22）。
@@ -22,6 +25,47 @@ defaults:
     shell: bash
 
 jobs:
+  frontend:
+    name: frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci --ignore-scripts
+        working-directory: web
+      - run: npm run typecheck && npm run lint && npm test && npm run build
+        working-directory: web
+
+  package:
+    name: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.12.9"
+      - run: uv python install 3.12
+      - run: uv build
+      - name: Install wheel in an isolated environment
+        run: |
+          uv venv --python 3.12 /tmp/codepilot-package-check
+          uv pip install --python /tmp/codepilot-package-check/bin/python dist/*.whl
+          cd /tmp
+          /tmp/codepilot-package-check/bin/codepilot --version
+          /tmp/codepilot-package-check/bin/python -I - <<'PY'
+          from codepilot.config import Settings
+          from codepilot.eval.swebench import _default_env_spec_snapshot
+          settings = Settings(_env_file=None)
+          assert settings.resolved_llm_config.is_file()
+          assert (settings.api_demo_root / 'mini_calc' / 'pyproject.toml').is_file()
+          assert settings.readme_path.is_file()
+          assert _default_env_spec_snapshot().is_file()
+          PY
+
   quality:
     name: lint + types
     runs-on: ubuntu-latest

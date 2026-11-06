@@ -1,0 +1,23 @@
+name: Dependency audit
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "24 3 * * 1"
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.12.9"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: uv python install 3.12
+      - run: uv export --frozen --no-dev --no-emit-project --no-hashes -o requirements-audit.txt
+      - run: uvx --python 3.12 pip-audit --no-deps --disable-pip -r requirements-audit.txt
+      - run: npm audit --package-lock-only
+        working-directory: web

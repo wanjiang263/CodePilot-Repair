@@ -1,0 +1,61 @@
+# 开源发布审查（2026-11-06）
+
+本次目标是可供审阅的 engineering preview 候选，不是生产上线认证。审查基线为 `9e99eda2036a17d4c0f38c2a8e505c57716bdd39`，加本次工作区改动。本报告生成时，候选尚未提交、推送或公开；后续交付状态以候选分支的提交和 CI 记录为准。
+
+## 仓库和历史
+
+GitHub 仓库为 `wanjiang263/CodePilot-Repair`，目前私有，默认分支 `main`。远端 7 个分支均已核对为当前工作分支的祖先，远端没有标签。当前较新的 `codex/phase12-real-issue-pilot` 尚未在远端出现。
+
+本地 `.git/shallow` 的 pvlib 边界 `04a523f` 属于本地异常 `main`，不是当前 HEAD 的祖先。对当前工作分支执行独立单分支克隆后，副本为 **non-shallow**，根为本项目初始化提交 `98aa6de`，没有带入本地异常 `main`。无需因该边界重建项目历史，也不要执行 `push --all` 或 `push --mirror`。
+
+## 许可证与第三方材料
+
+- 采用官方 Apache-2.0 原文；署名 `Copyright 2026 jiaoenqi`。所有者确认自有代码属于个人项目，无公司或团队权属限制。
+- 增加 LICENSE、NOTICE、安全政策、贡献说明、社区规范。私密报告及社区投诉邮箱由所有者确认为 `jeq0731@gmail.com`。
+- 补齐前端中英文许可证说明、Docker 构建中的 LICENSE/NOTICE，以及 Python 包元数据和许可文件。
+- 保留 py-tree-sitter MIT 源码快照声明；从官方 GitHub 接口取回 14 个第三方项目、65 个基准提交的许可证，保存 25 份去重文本。另保留 SWE-bench v4.1.0 的 MIT 许可证。具体来源及摘要见 [第三方清单](third-party/README.md)。
+- 前端生产依赖的完整许可文本包含在 `web/public/third-party-notices.txt`，随构建复制。Python/前端 SBOM 和 Python 许可元数据已保存。
+- 可选 psycopg 的 LGPL 和可选 CUDA 库的专有条款没有被 Apache-2.0 替代；本次源码及 wheel 不捆绑其二进制或模型权重。
+
+## 密钥与隐私
+
+使用校验过官方发布包 SHA-256 的 Gitleaks 8.30.1，检查当前候选文件树、当前项目分支及远端 main 的可达历史，以及 176 个根目录/`logs/` 本地排障文件。历史扫描实际处理 312 个非合并变更提交；当前分支可达提交总数为 318。
+
+历史和候选树各有 33 个 generic-api-key 命中，逐条定位为测试凭据或 SHA-256 清单误报；日志扫描 0 命中。`.gitleaksignore` 仅记录已审阅历史条目的精确 fingerprint，不排除目录、不添加通用密钥模式白名单。应用该清单后历史复扫 0 命中。没有发现需要据此轮换的真实凭据，但这不是对所有未知格式密钥或磁盘上所有运行目录的保证。
+
+另检查了当前 tracked 文件中的邮箱、Windows 路径和私网地址。邮箱命中为测试示例/误匹配；历史路径与本地 Docker 网络地址保留为实验元数据，不是公开部署配置。下载地址指向公开 PyPI，不含私有索引凭据。300 个已跟踪的 `artifacts/` 证据文件也纳入候选树扫描；`.gitignore` 不会使这些文件自动退出版本管理。未跟踪日志、`.env`、运行数据库、模型缓存和嵌套工作区不进入候选源码归档。
+
+## 依赖安全
+
+对 universal `uv.lock` 的全部 181 个第三方 registry 包，逐版本查询 PyPI 官方 JSON 中的漏洞信息及许可元数据，查询失败为 0；最终未撤销公告命中为 **0**。前端 `npm audit --package-lock-only` 对锁文件依赖报告 **0** 已知漏洞。此结论是审查时的公告快照，不覆盖尚未公开的漏洞。
+
+修复的锁定版本包括 certifi、filelock、GitPython、setuptools、virtualenv，以及 datasets、fsspec、huggingface-hub、tokenizers、transformers。可选依赖下限相应更新；真实模型和官方 Harness 未运行，所以不能声称这些升级已通过真实 embedding 或完整官方评测兼容性验证。另一个 pip-audit 在线扫描长时间无结果，已终止；不把它计作通过，公告结论来自上述完整 PyPI 查询和 npm 报告。
+
+## 安装、构建与回归
+
+| 检查 | 结果 |
+|---|---|
+| 当前项目分支独立克隆 | PASS；non-shallow，自有根提交 |
+| 前端干净依赖安装 | PASS；不运行依赖安装脚本 |
+| 前端 typecheck / lint / Vitest / build | PASS；14 个测试文件，50 项测试 |
+| Python 相关回归 | PASS；147 passed，1 项真实模型测试 skipped |
+| Ruff（改动的 Python 源文件） | PASS；格式检查通过 |
+| mypy | PASS；217 个源文件 |
+| 锁文件一致性 | PASS |
+| wheel 与 sdist 构建 | PASS；精确文件清单，不遍历本地运行目录 |
+| wheel 全新安装与依赖一致性 | PASS；先验证普通安装，再按核心锁定版本安装 |
+| 已安装 wheel 的健康检查、鉴权与离线修复任务 | PASS；任务 succeeded，补丁可用，真实 provider 请求/费用均为 0 |
+
+安装测试发现原 wheel 缺少默认配置及演示资源，已修复为携带审阅过的明确资源文件，并让安装后的配置和离线环境规格定位到包资源。源码运行仍使用仓库中的资源。
+
+新增前端和包安装 CI job、每周依赖审计 workflow、Dependabot 更新配置，并把工作流权限限制为 `contents: read`。GitHub 远端漏洞告警和自动安全修复已启用并回读确认；新增工作流尚未推送执行。
+
+## 发布动作与保留限制
+
+1. 审阅本次候选和差异，再提交本地改动；只推送选定的项目分支，勿推本地异常 `main`。
+2. 通过 PR 或正常快进方式更新远端 `main`，不需要强推；等待新增 CI 实际完成。
+3. 发布 preview 前核对远端默认分支的 LICENSE/NOTICE 和最终文件清单，再确认将整个仓库公开。公开操作不属于本次已执行动作。
+4. 仓库仍私有，GitHub 私密漏洞报告接口返回 404；已配置邮箱作为可立即使用的私密报告渠道。公开后可再启用 GitHub 私密报告。
+5. 已启用远端 `main` 基础保护：禁止强推和删除，对管理员同样生效，保留个人维护者的正常推送能力。新增 CI 实际运行后，再选择实际 check 名加入合并门禁；没有配置单人项目无法自行满足的额外审批人数。
+
+24h soak、真实 provider、真实 embedding、浏览器 E2E、复杂真实大仓及全平台 Docker 回归没有在本次执行。历史测试数字不升级为本次验证结果。它们是后续稳定版的验证工作，preview 必须保留这些限制。

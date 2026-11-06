@@ -1,0 +1,587 @@
+[
+  {
+    "repo": "astropy/astropy",
+    "ref": "a5917978be39d13cd90b517e1de4e7a539ffaa48",
+    "status": "retrieved",
+    "spdx": "BSD-3-Clause",
+    "source_url": "https://github.com/astropy/astropy/blob/a5917978be39d13cd90b517e1de4e7a539ffaa48/LICENSE.rst",
+    "sha256": "a86d75ead6df0886dcbc04230ffcd971c66a4a6746ca559ddf768865370637f5",
+    "notice_file": "astropy--astropy--a86d75ead6df.txt"
+  },
+  {
+    "repo": "astropy/astropy",
+    "ref": "b16c7d12ccbc7b2d20364b89fb44285bcbfede54",
+    "status": "retrieved",
+    "spdx": "BSD-3-Clause",
+    "source_url": "https://github.com/astropy/astropy/blob/b16c7d12ccbc7b2d20364b89fb44285bcbfede54/LICENSE.rst",
+    "sha256": "a86d75ead6df0886dcbc04230ffcd971c66a4a6746ca559ddf768865370637f5",
+    "notice_file": "astropy--astropy--a86d75ead6df.txt"
+  },
+  {
+    "repo": "astropy/astropy",
+    "ref": "c76af9ed6bb89bfba45b9f5bc1e635188278e2fa",
+    "status": "retrieved",
+    "spdx": "BSD-3-Clause",
+    "source_url": "https://github.com/astropy/astropy/blob/c76af9ed6bb89bfba45b9f5bc1e635188278e2fa/LICENSE.rst",
+    "sha256": "03712f43fede530155b72e3d4497bedcf6ac1c4d81b9f6e4d95e0876fec912da",
+    "notice_file": "astropy--astropy--03712f43fede.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "00ea883ef56fb5e092cbe4a6f7ff2e7470886ac4",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/00ea883ef56fb5e092cbe4a6f7ff2e7470886ac4/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "08a4ee06510ae45562c228eefbdcaac84bd38c7a",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/08a4ee06510ae45562c228eefbdcaac84bd38c7a/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "0c42cdf0d2422f4c080e93594d5d15381d6e955e",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/0c42cdf0d2422f4c080e93594d5d15381d6e955e/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "191f6a9a4586b5e5f79f4f42f190e7ad4bbacc84",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/191f6a9a4586b5e5f79f4f42f190e7ad4bbacc84/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "1bd6a7a0acc11e249fca11c017505ad39f15ebf6",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/1bd6a7a0acc11e249fca11c017505ad39f15ebf6/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "2f72480fbd27896c986c45193e1603e35c0b19a7",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/2f72480fbd27896c986c45193e1603e35c0b19a7/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "30e123ed351317b7527f632b3b7dc4e81e850449",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/30e123ed351317b7527f632b3b7dc4e81e850449/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "36bc47069ce071e80c8129500de3b8664d2058a7",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/36bc47069ce071e80c8129500de3b8664d2058a7/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "36fa071d6ebd18a61c4d7f1b5c9d17106134bd44",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/36fa071d6ebd18a61c4d7f1b5c9d17106134bd44/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "42e8cf47c7ee2db238bf91197ea398126c546741",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/42e8cf47c7ee2db238bf91197ea398126c546741/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "5eb6a2b33d70b9889e1cafa12594ad6f80773d3a",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/5eb6a2b33d70b9889e1cafa12594ad6f80773d3a/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "60dc957a825232fdda9138e2f8878b2ca407a7c9",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/60dc957a825232fdda9138e2f8878b2ca407a7c9/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "65e86948b80262574058a94ccaae3a9b59c3faea",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/65e86948b80262574058a94ccaae3a9b59c3faea/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "6f73eb9d90cfec684529aab48d517e3d6449ba8c",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/6f73eb9d90cfec684529aab48d517e3d6449ba8c/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "7b9596b974fb0ad1868b10c8c2174e10b72be403",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/7b9596b974fb0ad1868b10c8c2174e10b72be403/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "84633905273fc916e3d17883810d9969c03f73c2",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/84633905273fc916e3d17883810d9969c03f73c2/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "a754b82dac511475b6276039471ccd17cc64aeb8",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/a754b82dac511475b6276039471ccd17cc64aeb8/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "b30c0081d4d8a31ab7dc7f72a4c7099af606ef29",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/b30c0081d4d8a31ab7dc7f72a4c7099af606ef29/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "c5e373d48cbdd923575956fed477b63d66d9603f",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/c5e373d48cbdd923575956fed477b63d66d9603f/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "df46b329e0900e9e4dc1d60816c1dce6dfc1094e",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/df46b329e0900e9e4dc1d60816c1dce6dfc1094e/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "e7fd69d051eaa67cb17f172a39b57253e9cb831a",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/e7fd69d051eaa67cb17f172a39b57253e9cb831a/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "f39634ff229887bf7790c069d0c411b38494ca38",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/f39634ff229887bf7790c069d0c411b38494ca38/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "django/django",
+    "ref": "fce90950bef348803fa7cc3e6bc65f4bce429b82",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/django/django/blob/fce90950bef348803fa7cc3e6bc65f4bce429b82/LICENSE",
+    "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+    "notice_file": "django--django--b846415d1b51.txt"
+  },
+  {
+    "repo": "marshmallow-code/marshmallow",
+    "ref": "b40a0f4e33823e6d0f341f7e8684e359a99060d1",
+    "status": "retrieved",
+    "spdx": "MIT",
+    "source_url": "https://github.com/marshmallow-code/marshmallow/blob/b40a0f4e33823e6d0f341f7e8684e359a99060d1/LICENSE",
+    "sha256": "ae69ff4f28b18bef6fccfe37769d182bfeb0bfabcd2d8d7f28a80933d6f2d36b",
+    "notice_file": "marshmallow-code--marshmallow--ae69ff4f28b1.txt"
+  },
+  {
+    "repo": "matplotlib/matplotlib",
+    "ref": "149a0398b391cfc4eddb5e659f50b3c66f32ea65",
+    "status": "retrieved",
+    "spdx": "LicenseRef-Matplotlib",
+    "source_url": "https://github.com/matplotlib/matplotlib/blob/149a0398b391cfc4eddb5e659f50b3c66f32ea65/LICENSE/LICENSE",
+    "sha256": "5a1a81ea301728c8bba2933da832c0cd62229daf20893a024ab3d53244468dbc",
+    "notice_file": "matplotlib--matplotlib--5a1a81ea3017.txt"
+  },
+  {
+    "repo": "matplotlib/matplotlib",
+    "ref": "a3011dfd1aaa2487cce8aa7369475533133ef777",
+    "status": "retrieved",
+    "spdx": "LicenseRef-Matplotlib",
+    "source_url": "https://github.com/matplotlib/matplotlib/blob/a3011dfd1aaa2487cce8aa7369475533133ef777/LICENSE/LICENSE",
+    "sha256": "5a1a81ea301728c8bba2933da832c0cd62229daf20893a024ab3d53244468dbc",
+    "notice_file": "matplotlib--matplotlib--5a1a81ea3017.txt"
+  },
+  {
+    "repo": "matplotlib/matplotlib",
+    "ref": "b7d05919865fc0c37a0164cf467d5d5513bd0ede",
+    "status": "retrieved",
+    "spdx": "LicenseRef-Matplotlib",
+    "source_url": "https://github.com/matplotlib/matplotlib/blob/b7d05919865fc0c37a0164cf467d5d5513bd0ede/LICENSE/LICENSE",
+    "sha256": "5a1a81ea301728c8bba2933da832c0cd62229daf20893a024ab3d53244468dbc",
+    "notice_file": "matplotlib--matplotlib--5a1a81ea3017.txt"
+  },
+  {
+    "repo": "matplotlib/matplotlib",
+    "ref": "f670fe78795b18eb1118707721852209cd77ad51",
+    "status": "retrieved",
+    "spdx": "LicenseRef-Matplotlib",
+    "source_url": "https://github.com/matplotlib/matplotlib/blob/f670fe78795b18eb1118707721852209cd77ad51/LICENSE/LICENSE",
+    "sha256": "5a1a81ea301728c8bba2933da832c0cd62229daf20893a024ab3d53244468dbc",
+    "notice_file": "matplotlib--matplotlib--5a1a81ea3017.txt"
+  },
+  {
+    "repo": "mwaskom/seaborn",
+    "ref": "4a9e54962a29c12a8b103d75f838e0e795a6974d",
+    "status": "retrieved",
+    "spdx": "BSD-3-Clause",
+    "source_url": "https://github.com/mwaskom/seaborn/blob/4a9e54962a29c12a8b103d75f838e0e795a6974d/LICENSE.md",
+    "sha256": "0874bfc01308833385b2f5ca62205525739f6a57b8688afea1b078d0f845d6d4",
+    "notice_file": "mwaskom--seaborn--0874bfc01308.txt"
+  },
+  {
+    "repo": "pallets/flask",
+    "ref": "c12a5d874c5a014495eb2db8a73f40037bc813ac",
+    "status": "retrieved",
+    "spdx": "BSD-3-Clause",
+    "source_url": "https://github.com/pallets/flask/blob/c12a5d874c5a014495eb2db8a73f40037bc813ac/LICENSE.txt",
+    "sha256": "489a8e1108509ed98a37bb983e11e0f7e1d31f0bd8f99a79c8448e7ff37d07ea",
+    "notice_file": "pallets--flask--489a8e110850.txt"
+  },
+  {
+    "repo": "psf/requests",
+    "ref": "0e322af87745eff34caffe4df68456ebc20d9068",
+    "status": "retrieved",
+    "spdx": "Apache-2.0",
+    "source_url": "https://github.com/psf/requests/blob/0e322af87745eff34caffe4df68456ebc20d9068/LICENSE",
+    "sha256": "09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b",
+    "notice_file": "psf--requests--09e8a9bcec80.txt"
+  },
+  {
+    "repo": "psf/requests",
+    "ref": "36453b95b13079296776d11b09cab2567ea3e703",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/psf/requests/blob/36453b95b13079296776d11b09cab2567ea3e703/LICENSE",
+    "sha256": "c12dd61a3868c674312e979d0ec179ee84c82e8e63c742875238ac912fbd1bac",
+    "notice_file": "psf--requests--c12dd61a3868.txt"
+  },
+  {
+    "repo": "pydata/xarray",
+    "ref": "e56905889c836c736152b11a7e6117a229715975",
+    "status": "retrieved",
+    "spdx": "Apache-2.0",
+    "source_url": "https://github.com/pydata/xarray/blob/e56905889c836c736152b11a7e6117a229715975/LICENSE",
+    "sha256": "73ba74dfaa520b49a401b5d21459a8523a146f3b7518a833eea5efa85130bf68",
+    "notice_file": "pydata--xarray--73ba74dfaa52.txt"
+  },
+  {
+    "repo": "pylint-dev/pylint",
+    "ref": "397c1703e8ae6349d33f7b99f45b2ccaf581e666",
+    "status": "retrieved",
+    "spdx": "GPL-2.0",
+    "source_url": "https://github.com/pylint-dev/pylint/blob/397c1703e8ae6349d33f7b99f45b2ccaf581e666/LICENSE",
+    "sha256": "f97b14080de8b8490d60eb3d620ebc419943e0779466d1dd0d5d6f68fe195dcd",
+    "notice_file": "pylint-dev--pylint--f97b14080de8.txt"
+  },
+  {
+    "repo": "pytest-dev/pytest",
+    "ref": "10ca84ffc56c2dd2d9dc4bd71b7b898e083500cd",
+    "status": "retrieved",
+    "spdx": "MIT",
+    "source_url": "https://github.com/pytest-dev/pytest/blob/10ca84ffc56c2dd2d9dc4bd71b7b898e083500cd/LICENSE",
+    "sha256": "4be38574daf05665b6194e4fd84c5ef6ce7c3a2810308a5222d5cdffc2d04d18",
+    "notice_file": "pytest-dev--pytest--4be38574daf0.txt"
+  },
+  {
+    "repo": "pytest-dev/pytest",
+    "ref": "1aefb24b37c30fba8fd79a744829ca16e252f340",
+    "status": "retrieved",
+    "spdx": "MIT",
+    "source_url": "https://github.com/pytest-dev/pytest/blob/1aefb24b37c30fba8fd79a744829ca16e252f340/LICENSE",
+    "sha256": "4be38574daf05665b6194e4fd84c5ef6ce7c3a2810308a5222d5cdffc2d04d18",
+    "notice_file": "pytest-dev--pytest--4be38574daf0.txt"
+  },
+  {
+    "repo": "pytest-dev/pytest",
+    "ref": "29e336bd9bf87eaef8e2683196ee1975f1ad4088",
+    "status": "retrieved",
+    "spdx": "MIT",
+    "source_url": "https://github.com/pytest-dev/pytest/blob/29e336bd9bf87eaef8e2683196ee1975f1ad4088/LICENSE",
+    "sha256": "4be38574daf05665b6194e4fd84c5ef6ce7c3a2810308a5222d5cdffc2d04d18",
+    "notice_file": "pytest-dev--pytest--4be38574daf0.txt"
+  },
+  {
+    "repo": "pytest-dev/pytest",
+    "ref": "2f7415cfbc4b6ca62f9013f1abd27136f46b9653",
+    "status": "retrieved",
+    "spdx": "MIT",
+    "source_url": "https://github.com/pytest-dev/pytest/blob/2f7415cfbc4b6ca62f9013f1abd27136f46b9653/LICENSE",
+    "sha256": "ca836a5f9ecca3b2f350230faa20a48fb8b145653b5568d784862df864706b9b",
+    "notice_file": "pytest-dev--pytest--ca836a5f9ecc.txt"
+  },
+  {
+    "repo": "pytest-dev/pytest",
+    "ref": "4787fd64a4ca0dba5528b5651bddd254102fe9f3",
+    "status": "retrieved",
+    "spdx": "MIT",
+    "source_url": "https://github.com/pytest-dev/pytest/blob/4787fd64a4ca0dba5528b5651bddd254102fe9f3/LICENSE",
+    "sha256": "7898b9b164d4f93fd9a562fd0f592935518b48c4745303964110eb7f7fe64faf",
+    "notice_file": "pytest-dev--pytest--7898b9b164d4.txt"
+  },
+  {
+    "repo": "pytest-dev/pytest",
+    "ref": "56bf819c2f4eaf8b36bd8c42c06bb59d5a3bfc0f",
+    "status": "retrieved",
+    "spdx": "MIT",
+    "source_url": "https://github.com/pytest-dev/pytest/blob/56bf819c2f4eaf8b36bd8c42c06bb59d5a3bfc0f/LICENSE",
+    "sha256": "7898b9b164d4f93fd9a562fd0f592935518b48c4745303964110eb7f7fe64faf",
+    "notice_file": "pytest-dev--pytest--7898b9b164d4.txt"
+  },
+  {
+    "repo": "scikit-learn/scikit-learn",
+    "ref": "b90661d6a46aa3619d3eec94d5281f5888add501",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/scikit-learn/scikit-learn/blob/b90661d6a46aa3619d3eec94d5281f5888add501/COPYING",
+    "sha256": "3f046f2b5eea2c3b852dae4feea90f92a64ced2a6ac23ea137db2a5ac347ce22",
+    "notice_file": "scikit-learn--scikit-learn--3f046f2b5eea.txt"
+  },
+  {
+    "repo": "sphinx-doc/sphinx",
+    "ref": "332d80ba8433aea41c3709fa52737ede4405072b",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sphinx-doc/sphinx/blob/332d80ba8433aea41c3709fa52737ede4405072b/LICENSE",
+    "sha256": "f275b949f651f373e41cdd163ffa89b419497f89990e1a86753ac64a33829404",
+    "notice_file": "sphinx-doc--sphinx--f275b949f651.txt"
+  },
+  {
+    "repo": "sphinx-doc/sphinx",
+    "ref": "3ea1ec84cc610f7a9f4f6b354e264565254923ff",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sphinx-doc/sphinx/blob/3ea1ec84cc610f7a9f4f6b354e264565254923ff/LICENSE",
+    "sha256": "f275b949f651f373e41cdd163ffa89b419497f89990e1a86753ac64a33829404",
+    "notice_file": "sphinx-doc--sphinx--f275b949f651.txt"
+  },
+  {
+    "repo": "sphinx-doc/sphinx",
+    "ref": "88b81a06eb635a1596617f8971fa97a84c069e93",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sphinx-doc/sphinx/blob/88b81a06eb635a1596617f8971fa97a84c069e93/LICENSE",
+    "sha256": "f275b949f651f373e41cdd163ffa89b419497f89990e1a86753ac64a33829404",
+    "notice_file": "sphinx-doc--sphinx--f275b949f651.txt"
+  },
+  {
+    "repo": "sphinx-doc/sphinx",
+    "ref": "b19bce971e82f2497d67fdacdeca8db08ae0ba56",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sphinx-doc/sphinx/blob/b19bce971e82f2497d67fdacdeca8db08ae0ba56/LICENSE",
+    "sha256": "f275b949f651f373e41cdd163ffa89b419497f89990e1a86753ac64a33829404",
+    "notice_file": "sphinx-doc--sphinx--f275b949f651.txt"
+  },
+  {
+    "repo": "sphinx-doc/sphinx",
+    "ref": "e4bd3bd3ddd42c6642ff779a4f7381f219655c2c",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sphinx-doc/sphinx/blob/e4bd3bd3ddd42c6642ff779a4f7381f219655c2c/LICENSE",
+    "sha256": "f275b949f651f373e41cdd163ffa89b419497f89990e1a86753ac64a33829404",
+    "notice_file": "sphinx-doc--sphinx--f275b949f651.txt"
+  },
+  {
+    "repo": "sqlfluff/sqlfluff",
+    "ref": "14e1a23a3166b9a645a16de96f694c77a5d4abb7",
+    "status": "retrieved",
+    "spdx": "MIT",
+    "source_url": "https://github.com/sqlfluff/sqlfluff/blob/14e1a23a3166b9a645a16de96f694c77a5d4abb7/LICENSE.md",
+    "sha256": "6d1e394d2e68a47106733103e9ed87c9d1573d9b7a43f5d05989424fce6dae39",
+    "notice_file": "sqlfluff--sqlfluff--6d1e394d2e68.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "1923822ddf8265199dbd9ef9ce09641d3fd042b9",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/1923822ddf8265199dbd9ef9ce09641d3fd042b9/LICENSE",
+    "sha256": "bc14d2a9c696ce8d8f40aab542e4507d3a086d687465f56821454ebceee19681",
+    "notice_file": "sympy--sympy--bc14d2a9c696.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "3ff4717b6aef6086e78f01cdfa06f64ae23aed7e",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/3ff4717b6aef6086e78f01cdfa06f64ae23aed7e/LICENSE",
+    "sha256": "5b9b04818a656e98d186d1deada65ad4557798264225271136cea080bafbcbe7",
+    "notice_file": "sympy--sympy--5b9b04818a65.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "62000f37b8821573ba00280524ffb4ac4a380875",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/62000f37b8821573ba00280524ffb4ac4a380875/LICENSE",
+    "sha256": "bc14d2a9c696ce8d8f40aab542e4507d3a086d687465f56821454ebceee19681",
+    "notice_file": "sympy--sympy--bc14d2a9c696.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "67e3c956083d0128a621f65ee86a7dacd4f9f19f",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/67e3c956083d0128a621f65ee86a7dacd4f9f19f/LICENSE",
+    "sha256": "e6d5cc1bce88c52ec90cb34802a1b9fca23d01caee535431395aca3ba743123a",
+    "notice_file": "sympy--sympy--e6d5cc1bce88.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "7121bdf1facdd90d05b6994b4c2e5b2865a4638a",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/7121bdf1facdd90d05b6994b4c2e5b2865a4638a/LICENSE",
+    "sha256": "e6d5cc1bce88c52ec90cb34802a1b9fca23d01caee535431395aca3ba743123a",
+    "notice_file": "sympy--sympy--e6d5cc1bce88.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "74227f900b05009d4eed62e34a166228788a32ca",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/74227f900b05009d4eed62e34a166228788a32ca/LICENSE",
+    "sha256": "bc14d2a9c696ce8d8f40aab542e4507d3a086d687465f56821454ebceee19681",
+    "notice_file": "sympy--sympy--bc14d2a9c696.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "84c125972ad535b2dfb245f8d311d347b45e5b8a",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/84c125972ad535b2dfb245f8d311d347b45e5b8a/LICENSE",
+    "sha256": "b8fd72e9cdac9dc5028ec9c4623945971cdff1ce71fda381d5f5419ffe0ab587",
+    "notice_file": "sympy--sympy--b8fd72e9cdac.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "b9af885473ad7e34b5b0826cb424dd26d8934670",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/b9af885473ad7e34b5b0826cb424dd26d8934670/LICENSE",
+    "sha256": "0d753dffbbcb7412bc1ad25e5c5193c9ff7f8c6a3331f3b60761f8dbd744b742",
+    "notice_file": "sympy--sympy--0d753dffbbcb.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "bdb49c4abfb35554a3c8ce761696ffff3bb837fe",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/bdb49c4abfb35554a3c8ce761696ffff3bb837fe/LICENSE",
+    "sha256": "a7212a73709d040d7b932440f84c71e2334c045faaae589e9905ec1e9fbfd443",
+    "notice_file": "sympy--sympy--a7212a73709d.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "ca6ef27272be31c9dc3753ede9232c39df9a75d8",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/ca6ef27272be31c9dc3753ede9232c39df9a75d8/LICENSE",
+    "sha256": "ff1f4cd13c20e05580c3791fe2e78f210d81bd03b122735426830197e82a6eb6",
+    "notice_file": "sympy--sympy--ff1f4cd13c20.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "d3fcdb72bfcbb560eb45264ac1c03f359436edef",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/d3fcdb72bfcbb560eb45264ac1c03f359436edef/LICENSE",
+    "sha256": "e6d5cc1bce88c52ec90cb34802a1b9fca23d01caee535431395aca3ba743123a",
+    "notice_file": "sympy--sympy--e6d5cc1bce88.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "d60497958f6dea7f5e25bc41e9107a6a63694d01",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/d60497958f6dea7f5e25bc41e9107a6a63694d01/LICENSE",
+    "sha256": "e6d5cc1bce88c52ec90cb34802a1b9fca23d01caee535431395aca3ba743123a",
+    "notice_file": "sympy--sympy--e6d5cc1bce88.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "d822fcba181155b85ff2b29fe525adbafb22b448",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/d822fcba181155b85ff2b29fe525adbafb22b448/LICENSE",
+    "sha256": "5b9b04818a656e98d186d1deada65ad4557798264225271136cea080bafbcbe7",
+    "notice_file": "sympy--sympy--5b9b04818a65.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "eb926a1d0c1158bf43f01eaf673dc84416b5ebb1",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/eb926a1d0c1158bf43f01eaf673dc84416b5ebb1/LICENSE",
+    "sha256": "a7212a73709d040d7b932440f84c71e2334c045faaae589e9905ec1e9fbfd443",
+    "notice_file": "sympy--sympy--a7212a73709d.txt"
+  },
+  {
+    "repo": "sympy/sympy",
+    "ref": "fb536869fb7aa28b2695ad7a3b70949926b291c4",
+    "status": "retrieved",
+    "spdx": "NOASSERTION",
+    "source_url": "https://github.com/sympy/sympy/blob/fb536869fb7aa28b2695ad7a3b70949926b291c4/LICENSE",
+    "sha256": "3c98bbadf4c3f229dcd4565ba5ac9de649a9db689770e5ad759f9eaeecbe6cd9",
+    "notice_file": "sympy--sympy--3c98bbadf4c3.txt"
+  }
+]

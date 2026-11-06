@@ -1062,7 +1062,7 @@
       "docsHint": "文档通过鉴权 API 加载，不会作为未鉴权静态文件暴露。",
       "readme": "README",
       "license": "许可证",
-      "licenseValue": "本仓库当前未在树内声明项目许可证。第三方依赖保留各自许可证。",
+      "licenseValue": "项目自有代码采用 Apache-2.0。Copyright 2026 jiaoenqi。第三方内容保留各自的许可证与声明。",
       "disclaimer": "Fake 与 Live 运行分开标记。官方 SWE-bench 判定绝不会从 UI 状态推导。"
     }
   }
