@@ -1,5 +1,8 @@
 name: Dependency audit
 on:
+  push:
+    branches: ["codex/open-source-preview"]
+  pull_request:
   workflow_dispatch:
   schedule:
     - cron: "24 3 * * 1"
@@ -8,6 +11,7 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
