@@ -1,7 +1,7 @@
 {
   "tool": "phase32-test-gate",
-  "generated_at": "2026-11-05T17:35:15+00:00",
-  "scratch": "D:\\cp35\\final13",
+  "generated_at": "2026-11-07T04:56:57+00:00",
+  "scratch": "D:\\cp35\\merged-final",
   "rg_path": "C:\\Users\\lenovo\\AppData\\Local\\OpenAI\\Codex\\bin\\rg.EXE",
   "rg_version": "ripgrep 15.1.0 (rev af60c2de9d)",
   "sequential": true,
@@ -14,35 +14,35 @@
     {
       "suite": "unit-c",
       "run": 1,
-      "started_at": "2026-11-05T17:20:48+00:00",
+      "started_at": "2026-11-07T04:44:00+00:00",
       "exit_code": 0,
-      "wall_s": 835.05,
+      "wall_s": 760.7,
       "memory_after": {
         "total_phys_mb": 16176,
-        "avail_phys_mb": 3527,
-        "total_pagefile_mb": 34014,
-        "avail_pagefile_mb": 6940,
-        "commit_headroom_mb": 6940,
-        "load_pct": 78
+        "avail_phys_mb": 2809,
+        "total_pagefile_mb": 46775,
+        "avail_pagefile_mb": 6789,
+        "commit_headroom_mb": 6789,
+        "load_pct": 82
       },
-      "log": "D:\\cp35\\final13\\gate-unit-c-run1.log",
-      "junit": "D:\\cp35\\final13\\gate-unit-c-run1.xml",
-      "basetemp": "D:\\cp35\\final13\\pytest\\unit-c-run1-20261105T172048-390739",
-      "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/test_artifacts.py tests/unit/test_cli.py tests/unit/test_cli_glm.py tests/unit/test_fsutil_replace.py tests/unit/test_index_real_repo.py tests/unit/test_m3_batch.py tests/unit/test_net_proxy.py tests/unit/test_phase19_acceptance_gate.py tests/unit/test_phase20_batch_controls.py tests/unit/test_phase21_budget_chain.py tests/unit/test_phase23_runtime.py tests/unit/test_phase26_closeout.py tests/unit/test_phase26_estimation.py tests/unit/test_phase26_final.py tests/unit/test_phase26_harness.py tests/unit/test_phase28_archive.py tests/unit/test_phase28_archive_verify.py tests/unit/test_phase29_archive.py tests/unit/test_phase29_archive_security.py tests/unit/test_phase29_archive_verify.py tests/unit/test_phase30_archive_receipt.py tests/unit/test_phase30_archive_v4.py tests/unit/test_phase30_harness_failclosed.py tests/unit/test_phase31_archive_manifest.py tests/unit/test_phase31_archive_verify.py tests/unit/test_phase31_receipt.py tests/unit/test_phase33_runtime_results.py tests/unit/test_phase33_test_gate.py tests/unit/test_phase34_archive_normalization.py tests/unit/test_phase34_runtime_results.py tests/unit/test_phase35_activation_dryrun.py tests/unit/test_phase6_repro_stats.py -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp35\\final13\\gate-unit-c-run1.xml --basetemp=D:\\cp35\\final13\\pytest\\unit-c-run1-20261105T172048-390739",
-      "summary_line": "427 passed in 831.84s (0:13:51)",
+      "log": "D:\\cp35\\merged-final\\gate-unit-c-run1.log",
+      "junit": "D:\\cp35\\merged-final\\gate-unit-c-run1.xml",
+      "basetemp": "D:\\cp35\\merged-final\\pytest\\unit-c-run1-20261107T044400-062122",
+      "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe -m pytest tests/unit/test_artifacts.py tests/unit/test_cli.py tests/unit/test_cli_glm.py tests/unit/test_fsutil_replace.py tests/unit/test_index_real_repo.py tests/unit/test_m3_batch.py tests/unit/test_net_proxy.py tests/unit/test_phase19_acceptance_gate.py tests/unit/test_phase20_batch_controls.py tests/unit/test_phase21_budget_chain.py tests/unit/test_phase23_runtime.py tests/unit/test_phase26_closeout.py tests/unit/test_phase26_estimation.py tests/unit/test_phase26_final.py tests/unit/test_phase26_harness.py tests/unit/test_phase28_archive.py tests/unit/test_phase28_archive_verify.py tests/unit/test_phase29_archive.py tests/unit/test_phase29_archive_security.py tests/unit/test_phase29_archive_verify.py tests/unit/test_phase30_archive_receipt.py tests/unit/test_phase30_archive_v4.py tests/unit/test_phase30_harness_failclosed.py tests/unit/test_phase31_archive_manifest.py tests/unit/test_phase31_archive_verify.py tests/unit/test_phase31_receipt.py tests/unit/test_phase33_runtime_results.py tests/unit/test_phase33_test_gate.py tests/unit/test_phase34_archive_normalization.py tests/unit/test_phase34_runtime_results.py tests/unit/test_phase35_activation_dryrun.py tests/unit/test_phase6_repro_stats.py -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp35\\merged-final\\gate-unit-c-run1.xml --basetemp=D:\\cp35\\merged-final\\pytest\\unit-c-run1-20261107T044400-062122",
+      "summary_line": "427 passed in 757.56s (0:12:37)",
       "temp_reclaimed": {
-        "path": "D:\\cp35\\final13\\pytest\\unit-c-run1-20261105T172048-390739",
+        "path": "D:\\cp35\\merged-final\\pytest\\unit-c-run1-20261107T044400-062122",
         "existed": true,
         "removed": false,
-        "bytes_removed": 47323323
+        "bytes_removed": 47304561
       },
       "memory_before": {
         "total_phys_mb": 16176,
-        "avail_phys_mb": 2585,
-        "total_pagefile_mb": 34281,
-        "avail_pagefile_mb": 7009,
-        "commit_headroom_mb": 7009,
-        "load_pct": 84,
+        "avail_phys_mb": 2800,
+        "total_pagefile_mb": 46775,
+        "avail_pagefile_mb": 6673,
+        "commit_headroom_mb": 6673,
+        "load_pct": 82,
         "sufficient": 1
       }
     }

@@ -15,6 +15,6 @@
 ........................................................................ [ 94%]
 ............................................................             [100%]
 =========================== short test summary info ===========================
-SKIPPED [1] tests\unit\retrieval\test_embeddings.py:104: NOT RUN: set CODEPILOT_TEST_EMBEDDING_MODEL to a preinstalled code model
-SKIPPED [1] tests\unit\sandbox\test_transfer.py:253: os.mkfifo is not available on this platform
-1138 passed, 2 skipped in 245.27s (0:04:05)
+SKIPPED [1] C:\Users\lenovo\Desktop\CodePilot-Repair\tests\unit\retrieval\test_embeddings.py:104: NOT RUN: set CODEPILOT_TEST_EMBEDDING_MODEL to a preinstalled code model
+SKIPPED [1] C:\Users\lenovo\Desktop\CodePilot-Repair\tests\unit\sandbox\test_transfer.py:253: os.mkfifo is not available on this platform
+1138 passed, 2 skipped in 242.68s (0:04:02)

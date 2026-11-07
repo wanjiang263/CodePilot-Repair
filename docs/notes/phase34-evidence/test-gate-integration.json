@@ -1,7 +1,7 @@
 {
   "tool": "phase32-test-gate",
-  "generated_at": "2026-11-05T17:53:38+00:00",
-  "scratch": "D:\\cp35\\final13",
+  "generated_at": "2026-11-07T05:11:49+00:00",
+  "scratch": "D:\\cp35\\merged-final",
   "rg_path": "C:\\Users\\lenovo\\AppData\\Local\\OpenAI\\Codex\\bin\\rg.EXE",
   "rg_version": "ripgrep 15.1.0 (rev af60c2de9d)",
   "sequential": true,
@@ -14,35 +14,35 @@
     {
       "suite": "integration",
       "run": 1,
-      "started_at": "2026-11-05T17:47:32+00:00",
+      "started_at": "2026-11-07T05:06:58+00:00",
       "exit_code": 0,
-      "wall_s": 358.91,
+      "wall_s": 287.27,
       "memory_after": {
         "total_phys_mb": 16176,
-        "avail_phys_mb": 3549,
-        "total_pagefile_mb": 34108,
-        "avail_pagefile_mb": 6991,
-        "commit_headroom_mb": 6991,
-        "load_pct": 78
+        "avail_phys_mb": 2442,
+        "total_pagefile_mb": 46775,
+        "avail_pagefile_mb": 6852,
+        "commit_headroom_mb": 6852,
+        "load_pct": 84
       },
-      "log": "D:\\cp35\\final13\\gate-integration-run1.log",
-      "junit": "D:\\cp35\\final13\\gate-integration-run1.xml",
-      "basetemp": "D:\\cp35\\final13\\pytest\\integration-run1-20261105T174732-634785",
-      "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/integration -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp35\\final13\\gate-integration-run1.xml --basetemp=D:\\cp35\\final13\\pytest\\integration-run1-20261105T174732-634785",
-      "summary_line": "126 passed, 1 deselected in 355.45s (0:05:55)",
+      "log": "D:\\cp35\\merged-final\\gate-integration-run1.log",
+      "junit": "D:\\cp35\\merged-final\\gate-integration-run1.xml",
+      "basetemp": "D:\\cp35\\merged-final\\pytest\\integration-run1-20261107T050658-814401",
+      "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe -m pytest tests/integration -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp35\\merged-final\\gate-integration-run1.xml --basetemp=D:\\cp35\\merged-final\\pytest\\integration-run1-20261107T050658-814401",
+      "summary_line": "126 passed, 1 deselected in 284.31s (0:04:44)",
       "temp_reclaimed": {
-        "path": "D:\\cp35\\final13\\pytest\\integration-run1-20261105T174732-634785",
+        "path": "D:\\cp35\\merged-final\\pytest\\integration-run1-20261107T050658-814401",
         "existed": true,
         "removed": false,
-        "bytes_removed": 18661210
+        "bytes_removed": 18731659
       },
       "memory_before": {
         "total_phys_mb": 16176,
-        "avail_phys_mb": 3429,
-        "total_pagefile_mb": 34014,
-        "avail_pagefile_mb": 6792,
-        "commit_headroom_mb": 6792,
-        "load_pct": 78,
+        "avail_phys_mb": 2543,
+        "total_pagefile_mb": 46775,
+        "avail_pagefile_mb": 6641,
+        "commit_headroom_mb": 6641,
+        "load_pct": 84,
         "sufficient": 1
       }
     }

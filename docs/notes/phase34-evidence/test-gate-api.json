@@ -1,7 +1,7 @@
 {
   "tool": "phase32-test-gate",
-  "generated_at": "2026-11-05T17:56:16+00:00",
-  "scratch": "D:\\cp35\\final13",
+  "generated_at": "2026-11-07T05:13:08+00:00",
+  "scratch": "D:\\cp35\\merged-final",
   "rg_path": "C:\\Users\\lenovo\\AppData\\Local\\OpenAI\\Codex\\bin\\rg.EXE",
   "rg_version": "ripgrep 15.1.0 (rev af60c2de9d)",
   "sequential": true,
@@ -14,35 +14,35 @@
     {
       "suite": "api",
       "run": 1,
-      "started_at": "2026-11-05T17:53:39+00:00",
+      "started_at": "2026-11-07T05:11:50+00:00",
       "exit_code": 0,
-      "wall_s": 153.33,
+      "wall_s": 76.88,
       "memory_after": {
         "total_phys_mb": 16176,
-        "avail_phys_mb": 3528,
-        "total_pagefile_mb": 34028,
-        "avail_pagefile_mb": 6978,
-        "commit_headroom_mb": 6978,
-        "load_pct": 78
+        "avail_phys_mb": 2419,
+        "total_pagefile_mb": 46775,
+        "avail_pagefile_mb": 6815,
+        "commit_headroom_mb": 6815,
+        "load_pct": 85
       },
-      "log": "D:\\cp35\\final13\\gate-api-run1.log",
-      "junit": "D:\\cp35\\final13\\gate-api-run1.xml",
-      "basetemp": "D:\\cp35\\final13\\pytest\\api-run1-20261105T175339-012068",
-      "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/api -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp35\\final13\\gate-api-run1.xml --basetemp=D:\\cp35\\final13\\pytest\\api-run1-20261105T175339-012068",
-      "summary_line": "117 passed, 1 skipped in 146.58s (0:02:26)",
+      "log": "D:\\cp35\\merged-final\\gate-api-run1.log",
+      "junit": "D:\\cp35\\merged-final\\gate-api-run1.xml",
+      "basetemp": "D:\\cp35\\merged-final\\pytest\\api-run1-20261107T051150-007291",
+      "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\python.exe -m pytest tests/api -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp35\\merged-final\\gate-api-run1.xml --basetemp=D:\\cp35\\merged-final\\pytest\\api-run1-20261107T051150-007291",
+      "summary_line": "118 passed in 71.30s (0:01:11)",
       "temp_reclaimed": {
-        "path": "D:\\cp35\\final13\\pytest\\api-run1-20261105T175339-012068",
+        "path": "D:\\cp35\\merged-final\\pytest\\api-run1-20261107T051150-007291",
         "existed": true,
         "removed": false,
-        "bytes_removed": 31841242
+        "bytes_removed": 31911483
       },
       "memory_before": {
         "total_phys_mb": 16176,
-        "avail_phys_mb": 3559,
-        "total_pagefile_mb": 34108,
-        "avail_pagefile_mb": 6990,
-        "commit_headroom_mb": 6990,
-        "load_pct": 77,
+        "avail_phys_mb": 2447,
+        "total_pagefile_mb": 46775,
+        "avail_pagefile_mb": 6846,
+        "commit_headroom_mb": 6846,
+        "load_pct": 84,
         "sufficient": 1
       }
     }

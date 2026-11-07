@@ -1,120 +1,125 @@
 {
-  "tool": "phase35-static-v13",
-  "generated_at": "2026-11-05T16:09:53+00:00",
-  "base_commit": "dba045d",
+  "tool": "phase32-static-final",
+  "generated_at": "2026-11-07T05:30:27+00:00",
+  "base_commit": "7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d",
   "files": [
-    "scripts/__init__.py",
-    "scripts/phase28_archive_verify.py",
-    "scripts/phase32_provider_matrix.py",
-    "scripts/phase33_runtime_results.py",
-    "scripts/phase34_evidence_manifest.py",
+    "configs/swebench/testdeps/psf__requests-3362/codepilot_requests_compat.py",
+    "scripts/batch_budget.py",
+    "scripts/phase32_test_gate.py",
     "scripts/phase34_runtime_results.py",
-    "src/codepilot/archive.py",
-    "src/codepilot/eval/swebench_isolation.py",
-    "src/codepilot/graph/harness.py",
-    "tests/eval/test_isolation.py",
-    "tests/unit/llm/test_phase33_provider_real.py",
-    "tests/unit/test_phase26_final.py",
-    "tests/unit/test_phase28_archive.py",
-    "tests/unit/test_phase33_runtime_results.py",
-    "tests/unit/test_phase34_archive_normalization.py",
-    "tests/unit/test_phase34_runtime_results.py",
-    "tests/unit/test_phase35_activation_dryrun.py"
+    "scripts/recovery_admin.py",
+    "src/codepilot/config.py",
+    "src/codepilot/eval/swebench.py",
+    "tests/graph/test_phase11_closure_docker.py",
+    "tests/graph/test_phase12_closure_admission_docker.py",
+    "tests/graph/test_phase19_static_reliability.py",
+    "tests/integration/test_docker_phase1.py",
+    "tests/integration/test_swebench_smoke.py",
+    "tests/unit/graph/test_phase19_checkpoint_identity.py",
+    "tests/unit/llm/test_phase19_budget_binding.py",
+    "tests/unit/test_cli_glm.py",
+    "tests/unit/test_fsutil_replace.py",
+    "tests/unit/test_phase26_estimation.py",
+    "tests/unit/test_phase33_test_gate.py",
+    "tests/unit/tools/test_phase19_repro_permissions.py"
   ],
-  "file_count": 17,
+  "file_count": 19,
   "checks": [
     {
       "name": "AST parse",
       "files": [
-        "scripts/__init__.py",
-        "scripts/phase28_archive_verify.py",
-        "scripts/phase32_provider_matrix.py",
-        "scripts/phase33_runtime_results.py",
-        "scripts/phase34_evidence_manifest.py",
+        "configs/swebench/testdeps/psf__requests-3362/codepilot_requests_compat.py",
+        "scripts/batch_budget.py",
+        "scripts/phase32_test_gate.py",
         "scripts/phase34_runtime_results.py",
-        "src/codepilot/archive.py",
-        "src/codepilot/eval/swebench_isolation.py",
-        "src/codepilot/graph/harness.py",
-        "tests/eval/test_isolation.py",
-        "tests/unit/llm/test_phase33_provider_real.py",
-        "tests/unit/test_phase26_final.py",
-        "tests/unit/test_phase28_archive.py",
-        "tests/unit/test_phase33_runtime_results.py",
-        "tests/unit/test_phase34_archive_normalization.py",
-        "tests/unit/test_phase34_runtime_results.py",
-        "tests/unit/test_phase35_activation_dryrun.py"
+        "scripts/recovery_admin.py",
+        "src/codepilot/config.py",
+        "src/codepilot/eval/swebench.py",
+        "tests/graph/test_phase11_closure_docker.py",
+        "tests/graph/test_phase12_closure_admission_docker.py",
+        "tests/graph/test_phase19_static_reliability.py",
+        "tests/integration/test_docker_phase1.py",
+        "tests/integration/test_swebench_smoke.py",
+        "tests/unit/graph/test_phase19_checkpoint_identity.py",
+        "tests/unit/llm/test_phase19_budget_binding.py",
+        "tests/unit/test_cli_glm.py",
+        "tests/unit/test_fsutil_replace.py",
+        "tests/unit/test_phase26_estimation.py",
+        "tests/unit/test_phase33_test_gate.py",
+        "tests/unit/tools/test_phase19_repro_permissions.py"
       ],
-      "file_count": 17,
+      "file_count": 19,
       "exit_code": 0,
       "errors": []
     },
     {
       "name": "ruff check",
       "command": [
-        "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\ruff.exe",
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\ruff.exe",
         "check",
-        "scripts/__init__.py",
-        "scripts/phase28_archive_verify.py",
-        "scripts/phase32_provider_matrix.py",
-        "scripts/phase33_runtime_results.py",
-        "scripts/phase34_evidence_manifest.py",
+        "configs/swebench/testdeps/psf__requests-3362/codepilot_requests_compat.py",
+        "scripts/batch_budget.py",
+        "scripts/phase32_test_gate.py",
         "scripts/phase34_runtime_results.py",
-        "src/codepilot/archive.py",
-        "src/codepilot/eval/swebench_isolation.py",
-        "src/codepilot/graph/harness.py",
-        "tests/eval/test_isolation.py",
-        "tests/unit/llm/test_phase33_provider_real.py",
-        "tests/unit/test_phase26_final.py",
-        "tests/unit/test_phase28_archive.py",
-        "tests/unit/test_phase33_runtime_results.py",
-        "tests/unit/test_phase34_archive_normalization.py",
-        "tests/unit/test_phase34_runtime_results.py",
-        "tests/unit/test_phase35_activation_dryrun.py"
+        "scripts/recovery_admin.py",
+        "src/codepilot/config.py",
+        "src/codepilot/eval/swebench.py",
+        "tests/graph/test_phase11_closure_docker.py",
+        "tests/graph/test_phase12_closure_admission_docker.py",
+        "tests/graph/test_phase19_static_reliability.py",
+        "tests/integration/test_docker_phase1.py",
+        "tests/integration/test_swebench_smoke.py",
+        "tests/unit/graph/test_phase19_checkpoint_identity.py",
+        "tests/unit/llm/test_phase19_budget_binding.py",
+        "tests/unit/test_cli_glm.py",
+        "tests/unit/test_fsutil_replace.py",
+        "tests/unit/test_phase26_estimation.py",
+        "tests/unit/test_phase33_test_gate.py",
+        "tests/unit/tools/test_phase19_repro_permissions.py"
       ],
       "exit_code": 0,
-      "log": ".codex-pytest-tmp/phase35/static-v13/ruff-check.log",
+      "log": ".codex-pytest-tmp/merged-static/ruff-check.log",
       "output": "All checks passed!"
     },
     {
       "name": "ruff format --check",
       "command": [
-        "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\ruff.exe",
+        "D:\\Projects\\Desktop\\CodePilot-Repair\\.venv\\Scripts\\ruff.exe",
         "format",
         "--check",
-        "scripts/__init__.py",
-        "scripts/phase28_archive_verify.py",
-        "scripts/phase32_provider_matrix.py",
-        "scripts/phase33_runtime_results.py",
-        "scripts/phase34_evidence_manifest.py",
+        "configs/swebench/testdeps/psf__requests-3362/codepilot_requests_compat.py",
+        "scripts/batch_budget.py",
+        "scripts/phase32_test_gate.py",
         "scripts/phase34_runtime_results.py",
-        "src/codepilot/archive.py",
-        "src/codepilot/eval/swebench_isolation.py",
-        "src/codepilot/graph/harness.py",
-        "tests/eval/test_isolation.py",
-        "tests/unit/llm/test_phase33_provider_real.py",
-        "tests/unit/test_phase26_final.py",
-        "tests/unit/test_phase28_archive.py",
-        "tests/unit/test_phase33_runtime_results.py",
-        "tests/unit/test_phase34_archive_normalization.py",
-        "tests/unit/test_phase34_runtime_results.py",
-        "tests/unit/test_phase35_activation_dryrun.py"
+        "scripts/recovery_admin.py",
+        "src/codepilot/config.py",
+        "src/codepilot/eval/swebench.py",
+        "tests/graph/test_phase11_closure_docker.py",
+        "tests/graph/test_phase12_closure_admission_docker.py",
+        "tests/graph/test_phase19_static_reliability.py",
+        "tests/integration/test_docker_phase1.py",
+        "tests/integration/test_swebench_smoke.py",
+        "tests/unit/graph/test_phase19_checkpoint_identity.py",
+        "tests/unit/llm/test_phase19_budget_binding.py",
+        "tests/unit/test_cli_glm.py",
+        "tests/unit/test_fsutil_replace.py",
+        "tests/unit/test_phase26_estimation.py",
+        "tests/unit/test_phase33_test_gate.py",
+        "tests/unit/tools/test_phase19_repro_permissions.py"
       ],
       "exit_code": 0,
-      "log": ".codex-pytest-tmp/phase35/static-v13/ruff-format.log",
-      "output": "17 files already formatted"
+      "log": ".codex-pytest-tmp/merged-static/ruff-format.log",
+      "output": "19 files already formatted"
     },
     {
       "name": "mypy (changed src/scripts, new errors vs BASE, full-path keys)",
       "scope": [
-        "scripts/__init__.py",
-        "scripts/phase28_archive_verify.py",
-        "scripts/phase32_provider_matrix.py",
-        "scripts/phase33_runtime_results.py",
-        "scripts/phase34_evidence_manifest.py",
+        "scripts/batch_budget.py",
+        "scripts/phase32_test_gate.py",
         "scripts/phase34_runtime_results.py",
-        "src/codepilot/archive.py",
-        "src/codepilot/eval/swebench_isolation.py",
-        "src/codepilot/graph/harness.py"
+        "scripts/recovery_admin.py",
+        "src/codepilot/config.py",
+        "src/codepilot/eval/swebench.py"
       ],
       "exit_code": 0,
       "pre_existing_files": {}
@@ -148,11 +153,11 @@
         "git",
         "diff",
         "--check",
-        "dba045d"
+        "7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d"
       ],
       "exit_code": 2,
-      "log": ".codex-pytest-tmp/phase35/static-v13/diff-check.log",
-      "output": "configs/harness/candidates/historical-baseline.json:2: trailing whitespace.\n+  \"archive_root\": \"D:\\\\Projects\\\\Desktop\\\\CodePilot-Repair\\\\.claude\\\\worktrees\\\\phase34-v7-archive-closure-942bb1\\\\configs\\\\harness\",\nconfigs/harness/candidates/historical-baseline.json:293: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:294: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:295: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:296: trailing whitespace.\n+      \"bytes\": 26133,\nconfigs/harness/candidates/historical-baseline.json:297: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v10/candidate.diff\",\nconfigs/harness/candidates/historical-baseline.json:298: trailing whitespace.\n+      \"sha256\": \"d26c12841efde4aa7288abe5715490dc09f06c4fd1fb22ac581e2d77afb72e36\"\nconfigs/harness/candidates/historical-baseline.json:299: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:300: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:301: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:302: trailing whitespace.\n+      \"bytes\": 35317,\nconfigs/harness/candidates/historical-baseline.json:303: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v10/candidate.json\",\nconfigs/harness/candidates/historical-baseline.json:304: trailing whitespace.\n+      \"sha256\": \"5ccad67744024a0cf9087734e1427d3c18b9ae666435a6774963adea1ea79cba\"\nconfigs/harness/candidates/historical-baseline.json:305: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:306: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:307: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:308: trailing whitespace.\n+      \"bytes\": 3893,\nconfigs/harness/candidates/historical-baseline.json:309: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v10/snapshot.json\",\nconfigs/harness/candidates/historical-baseline.json:310: trailing whitespace.\n+      \"sha256\": \"6edf5eff6079ca44862e19bec962ef325d2d0c69c7eadb186d5574579990af64\"\nconfigs/harness/candidates/historical-baseline.json:311: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:312: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:313: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:314: trailing whitespace.\n+      \"bytes\": 2313438,\nconfigs/harness/candidates/historical-baseline.json:315: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v10/sources.json\",\nconfigs/harness/candidates/historical-baseline.json:316: trailing whitespace.\n+      \"sha256\": \"0922656112811a4e3d02726463efe75ef8f50bc965f940c1a5a247ce8b6391da\"\nconfigs/harness/candidates/historical-baseline.json:317: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:318: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:319: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:320: trailing whitespace.\n+      \"bytes\": 4156,\nconfigs/harness/candidates/historical-baseline.json:321: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v11/candidate.diff\",\nconfigs/harness/candidates/historical-baseline.json:322: trailing whitespace.\n+      \"sha256\": \"cc6f62e7294577fcf6fbf8537db1b45c1700d8a4730fb9d96b1fc7b59e7f73ac\"\nconfigs/harness/candidates/historical-baseline.json:323: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:324: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:325: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/hi"
+      "log": ".codex-pytest-tmp/merged-static/diff-check.log",
+      "output": "configs/harness/candidates/historical-baseline.json:368: trailing whitespace.\n+      \"bytes\": 10204,\nconfigs/harness/candidates/historical-baseline.json:369: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v13/candidate.diff\",\nconfigs/harness/candidates/historical-baseline.json:370: trailing whitespace.\n+      \"sha256\": \"1ab950921132bafca44db0f8540694a1080cc213a3fec3779dec4324be8075d5\"\nconfigs/harness/candidates/historical-baseline.json:371: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:372: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:373: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:374: trailing whitespace.\n+      \"bytes\": 35745,\nconfigs/harness/candidates/historical-baseline.json:375: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v13/candidate.json\",\nconfigs/harness/candidates/historical-baseline.json:376: trailing whitespace.\n+      \"sha256\": \"ab6b8a83cbe0160ca0ac5e61e44f452edf5ad13dcc28928a8e407225b6cde801\"\nconfigs/harness/candidates/historical-baseline.json:377: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:378: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:379: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:380: trailing whitespace.\n+      \"bytes\": 3894,\nconfigs/harness/candidates/historical-baseline.json:381: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v13/snapshot.json\",\nconfigs/harness/candidates/historical-baseline.json:382: trailing whitespace.\n+      \"sha256\": \"08daf2a7bd0deed4a1e170fcf25bbf329a5d1fa5c91bd7ea4284169ec900a57d\"\nconfigs/harness/candidates/historical-baseline.json:383: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:384: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:385: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:386: trailing whitespace.\n+      \"bytes\": 2321886,\nconfigs/harness/candidates/historical-baseline.json:387: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v13/sources.json\",\nconfigs/harness/candidates/historical-baseline.json:388: trailing whitespace.\n+      \"sha256\": \"ab89014d8fa0323e08015e2d36b785569a02845bec368a3844d4ec9b26ae8b8d\"\nconfigs/harness/candidates/historical-baseline.json:389: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:390: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:391: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:463: trailing whitespace.\n+  \"generated_at_epoch\": 1793895051,\nconfigs/harness/candidates/historical-baseline.json:464: trailing whitespace.\n+  \"manifest_head\": \"c4194cb2e8ff95aa41622aa4d266924077683725\",\nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:7: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:20: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:28: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:33: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:34: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:103: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:104: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:111: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:112: trailing whitespace.\n+ \ndocs/notes/phase34-evidence/docker-junit-idle.xml:1: trailing whitespace.\n+<?xml version=\"1.0\" encoding=\"utf-8\"?><testsuites name=\"pyt"
     },
     {
       "name": "git diff --check (CRLF-aware)",
@@ -162,50 +167,101 @@
         "core.whitespace=cr-at-eol",
         "diff",
         "--check",
-        "dba045d"
+        "7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d"
       ],
       "exit_code": 2,
-      "log": ".codex-pytest-tmp/phase35/static-v13/diff-check-crlf.log",
-      "output": "configs/harness/candidates/phase34-candidate-v10/candidate.diff:172: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:187: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:194: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:205: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:210: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:211: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:333: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:334: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:378: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:390: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:467: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:469: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:478: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:479: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:599: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:602: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:603: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:623: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:624: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v11/candidate.diff:6: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v11/candidate.diff:20: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v11/candidate.diff:36: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v11/candidate.diff:37: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:6: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:23: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:26: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:27: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:95: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:116: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:193: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:212: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:218: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:222: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:227: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:237: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:238: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:241: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:242: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:275: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:278: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:279: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:299: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:327: trailing whitespace.\n+ \nconfigs/harness/candidates/phase"
+      "log": ".codex-pytest-tmp/merged-static/diff-check-crlf.log",
+      "output": "configs/harness/candidates/phase34-candidate-v13/candidate.diff:7: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:20: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:28: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:33: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:34: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:103: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:104: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:111: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v13/candidate.diff:112: trailing whitespace.\n+ \ndocs/notes/phase34-evidence/docker-junit-idle.xml:14: trailing whitespace.\n+tests\\docker\\test_synthetic_suite.py:94: \ndocs/notes/phase34-evidence/docker-junit-idle.xml:40: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:45: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:52: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:91: trailing whitespace.\n+tests\\docker\\test_synthetic_suite.py:94: \ndocs/notes/phase34-evidence/docker-junit-idle.xml:117: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:122: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:129: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:168: trailing whitespace.\n+tests\\docker\\test_synthetic_suite.py:94: \ndocs/notes/phase34-evidence/docker-junit-idle.xml:194: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:199: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:206: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:245: trailing whitespace.\n+tests\\docker\\test_synthetic_suite.py:94: \ndocs/notes/phase34-evidence/docker-junit-idle.xml:271: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:276: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:283: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:322: trailing whitespace.\n+tests\\docker\\test_synthetic_suite.py:94: \ndocs/notes/phase34-evidence/docker-junit-idle.xml:348: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:353: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:360: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:391: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:409: trailing whitespace.\n+tests\\docker\\test_synthetic_suite.py:138: \ndocs/notes/phase34-evidence/docker-junit-idle.xml:435: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:440: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:447: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:478: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:482: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:503: trailing whitespace.\n+tests\\docker\\test_synthetic_suite.py:168: \ndocs/notes/phase34-evidence/docker-junit-idle.xml:529: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:534: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:541: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:574: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:588: trailing whitespace.\n+tests\\docker\\test_synthetic_suite.py:188: \ndocs/notes/phase34-evidence/docker-junit-idle.xml:614: trailing whitespace.\n+    \ndocs/notes/phase34-evidence/docker-junit-idle.xml:619: trailing whitespace.\n+    \ndocs/"
     },
     {
       "name": "EOL (LF only)",
       "files": [
-        "scripts/__init__.py",
-        "scripts/phase28_archive_verify.py",
-        "scripts/phase32_provider_matrix.py",
-        "scripts/phase33_runtime_results.py",
-        "scripts/phase34_evidence_manifest.py",
+        "configs/swebench/testdeps/psf__requests-3362/codepilot_requests_compat.py",
+        "scripts/batch_budget.py",
+        "scripts/phase32_test_gate.py",
         "scripts/phase34_runtime_results.py",
-        "src/codepilot/archive.py",
-        "src/codepilot/eval/swebench_isolation.py",
-        "src/codepilot/graph/harness.py",
-        "tests/eval/test_isolation.py",
-        "tests/unit/llm/test_phase33_provider_real.py",
-        "tests/unit/test_phase26_final.py",
-        "tests/unit/test_phase28_archive.py",
-        "tests/unit/test_phase33_runtime_results.py",
-        "tests/unit/test_phase34_archive_normalization.py",
-        "tests/unit/test_phase34_runtime_results.py",
-        "tests/unit/test_phase35_activation_dryrun.py"
+        "scripts/recovery_admin.py",
+        "src/codepilot/config.py",
+        "src/codepilot/eval/swebench.py",
+        "tests/graph/test_phase11_closure_docker.py",
+        "tests/graph/test_phase12_closure_admission_docker.py",
+        "tests/graph/test_phase19_static_reliability.py",
+        "tests/integration/test_docker_phase1.py",
+        "tests/integration/test_swebench_smoke.py",
+        "tests/unit/graph/test_phase19_checkpoint_identity.py",
+        "tests/unit/llm/test_phase19_budget_binding.py",
+        "tests/unit/test_cli_glm.py",
+        "tests/unit/test_fsutil_replace.py",
+        "tests/unit/test_phase26_estimation.py",
+        "tests/unit/test_phase33_test_gate.py",
+        "tests/unit/tools/test_phase19_repro_permissions.py"
       ],
-      "file_count": 17,
+      "file_count": 19,
       "exit_code": 0,
       "offenders": []
     },
     {
       "name": "credential scan (added lines only)",
-      "added_lines": 16234,
+      "added_lines": 54357,
       "exit_code": 0,
       "hits": []
     },
     {
       "name": "web/src scope",
-      "command": "git diff --name-only dba045d..HEAD -- web/src",
-      "output": "",
-      "changed_files": 0,
-      "exit_code": 0,
-      "result": "web/src has zero diff in this phase; frontend gates and page E2E conditionally skipped (documented, not faked)"
+      "command": "git diff --name-only 7d5e75d..HEAD -- web/src",
+      "changed_files": 2,
+      "files": [
+        "web/src/locales/en-US/index.json",
+        "web/src/locales/zh-CN/index.json"
+      ],
+      "gates": [
+        {
+          "name": "web: tsc --noEmit",
+          "command": [
+            "npx",
+            "tsc",
+            "--noEmit"
+          ],
+          "exit_code": 0,
+          "log": ".codex-pytest-tmp/merged-static/web-tsc.log",
+          "output": "npm warn Unknown user config \"disturl\". This will stop working in the next major version of npm."
+        },
+        {
+          "name": "web: eslint",
+          "command": [
+            "npx",
+            "eslint",
+            "src",
+            "--max-warnings=0"
+          ],
+          "exit_code": 0,
+          "log": ".codex-pytest-tmp/merged-static/web-eslint.log",
+          "output": "npm warn Unknown user config \"disturl\". This will stop working in the next major version of npm."
+        },
+        {
+          "name": "web: vitest",
+          "command": [
+            "npx",
+            "vitest",
+            "run"
+          ],
+          "exit_code": 0,
+          "log": ".codex-pytest-tmp/merged-static/web-vitest.log",
+          "output": "RUN  v5.1.0 D:/Projects/Desktop/CodePilot-Repair/web\n\n\n Test Files  14 passed (14)\n      Tests  50 passed (50)\n   Start at  13:30:05\n   Duration  12.22s (environment 67%, setup 26%, tests 2%, transform 2%, import 1%, worker 1%)\n\nnpm warn Unknown user config \"disturl\". This will stop working in the next major version of npm."
+        },
+        {
+          "name": "web: build",
+          "command": [
+            "npm",
+            "run",
+            "build"
+          ],
+          "exit_code": 0,
+          "log": ".codex-pytest-tmp/merged-static/web-build.log",
+          "output": "> codepilot-dashboard@0.1.0 build\n> tsc -b && vite build\n\n\u001b[36mvite v6.4.5 \u001b[32mbuilding for production...\u001b[36m\u001b[39m\ntransforming...\n\u001b[32m✓\u001b[39m 1664 modules transformed.\nrendering chunks...\ncomputing gzip size...\n\u001b[2mdist/\u001b[22m\u001b[32mindex.html                                                   \u001b[39m\u001b[1m\u001b[2m  1.60 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   0.69 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[32massets/jetbrains-mono-vietnamese-wght-normal-Bt-aOZkq.woff2  \u001b[39m\u001b[1m\u001b[2m  7.50 kB\u001b[22m\u001b[1m\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[32massets/jetbrains-mono-greek-wght-normal-Bw9x6K1M.woff2       \u001b[39m\u001b[1m\u001b[2m  9.00 kB\u001b[22m\u001b[1m\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[32massets/inter-vietnamese-wght-normal-CBcvBZtf.woff2           \u001b[39m\u001b[1m\u001b[2m 10.25 kB\u001b[22m\u001b[1m\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[32massets/inter-greek-ext-wght-normal-DlzME5K_.woff2            \u001b[39m\u001b[1m\u001b[2m 11.23 kB\u001b[22m\u001b[1m\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[32massets/jetbrains-mono-cyrillic-wght-normal-D73BlboJ.woff2    \u001b[39m\u001b[1m\u001b[2m 12.11 kB\u001b[22m\u001b[1m\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[32massets/jetbrains-mono-latin-ext-wght-normal-DBQx-q_a.woff2   \u001b[39m\u001b[1m\u001b[2m 15.20 kB\u001b[22m\u001b[1m\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[32massets/inter-cyrillic-wght-normal-DqGufNeO.woff2             \u001b[39m\u001b[1m\u001b[2m 18.75 kB\u001b[22m\u001b[1m\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[32massets/inter-greek-wght-normal-CkhJZR-_.woff2                \u001b[39m\u001b[1m\u001b[2m 19.00 kB\u001b[22m\u001b[1m\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[32massets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2         \u001b[39m\u001b[1m\u001b[2m 25.96 kB\u001b[22m\u001b[1m\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[32massets/jetbrains-mono-latin-wght-normal-B9CIFXIH.woff2       \u001b[39m\u001b[1m\u001b[2m 40.40 kB\u001b[22m\u001b[1m\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[32massets/inter-latin-wght-normal-Dx4kXJAl.woff2                \u001b[39m\u001b[1m\u001b[2m 48.26 kB\u001b[22m\u001b[1m\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[32massets/inter-latin-ext-wght-normal-DO1Apj_S.woff2            \u001b[39m\u001b[1m\u001b[2m 85.07 kB\u001b[22m\u001b[1m\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[35massets/index-C7tFVb1s.css                                    \u001b[39m\u001b[1m\u001b[2m 40.93 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  10.26 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/database-BV9Fr99q.js                                  \u001b[39m\u001b[1m\u001b[2m  0.41 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   0.30 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/BenchmarksView-C5MNyNSE.js                            \u001b[39m\u001b[1m\u001b[2m  2.68 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   1.05 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/HistoryView-C1RN7N7a.js                               \u001b[39m\u001b[1m\u001b[2m  5.17 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   1.81 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/BenchmarkDetailView-Cft3nb_L.js                       \u001b[39m\u001b[1m\u001b[2m  8.24 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   2.42 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/SettingsView-R-DRvBOL.js                              \u001b[39m\u001b[1m\u001b[2m 84.50 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  19.36 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/index-C7sqksfj.js                                     \u001b[39m\u001b[1m\u001b[2m436.12 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 134.71 kB\u001b[22m\n\u001b[32m✓ built in 4.65s\u001b[39m\nnpm warn Unknown user config \"disturl\". This will stop working in the next major version of npm."
+        }
+      ],
+      "exit_code": 0
     }
   ],
   "failed": [
