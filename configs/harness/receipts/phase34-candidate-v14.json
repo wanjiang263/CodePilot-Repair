@@ -1,0 +1,19 @@
+{
+  "candidate": "phase34-candidate-v14",
+  "candidate_commit": "d01b500f23f3a13fb63a296e4e104c7b7c2272bf",
+  "candidate_files": {
+    "candidate.diff": "5ae27b791007b2fd42813d34f654eccce2ad862b2f2204ceae26e5620ba727ff",
+    "candidate.json": "189773e3761265ef69822f641b248da756e3dec0930940a7dee6b71d6029658c",
+    "snapshot.json": "3d2ec522d9bcac53a15f7e92018d3e53f653cf0852a79081e66ca79744388e68",
+    "sources.json": "22bcddd9dc92fb44f53f87c51c2284f477eb6b68c0fba6e86932900b5d2c835a"
+  },
+  "candidate_tree_sha256": "dbea42d8b1358b37223f19a8a44480cd901c407f0a5a68bef312d1afdbdd1fb4",
+  "created_at": "2026-11-07T13:47:22+08:00",
+  "diff_base": "7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d",
+  "historical_manifest_sha256": "71e1c1af10ce1b381b34cb855475523d935f19d140a1fc89bb72180a8c181687",
+  "manifest_blob_sha256": "71e1c1af10ce1b381b34cb855475523d935f19d140a1fc89bb72180a8c181687",
+  "manifest_commit": "cc94d57a77706bf73b64189e616fbcaf0fd3148b",
+  "schema_version": 1,
+  "source_commit": "65b52216a64a770ce67d2ed3883827603056673d",
+  "status": "pending"
+}
