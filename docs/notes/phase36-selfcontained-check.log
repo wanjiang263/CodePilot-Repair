@@ -1,0 +1,10 @@
+warning: source repository is shallow, ignoring --local
+warning: --local is ignored
+SOURCE_SHALLOW=true
+CLONE_SHALLOW=false
+{
+  "check": "pass",
+  "file": "docs/notes/phase34-runtime-results.json",
+  "sha256": "b149088ccf067ad6a68bd9c867f56c300476be5e5ec064b4824ebd9cb20932b6"
+}
+SELF_CONTAINED_CHECK=PASS
