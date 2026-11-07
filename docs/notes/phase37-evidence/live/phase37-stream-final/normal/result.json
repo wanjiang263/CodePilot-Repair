@@ -1,0 +1,37 @@
+{
+  "source_origin": "worktree",
+  "source_hashes": {
+    "src/codepilot/llm/sse.py": "409545baae67f3125efdb2331a790ad4aed729fc51235c0fc1ca831e9124a40d",
+    "src/codepilot/llm/http_lifecycle.py": "383256296e551325d9d9a69aceca08277d018c21055574ed61bd275f32b142a9",
+    "src/codepilot/llm/openai_compatible.py": "06cfd708c8d9570094456a5b366c4df9a367bbaebed4364400973e692db12104",
+    "scripts/phase37_stream_probe.py": "dcf730a327b677974b734114ce358640c74283293e39a7bd65cd3cd624a30e03"
+  },
+  "mode": "normal",
+  "provider": "bigmodel",
+  "model": "glm-5.3-flash",
+  "endpoint": "https://open.bigmodel.cn/api/paas/v4",
+  "max_requests": 1,
+  "budget_cny": 1.0,
+  "status": "completed",
+  "input_tokens": 29,
+  "output_tokens": 51,
+  "cost": 0.000166,
+  "cost_known": true,
+  "stream": {
+    "events": 50,
+    "content_deltas": 39,
+    "done": true
+  },
+  "response_model": "glm-5.3-flash",
+  "response_id": "20261107145453090b598f5a6d4dd1",
+  "requests": 1,
+  "unacknowledged": 0,
+  "content_deltas": 39,
+  "content_sha256": "7747a514fec0c8bbe73acdb5ef9e4ca3a6b9d2be346c2b97de3d0560fa2a415f",
+  "seconds": 2.562,
+  "owned_threads_after": 0,
+  "accounted_or_reserved_cny": 0.00016599999999999948,
+  "ledger_frozen": false,
+  "exception_chain": [],
+  "passed": true
+}

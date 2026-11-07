@@ -1,0 +1,28 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: D:\Projects\Desktop\CodePilot-Repair
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.15.1, langsmith-0.14.4, asyncio-1.4.0, cov-7.1.0, timeout-2.4.0, xdist-3.8.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: thread
+timeout func_only: False
+collected 4249 items / 50 deselected / 4199 selected
+
+tests\api\test_phase13_auth.py ......................................... [  0%]
+                                                                         [  0%]
+tests\api\test_phase13_cancel.py .......                                 [  1%]
+tests\api\test_phase13_history.py ...                                    [  1%]
+tests\api\test_phase13_html_report.py ......                             [  1%]
+tests\api\test_phase13_patch_report.py ....                              [  1%]
+tests\api\test_phase13_tasks_security.py ............................... [  2%]
+.......                                                                  [  2%]
+tests\api\test_phase13_worker_e2e.py .......                             [  2%]
+tests\api\test_phase14_settings_api.py .......                           [  2%]
+tests\api\test_phase33_windows_transient_locks.py .....                  [  2%]
+tests\eval\test_attribution.py .............                             [  3%]
+tests\eval\test_bench_checkpoint.py .........                            [  3%]
+tests\eval\test_evaluation.py ........................                   [  3%]
+tests\eval\test_evaluation_artifacts.py .                                [  3%]
+tests\eval\test_isolation.py ...............                             [  4%]

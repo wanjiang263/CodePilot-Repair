@@ -1,0 +1,12 @@
+unformatted: File would be reformatted
+   --> tests\unit\llm\test_sse_completion.py:278:22
+    |
+277 |     with (
+    -         httpx.Client(base_url="https://fixture.test", transport=httpx.MockTransport(handle)) as client,
+278 +         httpx.Client(
+279 +             base_url="https://fixture.test", transport=httpx.MockTransport(handle)
+280 +         ) as client,
+281 |         provider("https://fixture.test") as model,
+    |
+
+1 file would be reformatted, 565 files already formatted

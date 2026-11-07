@@ -1,6 +1,6 @@
 # Open-source release readiness
 
-Audit date: 2026-11-06. Target: research / engineering preview.
+Audit date: 2026-11-06; Phase 37 addendum: 2026-11-07. Target: research / engineering preview.
 
 The detailed results and evidence boundaries are in [the audit report](open-source-audit.md).
 
@@ -21,7 +21,15 @@ The detailed results and evidence boundaries are in [the audit report](open-sour
 ## Publication actions remaining
 
 - [x] Commit and push the candidate to `codex/open-source-preview` only; local main and other refs were excluded.
-- [ ] Obtain successful results from all candidate CI jobs; frontend, package and lint/types have executed successfully, with full pytest and Docker fixes under validation.
+- [x] Phase 37 adds Chromium browser acceptance, bounded real GLM SSE streaming,
+  interrupt/timeout/usage/offline tests, and a fail-closed guard for the
+  deferred SDK directory-build path. See [Phase 37 validation](notes/phase37-validation.md).
+- [ ] Confirm the new Chromium CI job and all existing CI jobs are green on the
+  Phase 37 candidate commit before publication. Local current-source full
+  offline, Docker, browser and targeted evidence is recorded in the
+  [Phase 37 addendum](notes/phase37-validation.md#final-evidence-addendum-at-2026-11-07-2125-0800);
+  the one full-run timeout failure and its isolated passing rerun remain
+  separate evidence. Earlier CI results do not cover the candidate commit.
 - [ ] Update remote main normally after candidate CI passes.
 - [ ] Add required status checks after the new CI jobs actually execute; basic branch protection is already enabled.
 - [ ] Confirm public visibility and preview release publication. Repository remains private in this audit.
@@ -29,6 +37,23 @@ The detailed results and evidence boundaries are in [the audit report](open-sour
 
 ## Explicitly unverified
 
-No real provider request, model download, official Harness run, browser E2E or 24h soak was performed in this audit. The Linux Docker suite has now executed in candidate CI; its result must be checked alongside full pytest before merging. Optional dependency upgrades have passed resolution and interface/offline checks, not real model or official Harness runtime verification. Preserve these limitations in a preview release.
+The original 2026-11-06 audit did not perform a real provider request, model
+download, official Harness run, browser E2E or 24h soak. Those items were
+addressed by later phase-specific evidence: see the 24h soak and provider
+results in the Phase 34/35 evidence pack, and the newer browser and SSE
+streaming results in the Phase 37 report. These are separate runs with distinct
+source provenance and are not one CI acceptance pass.
+
+Phase 37 changed production HTTP/SSE, provider and sandbox code. Targeted
+offline tests, browser acceptance, bounded real GLM streaming, full offline
+regression and full Docker were rerun on that source. The full offline run has
+one Windows process-tree timing failure whose complete test module passed in
+an isolated rerun; these are distinct current-source results and must not be
+described as one zero-failure pass. The candidate commit's GitHub CI,
+including its new Chromium job, remains pending. Optional dependency upgrades
+have passed resolution and interface/offline checks, not real model or official
+Harness runtime verification. Full-history clone remains unverified because
+the local shallow boundary is not on origin; use a clean non-shallow clone of
+the project branch. Preserve these limitations in a preview release.
 
 Do not zip the whole working directory. Use the audited source archive/allowlist so ignored local data and nested worktrees cannot be included accidentally.

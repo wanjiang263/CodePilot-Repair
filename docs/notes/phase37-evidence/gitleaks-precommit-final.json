@@ -1,0 +1,42 @@
+[
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 68,
+  "EndLine": 68,
+  "StartColumn": 35,
+  "EndColumn": 121,
+  "Match": "secret-review.json\": \"REDACTED\"",
+  "Secret": "REDACTED",
+  "File": ".codex-pytest-tmp/phase37-precommit-files/docs/notes/phase37-evidence/source-hashes-candidate.json",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 3.775347,
+  "Author": "",
+  "Email": "",
+  "Date": "",
+  "Message": "",
+  "Tags": [],
+  "Fingerprint": ".codex-pytest-tmp/phase37-precommit-files/docs/notes/phase37-evidence/source-hashes-candidate.json:generic-api-key:68"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 51,
+  "EndLine": 51,
+  "StartColumn": 14,
+  "EndColumn": 83,
+  "Match": "resolved.resolved_api_queue_path, REDACTED",
+  "Secret": "REDACTED",
+  "File": ".codex-pytest-tmp/phase37-precommit-files/web/e2e/server.py",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 3.6943858,
+  "Author": "",
+  "Email": "",
+  "Date": "",
+  "Message": "",
+  "Tags": [],
+  "Fingerprint": ".codex-pytest-tmp/phase37-precommit-files/web/e2e/server.py:generic-api-key:51"
+ }
+]

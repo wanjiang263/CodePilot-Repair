@@ -419,16 +419,15 @@ class DockerSdkBackend(DockerBackend):
         context: Path,
         labels: Mapping[str, str],
     ) -> str:
-        try:
-            image, _logs = self._sdk().images.build(
-                path=str(context),
-                dockerfile=dockerfile,
-                tag=tag,
-                labels=dict(labels),
-            )
-        except (DockerException, OSError, PermissionError) as exc:
-            raise _map_docker_error(exc) from exc
-        return str(getattr(image, "id", tag))
+        # Official builds are deferred. Never let an accidental caller upload
+        # an arbitrary checkout (including .env, caches and linked worktrees)
+        # to the daemon through the generic SDK directory-context API.
+        del dockerfile, tag, context, labels
+        raise SWEBenchEnvironmentError(
+            "SDK directory-context builds are disabled; use a reviewed minimal "
+            "build context or the supported official image pull path",
+            kind=SWEBenchEnvironmentKind.UNSUPPORTED,
+        )
 
     def pull(self, ref: str) -> ImageInfo:
         try:

@@ -138,12 +138,35 @@ class OpenAICompatibleProvider:
     # ---------------------------------------------------------------- 调用
 
     def complete(self, request: LLMRequest) -> LLMResponse:
+        return self._complete(request)
+
+    def complete_stream(
+        self, request: LLMRequest, *, on_delta: Callable[[str], None] | None = None
+    ) -> LLMResponse:
+        """Opt-in SSE; return the same final response/usage contract as complete.
+
+        on_delta runs on the request's owned I/O thread and must not block.
+        A dispatched stream is never retried automatically.
+        """
+        return self._complete(request, streaming=True, on_delta=on_delta)
+
+    def _complete(
+        self,
+        request: LLMRequest,
+        *,
+        streaming: bool = False,
+        on_delta: Callable[[str], None] | None = None,
+    ) -> LLMResponse:
         messages = prepare_messages(request, self.spec)
         body = build_request_body(request, self.spec, messages)
+        if streaming:
+            body.update(stream=True, stream_options={"include_usage": True})
 
         from codepilot.observability.dispatch import check_dispatch, model_request_scope
 
         with model_request_scope(self.provider.timeout_seconds), self.limiter:
+            if body.get("stream") is True:
+                return self._parse(self._post(body, request.purpose, on_delta=on_delta), request)
             response = call_with_retry(
                 lambda: self._post(body, request.purpose),
                 policy=self.policy,
@@ -179,7 +202,13 @@ class OpenAICompatibleProvider:
             return text.replace(self._api_key, REDACTED)
         return text
 
-    def _post(self, body: dict[str, Any], purpose: str = "generic") -> httpx.Response:
+    def _post(
+        self,
+        body: dict[str, Any],
+        purpose: str = "generic",
+        *,
+        on_delta: Callable[[str], None] | None = None,
+    ) -> httpx.Response:
         """发一次请求，把 HTTP 层的失败翻译成本层的异常类型。"""
         from codepilot.observability.dispatch import check_dispatch, dispatch_timeout
 
@@ -200,6 +229,17 @@ class OpenAICompatibleProvider:
 
             mark_model_dispatch()
             self.attempts += 1
+            if body.get("stream") is True:
+                return send_request(
+                    self._client,
+                    CHAT_COMPLETIONS_PATH,
+                    body=body,
+                    headers=headers,
+                    timeout=timeout,
+                    deadline=deadline,
+                    trust_env=self.provider.trust_env,
+                    on_delta=on_delta,
+                )
             return self._send_before_deadline(
                 body=body, headers=headers, timeout=timeout, deadline=deadline
             )

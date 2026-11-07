@@ -1,0 +1,1085 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: D:\Projects\Desktop\CodePilot-Repair
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.15.1, langsmith-0.14.4, asyncio-1.4.0, cov-7.1.0, timeout-2.4.0, xdist-3.8.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: thread
+timeout func_only: False
+collected 4252 items / 4202 deselected / 50 selected
+
+2026-11-07T13:11:20.465963Z [info     ] sandbox.docker.phase.done      container_id=c132762bc1a7 duration_seconds=0.325 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:11:22.182700Z [info     ] sandbox.docker.phase.done      duration_seconds=1.717 phase=build_container_start
+2026-11-07T13:11:22.218967Z [info     ] sandbox.docker.phase.done      archive_bytes=10240 duration_seconds=0.036 phase=build_workspace_copy
+2026-11-07T13:11:28.233269Z [info     ] sandbox.docker.phase.done      duration_seconds=6.014 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:11:41.655140Z [info     ] sandbox.docker.phase.done      duration_seconds=13.422 phase=build_image_commit repository=codepilot-env tag=bb03201beeac5854ff8d9d91bacf5b3aa4d33afd
+2026-11-07T13:11:42.443877Z [info     ] sandbox.docker.phase.done      duration_seconds=0.788 phase=build_container_cleanup
+2026-11-07T13:11:43.253733Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.084 phase=volume_create
+2026-11-07T13:11:43.254243Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_broken.py::test_broken > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:11:43.533549Z [info     ] sandbox.docker.phase.done      container_id=a9ed1b3d5161 duration_seconds=0.279 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:11:44.545120Z [info     ] sandbox.docker.phase.done      duration_seconds=1.012 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:11:44.741189Z [info     ] sandbox.docker.phase.done      duration_seconds=0.196 phase=container_start
+2026-11-07T13:11:45.259890Z [info     ] sandbox.docker.phase.done      duration_seconds=0.518 exit_code=1 phase=test_wait timeout_seconds=120
+2026-11-07T13:11:45.342144Z [info     ] sandbox.docker.phase.done      duration_seconds=0.082 files=3 phase=output_collect
+2026-11-07T13:11:45.480640Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.138 oom_killed=False phase=cleanup
+2026-11-07T13:11:46.245633Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.039 phase=volume_create
+2026-11-07T13:11:46.245633Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_hog.py::test_allocates_until_killed > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:11:46.421423Z [info     ] sandbox.docker.phase.done      container_id=19cb5a5385a6 duration_seconds=0.176 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:11:47.205682Z [info     ] sandbox.docker.phase.done      duration_seconds=0.784 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:11:47.474812Z [info     ] sandbox.docker.phase.done      duration_seconds=0.269 phase=container_start
+2026-11-07T13:11:48.194587Z [info     ] sandbox.docker.phase.done      duration_seconds=0.72 exit_code=137 phase=test_wait timeout_seconds=120
+2026-11-07T13:11:48.261198Z [info     ] sandbox.docker.phase.done      duration_seconds=0.067 files=2 phase=output_collect
+2026-11-07T13:11:48.432087Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.171 oom_killed=True phase=cleanup
+2026-11-07T13:11:49.139853Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.046 phase=volume_create
+2026-11-07T13:11:49.139853Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_ok.py::test_ok > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:11:49.302458Z [info     ] sandbox.docker.phase.done      container_id=691f2da84004 duration_seconds=0.163 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:11:49.965330Z [info     ] sandbox.docker.phase.done      duration_seconds=0.663 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:11:50.124682Z [info     ] sandbox.docker.phase.done      duration_seconds=0.159 phase=container_start
+2026-11-07T13:11:50.617197Z [info     ] sandbox.docker.phase.done      duration_seconds=0.492 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:11:50.650182Z [info     ] sandbox.docker.phase.done      duration_seconds=0.032 files=3 phase=output_collect
+2026-11-07T13:11:50.775027Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.125 oom_killed=False phase=cleanup
+2026-11-07T13:11:51.411918Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.044 phase=volume_create
+2026-11-07T13:11:51.411918Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_ok.py::test_ok > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:11:51.756562Z [info     ] sandbox.docker.phase.done      container_id=abe26eb1a299 duration_seconds=0.344 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:11:52.164011Z [info     ] sandbox.docker.phase.done      duration_seconds=0.407 error='NotFound: 404 Client Error for http+docker://localnpipe/v1.56/containers/60707868159fbdd00ab1a1ebf2cf2d53c92f929aef4ede8d2a1417074f93b23f/start: Not Found ("failed to set up container networking: network codepilot-no-such-network-acceptance not found")' phase=workspace_copy
+2026-11-07T13:11:52.288170Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.124 oom_killed=False phase=cleanup
+2026-11-07T13:11:52.944598Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.021 phase=volume_create
+2026-11-07T13:11:52.944598Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_hang.py::test_never_returns > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:11:53.208419Z [info     ] sandbox.docker.phase.done      container_id=889aaca6d314 duration_seconds=0.263 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:11:54.152321Z [info     ] sandbox.docker.phase.done      duration_seconds=0.944 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:11:54.387149Z [info     ] sandbox.docker.phase.done      duration_seconds=0.235 phase=container_start
+2026-11-07T13:11:59.518429Z [info     ] sandbox.docker.phase.done      duration_seconds=5.131 phase=test_wait timed_out=True timeout_seconds=5
+2026-11-07T13:11:59.569036Z [info     ] sandbox.docker.phase.done      duration_seconds=0.051 files=2 phase=output_collect
+2026-11-07T13:11:59.728405Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.159 oom_killed=False phase=cleanup
+tests\docker\test_cleanup.py ........
+2026-11-07T13:12:02.553833Z [info     ] sandbox.docker.phase.done      container_id=b467579bca77 duration_seconds=0.199 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:12:03.267606Z [info     ] sandbox.docker.phase.done      duration_seconds=0.714 phase=build_container_start
+2026-11-07T13:12:03.278437Z [info     ] sandbox.docker.phase.done      archive_bytes=10240 duration_seconds=0.01 phase=build_workspace_copy
+2026-11-07T13:12:08.402405Z [info     ] sandbox.docker.phase.done      duration_seconds=5.124 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:12:09.696710Z [info     ] sandbox.docker.phase.done      duration_seconds=1.294 phase=build_image_commit repository=codepilot-env tag=4284b1185eed7f35537eb3c200e67c7c359ab465
+2026-11-07T13:12:10.291371Z [info     ] sandbox.docker.phase.done      duration_seconds=0.594 phase=build_container_cleanup
+2026-11-07T13:12:10.425720Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.025 phase=volume_create
+2026-11-07T13:12:10.425720Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_cache_probe.py::test_cache_probe > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:12:10.686823Z [info     ] sandbox.docker.phase.done      container_id=a7e3ce451819 duration_seconds=0.261 image=codepilot-env:4284b1185eed7f35537eb3c200e67c7c359ab465 phase=container_create
+2026-11-07T13:12:11.498414Z [info     ] sandbox.docker.phase.done      duration_seconds=0.811 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:12:11.797152Z [info     ] sandbox.docker.phase.done      duration_seconds=0.299 phase=container_start
+2026-11-07T13:12:12.180229Z [info     ] sandbox.docker.phase.done      duration_seconds=0.383 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:12:12.232979Z [info     ] sandbox.docker.phase.done      duration_seconds=0.053 files=3 phase=output_collect
+2026-11-07T13:12:12.352115Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.119 oom_killed=False phase=cleanup
+2026-11-07T13:12:13.131889Z [info     ] sandbox.docker.phase.done      container_id=8c4485f6850b duration_seconds=0.147 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:12:13.359532Z [info     ] sandbox.docker.phase.done      duration_seconds=0.228 phase=build_container_start
+2026-11-07T13:12:13.371074Z [info     ] sandbox.docker.phase.done      archive_bytes=10240 duration_seconds=0.011 phase=build_workspace_copy
+2026-11-07T13:12:17.483475Z [info     ] sandbox.docker.phase.done      duration_seconds=4.112 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:12:18.740066Z [info     ] sandbox.docker.phase.done      duration_seconds=1.257 phase=build_image_commit repository=codepilot-env tag=9e7a3cb1f982557e7af0168f51997036271e3080
+2026-11-07T13:12:19.217983Z [info     ] sandbox.docker.phase.done      duration_seconds=0.478 phase=build_container_cleanup
+2026-11-07T13:12:21.122076Z [info     ] sandbox.docker.phase.done      container_id=85e63f88c74d duration_seconds=0.125 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:12:21.378458Z [info     ] sandbox.docker.phase.done      duration_seconds=0.256 phase=build_container_start
+2026-11-07T13:12:21.388642Z [info     ] sandbox.docker.phase.done      archive_bytes=10240 duration_seconds=0.01 phase=build_workspace_copy
+2026-11-07T13:12:25.724072Z [info     ] sandbox.docker.phase.done      duration_seconds=4.335 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:12:27.019834Z [info     ] sandbox.docker.phase.done      duration_seconds=1.295 phase=build_image_commit repository=codepilot-env tag=6cd79ccd114736ecec412c0333471e65f951abb5
+2026-11-07T13:12:27.499269Z [info     ] sandbox.docker.phase.done      duration_seconds=0.479 phase=build_container_cleanup
+2026-11-07T13:12:28.436762Z [info     ] sandbox.docker.phase.done      container_id=58ff966e0b0f duration_seconds=0.171 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:12:28.659221Z [info     ] sandbox.docker.phase.done      duration_seconds=0.222 phase=build_container_start
+2026-11-07T13:12:28.669965Z [info     ] sandbox.docker.phase.done      archive_bytes=10240 duration_seconds=0.011 phase=build_workspace_copy
+2026-11-07T13:12:33.046073Z [info     ] sandbox.docker.phase.done      duration_seconds=4.376 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:12:34.341762Z [info     ] sandbox.docker.phase.done      duration_seconds=1.296 phase=build_image_commit repository=codepilot-env tag=a83ac2eca1917a076aaedba09d0842e7594dff1c
+2026-11-07T13:12:34.874236Z [info     ] sandbox.docker.phase.done      duration_seconds=0.532 phase=build_container_cleanup
+2026-11-07T13:12:35.445507Z [info     ] sandbox.docker.phase.done      container_id=f7abd7fa0634 duration_seconds=0.184 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:12:35.624859Z [info     ] sandbox.docker.phase.done      duration_seconds=0.179 phase=build_container_start
+2026-11-07T13:12:35.635604Z [info     ] sandbox.docker.phase.done      archive_bytes=10240 duration_seconds=0.011 phase=build_workspace_copy
+2026-11-07T13:12:39.890841Z [info     ] sandbox.docker.phase.done      duration_seconds=4.255 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:12:41.381333Z [info     ] sandbox.docker.phase.done      duration_seconds=1.491 phase=build_image_commit repository=codepilot-env tag=a83ac2eca1917a076aaedba09d0842e7594dff1c
+2026-11-07T13:12:42.455116Z [info     ] sandbox.docker.phase.done      duration_seconds=1.073 phase=build_container_cleanup
+2026-11-07T13:12:42.615437Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.043 phase=volume_create
+2026-11-07T13:12:42.615437Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_cache_probe.py::test_cache_probe > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:12:42.805165Z [info     ] sandbox.docker.phase.done      container_id=6dca3d265738 duration_seconds=0.19 image=codepilot-env:a83ac2eca1917a076aaedba09d0842e7594dff1c phase=container_create
+2026-11-07T13:12:43.487871Z [info     ] sandbox.docker.phase.done      duration_seconds=0.682 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:12:43.679547Z [info     ] sandbox.docker.phase.done      duration_seconds=0.192 phase=container_start
+2026-11-07T13:12:44.139151Z [info     ] sandbox.docker.phase.done      duration_seconds=0.46 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:12:44.194162Z [info     ] sandbox.docker.phase.done      duration_seconds=0.055 files=3 phase=output_collect
+2026-11-07T13:12:44.298483Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.104 oom_killed=False phase=cleanup
+2026-11-07T13:12:45.060102Z [info     ] sandbox.docker.phase.done      container_id=ea4339363a87 duration_seconds=0.161 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:12:45.281862Z [info     ] sandbox.docker.phase.done      duration_seconds=0.221 phase=build_container_start
+2026-11-07T13:12:45.291480Z [info     ] sandbox.docker.phase.done      archive_bytes=10240 duration_seconds=0.009 phase=build_workspace_copy
+2026-11-07T13:12:49.578179Z [info     ] sandbox.docker.phase.done      duration_seconds=4.287 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:12:50.801746Z [info     ] sandbox.docker.phase.done      duration_seconds=1.223 phase=build_image_commit repository=codepilot-env tag=34ec9254336bafe2e63152125605a036ac2e27f0
+2026-11-07T13:12:51.224889Z [info     ] sandbox.docker.phase.done      duration_seconds=0.423 phase=build_container_cleanup
+tests\docker\test_env_cache.py .....
+2026-11-07T13:12:51.980357Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.034 phase=volume_create
+2026-11-07T13:12:51.980357Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_network_isolation.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:12:52.136685Z [info     ] sandbox.docker.phase.done      container_id=2b12b8883356 duration_seconds=0.156 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:12:52.769423Z [info     ] sandbox.docker.phase.done      duration_seconds=0.632 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:12:53.118989Z [info     ] sandbox.docker.phase.done      duration_seconds=0.349 phase=container_start
+2026-11-07T13:12:53.631737Z [info     ] sandbox.docker.phase.done      duration_seconds=0.513 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:12:53.665022Z [info     ] sandbox.docker.phase.done      duration_seconds=0.033 files=3 phase=output_collect
+2026-11-07T13:12:53.780184Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.115 oom_killed=False phase=cleanup
+2026-11-07T13:12:54.417974Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.023 phase=volume_create
+2026-11-07T13:12:54.417974Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_anchor.py::test_probe_anchor > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:12:54.592009Z [info     ] sandbox.docker.phase.done      container_id=064624f6f03b duration_seconds=0.174 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:12:55.263410Z [info     ] sandbox.docker.phase.done      duration_seconds=0.671 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:12:55.469634Z [info     ] sandbox.docker.phase.done      duration_seconds=0.206 phase=container_start
+2026-11-07T13:12:55.902106Z [info     ] sandbox.docker.phase.done      duration_seconds=0.432 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:12:55.964402Z [info     ] sandbox.docker.phase.done      duration_seconds=0.062 files=3 phase=output_collect
+2026-11-07T13:12:56.049549Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.085 oom_killed=False phase=cleanup
+tests\docker\test_network.py ...
+2026-11-07T13:12:58.772503Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.202 phase=volume_create
+2026-11-07T13:12:58.772913Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_memory_hog.py::test_allocates_until_killed > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:12:58.935261Z [info     ] sandbox.docker.phase.done      container_id=78d462e4f680 duration_seconds=0.162 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:12:59.707784Z [info     ] sandbox.docker.phase.done      duration_seconds=0.772 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:12:59.917983Z [info     ] sandbox.docker.phase.done      duration_seconds=0.21 phase=container_start
+2026-11-07T13:13:00.626768Z [info     ] sandbox.docker.phase.done      duration_seconds=0.709 exit_code=137 phase=test_wait timeout_seconds=120
+2026-11-07T13:13:00.709870Z [info     ] sandbox.docker.phase.done      duration_seconds=0.083 files=2 phase=output_collect
+2026-11-07T13:13:00.900484Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.19 oom_killed=True phase=cleanup
+2026-11-07T13:13:01.933390Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.034 phase=volume_create
+2026-11-07T13:13:01.933390Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_memory_hog.py::test_allocates_until_killed > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:13:02.201211Z [info     ] sandbox.docker.phase.done      container_id=e6fb85b5ecef duration_seconds=0.268 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:13:02.752726Z [info     ] sandbox.docker.phase.done      duration_seconds=0.551 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:13:03.009470Z [info     ] sandbox.docker.phase.done      duration_seconds=0.257 phase=container_start
+2026-11-07T13:13:03.579695Z [info     ] sandbox.docker.phase.done      duration_seconds=0.57 exit_code=137 phase=test_wait timeout_seconds=120
+2026-11-07T13:13:03.666661Z [info     ] sandbox.docker.phase.done      duration_seconds=0.087 files=2 phase=output_collect
+2026-11-07T13:13:03.679456Z [info     ] sandbox.docker.phase.done      cleanup_notes=4 duration_seconds=0.012 oom_killed=True phase=cleanup
+tests\docker\test_oom.py ...
+2026-11-07T13:13:04.872032Z [info     ] sandbox.docker.phase.done      container_id=518a69510b02 duration_seconds=0.15 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:13:05.145509Z [info     ] sandbox.docker.phase.done      duration_seconds=0.273 phase=build_container_start
+2026-11-07T13:13:05.166124Z [info     ] sandbox.docker.phase.done      archive_bytes=10240 duration_seconds=0.02 phase=build_workspace_copy
+2026-11-07T13:13:13.813197Z [info     ] sandbox.docker.phase.done      duration_seconds=8.647 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:13:15.231800Z [info     ] sandbox.docker.phase.done      duration_seconds=1.419 phase=build_image_commit repository=codepilot-env tag=bdc8cb36ed8c438fd559d4c1d3e48a2d8fdc4923
+2026-11-07T13:13:15.888277Z [info     ] sandbox.docker.phase.done      duration_seconds=0.656 phase=build_container_cleanup
+2026-11-07T13:13:16.018117Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.084 phase=volume_create
+2026-11-07T13:13:16.018117Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_smoke.py::test_real_container > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:13:16.156784Z [info     ] sandbox.docker.phase.done      container_id=8e731ac23a05 duration_seconds=0.138 image=codepilot-env:bdc8cb36ed8c438fd559d4c1d3e48a2d8fdc4923 phase=container_create
+2026-11-07T13:13:16.877322Z [info     ] sandbox.docker.phase.done      duration_seconds=0.721 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:13:17.084607Z [info     ] sandbox.docker.phase.done      duration_seconds=0.207 phase=container_start
+2026-11-07T13:13:17.524386Z [info     ] sandbox.docker.phase.done      duration_seconds=0.44 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:13:17.575444Z [info     ] sandbox.docker.phase.done      duration_seconds=0.051 files=3 phase=output_collect
+2026-11-07T13:13:17.669836Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.094 oom_killed=False phase=cleanup
+tests\docker\test_sandbox_smoke.py .
+2026-11-07T13:13:21.942159Z [info     ] sandbox.docker.phase.done      container_id=eecf028883f9 duration_seconds=0.133 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:13:22.125406Z [info     ] sandbox.docker.phase.done      duration_seconds=0.183 phase=build_container_start
+2026-11-07T13:13:22.169857Z [info     ] sandbox.docker.phase.done      archive_bytes=30720 duration_seconds=0.044 phase=build_workspace_copy
+2026-11-07T13:13:26.388471Z [info     ] sandbox.docker.phase.done      duration_seconds=4.219 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:13:27.773437Z [info     ] sandbox.docker.phase.done      duration_seconds=1.385 phase=build_image_commit repository=codepilot-env tag=7f23d29ff346d339f0de68c8843277ee97c79e2e
+2026-11-07T13:13:28.266986Z [info     ] sandbox.docker.phase.done      duration_seconds=0.494 phase=build_container_cleanup
+2026-11-07T13:13:28.345147Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.019 phase=volume_create
+2026-11-07T13:13:28.345147Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:13:28.550161Z [info     ] sandbox.docker.phase.done      container_id=4e4ee82cf903 duration_seconds=0.205 image=codepilot-env:7f23d29ff346d339f0de68c8843277ee97c79e2e phase=container_create
+2026-11-07T13:13:29.213489Z [info     ] sandbox.docker.phase.done      duration_seconds=0.663 phase=workspace_copy uploaded_bytes=30720
+2026-11-07T13:13:29.486388Z [info     ] sandbox.docker.phase.done      duration_seconds=0.273 phase=container_start
+2026-11-07T13:13:30.026716Z [info     ] sandbox.docker.phase.done      duration_seconds=0.54 exit_code=1 phase=test_wait timeout_seconds=120
+2026-11-07T13:13:30.104583Z [info     ] sandbox.docker.phase.done      duration_seconds=0.078 files=3 phase=output_collect
+2026-11-07T13:13:30.220222Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.116 oom_killed=False phase=cleanup
+2026-11-07T13:13:31.861526Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.031 phase=volume_create
+2026-11-07T13:13:31.861526Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:13:32.011622Z [info     ] sandbox.docker.phase.done      container_id=002df27379e6 duration_seconds=0.15 image=codepilot-env:7f23d29ff346d339f0de68c8843277ee97c79e2e phase=container_create
+2026-11-07T13:13:32.844639Z [info     ] sandbox.docker.phase.done      duration_seconds=0.833 phase=workspace_copy uploaded_bytes=30720
+2026-11-07T13:13:33.012506Z [info     ] sandbox.docker.phase.done      duration_seconds=0.168 phase=container_start
+2026-11-07T13:13:33.470808Z [info     ] sandbox.docker.phase.done      duration_seconds=0.458 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:13:33.509517Z [info     ] sandbox.docker.phase.done      duration_seconds=0.038 files=3 phase=output_collect
+2026-11-07T13:13:33.618714Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.109 oom_killed=False phase=cleanup
+2026-11-07T13:13:36.206650Z [info     ] sandbox.docker.phase.done      container_id=c2c1c24cab98 duration_seconds=0.184 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:13:36.435336Z [info     ] sandbox.docker.phase.done      duration_seconds=0.228 phase=build_container_start
+2026-11-07T13:13:36.480085Z [info     ] sandbox.docker.phase.done      archive_bytes=30720 duration_seconds=0.044 phase=build_workspace_copy
+2026-11-07T13:13:40.741969Z [info     ] sandbox.docker.phase.done      duration_seconds=4.262 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:13:41.994021Z [info     ] sandbox.docker.phase.done      duration_seconds=1.252 phase=build_image_commit repository=codepilot-env tag=1d5040c58491d940486b50251133e9d4a21455f7
+2026-11-07T13:13:42.478258Z [info     ] sandbox.docker.phase.done      duration_seconds=0.484 phase=build_container_cleanup
+2026-11-07T13:13:42.590904Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.054 phase=volume_create
+2026-11-07T13:13:42.590904Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:13:42.744431Z [info     ] sandbox.docker.phase.done      container_id=0fe31f02fc9e duration_seconds=0.153 image=codepilot-env:1d5040c58491d940486b50251133e9d4a21455f7 phase=container_create
+2026-11-07T13:13:43.536691Z [info     ] sandbox.docker.phase.done      duration_seconds=0.792 phase=workspace_copy uploaded_bytes=30720
+2026-11-07T13:13:43.722483Z [info     ] sandbox.docker.phase.done      duration_seconds=0.185 phase=container_start
+2026-11-07T13:13:44.200691Z [info     ] sandbox.docker.phase.done      duration_seconds=0.478 exit_code=1 phase=test_wait timeout_seconds=120
+2026-11-07T13:13:44.239729Z [info     ] sandbox.docker.phase.done      duration_seconds=0.039 files=3 phase=output_collect
+2026-11-07T13:13:44.340812Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.101 oom_killed=False phase=cleanup
+2026-11-07T13:13:45.970739Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.038 phase=volume_create
+2026-11-07T13:13:45.970739Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:13:46.125757Z [info     ] sandbox.docker.phase.done      container_id=84f98fb266c1 duration_seconds=0.155 image=codepilot-env:1d5040c58491d940486b50251133e9d4a21455f7 phase=container_create
+2026-11-07T13:13:46.873192Z [info     ] sandbox.docker.phase.done      duration_seconds=0.747 phase=workspace_copy uploaded_bytes=30720
+2026-11-07T13:13:47.098835Z [info     ] sandbox.docker.phase.done      duration_seconds=0.225 phase=container_start
+2026-11-07T13:13:47.573627Z [info     ] sandbox.docker.phase.done      duration_seconds=0.475 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:13:47.631783Z [info     ] sandbox.docker.phase.done      duration_seconds=0.058 files=3 phase=output_collect
+2026-11-07T13:13:47.725113Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.093 oom_killed=False phase=cleanup
+2026-11-07T13:13:50.301216Z [info     ] sandbox.docker.phase.done      container_id=5a5b2c59fae7 duration_seconds=0.135 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:13:50.525079Z [info     ] sandbox.docker.phase.done      duration_seconds=0.224 phase=build_container_start
+2026-11-07T13:13:50.574036Z [info     ] sandbox.docker.phase.done      archive_bytes=30720 duration_seconds=0.049 phase=build_workspace_copy
+2026-11-07T13:14:05.796707Z [info     ] sandbox.docker.phase.done      duration_seconds=15.223 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:14:07.036188Z [info     ] sandbox.docker.phase.done      duration_seconds=1.239 phase=build_image_commit repository=codepilot-env tag=7dd58b61f3255cad6807efe2274093f95f3d38b8
+2026-11-07T13:14:07.899177Z [info     ] sandbox.docker.phase.done      duration_seconds=0.863 phase=build_container_cleanup
+2026-11-07T13:14:08.030926Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.061 phase=volume_create
+2026-11-07T13:14:08.031448Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:14:08.448909Z [info     ] sandbox.docker.phase.done      container_id=187607998ed8 duration_seconds=0.417 image=codepilot-env:7dd58b61f3255cad6807efe2274093f95f3d38b8 phase=container_create
+2026-11-07T13:14:09.396227Z [info     ] sandbox.docker.phase.done      duration_seconds=0.947 phase=workspace_copy uploaded_bytes=30720
+2026-11-07T13:14:09.601923Z [info     ] sandbox.docker.phase.done      duration_seconds=0.206 phase=container_start
+2026-11-07T13:14:10.079056Z [info     ] sandbox.docker.phase.done      duration_seconds=0.477 exit_code=1 phase=test_wait timeout_seconds=120
+2026-11-07T13:14:10.114273Z [info     ] sandbox.docker.phase.done      duration_seconds=0.035 files=3 phase=output_collect
+2026-11-07T13:14:10.234344Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.12 oom_killed=False phase=cleanup
+2026-11-07T13:14:12.021946Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.018 phase=volume_create
+2026-11-07T13:14:12.022474Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:14:12.230410Z [info     ] sandbox.docker.phase.done      container_id=d6456c6ecbdc duration_seconds=0.208 image=codepilot-env:7dd58b61f3255cad6807efe2274093f95f3d38b8 phase=container_create
+2026-11-07T13:14:12.907248Z [info     ] sandbox.docker.phase.done      duration_seconds=0.676 phase=workspace_copy uploaded_bytes=30720
+2026-11-07T13:14:13.079876Z [info     ] sandbox.docker.phase.done      duration_seconds=0.173 phase=container_start
+2026-11-07T13:14:13.571318Z [info     ] sandbox.docker.phase.done      duration_seconds=0.491 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:14:13.612808Z [info     ] sandbox.docker.phase.done      duration_seconds=0.041 files=3 phase=output_collect
+2026-11-07T13:14:13.740234Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.127 oom_killed=False phase=cleanup
+2026-11-07T13:14:16.330643Z [info     ] sandbox.docker.phase.done      container_id=3f4851f6e6d7 duration_seconds=0.151 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:14:16.536227Z [info     ] sandbox.docker.phase.done      duration_seconds=0.205 phase=build_container_start
+2026-11-07T13:14:16.591930Z [info     ] sandbox.docker.phase.done      archive_bytes=40960 duration_seconds=0.056 phase=build_workspace_copy
+2026-11-07T13:14:21.986019Z [info     ] sandbox.docker.phase.done      duration_seconds=5.394 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:14:23.206619Z [info     ] sandbox.docker.phase.done      duration_seconds=1.221 phase=build_image_commit repository=codepilot-env tag=ff3c0e00d21457a3fc0f066c075e49420e164a19
+2026-11-07T13:14:23.677416Z [info     ] sandbox.docker.phase.done      duration_seconds=0.47 phase=build_container_cleanup
+2026-11-07T13:14:23.754458Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.022 phase=volume_create
+2026-11-07T13:14:23.754458Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:14:23.953757Z [info     ] sandbox.docker.phase.done      container_id=fff57c8e1aef duration_seconds=0.199 image=codepilot-env:ff3c0e00d21457a3fc0f066c075e49420e164a19 phase=container_create
+2026-11-07T13:14:24.769524Z [info     ] sandbox.docker.phase.done      duration_seconds=0.816 phase=workspace_copy uploaded_bytes=30720
+2026-11-07T13:14:24.993016Z [info     ] sandbox.docker.phase.done      duration_seconds=0.223 phase=container_start
+2026-11-07T13:14:25.464894Z [info     ] sandbox.docker.phase.done      duration_seconds=0.472 exit_code=1 phase=test_wait timeout_seconds=120
+2026-11-07T13:14:25.538163Z [info     ] sandbox.docker.phase.done      duration_seconds=0.073 files=3 phase=output_collect
+2026-11-07T13:14:25.650982Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.113 oom_killed=False phase=cleanup
+2026-11-07T13:14:27.457726Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.052 phase=volume_create
+2026-11-07T13:14:27.457726Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:14:27.769555Z [info     ] sandbox.docker.phase.done      container_id=b827dec0b432 duration_seconds=0.312 image=codepilot-env:ff3c0e00d21457a3fc0f066c075e49420e164a19 phase=container_create
+2026-11-07T13:14:28.713751Z [info     ] sandbox.docker.phase.done      duration_seconds=0.944 phase=workspace_copy uploaded_bytes=30720
+2026-11-07T13:14:28.886528Z [info     ] sandbox.docker.phase.done      duration_seconds=0.173 phase=container_start
+2026-11-07T13:14:29.396773Z [info     ] sandbox.docker.phase.done      duration_seconds=0.51 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:14:29.425998Z [info     ] sandbox.docker.phase.done      duration_seconds=0.029 files=3 phase=output_collect
+2026-11-07T13:14:29.546186Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.12 oom_killed=False phase=cleanup
+2026-11-07T13:14:32.597540Z [info     ] sandbox.docker.phase.done      container_id=6ee7ebe2716a duration_seconds=0.161 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:14:32.820781Z [info     ] sandbox.docker.phase.done      duration_seconds=0.223 phase=build_container_start
+2026-11-07T13:14:32.875441Z [info     ] sandbox.docker.phase.done      archive_bytes=30720 duration_seconds=0.055 phase=build_workspace_copy
+2026-11-07T13:15:00.418202Z [info     ] sandbox.docker.phase.done      duration_seconds=27.543 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:15:01.941117Z [info     ] sandbox.docker.phase.done      duration_seconds=1.523 phase=build_image_commit repository=codepilot-env tag=e95a7359ae09a84095a9d583bad461a4323d7824
+2026-11-07T13:15:02.521746Z [info     ] sandbox.docker.phase.done      duration_seconds=0.58 phase=build_container_cleanup
+2026-11-07T13:15:02.598798Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.023 phase=volume_create
+2026-11-07T13:15:02.598798Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:15:02.819374Z [info     ] sandbox.docker.phase.done      container_id=f1b3e34974b4 duration_seconds=0.22 image=codepilot-env:e95a7359ae09a84095a9d583bad461a4323d7824 phase=container_create
+2026-11-07T13:15:03.705332Z [info     ] sandbox.docker.phase.done      duration_seconds=0.886 phase=workspace_copy uploaded_bytes=30720
+2026-11-07T13:15:03.886825Z [info     ] sandbox.docker.phase.done      duration_seconds=0.181 phase=container_start
+2026-11-07T13:15:04.352529Z [info     ] sandbox.docker.phase.done      duration_seconds=0.466 exit_code=1 phase=test_wait timeout_seconds=120
+2026-11-07T13:15:04.442886Z [info     ] sandbox.docker.phase.done      duration_seconds=0.09 files=3 phase=output_collect
+2026-11-07T13:15:04.577571Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.134 oom_killed=False phase=cleanup
+2026-11-07T13:15:06.188583Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.022 phase=volume_create
+2026-11-07T13:15:06.188583Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:15:06.388802Z [info     ] sandbox.docker.phase.done      container_id=3058a69cf371 duration_seconds=0.2 image=codepilot-env:e95a7359ae09a84095a9d583bad461a4323d7824 phase=container_create
+2026-11-07T13:15:07.614234Z [info     ] sandbox.docker.phase.done      duration_seconds=1.225 phase=workspace_copy uploaded_bytes=30720
+2026-11-07T13:15:07.794228Z [info     ] sandbox.docker.phase.done      duration_seconds=0.18 phase=container_start
+2026-11-07T13:15:08.270418Z [info     ] sandbox.docker.phase.done      duration_seconds=0.476 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:15:08.291341Z [info     ] sandbox.docker.phase.done      duration_seconds=0.021 files=3 phase=output_collect
+2026-11-07T13:15:08.412442Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.121 oom_killed=False phase=cleanup
+2026-11-07T13:15:12.862948Z [info     ] sandbox.docker.phase.done      container_id=3eddd51309f6 duration_seconds=0.452 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:15:13.152742Z [info     ] sandbox.docker.phase.done      duration_seconds=0.29 phase=build_container_start
+2026-11-07T13:15:13.183184Z [info     ] sandbox.docker.phase.done      archive_bytes=20480 duration_seconds=0.03 phase=build_workspace_copy
+2026-11-07T13:15:21.400066Z [info     ] sandbox.docker.phase.done      duration_seconds=8.217 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:15:22.881217Z [info     ] sandbox.docker.phase.done      duration_seconds=1.481 phase=build_image_commit repository=codepilot-env tag=31ec212b36ef28f6e54789da7085002a21074609
+2026-11-07T13:15:23.463449Z [info     ] sandbox.docker.phase.done      duration_seconds=0.582 phase=build_container_cleanup
+2026-11-07T13:15:23.539525Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.039 phase=volume_create
+2026-11-07T13:15:23.540038Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:15:23.853440Z [info     ] sandbox.docker.phase.done      container_id=1dfc753804cf duration_seconds=0.314 image=codepilot-env:31ec212b36ef28f6e54789da7085002a21074609 phase=container_create
+2026-11-07T13:15:25.019483Z [info     ] sandbox.docker.phase.done      duration_seconds=1.166 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:15:25.357970Z [info     ] sandbox.docker.phase.done      duration_seconds=0.338 phase=container_start
+2026-11-07T13:15:25.798176Z [info     ] sandbox.docker.phase.done      duration_seconds=0.44 exit_code=1 phase=test_wait timeout_seconds=120
+2026-11-07T13:15:25.946215Z [info     ] sandbox.docker.phase.done      duration_seconds=0.147 files=3 phase=output_collect
+2026-11-07T13:15:26.130058Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.184 oom_killed=False phase=cleanup
+2026-11-07T13:15:27.710274Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.021 phase=volume_create
+2026-11-07T13:15:27.710851Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:15:27.983724Z [info     ] sandbox.docker.phase.done      container_id=a061a4058b35 duration_seconds=0.273 image=codepilot-env:31ec212b36ef28f6e54789da7085002a21074609 phase=container_create
+2026-11-07T13:15:29.056095Z [info     ] sandbox.docker.phase.done      duration_seconds=1.072 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:15:29.330770Z [info     ] sandbox.docker.phase.done      duration_seconds=0.274 phase=container_start
+2026-11-07T13:15:29.842360Z [info     ] sandbox.docker.phase.done      duration_seconds=0.511 exit_code=1 phase=test_wait timeout_seconds=120
+2026-11-07T13:15:29.872689Z [info     ] sandbox.docker.phase.done      duration_seconds=0.03 files=3 phase=output_collect
+2026-11-07T13:15:30.031262Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.159 oom_killed=False phase=cleanup
+2026-11-07T13:15:42.140972Z [info     ] sandbox.docker.phase.done      container_id=04a891884920 duration_seconds=0.184 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:15:42.458872Z [info     ] sandbox.docker.phase.done      duration_seconds=0.318 phase=build_container_start
+2026-11-07T13:15:42.490407Z [info     ] sandbox.docker.phase.done      archive_bytes=20480 duration_seconds=0.032 phase=build_workspace_copy
+2026-11-07T13:15:53.188221Z [info     ] sandbox.docker.phase.done      duration_seconds=10.697 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:15:54.844947Z [info     ] sandbox.docker.phase.done      duration_seconds=1.657 phase=build_image_commit repository=codepilot-env tag=0e7830beebad7960501af4709fc5be5924082e20
+2026-11-07T13:15:55.505534Z [info     ] sandbox.docker.phase.done      duration_seconds=0.66 phase=build_container_cleanup
+2026-11-07T13:15:55.603368Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.054 phase=volume_create
+2026-11-07T13:15:55.603897Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:15:55.816316Z [info     ] sandbox.docker.phase.done      container_id=7f4e34c474bf duration_seconds=0.212 image=codepilot-env:0e7830beebad7960501af4709fc5be5924082e20 phase=container_create
+2026-11-07T13:15:56.822279Z [info     ] sandbox.docker.phase.done      duration_seconds=1.006 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:15:57.141292Z [info     ] sandbox.docker.phase.done      duration_seconds=0.319 phase=container_start
+2026-11-07T13:15:57.608591Z [info     ] sandbox.docker.phase.done      duration_seconds=0.467 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:15:57.715184Z [info     ] sandbox.docker.phase.done      duration_seconds=0.107 files=3 phase=output_collect
+2026-11-07T13:15:57.938759Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.223 oom_killed=False phase=cleanup
+2026-11-07T13:16:02.697124Z [info     ] sandbox.docker.phase.done      container_id=525b4b93a462 duration_seconds=0.433 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:16:03.043547Z [info     ] sandbox.docker.phase.done      duration_seconds=0.346 phase=build_container_start
+2026-11-07T13:16:03.065581Z [info     ] sandbox.docker.phase.done      archive_bytes=20480 duration_seconds=0.022 phase=build_workspace_copy
+2026-11-07T13:16:04.531962Z [info     ] sandbox.docker.phase.done      duration_seconds=1.466 exit_code=1 phase=build_install_exec script='set -eu\npython -m pip install no-such-package-5f3a9c1e'
+2026-11-07T13:16:05.072996Z [info     ] sandbox.docker.phase.done      duration_seconds=0.541 phase=build_container_cleanup
+2026-11-07T13:16:07.584217Z [info     ] sandbox.docker.phase.done      container_id=07e6c2a912f3 duration_seconds=0.218 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:16:07.954888Z [info     ] sandbox.docker.phase.done      duration_seconds=0.37 phase=build_container_start
+2026-11-07T13:16:08.007262Z [info     ] sandbox.docker.phase.done      archive_bytes=30720 duration_seconds=0.052 phase=build_workspace_copy
+2026-11-07T13:16:12.401983Z [info     ] sandbox.docker.phase.done      duration_seconds=4.395 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:16:14.522302Z [info     ] sandbox.docker.phase.done      duration_seconds=2.12 phase=build_image_commit repository=codepilot-env tag=c682ccceb5d98d8e1e567fc3f2d8efc837be126e
+2026-11-07T13:16:15.180377Z [info     ] sandbox.docker.phase.done      duration_seconds=0.658 phase=build_container_cleanup
+2026-11-07T13:16:15.305583Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.067 phase=volume_create
+2026-11-07T13:16:15.305583Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_eval_visibility_probe.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:16:15.532053Z [info     ] sandbox.docker.phase.done      container_id=1ebafbd48d52 duration_seconds=0.226 image=codepilot-env:c682ccceb5d98d8e1e567fc3f2d8efc837be126e phase=container_create
+2026-11-07T13:16:16.549638Z [info     ] sandbox.docker.phase.done      duration_seconds=1.018 phase=workspace_copy uploaded_bytes=30720
+2026-11-07T13:16:16.881610Z [info     ] sandbox.docker.phase.done      duration_seconds=0.332 phase=container_start
+2026-11-07T13:16:17.368273Z [info     ] sandbox.docker.phase.done      duration_seconds=0.487 exit_code=0 phase=test_wait timeout_seconds=120
+2026-11-07T13:16:17.484072Z [info     ] sandbox.docker.phase.done      duration_seconds=0.115 files=3 phase=output_collect
+2026-11-07T13:16:17.689224Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.205 oom_killed=False phase=cleanup
+tests\docker\test_synthetic_suite.py ..........
+2026-11-07T13:16:18.975974Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.025 phase=volume_create
+2026-11-07T13:16:18.976134Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_hang.py::test_never_returns > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:16:19.186757Z [info     ] sandbox.docker.phase.done      container_id=00fe264c9db6 duration_seconds=0.21 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:16:20.255989Z [info     ] sandbox.docker.phase.done      duration_seconds=1.069 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:16:20.558740Z [info     ] sandbox.docker.phase.done      duration_seconds=0.303 phase=container_start
+2026-11-07T13:16:35.769158Z [info     ] sandbox.docker.phase.done      duration_seconds=15.211 phase=test_wait timed_out=True timeout_seconds=15
+2026-11-07T13:16:35.831479Z [info     ] sandbox.docker.phase.done      duration_seconds=0.062 files=2 phase=output_collect
+2026-11-07T13:16:36.008302Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.177 oom_killed=False phase=cleanup
+2026-11-07T13:16:36.968881Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.022 phase=volume_create
+2026-11-07T13:16:36.968881Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_hang.py::test_never_returns > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:16:37.336536Z [info     ] sandbox.docker.phase.done      container_id=a7cf17019929 duration_seconds=0.368 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:16:37.972299Z [info     ] sandbox.docker.phase.done      duration_seconds=0.635 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:16:38.263532Z [info     ] sandbox.docker.phase.done      duration_seconds=0.291 phase=container_start
+2026-11-07T13:16:43.469243Z [info     ] sandbox.docker.phase.done      duration_seconds=5.206 phase=test_wait timed_out=True timeout_seconds=5
+2026-11-07T13:16:43.493939Z [info     ] sandbox.docker.phase.done      duration_seconds=0.025 files=2 phase=output_collect
+2026-11-07T13:16:43.511488Z [info     ] sandbox.docker.phase.done      cleanup_notes=4 duration_seconds=0.017 oom_killed=False phase=cleanup
+tests\docker\test_timeout.py ..
+2026-11-07T13:16:44.918354Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.056 phase=volume_create
+2026-11-07T13:16:44.918885Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_transfer_probe.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:16:45.129878Z [info     ] sandbox.docker.phase.done      container_id=ae5172993adb duration_seconds=0.211 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:16:46.053591Z [info     ] sandbox.docker.phase.done      duration_seconds=0.924 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:16:46.333404Z [info     ] sandbox.docker.phase.done      duration_seconds=0.28 phase=container_start
+2026-11-07T13:16:46.889866Z [info     ] sandbox.docker.phase.done      duration_seconds=0.556 exit_code=0 phase=test_wait timeout_seconds=180
+2026-11-07T13:16:46.983799Z [info     ] sandbox.docker.phase.done      duration_seconds=0.094 files=3 phase=output_collect
+2026-11-07T13:16:47.181111Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.197 oom_killed=False phase=cleanup
+tests\docker\test_transfer.py .
+2026-11-07T13:16:48.120266Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.012 phase=volume_create
+2026-11-07T13:16:48.120266Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml test_security_probe.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:16:48.392012Z [info     ] sandbox.docker.phase.done      container_id=8956612c8393 duration_seconds=0.271 image=codepilot-env:bb03201beeac5854ff8d9d91bacf5b3aa4d33afd phase=container_create
+2026-11-07T13:16:49.191388Z [info     ] sandbox.docker.phase.done      duration_seconds=0.799 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:16:49.461065Z [info     ] sandbox.docker.phase.done      duration_seconds=0.27 phase=container_start
+2026-11-07T13:16:49.889791Z [info     ] sandbox.docker.phase.done      duration_seconds=0.428 exit_code=0 phase=test_wait timeout_seconds=180
+2026-11-07T13:16:50.100546Z [info     ] sandbox.docker.phase.done      duration_seconds=0.21 files=4 phase=output_collect
+2026-11-07T13:16:50.270726Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.17 oom_killed=False phase=cleanup
+tests\docker\test_user.py ..
+2026-11-07T13:16:52.715233Z [info     ] repo.index.done                changed=3 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.25 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=phase5_e2e_repo reused=0
+2026-11-07T13:16:53.129765Z [info     ] sandbox.docker.phase.done      container_id=498d458cde20 duration_seconds=0.303 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:16:53.469928Z [info     ] sandbox.docker.phase.done      duration_seconds=0.34 phase=build_container_start
+2026-11-07T13:16:53.491748Z [info     ] sandbox.docker.phase.done      archive_bytes=10240 duration_seconds=0.022 phase=build_workspace_copy
+2026-11-07T13:16:59.047065Z [info     ] sandbox.docker.phase.done      duration_seconds=5.556 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:17:00.758098Z [info     ] sandbox.docker.phase.done      duration_seconds=1.711 phase=build_image_commit repository=codepilot-env tag=959f41b75c325f8e9ff980b0cb07710f434153d9
+2026-11-07T13:17:01.440019Z [info     ] sandbox.docker.phase.done      duration_seconds=0.682 phase=build_container_cleanup
+2026-11-07T13:17:02.396815Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.051 phase=volume_create
+2026-11-07T13:17:02.396815Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:17:02.617029Z [info     ] sandbox.docker.phase.done      container_id=3b00f7dfb251 duration_seconds=0.22 image=codepilot-env:959f41b75c325f8e9ff980b0cb07710f434153d9 phase=container_create
+2026-11-07T13:17:03.723353Z [info     ] sandbox.docker.phase.done      duration_seconds=1.106 phase=workspace_copy uploaded_bytes=10240
+2026-11-07T13:17:04.153038Z [info     ] sandbox.docker.phase.done      duration_seconds=0.429 phase=container_start
+2026-11-07T13:17:04.636775Z [info     ] sandbox.docker.phase.done      duration_seconds=0.484 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:17:04.740527Z [info     ] sandbox.docker.phase.done      duration_seconds=0.103 files=3 phase=output_collect
+2026-11-07T13:17:04.920605Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.18 oom_killed=False phase=cleanup
+tests\graph\test_minimal_e2e.py .
+2026-11-07T13:17:10.358317Z [info     ] repo.index.done                changed=4 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.172 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_3c3c384d54733b6c reused=0
+2026-11-07T13:17:10.945889Z [info     ] sandbox.docker.phase.done      container_id=549c6c6acbc6 duration_seconds=0.451 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:17:11.324920Z [info     ] sandbox.docker.phase.done      duration_seconds=0.379 phase=build_container_start
+2026-11-07T13:17:11.352304Z [info     ] sandbox.docker.phase.done      archive_bytes=20480 duration_seconds=0.027 phase=build_workspace_copy
+2026-11-07T13:17:15.705801Z [info     ] sandbox.docker.phase.done      duration_seconds=4.354 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:17:17.552850Z [info     ] sandbox.docker.phase.done      duration_seconds=1.847 phase=build_image_commit repository=codepilot-env tag=286ed8ac5346cd65dbd3eb581f1363714a3787d6
+2026-11-07T13:17:18.250522Z [info     ] sandbox.docker.phase.done      duration_seconds=0.698 phase=build_container_cleanup
+2026-11-07T13:17:18.735124Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.051 phase=volume_create
+2026-11-07T13:17:18.735654Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:17:19.023231Z [info     ] sandbox.docker.phase.done      container_id=f854057f4704 duration_seconds=0.287 image=codepilot-env:286ed8ac5346cd65dbd3eb581f1363714a3787d6 phase=container_create
+2026-11-07T13:17:19.912139Z [info     ] sandbox.docker.phase.done      duration_seconds=0.889 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:17:20.192084Z [info     ] sandbox.docker.phase.done      duration_seconds=0.28 phase=container_start
+2026-11-07T13:17:20.769015Z [info     ] sandbox.docker.phase.done      duration_seconds=0.577 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:17:20.873563Z [info     ] sandbox.docker.phase.done      duration_seconds=0.105 files=3 phase=output_collect
+2026-11-07T13:17:21.094838Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.221 oom_killed=False phase=cleanup
+2026-11-07T13:17:21.263559Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.078 phase=volume_create
+2026-11-07T13:17:21.263559Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:17:21.559981Z [info     ] sandbox.docker.phase.done      container_id=b9d6ef44da49 duration_seconds=0.296 image=codepilot-env:286ed8ac5346cd65dbd3eb581f1363714a3787d6 phase=container_create
+2026-11-07T13:17:22.968593Z [info     ] sandbox.docker.phase.done      duration_seconds=1.408 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:17:23.228651Z [info     ] sandbox.docker.phase.done      duration_seconds=0.26 phase=container_start
+2026-11-07T13:17:23.674700Z [info     ] sandbox.docker.phase.done      duration_seconds=0.446 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:17:23.774542Z [info     ] sandbox.docker.phase.done      duration_seconds=0.1 files=3 phase=output_collect
+2026-11-07T13:17:23.949917Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.175 oom_killed=False phase=cleanup
+2026-11-07T13:17:26.149424Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.049 phase=volume_create
+2026-11-07T13:17:26.149424Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:17:26.646839Z [info     ] sandbox.docker.phase.done      container_id=56364f1f002b duration_seconds=0.497 image=codepilot-env:286ed8ac5346cd65dbd3eb581f1363714a3787d6 phase=container_create
+2026-11-07T13:17:27.760049Z [info     ] sandbox.docker.phase.done      duration_seconds=1.113 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:17:28.023240Z [info     ] sandbox.docker.phase.done      duration_seconds=0.263 phase=container_start
+2026-11-07T13:17:28.657321Z [info     ] sandbox.docker.phase.done      duration_seconds=0.634 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:17:28.767751Z [info     ] sandbox.docker.phase.done      duration_seconds=0.11 files=3 phase=output_collect
+2026-11-07T13:17:28.991009Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.223 oom_killed=False phase=cleanup
+2026-11-07T13:17:29.788093Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.048 phase=volume_create
+2026-11-07T13:17:29.788093Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py::test_normalize > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:17:30.142121Z [info     ] sandbox.docker.phase.done      container_id=758b11e0a093 duration_seconds=0.354 image=codepilot-env:286ed8ac5346cd65dbd3eb581f1363714a3787d6 phase=container_create
+2026-11-07T13:17:31.322873Z [info     ] sandbox.docker.phase.done      duration_seconds=1.181 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:17:31.596286Z [info     ] sandbox.docker.phase.done      duration_seconds=0.273 phase=container_start
+2026-11-07T13:17:32.075493Z [info     ] sandbox.docker.phase.done      duration_seconds=0.479 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:17:32.164378Z [info     ] sandbox.docker.phase.done      duration_seconds=0.089 files=3 phase=output_collect
+2026-11-07T13:17:32.336969Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.172 oom_killed=False phase=cleanup
+2026-11-07T13:17:36.421142Z [info     ] repo.index.done                changed=4 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.141 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_74926521b263d3b7 reused=0
+2026-11-07T13:17:36.838935Z [info     ] sandbox.docker.phase.done      container_id=4d2e6400bcc4 duration_seconds=0.271 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:17:37.244169Z [info     ] sandbox.docker.phase.done      duration_seconds=0.405 phase=build_container_start
+2026-11-07T13:17:37.269666Z [info     ] sandbox.docker.phase.done      archive_bytes=20480 duration_seconds=0.025 phase=build_workspace_copy
+2026-11-07T13:17:41.513097Z [info     ] sandbox.docker.phase.done      duration_seconds=4.243 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:17:43.367756Z [info     ] sandbox.docker.phase.done      duration_seconds=1.854 phase=build_image_commit repository=codepilot-env tag=6ba550c4ad2901200110b2d660dbd22a3d40ed0c
+2026-11-07T13:17:44.126146Z [info     ] sandbox.docker.phase.done      duration_seconds=0.758 phase=build_container_cleanup
+2026-11-07T13:17:44.522270Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.033 phase=volume_create
+2026-11-07T13:17:44.522270Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:17:44.858448Z [info     ] sandbox.docker.phase.done      container_id=15068ba9f8d4 duration_seconds=0.336 image=codepilot-env:6ba550c4ad2901200110b2d660dbd22a3d40ed0c phase=container_create
+2026-11-07T13:17:46.066965Z [info     ] sandbox.docker.phase.done      duration_seconds=1.208 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:17:46.428820Z [info     ] sandbox.docker.phase.done      duration_seconds=0.362 phase=container_start
+2026-11-07T13:17:46.972882Z [info     ] sandbox.docker.phase.done      duration_seconds=0.544 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:17:47.037754Z [info     ] sandbox.docker.phase.done      duration_seconds=0.065 files=3 phase=output_collect
+2026-11-07T13:17:47.226976Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.189 oom_killed=False phase=cleanup
+2026-11-07T13:17:47.376918Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.063 phase=volume_create
+2026-11-07T13:17:47.376918Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:17:47.625210Z [info     ] sandbox.docker.phase.done      container_id=9ef9a7357aaa duration_seconds=0.248 image=codepilot-env:6ba550c4ad2901200110b2d660dbd22a3d40ed0c phase=container_create
+2026-11-07T13:17:48.600100Z [info     ] sandbox.docker.phase.done      duration_seconds=0.975 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:17:48.936385Z [info     ] sandbox.docker.phase.done      duration_seconds=0.336 phase=container_start
+2026-11-07T13:17:49.503654Z [info     ] sandbox.docker.phase.done      duration_seconds=0.567 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:17:49.541502Z [info     ] sandbox.docker.phase.done      duration_seconds=0.038 files=3 phase=output_collect
+2026-11-07T13:17:49.746306Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.205 oom_killed=False phase=cleanup
+2026-11-07T13:17:51.413518Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.023 phase=volume_create
+2026-11-07T13:17:51.413518Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:17:51.652563Z [info     ] sandbox.docker.phase.done      container_id=c2767f763c4f duration_seconds=0.239 image=codepilot-env:6ba550c4ad2901200110b2d660dbd22a3d40ed0c phase=container_create
+2026-11-07T13:17:52.594804Z [info     ] sandbox.docker.phase.done      duration_seconds=0.942 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:17:52.786888Z [info     ] sandbox.docker.phase.done      duration_seconds=0.192 phase=container_start
+2026-11-07T13:17:53.302451Z [info     ] sandbox.docker.phase.done      duration_seconds=0.515 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:17:53.390504Z [info     ] sandbox.docker.phase.done      duration_seconds=0.088 files=3 phase=output_collect
+2026-11-07T13:17:53.549334Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.159 oom_killed=False phase=cleanup
+tests\graph\test_phase11_closure_docker.py ..
+2026-11-07T13:17:58.248186Z [info     ] repo.index.done                changed=5 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.141 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_e7a628d285be7ce1 reused=0
+2026-11-07T13:17:58.608611Z [info     ] sandbox.docker.phase.done      container_id=2185524d5dcb duration_seconds=0.228 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:17:58.970606Z [info     ] sandbox.docker.phase.done      duration_seconds=0.362 phase=build_container_start
+2026-11-07T13:17:58.997307Z [info     ] sandbox.docker.phase.done      archive_bytes=20480 duration_seconds=0.026 phase=build_workspace_copy
+2026-11-07T13:18:04.591824Z [info     ] sandbox.docker.phase.done      duration_seconds=5.595 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:18:06.267610Z [info     ] sandbox.docker.phase.done      duration_seconds=1.676 phase=build_image_commit repository=codepilot-env tag=ad911c94252aba9d8cc98718ce6c0435e02987f9
+2026-11-07T13:18:06.835403Z [info     ] sandbox.docker.phase.done      duration_seconds=0.567 phase=build_container_cleanup
+2026-11-07T13:18:07.210264Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.024 phase=volume_create
+2026-11-07T13:18:07.210264Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py tests/test_unrelated.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:07.452899Z [info     ] sandbox.docker.phase.done      container_id=8f90de60f2e7 duration_seconds=0.242 image=codepilot-env:ad911c94252aba9d8cc98718ce6c0435e02987f9 phase=container_create
+2026-11-07T13:18:08.371755Z [info     ] sandbox.docker.phase.done      duration_seconds=0.919 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:18:08.618592Z [info     ] sandbox.docker.phase.done      duration_seconds=0.247 phase=container_start
+2026-11-07T13:18:09.048796Z [info     ] sandbox.docker.phase.done      duration_seconds=0.43 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:18:09.154560Z [info     ] sandbox.docker.phase.done      duration_seconds=0.106 files=3 phase=output_collect
+2026-11-07T13:18:09.313349Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.159 oom_killed=False phase=cleanup
+2026-11-07T13:18:09.445752Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.041 phase=volume_create
+2026-11-07T13:18:09.446276Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py tests/test_unrelated.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:09.662043Z [info     ] sandbox.docker.phase.done      container_id=b101a4b02890 duration_seconds=0.216 image=codepilot-env:ad911c94252aba9d8cc98718ce6c0435e02987f9 phase=container_create
+2026-11-07T13:18:10.572665Z [info     ] sandbox.docker.phase.done      duration_seconds=0.91 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:18:10.845527Z [info     ] sandbox.docker.phase.done      duration_seconds=0.273 phase=container_start
+2026-11-07T13:18:11.403976Z [info     ] sandbox.docker.phase.done      duration_seconds=0.559 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:18:11.471701Z [info     ] sandbox.docker.phase.done      duration_seconds=0.067 files=3 phase=output_collect
+2026-11-07T13:18:11.645876Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.174 oom_killed=False phase=cleanup
+2026-11-07T13:18:13.004440Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.036 phase=volume_create
+2026-11-07T13:18:13.004440Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:13.258047Z [info     ] sandbox.docker.phase.done      container_id=dfe0186bcd34 duration_seconds=0.254 image=codepilot-env:ad911c94252aba9d8cc98718ce6c0435e02987f9 phase=container_create
+2026-11-07T13:18:14.296062Z [info     ] sandbox.docker.phase.done      duration_seconds=1.038 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:18:14.531156Z [info     ] sandbox.docker.phase.done      duration_seconds=0.235 phase=container_start
+2026-11-07T13:18:15.006644Z [info     ] sandbox.docker.phase.done      duration_seconds=0.476 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:18:15.096181Z [info     ] sandbox.docker.phase.done      duration_seconds=0.089 files=3 phase=output_collect
+2026-11-07T13:18:15.323705Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.227 oom_killed=False phase=cleanup
+2026-11-07T13:18:15.900977Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.037 phase=volume_create
+2026-11-07T13:18:15.900977Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py::test_normalize > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:16.114477Z [info     ] sandbox.docker.phase.done      container_id=54fea1ea3ce4 duration_seconds=0.213 image=codepilot-env:ad911c94252aba9d8cc98718ce6c0435e02987f9 phase=container_create
+2026-11-07T13:18:17.587365Z [info     ] sandbox.docker.phase.done      duration_seconds=1.473 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:18:17.781224Z [info     ] sandbox.docker.phase.done      duration_seconds=0.194 phase=container_start
+2026-11-07T13:18:18.289175Z [info     ] sandbox.docker.phase.done      duration_seconds=0.508 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:18:18.329011Z [info     ] sandbox.docker.phase.done      duration_seconds=0.04 files=3 phase=output_collect
+2026-11-07T13:18:18.507906Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.179 oom_killed=False phase=cleanup
+2026-11-07T13:18:18.933759Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.067 phase=volume_create
+2026-11-07T13:18:18.934280Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py::test_normalize tests/test_unrelated.py::test_unrelated > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:19.185855Z [info     ] sandbox.docker.phase.done      container_id=01f6a9125120 duration_seconds=0.252 image=codepilot-env:ad911c94252aba9d8cc98718ce6c0435e02987f9 phase=container_create
+2026-11-07T13:18:20.255307Z [info     ] sandbox.docker.phase.done      duration_seconds=1.069 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:18:20.478902Z [info     ] sandbox.docker.phase.done      duration_seconds=0.223 phase=container_start
+2026-11-07T13:18:20.949634Z [info     ] sandbox.docker.phase.done      duration_seconds=0.471 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:18:21.044540Z [info     ] sandbox.docker.phase.done      duration_seconds=0.094 files=3 phase=output_collect
+2026-11-07T13:18:21.190527Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.146 oom_killed=False phase=cleanup
+2026-11-07T13:18:25.538720Z [info     ] repo.index.done                changed=5 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.141 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_00ac62fd4a3bd964 reused=0
+2026-11-07T13:18:25.864754Z [info     ] sandbox.docker.phase.done      container_id=6d8a37e792d2 duration_seconds=0.219 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:18:26.221035Z [info     ] sandbox.docker.phase.done      duration_seconds=0.356 phase=build_container_start
+2026-11-07T13:18:26.249354Z [info     ] sandbox.docker.phase.done      archive_bytes=20480 duration_seconds=0.029 phase=build_workspace_copy
+2026-11-07T13:18:33.773593Z [info     ] sandbox.docker.phase.done      duration_seconds=7.524 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:18:35.241831Z [info     ] sandbox.docker.phase.done      duration_seconds=1.468 phase=build_image_commit repository=codepilot-env tag=3db7ed65c10625a8950375024449631b493abe23
+2026-11-07T13:18:35.885887Z [info     ] sandbox.docker.phase.done      duration_seconds=0.644 phase=build_container_cleanup
+2026-11-07T13:18:36.263337Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.032 phase=volume_create
+2026-11-07T13:18:36.263855Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py tests/test_unrelated.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:36.593283Z [info     ] sandbox.docker.phase.done      container_id=d8f3e01554cd duration_seconds=0.33 image=codepilot-env:3db7ed65c10625a8950375024449631b493abe23 phase=container_create
+2026-11-07T13:18:37.479566Z [info     ] sandbox.docker.phase.done      duration_seconds=0.886 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:18:37.694683Z [info     ] sandbox.docker.phase.done      duration_seconds=0.215 phase=container_start
+2026-11-07T13:18:38.233565Z [info     ] sandbox.docker.phase.done      duration_seconds=0.539 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:18:38.288310Z [info     ] sandbox.docker.phase.done      duration_seconds=0.055 files=3 phase=output_collect
+2026-11-07T13:18:38.499587Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.211 oom_killed=False phase=cleanup
+2026-11-07T13:18:38.661649Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.078 phase=volume_create
+2026-11-07T13:18:38.661649Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py tests/test_unrelated.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:39.062548Z [info     ] sandbox.docker.phase.done      container_id=f1778bf563de duration_seconds=0.401 image=codepilot-env:3db7ed65c10625a8950375024449631b493abe23 phase=container_create
+2026-11-07T13:18:40.331804Z [info     ] sandbox.docker.phase.done      duration_seconds=1.269 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:18:40.624880Z [info     ] sandbox.docker.phase.done      duration_seconds=0.293 phase=container_start
+2026-11-07T13:18:41.136862Z [info     ] sandbox.docker.phase.done      duration_seconds=0.511 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:18:41.227304Z [info     ] sandbox.docker.phase.done      duration_seconds=0.091 files=3 phase=output_collect
+2026-11-07T13:18:41.456623Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.229 oom_killed=False phase=cleanup
+2026-11-07T13:18:43.378824Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.045 phase=volume_create
+2026-11-07T13:18:43.378824Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:43.651066Z [info     ] sandbox.docker.phase.done      container_id=0b6125d47a32 duration_seconds=0.272 image=codepilot-env:3db7ed65c10625a8950375024449631b493abe23 phase=container_create
+2026-11-07T13:18:44.605181Z [info     ] sandbox.docker.phase.done      duration_seconds=0.954 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:18:44.926140Z [info     ] sandbox.docker.phase.done      duration_seconds=0.321 phase=container_start
+2026-11-07T13:18:45.370995Z [info     ] sandbox.docker.phase.done      duration_seconds=0.445 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:18:45.468143Z [info     ] sandbox.docker.phase.done      duration_seconds=0.097 files=3 phase=output_collect
+2026-11-07T13:18:45.629474Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.161 oom_killed=False phase=cleanup
+2026-11-07T13:18:46.275837Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.063 phase=volume_create
+2026-11-07T13:18:46.276362Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py::test_normalize > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:46.488211Z [info     ] sandbox.docker.phase.done      container_id=4425b465eaa1 duration_seconds=0.212 image=codepilot-env:3db7ed65c10625a8950375024449631b493abe23 phase=container_create
+2026-11-07T13:18:47.634499Z [info     ] sandbox.docker.phase.done      duration_seconds=1.146 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:18:47.896675Z [info     ] sandbox.docker.phase.done      duration_seconds=0.262 phase=container_start
+2026-11-07T13:18:48.333608Z [info     ] sandbox.docker.phase.done      duration_seconds=0.437 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:18:48.432184Z [info     ] sandbox.docker.phase.done      duration_seconds=0.098 files=3 phase=output_collect
+2026-11-07T13:18:48.588288Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.156 oom_killed=False phase=cleanup
+2026-11-07T13:18:49.061421Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.032 phase=volume_create
+2026-11-07T13:18:49.061421Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py::test_normalize tests/test_unrelated.py::test_unrelated > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:49.317157Z [info     ] sandbox.docker.phase.done      container_id=245166a75b30 duration_seconds=0.256 image=codepilot-env:3db7ed65c10625a8950375024449631b493abe23 phase=container_create
+2026-11-07T13:18:50.522612Z [info     ] sandbox.docker.phase.done      duration_seconds=1.205 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:18:50.840904Z [info     ] sandbox.docker.phase.done      duration_seconds=0.318 phase=container_start
+2026-11-07T13:18:51.327748Z [info     ] sandbox.docker.phase.done      duration_seconds=0.487 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:18:51.401681Z [info     ] sandbox.docker.phase.done      duration_seconds=0.074 files=3 phase=output_collect
+2026-11-07T13:18:51.582967Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.181 oom_killed=False phase=cleanup
+2026-11-07T13:18:53.639042Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.025 phase=volume_create
+2026-11-07T13:18:53.639565Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:53.930160Z [info     ] sandbox.docker.phase.done      container_id=c6634aef948a duration_seconds=0.291 image=codepilot-env:3db7ed65c10625a8950375024449631b493abe23 phase=container_create
+2026-11-07T13:18:54.939177Z [info     ] sandbox.docker.phase.done      duration_seconds=1.009 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:18:55.207271Z [info     ] sandbox.docker.phase.done      duration_seconds=0.268 phase=container_start
+2026-11-07T13:18:55.705500Z [info     ] sandbox.docker.phase.done      duration_seconds=0.498 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:18:55.871056Z [info     ] sandbox.docker.phase.done      duration_seconds=0.166 files=3 phase=output_collect
+2026-11-07T13:18:56.154262Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.283 oom_killed=False phase=cleanup
+2026-11-07T13:18:56.839457Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.069 phase=volume_create
+2026-11-07T13:18:56.839457Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py::test_normalize > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:57.060554Z [info     ] sandbox.docker.phase.done      container_id=970c1b125e58 duration_seconds=0.221 image=codepilot-env:3db7ed65c10625a8950375024449631b493abe23 phase=container_create
+2026-11-07T13:18:58.201565Z [info     ] sandbox.docker.phase.done      duration_seconds=1.141 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:18:58.415095Z [info     ] sandbox.docker.phase.done      duration_seconds=0.213 phase=container_start
+2026-11-07T13:18:58.862504Z [info     ] sandbox.docker.phase.done      duration_seconds=0.448 exit_code=0 phase=test_wait timeout_seconds=9
+2026-11-07T13:18:58.958229Z [info     ] sandbox.docker.phase.done      duration_seconds=0.095 files=3 phase=output_collect
+2026-11-07T13:18:59.142263Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.184 oom_killed=False phase=cleanup
+2026-11-07T13:18:59.503180Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.05 phase=volume_create
+2026-11-07T13:18:59.503180Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py::test_normalize tests/test_unrelated.py::test_unrelated > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:18:59.695458Z [info     ] sandbox.docker.phase.done      container_id=dbe41924a295 duration_seconds=0.192 image=codepilot-env:3db7ed65c10625a8950375024449631b493abe23 phase=container_create
+2026-11-07T13:19:00.741145Z [info     ] sandbox.docker.phase.done      duration_seconds=1.046 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:19:01.100787Z [info     ] sandbox.docker.phase.done      duration_seconds=0.359 phase=container_start
+2026-11-07T13:19:01.909344Z [info     ] sandbox.docker.phase.done      duration_seconds=0.808 exit_code=0 phase=test_wait timeout_seconds=9
+2026-11-07T13:19:01.954356Z [info     ] sandbox.docker.phase.done      duration_seconds=0.045 files=3 phase=output_collect
+2026-11-07T13:19:02.153176Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.199 oom_killed=False phase=cleanup
+tests\graph\test_phase12_closure_admission_docker.py ..
+2026-11-07T13:19:06.143322Z [info     ] repo.index.done                changed=3 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.109 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_adb9193ef8af2f0c reused=0
+2026-11-07T13:19:08.184593Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.047 phase=volume_create
+2026-11-07T13:19:08.185122Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/_codepilot_repro/test_repro_normalize.py::test_normalize_returns_the_input > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:19:08.482022Z [info     ] sandbox.docker.phase.done      container_id=4702d23a0c99 duration_seconds=0.297 image=codepilot-env:7948f521fc1e2eb7672f0caaf1d2b407d8c48ba3 phase=container_create
+2026-11-07T13:19:09.532688Z [info     ] sandbox.docker.phase.done      duration_seconds=1.051 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:19:09.736985Z [info     ] sandbox.docker.phase.done      duration_seconds=0.204 phase=container_start
+2026-11-07T13:19:10.692478Z [info     ] sandbox.docker.phase.done      duration_seconds=0.955 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:19:10.751920Z [info     ] sandbox.docker.phase.done      duration_seconds=0.059 files=3 phase=output_collect
+2026-11-07T13:19:10.939679Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.187 oom_killed=False phase=cleanup
+2026-11-07T13:19:13.773132Z [info     ] repo.index.done                changed=3 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.141 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_3dbdea5c51658e32 reused=0
+2026-11-07T13:19:15.433457Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.053 phase=volume_create
+2026-11-07T13:19:15.433457Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/_codepilot_repro/test_repro_already_green.py::test_normalize_subtracts_one > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:19:15.652733Z [info     ] sandbox.docker.phase.done      container_id=eade1391cbe3 duration_seconds=0.219 image=codepilot-env:7948f521fc1e2eb7672f0caaf1d2b407d8c48ba3 phase=container_create
+2026-11-07T13:19:16.840834Z [info     ] sandbox.docker.phase.done      duration_seconds=1.188 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:19:17.063579Z [info     ] sandbox.docker.phase.done      duration_seconds=0.223 phase=container_start
+2026-11-07T13:19:17.485384Z [info     ] sandbox.docker.phase.done      duration_seconds=0.422 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:19:17.601894Z [info     ] sandbox.docker.phase.done      duration_seconds=0.116 files=3 phase=output_collect
+2026-11-07T13:19:17.762936Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.161 oom_killed=False phase=cleanup
+tests\graph\test_phase6_reproduction_e2e.py ..
+2026-11-07T13:19:20.611011Z [info     ] repo.index.done                changed=3 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.125 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_2c355d9243773929 reused=0
+2026-11-07T13:19:22.618769Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.062 phase=volume_create
+2026-11-07T13:19:22.619275Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/_codepilot_repro/test_repro_normalize.py::test_normalize_returns_the_input > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:19:22.948123Z [info     ] sandbox.docker.phase.done      container_id=6d8444eac4b9 duration_seconds=0.329 image=codepilot-env:7948f521fc1e2eb7672f0caaf1d2b407d8c48ba3 phase=container_create
+2026-11-07T13:19:24.176611Z [info     ] sandbox.docker.phase.done      duration_seconds=1.228 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:19:24.595878Z [info     ] sandbox.docker.phase.done      duration_seconds=0.419 phase=container_start
+2026-11-07T13:19:24.999864Z [info     ] sandbox.docker.phase.done      duration_seconds=0.404 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:19:25.084818Z [info     ] sandbox.docker.phase.done      duration_seconds=0.084 files=3 phase=output_collect
+2026-11-07T13:19:25.507205Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.422 oom_killed=False phase=cleanup
+tests\graph\test_phase7_diagnosis_e2e.py .
+2026-11-07T13:19:30.051064Z [info     ] repo.index.done                changed=4 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.172 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_3a2f6824bd801a54 reused=0
+2026-11-07T13:19:30.592421Z [info     ] sandbox.docker.phase.done      container_id=961cd26fc8e0 duration_seconds=0.364 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:19:31.032431Z [info     ] sandbox.docker.phase.done      duration_seconds=0.44 phase=build_container_start
+2026-11-07T13:19:31.065125Z [info     ] sandbox.docker.phase.done      archive_bytes=20480 duration_seconds=0.033 phase=build_workspace_copy
+2026-11-07T13:19:36.271197Z [info     ] sandbox.docker.phase.done      duration_seconds=5.206 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:19:37.774656Z [info     ] sandbox.docker.phase.done      duration_seconds=1.503 phase=build_image_commit repository=codepilot-env tag=2c031d47b02f3b06ecc30dee14c67f5ec2f77d21
+2026-11-07T13:19:38.335173Z [info     ] sandbox.docker.phase.done      duration_seconds=0.56 phase=build_container_cleanup
+2026-11-07T13:19:38.709750Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.021 phase=volume_create
+2026-11-07T13:19:38.709848Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:19:38.974883Z [info     ] sandbox.docker.phase.done      container_id=40f51b91b910 duration_seconds=0.265 image=codepilot-env:2c031d47b02f3b06ecc30dee14c67f5ec2f77d21 phase=container_create
+2026-11-07T13:19:40.103229Z [info     ] sandbox.docker.phase.done      duration_seconds=1.128 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:19:40.435583Z [info     ] sandbox.docker.phase.done      duration_seconds=0.332 phase=container_start
+2026-11-07T13:19:40.940577Z [info     ] sandbox.docker.phase.done      duration_seconds=0.505 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:19:41.001912Z [info     ] sandbox.docker.phase.done      duration_seconds=0.061 files=3 phase=output_collect
+2026-11-07T13:19:41.246734Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.245 oom_killed=False phase=cleanup
+2026-11-07T13:19:41.377437Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.045 phase=volume_create
+2026-11-07T13:19:41.377437Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:19:41.699400Z [info     ] sandbox.docker.phase.done      container_id=300be0c35d26 duration_seconds=0.321 image=codepilot-env:2c031d47b02f3b06ecc30dee14c67f5ec2f77d21 phase=container_create
+2026-11-07T13:19:43.023392Z [info     ] sandbox.docker.phase.done      duration_seconds=1.324 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:19:43.339726Z [info     ] sandbox.docker.phase.done      duration_seconds=0.316 phase=container_start
+2026-11-07T13:19:43.805025Z [info     ] sandbox.docker.phase.done      duration_seconds=0.465 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:19:43.900655Z [info     ] sandbox.docker.phase.done      duration_seconds=0.095 files=3 phase=output_collect
+2026-11-07T13:19:44.160712Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.26 oom_killed=False phase=cleanup
+2026-11-07T13:19:45.717888Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.072 phase=volume_create
+2026-11-07T13:19:45.717888Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:19:46.045648Z [info     ] sandbox.docker.phase.done      container_id=d006ed4ee23a duration_seconds=0.328 image=codepilot-env:2c031d47b02f3b06ecc30dee14c67f5ec2f77d21 phase=container_create
+2026-11-07T13:19:47.018968Z [info     ] sandbox.docker.phase.done      duration_seconds=0.973 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:19:47.267497Z [info     ] sandbox.docker.phase.done      duration_seconds=0.249 phase=container_start
+2026-11-07T13:19:47.729909Z [info     ] sandbox.docker.phase.done      duration_seconds=0.462 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:19:47.828702Z [info     ] sandbox.docker.phase.done      duration_seconds=0.099 files=3 phase=output_collect
+2026-11-07T13:19:48.006309Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.177 oom_killed=False phase=cleanup
+2026-11-07T13:19:49.686735Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.051 phase=volume_create
+2026-11-07T13:19:49.686735Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:19:49.961475Z [info     ] sandbox.docker.phase.done      container_id=54e9acd8cbff duration_seconds=0.274 image=codepilot-env:2c031d47b02f3b06ecc30dee14c67f5ec2f77d21 phase=container_create
+2026-11-07T13:19:51.006040Z [info     ] sandbox.docker.phase.done      duration_seconds=1.045 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:19:51.220936Z [info     ] sandbox.docker.phase.done      duration_seconds=0.215 phase=container_start
+2026-11-07T13:19:51.721887Z [info     ] sandbox.docker.phase.done      duration_seconds=0.501 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:19:51.824892Z [info     ] sandbox.docker.phase.done      duration_seconds=0.103 files=3 phase=output_collect
+2026-11-07T13:19:52.135760Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.311 oom_killed=False phase=cleanup
+tests\graph\test_phase8_docker_e2e.py .
+2026-11-07T13:19:55.506381Z [info     ] repo.index.done                changed=5 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.156 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_8fc95753bb9fe936 reused=0
+2026-11-07T13:19:55.875347Z [info     ] sandbox.docker.phase.done      container_id=ac0fded0155b duration_seconds=0.275 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:19:56.238231Z [info     ] sandbox.docker.phase.done      duration_seconds=0.363 phase=build_container_start
+2026-11-07T13:19:56.262815Z [info     ] sandbox.docker.phase.done      archive_bytes=20480 duration_seconds=0.025 phase=build_workspace_copy
+2026-11-07T13:20:01.155052Z [info     ] sandbox.docker.phase.done      duration_seconds=4.892 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:20:02.752126Z [info     ] sandbox.docker.phase.done      duration_seconds=1.597 phase=build_image_commit repository=codepilot-env tag=1c560b9acdffe60827bd51dc282cc70eb837caf2
+2026-11-07T13:20:03.469825Z [info     ] sandbox.docker.phase.done      duration_seconds=0.718 phase=build_container_cleanup
+2026-11-07T13:20:04.054555Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.039 phase=volume_create
+2026-11-07T13:20:04.055075Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py tests/test_other.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:20:04.402676Z [info     ] sandbox.docker.phase.done      container_id=84063788f9ac duration_seconds=0.348 image=codepilot-env:1c560b9acdffe60827bd51dc282cc70eb837caf2 phase=container_create
+2026-11-07T13:20:05.537774Z [info     ] sandbox.docker.phase.done      duration_seconds=1.135 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:20:05.906113Z [info     ] sandbox.docker.phase.done      duration_seconds=0.368 phase=container_start
+2026-11-07T13:20:06.419158Z [info     ] sandbox.docker.phase.done      duration_seconds=0.513 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:20:06.482825Z [info     ] sandbox.docker.phase.done      duration_seconds=0.063 files=3 phase=output_collect
+2026-11-07T13:20:06.696290Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.214 oom_killed=False phase=cleanup
+2026-11-07T13:20:06.810324Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.036 phase=volume_create
+2026-11-07T13:20:06.810324Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py tests/test_other.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:20:07.150017Z [info     ] sandbox.docker.phase.done      container_id=598db4a994f5 duration_seconds=0.339 image=codepilot-env:1c560b9acdffe60827bd51dc282cc70eb837caf2 phase=container_create
+2026-11-07T13:20:08.800290Z [info     ] sandbox.docker.phase.done      duration_seconds=1.65 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:20:09.036985Z [info     ] sandbox.docker.phase.done      duration_seconds=0.237 phase=container_start
+2026-11-07T13:20:09.480394Z [info     ] sandbox.docker.phase.done      duration_seconds=0.443 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:20:09.578466Z [info     ] sandbox.docker.phase.done      duration_seconds=0.098 files=3 phase=output_collect
+2026-11-07T13:20:09.774062Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.195 oom_killed=False phase=cleanup
+2026-11-07T13:20:11.961622Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.062 phase=volume_create
+2026-11-07T13:20:11.961622Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:20:12.165430Z [info     ] sandbox.docker.phase.done      container_id=0aead9ef6076 duration_seconds=0.204 image=codepilot-env:1c560b9acdffe60827bd51dc282cc70eb837caf2 phase=container_create
+2026-11-07T13:20:13.098628Z [info     ] sandbox.docker.phase.done      duration_seconds=0.933 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:20:13.333961Z [info     ] sandbox.docker.phase.done      duration_seconds=0.235 phase=container_start
+2026-11-07T13:20:13.778823Z [info     ] sandbox.docker.phase.done      duration_seconds=0.444 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:20:13.879256Z [info     ] sandbox.docker.phase.done      duration_seconds=0.101 files=3 phase=output_collect
+2026-11-07T13:20:14.102729Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.223 oom_killed=False phase=cleanup
+2026-11-07T13:20:14.771615Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.06 phase=volume_create
+2026-11-07T13:20:14.771615Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py::test_normalize tests/test_other.py::test_other > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:20:15.031687Z [info     ] sandbox.docker.phase.done      container_id=134fa9b7a186 duration_seconds=0.26 image=codepilot-env:1c560b9acdffe60827bd51dc282cc70eb837caf2 phase=container_create
+2026-11-07T13:20:16.028125Z [info     ] sandbox.docker.phase.done      duration_seconds=0.996 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:20:16.223938Z [info     ] sandbox.docker.phase.done      duration_seconds=0.195 phase=container_start
+2026-11-07T13:20:16.688368Z [info     ] sandbox.docker.phase.done      duration_seconds=0.465 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:20:16.761405Z [info     ] sandbox.docker.phase.done      duration_seconds=0.073 files=3 phase=output_collect
+2026-11-07T13:20:16.922261Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.161 oom_killed=False phase=cleanup
+2026-11-07T13:20:21.362805Z [info     ] repo.index.done                changed=5 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.156 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_110fabc7cc1281b4 reused=0
+2026-11-07T13:20:21.742246Z [info     ] sandbox.docker.phase.done      container_id=bfb10431af1c duration_seconds=0.258 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:20:22.093076Z [info     ] sandbox.docker.phase.done      duration_seconds=0.351 phase=build_container_start
+2026-11-07T13:20:22.117870Z [info     ] sandbox.docker.phase.done      archive_bytes=20480 duration_seconds=0.024 phase=build_workspace_copy
+2026-11-07T13:20:26.854223Z [info     ] sandbox.docker.phase.done      duration_seconds=4.736 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:20:28.513834Z [info     ] sandbox.docker.phase.done      duration_seconds=1.659 phase=build_image_commit repository=codepilot-env tag=73740b0fa971e7150167ccf241f79cf20d504973
+2026-11-07T13:20:29.146540Z [info     ] sandbox.docker.phase.done      duration_seconds=0.632 phase=build_container_cleanup
+2026-11-07T13:20:29.440089Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.037 phase=volume_create
+2026-11-07T13:20:29.440593Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py tests/test_other.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:20:29.746468Z [info     ] sandbox.docker.phase.done      container_id=6c274b5f2e3c duration_seconds=0.306 image=codepilot-env:73740b0fa971e7150167ccf241f79cf20d504973 phase=container_create
+2026-11-07T13:20:30.732123Z [info     ] sandbox.docker.phase.done      duration_seconds=0.985 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:20:31.074285Z [info     ] sandbox.docker.phase.done      duration_seconds=0.342 phase=container_start
+2026-11-07T13:20:31.505579Z [info     ] sandbox.docker.phase.done      duration_seconds=0.432 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:20:31.597820Z [info     ] sandbox.docker.phase.done      duration_seconds=0.091 files=3 phase=output_collect
+2026-11-07T13:20:31.818692Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.221 oom_killed=False phase=cleanup
+2026-11-07T13:20:31.956780Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.056 phase=volume_create
+2026-11-07T13:20:31.956780Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py tests/test_other.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:20:32.187475Z [info     ] sandbox.docker.phase.done      container_id=905c6e151a0b duration_seconds=0.231 image=codepilot-env:73740b0fa971e7150167ccf241f79cf20d504973 phase=container_create
+2026-11-07T13:20:33.214193Z [info     ] sandbox.docker.phase.done      duration_seconds=1.026 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:20:33.414162Z [info     ] sandbox.docker.phase.done      duration_seconds=0.2 phase=container_start
+2026-11-07T13:20:34.064196Z [info     ] sandbox.docker.phase.done      duration_seconds=0.65 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:20:34.149584Z [info     ] sandbox.docker.phase.done      duration_seconds=0.086 files=3 phase=output_collect
+2026-11-07T13:20:34.325530Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.175 oom_killed=False phase=cleanup
+2026-11-07T13:20:36.145348Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.045 phase=volume_create
+2026-11-07T13:20:36.145348Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:20:36.375418Z [info     ] sandbox.docker.phase.done      container_id=b4b89ffd291b duration_seconds=0.23 image=codepilot-env:73740b0fa971e7150167ccf241f79cf20d504973 phase=container_create
+2026-11-07T13:20:37.477350Z [info     ] sandbox.docker.phase.done      duration_seconds=1.102 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:20:37.700388Z [info     ] sandbox.docker.phase.done      duration_seconds=0.223 phase=container_start
+2026-11-07T13:20:38.191560Z [info     ] sandbox.docker.phase.done      duration_seconds=0.49 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:20:38.272840Z [info     ] sandbox.docker.phase.done      duration_seconds=0.081 files=3 phase=output_collect
+2026-11-07T13:20:38.422259Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.149 oom_killed=False phase=cleanup
+2026-11-07T13:20:38.942142Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.032 phase=volume_create
+2026-11-07T13:20:38.942142Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py::test_normalize tests/test_other.py::test_other > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:20:39.142065Z [info     ] sandbox.docker.phase.done      container_id=1c8c614738d3 duration_seconds=0.2 image=codepilot-env:73740b0fa971e7150167ccf241f79cf20d504973 phase=container_create
+2026-11-07T13:20:40.123835Z [info     ] sandbox.docker.phase.done      duration_seconds=0.982 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:20:40.370479Z [info     ] sandbox.docker.phase.done      duration_seconds=0.246 phase=container_start
+2026-11-07T13:20:40.795097Z [info     ] sandbox.docker.phase.done      duration_seconds=0.425 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:20:40.877523Z [info     ] sandbox.docker.phase.done      duration_seconds=0.083 files=3 phase=output_collect
+2026-11-07T13:20:41.044208Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.166 oom_killed=False phase=cleanup
+2026-11-07T13:20:41.469939Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.032 phase=volume_create
+2026-11-07T13:20:41.469939Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_other.py::test_other > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:20:41.764963Z [info     ] sandbox.docker.phase.done      container_id=0c7e1f50ced4 duration_seconds=0.295 image=codepilot-env:73740b0fa971e7150167ccf241f79cf20d504973 phase=container_create
+2026-11-07T13:20:42.942843Z [info     ] sandbox.docker.phase.done      duration_seconds=1.178 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:20:43.215395Z [info     ] sandbox.docker.phase.done      duration_seconds=0.272 phase=container_start
+2026-11-07T13:20:43.691842Z [info     ] sandbox.docker.phase.done      duration_seconds=0.477 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:20:43.754664Z [info     ] sandbox.docker.phase.done      duration_seconds=0.063 files=3 phase=output_collect
+2026-11-07T13:20:43.894815Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.14 oom_killed=False phase=cleanup
+2026-11-07T13:20:44.303621Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.014 phase=volume_create
+2026-11-07T13:20:44.304157Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_other.py::test_other > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:20:44.521787Z [info     ] sandbox.docker.phase.done      container_id=d7e53c688d1b duration_seconds=0.218 image=codepilot-env:73740b0fa971e7150167ccf241f79cf20d504973 phase=container_create
+2026-11-07T13:20:45.475851Z [info     ] sandbox.docker.phase.done      duration_seconds=0.954 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:20:45.741904Z [info     ] sandbox.docker.phase.done      duration_seconds=0.266 phase=container_start
+2026-11-07T13:20:46.294314Z [info     ] sandbox.docker.phase.done      duration_seconds=0.552 exit_code=1 phase=test_wait timeout_seconds=9
+2026-11-07T13:20:46.389708Z [info     ] sandbox.docker.phase.done      duration_seconds=0.095 files=3 phase=output_collect
+2026-11-07T13:20:46.614314Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.225 oom_killed=False phase=cleanup
+2026-11-07T13:20:50.553054Z [info     ] repo.index.done                changed=5 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.156 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_5cd8402425a243f3 reused=0
+2026-11-07T13:20:50.957695Z [info     ] sandbox.docker.phase.done      container_id=450a6c51388b duration_seconds=0.29 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:20:51.342626Z [info     ] sandbox.docker.phase.done      duration_seconds=0.385 phase=build_container_start
+2026-11-07T13:20:51.368255Z [info     ] sandbox.docker.phase.done      archive_bytes=20480 duration_seconds=0.025 phase=build_workspace_copy
+2026-11-07T13:21:19.870671Z [info     ] sandbox.docker.phase.done      duration_seconds=28.503 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:21:21.495318Z [info     ] sandbox.docker.phase.done      duration_seconds=1.625 phase=build_image_commit repository=codepilot-env tag=ab3b56401ed925aefd7ad77d5c12dffa3b682431
+2026-11-07T13:21:22.077429Z [info     ] sandbox.docker.phase.done      duration_seconds=0.582 phase=build_container_cleanup
+2026-11-07T13:21:22.763480Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.04 phase=volume_create
+2026-11-07T13:21:22.763996Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py tests/test_other.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:21:23.000877Z [info     ] sandbox.docker.phase.done      container_id=ce4347ba2169 duration_seconds=0.237 image=codepilot-env:ab3b56401ed925aefd7ad77d5c12dffa3b682431 phase=container_create
+2026-11-07T13:21:23.893153Z [info     ] sandbox.docker.phase.done      duration_seconds=0.892 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:21:24.079428Z [info     ] sandbox.docker.phase.done      duration_seconds=0.186 phase=container_start
+2026-11-07T13:21:24.569137Z [info     ] sandbox.docker.phase.done      duration_seconds=0.49 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:21:24.660724Z [info     ] sandbox.docker.phase.done      duration_seconds=0.091 files=3 phase=output_collect
+2026-11-07T13:21:24.823269Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.162 oom_killed=False phase=cleanup
+2026-11-07T13:21:24.942437Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.038 phase=volume_create
+2026-11-07T13:21:24.942437Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py tests/test_other.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:21:25.170220Z [info     ] sandbox.docker.phase.done      container_id=8da042796fe4 duration_seconds=0.228 image=codepilot-env:ab3b56401ed925aefd7ad77d5c12dffa3b682431 phase=container_create
+2026-11-07T13:21:26.284274Z [info     ] sandbox.docker.phase.done      duration_seconds=1.114 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:21:26.560914Z [info     ] sandbox.docker.phase.done      duration_seconds=0.276 phase=container_start
+2026-11-07T13:21:27.572399Z [info     ] sandbox.docker.phase.done      duration_seconds=1.012 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:21:27.620113Z [info     ] sandbox.docker.phase.done      duration_seconds=0.047 files=3 phase=output_collect
+2026-11-07T13:21:27.811404Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.191 oom_killed=False phase=cleanup
+2026-11-07T13:21:29.956961Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.058 phase=volume_create
+2026-11-07T13:21:29.957512Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:21:30.152689Z [info     ] sandbox.docker.phase.done      container_id=b66285b9fa4e duration_seconds=0.195 image=codepilot-env:ab3b56401ed925aefd7ad77d5c12dffa3b682431 phase=container_create
+2026-11-07T13:21:31.094051Z [info     ] sandbox.docker.phase.done      duration_seconds=0.941 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:21:31.295168Z [info     ] sandbox.docker.phase.done      duration_seconds=0.201 phase=container_start
+2026-11-07T13:21:31.763907Z [info     ] sandbox.docker.phase.done      duration_seconds=0.468 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:21:31.845174Z [info     ] sandbox.docker.phase.done      duration_seconds=0.081 files=3 phase=output_collect
+2026-11-07T13:21:31.997754Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.153 oom_killed=False phase=cleanup
+2026-11-07T13:21:32.660616Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.051 phase=volume_create
+2026-11-07T13:21:32.660616Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py::test_normalize tests/test_other.py::test_other tests/test_other.py::test_existing_failure > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:21:32.821411Z [info     ] sandbox.docker.phase.done      container_id=a70b3c0de7f6 duration_seconds=0.161 image=codepilot-env:ab3b56401ed925aefd7ad77d5c12dffa3b682431 phase=container_create
+2026-11-07T13:21:33.704497Z [info     ] sandbox.docker.phase.done      duration_seconds=0.883 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:21:33.936040Z [info     ] sandbox.docker.phase.done      duration_seconds=0.232 phase=container_start
+2026-11-07T13:21:34.424860Z [info     ] sandbox.docker.phase.done      duration_seconds=0.489 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:21:34.522684Z [info     ] sandbox.docker.phase.done      duration_seconds=0.097 files=3 phase=output_collect
+2026-11-07T13:21:34.673453Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.151 oom_killed=False phase=cleanup
+2026-11-07T13:21:39.316215Z [info     ] repo.index.done                changed=5 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.234 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_bd876749ac630da1 reused=0
+2026-11-07T13:21:39.667363Z [info     ] sandbox.docker.phase.done      container_id=2d362622949c duration_seconds=0.249 image=codepilot-sandbox-base:py3.12 phase=build_container_create
+2026-11-07T13:21:39.980047Z [info     ] sandbox.docker.phase.done      duration_seconds=0.312 phase=build_container_start
+2026-11-07T13:21:40.008804Z [info     ] sandbox.docker.phase.done      archive_bytes=20480 duration_seconds=0.029 phase=build_workspace_copy
+2026-11-07T13:21:44.511635Z [info     ] sandbox.docker.phase.done      duration_seconds=4.503 exit_code=0 phase=build_install_exec script='set -eu\npython -m pip install pytest'
+2026-11-07T13:21:46.215603Z [info     ] sandbox.docker.phase.done      duration_seconds=1.704 phase=build_image_commit repository=codepilot-env tag=bb45ff56dd5eead41d5ec865343bb1c781a98c17
+2026-11-07T13:21:46.739786Z [info     ] sandbox.docker.phase.done      duration_seconds=0.524 phase=build_container_cleanup
+2026-11-07T13:21:47.137645Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.025 phase=volume_create
+2026-11-07T13:21:47.138175Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py tests/test_other.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:21:47.400620Z [info     ] sandbox.docker.phase.done      container_id=0ee6b35d5b03 duration_seconds=0.262 image=codepilot-env:bb45ff56dd5eead41d5ec865343bb1c781a98c17 phase=container_create
+2026-11-07T13:21:48.433452Z [info     ] sandbox.docker.phase.done      duration_seconds=1.033 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:21:48.706494Z [info     ] sandbox.docker.phase.done      duration_seconds=0.273 phase=container_start
+2026-11-07T13:21:49.183787Z [info     ] sandbox.docker.phase.done      duration_seconds=0.477 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:21:49.292120Z [info     ] sandbox.docker.phase.done      duration_seconds=0.108 files=3 phase=output_collect
+2026-11-07T13:21:49.480052Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.188 oom_killed=False phase=cleanup
+2026-11-07T13:21:49.587484Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.018 phase=volume_create
+2026-11-07T13:21:49.588004Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py tests/test_other.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:21:49.834237Z [info     ] sandbox.docker.phase.done      container_id=5b37e0344453 duration_seconds=0.247 image=codepilot-env:bb45ff56dd5eead41d5ec865343bb1c781a98c17 phase=container_create
+2026-11-07T13:21:50.708747Z [info     ] sandbox.docker.phase.done      duration_seconds=0.874 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:21:50.970579Z [info     ] sandbox.docker.phase.done      duration_seconds=0.262 phase=container_start
+2026-11-07T13:21:51.458658Z [info     ] sandbox.docker.phase.done      duration_seconds=0.488 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:21:51.561301Z [info     ] sandbox.docker.phase.done      duration_seconds=0.102 files=3 phase=output_collect
+2026-11-07T13:21:51.720438Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.159 oom_killed=False phase=cleanup
+2026-11-07T13:21:53.135706Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.049 phase=volume_create
+2026-11-07T13:21:53.135706Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:21:53.417101Z [info     ] sandbox.docker.phase.done      container_id=f27bdf599a1a duration_seconds=0.281 image=codepilot-env:bb45ff56dd5eead41d5ec865343bb1c781a98c17 phase=container_create
+2026-11-07T13:21:54.439893Z [info     ] sandbox.docker.phase.done      duration_seconds=1.023 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:21:54.627999Z [info     ] sandbox.docker.phase.done      duration_seconds=0.188 phase=container_start
+2026-11-07T13:21:55.144512Z [info     ] sandbox.docker.phase.done      duration_seconds=0.516 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:21:55.234127Z [info     ] sandbox.docker.phase.done      duration_seconds=0.089 files=3 phase=output_collect
+2026-11-07T13:21:55.373993Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.139 oom_killed=False phase=cleanup
+2026-11-07T13:21:56.740616Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.072 phase=volume_create
+2026-11-07T13:21:56.740616Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_core.py::test_normalize tests/test_other.py::test_other tests/test_other.py::test_controlled_flaky > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:21:56.973446Z [info     ] sandbox.docker.phase.done      container_id=c0f06f7b0587 duration_seconds=0.233 image=codepilot-env:bb45ff56dd5eead41d5ec865343bb1c781a98c17 phase=container_create
+2026-11-07T13:21:57.970223Z [info     ] sandbox.docker.phase.done      duration_seconds=0.997 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:21:58.177049Z [info     ] sandbox.docker.phase.done      duration_seconds=0.207 phase=container_start
+2026-11-07T13:21:58.679693Z [info     ] sandbox.docker.phase.done      duration_seconds=0.503 exit_code=1 phase=test_wait timeout_seconds=300
+2026-11-07T13:21:58.758130Z [info     ] sandbox.docker.phase.done      duration_seconds=0.078 files=3 phase=output_collect
+2026-11-07T13:21:58.929824Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.171 oom_killed=False phase=cleanup
+2026-11-07T13:21:59.389438Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.03 phase=volume_create
+2026-11-07T13:21:59.389438Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_other.py::test_controlled_flaky > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:21:59.644143Z [info     ] sandbox.docker.phase.done      container_id=d5a1962a1d57 duration_seconds=0.255 image=codepilot-env:bb45ff56dd5eead41d5ec865343bb1c781a98c17 phase=container_create
+2026-11-07T13:22:00.804682Z [info     ] sandbox.docker.phase.done      duration_seconds=1.16 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:22:01.065618Z [info     ] sandbox.docker.phase.done      duration_seconds=0.261 phase=container_start
+2026-11-07T13:22:01.561296Z [info     ] sandbox.docker.phase.done      duration_seconds=0.495 exit_code=0 phase=test_wait timeout_seconds=300
+2026-11-07T13:22:01.634139Z [info     ] sandbox.docker.phase.done      duration_seconds=0.073 files=3 phase=output_collect
+2026-11-07T13:22:01.793306Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.159 oom_killed=False phase=cleanup
+2026-11-07T13:22:02.205521Z [info     ] sandbox.docker.phase.done      count=2 duration_seconds=0.044 phase=volume_create
+2026-11-07T13:22:02.205521Z [info     ] sandbox.docker.phase.done      command='python -m pytest -p no:cacheprovider --junitxml=/out/junit.xml tests/test_other.py::test_controlled_flaky > /out/stdout.log 2> /out/stderr.log' duration_seconds=0.0 phase=command_inject
+2026-11-07T13:22:02.487615Z [info     ] sandbox.docker.phase.done      container_id=c191174a1fce duration_seconds=0.282 image=codepilot-env:bb45ff56dd5eead41d5ec865343bb1c781a98c17 phase=container_create
+2026-11-07T13:22:03.368905Z [info     ] sandbox.docker.phase.done      duration_seconds=0.881 phase=workspace_copy uploaded_bytes=20480
+2026-11-07T13:22:03.617624Z [info     ] sandbox.docker.phase.done      duration_seconds=0.248 phase=container_start
+2026-11-07T13:22:04.050632Z [info     ] sandbox.docker.phase.done      duration_seconds=0.433 exit_code=0 phase=test_wait timeout_seconds=9
+2026-11-07T13:22:04.141929Z [info     ] sandbox.docker.phase.done      duration_seconds=0.091 files=3 phase=output_collect
+2026-11-07T13:22:04.335196Z [info     ] sandbox.docker.phase.done      cleanup_notes=0 duration_seconds=0.193 oom_killed=False phase=cleanup
+tests\graph\test_phase9_docker.py ....
+tests\integration\test_docker_phase1.py #0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.phase1
+#1 transferring dockerfile:
+#1 transferring dockerfile: 702B 0.0s done
+#1 DONE 0.2s
+
+#2 [internal] load metadata for docker.io/library/python:3.12.7-slim-bookworm
+#2 ...
+
+#3 [internal] load metadata for ghcr.io/astral-sh/uv:0.12.9
+#3 DONE 0.3s
+
+#2 [internal] load metadata for docker.io/library/python:3.12.7-slim-bookworm
+#2 DONE 0.3s
+
+#4 [internal] load .dockerignore
+#4 transferring context:
+#4 transferring context: 2B 0.0s done
+#4 DONE 0.1s
+
+#5 [internal] load build context
+#5 DONE 0.0s
+
+#6 [stage-1 1/6] FROM docker.io/library/python:3.12.7-slim-bookworm@sha256:60d9996b6a8a3689d36db740b49f4327be3be09a21122bd02fb8895abb38b50d
+#6 resolve docker.io/library/python:3.12.7-slim-bookworm@sha256:60d9996b6a8a3689d36db740b49f4327be3be09a21122bd02fb8895abb38b50d
+#6 resolve docker.io/library/python:3.12.7-slim-bookworm@sha256:60d9996b6a8a3689d36db740b49f4327be3be09a21122bd02fb8895abb38b50d 0.2s done
+#6 DONE 0.3s
+
+#7 [uv 1/1] FROM ghcr.io/astral-sh/uv:0.12.9@sha256:8b940d3a9d65bed080436972241af2e21c84b5e8c9193f7014ed71479ee795ff
+#7 resolve ghcr.io/astral-sh/uv:0.12.9@sha256:8b940d3a9d65bed080436972241af2e21c84b5e8c9193f7014ed71479ee795ff 0.2s done
+#7 DONE 0.3s
+
+#5 [internal] load build context
+#5 transferring context: 6.17MB 0.7s done
+#5 DONE 0.8s
+
+#8 [stage-1 2/6] COPY --from=uv /uv /uvx /usr/local/bin/
+#8 CACHED
+
+#9 [stage-1 3/6] RUN apt-get update     && apt-get install --yes --no-install-recommends git ca-certificates     && rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [stage-1 4/6] WORKDIR /app
+#10 CACHED
+
+#11 [stage-1 5/6] COPY . /app
+#11 DONE 0.4s
+
+#12 [stage-1 6/6] RUN uv sync --frozen --extra dev --no-cache
+#12 3.713 Using CPython 3.12.7 interpreter at: /usr/local/bin/python3
+#12 3.713 Creating virtual environment at: .venv
+#12 3.803    Building codepilot-repair @ file:///app
+#12 4.648 Downloading pygments (1.2MiB)
+#12 4.648 Downloading cryptography (4.5MiB)
+#12 4.722 Downloading networkx (2.0MiB)
+#12 4.723 Downloading pydantic-core (2.0MiB)
+#12 4.723 Downloading tiktoken (1.1MiB)
+#12 4.723 Downloading numpy (15.9MiB)
+#12 4.824 Downloading sqlalchemy (4.5MiB)
+#12 4.824 Downloading zstandard (5.3MiB)
+#12 4.824 Downloading mypy (14.8MiB)
+#12 4.825 Downloading ast-serialize (1.3MiB)
+#12 4.825 Downloading ruff (9.9MiB)
+#12 6.644  Downloaded pygments
+#12 6.721  Downloaded tiktoken
+#12 6.792  Downloaded ast-serialize
+#12 7.182  Downloaded networkx
+#12 7.184  Downloaded pydantic-core
+#12 8.314  Downloaded sqlalchemy
+#12 8.416  Downloaded cryptography
+#12 8.633  Downloaded zstandard
+#12 9.691  Downloaded ruff
+#12 10.35  Downloaded mypy
+#12 10.38       Built codepilot-repair @ file:///app
+#12 10.46  Downloaded numpy
+#12 10.46 Prepared 87 packages in 6.70s
+#12 10.51 Installed 87 packages in 55ms
+#12 10.51  + aiosqlite==0.22.1
+#12 10.51  + annotated-doc==0.0.5
+#12 10.51  + annotated-types==0.8.0
+#12 10.51  + anyio==4.15.1
+#12 10.51  + ast-serialize==0.12.1
+#12 10.51  + certifi==2026.10.23
+#12 10.51  + cffi==2.1.1
+#12 10.51  + charset-normalizer==3.5.2
+#12 10.51  + click==8.5.0
+#12 10.51  + codepilot-repair==0.1.0 (from file:///app)
+#12 10.51  + coverage==7.16.2
+#12 10.51  + cryptography==50.0.2
+#12 10.51  + distro==1.9.0
+#12 10.51  + docker==7.2.0
+#12 10.51  + fastapi==0.142.4
+#12 10.51  + h11==0.16.0
+#12 10.51  + httpcore==1.0.9
+#12 10.51  + httpcore2==2.13.1
+#12 10.51  + httpx==0.28.1
+#12 10.51  + httpx2==2.13.1
+#12 10.51  + idna==3.20
+#12 10.51  + iniconfig==2.3.1
+#12 10.51  + jinja2==3.1.6
+#12 10.51  + jsonpatch==1.33
+#12 10.51  + jsonpointer==3.2.0
+#12 10.51  + langchain-core==1.6.7
+#12 10.51  + langchain-protocol==0.0.19
+#12 10.51  + langgraph==1.2.14
+#12 10.51  + langgraph-checkpoint==4.3.1
+#12 10.51  + langgraph-checkpoint-sqlite==3.1.3
+#12 10.51  + langgraph-prebuilt==1.1.0
+#12 10.51  + langgraph-sdk==0.4.6
+#12 10.51  + langsmith==0.14.4
+#12 10.51  + librt==0.16.0
+#12 10.51  + markdown-it-py==4.2.0
+#12 10.51  + markupsafe==3.0.4
+#12 10.52  + mdurl==0.1.2
+#12 10.52  + mypy==2.4.0
+#12 10.52  + mypy-extensions==1.1.0
+#12 10.52  + networkx==3.7
+#12 10.52  + numpy==2.5.3
+#12 10.52  + opentelemetry-api==1.45.1
+#12 10.52  + orjson==3.13.0
+#12 10.52  + ormsgpack==1.12.2
+#12 10.52  + packaging==26.3
+#12 10.52  + pathspec==1.1.1
+#12 10.52  + pluggy==1.6.0
+#12 10.52  + pycparser==3.11
+#12 10.52  + pydantic==2.13.5
+#12 10.52  + pydantic-core==2.46.5
+#12 10.52  + pydantic-settings==2.15.0
+#12 10.52  + pygments==2.21.0
+#12 10.52  + pytest==9.1.1
+#12 10.52  + pytest-asyncio==1.4.0
+#12 10.52  + pytest-cov==7.1.0
+#12 10.52  + pytest-timeout==2.4.0
+#12 10.52  + python-dotenv==1.2.4
+#12 10.52  + pyyaml==6.0.3
+#12 10.52  + rank-bm25==0.2.2
+#12 10.52  + regex==2026.9.29
+#12 10.52  + requests==2.34.2
+#12 10.52  + requests-toolbelt==1.0.0
+#12 10.52  + rich==15.0.0
+#12 10.52  + ruff==0.16.10
+#12 10.52  + shellingham==1.5.4
+#12 10.52  + sniffio==1.3.1
+#12 10.52  + socksio==1.0.0
+#12 10.52  + sqlalchemy==2.1.4
+#12 10.52  + sqlite-vec==0.1.9
+#12 10.52  + sse-starlette==3.5.0
+#12 10.52  + starlette==1.7.0
+#12 10.52  + structlog==26.1.0
+#12 10.52  + tenacity==9.2.1
+#12 10.52  + tiktoken==0.14.0
+#12 10.52  + tree-sitter==0.25.2
+#12 10.52  + tree-sitter-python==0.25.0
+#12 10.52  + truststore==0.10.4
+#12 10.52  + typer==0.27.3
+#12 10.52  + types-pyyaml==6.0.12.20260906
+#12 10.52  + typing-extensions==4.16.0
+#12 10.52  + typing-inspection==0.4.4
+#12 10.52  + urllib3==2.8.0
+#12 10.52  + uuid-utils==0.17.1
+#12 10.52  + uvicorn==0.54.0
+#12 10.52  + websockets==16.1.1
+#12 10.52  + xxhash==4.0.1
+#12 10.52  + zstandard==0.25.0
+#12 DONE 11.3s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 7.4s done
+#13 exporting manifest sha256:4d53effda16f7a1d47972dff6945c675777158ebaa28a74fff35451cc6f7c83f 0.1s done
+#13 exporting config sha256:b49d851f58865ae199bb6110ccadb31eb4bada33de3e5bff8f2db9425ea5b8c0
+#13 exporting config sha256:b49d851f58865ae199bb6110ccadb31eb4bada33de3e5bff8f2db9425ea5b8c0 0.1s done
+#13 exporting attestation manifest sha256:88ce1dc3c7b593a4f1abab25317c57d6d3cd720fdfbd161303da6a706cac0f20
+#13 exporting attestation manifest sha256:88ce1dc3c7b593a4f1abab25317c57d6d3cd720fdfbd161303da6a706cac0f20 0.1s done
+#13 exporting manifest list sha256:dc4dc621c929604dd579b6d918cae32a2866da07f833a4a209672dabccfc8d8f
+#13 exporting manifest list sha256:dc4dc621c929604dd579b6d918cae32a2866da07f833a4a209672dabccfc8d8f 0.1s done
+#13 naming to docker.io/library/codepilot-phase1-test:defab8d68a52441e88c903455ebca8fa
+#13 naming to docker.io/library/codepilot-phase1-test:defab8d68a52441e88c903455ebca8fa 0.0s done
+#13 unpacking to docker.io/library/codepilot-phase1-test:defab8d68a52441e88c903455ebca8fa
+#13 unpacking to docker.io/library/codepilot-phase1-test:defab8d68a52441e88c903455ebca8fa 3.2s done
+#13 DONE 11.3s
+ENVIRONMENT {"python": "3.12.7 (main, Dec  3 2024, 02:26:04) [GCC 12.2.0]", "tree-sitter": "0.25.2", "tree-sitter-python": "0.25.0", "pytest": "9.1.1", "codepilot-repair": "0.1.0"}
+COMMAND ["git", "--version"]
+git version 2.39.5
+EXIT 0
+COMMAND ["uv", "--version"]
+uv 0.12.9 (x86_64-unknown-linux-musl)
+EXIT 0
+COMMAND ["/app/.venv/bin/python", "-X", "faulthandler", "-m", "pytest", "-v", "-p", "no:cacheprovider", "--basetemp", "/tmp/codepilot-phase1-t2kzo3cx/pytest", "--junitxml", "/tmp/codepilot-phase1-t2kzo3cx/contracts.xml", "tests/unit/repo/test_parser_subprocess.py", "tests/integration/test_index_golden.py", "tests/integration/test_cli_index.py", "tests/integration/test_incremental.py"]
+============================= test session starts ==============================
+platform linux -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0 -- /app/.venv/bin/python
+rootdir: /app
+configfile: pyproject.toml
+plugins: langsmith-0.14.4, cov-7.1.0, timeout-2.4.0, anyio-4.15.1, asyncio-1.4.0
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 11 items
+
+tests/unit/repo/test_parser_subprocess.py::test_native_parser_in_subprocess[row] PASSED [  9%]
+tests/unit/repo/test_parser_subprocess.py::test_native_parser_in_subprocess[column] PASSED [ 18%]
+tests/unit/repo/test_parser_subprocess.py::test_native_parser_in_subprocess[extract] PASSED [ 27%]
+tests/unit/repo/test_parser_subprocess.py::test_native_parser_in_subprocess[lifetime] PASSED [ 36%]
+tests/integration/test_index_golden.py::test_golden_index_matches_field_by_field PASSED [ 45%]
+tests/integration/test_cli_index.py::test_index_cli_prints_four_counts PASSED [ 54%]
+tests/integration/test_cli_index.py::test_index_cli_defaults_to_head_and_reports_tests PASSED [ 63%]
+tests/integration/test_cli_index.py::test_index_cli_rejects_non_git_directory PASSED [ 72%]
+tests/integration/test_cli_index.py::test_index_cli_rejects_unknown_mode PASSED [ 81%]
+tests/integration/test_incremental.py::test_incremental_reindex_over_real_workspace PASSED [ 90%]
+tests/integration/test_incremental.py::test_history_never_leaks_post_base_commits_through_shared_cache PASSED [100%]
+
+------- generated xml file: /tmp/codepilot-phase1-t2kzo3cx/contracts.xml -------
+============================== 11 passed in 2.95s ==============================
+EXIT 0
+CONTRACTS {"tests": 11, "failures": 0, "errors": 0, "skipped": 0}
+COMMAND ["git", "-c", "core.autocrlf=false", "-c", "commit.gpgsign=false", "-C", "/tmp/codepilot-phase1-t2kzo3cx/mini_auth", "init", "--initial-branch=main"]
+Initialized empty Git repository in /tmp/codepilot-phase1-t2kzo3cx/mini_auth/.git/
+EXIT 0
+COMMAND ["git", "-c", "core.autocrlf=false", "-c", "commit.gpgsign=false", "-C", "/tmp/codepilot-phase1-t2kzo3cx/mini_auth", "add", "--all"]
+EXIT 0
+COMMAND ["git", "-c", "core.autocrlf=false", "-c", "commit.gpgsign=false", "-C", "/tmp/codepilot-phase1-t2kzo3cx/mini_auth", "commit", "--quiet", "-m", "Phase 1 fixture"]
+EXIT 0
+COMMAND ["git", "-c", "core.autocrlf=false", "-c", "commit.gpgsign=false", "-C", "/tmp/codepilot-phase1-t2kzo3cx/mini_auth", "rev-parse", "HEAD"]
+533cf280dcb2f3e908bc7ba4be8d0d3016b1ebb9
+EXIT 0
+COMMAND ["codepilot", "index", "/tmp/codepilot-phase1-t2kzo3cx/mini_auth", "--base-commit", "533cf280dcb2f3e908bc7ba4be8d0d3016b1ebb9", "--database-url", "sqlite:////tmp/codepilot-phase1-t2kzo3cx/index.db"]
+Repository  : repo_21a34a31deec1983
+Base commit : 533cf280dcb2f3e908bc7ba4be8d0d3016b1ebb9
+Index mode  : full
+Duration    : 0.07s
+
+Files       : 14
+Symbols     :
+  class          8
+  function       14
+  method         17
+  module         12
+  test_function  3
+  test_method    4
+Edges       :
+  CALL       high    11
+  CALL       low     65
+  CALL       medium  7
+  IMPORT     high    27
+  IMPORT     low     11
+  INHERIT    high    3
+  REFERENCE  high    19
+  TEST       high    8
+  TEST       low     37
+  TEST       medium  12
+Tests       : 7
+2026-11-07T13:22:50.197379Z [info     ] repo.index.done                changed=14 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.068 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_21a34a31deec1983 reused=0
+EXIT 0
+MINI_AUTH {"commit": "533cf280dcb2f3e908bc7ba4be8d0d3016b1ebb9", "Files": 14, "Symbols": 58, "Edges": 200, "Tests": 7, "Parse errors": 0}
+PHASE1_DOCKER_ACCEPTANCE_OK
+.
+tests\sandbox\test_swebench_env.py .
+
+- generated xml file: D:\Projects\Desktop\CodePilot-Repair\docs\notes\phase37-evidence\docker-current.xml -
+=============== 50 passed, 4202 deselected in 704.49s (0:11:44) ===============

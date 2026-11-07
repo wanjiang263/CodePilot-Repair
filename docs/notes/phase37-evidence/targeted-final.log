@@ -1,0 +1,22 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: D:\Projects\Desktop\CodePilot-Repair
+configfile: pyproject.toml
+plugins: anyio-4.15.1, langsmith-0.14.4, asyncio-1.4.0, cov-7.1.0, timeout-2.4.0, xdist-3.8.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: thread
+timeout func_only: False
+collected 178 items
+
+tests\unit\llm\test_sse_completion.py ............                       [  6%]
+tests\sandbox\test_build_context_guard.py ....                           [  8%]
+tests\unit\llm\test_phase28_http_matrix.py ............................. [ 25%]
+..........                                                               [ 30%]
+tests\unit\llm\test_glm_provider.py .................................... [ 51%]
+....................                                                     [ 62%]
+tests\sandbox\test_swebench_env.py ..................................... [ 83%]
+..............................                                           [100%]
+
+- generated xml file: D:\Projects\Desktop\CodePilot-Repair\docs\notes\phase37-evidence\targeted-final.xml -
+============================ 178 passed in 48.62s =============================

@@ -1,0 +1,198 @@
+"""Single-attempt real SSE probes, <=3 requests and <=3 CNY reserved in total.
+
+Each scenario owns a child process/ledger: an unknown reservation is never reset.
+Only GLM_API_KEY is read from the ignored .env; no credentials or output text
+are written. Run after the offline socket tests, with explicit --real.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import subprocess
+import sys
+import threading
+import time
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+from codepilot.llm.config import load_llm_config
+from codepilot.llm.dispatch_budget import (
+    DispatchBudget,
+    DispatchBudgetStoppedError,
+    configure_dispatch_budget,
+)
+from codepilot.llm.openai_compatible import OpenAICompatibleProvider
+from codepilot.llm.retry import RetryPolicy
+from codepilot.llm.types import LLMRequest, Message
+from codepilot.observability.dispatch import Deadline, DispatchScope, dispatch_scope
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def source_hashes() -> dict[str, str]:
+    return {
+        name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+        for name in (
+            "src/codepilot/llm/sse.py",
+            "src/codepilot/llm/http_lifecycle.py",
+            "src/codepilot/llm/openai_compatible.py",
+            "scripts/phase37_stream_probe.py",
+        )
+    }
+
+
+def probe(mode: str, out: Path) -> int:
+    out.mkdir(parents=True, exist_ok=False)
+    load_dotenv(ROOT / ".env", override=False)
+    config = load_llm_config(ROOT / "configs/phase22/llm.yaml")
+    spec = config.models["glm-5.3-flash-main"]
+    provider = config.providers[spec.provider].model_copy(
+        update={
+            "timeout_seconds": 2.0 if mode == "timeout" else 60.0,
+            "max_retries": 0,
+            "trust_env": False,
+        }
+    )
+    assert provider.name == "bigmodel" and spec.model == "glm-5.3-flash"
+    assert provider.base_url == "https://open.bigmodel.cn/api/paas/v4"
+    key = provider.api_key()
+    if not key:
+        raise RuntimeError("GLM credential unavailable")
+    configure_dispatch_budget(DispatchBudget(1.0, out / "ledger.json"))
+    cancelled = threading.Event()
+    chunks = []
+    started = time.monotonic()
+
+    def delta(text: str) -> None:
+        chunks.append(text)
+        if mode == "cancel":
+            cancelled.set()
+
+    row = {
+        "source_origin": "worktree",
+        "source_hashes": source_hashes(),
+        "mode": mode,
+        "provider": provider.name,
+        "model": spec.model,
+        "endpoint": provider.base_url,
+        "max_requests": 1,
+        "budget_cny": 1.0,
+    }
+    with OpenAICompatibleProvider(
+        spec=spec, provider=provider, api_key=key, policy=RetryPolicy(max_attempts=1)
+    ) as model:
+        try:
+            request = LLMRequest(
+                messages=[
+                    Message.user(
+                        "请按顺序输出从1到20，每项单独一行，不要解释。"
+                        if mode == "normal"
+                        else "请按顺序输出从1到1000，每项单独一行，不要解释。"
+                    )
+                ],
+                max_output_tokens=512,
+                purpose=f"phase37-stream-{mode}",
+            )
+            with dispatch_scope(
+                DispatchScope(Deadline(time.monotonic() + 65), cancel=cancelled.is_set)
+            ):
+                result = model.complete_stream(request, on_delta=delta)
+            row.update(
+                status="completed",
+                input_tokens=result.input_tokens,
+                output_tokens=result.output_tokens,
+                cost=result.cost,
+                cost_known=result.cost_known,
+                stream=result.raw.get("stream"),
+                response_model=result.raw.get("model"),
+                response_id=result.raw.get("id"),
+            )
+        except DispatchBudgetStoppedError as exc:
+            row.update(status="unknown_frozen", dispatched=exc.dispatched)
+        row.update(
+            requests=model.attempts,
+            unacknowledged=model.unacknowledged,
+            content_deltas=len(chunks),
+            content_sha256=hashlib.sha256("".join(chunks).encode()).hexdigest(),
+            seconds=round(time.monotonic() - started, 3),
+            owned_threads_after=sum(t.name == "codepilot-http" for t in threading.enumerate()),
+        )
+    ledger = json.loads((out / "ledger.json").read_text(encoding="utf-8"))
+    row["accounted_or_reserved_cny"] = ledger["accounted_or_reserved"]
+    row["ledger_frozen"] = ledger["frozen"]
+    row["exception_chain"] = (
+        ledger["requests"][0].get("exception_chain", []) if ledger["requests"] else []
+    )
+    normal = (
+        mode == "normal"
+        and row["status"] == "completed"
+        and len(chunks) >= 2
+        and row.get("cost_known") is True
+        and row.get("input_tokens", 0) > 0
+    )
+    interrupted = (
+        mode != "normal"
+        and row["status"] == "unknown_frozen"
+        and model.unacknowledged == 1
+        and (
+            (mode == "cancel" and len(chunks) > 0 and "RequestCancelled" in row["exception_chain"])
+            or (mode == "timeout" and "ReadTimeout" in row["exception_chain"])
+        )
+    )
+    row["passed"] = (
+        (normal or interrupted) and model.attempts == 1 and row["owned_threads_after"] == 0
+    )
+    (out / "result.json").write_text(
+        json.dumps(row, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    print(json.dumps(row, ensure_ascii=False))
+    return 0 if row["passed"] else 1
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--real", action="store_true")
+    parser.add_argument("--mode", choices=["normal", "cancel", "timeout"])
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+    if not args.real:
+        parser.error("--real is required; this command issues billable provider requests")
+    if args.mode:
+        return probe(args.mode, args.out)
+    args.out.mkdir(parents=True, exist_ok=False)
+    rows = []
+    for mode in ("normal", "cancel", "timeout"):
+        result = subprocess.run(
+            [sys.executable, __file__, "--real", "--mode", mode, "--out", str(args.out / mode)],
+            cwd=ROOT,
+            timeout=90,
+            check=False,
+        )
+        report = args.out / mode / "result.json"
+        rows.append(
+            json.loads(report.read_text(encoding="utf-8"))
+            if report.exists()
+            else {"mode": mode, "passed": False}
+        )
+        if result.returncode:
+            break  # never automatically repeat an uncertain paid request
+    summary = {
+        "source_origin": "worktree",
+        "source_hashes": source_hashes(),
+        "rows": rows,
+        "real_requests": sum(r.get("requests", 0) for r in rows),
+        "accounted_or_reserved_cny": sum(r.get("accounted_or_reserved_cny", 0) for r in rows),
+        "budget_cap_cny": 3.0,
+        "passed": len(rows) == 3 and all(r["passed"] for r in rows),
+    }
+    (args.out / "summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    return 0 if summary["passed"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

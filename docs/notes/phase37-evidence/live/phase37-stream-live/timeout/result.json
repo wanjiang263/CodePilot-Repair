@@ -1,0 +1,22 @@
+{
+  "mode": "timeout",
+  "provider": "bigmodel",
+  "model": "glm-5.3-flash",
+  "endpoint": "https://open.bigmodel.cn/api/paas/v4",
+  "max_requests": 1,
+  "budget_cny": 1.0,
+  "status": "unknown_frozen",
+  "dispatched": true,
+  "requests": 1,
+  "unacknowledged": 1,
+  "content_deltas": 0,
+  "content_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "seconds": 2.125,
+  "owned_threads_after": 0,
+  "accounted_or_reserved_cny": 0.8014336,
+  "ledger_frozen": true,
+  "exception_chain": [
+    "ReadTimeout"
+  ],
+  "passed": true
+}

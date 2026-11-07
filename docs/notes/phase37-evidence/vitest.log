@@ -1,0 +1,14 @@
+npm warn Unknown user config "disturl". This will stop working in the next major version of npm.
+
+> codepilot-dashboard@0.1.0 test
+> vitest run
+
+
+ RUN  v5.1.0 D:/Projects/Desktop/CodePilot-Repair/web
+
+
+ Test Files  14 passed (14)
+      Tests  50 passed (50)
+   Start at  14:58:13
+   Duration  16.45s (environment 65%, setup 28%, transform 2%, tests 2%, import 1%, worker 1%)
+

@@ -4,3 +4,6 @@
 phase33-* -text
 phase34-* -text
 phase34-evidence/** -text
+phase37-* -text
+phase37-evidence/** -text
+phase37-evidence/** -whitespace

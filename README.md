@@ -13,8 +13,12 @@
 ## 发布状态与参与
 
 当前按 **research / engineering preview** 准备发布，不承诺生产可用性。
-真实 provider、浏览器 E2E、24h 长稳及干净环境安装结果应以对应发布版本的证据为准；
-历史报告中的通过项不代表所有平台或供应商均已验证。
+Phase 37 已补充 Chromium 浏览器验收、真实 GLM SSE 流式验收（完成/中断/超时）
+与 SDK 目录构建防护；24h 长稳、干净环境安装及其他真实 provider 结果应以对应
+发布版本的证据为准。历史报告中的通过项不代表当前源码、所有平台或供应商均已
+验证；当前候选的全量离线回归与 Docker 已分别记录，其中全量离线有一次
+Windows 超时用例抖动并在隔离重跑中通过。候选提交的 GitHub CI 结果见发布清单，
+等待 CI 时不将本版称为稳定版或生产可用。
 
 项目自有代码采用 [Apache License 2.0](LICENSE)，允许商业使用、修改和分发，须遵守许可证条件。
 Copyright 2026 jiaoenqi。署名见 [NOTICE](NOTICE)。
@@ -22,6 +26,8 @@ Copyright 2026 jiaoenqi。署名见 [NOTICE](NOTICE)。
 第三方来源及依赖许可见 [第三方声明](docs/third-party/README.md)。
 发布前检查见 [开源准备清单](docs/open-source-readiness.md)；
 本轮审查结果与未验证范围见 [开源审查报告](docs/open-source-audit.md)。
+浏览器验收、GLM SSE 流式探针及构建上下文防护的最新证据见
+[Phase37 验证报告](docs/notes/phase37-validation.md)。
 安全问题见 [SECURITY.md](SECURITY.md)，参与开发见 [CONTRIBUTING.md](CONTRIBUTING.md)，
 社区规范见 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
 
@@ -329,3 +335,8 @@ Phase 15 没有新增无理由 skip、没有降低覆盖率阈值。定向结果
 - 付费调用与官方 SWE-bench 批跑已按阶段单独授权执行（Phase 16–18）；40% 只是 5 个有效官方
   评测的读数，不是 test50/test300/M4 结论。当前仍未执行 test50/test300/M4 与消融。
 - 演示视频未在本环境录制（见演示脚本中的 NOT RUN 声明）；截图为真实浏览器生成。
+- SSE 流式能力是 OpenAI 兼容 Provider 的可选入口，当前验证覆盖 BigModel
+  `glm-5.3-flash` 及本地 TCP 夹具；原生 Anthropic/Bedrock 流式协议和浏览器端
+  逐 token 渲染尚未验收。Spark 未配置价格，历史真实调用的实际费用保持未知。
+- 当前检出为 shallow 仓库；全历史 clone 未验证。发布候选只沿用项目分支的
+  现有历史，不推送本地异常 `main` 或全部 refs。

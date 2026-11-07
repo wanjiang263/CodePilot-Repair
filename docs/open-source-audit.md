@@ -63,3 +63,29 @@ CI 修复包括 pytest 根目录导入路径、旧格式差异、Docker 测试�
 5. 已启用远端 `main` 基础保护：禁止强推和删除，对管理员同样生效，保留个人维护者的正常推送能力。新增 CI 实际运行后，再选择实际 check 名加入合并门禁；没有配置单人项目无法自行满足的额外审批人数。
 
 24h soak、真实 provider、真实 embedding、浏览器 E2E、复杂真实大仓及全平台 Docker 回归没有在本次执行。Linux Docker 验收已在 CI 实际执行，仍需核对最终通过结果。历史测试数字不升级为本次验证结果。这些限制必须保留在 preview 声明中。
+
+## Phase 37 增补（2026-11-07）
+
+本节只增补后续证据，不改写 2026-11-06 审计当时的事实。以 `d86360a`
+为基线的工作树新增 Chromium 浏览器验收、OpenAI 兼容 SSE 解析/中断/usage
+结算、真实 BigModel GLM 流式探针，以及禁用 SDK 目录上下文构建的防护；
+详见 [Phase 37 验证报告](notes/phase37-validation.md)。三条接受的真实
+GLM 请求分别覆盖完成、取消和超时；连同此前保留的六条探针请求，九次请求
+的已知结算费用为 0.000442 CNY，六次中断的实际费用未知且保留 4.8086016 CNY
+预留，不能把这些数字相加称为实际账单。
+
+新增候选文件已做精确密钥模式复核：最终 79 个变更/未跟踪候选文件的两处
+脱敏命中分别为证据清单里的文件名与 SHA-256 摘要、以及 Python 路径属性
+引用，复核后无待审命中或真实凭据；`.env` 已忽略且未纳入版本管理。证据
+目录中的 `gitleaks-precommit-final.json` 和 `secret-review-final.json`
+保留最终扫描与复核结果，早期 50 文件扫描另行保留。Apache-2.0、
+个人署名、私密邮箱与第三方声明沿用前文，不因新增代码而变化。
+
+Phase 37 修改了 HTTP/SSE、provider 和 sandbox 源码，因此 Phase36 的
+50/50 Docker 与 4184 项离线回归只作为旧源码证据。当前源码全量离线的
+4202 个用例为 4199 passed / 1 failed / 2 skipped，唯一失败是 Windows
+进程树超时用例在整机负载下的 3.75 秒对 3.5 秒阈值偏差；同一模块隔离
+重跑 21 passed。当前源码 Docker 为 50 passed / 0 failed。详见
+[最终证据增补](notes/phase37-validation.md#final-evidence-addendum-at-2026-11-07-2125-0800)。
+候选提交的 GitHub CI（含新增 Chromium job）仍须单独通过；目前只能发布
+research / engineering preview，不能称为稳定版或生产可用。

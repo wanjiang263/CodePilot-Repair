@@ -1,0 +1,130 @@
+npm warn Unknown user config "disturl". This will stop working in the next major version of npm.
+
+> codepilot-dashboard@0.1.0 test:e2e
+> playwright test --output=../output/playwright/final/results
+
+[WebServer] npm warn Unknown env config "disturl". This will stop working in the next major version of npm.
+[WebServer] npm warn Unknown user config "disturl". This will stop working in the next major version of npm.
+[WebServer] (node:335432) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] api.request
+
+Running 5 tests using 1 worker
+
+(node:334872) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+  ok 1 [chromium] › e2e\workbench.spec.ts:12:1 › authentication rejects an invalid key and keeps the accepted key session-only (1.9s)
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+  ok 2 [chromium] › e2e\workbench.spec.ts:26:1 › settings save through the real API and survive a reload (998ms)
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.worker.run
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] 2026-11-07T12:11:26.347739Z [info     ] repo.index.done                changed=5 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.516 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_c525b4c0eee7d8dc reused=0
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+  ok 3 [chromium] › e2e\workbench.spec.ts:38:1 › creates an offline task, observes completion, and displays the real patch/report (21.9s)
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.worker.run
+[WebServer] api.request
+  ok 4 [chromium] › e2e\workbench.spec.ts:57:1 › network errors are visible and retry recovers (717ms)
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+[WebServer] api.request
+  ok 5 [chromium] › e2e\workbench.spec.ts:77:1 › missing task displays the API error (518ms)
+[WebServer] 2026-11-07T12:11:47.644292Z [info     ] repo.index.done                changed=5 closure_mode=False dangling_edges_deleted=0 dangling_edges_unresolved=0 duration_seconds=0.282 edge_closure=0 fast_mode=False incremental=False removed=0 repository_id=repo_c525b4c0eee7d8dc reused=0
+
+  5 passed (1.4m)

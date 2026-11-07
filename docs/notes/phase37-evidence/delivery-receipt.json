@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-11-07T13:44:30+00:00",
+  "base_head": "d86360af4b1dd7ce8ec6087c2c2ac982d45a2027",
+  "worktree_status": "final_candidate_precommit",
+  "prior_snapshot_hash_mismatches": {
+    "files": [
+      "README.md",
+      "docs/notes/phase37-validation.md",
+      "docs/open-source-audit.md",
+      "docs/open-source-readiness.md"
+    ],
+    "explanation": "Final documentation and exact-candidate hashes supersede the 20:20 snapshot; final hashes are in source-hashes-candidate.json, which intentionally excludes its own hash."
+  },
+  "candidate_file_count": 81,
+  "full_offline": {
+    "log": "full-regression.log",
+    "junit": "full-regression.xml",
+    "result": "4199 passed, 1 failed, 2 skipped, 50 deselected",
+    "exit": "failed",
+    "coverage": "88.04%",
+    "isolated_failed_case_rerun": {
+      "log": "gitcmd-timeout-rerun.log",
+      "junit": "gitcmd-timeout-rerun.xml",
+      "result": "21 passed",
+      "exit": "passed",
+      "scope": "tests/unit/repo/test_gitcmd.py incl. failed timeout case",
+      "note": "Separate isolated module rerun of the sole full-run failure; not merged with the full-run result."
+    }
+  },
+  "docker_current": {
+    "log": "docker-current.log",
+    "junit": "docker-current.xml",
+    "result": "50 passed, 4202 deselected",
+    "exit": "passed",
+    "duration_seconds": 704.49
+  },
+  "browser_current": {
+    "log": "browser-e2e-final.log",
+    "result": "5 passed",
+    "exit": "passed"
+  },
+  "targeted_current": {
+    "junit": "targeted-final.xml",
+    "result": "178 passed",
+    "exit": "passed"
+  },
+  "frontend_vitest": {
+    "log": "vitest.log",
+    "result": "14 files, 50 passed",
+    "exit": "passed"
+  },
+  "live_glm_accepted": {
+    "summary": "live/phase37-stream-accepted/summary.json",
+    "requests": 3,
+    "result": "passed",
+    "known_cost_cny": 0.000138,
+    "accounted_or_reserved_cny": 1.6030052
+  },
+  "all_live_glm_runs": {
+    "requests": 9,
+    "known_settled_cost_cny": 0.000442,
+    "accounted_or_reserved_cny": 4.8090436,
+    "unknown_actual_cost_requests": 6
+  },
+  "secret_scan": {
+    "scanner": "gitleaks 8.30.1",
+    "exact_candidate_files": 79,
+    "raw_findings": 2,
+    "reviewed_false_positives": 2,
+    "unreviewed_findings": 0,
+    "detected_real_credentials": 0,
+    "note": "Includes the later exact-candidate scan; the earlier 50-file scan is retained separately."
+  },
+  "publication_boundary": {
+    "repository_private": true,
+    "pushed": false,
+    "pr_opened": false,
+    "published": false,
+    "candidate_activated": false
+  },
+  "source_hash_manifest": {
+    "path": "source-hashes-candidate.json",
+    "entries": 80,
+    "self_hash_excluded": true,
+    "status_files": 81
+  }
+}

@@ -5,7 +5,7 @@
   "serialNumber": "urn:uuid:***",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-06T11:41:30.202Z",
+    "timestamp": "2026-11-07T06:58:07.715Z",
     "lifecycles": [
       {
         "phase": "pre-build"
@@ -2762,6 +2762,39 @@
         {
           "license": {
             "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "@playwright/test@1.65.0",
+      "type": "library",
+      "name": "@playwright/test",
+      "version": "1.65.0",
+      "scope": "optional",
+      "purl": "pkg:npm/%40playwright/test@1.65.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:development",
+          "value": "true"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@playwright/test/-/test-1.65.0.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "8865112c6b8a0cb6a448497b3e07eff21edff972d3f95f3ad567e1cf4ce5125e67c85b8a528a5d90504f2aa4e5953529d3a68ec0fb87f22b9411bdf2a773296d"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
           }
         }
       ]
@@ -10162,6 +10195,72 @@
       ]
     },
     {
+      "bom-ref": "playwright@1.65.0",
+      "type": "library",
+      "name": "playwright",
+      "version": "1.65.0",
+      "scope": "optional",
+      "purl": "pkg:npm/playwright@1.65.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:development",
+          "value": "true"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/playwright/-/playwright-1.65.0.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "17700c59c478e2a301b7892afba29bea65fb6e3197b2192d28538f50b77bade103e992567af8db351ab2b0feeaf8001313d91d3c464189b7b1d4162cbe956878"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "playwright-core@1.65.0",
+      "type": "library",
+      "name": "playwright-core",
+      "version": "1.65.0",
+      "scope": "optional",
+      "purl": "pkg:npm/playwright-core@1.65.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:development",
+          "value": "true"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/playwright-core/-/playwright-core-1.65.0.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "bcd48a807e98aad37b71d4ff2f7df8ce8d1af98c24ae989ccab1c995658f226fd0f8d9f64962278a5d35a13d266eef7a5381a0a11b426100fd0b3250823bbe94"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
       "bom-ref": "postcss@8.5.31",
       "type": "library",
       "name": "postcss",
@@ -12752,6 +12851,7 @@
         "react-dom@18.3.1",
         "react-i18next@17.1.0",
         "@eslint/js@9.39.5",
+        "@playwright/test@1.65.0",
         "@testing-library/jest-dom@6.10.0",
         "@testing-library/react@16.3.3",
         "@testing-library/user-event@14.6.8",
@@ -13230,6 +13330,12 @@
       "dependsOn": [
         "@nodelib/fs.scandir@2.1.5",
         "fastq@1.20.3"
+      ]
+    },
+    {
+      "ref": "@playwright/test@1.65.0",
+      "dependsOn": [
+        "playwright@1.65.0"
       ]
     },
     {
@@ -14537,6 +14643,16 @@
     },
     {
       "ref": "pirates@4.0.7",
+      "dependsOn": []
+    },
+    {
+      "ref": "playwright@1.65.0",
+      "dependsOn": [
+        "playwright-core@1.65.0"
+      ]
+    },
+    {
+      "ref": "playwright-core@1.65.0",
       "dependsOn": []
     },
     {

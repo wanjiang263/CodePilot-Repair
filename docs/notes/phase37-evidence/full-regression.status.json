@@ -1,0 +1,18 @@
+{
+  "state": "completed",
+  "exit_code": 1,
+  "started_utc": "2026-11-07T11:55:15.9662812Z",
+  "finished_utc": "2026-11-07T13:15:03.3738653Z",
+  "seconds": 4787.4151545,
+  "mode": "pytest -m not docker and not llm --cov",
+  "basetemp": ".codex-pytest-tmp/phase37-full-20261107195515",
+  "source_hashes": {
+    "tests/sandbox/test_build_context_guard.py": "e940681b0aef6b0b16295f9da9106ae8eef99908fc0aa0ee8b61115cfff3099b",
+    "src/codepilot/llm/sse.py": "94eaee15fda2a52c4e2e2a1a9346d4fc44af5001bc48194ce0d409ffbd18fd0b",
+    "src/codepilot/llm/openai_compatible.py": "06cfd708c8d9570094456a5b366c4df9a367bbaebed4364400973e692db12104",
+    "src/codepilot/llm/http_lifecycle.py": "383256296e551325d9d9a69aceca08277d018c21055574ed61bd275f32b142a9",
+    "tests/unit/llm/test_sse_completion.py": "8d4b249e7fcea8f27435c6e2fa86137c2e22f51a87dc8e1be6ae8d6a6fe5236a",
+    "src/codepilot/sandbox/swebench_env.py": "03b5287ad1c7326f965196ae520e0e327865eab51a64ac265713ceb62c234cd7"
+  },
+  "source_unchanged": true
+}

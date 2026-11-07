@@ -1,0 +1,27 @@
+{
+  "base": "d86360af4b1dd7ce8ec6087c2c2ac982d45a2027",
+  "source_origin": "worktree",
+  "normalization": "UTF-8 text with LF newlines",
+  "generated_at_utc": "2026-11-07T12:16:07.4932205Z",
+  "files": {
+    "src/codepilot/llm/sse.py": "94eaee15fda2a52c4e2e2a1a9346d4fc44af5001bc48194ce0d409ffbd18fd0b",
+    "src/codepilot/llm/http_lifecycle.py": "383256296e551325d9d9a69aceca08277d018c21055574ed61bd275f32b142a9",
+    "src/codepilot/llm/openai_compatible.py": "06cfd708c8d9570094456a5b366c4df9a367bbaebed4364400973e692db12104",
+    "src/codepilot/sandbox/swebench_env.py": "03b5287ad1c7326f965196ae520e0e327865eab51a64ac265713ceb62c234cd7",
+    "tests/unit/llm/test_sse_completion.py": "8d4b249e7fcea8f27435c6e2fa86137c2e22f51a87dc8e1be6ae8d6a6fe5236a",
+    "tests/sandbox/test_build_context_guard.py": "e940681b0aef6b0b16295f9da9106ae8eef99908fc0aa0ee8b61115cfff3099b",
+    "scripts/phase37_stream_probe.py": "4e41868ae22feffc276a2b9329d1ad3af68dadc4a966f04d239a7a93491d1fe2",
+    "web/e2e/server.py": "f3e07aa84f40441b1d16ef99563d0737aeda167e12a226055340de2735d4afe6",
+    "web/e2e/workbench.spec.ts": "4096a4e2d5961a37cb09771dfb05e6a396f5ae23245cef9dbb68a7d7ffebba42",
+    "web/playwright.config.ts": "00c85cf80ba9e111d633d31b8673b307ad50d72907715b999ae599f9177fe5a6",
+    "web/package.json": "8fd0f25cc2657a106be3d542bfd0e6c026d78b3d4050544f5cee410138e25ab1",
+    "web/package-lock.json": "11dfdd05f28ab60916194ab9f8f42b57de93d0e9236b9692eae3c1756d661f4c",
+    "web/tsconfig.node.json": "03174a554638286fbd8fe1560ad6afb478ad5b36294b8749f3f987886e0b8d22",
+    ".github/workflows/ci.yml": "fb61ef694a7e488eb1f9b4539d2d702541d405d8c5e7101fddef5697454609d0",
+    ".gitignore": "6e2f7d081c82e6dea04fb47fad5fd55ab7a8be695dfeab5a01c33d1a8f6b354e",
+    "CONTRIBUTING.md": "94e9f066318ce9f26007068629d1991fc972b316854ee40f2e439ffc014c7b0b",
+    "README.md": "4d5d4cb8b3b7fc04d009022821580d0422a1f6263683594ff2cd36667e121595",
+    "docs/notes/.gitattributes": "3edc111e3d37ca22795df14be325792b0b7e29b5be1150cebcf2925a9059436e",
+    "docs/third-party/web-sbom.cdx.json": "d566201656768c6e5bcb761b873e34985a806e4f4fd3b0cc9f1cfc62c6f17aed"
+  }
+}

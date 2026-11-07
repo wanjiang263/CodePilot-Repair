@@ -1,0 +1,29 @@
+{
+  "source_origin": "worktree",
+  "source_hashes": {
+    "src/codepilot/llm/sse.py": "409545baae67f3125efdb2331a790ad4aed729fc51235c0fc1ca831e9124a40d",
+    "src/codepilot/llm/http_lifecycle.py": "383256296e551325d9d9a69aceca08277d018c21055574ed61bd275f32b142a9",
+    "src/codepilot/llm/openai_compatible.py": "06cfd708c8d9570094456a5b366c4df9a367bbaebed4364400973e692db12104",
+    "scripts/phase37_stream_probe.py": "dcf730a327b677974b734114ce358640c74283293e39a7bd65cd3cd624a30e03"
+  },
+  "mode": "cancel",
+  "provider": "bigmodel",
+  "model": "glm-5.3-flash",
+  "endpoint": "https://open.bigmodel.cn/api/paas/v4",
+  "max_requests": 1,
+  "budget_cny": 1.0,
+  "status": "unknown_frozen",
+  "dispatched": true,
+  "requests": 1,
+  "unacknowledged": 1,
+  "content_deltas": 1,
+  "content_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+  "seconds": 2.156,
+  "owned_threads_after": 0,
+  "accounted_or_reserved_cny": 0.8014336,
+  "ledger_frozen": true,
+  "exception_chain": [
+    "RequestCancelled"
+  ],
+  "passed": true
+}

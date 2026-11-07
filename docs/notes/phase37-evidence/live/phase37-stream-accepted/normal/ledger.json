@@ -1,0 +1,56 @@
+{
+  "currency": "CNY",
+  "limit": 1.0,
+  "accounted_or_reserved": 0.00013799999999997148,
+  "frozen": false,
+  "opening_balance": 0.0,
+  "opening_source": null,
+  "requests": [
+    {
+      "seq": 1,
+      "model": "glm-5.3-flash",
+      "reserved_cny": 0.8014336,
+      "status": "settled",
+      "cost_cny": 0.000138,
+      "request_sha256": "128d8da48b8dbc7818542dc94e253d14915bcedf9801cf384773803568378fba",
+      "dispatched_at_unix": 1794046539.0567825,
+      "metadata": {
+        "purpose": "phase37-stream-normal",
+        "request_model": "glm-5.3-flash",
+        "request_temperature": null,
+        "request_max_tokens": 512,
+        "request_body_bytes": 307,
+        "message_roles": [
+          "user"
+        ],
+        "timeout": {
+          "connect": 10.0,
+          "read": 60.0,
+          "write": 30.0,
+          "pool": 10.0
+        },
+        "trust_env": false
+      },
+      "response_request_id": "e53c0506-89df-49a0-a525-cddda1c7a6e4",
+      "http_status": 200,
+      "response_id": "20261107181539a6ce644b2fb8433c",
+      "response_model": "glm-5.3-flash",
+      "response_usage": {
+        "prompt_tokens": 29,
+        "completion_tokens": 41,
+        "total_tokens": 70,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "input_tokens": 29,
+      "cached_input_tokens": 0,
+      "output_tokens": 41,
+      "elapsed_seconds": 1.6559999999881256
+    }
+  ],
+  "cancelled_admissions": []
+}

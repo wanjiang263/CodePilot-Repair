@@ -56,6 +56,7 @@ Thumbs.db
 
 # ---- 浏览器工具会话产物（可再生成，文件保留在磁盘，T13 决定）----
 .playwright-mcp/
+/output/playwright/
 
 # Local troubleshooting output (not a release artifact; retain files on disk)
 /logs/

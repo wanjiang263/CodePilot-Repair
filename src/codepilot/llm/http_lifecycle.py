@@ -32,6 +32,7 @@ def send_request(
     timeout: httpx.Timeout,
     deadline: float,
     trust_env: bool,
+    on_delta: Callable[[str], None] | None = None,
 ) -> httpx.Response:
     request = client.build_request("POST", path, json=body, headers=headers, timeout=timeout)
     scope = current_dispatch_scope()
@@ -47,6 +48,17 @@ def send_request(
             raise RequestCancelled("cancelled after model dispatch", request=request)
         if time.monotonic() >= deadline:
             raise httpx.ReadTimeout("request total deadline exhausted", request=request)
+        if body.get("stream") is True and response.is_success:
+            from codepilot.llm.sse import SSECompletion
+
+            parser = SSECompletion(on_delta)
+            for line in response.iter_lines():
+                parser.line(line)
+                if cancel and cancel():
+                    raise RequestCancelled("cancelled after model dispatch", request=request)
+                if time.monotonic() >= deadline:
+                    raise httpx.ReadTimeout("request total deadline exhausted", request=request)
+            return httpx.Response(response.status_code, json=parser.finish(), request=request)
         return response
     if not isinstance(transport, httpx.HTTPTransport):
         raise TypeError("Cancellable HTTP requires HTTPTransport or offline MockTransport")
@@ -60,6 +72,26 @@ def send_request(
                 request.method, request.url, content=request.content, headers=request.headers
             ) as response,
         ):
+            if body.get("stream") is True and response.is_success:
+                from codepilot.llm.sse import SSECompletion
+
+                parser = SSECompletion(on_delta)
+                async for line in response.aiter_lines():
+                    parser.line(line)
+                    if cancel and cancel():
+                        raise RequestCancelled("cancelled after model dispatch", request=request)
+                    if time.monotonic() >= deadline:
+                        raise httpx.ReadTimeout("request total deadline exhausted", request=request)
+                    if parser.done:
+                        break
+                return httpx.Response(
+                    response.status_code,
+                    json=parser.finish(),
+                    request=request,
+                    headers={
+                        k: v for k, v in response.headers.items() if k.lower() in {"x-request-id"}
+                    },
+                )
             content = await response.aread()
             # aread decodes content. Rebuilding must not decode it twice or
             # advertise the wire body's framing/length as the decoded size.

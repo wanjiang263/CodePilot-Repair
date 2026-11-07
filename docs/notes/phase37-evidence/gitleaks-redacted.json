@@ -1,0 +1,22 @@
+[
+  {
+    "RuleID": "generic-api-key",
+    "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+    "StartLine": 51,
+    "EndLine": 51,
+    "StartColumn": 14,
+    "EndColumn": 83,
+    "Match": "resolved.resolved_api_queue_path, REDACTED",
+    "Secret": "REDACTED",
+    "File": "web/e2e/server.py",
+    "SymlinkFile": "",
+    "Commit": "",
+    "Entropy": 3.6943858,
+    "Author": "",
+    "Email": "",
+    "Date": "",
+    "Message": "",
+    "Tags": [],
+    "Fingerprint": "web/e2e/server.py:generic-api-key:51"
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "mode": "normal",
+  "provider": "bigmodel",
+  "model": "glm-5.3-flash",
+  "endpoint": "https://open.bigmodel.cn/api/paas/v4",
+  "max_requests": 1,
+  "budget_cny": 1.0,
+  "status": "completed",
+  "input_tokens": 29,
+  "output_tokens": 41,
+  "cost": 0.000138,
+  "cost_known": true,
+  "stream": {
+    "events": 40,
+    "content_deltas": 39,
+    "done": true
+  },
+  "response_model": "glm-5.3-flash",
+  "response_id": "202611071446344772175ace494139",
+  "requests": 1,
+  "unacknowledged": 0,
+  "content_deltas": 39,
+  "content_sha256": "7747a514fec0c8bbe73acdb5ef9e4ca3a6b9d2be346c2b97de3d0560fa2a415f",
+  "seconds": 1.938,
+  "owned_threads_after": 0,
+  "accounted_or_reserved_cny": 0.00013799999999997148,
+  "ledger_frozen": false,
+  "exception_chain": [],
+  "passed": true
+}
