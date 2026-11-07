@@ -1,5 +1,5 @@
 {
-  "archive_root": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\configs\\harness",
+  "archive_root": "D:\\Projects\\Desktop\\CodePilot-Repair\\configs\\harness",
   "baseline_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
   "baseline_drift": [],
   "files": [
@@ -389,6 +389,30 @@
     },
     {
       "baseline_commit_sha256": null,
+      "bytes": 35759,
+      "path": "candidates/phase34-candidate-v14/candidate.diff",
+      "sha256": "5ae27b791007b2fd42813d34f654eccce2ad862b2f2204ceae26e5620ba727ff"
+    },
+    {
+      "baseline_commit_sha256": null,
+      "bytes": 43949,
+      "path": "candidates/phase34-candidate-v14/candidate.json",
+      "sha256": "189773e3761265ef69822f641b248da756e3dec0930940a7dee6b71d6029658c"
+    },
+    {
+      "baseline_commit_sha256": null,
+      "bytes": 3894,
+      "path": "candidates/phase34-candidate-v14/snapshot.json",
+      "sha256": "3d2ec522d9bcac53a15f7e92018d3e53f653cf0852a79081e66ca79744388e68"
+    },
+    {
+      "baseline_commit_sha256": null,
+      "bytes": 2516966,
+      "path": "candidates/phase34-candidate-v14/sources.json",
+      "sha256": "22bcddd9dc92fb44f53f87c51c2284f477eb6b68c0fba6e86932900b5d2c835a"
+    },
+    {
+      "baseline_commit_sha256": null,
       "bytes": 40893,
       "path": "candidates/phase34-candidate-v7/candidate.diff",
       "sha256": "47d4927a0f5cb3bc2c78631e6a1762851a557c645e9243dfa3271be66c0240f0"
@@ -460,8 +484,8 @@
       "sha256": "be7d60560f2ff567001b97bb47750dc16ebcddd8c4bd51748a7cc681e312c9fc"
     }
   ],
-  "generated_at_epoch": 1793895051,
-  "manifest_head": "c4194cb2e8ff95aa41622aa4d266924077683725",
+  "generated_at_epoch": 1794030442,
+  "manifest_head": "d01b500f23f3a13fb63a296e4e104c7b7c2272bf",
   "note": "Per-file SHA256 of every candidate file at freeze time; the verifier compares current bytes against this manifest (catches committed tampering that a git log -1 heuristic cannot see).",
   "tool": "phase29_baseline_manifest",
   "zero_change_since_baseline": true
