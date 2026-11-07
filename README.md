@@ -17,8 +17,10 @@ Phase 37 已补充 Chromium 浏览器验收、真实 GLM SSE 流式验收（完�
 与 SDK 目录构建防护；24h 长稳、干净环境安装及其他真实 provider 结果应以对应
 发布版本的证据为准。历史报告中的通过项不代表当前源码、所有平台或供应商均已
 验证；当前候选的全量离线回归与 Docker 已分别记录，其中全量离线有一次
-Windows 超时用例抖动并在隔离重跑中通过。候选提交的 GitHub CI 结果见发布清单，
-等待 CI 时不将本版称为稳定版或生产可用。
+Windows 超时用例抖动并在隔离重跑中通过。候选提交的 Linux CI 六个 job 与依赖审计
+均通过（见[发布清单](docs/open-source-readiness.md)与 [Phase37 报告](docs/notes/phase37-validation.md)），
+最终文档提交的 CI 结果以该提交的发布记录为准；本版仍按 research /
+engineering preview 发布，不称为稳定版或生产可用。
 
 项目自有代码采用 [Apache License 2.0](LICENSE)，允许商业使用、修改和分发，须遵守许可证条件。
 Copyright 2026 jiaoenqi。署名见 [NOTICE](NOTICE)。

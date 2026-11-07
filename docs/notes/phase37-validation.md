@@ -191,6 +191,42 @@ attribute expression. Neither is a real credential; no scanner allowlist was
 added. The earlier 50-file scan remains a separate intermediate result.
 
 The candidate changed production source, so the historical runtime check is
-not current-source acceptance. The candidate commit's GitHub CI, including the
-new Chromium job, is still a separate pending result. No public visibility,
-main update, PR or release activation has been performed.
+not current-source acceptance. At the 21:25 snapshot, the candidate commit's
+GitHub CI, including the new Chromium job, was still a separate pending result;
+the later completed result is recorded below. No public visibility, main
+update, PR or release activation had been performed.
+
+## Candidate CI result at 2026-11-07 21:56 +08:00
+
+The private candidate `cddeeb2217eeb3844dfb5649bcfc1b404abaa512` was pushed
+only to `codex/open-source-preview`. Its [CI run 42378433945](https://github.com/wanjiang263/CodePilot-Repair/actions/runs/42378433945)
+completed with all six jobs successful: Linux pytest `4193 passed, 9 skipped,
+50 deselected`, 87.94% coverage; Linux Docker `50 passed, 4202 deselected`;
+Chromium E2E `5 passed, 0 unexpected, 0 flaky`; frontend typecheck/lint/
+Vitest/build; package installation; Ruff/format/mypy. The separate
+[dependency audit run 42378433962](https://github.com/wanjiang263/CodePilot-Repair/actions/runs/42378433962)
+also succeeded. These are Linux CI results on the candidate source and are
+separate from the Windows full-run timing failure and its isolated rerun.
+
+The six-job result covers the source at `cddeeb2`. A later documentation-only
+commit changes only release-status prose and requires its own successful CI run
+before that commit can be treated as the publication head. The remaining
+publication actions are normal `main` update, required-check configuration,
+public visibility and preview release creation. None was performed; no PR was
+opened and the repository remains private.
+
+## Final documentation head evidence
+
+A later documentation-only change updates the release notes to reflect this
+completed CI result and clarifies that the earlier clean-clone check belongs to
+the 2026-11-06 audit. No production source, test, workflow, lockfile, evidence
+artifact or license text changes. The final commit's SHA-256 manifest and
+Gitleaks report are recorded in `source-hashes-doc-head.json` and
+`gitleaks-doc-head.json`; the latter scans the four changed tracked files with
+the same Gitleaks 8.30.1 binary used in the candidate audit and reports no
+findings. The manifest excludes its own hash and records the report hash. The
+exact documentation HEAD, its CI/audit run IDs and repository visibility are
+recorded in the release handoff outside the tracked tree, so adding that
+result does not create another untested HEAD. The earlier 80-file source-hash
+manifest remains bound to the code at `cddeeb2` and is not reused as a
+manifest for this prose-only commit.

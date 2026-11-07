@@ -9,7 +9,7 @@ The detailed results and evidence boundaries are in [the audit report](open-sour
 - [x] Apache-2.0 LICENSE, jiaoenqi attribution, NOTICE and package metadata.
 - [x] Owner confirmed personal ownership with no company/team restrictions.
 - [x] SECURITY, CONTRIBUTING and CODE_OF_CONDUCT; owner-confirmed private contact email.
-- [x] Remote branch/tag inventory and reachability checks; independent non-shallow clone of the project branch. The local pvlib main is excluded.
+- [x] Remote branch/tag inventory and reachability checks; independent non-shallow clone of the project branch in the 2026-11-06 audit. The local pvlib main is excluded; this is historical evidence, not a new clone of the Phase 37 candidate.
 - [x] Current tree / project history / 176 local troubleshooting files scanned; 33 precise historical false positives reviewed. No detected real credentials requiring rotation.
 - [x] Third-party source/evidence notice inventory and upstream license retrieval; frontend production dependency notices.
 - [x] Universal Python lockfile and frontend dependency vulnerability checks, compatible security fixes and optional dependency version updates; both SBOMs.
@@ -24,12 +24,15 @@ The detailed results and evidence boundaries are in [the audit report](open-sour
 - [x] Phase 37 adds Chromium browser acceptance, bounded real GLM SSE streaming,
   interrupt/timeout/usage/offline tests, and a fail-closed guard for the
   deferred SDK directory-build path. See [Phase 37 validation](notes/phase37-validation.md).
-- [ ] Confirm the new Chromium CI job and all existing CI jobs are green on the
-  Phase 37 candidate commit before publication. Local current-source full
-  offline, Docker, browser and targeted evidence is recorded in the
+- [x] Confirm the candidate's six CI jobs and separate dependency audit are
+  green: [CI run 42378433945](https://github.com/wanjiang263/CodePilot-Repair/actions/runs/42378433945)
+  and [audit run 42378433962](https://github.com/wanjiang263/CodePilot-Repair/actions/runs/42378433962)
+  on `cddeeb2`. Local Windows full offline, Docker, browser, targeted and
+  real GLM evidence is recorded in the
   [Phase 37 addendum](notes/phase37-validation.md#final-evidence-addendum-at-2026-11-07-2125-0800);
-  the one full-run timeout failure and its isolated passing rerun remain
-  separate evidence. Earlier CI results do not cover the candidate commit.
+  the one Windows full-run timeout failure and its isolated passing rerun
+  remain separate evidence. A later documentation-only commit must have its
+  own green CI result before publication; its source code is unchanged.
 - [ ] Update remote main normally after candidate CI passes.
 - [ ] Add required status checks after the new CI jobs actually execute; basic branch protection is already enabled.
 - [ ] Confirm public visibility and preview release publication. Repository remains private in this audit.
@@ -46,14 +49,16 @@ source provenance and are not one CI acceptance pass.
 
 Phase 37 changed production HTTP/SSE, provider and sandbox code. Targeted
 offline tests, browser acceptance, bounded real GLM streaming, full offline
-regression and full Docker were rerun on that source. The full offline run has
+regression and full Docker were rerun on that source, and candidate CI passed
+on Linux. The local Windows full offline run has
 one Windows process-tree timing failure whose complete test module passed in
 an isolated rerun; these are distinct current-source results and must not be
-described as one zero-failure pass. The candidate commit's GitHub CI,
-including its new Chromium job, remains pending. Optional dependency upgrades
+described as one zero-failure pass. Optional dependency upgrades
 have passed resolution and interface/offline checks, not real model or official
 Harness runtime verification. Full-history clone remains unverified because
-the local shallow boundary is not on origin; use a clean non-shallow clone of
-the project branch. Preserve these limitations in a preview release.
+the local shallow boundary is not on origin; the earlier audit's clean
+non-shallow clone covers the project branch at that time, while a fresh clone
+of the final candidate is still recommended before publication. Preserve
+these limitations in a preview release.
 
 Do not zip the whole working directory. Use the audited source archive/allowlist so ignored local data and nested worktrees cannot be included accidentally.

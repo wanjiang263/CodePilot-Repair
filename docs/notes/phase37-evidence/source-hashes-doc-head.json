@@ -1,0 +1,14 @@
+{
+  "generated_at_utc": "2026-11-07T15:52:26.6939572Z",
+  "base": "cddeeb2217eeb3844dfb5649bcfc1b404abaa512",
+  "scope": "documentation-only final release status and evidence",
+  "normalization": "binary bytes as checked out, UTF-8 LF",
+  "note": "Manifest self-hash excluded",
+  "files": {
+    "docs/notes/phase37-evidence/gitleaks-doc-head.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "README.md": "f6c25f0e923807e717ed254377d5e51fc10a955ea213886ecf86d2b985462b22",
+    "docs/notes/phase37-validation.md": "f94fc47dacf143db6635c0c69dea3d91c482453a42c15683ccd1e99b0d07d88d",
+    "docs/open-source-audit.md": "f0848dc0ed589db125d941d33ce25fea4ffefadf2fd7acd95c4bf4b71087a8cf",
+    "docs/open-source-readiness.md": "3ea0fc72a20757efca511305f61c1a7e5ab70de8a850fb8cd3bb322bc7c3adb9"
+  }
+}

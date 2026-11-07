@@ -87,5 +87,7 @@ Phase 37 修改了 HTTP/SSE、provider 和 sandbox 源码，因此 Phase36 的
 进程树超时用例在整机负载下的 3.75 秒对 3.5 秒阈值偏差；同一模块隔离
 重跑 21 passed。当前源码 Docker 为 50 passed / 0 failed。详见
 [最终证据增补](notes/phase37-validation.md#final-evidence-addendum-at-2026-11-07-2125-0800)。
-候选提交的 GitHub CI（含新增 Chromium job）仍须单独通过；目前只能发布
-research / engineering preview，不能称为稳定版或生产可用。
+候选 `cddeeb2` 的 GitHub CI 六个 job 与依赖审计均通过，详见
+[候选 CI 结果](notes/phase37-validation.md#candidate-ci-result-at-2026-11-07-2156-0800)。
+后续仅改发布说明的提交须另行核对 CI；目前只能发布 research / engineering
+preview，不能称为稳定版或生产可用。
