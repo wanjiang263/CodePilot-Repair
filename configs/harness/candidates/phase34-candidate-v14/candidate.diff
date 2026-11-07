@@ -1,0 +1,690 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index d8c8931..eb18f79 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -7,6 +7,8 @@ name = "codepilot-repair"
+ version = "0.1.0"
+ description = "Repository-level autonomous software engineering agent"
+ readme = "README.md"
++license = "Apache-2.0"
++license-files = ["LICENSE", "NOTICE"]
+ requires-python = ">=3.12"
+ authors = [{ name = "CodePilot-Repair" }]
+ keywords = ["software-engineering-agent", "automated-program-repair", "llm", "swe-bench"]
+@@ -38,7 +40,7 @@ dependencies = [
+     "docker>=7.1",
+     # LangGraph 编排
+     "langgraph>=0.2",
+-    "langgraph-checkpoint-sqlite>=2.0",
++    "langgraph-checkpoint-sqlite>=3.1.2",
+     # Run Report / 静态 HTML 报告降级
+     "jinja2>=3.1",
+     # API（Phase 13；Phase 0 只用到 GET /health）
+@@ -49,12 +51,12 @@ dependencies = [
+ ]
+ 
+ [project.optional-dependencies]
+-embeddings = ["sentence-transformers>=3.0"]
++embeddings = ["sentence-transformers>=5.7", "transformers>=5.22.1,<6"]
+ faiss = ["faiss-cpu>=1.8"]
+ swebench = [
+     "swebench==4.1.0",
+-    "datasets>=2.19,<4",
+-    "huggingface-hub>=0.23,<1",
++    "datasets>=5.0.1,<6",
++    "huggingface-hub>=1.31,<3",
+     "pyarrow>=15",
+ ]
+ postgres = ["psycopg[binary]>=3.2"]
+@@ -76,6 +78,123 @@ codepilot = "codepilot.cli:app"
+ [tool.hatch.build.targets.wheel]
+ packages = ["src/codepilot"]
+ 
++[tool.hatch.build.targets.wheel.force-include]
++"README.md" = "codepilot/_resources/README.md"
++"configs/benchmarks.yaml" = "codepilot/_resources/configs/benchmarks.yaml"
++"configs/full.yaml" = "codepilot/_resources/configs/full.yaml"
++"configs/llm.yaml" = "codepilot/_resources/configs/llm.yaml"
++"configs/subsets/manifest.json" = "codepilot/_resources/configs/subsets/manifest.json"
++"configs/subsets/swebench-lite-cal10.json" = "codepilot/_resources/configs/subsets/swebench-lite-cal10.json"
++"configs/subsets/swebench-lite-dev30.json" = "codepilot/_resources/configs/subsets/swebench-lite-dev30.json"
++"configs/subsets/swebench-lite-official-dev23.json" = "codepilot/_resources/configs/subsets/swebench-lite-official-dev23.json"
++"configs/subsets/swebench-lite-test50.json" = "codepilot/_resources/configs/subsets/swebench-lite-test50.json"
++"configs/swebench/env-specs-4.1.0.json" = "codepilot/_resources/configs/swebench/env-specs-4.1.0.json"
++"configs/swebench/instance-image-overrides.json" = "codepilot/_resources/configs/swebench/instance-image-overrides.json"
++"configs/swebench/l2cal10e-instances.json" = "codepilot/_resources/configs/swebench/l2cal10e-instances.json"
++"configs/swebench/testdeps/psf__requests-3362/codepilot_requests_compat.py" = "codepilot/_resources/configs/swebench/testdeps/psf__requests-3362/codepilot_requests_compat.py"
++"demo/mini_calc/README.md" = "codepilot/_resources/demo/mini_calc/README.md"
++"demo/mini_calc/pyproject.toml" = "codepilot/_resources/demo/mini_calc/pyproject.toml"
++"demo/mini_calc/src/demo_calc/__init__.py" = "codepilot/_resources/demo/mini_calc/src/demo_calc/__init__.py"
++"demo/mini_calc/src/demo_calc/calc.py" = "codepilot/_resources/demo/mini_calc/src/demo_calc/calc.py"
++"demo/mini_calc/tests/test_calc.py" = "codepilot/_resources/demo/mini_calc/tests/test_calc.py"
++"docs/02-实现方案.md" = "codepilot/_resources/docs/02-实现方案.md"
++"docs/03-AGENTS.md" = "codepilot/_resources/docs/03-AGENTS.md"
++"docs/06-security.md" = "codepilot/_resources/docs/06-security.md"
++"docs/third-party/README.md" = "codepilot/_resources/docs/third-party/README.md"
++"docs/third-party/github-advisory-review.json" = "codepilot/_resources/docs/third-party/github-advisory-review.json"
++"docs/third-party/python-dependencies.json" = "codepilot/_resources/docs/third-party/python-dependencies.json"
++"docs/third-party/python-sbom.cdx.json" = "codepilot/_resources/docs/third-party/python-sbom.cdx.json"
++"docs/third-party/upstream/SWE-bench--v4.1.0.txt" = "codepilot/_resources/docs/third-party/upstream/SWE-bench--v4.1.0.txt"
++"docs/third-party/upstream/astropy--astropy--03712f43fede.txt" = "codepilot/_resources/docs/third-party/upstream/astropy--astropy--03712f43fede.txt"
++"docs/third-party/upstream/astropy--astropy--a86d75ead6df.txt" = "codepilot/_resources/docs/third-party/upstream/astropy--astropy--a86d75ead6df.txt"
++"docs/third-party/upstream/django--django--b846415d1b51.txt" = "codepilot/_resources/docs/third-party/upstream/django--django--b846415d1b51.txt"
++"docs/third-party/upstream/manifest.json" = "codepilot/_resources/docs/third-party/upstream/manifest.json"
++"docs/third-party/upstream/marshmallow-code--marshmallow--ae69ff4f28b1.txt" = "codepilot/_resources/docs/third-party/upstream/marshmallow-code--marshmallow--ae69ff4f28b1.txt"
++"docs/third-party/upstream/matplotlib--matplotlib--5a1a81ea3017.txt" = "codepilot/_resources/docs/third-party/upstream/matplotlib--matplotlib--5a1a81ea3017.txt"
++"docs/third-party/upstream/mwaskom--seaborn--0874bfc01308.txt" = "codepilot/_resources/docs/third-party/upstream/mwaskom--seaborn--0874bfc01308.txt"
++"docs/third-party/upstream/pallets--flask--489a8e110850.txt" = "codepilot/_resources/docs/third-party/upstream/pallets--flask--489a8e110850.txt"
++"docs/third-party/upstream/psf--requests--09e8a9bcec80.txt" = "codepilot/_resources/docs/third-party/upstream/psf--requests--09e8a9bcec80.txt"
++"docs/third-party/upstream/psf--requests--c12dd61a3868.txt" = "codepilot/_resources/docs/third-party/upstream/psf--requests--c12dd61a3868.txt"
++"docs/third-party/upstream/pydata--xarray--73ba74dfaa52.txt" = "codepilot/_resources/docs/third-party/upstream/pydata--xarray--73ba74dfaa52.txt"
++"docs/third-party/upstream/pylint-dev--pylint--f97b14080de8.txt" = "codepilot/_resources/docs/third-party/upstream/pylint-dev--pylint--f97b14080de8.txt"
++"docs/third-party/upstream/pytest-dev--pytest--4be38574daf0.txt" = "codepilot/_resources/docs/third-party/upstream/pytest-dev--pytest--4be38574daf0.txt"
++"docs/third-party/upstream/pytest-dev--pytest--7898b9b164d4.txt" = "codepilot/_resources/docs/third-party/upstream/pytest-dev--pytest--7898b9b164d4.txt"
++"docs/third-party/upstream/pytest-dev--pytest--ca836a5f9ecc.txt" = "codepilot/_resources/docs/third-party/upstream/pytest-dev--pytest--ca836a5f9ecc.txt"
++"docs/third-party/upstream/scikit-learn--scikit-learn--3f046f2b5eea.txt" = "codepilot/_resources/docs/third-party/upstream/scikit-learn--scikit-learn--3f046f2b5eea.txt"
++"docs/third-party/upstream/sphinx-doc--sphinx--f275b949f651.txt" = "codepilot/_resources/docs/third-party/upstream/sphinx-doc--sphinx--f275b949f651.txt"
++"docs/third-party/upstream/sqlfluff--sqlfluff--6d1e394d2e68.txt" = "codepilot/_resources/docs/third-party/upstream/sqlfluff--sqlfluff--6d1e394d2e68.txt"
++"docs/third-party/upstream/sympy--sympy--0d753dffbbcb.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--0d753dffbbcb.txt"
++"docs/third-party/upstream/sympy--sympy--3c98bbadf4c3.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--3c98bbadf4c3.txt"
++"docs/third-party/upstream/sympy--sympy--5b9b04818a65.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--5b9b04818a65.txt"
++"docs/third-party/upstream/sympy--sympy--a7212a73709d.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--a7212a73709d.txt"
++"docs/third-party/upstream/sympy--sympy--b8fd72e9cdac.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--b8fd72e9cdac.txt"
++"docs/third-party/upstream/sympy--sympy--bc14d2a9c696.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--bc14d2a9c696.txt"
++"docs/third-party/upstream/sympy--sympy--e6d5cc1bce88.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--e6d5cc1bce88.txt"
++"docs/third-party/upstream/sympy--sympy--ff1f4cd13c20.txt" = "codepilot/_resources/docs/third-party/upstream/sympy--sympy--ff1f4cd13c20.txt"
++"docs/third-party/web-sbom.cdx.json" = "codepilot/_resources/docs/third-party/web-sbom.cdx.json"
++
++[tool.hatch.build.targets.sdist]
++# Explicit paths prevent local logs, worktrees and request payloads entering archives.
++only-include = [
++    "src/codepilot",
++    "pyproject.toml",
++    "LICENSE",
++    "NOTICE",
++    "README.md",
++    "configs/benchmarks.yaml",
++    "configs/full.yaml",
++    "configs/llm.yaml",
++    "configs/subsets/manifest.json",
++    "configs/subsets/swebench-lite-cal10.json",
++    "configs/subsets/swebench-lite-dev30.json",
++    "configs/subsets/swebench-lite-official-dev23.json",
++    "configs/subsets/swebench-lite-test50.json",
++    "configs/swebench/env-specs-4.1.0.json",
++    "configs/swebench/instance-image-overrides.json",
++    "configs/swebench/l2cal10e-instances.json",
++    "configs/swebench/testdeps/psf__requests-3362/codepilot_requests_compat.py",
++    "demo/mini_calc/README.md",
++    "demo/mini_calc/pyproject.toml",
++    "demo/mini_calc/src/demo_calc/__init__.py",
++    "demo/mini_calc/src/demo_calc/calc.py",
++    "demo/mini_calc/tests/test_calc.py",
++    "docs/02-实现方案.md",
++    "docs/03-AGENTS.md",
++    "docs/06-security.md",
++    "docs/third-party/README.md",
++    "docs/third-party/github-advisory-review.json",
++    "docs/third-party/python-dependencies.json",
++    "docs/third-party/python-sbom.cdx.json",
++    "docs/third-party/upstream/SWE-bench--v4.1.0.txt",
++    "docs/third-party/upstream/astropy--astropy--03712f43fede.txt",
++    "docs/third-party/upstream/astropy--astropy--a86d75ead6df.txt",
++    "docs/third-party/upstream/django--django--b846415d1b51.txt",
++    "docs/third-party/upstream/manifest.json",
++    "docs/third-party/upstream/marshmallow-code--marshmallow--ae69ff4f28b1.txt",
++    "docs/third-party/upstream/matplotlib--matplotlib--5a1a81ea3017.txt",
++    "docs/third-party/upstream/mwaskom--seaborn--0874bfc01308.txt",
++    "docs/third-party/upstream/pallets--flask--489a8e110850.txt",
++    "docs/third-party/upstream/psf--requests--09e8a9bcec80.txt",
++    "docs/third-party/upstream/psf--requests--c12dd61a3868.txt",
++    "docs/third-party/upstream/pydata--xarray--73ba74dfaa52.txt",
++    "docs/third-party/upstream/pylint-dev--pylint--f97b14080de8.txt",
++    "docs/third-party/upstream/pytest-dev--pytest--4be38574daf0.txt",
++    "docs/third-party/upstream/pytest-dev--pytest--7898b9b164d4.txt",
++    "docs/third-party/upstream/pytest-dev--pytest--ca836a5f9ecc.txt",
++    "docs/third-party/upstream/scikit-learn--scikit-learn--3f046f2b5eea.txt",
++    "docs/third-party/upstream/sphinx-doc--sphinx--f275b949f651.txt",
++    "docs/third-party/upstream/sqlfluff--sqlfluff--6d1e394d2e68.txt",
++    "docs/third-party/upstream/sympy--sympy--0d753dffbbcb.txt",
++    "docs/third-party/upstream/sympy--sympy--3c98bbadf4c3.txt",
++    "docs/third-party/upstream/sympy--sympy--5b9b04818a65.txt",
++    "docs/third-party/upstream/sympy--sympy--a7212a73709d.txt",
++    "docs/third-party/upstream/sympy--sympy--b8fd72e9cdac.txt",
++    "docs/third-party/upstream/sympy--sympy--bc14d2a9c696.txt",
++    "docs/third-party/upstream/sympy--sympy--e6d5cc1bce88.txt",
++    "docs/third-party/upstream/sympy--sympy--ff1f4cd13c20.txt",
++    "docs/third-party/web-sbom.cdx.json"
++]
++
+ # ----------------------------------------------------------------------------
+ # Ruff
+ # ----------------------------------------------------------------------------
+@@ -158,6 +277,7 @@ ignore_missing_imports = true
+ [tool.pytest.ini_options]
+ minversion = "8.0"
+ testpaths = ["tests"]
++pythonpath = ["."]
+ # tests/fixtures/repos/ 下是**被解析的对象**，不是被测代码。它们长得就像真
+ # 仓库——`tests/test_session.py`、`conftest.py` 一应俱全，其中一个还故意带
+ # 语法错误。不排除的话 pytest 会去收集它们：轻则多出一堆无夹具的失败，
+diff --git a/scripts/batch_budget.py b/scripts/batch_budget.py
+index 8e2c616..825094a 100644
+--- a/scripts/batch_budget.py
++++ b/scripts/batch_budget.py
+@@ -264,9 +264,7 @@ def evaluate(args: argparse.Namespace) -> tuple[int, str]:
+ 
+     instance = args.instance
+     root = Path(args.repo_root) if args.repo_root is not None else ROOT
+-    opening_instance = (
+-        _opening_instance(manifest, instance, repo_root=root) if instance else None
+-    )
++    opening_instance = _opening_instance(manifest, instance, repo_root=root) if instance else None
+     registry_prior = float(registry_totals.get(instance, 0.0)) if instance else 0.0
+     if opening_instance is not None and registry_prior > opening_instance + 1e-9:
+         return 9, (
+diff --git a/scripts/phase32_test_gate.py b/scripts/phase32_test_gate.py
+index 511a928..8b93d8f 100644
+--- a/scripts/phase32_test_gate.py
++++ b/scripts/phase32_test_gate.py
+@@ -49,7 +49,7 @@ from pathlib import Path
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ SCRATCH = ROOT / ".codex-pytest-tmp" / "phase32"
+-PYTHON = ROOT / ".venv" / "Scripts" / "python.exe"
++PYTHON = Path(sys.executable)
+ RG_CANDIDATES: tuple[Callable[[], Path], ...] = (
+     lambda: Path.home() / "AppData" / "Local" / "OpenAI" / "Codex" / "bin" / "rg.exe",
+     lambda: Path.home() / "scoop" / "shims" / "rg.exe",
+@@ -73,6 +73,19 @@ class MemoryStatus(ctypes.Structure):
+ 
+ 
+ def memory() -> dict[str, int]:
++    if sys.platform.startswith("linux"):
++        values = {}
++        for line in Path("/proc/meminfo").read_text(encoding="ascii").splitlines():
++            key, _, value = line.partition(":")
++            values[key] = int(value.split()[0]) // 1024
++        return {
++            "total_phys_mb": values["MemTotal"],
++            "avail_phys_mb": values["MemAvailable"],
++            "total_pagefile_mb": values["MemTotal"] + values["SwapTotal"],
++            "avail_pagefile_mb": values["MemAvailable"] + values["SwapFree"],
++            "commit_headroom_mb": max(0, values["CommitLimit"] - values["Committed_AS"]),
++            "load_pct": int(100 * (1 - values["MemAvailable"] / values["MemTotal"])),
++        }
+     status = MemoryStatus()
+     status.dwLength = ctypes.sizeof(MemoryStatus)
+     ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status))
+diff --git a/scripts/phase34_runtime_results.py b/scripts/phase34_runtime_results.py
+index 60ea39f..1f54558 100644
+--- a/scripts/phase34_runtime_results.py
++++ b/scripts/phase34_runtime_results.py
+@@ -22,7 +22,7 @@ import json
+ import re
+ import sys
+ from datetime import UTC, datetime
+-from pathlib import Path
++from pathlib import Path, PureWindowsPath
+ from typing import Any
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+@@ -102,8 +102,9 @@ def _rebind(value: Any, scratch: Path) -> Any:
+     if not isinstance(value, str) or not value:
+         return value
+     path = Path(value)
+-    if path.is_absolute():
+-        return rel(scratch / path.name)
++    windows = PureWindowsPath(value)
++    if path.is_absolute() or windows.is_absolute():
++        return rel(scratch / (windows.name if windows.is_absolute() else path.name))
+     return value.replace("\\", "/")
+ 
+ 
+@@ -115,7 +116,7 @@ def evidence_records(scratch: Path) -> dict[str, Any]:
+             run[key] = _rebind(run.get(key), scratch)
+         basetemp = run.get("basetemp")
+         if isinstance(basetemp, str) and basetemp:
+-            run["basetemp"] = Path(basetemp).name
++            run["basetemp"] = PureWindowsPath(basetemp).name
+         command = run.get("command")
+         if isinstance(command, str) and command:
+             run["command"] = _scrub(command, scratch)
+diff --git a/scripts/recovery_admin.py b/scripts/recovery_admin.py
+index 15f48a0..ad69953 100644
+--- a/scripts/recovery_admin.py
++++ b/scripts/recovery_admin.py
+@@ -137,9 +137,7 @@ def _totals(args: argparse.Namespace) -> dict[str, object]:
+ 
+ def _opening(args: argparse.Namespace) -> dict[str, object]:
+     manifest = load_recovery_manifest(args.manifest)
+-    amount = instance_opening_cny(
+-        manifest, args.instance, repo_root=_repo_root(args.repo_root)
+-    )
++    amount = instance_opening_cny(manifest, args.instance, repo_root=_repo_root(args.repo_root))
+     return {
+         "manifest": str(args.manifest),
+         "instance": args.instance,
+diff --git a/src/codepilot/config.py b/src/codepilot/config.py
+index 549f58c..27516a9 100644
+--- a/src/codepilot/config.py
++++ b/src/codepilot/config.py
+@@ -23,7 +23,10 @@ __all__ = ["Settings", "get_settings", "read_secret_env", "reset_settings_cache"
+ 
+ #: 仓库根目录。src/codepilot/config.py → parents[2]。
+ #: 只用于定位随包分发的默认配置（``configs/``），不用于运行产物路径。
+-PROJECT_ROOT = Path(__file__).resolve().parents[2]
++_PACKAGED_RESOURCES = Path(__file__).resolve().parent / "_resources"
++PROJECT_ROOT = (
++    _PACKAGED_RESOURCES if _PACKAGED_RESOURCES.is_dir() else Path(__file__).resolve().parents[2]
++)
+ 
+ 
+ class Settings(BaseSettings):
+diff --git a/src/codepilot/eval/swebench.py b/src/codepilot/eval/swebench.py
+index efb29f2..3a8cbe5 100644
+--- a/src/codepilot/eval/swebench.py
++++ b/src/codepilot/eval/swebench.py
+@@ -895,7 +895,9 @@ class SWEBenchLoader:
+ 
+ def _default_env_spec_snapshot() -> Path:
+     """仓库内冻结的官方规格快照（不含 swebench 依赖，纯 JSON）。"""
+-    repo_root = Path(__file__).resolve().parents[3]
++    from codepilot.config import PROJECT_ROOT
++
++    repo_root = PROJECT_ROOT
+     return repo_root / "configs" / "swebench" / f"env-specs-{HARNESS_VERSION}.json"
+ 
+ 
+diff --git a/tests/graph/test_phase11_closure_docker.py b/tests/graph/test_phase11_closure_docker.py
+index 6aefbe2..cbfeff8 100644
+--- a/tests/graph/test_phase11_closure_docker.py
++++ b/tests/graph/test_phase11_closure_docker.py
+@@ -61,6 +61,7 @@ def _run(tmp_path: Path, monkeypatch, *, case: str):
+         baseline_results=[],
+         sandbox_override=sandbox,
+         coder_rounds=coder_rounds,
++        coder_relocalize_replies=[READ],
+         diagnoses=diagnoses,
+     )
+     # L2 的受影响范围与 Phase 9 的真实 Docker 用例同一给法：impact 提供 related_tests，
+@@ -89,7 +90,7 @@ def test_local_tool_cap_closure_completes_on_real_containers(tmp_path: Path, mon
+     state = harness.run()
+ 
+     # 前提：局部额度**确实**用满了，而 run 没有被它判死。
+-    assert len(state.tool_calls) == 30
++    assert len(state.tool_calls) == 30, state.model_dump_json()
+     assert state.coding_stop_reason is StopReason.BUDGET_TOOL_CALLS
+     visited = [item["node"] for item in state.events]
+     for node in (Node.VALIDATE_PATCH, Node.RUN_TARGET_TESTS, Node.RUN_REGRESSION, Node.REVIEW):
+diff --git a/tests/graph/test_phase12_closure_admission_docker.py b/tests/graph/test_phase12_closure_admission_docker.py
+index f13be4b..7ea0552 100644
+--- a/tests/graph/test_phase12_closure_admission_docker.py
++++ b/tests/graph/test_phase12_closure_admission_docker.py
+@@ -20,15 +20,18 @@ import json
+ from pathlib import Path
+ from typing import Any
+ 
++import harness as harness_module
+ import pytest
+ from harness import TARGET, build_harness, edit
+ 
+ from codepilot.agents.reviewer import PatchReviewer
+ from codepilot.artifacts import ArtifactStore
++from codepilot.graph import nodes
+ from codepilot.graph.regression import RegressionRunner
+ from codepilot.graph.routing import Node
+ from codepilot.graph.stop_rules import patch_hash
+ from codepilot.llm.fake import FakeLLM
++from codepilot.repo.gitcmd import run_git
+ from codepilot.sandbox.docker import DockerSandbox
+ from codepilot.schemas.budget import RepairBudget
+ from codepilot.schemas.enums import RunStatus, StopReason
+@@ -58,6 +61,25 @@ ROUND_B: list[dict[str, Any]] = [
+ 
+ def _run(tmp_path: Path, monkeypatch, *, case: str):
+     """在真实 daemon 上跑完整图；只换额度与补丁形状，其余装配一致。"""
++    base_repo = harness_module._base_repo
++
++    def with_unrelated_test(root: Path, **kwargs):
++        original, _ = base_repo(root, **kwargs)
++        # Keep L2 a strict subset of L3: otherwise full-scope L2 correctly
++        # replaces L3, and the five/eight-container admission boundary vanishes.
++        (original / "tests/test_unrelated.py").write_text(
++            "def test_unrelated():\n    assert 2 + 2 == 4\n", encoding="utf-8"
++        )
++        run_git(["add", "tests/test_unrelated.py"], cwd=original)
++        run_git(["commit", "-qm", "add independent regression scope"], cwd=original)
++        return original, run_git(["rev-parse", "HEAD"], cwd=original).stdout.strip()
++
++    monkeypatch.setattr(harness_module, "_base_repo", with_unrelated_test)
++    # Baseline collection is impact-scoped in current runtime. This fixture
++    # explicitly authorizes both files so L3 has an independent obligation.
++    monkeypatch.setattr(
++        nodes, "_baseline_scope", lambda state, policy: (TARGET, "tests/test_unrelated.py")
++    )
+     sandbox = DockerSandbox(
+         artifacts=ArtifactStore(tmp_path / "docker", case), allowed_workspace_root=tmp_path
+     )
+@@ -102,7 +124,9 @@ def test_a_refused_round_runs_no_further_container_on_real_docker(
+     assert Node.REVIEW.value in visited and Node.REPAIR_PATCH.value in visited
+ 
+     # 前提：第一轮确实在真容器里挣到了完整闭环（不是脚本给的 PASS）。
+-    assert harness.deps.accounting.run_log and len(harness.deps.accounting.run_log) == 5
++    assert harness.deps.accounting.run_log and len(harness.deps.accounting.run_log) == 5, (
++        state.model_dump_json()
++    )
+     assert state.execution is not None
+     assert state.execution.status.value == "PASS"
+     assert state.execution.diagnostics.get("execution_backend") == "docker"
+@@ -154,7 +178,7 @@ def test_a_round_with_just_enough_room_closes_on_real_containers(
+     harness, reviewer_llm = _run(tmp_path, monkeypatch, case="allowed")
+     state = harness.run()
+ 
+-    assert len(harness.deps.accounting.run_log) == 8, "两轮闭环都用真容器执行"
++    assert len(harness.deps.accounting.run_log) == 8, state.model_dump_json()
+     assert harness.llm.purposes().count("coder") == 4
+     assert len(reviewer_llm.calls) == 2, "复审重新问了模型，没有复用旧结论"
+ 
+diff --git a/tests/graph/test_phase19_static_reliability.py b/tests/graph/test_phase19_static_reliability.py
+index 2b8d02b..663e65c 100644
+--- a/tests/graph/test_phase19_static_reliability.py
++++ b/tests/graph/test_phase19_static_reliability.py
+@@ -198,7 +198,7 @@ def test_collection_attribution_uses_frames_not_substrings() -> None:
+     execution = ExecutionResult(
+         status=ExecutionStatus.COLLECTION_ERROR,
+         stderr_tail=(
+-            'ERROR collecting tests/test_core.py\n'
++            "ERROR collecting tests/test_core.py\n"
+             '  File "/testbed/tests/test_core.py", line 2\n'
+             "ImportError: something in docs/path.py was mentioned\n"
+         ),
+@@ -209,8 +209,7 @@ def test_collection_attribution_uses_frames_not_substrings() -> None:
+     assert result is not None and result[1] == "workspace"
+ 
+     execution.stderr_tail = (
+-        '  File "/testbed/src/pkg/path.py", line 10\n'
+-        "SyntaxError: invalid syntax"
++        '  File "/testbed/src/pkg/path.py", line 10\nSyntaxError: invalid syntax'
+     )
+     result = nodes._target_execution_attribution(execution, ("src/pkg/path.py",))
+     assert result == (
+@@ -227,9 +226,7 @@ def test_review_without_a_patch_hash_does_not_verify(tmp_path: Path) -> None:
+         coder_rounds=[ROUND],
+     )
+     harness.deps.regression_runner = RegressionRunner()
+-    harness.deps.reviewer = PatchReviewer(
+-        FakeLLM([{"approved": True, "summary": "looks good"}])
+-    )
++    harness.deps.reviewer = PatchReviewer(FakeLLM([{"approved": True, "summary": "looks good"}]))
+     state = harness.run()
+     assert state.review is not None
+     try:
+diff --git a/tests/integration/test_docker_phase1.py b/tests/integration/test_docker_phase1.py
+index 47b2495..99611f4 100644
+--- a/tests/integration/test_docker_phase1.py
++++ b/tests/integration/test_docker_phase1.py
+@@ -4,6 +4,7 @@ from __future__ import annotations
+ 
+ import shutil
+ import subprocess
++import tomllib
+ from pathlib import Path
+ from uuid import uuid4
+ 
+@@ -30,6 +31,10 @@ _FILES = (
+ def _build_context(repo_root: Path, target: Path) -> None:
+     """Copy only source and named contract inputs; no .env, keys, git or artifacts."""
+     files = [repo_root / relative for relative in _FILES]
++    metadata = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
++    resources = metadata["tool"]["hatch"]["build"]["targets"]["wheel"]["force-include"]
++    files.extend(repo_root / relative for relative in resources)
++    files.extend(repo_root / relative for relative in metadata["project"]["license-files"])
+     files.extend((repo_root / "src").rglob("*.py"))
+     files.append(repo_root / "src/codepilot/py.typed")
+     fixture = repo_root / "tests/fixtures/repos/mini_auth"
+diff --git a/tests/integration/test_swebench_smoke.py b/tests/integration/test_swebench_smoke.py
+index 317e25d..86dc63e 100644
+--- a/tests/integration/test_swebench_smoke.py
++++ b/tests/integration/test_swebench_smoke.py
+@@ -533,13 +533,38 @@ VALID_PATCH = (
+ 
+ def test_dry_run_uses_real_loader_and_builds_official_command(tmp_path: Path) -> None:
+     """dry-run：真实 Loader + 真实官方命令拼装，不调 LLM、不建镜像、不建 workspace。"""
++    from fetch_swebench_lite import build_snapshot_files
++
++    from codepilot.eval.swebench import SWEBenchLoader
++
++    dataset_name = smoke.DATASET_NAME
++    revision = "b" * 40
++    rows = {
++        split: [
++            json.loads(line)
++            for line in (ROOT / "tests/fixtures/swebench" / f"{split}.jsonl")
++            .read_text(encoding="utf-8")
++            .splitlines()
++        ]
++        for split in ("dev", "test")
++    }
++    snapshot_root = tmp_path / "snapshot"
++    snapshot = snapshot_root / f"{dataset_name.replace('/', '__')}__{revision}"
++    snapshot.mkdir(parents=True)
++    for name, payload in build_snapshot_files(
++        rows, dataset_name=dataset_name, revision=revision
++    ).items():
++        (snapshot / name).write_bytes(payload)
++    loader = SWEBenchLoader(snapshot_root, dataset_name=dataset_name, revision=revision)
+     config = _config(
+         tmp_path,
+-        instance_id="django__django-11099",
++        instance_id=rows["test"][0]["instance_id"],
++        revision=revision,
++        snapshot_root=snapshot_root,
+         model=None,
+         dry_run=True,
+     )
+-    report = smoke.run_smoke(config)
++    report = smoke.run_smoke(config, deps=smoke.SmokeDeps(loader=loader))
+     assert report["status"] == "DRY_RUN"
+     assert report["model_run_status"] == smoke.LIVE_NOT_RUN
+     assert report["dry_run_checks"]["placeholder_removed"] is True
+diff --git a/tests/unit/graph/test_phase19_checkpoint_identity.py b/tests/unit/graph/test_phase19_checkpoint_identity.py
+index 1702382..05de0ba 100644
+--- a/tests/unit/graph/test_phase19_checkpoint_identity.py
++++ b/tests/unit/graph/test_phase19_checkpoint_identity.py
+@@ -24,9 +24,7 @@ def _manifest(tmp_path: Path, **overrides: object) -> Path:
+ def test_missing_manifest_is_not_a_fresh_run(tmp_path: Path) -> None:
+     checkpoint = tmp_path / "checkpoints.sqlite"
+     checkpoint.write_bytes(b"")
+-    assert "without checkpoint_manifest" in (
+-        checkpoint_identity_problem(checkpoint, "run-a") or ""
+-    )
++    assert "without checkpoint_manifest" in (checkpoint_identity_problem(checkpoint, "run-a") or "")
+ 
+ 
+ def test_schema_or_run_identity_mismatch_is_rejected(tmp_path: Path) -> None:
+diff --git a/tests/unit/llm/test_phase19_budget_binding.py b/tests/unit/llm/test_phase19_budget_binding.py
+index ae6d243..c5f056c 100644
+--- a/tests/unit/llm/test_phase19_budget_binding.py
++++ b/tests/unit/llm/test_phase19_budget_binding.py
+@@ -87,9 +87,7 @@ def test_per_instance_dispatch_rejects_a_wrong_opening_before_any_request(
+ ) -> None:
+     source = _ledger(tmp_path / "pytest" / "dispatch.json", 1.25)
+     manifest, manifest_path = _manifest(tmp_path, source, "pytest-dev__pytest-11148")
+-    opening = instance_opening_cny(
+-        manifest, "pytest-dev__pytest-11148", repo_root=tmp_path
+-    )
++    opening = instance_opening_cny(manifest, "pytest-dev__pytest-11148", repo_root=tmp_path)
+     base_source = {
+         "kind": "per_instance",
+         "instance_id": "pytest-dev__pytest-11148",
+@@ -147,9 +145,7 @@ def test_schema_one_manifest_can_be_read_but_not_used_for_instance_opening(
+     tmp_path: Path,
+ ) -> None:
+     source = _ledger(tmp_path / "pytest" / "dispatch.json", 1.0)
+-    manifest = build_recovery_manifest(
+-        source, run_id="legacy", reason="legacy", repo_root=tmp_path
+-    )
++    manifest = build_recovery_manifest(source, run_id="legacy", reason="legacy", repo_root=tmp_path)
+     assert manifest["schema_version"] == 1
+     with pytest.raises(ValueError, match="schema 1"):
+         instance_opening_cny(manifest, "pytest-dev__pytest-11148", repo_root=tmp_path)
+diff --git a/tests/unit/test_cli_glm.py b/tests/unit/test_cli_glm.py
+index 91b8203..676986f 100644
+--- a/tests/unit/test_cli_glm.py
++++ b/tests/unit/test_cli_glm.py
+@@ -8,6 +8,7 @@ live 跑批的配置指纹是否与真正跑起来的是同一份。
+ from __future__ import annotations
+ 
+ import json
++import re
+ from pathlib import Path
+ from typing import Any
+ 
+@@ -245,9 +246,11 @@ def test_smoke_platform_flag_switches_endpoint(monkeypatch: pytest.MonkeyPatch)
+ 
+ 
+ def test_smoke_refuses_to_guess_among_several_aliases() -> None:
+-    result = runner.invoke(app, ["llm", "smoke", "--alias", "x", "--provider", "zai"])
++    result = runner.invoke(app, ["llm", "smoke", "--alias", "x", "--provider", "zai"], color=False)
+     assert result.exit_code == 2
+-    assert "--alias" in result.output
++    # Rich may force ANSI styling in CI despite CliRunner's color=False.
++    output = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", result.output)
++    assert "--alias" in output
+ 
+ 
+ # --------------------------------------------------------------- 生效配置
+diff --git a/tests/unit/test_fsutil_replace.py b/tests/unit/test_fsutil_replace.py
+index fa4e149..ab6aad8 100644
+--- a/tests/unit/test_fsutil_replace.py
++++ b/tests/unit/test_fsutil_replace.py
+@@ -3,6 +3,7 @@ from __future__ import annotations
+ import errno
+ import os
+ from pathlib import Path
++from types import SimpleNamespace
+ 
+ import pytest
+ 
+@@ -30,7 +31,7 @@ def test_transient_handle_error_is_retried_with_a_bound(
+             raise _winerror(32)
+         return real_replace(self, other)
+ 
+-    monkeypatch.setattr(fsutil.os, "name", "nt")
++    monkeypatch.setattr(fsutil, "os", SimpleNamespace(name="nt"))
+     monkeypatch.setattr(Path, "replace", flaky)
+     fsutil.replace_path(source, target, attempts=5, base_delay=0.0)
+     assert calls["count"] == 3
+@@ -48,7 +49,7 @@ def test_persistent_handle_error_raises_after_the_bound(
+         calls["count"] += 1
+         raise _winerror(5)
+ 
+-    monkeypatch.setattr(fsutil.os, "name", "nt")
++    monkeypatch.setattr(fsutil, "os", SimpleNamespace(name="nt"))
+     monkeypatch.setattr(Path, "replace", always)
+     with pytest.raises(OSError):
+         fsutil.replace_path(source, tmp_path / "target", attempts=3, base_delay=0.0)
+@@ -64,7 +65,7 @@ def test_non_transient_error_is_not_retried(
+         calls["count"] += 1
+         raise _winerror(2)
+ 
+-    monkeypatch.setattr(fsutil.os, "name", "nt")
++    monkeypatch.setattr(fsutil, "os", SimpleNamespace(name="nt"))
+     monkeypatch.setattr(Path, "replace", missing)
+     with pytest.raises(OSError):
+         fsutil.replace_path(tmp_path / "a", tmp_path / "b", attempts=5, base_delay=0.0)
+diff --git a/tests/unit/test_phase26_estimation.py b/tests/unit/test_phase26_estimation.py
+index 2498465..23ed34e 100644
+--- a/tests/unit/test_phase26_estimation.py
++++ b/tests/unit/test_phase26_estimation.py
+@@ -165,7 +165,7 @@ def test_incomplete_scope_is_recorded_as_aggregate_evidence_only(tmp_path):
+ 
+ 
+ def test_closure_reservation_is_deducted_once_from_the_remaining_window():
+-    with dispatch_scope(DispatchScope(Deadline(time.monotonic() + 30), reserve=10)):
++    with dispatch_scope(DispatchScope(Deadline(30, clock=lambda: 0), reserve=10)):
+         from codepilot.observability.dispatch import dispatch_timeout
+ 
+         # 30 秒窗口扣一次 10 秒预留 = 20；扣两次会得到 10。
+diff --git a/tests/unit/test_phase33_test_gate.py b/tests/unit/test_phase33_test_gate.py
+index d30f945..66cdb50 100644
+--- a/tests/unit/test_phase33_test_gate.py
++++ b/tests/unit/test_phase33_test_gate.py
+@@ -77,7 +77,7 @@ def test_default_scratch_stays_backward_compatible() -> None:
+     assert gate.resolve_scratch(".codex-pytest-tmp/phase33") == (
+         ROOT / ".codex-pytest-tmp" / "phase33"
+     )
+-    absolute = Path("C:/somewhere/else")
++    absolute = Path(ROOT.anchor) / "somewhere" / "else"
+     assert gate.resolve_scratch(str(absolute)) == absolute
+ 
+ 
+diff --git a/tests/unit/tools/test_phase19_repro_permissions.py b/tests/unit/tools/test_phase19_repro_permissions.py
+index a4f11f2..93c3c85 100644
+--- a/tests/unit/tools/test_phase19_repro_permissions.py
++++ b/tests/unit/tools/test_phase19_repro_permissions.py
+@@ -30,9 +30,7 @@ def test_reproducer_policy_can_create_and_correct_its_own_test(tmp_path: Path) -
+     reproducer = WorkspacePathPolicy(tmp_path, repro_write=True)
+     assert reproducer.resolve(relative, must_exist=True, for_write=True).is_file()
+     new_relative = "tests/_codepilot_repro/test_issue_retry.py"
+-    assert not reproducer.resolve(
+-        new_relative, must_exist=False, for_write=True
+-    ).exists()
++    assert not reproducer.resolve(new_relative, must_exist=False, for_write=True).exists()
+ 
+ 
+ def test_coder_policy_can_still_read_reproduction_evidence(tmp_path: Path) -> None:
+diff --git a/web/package.json b/web/package.json
+index ad0536e..61806c2 100644
+--- a/web/package.json
++++ b/web/package.json
+@@ -1,8 +1,14 @@
+ {
+   "name": "codepilot-dashboard",
+   "private": true,
++  "license": "Apache-2.0",
+   "version": "0.1.0",
+   "type": "module",
++  "overrides": {
++    "@typescript-eslint/typescript-estree": {
++      "minimatch": "^11.0.1"
++    }
++  },
+   "scripts": {
+     "dev": "vite --host 127.0.0.1 --port 5173",
+     "build": "tsc -b && vite build",
+@@ -41,6 +47,6 @@
+     "typescript": "~5.7.2",
+     "typescript-eslint": "^8.18.2",
+     "vite": "^6.0.5",
+-    "vitest": "^2.1.8"
++    "vitest": "^5.1.0"
+   }
+ }
+diff --git a/web/src/locales/en-US/index.json b/web/src/locales/en-US/index.json
+index a15ba10..73f0183 100644
+--- a/web/src/locales/en-US/index.json
++++ b/web/src/locales/en-US/index.json
+@@ -1061,7 +1061,7 @@
+       "docsHint": "Documents load through the authenticated API; they are never exposed as unauthenticated static files.",
+       "readme": "README",
+       "license": "License",
+-      "licenseValue": "This repository does not declare a project license in-tree. Third-party dependencies retain their own licenses.",
++      "licenseValue": "Project-owned code is licensed under Apache-2.0. Copyright 2026 jiaoenqi. Third-party material retains its own licenses and notices.",
+       "disclaimer": "Fake and live runs are labelled separately. Official SWE-bench verdicts are never inferred from UI state."
+     }
+   }
+diff --git a/web/src/locales/zh-CN/index.json b/web/src/locales/zh-CN/index.json
+index 28b9172..31d94eb 100644
+--- a/web/src/locales/zh-CN/index.json
++++ b/web/src/locales/zh-CN/index.json
+@@ -1062,7 +1062,7 @@
+       "docsHint": "文档通过鉴权 API 加载，不会作为未鉴权静态文件暴露。",
+       "readme": "README",
+       "license": "许可证",
+-      "licenseValue": "本仓库当前未在树内声明项目许可证。第三方依赖保留各自许可证。",
++      "licenseValue": "项目自有代码采用 Apache-2.0。Copyright 2026 jiaoenqi。第三方内容保留各自的许可证与声明。",
+       "disclaimer": "Fake 与 Live 运行分开标记。官方 SWE-bench 判定绝不会从 UI 状态推导。"
+     }
+   }
