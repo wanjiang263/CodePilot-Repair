@@ -1,0 +1,272 @@
+{
+  "phase": 36,
+  "generated_at": "2026-11-07T13:59:22+08:00",
+  "tool": "delivery receipt; every hash computed from the referenced file at generation time",
+  "verdict": "PASS (merged open-source preview: v14 archive, regression, Docker and clean clone)",
+  "verdict_basis": "v14 source equals the final code commit (the merge commit 65b5221); the 20-version archive verify passes with witness verified, 80-file historical baseline and v14 32/32; the merged tree passes nine-group regression 4184/0/2, static checks and Docker 50/50; the clean-clone runtime check passes. Soak, real provider, 20k large-repo and standalone frontend evidence were produced at v13 and carried over with provenance: the merge changes no llm/graph/observability/index/repo/retrieval file, and its web/src changes (two locale files) were re-covered by the merged static web scope. Remaining gaps: real-provider streaming, browser E2E, full-history clone, the P2 guard, and unknown Spark cost.",
+  "commits": {
+    "base": "dba045dabd70f0e6eb7779287136944b589f2734",
+    "merge": "65b52216a64a770ce67d2ed3883827603056673d",
+    "C50": "d01b500f23f3a13fb63a296e4e104c7b7c2272bf",
+    "C51": "cc94d57a77706bf73b64189e616fbcaf0fd3148b",
+    "C52": "c00ab84ca4a6c94823845ae0354d145558c6a4fb",
+    "C53": "8744dd495bd8bd1f61444e07da40f6fda8cfb309",
+    "C54": "f6a18132f6504fb51d77ccb1f93d232392c2ba0d",
+    "C55": "df697c6a224de4678e6be720187a960b5c8046e8",
+    "C56": "this report + receipt commit (hash not embedded)",
+    "push": false,
+    "pr": false,
+    "publish": false,
+    "activate": false
+  },
+  "candidate": {
+    "version": "phase34-candidate-v14",
+    "status": "pending",
+    "parent": "phase34-candidate-v13",
+    "schema_version": 5,
+    "source_commit": "65b52216a64a770ce67d2ed3883827603056673d",
+    "diff_base_commit": "7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d",
+    "resolved_source_files": 150,
+    "source_scope_files": 788,
+    "files_sha256": {
+      "candidate.diff": "5ae27b791007b2fd42813d34f654eccce2ad862b2f2204ceae26e5620ba727ff",
+      "candidate.json": "189773e3761265ef69822f641b248da756e3dec0930940a7dee6b71d6029658c",
+      "snapshot.json": "3d2ec522d9bcac53a15f7e92018d3e53f653cf0852a79081e66ca79744388e68",
+      "sources.json": "22bcddd9dc92fb44f53f87c51c2284f477eb6b68c0fba6e86932900b5d2c835a"
+    },
+    "candidate_tree_sha256": "dbea42d8b1358b37223f19a8a44480cd901c407f0a5a68bef312d1afdbdd1fb4",
+    "snapshot_canonical_sha256": "dc0e55745b9067a99e8c4b247daea88794a59a5aa694ad3912636f4481e6602d",
+    "receipt_sha256": "407d8f9bb57f7b0bad5d1aacaed20c1f1b6503fcc1268401b559c594fda7b0f2",
+    "external_witness_sha256": "ab18fe5cdac4f256555cd4bdf3a2ac65fb6f4c6754fa452dfe094a8b04028edf",
+    "active_pointer_exists": false
+  },
+  "archive": {
+    "historical_manifest": {
+      "path": "configs/harness/candidates/historical-baseline.json",
+      "sha256": "71e1c1af10ce1b381b34cb855475523d935f19d140a1fc89bb72180a8c181687",
+      "files": 80,
+      "baseline_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
+      "zero_change_since_baseline": true
+    },
+    "verify": {
+      "exit_code": 0,
+      "witness": "verified",
+      "historical_integrity": "ok",
+      "totals": {
+        "historical_baseline_files": 80,
+        "historical_baseline_mismatches": 0,
+        "historical_files_modified": false,
+        "new_archive_failures": 0,
+        "new_archives": 13,
+        "old_archives": 7,
+        "old_unexplained_mismatches": 0,
+        "unknown_entries": 0,
+        "versions_checked": 20
+      },
+      "v14": {
+        "ok": true,
+        "checks": 32,
+        "failures": 0
+      },
+      "full_report": {
+        "path": "docs/notes/phase34-evidence/verify-v14.json",
+        "sha256": "ed2c136796d49841d58167ab28e9404bf7735a5cfdc31ba7c5f2c5caa6bc586e"
+      }
+    }
+  },
+  "regression": {
+    "tree": "merged tree at 65b5221",
+    "groups": {
+      "unit-a": "1535 passed, exit 0",
+      "unit-b": "1138 passed, 2 skipped, exit 0",
+      "unit-c": "427 passed, exit 0",
+      "unit-d": "25 passed, exit 0",
+      "eval": "483 passed, exit 0",
+      "sandbox": "66 passed, exit 0",
+      "integration": "126 passed, exit 0",
+      "api": "118 passed, exit 0",
+      "graph": "266 passed, exit 0"
+    },
+    "totals": {
+      "passed": 4184,
+      "failed": 0,
+      "skipped": 2,
+      "selected": 4186
+    },
+    "note": "D:/cp35/merged-final scratch; unit-c includes tests/unit/test_phase35_activation_dryrun.py, which resolves v14 as the latest pending candidate."
+  },
+  "static": {
+    "files": 19,
+    "failed": [
+      "git diff --check",
+      "git diff --check (CRLF-aware)"
+    ],
+    "failed_is_generated_artifact_only": true,
+    "informational_mypy_exit": 1,
+    "web_scope_exit": 0,
+    "source_sha256": "809a1cf10a970612c2fd1427c835f4afeedbeb6f2c3d72c880c3ecfa954a5202"
+  },
+  "external": {
+    "frontend": {
+      "status": "passed",
+      "provenance": "v13 source standalone run; merged web/src changes are two locale JSON files and the merged static web scope exited 0",
+      "source_sha256": "97463c88b0eb61817ce06c5c7fc76785d84d9eba69b0e6bd7992282831791244"
+    },
+    "large_repo": {
+      "status": "passed",
+      "provenance": "v13 source; the merge touches no src/codepilot/{index,repo,retrieval} file",
+      "source_sha256": "a78d8587a4d40ed66e21b7e8e4395051dab4c3b5d746eb00dd563dda1b49b7e9"
+    },
+    "docker": {
+      "status": "passed",
+      "summary": {
+        "tests": 50,
+        "passed": 50,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "authoritative_run": "merged tree, Bash/Git Bash: 50 passed in 306.72s",
+        "first_attempt": "49/50; apt-get update returned HTTP 502 through the local proxy 127.0.0.1:7899",
+        "resolution": "direct image pull, then the full suite passed 50/50; not a code failure"
+      },
+      "junit": "docs/notes/phase34-evidence/docker-junit-merged.xml",
+      "junit_sha256": "822e40490e244d3d8dd1981da57577e77a2314cdb9bb0f0c4ab6f638f36b4215",
+      "source_sha256": "47979bc0f94fdf7f473d0970a46d501acc82e3275bd2436d137daa85e9a3fda8"
+    },
+    "soak": {
+      "status": "passed",
+      "provenance": "v13 source; the merge touches no src/codepilot/{llm,graph,observability} file",
+      "started_at": "2026-11-05T18:54:09+00:00",
+      "ended_at": "2026-11-06T18:54:09+00:00",
+      "completed": true,
+      "cycles": 1440,
+      "errors": 0,
+      "lock_failures": 0,
+      "checkpoint_failures": 0,
+      "rss_bytes_first": 140910592,
+      "rss_bytes_last": 145465344,
+      "rss_bytes_max": 695427072,
+      "rss_slope_bytes_per_cycle": -98110.01267188111,
+      "summary_sha256": "4e6f1d01310f6a5c939bb54aca5c1ab5469572338d1b4586d0a114ba00661933",
+      "heartbeat_sha256": "cbf4bf6c2564e169a3a2c7ce19d18e34c1c55eecf7c1ddc5aeddf3814ae63a1c"
+    },
+    "real_provider": {
+      "status": "verified",
+      "provenance": "v13 source; the merge touches no src/codepilot/llm file",
+      "protocol": "OpenAI-compatible",
+      "budget_gate_cny": 20,
+      "real_requests": 2,
+      "real_cost_cny": 0.0,
+      "cost_known": false,
+      "cost_unknown_calls": 1,
+      "cost_is_lower_bound": true,
+      "input_tokens": 42,
+      "output_tokens": 32,
+      "rows": [
+        {
+          "row": "openai:glm-5.3-flash",
+          "status": "real-verified",
+          "real_requests": 1,
+          "input_tokens": 17,
+          "output_tokens": 16,
+          "cost_cny": 5.8399999999999997e-05,
+          "cost_known": true
+        },
+        {
+          "row": "openai:spark-x2.6",
+          "status": "real-verified",
+          "real_requests": 1,
+          "input_tokens": 25,
+          "output_tokens": 16,
+          "cost_cny": 0.0,
+          "cost_known": false
+        }
+      ],
+      "proxy_note": "Two earlier Spark attempts failed TLS through 127.0.0.1:7899; the direct NO_PROXY='*' retry succeeded. The uncertain attempts and raw logs are kept under provider-real/spark/.",
+      "matrix_sha256": "f77ff369a1b3b9ec48d88c6b42488a877a550910c0a35fa46f432a3c12925821"
+    }
+  },
+  "evidence_pack": {
+    "dir": "docs/notes/phase34-evidence",
+    "manifest": "docs/notes/phase34-evidence/SHA256SUMS",
+    "manifest_sha256": "d47155d3a58d4dc1319dc36e339915473b3c684a1224ecc06ca486cca5023db6",
+    "entries": 87,
+    "runtime_json": "docs/notes/phase34-runtime-results.json",
+    "runtime_json_sha256": "b149088ccf067ad6a68bd9c867f56c300476be5e5ec064b4824ebd9cb20932b6",
+    "runtime_check": "pass",
+    "requires_scratch": false
+  },
+  "clean_clone": {
+    "status": "passed",
+    "commit": "f6a18132f6504fb51d77ccb1f93d232392c2ba0d",
+    "log": "docs/notes/phase36-selfcontained-check.log",
+    "log_sha256": "fa0959edb57fe3201cb3b9cdefbfb68d1bc2a237ba4dff31df56907b0028aaea",
+    "source_shallow": true,
+    "clone_shallow": false,
+    "result": "SELF_CONTAINED_CHECK=PASS"
+  },
+  "stats": {
+    "commits_at_c38": 318,
+    "commits_at_c52": 343,
+    "phase_commits_from_base": 66,
+    "code_commits_from_base": 17,
+    "effective_source_scope_files": 788,
+    "curated_source_files": 150,
+    "untracked_status_entries": 172,
+    "untracked_files_uall": 176
+  },
+  "shallow_history": {
+    "is_shallow": true,
+    "boundary_commit": "04a523fafbd61bc2e49420963b84ed8e2bd1b3cf",
+    "unshallow_result": "git fetch --unshallow origin is a no-op; the boundary is not on origin",
+    "clean_clone_scope": "existing history only; full-history clone not verified"
+  },
+  "p2": {
+    "path": "src/codepilot/sandbox/swebench_env.py:423",
+    "status": "audited, not changed",
+    "detail": "DockerSdkBackend.build has no real caller; the official path does not build; the generic base build uses a fileobj micro-context in docker.py:354"
+  },
+  "mainline": {
+    "merged_branch": "codex/open-source-preview",
+    "final_head": "C56 (this report + receipt); not pushed",
+    "other_branch": "codex/phase12-real-issue-pilot remains at C49 2813c654b8111837c508dde438383dbe83dce100",
+    "push": false
+  },
+  "unverified": [
+    "real provider streaming (non-streaming matrix only)",
+    "frontend browser E2E: no Playwright/Cypress suite",
+    "full-history clone: repository shallow; boundary not on origin",
+    "P2 images.build context guard: audited, not implemented",
+    "Spark cost: no price table; cost_known=false and 0.0 is a lower bound"
+  ],
+  "docs_sha256": {
+    "docs/notes/phase36-merged-validation-report.md": "c05d73dae24ad4e3174c9a3e5efeb16f4b0b7fd0aaebce826425ea485455ac7e",
+    "docs/notes/phase34-runtime-results.json": "b149088ccf067ad6a68bd9c867f56c300476be5e5ec064b4824ebd9cb20932b6",
+    "docs/notes/phase34-evidence/SHA256SUMS": "d47155d3a58d4dc1319dc36e339915473b3c684a1224ecc06ca486cca5023db6",
+    "docs/notes/phase34-evidence/verify-v14.json": "ed2c136796d49841d58167ab28e9404bf7735a5cfdc31ba7c5f2c5caa6bc586e",
+    "docs/notes/phase34-evidence/external-witness-v14.txt": "ab18fe5cdac4f256555cd4bdf3a2ac65fb6f4c6754fa452dfe094a8b04028edf",
+    "docs/notes/phase34-evidence/static-checks.json": "809a1cf10a970612c2fd1427c835f4afeedbeb6f2c3d72c880c3ecfa954a5202",
+    "docs/notes/phase34-evidence/docker-summary.json": "47979bc0f94fdf7f473d0970a46d501acc82e3275bd2436d137daa85e9a3fda8",
+    "docs/notes/phase34-evidence/docker-junit-merged.xml": "822e40490e244d3d8dd1981da57577e77a2314cdb9bb0f0c4ab6f638f36b4215",
+    "docs/notes/phase34-evidence/frontend-summary.json": "97463c88b0eb61817ce06c5c7fc76785d84d9eba69b0e6bd7992282831791244",
+    "docs/notes/phase34-evidence/large-repo-summary.json": "a78d8587a4d40ed66e21b7e8e4395051dab4c3b5d746eb00dd563dda1b49b7e9",
+    "docs/notes/phase34-evidence/soak-summary.json": "4e6f1d01310f6a5c939bb54aca5c1ab5469572338d1b4586d0a114ba00661933",
+    "docs/notes/phase34-evidence/soak-heartbeat.jsonl": "cbf4bf6c2564e169a3a2c7ce19d18e34c1c55eecf7c1ddc5aeddf3814ae63a1c",
+    "docs/notes/phase34-evidence/provider-matrix.json": "f77ff369a1b3b9ec48d88c6b42488a877a550910c0a35fa46f432a3c12925821",
+    "configs/harness/receipts/phase34-candidate-v14.json": "407d8f9bb57f7b0bad5d1aacaed20c1f1b6503fcc1268401b559c594fda7b0f2",
+    "configs/harness/candidates/historical-baseline.json": "71e1c1af10ce1b381b34cb855475523d935f19d140a1fc89bb72180a8c181687",
+    "docs/notes/phase36-selfcontained-check.log": "fa0959edb57fe3201cb3b9cdefbfb68d1bc2a237ba4dff31df56907b0028aaea"
+  },
+  "constraints_honored": [
+    "single controller, no teammate/subagent",
+    "no push/PR/publish/activate",
+    "history not rewritten; no commit deleted or report retro-edited; the v13 chain stays as history",
+    "v1-v13 candidate files unchanged; v14 is pending with no active pointer",
+    "2 real model requests total, within the 20 CNY budget gate and user authorization",
+    "no skip/xfail/deleted/weakened tests to hide failures",
+    "Docker first-attempt 502, earlier soak failures and uncertain Spark attempts recorded, not hidden",
+    "evidence pack in-repo with SHA256SUMS; default --check has no external scratch dependency",
+    "byte pinning via docs/notes/.gitattributes and configs/harness/.gitattributes",
+    "the Spark key is not in the repository or the evidence pack"
+  ]
+}
