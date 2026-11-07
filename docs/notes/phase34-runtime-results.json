@@ -1,18 +1,108 @@
 {
   "phase": 34,
-  "generated_at": "2026-11-06T18:55:59+00:00",
+  "generated_at": "2026-11-07T05:57:08+00:00",
   "generator": "scripts/phase34_runtime_results.py",
   "base_commit": "dba045dabd70f0e6eb7779287136944b589f2734",
-  "recorded_through": "fe6fbbcc8d530cf2285bd9040ca6d108c8544dbe",
-  "recorded_head": "fe6fbbcc8d530cf2285bd9040ca6d108c8544dbe",
-  "actual_head_at_write": "fe6fbbcc8d530cf2285bd9040ca6d108c8544dbe",
+  "recorded_through": "8744dd495bd8bd1f61444e07da40f6fda8cfb309",
+  "recorded_head": "8744dd495bd8bd1f61444e07da40f6fda8cfb309",
+  "actual_head_at_write": "8744dd495bd8bd1f61444e07da40f6fda8cfb309",
   "evidence_dir": "docs/notes/phase34-evidence",
-  "evidence_manifest_sha256": "ac70b3e5193936204e9ae88e70c7e29bb1a1c62ad67103b5e6a9d3e687a18de0",
+  "evidence_manifest_sha256": "d47155d3a58d4dc1319dc36e339915473b3c684a1224ecc06ca486cca5023db6",
   "phase_commits": [
+    {
+      "hash": "8744dd495bd8bd1f61444e07da40f6fda8cfb309",
+      "short": "8744dd4",
+      "subject": "docs: record merged-tree regression, static and Docker evidence"
+    },
+    {
+      "hash": "c00ab84ca4a6c94823845ae0354d145558c6a4fb",
+      "short": "c00ab84",
+      "subject": "docs: bind phase34-candidate-v14 receipt"
+    },
+    {
+      "hash": "cc94d57a77706bf73b64189e616fbcaf0fd3148b",
+      "short": "cc94d57",
+      "subject": "docs: bind phase34-candidate-v14 into the historical baseline manifest"
+    },
+    {
+      "hash": "d01b500f23f3a13fb63a296e4e104c7b7c2272bf",
+      "short": "d01b500",
+      "subject": "feat: archive phase34-candidate-v14 (pending, parent v13)"
+    },
+    {
+      "hash": "65b52216a64a770ce67d2ed3883827603056673d",
+      "short": "65b5221",
+      "subject": "merge: bring Phase34/35 archive and validation into open-source preview"
+    },
+    {
+      "hash": "2813c654b8111837c508dde438383dbe83dce100",
+      "short": "2813c65",
+      "subject": "docs: clarify phase35 external validation wording"
+    },
+    {
+      "hash": "4ecb89086b34147bb07638cd58dc359abf83c92a",
+      "short": "4ecb890",
+      "subject": "docs: finalize phase35 report and delivery receipt"
+    },
+    {
+      "hash": "365a91e837b44b93728a96285172cb92a33fd18d",
+      "short": "365a91e",
+      "subject": "docs: refresh phase34 runtime results at C46"
+    },
     {
       "hash": "fe6fbbcc8d530cf2285bd9040ca6d108c8544dbe",
       "short": "fe6fbbc",
       "subject": "docs: record final soak and real provider evidence"
+    },
+    {
+      "hash": "c6500d4e42aa582351da40c0e44dc039e39718de",
+      "short": "c6500d4",
+      "subject": "test: compare CLI errors without forced ANSI styling"
+    },
+    {
+      "hash": "ff4460458cb49442788e7cd5f664bd10044c179a",
+      "short": "ff44604",
+      "subject": "chore: normalize generated SBOM line endings"
+    },
+    {
+      "hash": "17ec5625e594dd63183572f84612814911fb177c",
+      "short": "17ec562",
+      "subject": "fix: patch frontend dev dependencies and authorize Docker baseline scopes"
+    },
+    {
+      "hash": "5e04312824914b11df6da12ceeb0adc21c36e8aa",
+      "short": "5e04312",
+      "subject": "ci: audit dependencies on preview pushes and pull requests"
+    },
+    {
+      "hash": "5b7c98852f39e7e705b69ada0df8183538aaf19f",
+      "short": "5b7c988",
+      "subject": "docs: record candidate push and CI verification boundaries"
+    },
+    {
+      "hash": "0c0c9a7172898e6ba3f0d45cacf7d4bb9e0edf6d",
+      "short": "0c0c9a7",
+      "subject": "test: restore independent closure scopes in real Docker fixtures"
+    },
+    {
+      "hash": "42cb32ccc61c88143defa1b0197b48c0ec4ba256",
+      "short": "42cb32c",
+      "subject": "fix: make offline regression checks portable across CI hosts"
+    },
+    {
+      "hash": "605388dd90819d2e13fdee93a6035bda564c62e8",
+      "short": "605388d",
+      "subject": "test: include packaged resources in Docker acceptance context"
+    },
+    {
+      "hash": "3b3f37562aa94a3af6524a6fa6303b9d044edc95",
+      "short": "3b3f375",
+      "subject": "fix: unblock preview CI and patch checkpoint security advisory"
+    },
+    {
+      "hash": "af109cfd861351c79db30abd85ab1da988023490",
+      "short": "af109cf",
+      "subject": "chore: prepare Apache-2.0 engineering preview candidate"
     },
     {
       "hash": "ab75c03d5b4ac72a664a849e4c8ef4baf3ae1e8d",
@@ -252,6 +342,41 @@
   ],
   "code_commits": [
     {
+      "hash": "c6500d4e42aa582351da40c0e44dc039e39718de",
+      "short": "c6500d4",
+      "subject": "test: compare CLI errors without forced ANSI styling"
+    },
+    {
+      "hash": "17ec5625e594dd63183572f84612814911fb177c",
+      "short": "17ec562",
+      "subject": "fix: patch frontend dev dependencies and authorize Docker baseline scopes"
+    },
+    {
+      "hash": "0c0c9a7172898e6ba3f0d45cacf7d4bb9e0edf6d",
+      "short": "0c0c9a7",
+      "subject": "test: restore independent closure scopes in real Docker fixtures"
+    },
+    {
+      "hash": "42cb32ccc61c88143defa1b0197b48c0ec4ba256",
+      "short": "42cb32c",
+      "subject": "fix: make offline regression checks portable across CI hosts"
+    },
+    {
+      "hash": "605388dd90819d2e13fdee93a6035bda564c62e8",
+      "short": "605388d",
+      "subject": "test: include packaged resources in Docker acceptance context"
+    },
+    {
+      "hash": "3b3f37562aa94a3af6524a6fa6303b9d044edc95",
+      "short": "3b3f375",
+      "subject": "fix: unblock preview CI and patch checkpoint security advisory"
+    },
+    {
+      "hash": "af109cfd861351c79db30abd85ab1da988023490",
+      "short": "af109cf",
+      "subject": "chore: prepare Apache-2.0 engineering preview candidate"
+    },
+    {
       "hash": "7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d",
       "short": "7d5e75d",
       "subject": "feat: add activation dry-run and external validation evidence"
@@ -306,47 +431,47 @@
     "sources": [
       {
         "path": "docs/notes/phase34-evidence/test-gate-api.json",
-        "sha256": "5d85689f68188d7322b9f8d5604e5b8f4d48b8a3c2223ce2ee30c11f505dfc99",
+        "sha256": "945e488228c9e9c14a2272cf690ca7e47319b307a46e9cfc8f78d70384df4de4",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-eval.json",
-        "sha256": "b90e23e74a6d982df41ef8b87f8d0f811bb8d4c8fff77504a022e4613f5b6d82",
+        "sha256": "b660a7cb72141c8eaa69eeee68941738fe5d24952d9798e2acfd987db45ff2a8",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-graph.json",
-        "sha256": "65038a575030afb966a280a410c52957218d809d55d62b422f0d995b62fd34f7",
+        "sha256": "32bf2f04ae058484d2c5b22225b5b8683070539ac2309827a5d111b0d2b0caad",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-integration.json",
-        "sha256": "e25aa3ba6b97560b8e9c229277990577618c78eacb5acb5ae644c04e7dc18977",
+        "sha256": "c36bd36740cb6a1a18d1c5f0f85d563fe5f5c5fcfb19825f3880360350c1d9c1",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-sandbox.json",
-        "sha256": "8e34a3ff499d75cfb52c02be46c66b9c854f07780681bc61a39ac93c4f08605f",
+        "sha256": "2aab33cd273c193c4f806b83e713ecd6919e088b15a4fccdb8e3cbdf9d8f0540",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-unit-a.json",
-        "sha256": "f89e9caf73e148ecb56a16545c50c5e31fb59b898a186181bae3bf4fbdd1dd29",
+        "sha256": "3045995994784052a36362fad06eb2d95e6ebfc93360cb7ce8884f6b752e6466",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-unit-b.json",
-        "sha256": "eb6d396d4f6062d28a85b725939727752924da7a0c738e5617d6340306e90432",
+        "sha256": "6ce7d333376f4b4ce082abf1a75439ab0254426615a0dfac910a52009e87ee09",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-unit-c.json",
-        "sha256": "059d9afda36f08048436e6bc916698e1d81050595a3bae5bd5d5873e199decc8",
+        "sha256": "0a15f83f7b443dc4303417c7fb1e7673cceb2985939192c28b0c036388d8afdf",
         "kind": "gate-summary"
       },
       {
         "path": "docs/notes/phase34-evidence/test-gate-unit-d.json",
-        "sha256": "d4676810907120295c495d5f4b75643bce708d77ac6849b60299cf7772c1574c",
+        "sha256": "fbd79126445549897a23040fedf355fa6ef2b14416426ad647dfce345212fc93",
         "kind": "gate-summary"
       }
     ],
@@ -364,8 +489,8 @@
         "group": "unit-a",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "1535 passed in 185.41s (0:03:05)",
-        "wall_s": 188.94,
+        "summary_line": "1535 passed in 170.04s (0:02:50)",
+        "wall_s": 173.25,
         "failed": 0,
         "junit_counts": {
           "passed": 1535,
@@ -374,34 +499,34 @@
           "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-unit-a-run1.log",
-        "log_sha256": "0cd8cb29f2e965e1d36641e590d659e87e9bb12e6a2868884053554940efa476",
+        "log_sha256": "60eb56dd6913eb1cbcd2c8fea433ff79918922d9c0f50313fba99a6ed15cad37",
         "junit": "docs/notes/phase34-evidence/gate-unit-a-run1.xml",
-        "junit_sha256": "5ca073cffe6be6a9695ab25c047323ac82878ebeb0097c11435eff0bbed5cf69",
+        "junit_sha256": "de68b5737cbdd2170dc0f7e88cfa36ecb2bb8635765978e2c72d1cf2a57c1edd",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3099,
-          "total_pagefile_mb": 32825,
-          "avail_pagefile_mb": 5993,
-          "commit_headroom_mb": 5993,
-          "load_pct": 80,
+          "avail_phys_mb": 2428,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6745,
+          "commit_headroom_mb": 6745,
+          "load_pct": 84,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2759,
-          "total_pagefile_mb": 32825,
-          "avail_pagefile_mb": 5752,
-          "commit_headroom_mb": 5752,
-          "load_pct": 82
+          "avail_phys_mb": 2556,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6615,
+          "commit_headroom_mb": 6615,
+          "load_pct": 84
         },
-        "basetemp": "unit-a-run1-20261105T171301-895338"
+        "basetemp": "unit-a-run1-20261107T043645-668719"
       },
       {
         "group": "unit-b",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "1138 passed, 2 skipped in 245.27s (0:04:05)",
-        "wall_s": 248.78,
+        "summary_line": "1138 passed, 2 skipped in 242.68s (0:04:02)",
+        "wall_s": 245.89,
         "failed": 0,
         "junit_counts": {
           "passed": 1138,
@@ -410,34 +535,34 @@
           "skipped": 2
         },
         "log": "docs/notes/phase34-evidence/gate-unit-b-run1.log",
-        "log_sha256": "e82692514ffc0b2fae5c14224fbd57ed6eae92e71f940d044d763bbe9fe1625f",
+        "log_sha256": "fe0bea5f7fe002c658517e8b6ee807b89df1c902c7be275e446ba5296a7abfee",
         "junit": "docs/notes/phase34-evidence/gate-unit-b-run1.xml",
-        "junit_sha256": "386013584ae6dea86f3240b2505f8a5a3d2dce6eecfff51fe49f3c680c5deb88",
+        "junit_sha256": "c95f87bcb18be3887b5a71552e8e1ee4a629c9f613bab833828f0becbc02a71b",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2815,
-          "total_pagefile_mb": 32825,
-          "avail_pagefile_mb": 5799,
-          "commit_headroom_mb": 5799,
-          "load_pct": 82,
+          "avail_phys_mb": 2547,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6627,
+          "commit_headroom_mb": 6627,
+          "load_pct": 84,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2586,
-          "total_pagefile_mb": 34281,
-          "avail_pagefile_mb": 7009,
-          "commit_headroom_mb": 7009,
-          "load_pct": 84
+          "avail_phys_mb": 2797,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6677,
+          "commit_headroom_mb": 6677,
+          "load_pct": 82
         },
-        "basetemp": "unit-b-run1-20261105T171617-235275"
+        "basetemp": "unit-b-run1-20261107T043942-848407"
       },
       {
         "group": "unit-c",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "427 passed in 831.84s (0:13:51)",
-        "wall_s": 835.05,
+        "summary_line": "427 passed in 757.56s (0:12:37)",
+        "wall_s": 760.7,
         "failed": 0,
         "junit_counts": {
           "passed": 427,
@@ -446,34 +571,34 @@
           "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-unit-c-run1.log",
-        "log_sha256": "aafbb9404fbaaea0d9854679c82bc8e007d220cc0c95343dde1481e0736ae59b",
+        "log_sha256": "cf6ebe1658b463c74f42f0af1249c059c14c5861a22e9e36c47b26bfc049e375",
         "junit": "docs/notes/phase34-evidence/gate-unit-c-run1.xml",
-        "junit_sha256": "da6a4a7b79716deb6524ab8692a95bd276045e26e29a754e136f35d3938dcf11",
+        "junit_sha256": "2e4dd316b97350f8a4abad538595bee2ac798816b13f2f059fa9c6b6bb751784",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 2585,
-          "total_pagefile_mb": 34281,
-          "avail_pagefile_mb": 7009,
-          "commit_headroom_mb": 7009,
-          "load_pct": 84,
+          "avail_phys_mb": 2800,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6673,
+          "commit_headroom_mb": 6673,
+          "load_pct": 82,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3527,
-          "total_pagefile_mb": 34014,
-          "avail_pagefile_mb": 6940,
-          "commit_headroom_mb": 6940,
-          "load_pct": 78
+          "avail_phys_mb": 2809,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6789,
+          "commit_headroom_mb": 6789,
+          "load_pct": 82
         },
-        "basetemp": "unit-c-run1-20261105T172048-390739"
+        "basetemp": "unit-c-run1-20261107T044400-062122"
       },
       {
         "group": "unit-d",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "25 passed in 6.70s",
-        "wall_s": 10.72,
+        "summary_line": "25 passed in 4.40s",
+        "wall_s": 7.19,
         "failed": 0,
         "junit_counts": {
           "passed": 25,
@@ -482,70 +607,70 @@
           "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-unit-d-run1.log",
-        "log_sha256": "39bb06b1a750f7b36c248e23abba35276ab893fa426ded3bd745c4cd48fdd244",
+        "log_sha256": "a3410f62c6155e50cff4d8745bacb545e7abb18c2288ce518bf1e9692571195f",
         "junit": "docs/notes/phase34-evidence/gate-unit-d-run1.xml",
-        "junit_sha256": "499d3dc3244952fde8e3b7ec8a0952d82e4ec8da7075de16d13da8fbf7e8fc22",
+        "junit_sha256": "fd6e72d5cb3a3931350927725c7b2d5ce484bc500e8699b79e8c159df9e9b617",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3538,
-          "total_pagefile_mb": 34014,
-          "avail_pagefile_mb": 6937,
-          "commit_headroom_mb": 6937,
-          "load_pct": 78,
+          "avail_phys_mb": 2813,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6786,
+          "commit_headroom_mb": 6786,
+          "load_pct": 82,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3504,
-          "total_pagefile_mb": 34014,
-          "avail_pagefile_mb": 6911,
-          "commit_headroom_mb": 6911,
-          "load_pct": 78
+          "avail_phys_mb": 2799,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6772,
+          "commit_headroom_mb": 6772,
+          "load_pct": 82
         },
-        "basetemp": "unit-d-run1-20261105T173515-786532"
+        "basetemp": "unit-d-run1-20261107T045657-292020"
       },
       {
         "group": "eval",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "482 passed, 1 skipped in 674.67s (0:11:14)",
-        "wall_s": 677.94,
+        "summary_line": "483 passed in 568.79s (0:09:28)",
+        "wall_s": 571.69,
         "failed": 0,
         "junit_counts": {
-          "passed": 482,
+          "passed": 483,
           "failure": 0,
           "error": 0,
-          "skipped": 1
+          "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-eval-run1.log",
-        "log_sha256": "78ced94046a734f2d8659bea44bbdbd8d5e4db5a238aaeb0048f063428575b6b",
+        "log_sha256": "2dede6d9cb397501863b63b6b4e40d92f57b069878283ec49b254bab3c854cac",
         "junit": "docs/notes/phase34-evidence/gate-eval-run1.xml",
-        "junit_sha256": "f43d73398cc97d7f7446654a677dcb3a248dd43d3b0a9ca1b362dff491d110dd",
+        "junit_sha256": "4f2946937576cb64c72b5284e6c59de80e4deb2ce9c15b356220f299480a571f",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3507,
-          "total_pagefile_mb": 34014,
-          "avail_pagefile_mb": 6913,
-          "commit_headroom_mb": 6913,
-          "load_pct": 78,
+          "avail_phys_mb": 2808,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6785,
+          "commit_headroom_mb": 6785,
+          "load_pct": 82,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3487,
-          "total_pagefile_mb": 34014,
-          "avail_pagefile_mb": 6873,
-          "commit_headroom_mb": 6873,
-          "load_pct": 78
+          "avail_phys_mb": 2539,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6624,
+          "commit_headroom_mb": 6624,
+          "load_pct": 84
         },
-        "basetemp": "eval-run1-20261105T173527-195185"
+        "basetemp": "eval-run1-20261107T045704-947814"
       },
       {
         "group": "sandbox",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "66 passed, 1 deselected in 2.90s",
-        "wall_s": 5.98,
+        "summary_line": "66 passed, 1 deselected in 1.80s",
+        "wall_s": 4.56,
         "failed": 0,
         "junit_counts": {
           "passed": 66,
@@ -554,34 +679,34 @@
           "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-sandbox-run1.log",
-        "log_sha256": "8124dcaae6fd9161706866c5edfd655a8c48d9a62092cc91f404425c80cefd2f",
+        "log_sha256": "d0d12739ded3a6d4f072706bdb45cb38c0af90fd81b7707456fbe68569e4a076",
         "junit": "docs/notes/phase34-evidence/gate-sandbox-run1.xml",
-        "junit_sha256": "e7fd7c9de47e603e8dcea41e032c4d085e3c1cbfbe352a7f49cf6feafa6b222b",
+        "junit_sha256": "d818e005153521c630ea883f00b6a16a7592addecb60bc517e59aa13b74dffda",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3495,
-          "total_pagefile_mb": 34014,
-          "avail_pagefile_mb": 6872,
-          "commit_headroom_mb": 6872,
-          "load_pct": 78,
+          "avail_phys_mb": 2547,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6648,
+          "commit_headroom_mb": 6648,
+          "load_pct": 84,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3426,
-          "total_pagefile_mb": 34014,
-          "avail_pagefile_mb": 6793,
-          "commit_headroom_mb": 6793,
-          "load_pct": 78
+          "avail_phys_mb": 2543,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6644,
+          "commit_headroom_mb": 6644,
+          "load_pct": 84
         },
-        "basetemp": "sandbox-run1-20261105T174726-314921"
+        "basetemp": "sandbox-run1-20261107T050653-914963"
       },
       {
         "group": "integration",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "126 passed, 1 deselected in 355.45s (0:05:55)",
-        "wall_s": 358.91,
+        "summary_line": "126 passed, 1 deselected in 284.31s (0:04:44)",
+        "wall_s": 287.27,
         "failed": 0,
         "junit_counts": {
           "passed": 126,
@@ -590,70 +715,70 @@
           "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-integration-run1.log",
-        "log_sha256": "eaec99de692822c293769956293c3f2fabd2ad270090addb8923f9888044a66c",
+        "log_sha256": "8876d911cc1cb21f8fc6e7494566e53f309a0d0baf54a3f9919269a406f95028",
         "junit": "docs/notes/phase34-evidence/gate-integration-run1.xml",
-        "junit_sha256": "81689a1bbec4b340e531e4eb92b7fdbfc505d3099206662c33df478a0738ed72",
+        "junit_sha256": "5cf921420981c21984e0889f204b146e43ed19d7b50c7e6e7042672f8960c2dd",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3429,
-          "total_pagefile_mb": 34014,
-          "avail_pagefile_mb": 6792,
-          "commit_headroom_mb": 6792,
-          "load_pct": 78,
+          "avail_phys_mb": 2543,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6641,
+          "commit_headroom_mb": 6641,
+          "load_pct": 84,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3549,
-          "total_pagefile_mb": 34108,
-          "avail_pagefile_mb": 6991,
-          "commit_headroom_mb": 6991,
-          "load_pct": 78
+          "avail_phys_mb": 2442,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6852,
+          "commit_headroom_mb": 6852,
+          "load_pct": 84
         },
-        "basetemp": "integration-run1-20261105T174732-634785"
+        "basetemp": "integration-run1-20261107T050658-814401"
       },
       {
         "group": "api",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "117 passed, 1 skipped in 146.58s (0:02:26)",
-        "wall_s": 153.33,
+        "summary_line": "118 passed in 71.30s (0:01:11)",
+        "wall_s": 76.88,
         "failed": 0,
         "junit_counts": {
-          "passed": 117,
+          "passed": 118,
           "failure": 0,
           "error": 0,
-          "skipped": 1
+          "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-api-run1.log",
-        "log_sha256": "785bebae5ff24923375de4650480abf87c559c2ad2099088ed8562dc4b54cfa2",
+        "log_sha256": "3a9e35e77446bc68f53fa3fd740813fb14c9786faed76d20ad450de42caeb473",
         "junit": "docs/notes/phase34-evidence/gate-api-run1.xml",
-        "junit_sha256": "4f254453e7480f030a90a464caa6d3f9d06265592b76a6281654d1380ab0ba1a",
+        "junit_sha256": "11807ade5c48029cbf33fe9458cede286c30b7894a7919ab02c2318af0956f5f",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3559,
-          "total_pagefile_mb": 34108,
-          "avail_pagefile_mb": 6990,
-          "commit_headroom_mb": 6990,
-          "load_pct": 77,
+          "avail_phys_mb": 2447,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6846,
+          "commit_headroom_mb": 6846,
+          "load_pct": 84,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3528,
-          "total_pagefile_mb": 34028,
-          "avail_pagefile_mb": 6978,
-          "commit_headroom_mb": 6978,
-          "load_pct": 78
+          "avail_phys_mb": 2419,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6815,
+          "commit_headroom_mb": 6815,
+          "load_pct": 85
         },
-        "basetemp": "api-run1-20261105T175339-012068"
+        "basetemp": "api-run1-20261107T051150-007291"
       },
       {
         "group": "graph",
         "run": 1,
         "exit_code": 0,
-        "summary_line": "266 passed, 13 deselected in 1052.70s (0:17:32)",
-        "wall_s": 1057.8,
+        "summary_line": "266 passed, 13 deselected in 850.80s (0:14:10)",
+        "wall_s": 855.03,
         "failed": 0,
         "junit_counts": {
           "passed": 266,
@@ -662,27 +787,27 @@
           "skipped": 0
         },
         "log": "docs/notes/phase34-evidence/gate-graph-run1.log",
-        "log_sha256": "4cfb2168079173c925e183edf31d032de8bdc3d7610c713c8647cc677e53f0d7",
+        "log_sha256": "4ed2967c9df81faede7d54e8157f84e572388af9dbde07bc2e403e8c9d1c1a87",
         "junit": "docs/notes/phase34-evidence/gate-graph-run1.xml",
-        "junit_sha256": "71ae4d4bcba4b950faaf64a4a7aa9b427d651f72b6c04ddd3fcd7f658347361f",
+        "junit_sha256": "354d4e160547b4fed5f45590d2d06f492b479d4011ad70a1b78dcfb0cf496a09",
         "memory_before": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3531,
-          "total_pagefile_mb": 34028,
-          "avail_pagefile_mb": 6974,
-          "commit_headroom_mb": 6974,
-          "load_pct": 78,
+          "avail_phys_mb": 2421,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6813,
+          "commit_headroom_mb": 6813,
+          "load_pct": 85,
           "sufficient": 1
         },
         "memory_after": {
           "total_phys_mb": 16176,
-          "avail_phys_mb": 3097,
-          "total_pagefile_mb": 34028,
-          "avail_pagefile_mb": 6662,
-          "commit_headroom_mb": 6662,
-          "load_pct": 80
+          "avail_phys_mb": 2476,
+          "total_pagefile_mb": 46775,
+          "avail_pagefile_mb": 6809,
+          "commit_headroom_mb": 6809,
+          "load_pct": 84
         },
-        "basetemp": "graph-run1-20261105T175616-516612"
+        "basetemp": "graph-run1-20261107T051309-160480"
       }
     ],
     "selected_tests_note": "full repository selection: unit-a 1535 + unit-b 1140 + unit-c 427 + unit-d 25 + eval 483 + sandbox 66 + integration 126 + api 118 + graph 266 = 4186; tests/docker 35 deselected",
@@ -700,31 +825,33 @@
         "skipped": 2
       },
       "failed": 0,
-      "wall_s": 1283.49
+      "wall_s": 1187.03
     }
   },
   "static_checks": {
     "source": "docs/notes/phase34-evidence/static-checks.json",
-    "source_sha256": "e05860e5d6e461e387a7b4eee1dfeaa9a9fab8205371d450410f16c3ac479be8",
-    "file_count": 17,
+    "source_sha256": "809a1cf10a970612c2fd1427c835f4afeedbeb6f2c3d72c880c3ecfa954a5202",
+    "file_count": 19,
     "files": [
-      "scripts/__init__.py",
-      "scripts/phase28_archive_verify.py",
-      "scripts/phase32_provider_matrix.py",
-      "scripts/phase33_runtime_results.py",
-      "scripts/phase34_evidence_manifest.py",
+      "configs/swebench/testdeps/psf__requests-3362/codepilot_requests_compat.py",
+      "scripts/batch_budget.py",
+      "scripts/phase32_test_gate.py",
       "scripts/phase34_runtime_results.py",
-      "src/codepilot/archive.py",
-      "src/codepilot/eval/swebench_isolation.py",
-      "src/codepilot/graph/harness.py",
-      "tests/eval/test_isolation.py",
-      "tests/unit/llm/test_phase33_provider_real.py",
-      "tests/unit/test_phase26_final.py",
-      "tests/unit/test_phase28_archive.py",
-      "tests/unit/test_phase33_runtime_results.py",
-      "tests/unit/test_phase34_archive_normalization.py",
-      "tests/unit/test_phase34_runtime_results.py",
-      "tests/unit/test_phase35_activation_dryrun.py"
+      "scripts/recovery_admin.py",
+      "src/codepilot/config.py",
+      "src/codepilot/eval/swebench.py",
+      "tests/graph/test_phase11_closure_docker.py",
+      "tests/graph/test_phase12_closure_admission_docker.py",
+      "tests/graph/test_phase19_static_reliability.py",
+      "tests/integration/test_docker_phase1.py",
+      "tests/integration/test_swebench_smoke.py",
+      "tests/unit/graph/test_phase19_checkpoint_identity.py",
+      "tests/unit/llm/test_phase19_budget_binding.py",
+      "tests/unit/test_cli_glm.py",
+      "tests/unit/test_fsutil_replace.py",
+      "tests/unit/test_phase26_estimation.py",
+      "tests/unit/test_phase33_test_gate.py",
+      "tests/unit/tools/test_phase19_repro_permissions.py"
     ],
     "failed": [
       "git diff --check",
@@ -811,17 +938,17 @@
     "docker": {
       "status": "passed",
       "source": "docs/notes/phase34-evidence/docker-summary.json",
-      "source_sha256": "5e76c768b5b61da6c68d74cdebf2439184048e0b115833d09b934b99072d6c7c",
+      "source_sha256": "47979bc0f94fdf7f473d0970a46d501acc82e3275bd2436d137daa85e9a3fda8",
       "summary": {
-        "tests": 35,
-        "passed": 35,
+        "tests": 50,
+        "passed": 50,
         "failed": 0,
         "errors": 0,
         "skipped": 0,
-        "authoritative_run": "Bash/Git Bash environment: 35 passed in 316.44s",
-        "powershell_attempts": "26/35 with 9 deterministic synthetic-suite failures in the PowerShell Terminal; the same tests pass under Bash",
-        "root_cause": "The PowerShell Terminal environment (git/workspace env) caused the synthetic fixture cache failures; this is not a v13 code or fixture defect",
-        "fix_scope": "none required; rerun under Bash is the authoritative result"
+        "authoritative_run": "merged tree, Bash/Git Bash: 50 passed in 306.72s",
+        "transient_retry": "The first run was 49/50: apt-get update returned HTTP 502 through the local proxy. After a direct image pull and a single retry, the full suite passed 50/50.",
+        "environment": "Docker linux 29.8.2",
+        "code_failure": false
       }
     },
     "large_repo": {
@@ -1056,6 +1183,25 @@
         "sources.json": "ab89014d8fa0323e08015e2d36b785569a02845bec368a3844d4ec9b26ae8b8d"
       }
     },
+    "v14": {
+      "version": "phase34-candidate-v14",
+      "status": "pending",
+      "parent": "phase34-candidate-v13",
+      "schema_version": 5,
+      "source_commit": "65b52216a64a770ce67d2ed3883827603056673d",
+      "diff_base_commit": "7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d",
+      "normalization_policy": {
+        "raw_bytes": "source_commit_git_blob",
+        "raw_hashes_stored": false,
+        "source_hash": "lf_sha256"
+      },
+      "file_sha256": {
+        "candidate.json": "189773e3761265ef69822f641b248da756e3dec0930940a7dee6b71d6029658c",
+        "candidate.diff": "5ae27b791007b2fd42813d34f654eccce2ad862b2f2204ceae26e5620ba727ff",
+        "snapshot.json": "3d2ec522d9bcac53a15f7e92018d3e53f653cf0852a79081e66ca79744388e68",
+        "sources.json": "22bcddd9dc92fb44f53f87c51c2284f477eb6b68c0fba6e86932900b5d2c835a"
+      }
+    },
     "active_pointer_exists": false
   },
   "archive_verify": {
@@ -1064,18 +1210,18 @@
     "historical_integrity": "ok",
     "new_archive_status": "passed",
     "totals": {
-      "historical_baseline_files": 76,
+      "historical_baseline_files": 80,
       "historical_baseline_mismatches": 0,
       "historical_files_modified": false,
       "new_archive_failures": 0,
-      "new_archives": 12,
+      "new_archives": 13,
       "old_archives": 7,
       "old_unexplained_mismatches": 0,
       "unknown_entries": 0,
-      "versions_checked": 19
+      "versions_checked": 20
     },
     "receipt": {
-      "candidate": "phase34-candidate-v13",
+      "candidate": "phase34-candidate-v14",
       "check": "receipt",
       "checks": [
         {
@@ -1090,7 +1236,7 @@
         },
         {
           "check": "receipt_commit_ancestor",
-          "detail": "merge-base --is-ancestor c4194cb2e8ff95aa41622aa4d266924077683725 HEAD(bc493631ede7e77a4c7a2e109e3926d31a405b23) holds",
+          "detail": "merge-base --is-ancestor d01b500f23f3a13fb63a296e4e104c7b7c2272bf HEAD(c00ab84ca4a6c94823845ae0354d145558c6a4fb) holds",
           "ok": true
         },
         {
@@ -1100,22 +1246,22 @@
         },
         {
           "check": "receipt_candidate_tree_self",
-          "detail": "declared='f1236ed4e22e649092772aa3c178e25c37c1721bbfe7c5b8558db510d86ffd20' recomputed_from_receipt=f1236ed4e22e649092772aa3c178e25c37c1721bbfe7c5b8558db510d86ffd20",
+          "detail": "declared='dbea42d8b1358b37223f19a8a44480cd901c407f0a5a68bef312d1afdbdd1fb4' recomputed_from_receipt=dbea42d8b1358b37223f19a8a44480cd901c407f0a5a68bef312d1afdbdd1fb4",
           "ok": true
         },
         {
           "check": "receipt_candidate_tree_current",
-          "detail": "declared='f1236ed4e22e649092772aa3c178e25c37c1721bbfe7c5b8558db510d86ffd20' recomputed_from_disk=f1236ed4e22e649092772aa3c178e25c37c1721bbfe7c5b8558db510d86ffd20",
+          "detail": "declared='dbea42d8b1358b37223f19a8a44480cd901c407f0a5a68bef312d1afdbdd1fb4' recomputed_from_disk=dbea42d8b1358b37223f19a8a44480cd901c407f0a5a68bef312d1afdbdd1fb4",
           "ok": true
         },
         {
           "check": "receipt_source_ancestry",
-          "detail": "diff_base=254b0a81248b8455c236696f9915e2a237b8c05e ancestor-of source_commit=7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d: holds",
+          "detail": "diff_base=7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d ancestor-of source_commit=65b52216a64a770ce67d2ed3883827603056673d: holds",
           "ok": true
         },
         {
           "check": "receipt_candidate_record",
-          "detail": "version='phase34-candidate-v13' from candidate_commit blob",
+          "detail": "version='phase34-candidate-v14' from candidate_commit blob",
           "ok": true
         },
         {
@@ -1150,7 +1296,7 @@
         },
         {
           "check": "receipt_source_hashes_blobs",
-          "detail": "134 paths match source_commit blobs",
+          "detail": "150 paths match source_commit blobs",
           "ok": true
         },
         {
@@ -1160,7 +1306,7 @@
         },
         {
           "check": "receipt_parent_present",
-          "detail": "parent='phase34-candidate-v12' directory present",
+          "detail": "parent='phase34-candidate-v13' directory present",
           "ok": true
         },
         {
@@ -1197,14 +1343,14 @@
       "failures": [],
       "manifest_binding": "manifest_commit",
       "ok": true,
-      "receipt_path": "configs\\harness\\receipts\\phase34-candidate-v13.json",
-      "receipt_sha256": "105bacf33d2b07e9a3b76920c4270d479e4b3ed4f878367d1405b78005c36f47",
+      "receipt_path": "configs\\harness\\receipts\\phase34-candidate-v14.json",
+      "receipt_sha256": "407d8f9bb57f7b0bad5d1aacaed20c1f1b6503fcc1268401b559c594fda7b0f2",
       "witness": "verified"
     },
     "historical_baseline": {
       "baseline_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
       "check": "historical_baseline",
-      "files_checked": 76,
+      "files_checked": 80,
       "manifest_path": "configs/harness/candidates/historical-baseline.json",
       "manifest_present": true,
       "mismatches": {},
@@ -1309,6 +1455,12 @@
         "failures": 0
       },
       {
+        "version": "phase34-candidate-v14",
+        "ok": true,
+        "normalization_note_stale": false,
+        "failures": 0
+      },
+      {
         "version": "phase34-candidate-v7",
         "ok": true,
         "normalization_note_stale": false,
@@ -1327,8 +1479,8 @@
         "failures": 0
       }
     ],
-    "source": "docs/notes/phase34-evidence/verify-v13.json",
-    "source_sha256": "845dc56adda3225d797a9f2c1a2a3135571ee0040e6600526c7c74ba71adc1a7"
+    "source": "docs/notes/phase34-evidence/verify-v14.json",
+    "source_sha256": "ed2c136796d49841d58167ab28e9404bf7735a5cfdc31ba7c5f2c5caa6bc586e"
   },
   "runtime_lifecycle": {
     "before_fix": {
@@ -1345,10 +1497,13 @@
     "rule": "recorded_through/recorded_head describe the evidence tree; phase_commits=base..recorded_through; code_commits is path-filtered; changes after recorded_through must be docs-only"
   },
   "page_e2e": {
-    "command": "git diff --name-only dba045dabd70f0e6eb7779287136944b589f2734..fe6fbbcc8d530cf2285bd9040ca6d108c8544dbe -- web/src",
-    "changed_files": 0,
-    "files": [],
-    "result": "conditionally skipped: web/src has zero diff in this phase"
+    "command": "git diff --name-only dba045dabd70f0e6eb7779287136944b589f2734..8744dd495bd8bd1f61444e07da40f6fda8cfb309 -- web/src",
+    "changed_files": 2,
+    "files": [
+      "web/src/locales/en-US/index.json",
+      "web/src/locales/zh-CN/index.json"
+    ],
+    "result": "frontend checks required"
   },
   "unverified": [
     "real provider streaming (non-streaming matrix only)",
