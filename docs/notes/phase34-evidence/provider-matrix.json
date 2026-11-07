@@ -1,14 +1,14 @@
 {
   "tool": "phase32-provider-matrix",
-  "generated_at": "2026-11-05T11:03:50+00:00",
-  "real_mode": false,
+  "generated_at": "2026-11-06T05:06:00+00:00",
+  "real_mode": true,
   "pytest": {
-    "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/llm/test_openai_compatible.py tests/unit/llm/test_phase14_protocols.py tests/unit/llm/test_phase28_http_matrix.py tests/unit/llm/test_phase29_http_matrix.py tests/unit/llm/test_http_total_deadline.py tests/unit/llm/test_tracking_chain_accounting.py tests/unit/llm/test_dispatch_ledger_reconciliation.py tests/unit/llm/test_cost.py tests/unit/llm/test_retry.py -q -p no:cacheprovider --basetemp=D:\\cp34\\final-v12\\provider-matrix\\pytest-basetemp --junitxml=D:\\cp34\\final-v12\\provider-matrix\\provider-matrix.xml",
+    "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/llm/test_openai_compatible.py tests/unit/llm/test_phase14_protocols.py tests/unit/llm/test_phase28_http_matrix.py tests/unit/llm/test_phase29_http_matrix.py tests/unit/llm/test_http_total_deadline.py tests/unit/llm/test_tracking_chain_accounting.py tests/unit/llm/test_dispatch_ledger_reconciliation.py tests/unit/llm/test_cost.py tests/unit/llm/test_retry.py -q -p no:cacheprovider --basetemp=D:\\cp35\\real\\glm\\pytest-basetemp --junitxml=D:\\cp35\\real\\glm\\provider-matrix.xml",
     "exit_code": 0,
-    "log": "D:\\cp34\\final-v12\\provider-matrix\\provider-matrix.log",
-    "junit": "D:\\cp34\\final-v12\\provider-matrix\\provider-matrix.xml",
+    "log": "D:\\cp35\\real\\glm\\provider-matrix.log",
+    "junit": "D:\\cp35\\real\\glm\\provider-matrix.xml",
     "summary": [
-      "166 passed in 81.96s (0:01:21)"
+      "166 passed in 77.55s (0:01:17)"
     ]
   },
   "totals_from_junit": {
@@ -139,16 +139,16 @@
   "real_provider": {
     "budget": {
       "env": "PHASE32_REAL_BUDGET_CNY",
-      "raw_present": false,
-      "budget_cny": null,
+      "raw_present": true,
+      "budget_cny": 20.0,
       "cap_cny": 20.0,
-      "effective_budget_cny": null,
+      "effective_budget_cny": 20.0,
       "capped": false,
-      "real_requests_allowed": false
+      "real_requests_allowed": true
     },
     "credentials_present": {
-      "OPENAI_API_KEY": false,
-      "OPENAI_BASE_URL": false,
+      "OPENAI_API_KEY": true,
+      "OPENAI_BASE_URL": true,
       "ANTHROPIC_API_KEY": false,
       "AWS_ACCESS_KEY_ID": false,
       "AWS_SECRET_ACCESS_KEY": false,
@@ -159,59 +159,44 @@
     },
     "rows": [
       {
-        "row": "openai-compatible real endpoint",
+        "row": "openai:glm-5.3-flash",
         "provider": "openai-compatible",
-        "model": null,
-        "status": "blocked",
-        "missing": [
-          "--real flag (real channel disabled by default)",
-          "PHASE32_REAL_BUDGET_CNY > 0",
-          "OPENAI_API_KEY",
-          "OPENAI_BASE_URL",
-          "PHASE32_REAL_MODEL_OPENAI"
-        ],
-        "real_requests": 0
+        "model": "glm-5.3-flash",
+        "missing": [],
+        "status": "real-verified",
+        "real_requests": 1,
+        "input_tokens": 17,
+        "output_tokens": 16,
+        "cached_input_tokens": 0,
+        "finish_reason": "length",
+        "cost_cny": 5.8399999999999997e-05,
+        "cost_known": true
       },
       {
-        "row": "anthropic real endpoint",
-        "provider": "anthropic",
-        "model": null,
-        "status": "blocked",
-        "missing": [
-          "--real flag (real channel disabled by default)",
-          "PHASE32_REAL_BUDGET_CNY > 0",
-          "ANTHROPIC_API_KEY",
-          "PHASE32_REAL_MODEL_ANTHROPIC"
-        ],
-        "real_requests": 0
-      },
-      {
-        "row": "bedrock real endpoint (boto3 + credentials)",
-        "provider": "bedrock",
-        "model": null,
-        "status": "blocked",
-        "missing": [
-          "--real flag (real channel disabled by default)",
-          "PHASE32_REAL_BUDGET_CNY > 0",
-          "AWS_ACCESS_KEY_ID",
-          "AWS_SECRET_ACCESS_KEY",
-          "boto3 importable",
-          "botocore importable",
-          "AWS_REGION or AWS_DEFAULT_REGION",
-          "PHASE32_REAL_MODEL_BEDROCK"
-        ],
-        "real_requests": 0
+        "row": "openai:spark-x2.6",
+        "provider": "openai-compatible",
+        "model": "spark-x2.6",
+        "missing": [],
+        "cost_note": "no price configured for model 'spark-x2.6'; cost stays unknown",
+        "status": "real-verified",
+        "real_requests": 1,
+        "input_tokens": 25,
+        "output_tokens": 16,
+        "cached_input_tokens": 0,
+        "finish_reason": "length",
+        "cost_cny": 0.0,
+        "cost_known": false
       }
     ],
-    "real_requests": 0,
+    "real_requests": 2,
     "real_cost_cny": 0.0,
-    "cost_known": true,
-    "cost_unknown_calls": 0,
-    "cost_is_lower_bound": false,
-    "llm_calls": 0,
-    "input_tokens": 0,
-    "output_tokens": 0,
-    "note": "No real request was issued in this run. Zero-cost fake coverage is not a substitute for a real-provider row and is not reported as one. Pass --real to enable the real channel."
+    "cost_known": false,
+    "cost_unknown_calls": 1,
+    "cost_is_lower_bound": true,
+    "llm_calls": 2,
+    "input_tokens": 42,
+    "output_tokens": 32,
+    "note": "two OpenAI-compatible models, one request each, no retries; cost_known is the AND of both runs; no price is invented when false"
   },
-  "overlap_note": "fake_rows overlap; never sum them into a test total"
+  "overlap_note": "fake_rows are identical across the two runs (166 tests each); never sum them. real rows are one request per OpenAI-compatible model; total real requests is 2."
 }

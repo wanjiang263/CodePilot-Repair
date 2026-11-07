@@ -1,0 +1,13 @@
+{"event": "start", "at": "2026-11-05T18:15:14+00:00", "hours": 24.0}
+{"event": "error", "at": "2026-11-05T18:15:15+00:00", "cycle": 1, "error": "WorkspaceError(\"base_commit 不在缓存中: '6281696b8aeb28b57fed109559042c157fdd9aab'\\n  仓库: D:/cp35/soak/work/cycle-000001/original\\n  缓存: D:\\\\cp35\\\\soak\\\\work\\\\cycle-000001\\\\cache\\\\b2511ca2a4f53155\\n已重建过缓存仍然找不到该 commit，所以更可能是这个 SHA 打错了，或者它还没有被推送到远端。\")"}
+{"event": "error", "at": "2026-11-05T18:16:14+00:00", "cycle": 1, "error": "FileExistsError(17, '当文件已存在时，无法创建该文件。')"}
+{"event": "error", "at": "2026-11-05T18:17:14+00:00", "cycle": 1, "error": "FileExistsError(17, '当文件已存在时，无法创建该文件。')"}
+{"event": "error", "at": "2026-11-05T18:18:14+00:00", "cycle": 1, "error": "FileExistsError(17, '当文件已存在时，无法创建该文件。')"}
+{"event": "error", "at": "2026-11-05T18:19:14+00:00", "cycle": 1, "error": "FileExistsError(17, '当文件已存在时，无法创建该文件。')"}
+{"event": "error", "at": "2026-11-05T18:20:14+00:00", "cycle": 1, "error": "FileExistsError(17, '当文件已存在时，无法创建该文件。')"}
+{"event": "error", "at": "2026-11-05T18:21:14+00:00", "cycle": 1, "error": "FileExistsError(17, '当文件已存在时，无法创建该文件。')"}
+{"event": "error", "at": "2026-11-05T18:22:14+00:00", "cycle": 1, "error": "FileExistsError(17, '当文件已存在时，无法创建该文件。')"}
+{"event": "error", "at": "2026-11-05T18:23:14+00:00", "cycle": 1, "error": "FileExistsError(17, '当文件已存在时，无法创建该文件。')"}
+{"event": "error", "at": "2026-11-05T18:24:14+00:00", "cycle": 1, "error": "FileExistsError(17, '当文件已存在时，无法创建该文件。')"}
+{"event": "error", "at": "2026-11-05T18:25:14+00:00", "cycle": 1, "error": "FileExistsError(17, '当文件已存在时，无法创建该文件。')"}
+{"event": "error", "at": "2026-11-05T18:26:14+00:00", "cycle": 1, "error": "FileExistsError(17, '当文件已存在时，无法创建该文件。')"}

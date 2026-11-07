@@ -1,7 +1,7 @@
 {
   "tool": "phase32-test-gate",
-  "generated_at": "2026-11-05T09:27:39+00:00",
-  "scratch": "D:\\cp34\\final-v11",
+  "generated_at": "2026-11-05T17:35:26+00:00",
+  "scratch": "D:\\cp35\\final13",
   "rg_path": "C:\\Users\\lenovo\\AppData\\Local\\OpenAI\\Codex\\bin\\rg.EXE",
   "rg_version": "ripgrep 15.1.0 (rev af60c2de9d)",
   "sequential": true,
@@ -14,35 +14,35 @@
     {
       "suite": "unit-d",
       "run": 1,
-      "started_at": "2026-11-05T09:27:22+00:00",
+      "started_at": "2026-11-05T17:35:15+00:00",
       "exit_code": 0,
-      "wall_s": 16.06,
+      "wall_s": 10.72,
       "memory_after": {
         "total_phys_mb": 16176,
-        "avail_phys_mb": 1921,
-        "total_pagefile_mb": 48048,
-        "avail_pagefile_mb": 5703,
-        "commit_headroom_mb": 5703,
-        "load_pct": 88
+        "avail_phys_mb": 3504,
+        "total_pagefile_mb": 34014,
+        "avail_pagefile_mb": 6911,
+        "commit_headroom_mb": 6911,
+        "load_pct": 78
       },
-      "log": "D:\\cp34\\final-v11\\gate-unit-d-run1.log",
-      "junit": "D:\\cp34\\final-v11\\gate-unit-d-run1.xml",
-      "basetemp": "D:\\cp34\\final-v11\\pytest\\unit-d-run1-20261105T092722-982438",
-      "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/tools -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp34\\final-v11\\gate-unit-d-run1.xml --basetemp=D:\\cp34\\final-v11\\pytest\\unit-d-run1-20261105T092722-982438",
-      "summary_line": "25 passed in 9.01s",
+      "log": "D:\\cp35\\final13\\gate-unit-d-run1.log",
+      "junit": "D:\\cp35\\final13\\gate-unit-d-run1.xml",
+      "basetemp": "D:\\cp35\\final13\\pytest\\unit-d-run1-20261105T173515-786532",
+      "command": "D:\\Projects\\Desktop\\CodePilot-Repair\\.claude\\worktrees\\phase34-v7-archive-closure-942bb1\\.venv\\Scripts\\python.exe -m pytest tests/unit/tools -q -m not docker and not llm -p no:cacheprovider --junitxml=D:\\cp35\\final13\\gate-unit-d-run1.xml --basetemp=D:\\cp35\\final13\\pytest\\unit-d-run1-20261105T173515-786532",
+      "summary_line": "25 passed in 6.70s",
       "temp_reclaimed": {
-        "path": "D:\\cp34\\final-v11\\pytest\\unit-d-run1-20261105T092722-982438",
+        "path": "D:\\cp35\\final13\\pytest\\unit-d-run1-20261105T173515-786532",
         "existed": true,
         "removed": false,
         "bytes_removed": 5385262
       },
       "memory_before": {
         "total_phys_mb": 16176,
-        "avail_phys_mb": 1035,
-        "total_pagefile_mb": 48048,
-        "avail_pagefile_mb": 5681,
-        "commit_headroom_mb": 5681,
-        "load_pct": 93,
+        "avail_phys_mb": 3538,
+        "total_pagefile_mb": 34014,
+        "avail_pagefile_mb": 6937,
+        "commit_headroom_mb": 6937,
+        "load_pct": 78,
         "sufficient": 1
       }
     }

@@ -1,6 +1,6 @@
 {
-  "tool": "phase34-static-final",
-  "generated_at": "2026-11-05T11:02:07+00:00",
+  "tool": "phase35-static-v13",
+  "generated_at": "2026-11-05T16:09:53+00:00",
   "base_commit": "dba045d",
   "files": [
     "scripts/__init__.py",
@@ -18,9 +18,10 @@
     "tests/unit/test_phase28_archive.py",
     "tests/unit/test_phase33_runtime_results.py",
     "tests/unit/test_phase34_archive_normalization.py",
-    "tests/unit/test_phase34_runtime_results.py"
+    "tests/unit/test_phase34_runtime_results.py",
+    "tests/unit/test_phase35_activation_dryrun.py"
   ],
-  "file_count": 16,
+  "file_count": 17,
   "checks": [
     {
       "name": "AST parse",
@@ -40,9 +41,10 @@
         "tests/unit/test_phase28_archive.py",
         "tests/unit/test_phase33_runtime_results.py",
         "tests/unit/test_phase34_archive_normalization.py",
-        "tests/unit/test_phase34_runtime_results.py"
+        "tests/unit/test_phase34_runtime_results.py",
+        "tests/unit/test_phase35_activation_dryrun.py"
       ],
-      "file_count": 16,
+      "file_count": 17,
       "exit_code": 0,
       "errors": []
     },
@@ -66,10 +68,11 @@
         "tests/unit/test_phase28_archive.py",
         "tests/unit/test_phase33_runtime_results.py",
         "tests/unit/test_phase34_archive_normalization.py",
-        "tests/unit/test_phase34_runtime_results.py"
+        "tests/unit/test_phase34_runtime_results.py",
+        "tests/unit/test_phase35_activation_dryrun.py"
       ],
       "exit_code": 0,
-      "log": ".codex-pytest-tmp/phase34/static-final-v12/ruff-check.log",
+      "log": ".codex-pytest-tmp/phase35/static-v13/ruff-check.log",
       "output": "All checks passed!"
     },
     {
@@ -93,11 +96,12 @@
         "tests/unit/test_phase28_archive.py",
         "tests/unit/test_phase33_runtime_results.py",
         "tests/unit/test_phase34_archive_normalization.py",
-        "tests/unit/test_phase34_runtime_results.py"
+        "tests/unit/test_phase34_runtime_results.py",
+        "tests/unit/test_phase35_activation_dryrun.py"
       ],
       "exit_code": 0,
-      "log": ".codex-pytest-tmp/phase34/static-final-v12/ruff-format.log",
-      "output": "16 files already formatted"
+      "log": ".codex-pytest-tmp/phase35/static-v13/ruff-format.log",
+      "output": "17 files already formatted"
     },
     {
       "name": "mypy (changed src/scripts, new errors vs BASE, full-path keys)",
@@ -147,7 +151,7 @@
         "dba045d"
       ],
       "exit_code": 2,
-      "log": ".codex-pytest-tmp/phase34/static-final-v12/diff-check.log",
+      "log": ".codex-pytest-tmp/phase35/static-v13/diff-check.log",
       "output": "configs/harness/candidates/historical-baseline.json:2: trailing whitespace.\n+  \"archive_root\": \"D:\\\\Projects\\\\Desktop\\\\CodePilot-Repair\\\\.claude\\\\worktrees\\\\phase34-v7-archive-closure-942bb1\\\\configs\\\\harness\",\nconfigs/harness/candidates/historical-baseline.json:293: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:294: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:295: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:296: trailing whitespace.\n+      \"bytes\": 26133,\nconfigs/harness/candidates/historical-baseline.json:297: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v10/candidate.diff\",\nconfigs/harness/candidates/historical-baseline.json:298: trailing whitespace.\n+      \"sha256\": \"d26c12841efde4aa7288abe5715490dc09f06c4fd1fb22ac581e2d77afb72e36\"\nconfigs/harness/candidates/historical-baseline.json:299: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:300: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:301: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:302: trailing whitespace.\n+      \"bytes\": 35317,\nconfigs/harness/candidates/historical-baseline.json:303: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v10/candidate.json\",\nconfigs/harness/candidates/historical-baseline.json:304: trailing whitespace.\n+      \"sha256\": \"5ccad67744024a0cf9087734e1427d3c18b9ae666435a6774963adea1ea79cba\"\nconfigs/harness/candidates/historical-baseline.json:305: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:306: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:307: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:308: trailing whitespace.\n+      \"bytes\": 3893,\nconfigs/harness/candidates/historical-baseline.json:309: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v10/snapshot.json\",\nconfigs/harness/candidates/historical-baseline.json:310: trailing whitespace.\n+      \"sha256\": \"6edf5eff6079ca44862e19bec962ef325d2d0c69c7eadb186d5574579990af64\"\nconfigs/harness/candidates/historical-baseline.json:311: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:312: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:313: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:314: trailing whitespace.\n+      \"bytes\": 2313438,\nconfigs/harness/candidates/historical-baseline.json:315: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v10/sources.json\",\nconfigs/harness/candidates/historical-baseline.json:316: trailing whitespace.\n+      \"sha256\": \"0922656112811a4e3d02726463efe75ef8f50bc965f940c1a5a247ce8b6391da\"\nconfigs/harness/candidates/historical-baseline.json:317: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:318: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:319: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/historical-baseline.json:320: trailing whitespace.\n+      \"bytes\": 4156,\nconfigs/harness/candidates/historical-baseline.json:321: trailing whitespace.\n+      \"path\": \"candidates/phase34-candidate-v11/candidate.diff\",\nconfigs/harness/candidates/historical-baseline.json:322: trailing whitespace.\n+      \"sha256\": \"cc6f62e7294577fcf6fbf8537db1b45c1700d8a4730fb9d96b1fc7b59e7f73ac\"\nconfigs/harness/candidates/historical-baseline.json:323: trailing whitespace.\n+    },\nconfigs/harness/candidates/historical-baseline.json:324: trailing whitespace.\n+    {\nconfigs/harness/candidates/historical-baseline.json:325: trailing whitespace.\n+      \"baseline_commit_sha256\": null,\nconfigs/harness/candidates/hi"
     },
     {
@@ -161,7 +165,7 @@
         "dba045d"
       ],
       "exit_code": 2,
-      "log": ".codex-pytest-tmp/phase34/static-final-v12/diff-check-crlf.log",
+      "log": ".codex-pytest-tmp/phase35/static-v13/diff-check-crlf.log",
       "output": "configs/harness/candidates/phase34-candidate-v10/candidate.diff:172: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:187: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:194: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:205: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:210: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:211: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:333: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:334: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:378: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:390: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:467: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:469: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:478: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:479: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:599: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:602: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:603: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:623: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v10/candidate.diff:624: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v11/candidate.diff:6: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v11/candidate.diff:20: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v11/candidate.diff:36: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v11/candidate.diff:37: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:6: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:23: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:26: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:27: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:95: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:116: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:193: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:212: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:218: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:222: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:227: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:237: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:238: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:241: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:242: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:275: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:278: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:279: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:299: trailing whitespace.\n+ \nconfigs/harness/candidates/phase34-candidate-v7/candidate.diff:327: trailing whitespace.\n+ \nconfigs/harness/candidates/phase"
     },
     {
@@ -182,15 +186,16 @@
         "tests/unit/test_phase28_archive.py",
         "tests/unit/test_phase33_runtime_results.py",
         "tests/unit/test_phase34_archive_normalization.py",
-        "tests/unit/test_phase34_runtime_results.py"
+        "tests/unit/test_phase34_runtime_results.py",
+        "tests/unit/test_phase35_activation_dryrun.py"
       ],
-      "file_count": 16,
+      "file_count": 17,
       "exit_code": 0,
       "offenders": []
     },
     {
       "name": "credential scan (added lines only)",
-      "added_lines": 10207,
+      "added_lines": 16234,
       "exit_code": 0,
       "hits": []
     },

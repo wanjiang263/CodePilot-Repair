@@ -1,0 +1,67 @@
+{
+  "status": "passed",
+  "summary": {
+    "repo": "D:\\cp35\\large\\repo",
+    "files": 20201,
+    "commit": "7e9917219a282e35dd9037d378b61db702740963",
+    "profile": "large-repo-profile.json",
+    "runs": [
+      {
+        "association_mode": "complete_closure_v2",
+        "fast_mode": false,
+        "wall_index_s": 208.4381,
+        "scan_files": 20201,
+        "symbol_rows": 40200,
+        "edge_rows": 0,
+        "parse_errors": 0,
+        "db_bytes": 24489984,
+        "peak_working_set_bytes": 332427264,
+        "changed": 20201,
+        "content_reused": 0
+      },
+      {
+        "association_mode": "verified_snapshot_v2",
+        "fast_mode": false,
+        "wall_index_s": 77.5459,
+        "scan_files": 20201,
+        "symbol_rows": 40200,
+        "edge_rows": 0,
+        "parse_errors": 0,
+        "db_bytes": 24489984,
+        "peak_working_set_bytes": 117325824,
+        "changed": 0,
+        "content_reused": 20201
+      },
+      {
+        "association_mode": "complete_closure_v2",
+        "fast_mode": false,
+        "wall_index_s": 73.5382,
+        "scan_files": 20201,
+        "symbol_rows": 40201,
+        "edge_rows": 0,
+        "parse_errors": 0,
+        "db_bytes": 24494080,
+        "peak_working_set_bytes": 460853248,
+        "changed": 1,
+        "content_reused": 20200
+      },
+      {
+        "association_mode": "complete_closure_v2",
+        "fast_mode": true,
+        "wall_index_s": 72.6063,
+        "scan_files": 20201,
+        "symbol_rows": 40201,
+        "edge_rows": 0,
+        "parse_errors": 0,
+        "db_bytes": 24494080,
+        "peak_working_set_bytes": 462761984,
+        "changed": 1,
+        "content_reused": 20200
+      }
+    ],
+    "verification": "skipped (--no-verify)",
+    "parse_errors": 0,
+    "peak_working_set_bytes": 462761984,
+    "db_bytes_last": 24494080
+  }
+}

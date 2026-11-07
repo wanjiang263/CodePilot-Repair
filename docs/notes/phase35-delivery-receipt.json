@@ -1,0 +1,343 @@
+{
+  "phase": 35,
+  "generated_at": "2026-11-07T03:00:58+08:00",
+  "tool": "delivery receipt; every hash computed from the referenced file at generation time",
+  "verdict": "PASS (Phase34/v13 archive, regression and external validation)",
+  "verdict_basis": "v13 source matches the final code commit; 19-version archive verify passes with witness verified and baseline 76; nine-group regression is 4182 passed / 0 failed / 4 skipped; static, frontend and 20k large-repo validation pass; Docker is 35/35 under Bash; the 24h soak completed 1440 cycles with 0 errors and a negative RSS slope; both GLM and Spark returned real-verified rows. Remaining gaps: real-provider streaming, browser E2E, full-history clone and the P2 guard.",
+  "commits": {
+    "base": "dba045dabd70f0e6eb7779287136944b589f2734",
+    "C39": "5163f26859da54967fc5d4a71bf72455f3ba4a1a",
+    "C40": "7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d",
+    "C41": "c4194cb2e8ff95aa41622aa4d266924077683725",
+    "C42": "d3ab82e04830e27d7ecb8d73bc394f07811c7abc",
+    "C43": "bc493631ede7e77a4c7a2e109e3926d31a405b23",
+    "C44": "83a8ce01fd795baf32af0aaa58a2c4f098c30171",
+    "C45": "ab75c03d5b4ac72a664a849e4c8ef4baf3ae1e8d",
+    "C46": "fe6fbbcc8d530cf2285bd9040ca6d108c8544dbe",
+    "C47": "365a91e837b44b93728a96285172cb92a33fd18d",
+    "C48": "docs: finalize phase35 report and delivery receipt",
+    "C49": "this wording clarification + regenerated receipt (docs-only; hash not embedded)",
+    "push": false,
+    "pr": false,
+    "publish": false,
+    "activate": false
+  },
+  "candidate": {
+    "version": "phase34-candidate-v13",
+    "status": "pending",
+    "parent": "phase34-candidate-v12",
+    "schema_version": 5,
+    "source_commit": "7d5e75dd1e57243ce923f35ecc1ab2c0d9757c0d",
+    "diff_base_commit": "254b0a81248b8455c236696f9915e2a237b8c05e",
+    "resolved_source_files": 134,
+    "source_scope_files": 787,
+    "files_sha256": {
+      "candidate.diff": "1ab950921132bafca44db0f8540694a1080cc213a3fec3779dec4324be8075d5",
+      "candidate.json": "ab6b8a83cbe0160ca0ac5e61e44f452edf5ad13dcc28928a8e407225b6cde801",
+      "snapshot.json": "08daf2a7bd0deed4a1e170fcf25bbf329a5d1fa5c91bd7ea4284169ec900a57d",
+      "sources.json": "ab89014d8fa0323e08015e2d36b785569a02845bec368a3844d4ec9b26ae8b8d"
+    },
+    "candidate_tree_sha256": "f1236ed4e22e649092772aa3c178e25c37c1721bbfe7c5b8558db510d86ffd20",
+    "receipt_sha256": "105bacf33d2b07e9a3b76920c4270d479e4b3ed4f878367d1405b78005c36f47",
+    "external_witness_sha256": "7c7ed280cb5f297560dd70cd947adcd2ef7f62b72ffb54948833fd08f028a6aa",
+    "active_pointer_exists": false
+  },
+  "archive": {
+    "historical_manifest": {
+      "path": "configs/harness/candidates/historical-baseline.json",
+      "sha256": "66accc3c5accf58ed43e1a283517cb7f8d49aa2ab5defe667e25468bcf17e868",
+      "files": 76,
+      "baseline_commit": "9ccc7032ec4feed423b888312630e7b28800b72f",
+      "zero_change_since_baseline": true
+    },
+    "verify": {
+      "exit_code": 0,
+      "witness": "verified",
+      "historical_integrity": "ok",
+      "totals": {
+        "historical_baseline_files": 76,
+        "historical_baseline_mismatches": 0,
+        "historical_files_modified": false,
+        "new_archive_failures": 0,
+        "new_archives": 12,
+        "old_archives": 7,
+        "old_unexplained_mismatches": 0,
+        "unknown_entries": 0,
+        "versions_checked": 19
+      },
+      "v13": {
+        "ok": true,
+        "checks": 32,
+        "failures": 0
+      },
+      "full_report": {
+        "path": "docs/notes/phase34-evidence/verify-v13.json",
+        "sha256": "845dc56adda3225d797a9f2c1a2a3135571ee0040e6600526c7c74ba71adc1a7"
+      }
+    }
+  },
+  "regression": {
+    "groups": {
+      "unit-a": "1535 passed, exit 0",
+      "unit-b": "1138 passed, 2 skipped, exit 0",
+      "unit-c": "427 passed, exit 0",
+      "unit-d": "25 passed, exit 0",
+      "eval": "482 passed, 1 skipped, exit 0",
+      "sandbox": "66 passed, exit 0",
+      "integration": "126 passed, exit 0",
+      "api": "117 passed, 1 skipped, exit 0",
+      "graph": "266 passed, exit 0"
+    },
+    "totals": {
+      "passed": 4182,
+      "failed": 0,
+      "skipped": 4,
+      "selected": 4186
+    },
+    "note": "D:/cp35/final13 scratch (neutral name); the earlier D:/cp35/regression scratch was rejected because 'regression' in the tmp path changed the issue-analyzer rule."
+  },
+  "static": {
+    "files": 17,
+    "failed": [
+      "git diff --check",
+      "git diff --check (CRLF-aware)"
+    ],
+    "failed_is_generated_artifact_only": true,
+    "informational_mypy_exit": 1,
+    "source_sha256": "e05860e5d6e461e387a7b4eee1dfeaa9a9fab8205371d450410f16c3ac479be8"
+  },
+  "external": {
+    "frontend": {
+      "status": "passed",
+      "summary": {
+        "install": "npm ci: 359 packages",
+        "typecheck": "passed",
+        "lint": "passed (eslint --max-warnings=0)",
+        "vitest": {
+          "files": 14,
+          "tests": 50,
+          "passed": true
+        },
+        "build": "passed (vite build, 6.35s)",
+        "e2e": "no Playwright/Cypress suite in the repository; build/typecheck/lint/vitest only"
+      },
+      "source_sha256": "97463c88b0eb61817ce06c5c7fc76785d84d9eba69b0e6bd7992282831791244"
+    },
+    "large_repo": {
+      "status": "passed",
+      "summary": {
+        "repo": "D:\\cp35\\large\\repo",
+        "files": 20201,
+        "commit": "7e9917219a282e35dd9037d378b61db702740963",
+        "profile": "large-repo-profile.json",
+        "runs": [
+          {
+            "association_mode": "complete_closure_v2",
+            "fast_mode": false,
+            "wall_index_s": 208.4381,
+            "scan_files": 20201,
+            "symbol_rows": 40200,
+            "edge_rows": 0,
+            "parse_errors": 0,
+            "db_bytes": 24489984,
+            "peak_working_set_bytes": 332427264,
+            "changed": 20201,
+            "content_reused": 0
+          },
+          {
+            "association_mode": "verified_snapshot_v2",
+            "fast_mode": false,
+            "wall_index_s": 77.5459,
+            "scan_files": 20201,
+            "symbol_rows": 40200,
+            "edge_rows": 0,
+            "parse_errors": 0,
+            "db_bytes": 24489984,
+            "peak_working_set_bytes": 117325824,
+            "changed": 0,
+            "content_reused": 20201
+          },
+          {
+            "association_mode": "complete_closure_v2",
+            "fast_mode": false,
+            "wall_index_s": 73.5382,
+            "scan_files": 20201,
+            "symbol_rows": 40201,
+            "edge_rows": 0,
+            "parse_errors": 0,
+            "db_bytes": 24494080,
+            "peak_working_set_bytes": 460853248,
+            "changed": 1,
+            "content_reused": 20200
+          },
+          {
+            "association_mode": "complete_closure_v2",
+            "fast_mode": true,
+            "wall_index_s": 72.6063,
+            "scan_files": 20201,
+            "symbol_rows": 40201,
+            "edge_rows": 0,
+            "parse_errors": 0,
+            "db_bytes": 24494080,
+            "peak_working_set_bytes": 462761984,
+            "changed": 1,
+            "content_reused": 20200
+          }
+        ],
+        "verification": "skipped (--no-verify)",
+        "parse_errors": 0,
+        "peak_working_set_bytes": 462761984,
+        "db_bytes_last": 24494080
+      },
+      "source_sha256": "a78d8587a4d40ed66e21b7e8e4395051dab4c3b5d746eb00dd563dda1b49b7e9"
+    },
+    "docker": {
+      "status": "passed",
+      "summary": {
+        "tests": 35,
+        "passed": 35,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "authoritative_run": "Bash/Git Bash environment: 35 passed in 316.44s",
+        "powershell_attempts": "26/35 with 9 deterministic synthetic-suite failures in the PowerShell Terminal; the same tests pass under Bash",
+        "root_cause": "The PowerShell Terminal environment (git/workspace env) caused the synthetic fixture cache failures; this is not a v13 code or fixture defect",
+        "fix_scope": "none required; rerun under Bash is the authoritative result"
+      },
+      "junit": "docs/notes/phase34-evidence/docker-junit-bash.xml",
+      "junit_sha256": "4c9919b75992d3933ba6a2e37eb3d586f77f771c82b2007dcdfc2dd376b78198",
+      "source_sha256": "5e76c768b5b61da6c68d74cdebf2439184048e0b115833d09b934b99072d6c7c"
+    },
+    "soak": {
+      "status": "passed",
+      "started_at": "2026-11-05T18:54:09+00:00",
+      "ended_at": "2026-11-06T18:54:09+00:00",
+      "completed": true,
+      "cycles": 1440,
+      "errors": 0,
+      "lock_failures": 0,
+      "checkpoint_failures": 0,
+      "rss_bytes_first": 140910592,
+      "rss_bytes_last": 145465344,
+      "rss_bytes_max": 695427072,
+      "rss_slope_bytes_per_cycle": -98110.01267188111,
+      "summary_sha256": "4e6f1d01310f6a5c939bb54aca5c1ab5469572338d1b4586d0a114ba00661933",
+      "heartbeat_sha256": "cbf4bf6c2564e169a3a2c7ce19d18e34c1c55eecf7c1ddc5aeddf3814ae63a1c"
+    },
+    "real_provider": {
+      "status": "verified",
+      "protocol": "OpenAI-compatible",
+      "budget_gate_cny": 20,
+      "real_requests": 2,
+      "real_cost_cny": 0.0,
+      "cost_known": false,
+      "cost_unknown_calls": 1,
+      "cost_is_lower_bound": true,
+      "input_tokens": 42,
+      "output_tokens": 32,
+      "rows": [
+        {
+          "row": "openai:glm-5.3-flash",
+          "status": "real-verified",
+          "real_requests": 1,
+          "input_tokens": 17,
+          "output_tokens": 16,
+          "cost_cny": 5.8399999999999997e-05,
+          "cost_known": true
+        },
+        {
+          "row": "openai:spark-x2.6",
+          "status": "real-verified",
+          "real_requests": 1,
+          "input_tokens": 25,
+          "output_tokens": 16,
+          "cost_cny": 0.0,
+          "cost_known": false
+        }
+      ],
+      "proxy_note": "Two earlier Spark attempts failed TLS through 127.0.0.1:7899; the direct NO_PROXY='*' retry succeeded. The uncertain attempts and raw logs are kept under provider-real/spark/.",
+      "matrix_sha256": "f77ff369a1b3b9ec48d88c6b42488a877a550910c0a35fa46f432a3c12925821"
+    }
+  },
+  "evidence_pack": {
+    "dir": "docs/notes/phase34-evidence",
+    "manifest": "docs/notes/phase34-evidence/SHA256SUMS",
+    "manifest_sha256": "ac70b3e5193936204e9ae88e70c7e29bb1a1c62ad67103b5e6a9d3e687a18de0",
+    "entries": 84,
+    "runtime_json": "docs/notes/phase34-runtime-results.json",
+    "runtime_json_sha256": "cda4c935392e36ab45919fef41868e9a7893e8b51caa1aebbe75d7b4f998f423",
+    "runtime_check": "pass",
+    "requires_scratch": false
+  },
+  "clean_clone": {
+    "status": "passed",
+    "commit": "365a91e837b44b93728a96285172cb92a33fd18d",
+    "log": "docs/notes/phase35-selfcontained-check.log",
+    "log_sha256": "df846448e0e42249e95229d5a26fd336e20150eb6cedfd9d14c6c0424ea67c31",
+    "source_shallow": true,
+    "clone_shallow": false,
+    "result": "SELF_CONTAINED_CHECK=PASS"
+  },
+  "stats": {
+    "commits_at_c38": 318,
+    "commits_at_c47": 327,
+    "effective_source_scope_files": 787,
+    "curated_source_files": 134,
+    "untracked_status_entries": 172,
+    "untracked_files_uall": 176,
+    "note": "see docs/notes/phase35-errata.md"
+  },
+  "shallow_history": {
+    "is_shallow": true,
+    "boundary_commit": "04a523fafbd61bc2e49420963b84ed8e2bd1b3cf",
+    "unshallow_result": "git fetch --unshallow origin is a no-op; the boundary is not on origin",
+    "clean_clone_scope": "existing history only; full-history clone not verified"
+  },
+  "p2": {
+    "path": "src/codepilot/sandbox/swebench_env.py:423",
+    "status": "audited, not changed",
+    "detail": "DockerSdkBackend.build has no real caller; the official path does not build; the generic base build uses a fileobj micro-context in docker.py:354"
+  },
+  "mainline": {
+    "branch": "codex/phase12-real-issue-pilot",
+    "pre_merge_head": "9e99eda2036a17d4c0f38c2a8e505c57716bdd39",
+    "target": "C48 (after the final report/receipt); fast-forward after all docs",
+    "ff_only": true,
+    "pushed": false
+  },
+  "unverified": [
+    "real provider streaming (non-streaming matrix only)",
+    "frontend browser E2E: no Playwright/Cypress suite",
+    "full-history clone: repository shallow; boundary not on origin",
+    "P2 images.build context guard: audited, not implemented",
+    "Spark cost: no price table; cost_known=false and 0.0 is a lower bound"
+  ],
+  "docs_sha256": {
+    "docs/notes/phase35-final-report.md": "ee9f77aec49b110adbbe4196e7907cfc652b468593293e7eba323bf282dce6e9",
+    "docs/notes/phase34-runtime-results.json": "cda4c935392e36ab45919fef41868e9a7893e8b51caa1aebbe75d7b4f998f423",
+    "docs/notes/phase34-evidence/SHA256SUMS": "ac70b3e5193936204e9ae88e70c7e29bb1a1c62ad67103b5e6a9d3e687a18de0",
+    "docs/notes/phase34-evidence/verify-v13.json": "845dc56adda3225d797a9f2c1a2a3135571ee0040e6600526c7c74ba71adc1a7",
+    "docs/notes/phase34-evidence/external-witness-v13.txt": "7c7ed280cb5f297560dd70cd947adcd2ef7f62b72ffb54948833fd08f028a6aa",
+    "configs/harness/receipts/phase34-candidate-v13.json": "105bacf33d2b07e9a3b76920c4270d479e4b3ed4f878367d1405b78005c36f47",
+    "configs/harness/candidates/historical-baseline.json": "66accc3c5accf58ed43e1a283517cb7f8d49aa2ab5defe667e25468bcf17e868",
+    "docs/notes/phase34-evidence/frontend-summary.json": "97463c88b0eb61817ce06c5c7fc76785d84d9eba69b0e6bd7992282831791244",
+    "docs/notes/phase34-evidence/large-repo-summary.json": "a78d8587a4d40ed66e21b7e8e4395051dab4c3b5d746eb00dd563dda1b49b7e9",
+    "docs/notes/phase34-evidence/docker-summary.json": "5e76c768b5b61da6c68d74cdebf2439184048e0b115833d09b934b99072d6c7c",
+    "docs/notes/phase34-evidence/soak-summary.json": "4e6f1d01310f6a5c939bb54aca5c1ab5469572338d1b4586d0a114ba00661933",
+    "docs/notes/phase34-evidence/provider-matrix.json": "f77ff369a1b3b9ec48d88c6b42488a877a550910c0a35fa46f432a3c12925821",
+    "docs/notes/phase35-selfcontained-check.log": "df846448e0e42249e95229d5a26fd336e20150eb6cedfd9d14c6c0424ea67c31",
+    "docs/notes/phase35-errata.md": "aca99e25212e637d2efff1f72dfd4f4c07ad476d4d55808e1d6e1d03375645e8"
+  },
+  "constraints_honored": [
+    "single controller, no teammate/subagent",
+    "no push/PR/publish/activate",
+    "C1-C4 history unchanged",
+    "v1-v12 candidate files unchanged",
+    "v13 is the final candidate; no active pointer",
+    "2 real model requests total, within the 20 CNY budget gate and user authorization",
+    "no skip/xfail/deleted/weakened tests to hide failures",
+    "Docker PowerShell failures, earlier soak failures and uncertain Spark attempts recorded, not hidden",
+    "evidence pack in-repo with SHA256SUMS; default --check has no external scratch dependency",
+    "byte pinning via docs/notes/.gitattributes and configs/harness/.gitattributes"
+  ]
+}

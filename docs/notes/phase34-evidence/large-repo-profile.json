@@ -1,0 +1,866 @@
+{
+  "phase": "phase33-t05",
+  "tag": "large20k",
+  "generated_at": "2026-11-05T18:34:40+00:00",
+  "export": {
+    "source_repo": "D:\\cp35\\large\\repo",
+    "source_head": "7e9917219a282e35dd9037d378b61db702740963",
+    "exported_files": 20201,
+    "reused": false
+  },
+  "pinned_commit": "7e9917219a282e35dd9037d378b61db702740963",
+  "probe_file": "pkg100/mod010.py",
+  "probe_edit": "def _phase32_probe() -> int:\n    return 42",
+  "parse_cache_dir": "",
+  "association_mode": "complete_closure_v2",
+  "runs": [
+    {
+      "association_mode": "complete_closure_v2",
+      "fast_mode": false,
+      "wall_index_s": 208.4381,
+      "wall_commit_s": 0.0607,
+      "indexer_reported_s": 208.359,
+      "scan_files": 20201,
+      "db_files": 20201,
+      "symbol_rows": 40200,
+      "symbols_by_kind": {
+        "function": 20000,
+        "module": 20200
+      },
+      "edge_rows": 0,
+      "edge_rows_by_kind": {},
+      "test_edges": 0,
+      "parsed": 20200,
+      "parse_reused": 0,
+      "changed": 20201,
+      "content_reused": 0,
+      "removed": 0,
+      "parse_errors": 0,
+      "cache_entries": 128,
+      "cache_source_bytes": 10648,
+      "cache_evictions": 20072,
+      "peak_working_set_bytes": 332427264,
+      "peak_scope": "process_lifetime",
+      "db_bytes": 24489984,
+      "progress_events": 205,
+      "phases": {
+        "labels": {
+          "scan": {
+            "inclusive_s": 133.45601,
+            "exclusive_s": 133.45601,
+            "calls": 1
+          },
+          "files.upsert_many": {
+            "inclusive_s": 10.60398,
+            "exclusive_s": 10.60398,
+            "calls": 1
+          },
+          "extract_all_edges": {
+            "inclusive_s": 10.22416,
+            "exclusive_s": 7e-05,
+            "calls": 1
+          },
+          "symbols.replace_for_files": {
+            "inclusive_s": 4.76243,
+            "exclusive_s": 4.76243,
+            "calls": 1
+          },
+          "extract_edges": {
+            "inclusive_s": 4.5736,
+            "exclusive_s": 4.5736,
+            "calls": 1
+          },
+          "context_build": {
+            "inclusive_s": 3.63281,
+            "exclusive_s": 3.63281,
+            "calls": 1
+          },
+          "extract_calls": {
+            "inclusive_s": 2.72454,
+            "exclusive_s": 2.72454,
+            "calls": 1
+          },
+          "imports_resolve": {
+            "inclusive_s": 1.58155,
+            "exclusive_s": 1.58155,
+            "calls": 1
+          },
+          "extract_test_links": {
+            "inclusive_s": 1.34441,
+            "exclusive_s": 1.34441,
+            "calls": 1
+          },
+          "parse": {
+            "inclusive_s": 0.99672,
+            "exclusive_s": 0.99672,
+            "calls": 20200
+          },
+          "files.list_by_repo": {
+            "inclusive_s": 0.19463,
+            "exclusive_s": 0.19463,
+            "calls": 2
+          },
+          "edges.replace_for_sources": {
+            "inclusive_s": 0.10951,
+            "exclusive_s": 8e-05,
+            "calls": 2
+          },
+          "edges.replace_for_sources.delete": {
+            "inclusive_s": 0.10939,
+            "exclusive_s": 0.10939,
+            "calls": 1
+          },
+          "symbols.count_by_kind": {
+            "inclusive_s": 0.06736,
+            "exclusive_s": 0.06736,
+            "calls": 2
+          },
+          "symbols.list_by_repo": {
+            "inclusive_s": 0.00598,
+            "exclusive_s": 0.00598,
+            "calls": 1
+          },
+          "resolve_dangling": {
+            "inclusive_s": 0.00309,
+            "exclusive_s": 1e-05,
+            "calls": 1
+          },
+          "edges.list_dangling_targets": {
+            "inclusive_s": 0.00308,
+            "exclusive_s": 0.00308,
+            "calls": 1
+          },
+          "edges.count_by_kind_confidence": {
+            "inclusive_s": 0.00124,
+            "exclusive_s": 0.00124,
+            "calls": 1
+          },
+          "replace_test_edges": {
+            "inclusive_s": 0.00074,
+            "exclusive_s": 1e-05,
+            "calls": 1
+          },
+          "edges.delete_by_kind": {
+            "inclusive_s": 0.00071,
+            "exclusive_s": 0.00071,
+            "calls": 1
+          },
+          "edges.replace_for_sources.insert": {
+            "inclusive_s": 2e-05,
+            "exclusive_s": 2e-05,
+            "calls": 2
+          },
+          "edge_rows_build": {
+            "inclusive_s": 1e-05,
+            "exclusive_s": 1e-05,
+            "calls": 1
+          },
+          "edges.replace_for_sources.flush": {
+            "inclusive_s": 1e-05,
+            "exclusive_s": 1e-05,
+            "calls": 2
+          }
+        },
+        "by_parent": {
+          "<root> -> scan": {
+            "inclusive_s": 133.45601,
+            "calls": 1
+          },
+          "<root> -> files.upsert_many": {
+            "inclusive_s": 10.60398,
+            "calls": 1
+          },
+          "<root> -> extract_all_edges": {
+            "inclusive_s": 10.22416,
+            "calls": 1
+          },
+          "<root> -> symbols.replace_for_files": {
+            "inclusive_s": 4.76243,
+            "calls": 1
+          },
+          "extract_all_edges -> extract_edges": {
+            "inclusive_s": 4.5736,
+            "calls": 1
+          },
+          "<root> -> context_build": {
+            "inclusive_s": 3.63281,
+            "calls": 1
+          },
+          "extract_all_edges -> extract_calls": {
+            "inclusive_s": 2.72454,
+            "calls": 1
+          },
+          "extract_all_edges -> imports_resolve": {
+            "inclusive_s": 1.58155,
+            "calls": 1
+          },
+          "extract_all_edges -> extract_test_links": {
+            "inclusive_s": 1.34441,
+            "calls": 1
+          },
+          "<root> -> parse": {
+            "inclusive_s": 0.99672,
+            "calls": 20200
+          },
+          "<root> -> files.list_by_repo": {
+            "inclusive_s": 0.19463,
+            "calls": 2
+          },
+          "<root> -> edges.replace_for_sources": {
+            "inclusive_s": 0.10949,
+            "calls": 1
+          },
+          "edges.replace_for_sources -> edges.replace_for_sources.delete": {
+            "inclusive_s": 0.10939,
+            "calls": 1
+          },
+          "<root> -> symbols.count_by_kind": {
+            "inclusive_s": 0.06736,
+            "calls": 2
+          },
+          "<root> -> symbols.list_by_repo": {
+            "inclusive_s": 0.00598,
+            "calls": 1
+          },
+          "<root> -> resolve_dangling": {
+            "inclusive_s": 0.00309,
+            "calls": 1
+          },
+          "resolve_dangling -> edges.list_dangling_targets": {
+            "inclusive_s": 0.00308,
+            "calls": 1
+          },
+          "<root> -> edges.count_by_kind_confidence": {
+            "inclusive_s": 0.00124,
+            "calls": 1
+          },
+          "<root> -> replace_test_edges": {
+            "inclusive_s": 0.00074,
+            "calls": 1
+          },
+          "replace_test_edges -> edges.delete_by_kind": {
+            "inclusive_s": 0.00071,
+            "calls": 1
+          },
+          "edges.replace_for_sources -> edges.replace_for_sources.insert": {
+            "inclusive_s": 2e-05,
+            "calls": 2
+          },
+          "replace_test_edges -> edges.replace_for_sources": {
+            "inclusive_s": 2e-05,
+            "calls": 1
+          },
+          "<root> -> edge_rows_build": {
+            "inclusive_s": 1e-05,
+            "calls": 1
+          },
+          "edges.replace_for_sources -> edges.replace_for_sources.flush": {
+            "inclusive_s": 1e-05,
+            "calls": 2
+          }
+        }
+      },
+      "unaccounted_s": 44.37943,
+      "scenario": "cold",
+      "db_path": "D:\\cp35\\large\\db-cold\\index.sqlite3",
+      "workspace": "D:\\cp35\\large\\scratch\\realrepo",
+      "child_total_wall_s": 208.5011,
+      "base_commit": "7e9917219a282e35dd9037d378b61db702740963",
+      "instrumentation_missing": [],
+      "child_process_wall_s": 210.8291
+    },
+    {
+      "association_mode": "verified_snapshot_v2",
+      "fast_mode": false,
+      "wall_index_s": 77.5459,
+      "wall_commit_s": 0.0002,
+      "indexer_reported_s": 77.515,
+      "scan_files": 20201,
+      "db_files": 20201,
+      "symbol_rows": 40200,
+      "symbols_by_kind": {
+        "function": 20000,
+        "module": 20200
+      },
+      "edge_rows": 0,
+      "edge_rows_by_kind": {},
+      "test_edges": 0,
+      "parsed": 0,
+      "parse_reused": 0,
+      "changed": 0,
+      "content_reused": 20201,
+      "removed": 0,
+      "parse_errors": 0,
+      "cache_entries": 0,
+      "cache_source_bytes": 0,
+      "cache_evictions": 0,
+      "peak_working_set_bytes": 117325824,
+      "peak_scope": "process_lifetime",
+      "db_bytes": 24489984,
+      "progress_events": 2,
+      "phases": {
+        "labels": {
+          "scan": {
+            "inclusive_s": 76.53982,
+            "exclusive_s": 76.53982,
+            "calls": 1
+          },
+          "files.list_by_repo": {
+            "inclusive_s": 0.5758,
+            "exclusive_s": 0.5758,
+            "calls": 2
+          },
+          "symbols.count_by_kind": {
+            "inclusive_s": 0.34184,
+            "exclusive_s": 0.34184,
+            "calls": 2
+          },
+          "edges.count_by_kind_confidence": {
+            "inclusive_s": 0.00112,
+            "exclusive_s": 0.00112,
+            "calls": 1
+          }
+        },
+        "by_parent": {
+          "<root> -> scan": {
+            "inclusive_s": 76.53982,
+            "calls": 1
+          },
+          "<root> -> files.list_by_repo": {
+            "inclusive_s": 0.5758,
+            "calls": 2
+          },
+          "<root> -> symbols.count_by_kind": {
+            "inclusive_s": 0.34184,
+            "calls": 2
+          },
+          "<root> -> edges.count_by_kind_confidence": {
+            "inclusive_s": 0.00112,
+            "calls": 1
+          }
+        }
+      },
+      "unaccounted_s": 0.08734,
+      "scenario": "nochange",
+      "db_path": "D:\\cp35\\large\\db-nochange\\index.sqlite3",
+      "workspace": "D:\\cp35\\large\\scratch\\realrepo",
+      "child_total_wall_s": 77.5482,
+      "base_commit": "7e9917219a282e35dd9037d378b61db702740963",
+      "instrumentation_missing": [],
+      "child_process_wall_s": 79.4053
+    },
+    {
+      "association_mode": "complete_closure_v2",
+      "fast_mode": false,
+      "wall_index_s": 73.5382,
+      "wall_commit_s": 0.1728,
+      "indexer_reported_s": 73.297,
+      "scan_files": 20201,
+      "db_files": 20201,
+      "symbol_rows": 40201,
+      "symbols_by_kind": {
+        "function": 20001,
+        "module": 20200
+      },
+      "edge_rows": 0,
+      "edge_rows_by_kind": {},
+      "test_edges": 0,
+      "parsed": 20200,
+      "parse_reused": 0,
+      "changed": 1,
+      "content_reused": 20200,
+      "removed": 0,
+      "parse_errors": 0,
+      "cache_entries": 128,
+      "cache_source_bytes": 10648,
+      "cache_evictions": 20072,
+      "peak_working_set_bytes": 460853248,
+      "peak_scope": "process_lifetime",
+      "db_bytes": 24494080,
+      "progress_events": 205,
+      "phases": {
+        "labels": {
+          "scan": {
+            "inclusive_s": 20.78792,
+            "exclusive_s": 20.78792,
+            "calls": 1
+          },
+          "symbols.replace_for_files": {
+            "inclusive_s": 14.01785,
+            "exclusive_s": 14.01785,
+            "calls": 1
+          },
+          "context_build": {
+            "inclusive_s": 3.06139,
+            "exclusive_s": 3.06139,
+            "calls": 1
+          },
+          "extract_edges": {
+            "inclusive_s": 1.7395,
+            "exclusive_s": 1.7395,
+            "calls": 1
+          },
+          "extract_calls": {
+            "inclusive_s": 1.64112,
+            "exclusive_s": 1.64112,
+            "calls": 1
+          },
+          "extract_test_links": {
+            "inclusive_s": 1.53814,
+            "exclusive_s": 1.53814,
+            "calls": 1
+          },
+          "imports_resolve": {
+            "inclusive_s": 1.33269,
+            "exclusive_s": 1.33269,
+            "calls": 1
+          },
+          "files.upsert_many": {
+            "inclusive_s": 0.89245,
+            "exclusive_s": 0.89245,
+            "calls": 1
+          },
+          "parse": {
+            "inclusive_s": 0.86881,
+            "exclusive_s": 0.86881,
+            "calls": 20200
+          },
+          "symbols.list_by_repo": {
+            "inclusive_s": 0.8512,
+            "exclusive_s": 0.8512,
+            "calls": 1
+          },
+          "files.list_by_repo": {
+            "inclusive_s": 0.44387,
+            "exclusive_s": 0.44387,
+            "calls": 2
+          },
+          "affected_closure": {
+            "inclusive_s": 0.18738,
+            "exclusive_s": 0.18738,
+            "calls": 1
+          },
+          "symbols.count_by_kind": {
+            "inclusive_s": 0.07465,
+            "exclusive_s": 0.07465,
+            "calls": 2
+          },
+          "closure_source_maps": {
+            "inclusive_s": 0.01283,
+            "exclusive_s": 0.01283,
+            "calls": 1
+          },
+          "edges.replace_for_sources": {
+            "inclusive_s": 0.00712,
+            "exclusive_s": 8e-05,
+            "calls": 2
+          },
+          "edges.replace_for_sources.delete": {
+            "inclusive_s": 0.00702,
+            "exclusive_s": 0.00702,
+            "calls": 1
+          },
+          "resolve_dangling": {
+            "inclusive_s": 0.00437,
+            "exclusive_s": 1e-05,
+            "calls": 1
+          },
+          "edges.list_dangling_targets": {
+            "inclusive_s": 0.00437,
+            "exclusive_s": 0.00437,
+            "calls": 1
+          },
+          "edges.count_by_kind_confidence": {
+            "inclusive_s": 0.00124,
+            "exclusive_s": 0.00124,
+            "calls": 1
+          },
+          "replace_test_edges": {
+            "inclusive_s": 2e-05,
+            "exclusive_s": 0.0,
+            "calls": 1
+          },
+          "edges.replace_for_sources.insert": {
+            "inclusive_s": 1e-05,
+            "exclusive_s": 1e-05,
+            "calls": 2
+          },
+          "edges.replace_for_sources.flush": {
+            "inclusive_s": 1e-05,
+            "exclusive_s": 1e-05,
+            "calls": 2
+          },
+          "edge_rows_build": {
+            "inclusive_s": 1e-05,
+            "exclusive_s": 1e-05,
+            "calls": 1
+          }
+        },
+        "by_parent": {
+          "<root> -> scan": {
+            "inclusive_s": 20.78792,
+            "calls": 1
+          },
+          "<root> -> symbols.replace_for_files": {
+            "inclusive_s": 14.01785,
+            "calls": 1
+          },
+          "<root> -> context_build": {
+            "inclusive_s": 3.06139,
+            "calls": 1
+          },
+          "<root> -> extract_edges": {
+            "inclusive_s": 1.7395,
+            "calls": 1
+          },
+          "<root> -> extract_calls": {
+            "inclusive_s": 1.64112,
+            "calls": 1
+          },
+          "<root> -> extract_test_links": {
+            "inclusive_s": 1.53814,
+            "calls": 1
+          },
+          "<root> -> imports_resolve": {
+            "inclusive_s": 1.33269,
+            "calls": 1
+          },
+          "<root> -> files.upsert_many": {
+            "inclusive_s": 0.89245,
+            "calls": 1
+          },
+          "<root> -> parse": {
+            "inclusive_s": 0.86881,
+            "calls": 20200
+          },
+          "<root> -> symbols.list_by_repo": {
+            "inclusive_s": 0.8512,
+            "calls": 1
+          },
+          "<root> -> files.list_by_repo": {
+            "inclusive_s": 0.44387,
+            "calls": 2
+          },
+          "<root> -> affected_closure": {
+            "inclusive_s": 0.18738,
+            "calls": 1
+          },
+          "<root> -> symbols.count_by_kind": {
+            "inclusive_s": 0.07465,
+            "calls": 2
+          },
+          "<root> -> closure_source_maps": {
+            "inclusive_s": 0.01283,
+            "calls": 1
+          },
+          "<root> -> edges.replace_for_sources": {
+            "inclusive_s": 0.0071,
+            "calls": 1
+          },
+          "edges.replace_for_sources -> edges.replace_for_sources.delete": {
+            "inclusive_s": 0.00702,
+            "calls": 1
+          },
+          "<root> -> resolve_dangling": {
+            "inclusive_s": 0.00437,
+            "calls": 1
+          },
+          "resolve_dangling -> edges.list_dangling_targets": {
+            "inclusive_s": 0.00437,
+            "calls": 1
+          },
+          "<root> -> edges.count_by_kind_confidence": {
+            "inclusive_s": 0.00124,
+            "calls": 1
+          },
+          "<root> -> replace_test_edges": {
+            "inclusive_s": 2e-05,
+            "calls": 1
+          },
+          "replace_test_edges -> edges.replace_for_sources": {
+            "inclusive_s": 2e-05,
+            "calls": 1
+          },
+          "edges.replace_for_sources -> edges.replace_for_sources.insert": {
+            "inclusive_s": 1e-05,
+            "calls": 2
+          },
+          "edges.replace_for_sources -> edges.replace_for_sources.flush": {
+            "inclusive_s": 1e-05,
+            "calls": 2
+          },
+          "<root> -> edge_rows_build": {
+            "inclusive_s": 1e-05,
+            "calls": 1
+          }
+        }
+      },
+      "unaccounted_s": 26.07563,
+      "scenario": "change",
+      "db_path": "D:\\cp35\\large\\db-change\\index.sqlite3",
+      "workspace": "D:\\cp35\\large\\scratch\\realrepo",
+      "child_total_wall_s": 73.7133,
+      "base_commit": "7e9917219a282e35dd9037d378b61db702740963",
+      "instrumentation_missing": [],
+      "child_process_wall_s": 75.2658
+    },
+    {
+      "association_mode": "complete_closure_v2",
+      "fast_mode": true,
+      "wall_index_s": 72.6063,
+      "wall_commit_s": 0.0831,
+      "indexer_reported_s": 72.453,
+      "scan_files": 20201,
+      "db_files": 20201,
+      "symbol_rows": 40201,
+      "symbols_by_kind": {
+        "function": 20001,
+        "module": 20200
+      },
+      "edge_rows": 0,
+      "edge_rows_by_kind": {},
+      "test_edges": 0,
+      "parsed": 20200,
+      "parse_reused": 0,
+      "changed": 1,
+      "content_reused": 20200,
+      "removed": 0,
+      "parse_errors": 0,
+      "cache_entries": 128,
+      "cache_source_bytes": 10648,
+      "cache_evictions": 20072,
+      "peak_working_set_bytes": 462761984,
+      "peak_scope": "process_lifetime",
+      "db_bytes": 24494080,
+      "progress_events": 205,
+      "phases": {
+        "labels": {
+          "scan": {
+            "inclusive_s": 20.72254,
+            "exclusive_s": 20.72254,
+            "calls": 1
+          },
+          "symbols.replace_for_files": {
+            "inclusive_s": 14.14558,
+            "exclusive_s": 14.14558,
+            "calls": 1
+          },
+          "extract_all_edges": {
+            "inclusive_s": 5.17879,
+            "exclusive_s": 5e-05,
+            "calls": 1
+          },
+          "context_build": {
+            "inclusive_s": 3.06527,
+            "exclusive_s": 3.06527,
+            "calls": 1
+          },
+          "extract_calls": {
+            "inclusive_s": 1.99933,
+            "exclusive_s": 1.99933,
+            "calls": 1
+          },
+          "extract_test_links": {
+            "inclusive_s": 1.61897,
+            "exclusive_s": 1.61897,
+            "calls": 1
+          },
+          "extract_edges": {
+            "inclusive_s": 1.55914,
+            "exclusive_s": 1.55914,
+            "calls": 1
+          },
+          "symbols.list_by_repo": {
+            "inclusive_s": 1.14982,
+            "exclusive_s": 1.14982,
+            "calls": 1
+          },
+          "parse": {
+            "inclusive_s": 0.88371,
+            "exclusive_s": 0.88371,
+            "calls": 20200
+          },
+          "files.upsert_many": {
+            "inclusive_s": 0.84122,
+            "exclusive_s": 0.84122,
+            "calls": 1
+          },
+          "files.list_by_repo": {
+            "inclusive_s": 0.39288,
+            "exclusive_s": 0.39288,
+            "calls": 2
+          },
+          "symbols.count_by_kind": {
+            "inclusive_s": 0.06592,
+            "exclusive_s": 0.06592,
+            "calls": 2
+          },
+          "edges.replace_for_sources": {
+            "inclusive_s": 0.00562,
+            "exclusive_s": 7e-05,
+            "calls": 2
+          },
+          "edges.replace_for_sources.delete": {
+            "inclusive_s": 0.00553,
+            "exclusive_s": 0.00553,
+            "calls": 1
+          },
+          "import_bindings_guard": {
+            "inclusive_s": 0.00371,
+            "exclusive_s": 0.00371,
+            "calls": 1
+          },
+          "resolve_dangling": {
+            "inclusive_s": 0.00191,
+            "exclusive_s": 1e-05,
+            "calls": 1
+          },
+          "edges.list_dangling_targets": {
+            "inclusive_s": 0.0019,
+            "exclusive_s": 0.0019,
+            "calls": 1
+          },
+          "imports_resolve": {
+            "inclusive_s": 0.0013,
+            "exclusive_s": 0.0013,
+            "calls": 1
+          },
+          "edges.count_by_kind_confidence": {
+            "inclusive_s": 0.00122,
+            "exclusive_s": 0.00122,
+            "calls": 1
+          },
+          "replace_test_edges": {
+            "inclusive_s": 3e-05,
+            "exclusive_s": 0.0,
+            "calls": 1
+          },
+          "edges.replace_for_sources.insert": {
+            "inclusive_s": 1e-05,
+            "exclusive_s": 1e-05,
+            "calls": 2
+          },
+          "edges.replace_for_sources.flush": {
+            "inclusive_s": 1e-05,
+            "exclusive_s": 1e-05,
+            "calls": 2
+          },
+          "edge_rows_build": {
+            "inclusive_s": 1e-05,
+            "exclusive_s": 1e-05,
+            "calls": 1
+          }
+        },
+        "by_parent": {
+          "<root> -> scan": {
+            "inclusive_s": 20.72254,
+            "calls": 1
+          },
+          "<root> -> symbols.replace_for_files": {
+            "inclusive_s": 14.14558,
+            "calls": 1
+          },
+          "<root> -> extract_all_edges": {
+            "inclusive_s": 5.17879,
+            "calls": 1
+          },
+          "<root> -> context_build": {
+            "inclusive_s": 3.06527,
+            "calls": 1
+          },
+          "extract_all_edges -> extract_calls": {
+            "inclusive_s": 1.99933,
+            "calls": 1
+          },
+          "extract_all_edges -> extract_test_links": {
+            "inclusive_s": 1.61897,
+            "calls": 1
+          },
+          "extract_all_edges -> extract_edges": {
+            "inclusive_s": 1.55914,
+            "calls": 1
+          },
+          "<root> -> symbols.list_by_repo": {
+            "inclusive_s": 1.14982,
+            "calls": 1
+          },
+          "<root> -> parse": {
+            "inclusive_s": 0.88371,
+            "calls": 20200
+          },
+          "<root> -> files.upsert_many": {
+            "inclusive_s": 0.84122,
+            "calls": 1
+          },
+          "<root> -> files.list_by_repo": {
+            "inclusive_s": 0.39288,
+            "calls": 2
+          },
+          "<root> -> symbols.count_by_kind": {
+            "inclusive_s": 0.06592,
+            "calls": 2
+          },
+          "<root> -> edges.replace_for_sources": {
+            "inclusive_s": 0.0056,
+            "calls": 1
+          },
+          "edges.replace_for_sources -> edges.replace_for_sources.delete": {
+            "inclusive_s": 0.00553,
+            "calls": 1
+          },
+          "<root> -> import_bindings_guard": {
+            "inclusive_s": 0.00371,
+            "calls": 1
+          },
+          "<root> -> resolve_dangling": {
+            "inclusive_s": 0.00191,
+            "calls": 1
+          },
+          "resolve_dangling -> edges.list_dangling_targets": {
+            "inclusive_s": 0.0019,
+            "calls": 1
+          },
+          "extract_all_edges -> imports_resolve": {
+            "inclusive_s": 0.0013,
+            "calls": 1
+          },
+          "<root> -> edges.count_by_kind_confidence": {
+            "inclusive_s": 0.00122,
+            "calls": 1
+          },
+          "<root> -> replace_test_edges": {
+            "inclusive_s": 3e-05,
+            "calls": 1
+          },
+          "replace_test_edges -> edges.replace_for_sources": {
+            "inclusive_s": 2e-05,
+            "calls": 1
+          },
+          "edges.replace_for_sources -> edges.replace_for_sources.insert": {
+            "inclusive_s": 1e-05,
+            "calls": 2
+          },
+          "edges.replace_for_sources -> edges.replace_for_sources.flush": {
+            "inclusive_s": 1e-05,
+            "calls": 2
+          },
+          "<root> -> edge_rows_build": {
+            "inclusive_s": 1e-05,
+            "calls": 1
+          }
+        }
+      },
+      "unaccounted_s": 26.14815,
+      "scenario": "change_body",
+      "db_path": "D:\\cp35\\large\\db-change_body\\index.sqlite3",
+      "workspace": "D:\\cp35\\large\\scratch\\realrepo",
+      "child_total_wall_s": 72.6907,
+      "base_commit": "7e9917219a282e35dd9037d378b61db702740963",
+      "instrumentation_missing": [],
+      "child_process_wall_s": 74.2956
+    }
+  ],
+  "verification": {
+    "pairs": []
+  }
+}

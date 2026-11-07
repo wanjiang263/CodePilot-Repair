@@ -7,7 +7,8 @@
 C34 提交 v12 候选；C35a 提交历史基线 manifest；C35b 提交 v12 receipt；
 C36 提交证据包、runtime JSON、静态结果、本报告初稿与回执；C37 提交
 clean-clone 绿色日志与最终哈希；C38 修正 C36/C37 的提交标注与回执哈希
-（docs-only）。Phase34 起点：
+（docs-only）；C39 统计勘误（318 提交 / 787 有效 SOURCE_SCOPE /
+172–176 untracked，docs-only）。Phase34 起点：
 `dba045dabd70f0e6eb7779287136944b589f2734`。
 
 交付硬约束：Phase34 runtime `--check` 默认读取仓库内
@@ -22,7 +23,7 @@ clean-clone 绿色日志与最终哈希；C38 修正 C36/C37 的提交标注与�
 
 处理链：
 
-- v10 从 C27 `7646709` 生成（133 源文件，6 个 source-scope 变更），并完成
+- v10 从 C27 `7646709` 生成（133 个策展源文件，6 个 source-scope 变更），并完成
   manifest/receipt/verify。
 - v10 后的最终全量回归暴露了 `test_process_exit_releases_workspace` 的
   环境超时：spawn 子进程导入 `codepilot.graph.builder` 需要 10–13 秒，而
@@ -34,8 +35,12 @@ clean-clone 绿色日志与最终哈希；C38 修正 C36/C37 的提交标注与�
 v12 数据：
 
 - `phase34-candidate-v12`：pending、parent `phase34-candidate-v11`、
-  schema 5、full、`source_commit=C33`、`diff_base=C30`、133 sources、
+  schema 5、full、`source_commit=C33`、`diff_base=C30`、133 个策展 sources、
   1 changed（`tests/unit/test_phase26_final.py`，仅行尾规范化）。
+- 口径：`resolved_source_files=133` 是父候选继承 + source-scope 变更的策展
+  集合；有效 SOURCE_SCOPE（含 `configs/harness/`，排除 candidates/receipts）
+  共 **787** 个文件。v9 源点 `cc0dd9a..C33` 的 7 个 scope 变更全部被
+  v10/v11/v12 的 `changed_files` 覆盖。
 - 4 文件 sha256：
   - candidate.diff `0a2e0de07223be604ac8f817254e0b0da86163a652e2dda114e3a9eaa63aaf38`
   - candidate.json `458b42b55407ed4ae27c142719dca164dc716125199d2038f44aa77fa79a61a8`
@@ -90,7 +95,7 @@ runtime JSON sha 与交付文件一致
 日志 `docs/notes/phase34-selfcontained-check.log`（sha256
 `abe09bce95f7e64824ec1ed98504bce325797c47072259989084b286682ec99a`）。
 日志显示 `SOURCE_SHALLOW=true`、`CLONE_SHALLOW=false`；后者是
-`clone --local` 未复制 `.git/shallow` 的标记假象，clone 仍只有现有 303 条
+`clone --local` 未复制 `.git/shallow` 的标记假象，clone 仍只有现有 318 条
 历史（边界 `04a523f` 的父对象不存在），完整历史 clone 未验证（见 §六）。
 
 ## 四、最终全量回归
@@ -138,7 +143,7 @@ runtime JSON sha 与交付文件一致
   `.git/shallow` 的边界是 `04a523fafbd61bc2e49420963b84ed8e2bd1b3cf`。
 - `origin`（`github.com/wanjiang263/CodePilot-Repair`）的分支不包含该边界提交，
   `git fetch --unshallow origin` 退出 0 但不改变 shallow 文件（no-op）。
-- 因此 clean-clone 通过范围仅限现有 303 条提交历史；完整历史 clone **未验证**。
+- 因此 clean-clone 通过范围仅限现有 318 条提交历史；完整历史 clone **未验证**。
   日志中的 `CLONE_SHALLOW=false` 是 `clone --local` 未复制 `.git/shallow` 的
   标记假象（clone 的历史根仍是 `04a523f`，其父对象不存在），不能解读为完整
   历史；报告中不把它写成“任意完整 clone 均可复现”。`SOURCE_SHALLOW=true`
@@ -161,7 +166,9 @@ runtime JSON sha 与交付文件一致
   C35b `f843fe3` v12 receipt。
 - C36 `fc60014` 证据包、runtime JSON、静态结果、最终报告初稿、delivery receipt。
 - C37 `489b555` clean-clone 绿色日志与最终哈希回填。
-- C38（本提交）修正 C36/C37 的提交标注与回执哈希（docs-only）。
+- C38 `9e99eda` 修正 C36/C37 的提交标注与回执哈希（docs-only）。
+- C39（本提交）统计勘误（docs-only；318 提交 / 787 有效 SOURCE_SCOPE /
+  172–176 untracked；见 `phase35-errata.md`）。
 - 不 push、不 PR、不激活。
 
 ## 八、验收清单（逐项）
@@ -191,8 +198,10 @@ runtime JSON sha 与交付文件一致
 - 大型仓库（≥2 万文件）：未验证。
 - 24h 长稳：未验证。
 - 前端：`web/src` 零 diff，条件跳过。
-- `src/codepilot/eval/swebench_runner.py:423` 的 `images.build(path=大目录)` 风险：
-  P2，未动。
+- `src/codepilot/sandbox/swebench_env.py:423` 的 `images.build(path=大 context)`
+  潜在误用风险（P2）：官方路径不调用该 build，通用 base 构建已使用 `fileobj`
+  微上下文（`src/codepilot/sandbox/docker.py:354`）；未改 src，审计结论见
+  `phase35-errata.md`。
 - Phase35 的 activation dry-run、真实 provider 小预算冒烟、Docker / 官方
   Harness 全量等：不在本轮范围。
 

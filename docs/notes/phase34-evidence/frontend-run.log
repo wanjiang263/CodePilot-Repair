@@ -1,0 +1,41 @@
+npm warn Unknown user config "disturl". This will stop working in the next major version of npm.
+npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+
+added 359 packages in 1m
+
+89 packages are looking for funding
+  run `npm fund` for details
+npm warn Unknown user config "disturl". This will stop working in the next major version of npm.
+
+> codepilot-dashboard@0.1.0 typecheck
+> tsc -b --pretty false
+
+npm warn Unknown user config "disturl". This will stop working in the next major version of npm.
+
+> codepilot-dashboard@0.1.0 lint
+> eslint . --max-warnings=0
+
+ [32m✓[39m src/components/SettingsView.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 848[2mms[22m[39m
+   [33m[2m✓[22m[39m SettingsView[2m > [22mrenders the settings sections and provider inventory [33m321[2mms[22m[39m
+   [33m[2m✓[22m[39m SettingsView[2m > [22mopens provider and model actions without cluttering the row [33m414[2mms[22m[39m
+ [32m✓[39m src/components/Composer.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 1969[2mms[22m[39m
+   [33m[2m✓[22m[39m Composer[2m > [22mrequires a meaningful issue before enabling Start repair [33m940[2mms[22m[39m
+   [33m[2m✓[22m[39m Composer[2m > [22menforces the server-side repository host allow-list in the form [33m1028[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m14 passed[39m[22m[90m (14)[39m
+[2m      Tests [22m [1m[32m50 passed[39m[22m[90m (50)[39m
+[2m   Start at [22m 02:22:22
+[2m   Duration [22m 21.31s[2m (transform 4.10s, setup 83.23s, collect 8.89s, tests 6.13s, environment 142.05s, prepare 13.67s)[22m
+
+[2mdist/[22m[32massets/inter-latin-wght-normal-Dx4kXJAl.woff2                [39m[1m[2m 48.26 kB[22m[1m[22m
+[2mdist/[22m[32massets/inter-latin-ext-wght-normal-DO1Apj_S.woff2            [39m[1m[2m 85.07 kB[22m[1m[22m
+[2mdist/[22m[35massets/index-C7tFVb1s.css                                    [39m[1m[2m 40.93 kB[22m[1m[22m[2m │ gzip:  10.26 kB[22m
+[2mdist/[22m[36massets/database-C6rEW66c.js                                  [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/BenchmarksView-C6xxlKFE.js                            [39m[1m[2m  2.68 kB[22m[1m[22m[2m │ gzip:   1.05 kB[22m
+[2mdist/[22m[36massets/HistoryView-CjETaLZ2.js                               [39m[1m[2m  5.17 kB[22m[1m[22m[2m │ gzip:   1.81 kB[22m
+[2mdist/[22m[36massets/BenchmarkDetailView-BbtuZEg_.js                       [39m[1m[2m  8.24 kB[22m[1m[22m[2m │ gzip:   2.42 kB[22m
+[2mdist/[22m[36massets/SettingsView-B7pa4vk4.js                              [39m[1m[2m 84.50 kB[22m[1m[22m[2m │ gzip:  19.36 kB[22m
+[2mdist/[22m[36massets/index-Wv9_f_OH.js                                     [39m[1m[2m436.08 kB[22m[1m[22m[2m │ gzip: 134.66 kB[22m
+[32m✓ built in 6.35s[39m
+
+[exited with code 0]

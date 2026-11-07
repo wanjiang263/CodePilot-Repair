@@ -276,6 +276,20 @@ def test_manifest_path_traversal_is_rejected(
     assert "evidence_manifest_invalid" in capsys.readouterr().out
 
 
+def test_external_summary_trims_unverified(env: dict[str, Any]) -> None:
+    assert run(env, "--write", "--base", env["base"]) == 0
+    write(
+        env["scratch"] / "docker-summary.json",
+        json.dumps({"status": "passed", "summary": "35 passed"}) + "\n",
+    )
+    write_manifest(env["scratch"])
+    assert run(env, "--write", "--base", env["base"]) == 0
+    payload = written(env)
+    assert payload["external_validation"]["docker"]["status"] == "passed"
+    assert not any(item.startswith("full Docker suite") for item in payload["unverified"])
+    assert any(item.startswith("large repository") for item in payload["unverified"])
+
+
 def test_double_write_is_byte_identical(env: dict[str, Any]) -> None:
     assert run(env, "--write", "--base", env["base"]) == 0
     first = env["out"].read_bytes()

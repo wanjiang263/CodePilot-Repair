@@ -1,0 +1,267 @@
+diff --git a/scripts/phase34_runtime_results.py b/scripts/phase34_runtime_results.py
+index 03f23bd..60ea39f 100644
+--- a/scripts/phase34_runtime_results.py
++++ b/scripts/phase34_runtime_results.py
+@@ -57,14 +57,23 @@ CONSUMED_EVIDENCE = (
+ )
+ 
+ UNVERIFIED = [
+-    "real provider streaming/usage/billing (0 requests, 0 cost; rows blocked)",
++    "real provider streaming (non-streaming matrix only)",
++    "real provider usage/billing (0 requests, 0 cost; rows blocked)",
+     "full Docker suite (not run in Phase34)",
+     "large repository (>=20k files)",
+     "24h stability",
+     "frontend checks (web/src zero diff; conditionally skipped)",
+-    "src/codepilot/eval/swebench_runner.py:423 build-context risk (P2, untouched)",
++    "frontend browser E2E (no suite in the repository)",
++    "src/codepilot/sandbox/swebench_env.py:423 build-context potential misuse (P2, audited)",
+ ]
+ 
++EXTERNAL_EVIDENCE = {
++    "docker": "docker-summary.json",
++    "large_repo": "large-repo-summary.json",
++    "soak": "soak-summary.json",
++    "frontend": "frontend-summary.json",
++}
++
+ 
+ def commits_section(
+     base: str, recorded_through: str
+@@ -342,6 +351,45 @@ def lifecycle_section(scratch: Path) -> dict[str, Any]:
+     }
+ 
+ 
++def external_validation_section(scratch: Path) -> dict[str, Any]:
++    out: dict[str, Any] = {}
++    for key, name in EXTERNAL_EVIDENCE.items():
++        path = scratch / name
++        data = load_json(path)
++        if not isinstance(data, dict):
++            out[key] = missing(path)
++            continue
++        out[key] = {
++            "status": data.get("status"),
++            "source": rel(path),
++            "source_sha256": sha256(path),
++            "summary": data.get("summary"),
++        }
++    return out
++
++
++def unverified_list(external: dict[str, Any], provider: dict[str, Any]) -> list[str]:
++    items = list(UNVERIFIED)
++
++    def drop(prefix: str) -> None:
++        items[:] = [item for item in items if not item.startswith(prefix)]
++
++    if str(external.get("docker", {}).get("status")) in {"passed", "verified"}:
++        drop("full Docker suite")
++    if str(external.get("large_repo", {}).get("status")) in {"passed", "verified"}:
++        drop("large repository")
++    if str(external.get("soak", {}).get("status")) in {"passed", "verified"}:
++        drop("24h stability")
++    if str(external.get("frontend", {}).get("status")) in {"passed", "verified"}:
++        drop("frontend checks")
++    rows = provider.get("rows") or []
++    if provider.get("real_requests", 0) and any(
++        row.get("status") == "real-verified" for row in rows
++    ):
++        drop("real provider usage/billing")
++    return items
++
++
+ def build_payload(
+     base: str,
+     scratch: Path,
+@@ -354,6 +402,8 @@ def build_payload(
+     phase, code = commits_section(resolved_base, recorded_through)
+     web_diff = git("diff", "--name-only", f"{resolved_base}..{recorded_through}", "--", "web/src")
+     web_files = [path for path in web_diff.splitlines() if path.strip()]
++    provider = provider_section(scratch)
++    external = external_validation_section(scratch)
+     return {
+         "phase": 34,
+         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
+@@ -368,7 +418,8 @@ def build_payload(
+         "code_commits": code,
+         "final_regression": regression_section(scratch),
+         "static_checks": static_section(scratch),
+-        "provider_matrix": provider_section(scratch),
++        "provider_matrix": provider,
++        "external_validation": external,
+         "candidates": candidates_section(),
+         "archive_verify": archive_section(scratch),
+         "runtime_lifecycle": lifecycle_section(scratch),
+@@ -382,7 +433,7 @@ def build_payload(
+                 else "frontend checks required"
+             ),
+         },
+-        "unverified": UNVERIFIED,
++        "unverified": unverified_list(external, provider),
+     }
+ 
+ 
+diff --git a/tests/unit/test_phase34_runtime_results.py b/tests/unit/test_phase34_runtime_results.py
+index ba48c0c..c65e3b1 100644
+--- a/tests/unit/test_phase34_runtime_results.py
++++ b/tests/unit/test_phase34_runtime_results.py
+@@ -276,6 +276,20 @@ def test_manifest_path_traversal_is_rejected(
+     assert "evidence_manifest_invalid" in capsys.readouterr().out
+ 
+ 
++def test_external_summary_trims_unverified(env: dict[str, Any]) -> None:
++    assert run(env, "--write", "--base", env["base"]) == 0
++    write(
++        env["scratch"] / "docker-summary.json",
++        json.dumps({"status": "passed", "summary": "35 passed"}) + "\n",
++    )
++    write_manifest(env["scratch"])
++    assert run(env, "--write", "--base", env["base"]) == 0
++    payload = written(env)
++    assert payload["external_validation"]["docker"]["status"] == "passed"
++    assert not any(item.startswith("full Docker suite") for item in payload["unverified"])
++    assert any(item.startswith("large repository") for item in payload["unverified"])
++
++
+ def test_double_write_is_byte_identical(env: dict[str, Any]) -> None:
+     assert run(env, "--write", "--base", env["base"]) == 0
+     first = env["out"].read_bytes()
+diff --git a/tests/unit/test_phase35_activation_dryrun.py b/tests/unit/test_phase35_activation_dryrun.py
+new file mode 100644
+index 0000000..cc73bdd
+--- /dev/null
++++ b/tests/unit/test_phase35_activation_dryrun.py
+@@ -0,0 +1,132 @@
++"""Phase35 activation dry-run against the real, latest candidate archive.
++
++The repository archive must stay pointer-free. The test copies the real archive
++to a temporary root, stages the candidate there, and drives the harness with fake
++agents: it proves the three role prompts come from the candidate snapshot (never
++the sentinel code defaults), that a pending candidate is refused without
++``allow_pending``, and that the real archive and candidate bytes are unchanged.
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++import shutil
++from datetime import UTC, datetime
++from pathlib import Path
++from types import SimpleNamespace
++from typing import Any
++
++import pytest
++
++from codepilot.schemas.state import RepairState
++
++ROOT = Path(__file__).resolve().parents[2]
++REAL_ARCHIVE = ROOT / "configs" / "harness"
++ROLES = ("coder", "planner", "reviewer")
++SENTINELS = {
++    "coder": "CODE-DEFAULT-CODER",
++    "planner": "CODE-DEFAULT-PLANNER",
++    "reviewer": "CODE-DEFAULT-REVIEWER",
++}
++
++
++def sha256(path: Path) -> str:
++    return hashlib.sha256(path.read_bytes()).hexdigest()
++
++
++def pointer_names(archive: Path) -> list[str]:
++    return sorted(name for name in ("active.json", "active.next.json") if (archive / name).exists())
++
++
++def latest_candidate(archive: Path) -> str:
++    versions = [
++        path.name for path in (archive / "candidates").glob("phase34-candidate-v*") if path.is_dir()
++    ]
++    assert versions, "no phase34 candidate archive found"
++    return max(versions, key=lambda name: int(name.rsplit("-v", 1)[1]))
++
++
++def make_deps(run_dir: Path) -> Any:
++    from codepilot.artifacts import ArtifactStore
++    from codepilot.observability.events import EventSink
++    from codepilot.observability.lifecycle import Lifecycle
++    from codepilot.sandbox.env_spec import EnvSpec
++
++    artifacts = ArtifactStore(run_dir, "run")
++    events = EventSink(run_id="run", task_id="task", jsonl_path=artifacts.run_dir / "events.jsonl")
++    return SimpleNamespace(
++        artifacts=artifacts,
++        lifecycle=Lifecycle(events),
++        harness_started=False,
++        coder=SimpleNamespace(system_prompt=SENTINELS["coder"]),
++        planner=SimpleNamespace(system_prompt=SENTINELS["planner"]),
++        reviewer=SimpleNamespace(system_prompt=SENTINELS["reviewer"]),
++        repository="repo",
++        env_spec=EnvSpec(),
++        clock=lambda: datetime.now(UTC),
++        experience_snapshot=[],
++        tools=SimpleNamespace(query_cache=None),
++    )
++
++
++def make_state() -> RepairState:
++    return RepairState(
++        task_id="task",
++        run_id="run",
++        repository_id="repo",
++        base_commit="abc",
++        issue="activation dry-run",
++        started_at=datetime.now(UTC),
++    )
++
++
++def test_latest_candidate_activation_dry_run(
++    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    import codepilot.graph.harness as harness
++    from codepilot import rsi
++
++    version = latest_candidate(REAL_ARCHIVE)
++    folder = REAL_ARCHIVE / "candidates" / version
++    record = json.loads((folder / "candidate.json").read_text(encoding="utf-8"))
++    assert record["status"] == "pending"
++    assert record["schema_version"] == 5
++    snapshot = json.loads((folder / "snapshot.json").read_text(encoding="utf-8"))
++    prompts = snapshot["prompts"]
++    assert all(prompts.get(role) for role in ROLES)
++    assert all(prompts[role] != SENTINELS[role] for role in ROLES)
++
++    files = ("candidate.diff", "candidate.json", "snapshot.json", "sources.json")
++    real_before = {name: sha256(folder / name) for name in files}
++    assert pointer_names(REAL_ARCHIVE) == []
++
++    temp_archive = tmp_path / "archive"
++    shutil.copytree(REAL_ARCHIVE, temp_archive)
++    assert pointer_names(temp_archive) == []
++
++    builtin = rsi.load_selection(temp_archive)
++    assert builtin["version"] == "builtin-phase26-v1"
++
++    with pytest.raises(ValueError):
++        rsi.select(temp_archive, version)
++    assert pointer_names(temp_archive) == []
++
++    rsi.select(temp_archive, version, allow_pending=True)
++    assert pointer_names(temp_archive) == ["active.json"]
++    selection = rsi.load_selection(temp_archive)
++    assert selection["version"] == version
++    assert selection["status"] == "pending"
++
++    monkeypatch.setattr(harness, "archive_root", lambda: temp_archive)
++    deps = make_deps(tmp_path / "runs")
++    state = harness.begin(make_state(), deps, "plan")
++
++    for role in ROLES:
++        assert getattr(deps, role).system_prompt == prompts[role]
++        assert getattr(deps, role).system_prompt != SENTINELS[role]
++    assert state.policy_snapshot["version"] == version
++    assert state.policy_snapshot["status"] == "pending"
++
++    assert pointer_names(REAL_ARCHIVE) == []
++    assert {name: sha256(folder / name) for name in files} == real_before
