@@ -37,12 +37,26 @@ export function CommandPalette({
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
+  const [lastOpen, setLastOpen] = useState(open);
+  const [lastQuery, setLastQuery] = useState(query);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Reset the palette state synchronously during render when it opens or the
+  // query changes (the sanctioned "adjust state when a prop changes" pattern).
+  if (lastOpen !== open) {
+    setLastOpen(open);
+    if (open) {
+      setQuery("");
+      setActive(0);
+    }
+  }
+  if (lastQuery !== query) {
+    setLastQuery(query);
+    setActive(0);
+  }
 
   useEffect(() => {
     if (!open) return;
-    setQuery("");
-    setActive(0);
     const timer = window.setTimeout(() => inputRef.current?.focus(), 20);
     return () => window.clearTimeout(timer);
   }, [open]);
@@ -67,10 +81,6 @@ export function CommandPalette({
       .map((item): Item => ({ kind: "history", history: item }));
     return [...taskItems, ...historyItems];
   }, [history, query, tasks]);
-
-  useEffect(() => {
-    setActive(0);
-  }, [query]);
 
   if (!open) return null;
 

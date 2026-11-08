@@ -234,14 +234,19 @@ export function Timeline({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pinned, setPinned] = useState(true);
   const terminal = isTerminal(session.status);
+  const [lastRunId, setLastRunId] = useState(session.runId);
+  const [lastTerminal, setLastTerminal] = useState(terminal);
 
-  useEffect(() => {
+  // Re-pin synchronously during render when a new run starts or the run
+  // terminates (the sanctioned "adjust state when a prop changes" pattern).
+  if (lastRunId !== session.runId) {
+    setLastRunId(session.runId);
     setPinned(true);
-  }, [session.runId]);
-
-  useEffect(() => {
+  }
+  if (lastTerminal !== terminal) {
+    setLastTerminal(terminal);
     if (terminal) setPinned(true);
-  }, [terminal]);
+  }
 
   useEffect(() => {
     if (!pinned) return;

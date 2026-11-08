@@ -1,5 +1,5 @@
 import { Bot, CheckCircle2, TriangleAlert } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { updateSettingsSection } from "../../api/client";
@@ -28,10 +28,14 @@ export function AgentsSettings({
 }) {
   const { t } = useTranslation();
   const [draft, setDraft] = useState<AgentSettingsShape>(document.agents);
+  const [lastDocument, setLastDocument] = useState(document.agents);
 
-  useEffect(() => {
+  // Re-seed the draft synchronously during render when the server document
+  // changes (the sanctioned "adjust state when a prop changes" pattern).
+  if (lastDocument !== document.agents) {
+    setLastDocument(document.agents);
     setDraft(document.agents);
-  }, [document.agents]);
+  }
 
   const options = useMemo(
     () =>

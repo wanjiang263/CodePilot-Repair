@@ -1,5 +1,5 @@
 import { Gauge, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { updateSettingsSection } from "../../api/client";
@@ -61,13 +61,17 @@ export function BudgetSettings({
   );
   const [newCurrency, setNewCurrency] = useState("");
   const [newRate, setNewRate] = useState("");
+  const [lastExecution, setLastExecution] = useState(document.execution);
 
-  useEffect(() => {
+  // Re-seed the draft and rates synchronously during render when the server
+  // document changes (the sanctioned "adjust state when a prop changes" pattern).
+  if (lastExecution !== document.execution) {
+    setLastExecution(document.execution);
     setDraft(toDraft(document.execution));
     setRates(
       Object.fromEntries(Object.entries(document.execution.exchange_rates).map(([key, value]) => [key, String(value)])),
     );
-  }, [document.execution]);
+  }
 
   const save = async () => {
     const numericKeys: Array<keyof Draft> = [

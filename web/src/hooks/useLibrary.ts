@@ -38,7 +38,9 @@ export function useLibrary(apiKey: string): {
 
   useEffect(() => {
     mounted.current = true;
-    void refresh();
+    (async () => {
+      await refresh();
+    })();
     const timer = window.setInterval(() => {
       if (document.visibilityState === "visible") void refresh();
     }, 20_000);

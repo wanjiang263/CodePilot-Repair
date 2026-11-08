@@ -123,14 +123,24 @@ export default function App() {
     window.localStorage.setItem("codepilot.sidebar", sidebarCollapsed ? "collapsed" : "expanded");
   }, [sidebarCollapsed]);
 
-  useEffect(() => {
+  const [lastApiKey, setLastApiKey] = useState(apiKey);
+
+  // Clear cached metadata synchronously during render when the API key is
+  // removed (the sanctioned "adjust state when a prop changes" pattern).
+  if (lastApiKey !== apiKey) {
+    setLastApiKey(apiKey);
     if (!apiKey) {
       setMeta(null);
       setAuthError(null);
-      return;
     }
+  }
+
+  useEffect(() => {
+    if (!apiKey) return;
     const controller = new AbortController();
-    void loadMeta(apiKey, controller.signal);
+    (async () => {
+      await loadMeta(apiKey, controller.signal);
+    })();
     return () => controller.abort();
   }, [apiKey, loadMeta]);
 
