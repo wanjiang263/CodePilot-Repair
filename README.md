@@ -1,5 +1,9 @@
 # CodePilot-Repair
 
+[![CI](https://github.com/wanjiang263/CodePilot-Repair/actions/workflows/ci.yml/badge.svg)](https://github.com/wanjiang263/CodePilot-Repair/actions/workflows/ci.yml)
+[![Dependency audit](https://github.com/wanjiang263/CodePilot-Repair/actions/workflows/dependency-audit.yml/badge.svg)](https://github.com/wanjiang263/CodePilot-Repair/actions/workflows/dependency-audit.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 **可配置、可回放、能真正运行的仓库级自主修复 Agent 工作台。**
 
 给定一个 Python 仓库、一个固定 commit 和一份 Issue，CodePilot-Repair 在隔离环境中完成
@@ -12,15 +16,13 @@
 
 ## 发布状态与参与
 
-当前按 **research / engineering preview** 准备发布，不承诺生产可用性。
-Phase 37 已补充 Chromium 浏览器验收、真实 GLM SSE 流式验收（完成/中断/超时）
-与 SDK 目录构建防护；24h 长稳、干净环境安装及其他真实 provider 结果应以对应
-发布版本的证据为准。历史报告中的通过项不代表当前源码、所有平台或供应商均已
-验证；当前候选的全量离线回归与 Docker 已分别记录，其中全量离线有一次
-Windows 超时用例抖动并在隔离重跑中通过。候选提交的 Linux CI 六个 job 与依赖审计
-均通过（见[发布清单](docs/open-source-readiness.md)与 [Phase37 报告](docs/notes/phase37-validation.md)），
-最终文档提交的 CI 结果以该提交的发布记录为准；本版仍按 research /
-engineering preview 发布，不称为稳定版或生产可用。
+当前按 **research / engineering preview** 发布：**不承诺生产可用性，不称为稳定版**。
+
+- Phase 37 已补充 Chromium 浏览器验收、真实 GLM SSE 流式验收（完成/中断/超时）与 SDK 目录构建防护。
+- 24h 长稳、干净环境安装及其他真实 provider 的结果，应以对应发布版本的证据为准。
+- 历史报告中的通过项不代表当前源码、所有平台或所有供应商均已验证。
+- 当前候选的全量离线回归与 Docker 验收已分别记录（全量离线有一次 Windows 超时用例抖动，隔离重跑通过）。
+- 候选提交的 Linux CI 六个 job 与依赖审计均通过（见[发布清单](docs/open-source-readiness.md)与 [Phase37 报告](docs/notes/phase37-validation.md)）；最终 CI 结果以该提交的发布记录为准。
 
 项目自有代码采用 [Apache License 2.0](LICENSE)，允许商业使用、修改和分发，须遵守许可证条件。
 Copyright 2026 jiaoenqi。署名见 [NOTICE](NOTICE)。
@@ -76,7 +78,7 @@ Copyright 2026 jiaoenqi。署名见 [NOTICE](NOTICE)。
 ## 架构
 
 ```text
-Browser (React 18 + Vite + Tailwind + i18next)
+Browser (React 19 + Vite + Tailwind + i18next)
    │  X-API-Key（同源）
    ▼
 FastAPI (auth / settings / tasks / SSE / static /app)
