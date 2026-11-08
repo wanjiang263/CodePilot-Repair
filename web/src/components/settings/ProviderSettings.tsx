@@ -11,7 +11,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -1268,13 +1268,18 @@ function CredentialDialog({
   const [mode, setMode] = useState<"value" | "env">("value");
   const [value, setValue] = useState("");
   const [envName, setEnvName] = useState("");
+  const [lastProvider, setLastProvider] = useState(provider);
 
-  useEffect(() => {
-    if (!provider) return;
-    setMode(provider.credential.kind === "env" ? "env" : "value");
-    setValue("");
-    setEnvName(provider.credential.env_name ?? "");
-  }, [provider]);
+  // Re-seed the credential form synchronously during render when the target
+  // provider changes (the sanctioned "adjust state when a prop changes" pattern).
+  if (lastProvider !== provider) {
+    setLastProvider(provider);
+    if (provider) {
+      setMode(provider.credential.kind === "env" ? "env" : "value");
+      setValue("");
+      setEnvName(provider.credential.env_name ?? "");
+    }
+  }
 
   if (!provider) return null;
 
@@ -1406,30 +1411,35 @@ function ModelDialog({
   const editingModel = editing?.model;
   const [draft, setDraft] = useState<Record<string, unknown> | null>(null);
   const [originalId, setOriginalId] = useState<string | null>(null);
+  const [lastEditing, setLastEditing] = useState(editing);
 
-  useEffect(() => {
-    if (!provider) return;
-    if (editingModel) {
-      setDraft(rawModel(editingModel));
-      setOriginalId(editingModel.model_id);
-      return;
+  // Re-seed the model form synchronously during render when the editing target
+  // changes (the sanctioned "adjust state when a prop changes" pattern).
+  if (lastEditing !== editing) {
+    setLastEditing(editing);
+    if (provider) {
+      if (editingModel) {
+        setDraft(rawModel(editingModel));
+        setOriginalId(editingModel.model_id);
+      } else {
+        setDraft({
+          model_id: "",
+          display_name: "",
+          context_window: null,
+          max_output_tokens: null,
+          supports_tools: true,
+          supports_json_mode: true,
+          supports_temperature: true,
+          supports_thinking: null,
+          price: { currency: "CNY", input_per_mtok: null, output_per_mtok: null, cached_input_per_mtok: null },
+          source: "manual",
+          source_note: null,
+          favorite: false,
+        });
+        setOriginalId(null);
+      }
     }
-    setDraft({
-      model_id: "",
-      display_name: "",
-      context_window: null,
-      max_output_tokens: null,
-      supports_tools: true,
-      supports_json_mode: true,
-      supports_temperature: true,
-      supports_thinking: null,
-      price: { currency: "CNY", input_per_mtok: null, output_per_mtok: null, cached_input_per_mtok: null },
-      source: "manual",
-      source_note: null,
-      favorite: false,
-    });
-    setOriginalId(null);
-  }, [provider, editingModel]);
+  }
 
   if (!provider || !draft) return null;
 

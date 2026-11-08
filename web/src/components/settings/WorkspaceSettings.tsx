@@ -47,11 +47,15 @@ export function WorkspaceSettings({
   const [confirmation, setConfirmation] = useState("");
   const [cleanupBusy, setCleanupBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [lastWorkspace, setLastWorkspace] = useState(document.workspace);
 
-  useEffect(() => {
+  // Re-seed the repository defaults synchronously during render when the
+  // server document changes (the sanctioned "adjust state" pattern).
+  if (lastWorkspace !== document.workspace) {
+    setLastWorkspace(document.workspace);
     setKind(document.workspace.default_repository_kind);
     setRepository(document.workspace.default_repository);
-  }, [document.workspace]);
+  }
 
   useEffect(() => {
     let mounted = true;

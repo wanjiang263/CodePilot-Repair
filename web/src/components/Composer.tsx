@@ -1,5 +1,5 @@
 import { ArrowRight, ChevronDown, FlaskConical, GitBranch, LockKeyhole, SlidersHorizontal } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 
@@ -59,54 +59,41 @@ export function Composer({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!demoName && meta?.demo_repositories.length) {
-      setDemoName(meta.demo_repositories[0].name);
-    }
-  }, [meta, demoName]);
+  // The demo repository defaults to the first server-side demo repo until the
+  // user picks one; derived during render (replaces the old sync effect).
+  const effectiveDemoName =
+    demoName || (meta?.demo_repositories.length ? meta.demo_repositories[0].name : "");
 
-  useEffect(() => {
-    if (!meta) return;
-    setMaxIterations(String(meta.default_budget.max_iterations ?? 5));
-    setMaxTestRuns(String(meta.default_budget.max_test_runs ?? 12));
-    setMaxRuntime(String(meta.default_budget.max_runtime_seconds ?? 1800));
-    if (meta.default_budget.max_cost !== null && meta.default_budget.max_cost !== undefined) {
-      setMaxCost(String(meta.default_budget.max_cost));
-    }
-    const preferred = meta.default_execution_mode;
-    if (preferred && meta.execution_modes.includes(preferred)) {
-      setExecutionMode(preferred);
-    }
-    if (meta.workspace_defaults) {
-      setRepositoryKind(meta.workspace_defaults.default_repository_kind);
-      if (meta.workspace_defaults.default_repository_kind === "https") {
-        setRepositoryUrl(meta.workspace_defaults.default_repository);
+  const [lastMeta, setLastMeta] = useState(meta);
+
+  // Seed the budget / mode / repository defaults synchronously during render
+  // when new metadata arrives (the sanctioned "adjust state" pattern).
+  if (lastMeta !== meta) {
+    setLastMeta(meta);
+    if (meta) {
+      setMaxIterations(String(meta.default_budget.max_iterations ?? 5));
+      setMaxTestRuns(String(meta.default_budget.max_test_runs ?? 12));
+      setMaxRuntime(String(meta.default_budget.max_runtime_seconds ?? 1800));
+      if (meta.default_budget.max_cost !== null && meta.default_budget.max_cost !== undefined) {
+        setMaxCost(String(meta.default_budget.max_cost));
+      }
+      const preferred = meta.default_execution_mode;
+      if (preferred && meta.execution_modes.includes(preferred)) {
+        setExecutionMode(preferred);
+      }
+      if (meta.workspace_defaults) {
+        setRepositoryKind(meta.workspace_defaults.default_repository_kind);
+        if (meta.workspace_defaults.default_repository_kind === "https") {
+          setRepositoryUrl(meta.workspace_defaults.default_repository);
+        }
       }
     }
-  }, [meta]);
+  }
 
   const readyModels = useMemo(
     () => (meta?.live_models ?? []).filter((item) => item.ready),
     [meta],
   );
-  useEffect(() => {
-    if (modelChoice && readyModels.some((item) => `${item.provider_id}/${item.model_id}` === modelChoice)) {
-      return;
-    }
-    const preferred = meta?.default_model;
-    const preferredKey =
-      preferred?.provider_id && preferred.model_id
-        ? `${preferred.provider_id}/${preferred.model_id}`
-        : null;
-    if (preferredKey && readyModels.some((item) => `${item.provider_id}/${item.model_id}` === preferredKey)) {
-      setModelChoice(preferredKey);
-      return;
-    }
-    if (readyModels.length) {
-      setModelChoice(`${readyModels[0].provider_id}/${readyModels[0].model_id}`);
-    }
-  }, [meta, modelChoice, readyModels]);
-
   const allowedHosts = useMemo(() => meta?.allowed_repository_hosts ?? [], [meta]);
   const urlError = useMemo(() => {
     if (repositoryKind !== "https" || !repositoryUrl.trim()) return null;
@@ -124,13 +111,31 @@ export function Composer({
   }, [allowedHosts, repositoryKind, repositoryUrl, t]);
 
   const live = executionMode === "live";
+  // Fall back to the preferred (or first ready) model during render whenever
+  // the current choice is unavailable (replaces the old sync effect).
+  const effectiveModelChoice = useMemo(() => {
+    if (modelChoice && readyModels.some((item) => `${item.provider_id}/${item.model_id}` === modelChoice)) {
+      return modelChoice;
+    }
+    const preferred = meta?.default_model;
+    const preferredKey =
+      preferred?.provider_id && preferred.model_id
+        ? `${preferred.provider_id}/${preferred.model_id}`
+        : null;
+    if (preferredKey && readyModels.some((item) => `${item.provider_id}/${item.model_id}` === preferredKey)) {
+      return preferredKey;
+    }
+    return readyModels.length
+      ? `${readyModels[0].provider_id}/${readyModels[0].model_id}`
+      : modelChoice;
+  }, [meta, modelChoice, readyModels]);
   const selectedModel = readyModels.find(
-    (item) => `${item.provider_id}/${item.model_id}` === modelChoice,
+    (item) => `${item.provider_id}/${item.model_id}` === effectiveModelChoice,
   );
   const canSubmit =
     issue.trim().length >= 10 &&
     !submitting &&
-    (repositoryKind === "demo" ? Boolean(demoName) : Boolean(repositoryUrl.trim()) && !urlError) &&
+    (repositoryKind === "demo" ? Boolean(effectiveDemoName) : Boolean(repositoryUrl.trim()) && !urlError) &&
     (!live || (Boolean(selectedModel) && Number(maxCost) > 0));
 
   const submit = async () => {
@@ -152,7 +157,7 @@ export function Composer({
       const task = await createTask(apiKey, {
         repository:
           repositoryKind === "demo"
-            ? { kind: "demo", value: demoName }
+            ? { kind: "demo", value: effectiveDemoName }
             : { kind: "https", value: repositoryUrl.trim() },
         issue: issue.trim(),
         base_commit: baseCommit.trim() || "HEAD",
@@ -228,7 +233,7 @@ export function Composer({
             {live && readyModels.length ? (
               <select
                 className="select h-8 w-[230px] py-0 text-[12px]"
-                value={modelChoice}
+                value={effectiveModelChoice}
                 onChange={(event) => setModelChoice(event.target.value)}
                 aria-label={t("composer.model")}
               >
@@ -272,7 +277,7 @@ export function Composer({
             <div className="relative min-w-0 flex-1">
               <select
                 className="select h-8 py-0 text-[12px]"
-                value={demoName}
+                value={effectiveDemoName}
                 onChange={(event) => setDemoName(event.target.value)}
                 aria-label={t("composer.demoRepositoryAria")}
               >

@@ -9,7 +9,7 @@ import {
   ShieldCheck,
   ShieldX,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import type { PatchFile } from "../../api/types";
@@ -41,18 +41,13 @@ export function ChangesPanel({
   const [filter, setFilter] = useState("");
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    if (!files.length) {
-      setSelected("");
-      return;
-    }
-    if (focusFile && files.some((file) => file.path === focusFile)) {
-      setSelected(focusFile);
-      return;
-    }
-    if (!files.some((file) => file.path === selected)) {
-      setSelected(files[0].path);
-    }
+  // The selection is derived during render so it can never point at a file
+  // that is no longer part of the patch (replaces the old sync effect).
+  const effectiveSelected = useMemo(() => {
+    if (!files.length) return "";
+    if (focusFile && files.some((file) => file.path === focusFile)) return focusFile;
+    if (files.some((file) => file.path === selected)) return selected;
+    return files[0].path;
   }, [files, selected, focusFile]);
 
   const filtered = useMemo(() => {
@@ -60,7 +55,7 @@ export function ChangesPanel({
     return needle ? files.filter((file) => file.path.toLowerCase().includes(needle)) : files;
   }, [files, filter]);
 
-  const file = files.find((item) => item.path === selected) ?? files[0] ?? null;
+  const file = files.find((item) => item.path === effectiveSelected) ?? files[0] ?? null;
   const wide = width >= 520;
 
   const copy = async (value: string) => {
@@ -169,7 +164,7 @@ export function ChangesPanel({
               <div className="relative">
                 <select
                   className="select h-8 py-0 text-[11.5px]"
-                  value={selected}
+                  value={effectiveSelected}
                   onChange={(event) => setSelected(event.target.value)}
                   aria-label={t("panels.changedFile")}
                 >
@@ -190,7 +185,7 @@ export function ChangesPanel({
                   onClick={() => setSelected(item.path)}
                   className={clsx(
                     "flex w-full items-start gap-1.5 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-elevated",
-                    selected === item.path && "bg-accent-soft",
+                    effectiveSelected === item.path && "bg-accent-soft",
                   )}
                   title={item.path}
                 >

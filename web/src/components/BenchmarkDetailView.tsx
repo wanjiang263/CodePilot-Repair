@@ -40,14 +40,22 @@ export function BenchmarkDetailView({
   onBack: () => void;
   onOpenReplay: (benchId: string) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [benchmark, setBenchmark] = useState<Benchmark | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const detailKey = `${apiKey}|${benchId}|${i18n.language}`;
+  const [lastDetailKey, setLastDetailKey] = useState(detailKey);
+
+  // Flip back to the loading state synchronously during render when the
+  // benchmark identity changes (the sanctioned "adjust state" pattern).
+  if (lastDetailKey !== detailKey) {
+    setLastDetailKey(detailKey);
+    setLoading(true);
+  }
 
   useEffect(() => {
     const controller = new AbortController();
-    setLoading(true);
     getBenchmark(apiKey, benchId, controller.signal)
       .then(setBenchmark)
       .catch((caught: unknown) => {
