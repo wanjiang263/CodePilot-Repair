@@ -37,20 +37,51 @@ export function useSettings(apiKey: string, onChanged?: () => void): {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<SettingsNotice | null>(null);
+  const [loadedKey, setLoadedKey] = useState(apiKey);
+
+  // Reset the loading indicator synchronously during render when the API key
+  // changes; the fetch itself runs in the effect below (setState after await).
+  if (loadedKey !== apiKey) {
+    setLoadedKey(apiKey);
+    setLoading(true);
+    setError(null);
+  }
+
+  const loadSettingsData = useCallback(async (): Promise<void> => {
+    const [settings, templates] = await Promise.all([getSettings(apiKey), getCatalog(apiKey)]);
+    setDocument(settings);
+    setCatalog(templates);
+  }, [apiKey]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await loadSettingsData();
+      } catch (caught) {
+        if (!cancelled) {
+          setError(caught instanceof Error ? caught.message : "Settings could not be loaded.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [loadSettingsData]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [settings, templates] = await Promise.all([getSettings(apiKey), getCatalog(apiKey)]);
-      setDocument(settings);
-      setCatalog(templates);
+      await loadSettingsData();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Settings could not be loaded.");
     } finally {
       setLoading(false);
     }
-  }, [apiKey]);
+  }, [loadSettingsData]);
 
   const refreshQuiet = useCallback(async () => {
     try {
@@ -73,10 +104,6 @@ export function useSettings(apiKey: string, onChanged?: () => void): {
       });
     }
   }, [apiKey]);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
 
   const adopt = useCallback(
     (next: SettingsDocument, successText?: string) => {

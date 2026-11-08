@@ -79,7 +79,7 @@ export function useSessionData(options: {
   onSessionChange?: () => void;
 }): SessionData {
   const { mode, apiKey, taskId, benchId, onSessionChange } = options;
-  const [task, setTask] = useState<TaskDetail | null>(null);
+  const [taskState, setTaskState] = useState<TaskDetail | null>(null);
   const [benchmark, setBenchmark] = useState<Benchmark | null>(null);
   const [report, setReport] = useState<Report | null>(null);
   const [patch, setPatch] = useState<Patch | null>(null);
@@ -88,30 +88,36 @@ export function useSessionData(options: {
   const [cancelling, setCancelling] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
   const fetchedTerminal = useRef<string | null>(null);
-  const runId = task?.run_id ?? benchmark?.run_id ?? null;
-  const stream = useRunStream(runId, apiKey, Boolean(runId));
 
-  useEffect(() => {
-    setTask(null);
+  const sessionKey = `${mode}|${taskId ?? ""}|${benchId ?? ""}|${apiKey}`;
+  const [lastSessionKey, setLastSessionKey] = useState(sessionKey);
+
+  // Reset the session state synchronously during render when the session
+  // identity changes; the fetch effect below re-runs on the same keys and also
+  // clears the one-time terminal-fetch bookkeeping ref.
+  if (lastSessionKey !== sessionKey) {
+    setLastSessionKey(sessionKey);
+    setTaskState(null);
     setBenchmark(null);
     setReport(null);
     setPatch(null);
     setLoadError(null);
     setLoading(mode === "live" ? Boolean(taskId) : Boolean(benchId));
-    fetchedTerminal.current = null;
-  }, [mode, taskId, benchId, apiKey]);
+  }
+
+  const runId = taskState?.run_id ?? benchmark?.run_id ?? null;
+  const stream = useRunStream(runId, apiKey, Boolean(runId));
 
   useEffect(() => {
+    fetchedTerminal.current = null;
     if (mode === "live" && !taskId) return;
     if (mode === "replay" && !benchId) return;
     const controller = new AbortController();
-    setLoading(true);
-    setLoadError(null);
     const load = async () => {
       try {
         if (mode === "live" && taskId) {
           const detail = await getTask(apiKey, taskId, controller.signal);
-          setTask(detail);
+          setTaskState(detail);
           if (detail.report_available) {
             await Promise.all([
               getReport(apiKey, detail.run_id, controller.signal)
@@ -151,7 +157,7 @@ export function useSessionData(options: {
       try {
         if (mode === "live") {
           const detailTask = taskId ? await getTask(apiKey, taskId) : null;
-          if (detailTask) setTask(detailTask);
+          if (detailTask) setTaskState(detailTask);
         }
         const [loadedReport, loadedPatch] = await Promise.all([
           getReport(apiKey, effectiveRunId).catch(() => null),
@@ -171,22 +177,27 @@ export function useSessionData(options: {
     [apiKey, benchId, mode, onSessionChange, taskId],
   );
 
+  // Terminal control messages are merged into the exposed task during render;
+  // the effect below only triggers the one-time terminal refetch.
+  const task = useMemo(() => {
+    if (!taskState) return taskState;
+    if (!stream.control) return taskState;
+    return {
+      ...taskState,
+      status: stream.control.status ?? taskState.status,
+      raw_status: stream.control.status ?? taskState.raw_status,
+      ui_status: stream.control.ui_status ?? taskState.ui_status,
+      stop_reason: stream.control.stop_reason ?? taskState.stop_reason,
+    };
+  }, [taskState, stream.control]);
+
   useEffect(() => {
     if (!stream.control || !runId) return;
-    setTask((previous) =>
-      previous
-        ? {
-            ...previous,
-            status: stream.control?.status ?? previous.status,
-            raw_status: stream.control?.status ?? previous.raw_status,
-            ui_status: stream.control?.ui_status ?? previous.ui_status,
-            stop_reason: stream.control?.stop_reason ?? previous.stop_reason,
-          }
-        : previous,
-    );
     if (fetchedTerminal.current === runId) return;
     fetchedTerminal.current = runId;
-    void refreshTerminal(runId);
+    (async () => {
+      await refreshTerminal(runId);
+    })();
   }, [stream.control, runId, refreshTerminal]);
 
   const cancel = useCallback(async () => {
@@ -196,7 +207,7 @@ export function useSessionData(options: {
       await cancelRun(apiKey, runId);
       if (taskId) {
         const refreshed = await getTask(apiKey, taskId).catch(() => null);
-        if (refreshed) setTask(refreshed);
+        if (refreshed) setTaskState(refreshed);
       }
       onSessionChange?.();
     } finally {
@@ -205,6 +216,8 @@ export function useSessionData(options: {
   }, [apiKey, mode, onSessionChange, runId, taskId]);
 
   const reload = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
     setReloadToken((value) => value + 1);
   }, []);
 

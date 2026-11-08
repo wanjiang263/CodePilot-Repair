@@ -9,7 +9,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
-let stored: string | null = null;
+let stored: string | null;
 try {
   stored = window.localStorage.getItem("codepilot.theme");
 } catch {

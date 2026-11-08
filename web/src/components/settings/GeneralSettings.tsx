@@ -1,5 +1,5 @@
 import { Check, KeyRound, Languages, MonitorCog, Palette } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { updateSettingsSection } from "../../api/client";
@@ -45,10 +45,14 @@ export function GeneralSettings({
   const [draft, setDraft] = useState(document.general);
   const [draftKey, setDraftKey] = useState("");
   const [savedKey, setSavedKey] = useState(false);
+  const [lastDocument, setLastDocument] = useState(document.general);
 
-  useEffect(() => {
+  // Re-seed the draft synchronously during render when the server document
+  // changes (the sanctioned "adjust state when a prop changes" pattern).
+  if (lastDocument !== document.general) {
+    setLastDocument(document.general);
     setDraft(document.general);
-  }, [document.general]);
+  }
 
   const save = async (general = draft) => {
     window.localStorage.setItem("codepilot.density", general.activity_density);

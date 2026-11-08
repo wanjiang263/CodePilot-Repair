@@ -51,13 +51,17 @@ export function DetailPanel({
 }) {
   const { t } = useTranslation();
   const [focusFile, setFocusFile] = useState<string | null>(null);
+  const [lastRunId, setLastRunId] = useState(session.runId);
   const resizing = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(width);
 
-  useEffect(() => {
+  // Drop the focused file synchronously during render when the run changes
+  // (the sanctioned "adjust state when a prop changes" pattern).
+  if (lastRunId !== session.runId) {
+    setLastRunId(session.runId);
     setFocusFile(null);
-  }, [session.runId]);
+  }
 
   useEffect(() => {
     const move = (event: PointerEvent) => {

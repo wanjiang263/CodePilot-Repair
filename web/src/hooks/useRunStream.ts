@@ -33,16 +33,22 @@ export function useRunStream(
   const [retryNonce, setRetryNonce] = useState(0);
   const seen = useRef<Set<number>>(new Set());
   const cursor = useRef(0);
+  const connectedKey = useRef<string | null>(null);
+  const streamKey = `${runId ?? ""}|${apiKey}`;
+  const [lastStreamKey, setLastStreamKey] = useState(streamKey);
 
-  useEffect(() => {
+  // Reset buffered stream state synchronously during render when the stream
+  // identity (runId / API key) changes. The scan bookkeeping refs are cleared
+  // inside the connection effect below, which re-runs on the same keys and
+  // detects the identity change via `connectedKey`.
+  if (lastStreamKey !== streamKey) {
+    setLastStreamKey(streamKey);
     setEvents([]);
     setControl(null);
     setConnection("idle");
     setLastSeq(0);
     setError(null);
-    seen.current = new Set();
-    cursor.current = 0;
-  }, [runId, apiKey]);
+  }
 
   useEffect(() => {
     if (!enabled || !runId || !apiKey) return;
@@ -50,6 +56,12 @@ export function useRunStream(
     let attempt = 0;
     let timer: number | undefined;
     let controller: AbortController | null = null;
+
+    if (connectedKey.current !== streamKey) {
+      connectedKey.current = streamKey;
+      seen.current = new Set();
+      cursor.current = 0;
+    }
 
     const scheduleRetry = () => {
       if (stopped) return;
