@@ -33,9 +33,9 @@ The detailed results and evidence boundaries are in [the audit report](open-sour
   the one Windows full-run timeout failure and its isolated passing rerun
   remain separate evidence. A later documentation-only commit must have its
   own green CI result before publication; its source code is unchanged.
-- [ ] Update remote main normally after candidate CI passes.
-- [ ] Add required status checks after the new CI jobs actually execute; basic branch protection is already enabled.
-- [ ] Confirm public visibility and preview release publication. Repository remains private in this audit.
+- [x] Update remote main normally after candidate CI passes. (2026-11-12: `main` is at `b8e1fa9`; the preview candidate and the follow-up README change were merged through pull requests after green CI, not by direct push.)
+- [x] Add required status checks after the new CI jobs actually execute; basic branch protection is already enabled. (2026-11-12 verified: six required contexts — `browser E2E (Chromium, offline worker)`, `Phase 1 index in Docker`, `lint + types`, `package`, `pytest (no docker, no llm)`, `frontend`; administrators are enforced.)
+- [x] Confirm public visibility and preview release publication. Repository remains private in this audit. (2026-11-12: repository visibility is public; `v0.1.0-preview.2` is published as a prerelease at `b8e1fa9`.)
 - [ ] Optionally enable GitHub private vulnerability reporting after publication; confirmed email is already available.
 
 ## Explicitly unverified
